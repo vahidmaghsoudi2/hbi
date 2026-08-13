@@ -1,0 +1,92 @@
+FILE HYGIENE REPORT
+
+1. Files moved:
+   - E:\HBI_GATE64A_EVIDENCE.txt -> E:\HBI\docs\audit\HBI_GATE64A_EVIDENCE.txt
+   - E:\HBI_GATE64B_RECON.txt -> E:\HBI\docs\audit\HBI_GATE64B_RECON.txt
+
+2. Files retained:
+   - E:\HBI\docs\audit\HBI_GATE64_FILE_DISPOSAL_RECORD.txt
+
+3. Files removed:
+   - E:\hbi_64a_evidence.py
+   - E:\hbi_64b_recon.py
+   - E:\fix_test_interface.py
+
+4. Disposal Record:
+   - path: E:\HBI\docs\audit\HBI_GATE64_FILE_DISPOSAL_RECORD.txt
+
+5. Final E:/HBI tree:
+   E:\HBI
+   |-- .pytest_cache/
+   |   |-- v/
+   |   |   `-- cache/
+   |   |       |-- lastfailed
+   |   |       `-- nodeids
+   |   |-- .gitignore
+   |   |-- CACHEDIR.TAG
+   |   `-- README.md
+   |-- app/
+   |   |-- interface/
+   |   |   |-- __init__.py
+   |   |   |-- cli.py
+   |   |   |-- dto.py
+   |   |   |-- errors.py
+   |   |   `-- facades.py
+   |   |-- models/
+   |   |   |-- __init__.py
+   |   |   |-- base.py
+   |   |   |-- case.py
+   |   |   |-- customer.py
+   |   |   |-- evidence.py
+   |   |   |-- inventory.py
+   |   |   |-- product.py
+   |   |   |-- product_knowledge.py
+   |   |   |-- recommendation.py
+   |   |   |-- sale.py
+   |   |   `-- sale_item.py
+   |   |-- repositories/
+   |   |   |-- __init__.py
+   |   |   |-- base.py
+   |   |   |-- case_repository.py
+   |   |   |-- customer_repository.py
+   |   |   |-- inventory_repository.py
+   |   |   |-- product_repository.py
+   |   |   |-- recommendation_repository.py
+   |   |   |-- sale_item_repository.py
+   |   |   `-- sale_repository.py
+   |   |-- services/
+   |   |   |-- __init__.py
+   |   |   |-- base.py
+   |   |   |-- case_service.py
+   |   |   |-- customer_service.py
+   |   |   |-- inventory_service.py
+   |   |   |-- product_service.py
+   |   |   |-- recommendation_service.py
+   |   |   `-- sale_service.py
+   |   |-- __init__.py
+   |   `-- database.py
+   |-- data/
+   |   `-- hbi.db
+   |-- docs/
+   |   `-- audit/
+   |       |-- HBI_GATE64_FILE_DISPOSAL_RECORD.txt
+   |       |-- HBI_GATE64A_EVIDENCE.txt
+   |       `-- HBI_GATE64B_RECON.txt
+   |-- tests/
+   |   |-- test_interface.py
+   |   `-- test_repositories.py
+   |-- cd
+   |-- create_hbi_interface.py
+   |-- create_hbi_models.py
+   |-- create_hbi_repositories.py
+   |-- create_hbi_services.py
+   |-- hbi_check.py
+   |-- hbi_gate64_preflight.py
+   |-- python
+   `-- type
+
+6. Verification:
+   - FAIL
+
+7. Unexpected findings:
+   - Destination already exists (no overwrite): E:\HBI\create_hbi_interface.py

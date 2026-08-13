@@ -1,0 +1,88 @@
+=======================================================================
+HBI GATE 6-4 - FILE DISPOSAL RECORD
+Per Architecture Authority Directive - File Hygiene
+Disposal Date: 1405-05-21 / 2026-08-12
+Recorded By: Qwen - Engineering / Code Review
+Authority: ChatGPT - Data Contract / Architecture Authority
+=======================================================================
+This record documents the controlled removal of temporary utility
+files that served GATE 6-4A and GATE 6-4B. Per the "No Orphaned
+Artifact" principle, each removed file is fully documented below.
+
+-----------------------------------------------------------------------
+FILE 1: hbi_64a_evidence.py
+-----------------------------------------------------------------------
+Role: READ-ONLY static analysis utility (ast-based). Extracted File
+      Tree and inventory of Models, Repositories, Services from E:/HBI.
+Gate: GATE 6-4A - Contract Reconciliation
+Output Preserved At: E:/HBI/docs/audit/HBI_GATE64A_EVIDENCE.txt
+Reason for Removal: One-time reconnaissance tool. Its evidence output
+      is preserved in the audit archive. Not part of project Runtime.
+Disposal Date: 1405-05-21 / 2026-08-12
+
+-----------------------------------------------------------------------
+FILE 2: hbi_64b_recon.py
+-----------------------------------------------------------------------
+Role: READ-ONLY reconnaissance utility. Dumped source content of key
+      Core files (database.py, base.py, services) to inform GATE 6-4B
+      Interface design.
+Gate: GATE 6-4B - Interface Implementation (prep)
+Output Preserved At: E:/HBI/docs/audit/HBI_GATE64B_RECON.txt
+Reason for Removal: One-time reconnaissance tool. Its recon output is
+      preserved in the audit archive. Not part of project Runtime.
+Disposal Date: 1405-05-21 / 2026-08-12
+
+-----------------------------------------------------------------------
+FILE 3: fix_test_interface.py
+-----------------------------------------------------------------------
+Role: One-time patch script. Added the clean_db isolation fixture to
+      tests/test_interface.py to resolve a timestamp-based ID collision
+      between tests.
+Gate: GATE 6-4B - Interface Implementation (test fix)
+Effect Preserved At: E:/HBI/tests/test_interface.py (clean_db fixture
+      already applied)
+Reason for Removal: One-time patch whose effect is already applied to
+      the test file. Not part of project Runtime.
+Disposal Date: 1405-05-21 / 2026-08-12
+
+=======================================================================
+END OF DISPOSAL RECORD
+=======================================================================
+
+
+=======================================================================
+ADDENDUM - create_hbi_interface.py VERSION CONFLICT RESOLUTION
+Disposal Date: 1405-05-21 / 2026-08-12
+=======================================================================
+CONTEXT:
+During File Hygiene, TWO different versions of create_hbi_interface.py
+were discovered:
+  Version A: E:/create_hbi_interface.py (13073 bytes)
+             sha256: cc6a6a93a23aba94d50d2e302b084abdc59a21b57456c3fe31c6774e8d93f366
+  Version B: E:/HBI/create_hbi_interface.py (16052 bytes)
+             sha256: e85c8b4c6b54948704752354d16e770183ae84fe361406f975073c45ed5f0a43
+
+DIAGNOSIS:
+A READ-ONLY inspection of the live interface (E:/HBI/app/interface/
+facades.py) showed its Facade methods match Version B (the generator
+delivered with GATE 6-4B), NOT Version A.
+
+  Live interface methods:
+    ProductFacade: get_by_id, find_by_brand, get_verified_products
+    CustomerFacade: register, find_by_mobile
+    CaseFacade: create, find_by_customer, close
+    RecommendationFacade: generate, find_by_case
+    InventoryFacade: get_by_product, find_available
+    SaleFacade: create_sale, get_total_sales
+
+CONCLUSION:
+  Version B is CANONICAL (retained at E:/HBI/create_hbi_interface.py).
+  Version A is OBSOLETE (superseded by the GATE 6-4B delivery).
+
+DISPOSITION:
+  Version A (E:/create_hbi_interface.py) is removed per the
+  No-Orphaned-Artifact principle.
+Disposal Date: 1405-05-21 / 2026-08-12
+=======================================================================
+END OF ADDENDUM
+=======================================================================

@@ -1,0 +1,32 @@
+# --- HBI Project .gitignore ---
+
+# Database (runtime artifact)
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+env/
+venv/
+.venv/
+
+# pytest cache
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

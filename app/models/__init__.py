@@ -1,0 +1,23 @@
+from app.models.base import Base
+from app.models.product import Product
+from app.models.product_knowledge import ProductKnowledge
+from app.models.evidence import Evidence
+from app.models.customer import Customer
+from app.models.case import Case
+from app.models.recommendation import Recommendation
+from app.models.inventory import Inventory
+from app.models.sale import Sale
+from app.models.sale_item import SaleItem
+
+__all__ = [
+    "Base",
+    "Product",
+    "ProductKnowledge",
+    "Evidence",
+    "Customer",
+    "Case",
+    "Recommendation",
+    "Inventory",
+    "Sale",
+    "SaleItem",
+]

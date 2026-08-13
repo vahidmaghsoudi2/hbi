@@ -1,0 +1,105 @@
+HBI Project Handover Document
+Date: 1405-05-20 (2026-08-11)
+From: Qwen — Knowledge Engineer / Data QA
+To: Maqsoudi Gallery Team
+
+═══════════════════════════════════════════════════════════
+PROJECT OVERVIEW
+═══════════════════════════════════════════════════════════
+
+Project: HBI (Health & Beauty Intelligence)
+Owner: Vahid Maghsoudi (Product Owner)
+Phase: Phase 1 — Vertical Slice (Products A and B from ISDIN)
+
+Architecture Layers:
+1. Models (GATE 6-1)
+2. Repositories (GATE 6-2)
+3. Services (GATE 6-3)
+4. Interface (GATE 6-4)
+
+═══════════════════════════════════════════════════════════
+GATE STATUS
+═══════════════════════════════════════════════════════════
+
+GATE 5 — Schema Lock v1.1
+Status: LOCKED & APPROVED
+Notes: Schema is locked. Changes only via formal Change Request.
+Finding: Table name "Case" requires quoting in raw SQL due to reserved keyword.
+
+GATE 6-1 — Models
+Status: NOT APPROVED (as of 1405-05-20)
+Notes: DeepSeek was fixing issues. May have been approved since then.
+Models: Product, ProductKnowledge, Evidence, Customer, Case,
+        Recommendation, Inventory, Sale, SaleItem (9 total)
+
+GATE 6-2 — Repository Layer
+Status: Not explicitly documented in this handover
+Notes: BaseRepository + 7 domain repositories exist.
+Missing: EvidenceRepository, ProductKnowledgeRepository
+
+GATE 6-3 — Service Layer
+Status: Not explicitly documented in this handover
+Notes: BaseService + 6 domain services exist.
+Missing: EvidenceService, ProductKnowledgeService
+
+GATE 6-4 — Interface Layer
+Status: Not started as of 1405-05-20
+Notes: Contract reconciliation (6-4A) was in progress.
+
+═══════════════════════════════════════════════════════════
+KNOWN GAPS (as of 1405-05-20)
+═══════════════════════════════════════════════════════════
+
+1. EvidenceRepository — MISSING
+2. EvidenceService — MISSING
+3. ProductKnowledgeRepository — MISSING
+4. ProductKnowledgeService — MISSING
+5. Reasoning Engine — SKELETON ONLY
+   (RecommendationService._calculate_match_score returns fixed 0.75)
+6. Consent management (update_consent, withdraw_consent) — MISSING
+
+═══════════════════════════════════════════════════════════
+PRODUCTS STATUS
+═══════════════════════════════════════════════════════════
+
+Products A and B (ISDIN):
+- Identity Status: VERIFIED
+- Evidence: Awaiting collection
+- Gate: Ready for Evidence Gathering
+
+Products C and D:
+- Identity Status: UNIDENTIFIED
+- Issue: Awaiting physical information from Product Owner
+- Gate: Blocked until identity is established
+
+═══════════════════════════════════════════════════════════
+DECISIONS MADE
+═══════════════════════════════════════════════════════════
+
+ADR-001: Use quoted table name "Case" in raw SQL
+Status: ACCEPTED
+Date: 1405-05-21
+Reason: "Case" is a reserved keyword in SQLite. ORM handles quoting
+        automatically, but raw SQL must use "Case" with quotes.
+
+ADR-002: Do not implement Evidence/ProductKnowledge in GATE 6-4B
+Status: ACCEPTED
+Date: 1405-05-21
+Reason: These services do not exist in GATE 6-3. Interface layer
+        should only expose capabilities that have real backend support.
+
+═══════════════════════════════════════════════════════════
+NEXT STEPS (as of 1405-05-20)
+═══════════════════════════════════════════════════════════
+
+1. Complete GATE 6-4B (Interface Implementation)
+2. Perform Reality Check to confirm what is actually built
+3. Build the real Reasoning Engine (replace skeleton)
+4. Implement EvidenceRepository and EvidenceService
+5. Implement ProductKnowledgeRepository and ProductKnowledgeService
+6. Gather evidence for Products A and B (ISDIN)
+7. Establish identity for Products C and D
+
+═══════════════════════════════════════════════════════════
+END OF HANDOVER
+═══════════════════════════════════════════════════════════
