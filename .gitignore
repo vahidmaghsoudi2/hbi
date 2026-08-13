@@ -30,3 +30,13 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Temporary setup scripts
+setup_git*.bat
+hbi_setup_memory.py
+create_reference_docs.py
+
+# Stray files
+cd
+python
+type
