@@ -35,6 +35,16 @@ class RecommendationDTO:
     eligibility_status: Optional[str] = None
     ranking_score: Optional[float] = None
     ranking_reasons: Optional[str] = None
+    # AD-3 Contract fields
+    final_score: Optional[float] = None
+    confidence: Optional[float] = None
+    eligibility: Optional[str] = None
+    reasoning: Optional[str] = None
+    evidence_score: Optional[float] = None
+    evidence_refs: Optional[list] = None
+    warnings: Optional[list] = None
+    availability: Optional[str] = None
+    price: Optional[int] = None
 
 @dataclass
 class InventoryDTO:
