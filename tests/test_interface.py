@@ -31,7 +31,23 @@ def db():
     try:
         yield session
     finally:
-        session.rollback()
+        # Cleanup all test data
+        from app.models.recommendation import Recommendation
+        from app.models.case import Case
+        from app.models.sale_item import SaleItem
+        from app.models.sale import Sale
+        from app.models.inventory import Inventory
+        from app.models.customer import Customer
+        from app.models.product import Product
+        
+        session.query(Recommendation).filter(Recommendation.case_id.like("CASE_%")).delete(synchronize_session=False)
+        session.query(Case).filter(Case.case_id.like("CASE_%")).delete(synchronize_session=False)
+        session.query(SaleItem).delete(synchronize_session=False)
+        session.query(Sale).delete(synchronize_session=False)
+        session.query(Inventory).filter(Inventory.inventory_id.like("I%")).delete(synchronize_session=False)
+        session.query(Customer).filter(Customer.customer_id.like("C%")).delete(synchronize_session=False)
+        session.query(Product).filter(Product.product_id.like("P%")).delete(synchronize_session=False)
+        session.commit()
         session.close()
 
 @pytest.fixture
