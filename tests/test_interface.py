@@ -101,12 +101,38 @@ def test_case_facade_create_and_find(db, sample_customer):
     assert len(cases) >= 1
 
 def test_recommendation_facade_generate(db, sample_product, sample_customer, sample_inventory):
+    from app.models.product_knowledge import ProductKnowledge
+    from app.models.evidence import Evidence
+
+    # Add ProductKnowledge for scoring
+    pk = ProductKnowledge(
+        product_knowledge_id="PK_TEST_001",
+        product_id=sample_product.product_id,
+        known_use_cases="oily skin care, daily protection",
+        claimed_benefits="oil control"
+    )
+    db.add(pk)
+
+    # Add Evidence for scoring
+    ev = Evidence(
+        evidence_id="EV_TEST_001",
+        product_id=sample_product.product_id,
+        source_type="OFFICIAL_MANUFACTURER",
+        source_reference="TEST-SOURCE",
+        claim="Test claim for oily skin",
+        claim_type="FACT",
+        evidence_status="SUPPORTED"
+    )
+    db.add(ev)
+    db.commit()
+
     case_facade = CaseFacade(db)
     case = case_facade.create(customer_id=sample_customer.customer_id)
     rec_facade = RecommendationFacade(db)
-    recs = rec_facade.generate(case.case_id, {"skin_type": "oily"})
+    recs = rec_facade.generate(case.case_id, {"concerns": "oily skin care"})
     assert len(recs) >= 1
     assert recs[0].case_id == case.case_id
+
 
 def test_inventory_facade_get_by_product(db, sample_product, sample_inventory):
     facade = InventoryFacade(db)
