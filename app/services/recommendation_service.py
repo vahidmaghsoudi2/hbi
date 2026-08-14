@@ -50,6 +50,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                     case_id=case_id,
                     product_id=product.product_id,
                     need_match_score=match_score,
+                    evidence_score=self._get_evidence_score(product),
                     eligibility_status=eligibility,
                     ranking_score=match_score,
                     ranking_reasons=f"Deterministic match score based on available verified product: {match_score:.2f}"
@@ -104,3 +105,24 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
 
         result = eng.calculate(need, ev_score, inv_score)
         return result["final_score"]
+
+    def _get_evidence_score(self, product) -> float:
+        """Return max evidence weight for a product."""
+        try:
+            from app.models.evidence import Evidence
+            evs = self.db.query(Evidence).filter_by(
+                product_id=product.product_id).all()
+            weights = {
+                "PEER_REVIEWED": 1.0, "CLINICAL_TRIAL": 1.0,
+                "REGULATORY": 1.0, "OFFICIAL_MANUFACTURER": 0.6,
+                "MANUFACTURER": 0.6, "REPUTABLE_RETAILER": 0.4,
+                "SECONDARY": 0.2,
+            }
+            mx = 0.0
+            for e in evs:
+                s = weights.get((e.source_type or "").upper(), 0.0)
+                if s > mx:
+                    mx = s
+            return mx
+        except Exception:
+            return 0.0
