@@ -40,3 +40,7 @@ create_reference_docs.py
 cd
 python
 type
+
+# Added by cleanup
+*.pyc
+*.bak
