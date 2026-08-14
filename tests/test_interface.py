@@ -31,24 +31,27 @@ def db():
     try:
         yield session
     finally:
-        # Cleanup all test data
         from app.models.recommendation import Recommendation
-        from app.models.case import Case
         from app.models.sale_item import SaleItem
         from app.models.sale import Sale
+        from app.models.case import Case
         from app.models.inventory import Inventory
+        from app.models.product_knowledge import ProductKnowledge
+        from app.models.evidence import Evidence
         from app.models.customer import Customer
         from app.models.product import Product
-        
-        session.query(Recommendation).filter(Recommendation.case_id.like("CASE_%")).delete(synchronize_session=False)
-        session.query(Case).filter(Case.case_id.like("CASE_%")).delete(synchronize_session=False)
+        session.query(Recommendation).delete(synchronize_session=False)
         session.query(SaleItem).delete(synchronize_session=False)
         session.query(Sale).delete(synchronize_session=False)
-        session.query(Inventory).filter(Inventory.inventory_id.like("I%")).delete(synchronize_session=False)
-        session.query(Customer).filter(Customer.customer_id.like("C%")).delete(synchronize_session=False)
-        session.query(Product).filter(Product.product_id.like("P%")).delete(synchronize_session=False)
+        session.query(Case).delete(synchronize_session=False)
+        session.query(Inventory).delete(synchronize_session=False)
+        session.query(ProductKnowledge).delete(synchronize_session=False)
+        session.query(Evidence).delete(synchronize_session=False)
+        session.query(Customer).delete(synchronize_session=False)
+        session.query(Product).delete(synchronize_session=False)
         session.commit()
         session.close()
+
 
 @pytest.fixture
 def sample_product(db):
