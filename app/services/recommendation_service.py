@@ -60,11 +60,47 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         return recommendations
 
     def _calculate_match_score(self, product: Product, profile: Dict) -> float:
-        """
-        منطق قطعی ساده برای Phase 1:
-        اگر محصول VERIFIED باشد و موجودی داشته باشد، امتیاز پایه 0.75 می‌گیرد.
-        (در آینده می‌توان بر اساس skin_type و claims گسترش داد)
-        """
-        # منطق قطعی و قابل توضیح
-        base_score = 0.75
-        return base_score
+        """Uses MatchScoringEngine. Replaces placeholder base_score=0.75."""
+        from app.reasoning.scoring import MatchScoringEngine
+        eng = MatchScoringEngine()
+
+        # need_match: keyword matching concerns vs known_use_cases
+        concerns = profile.get("concerns", "")
+        if isinstance(concerns, str):
+            concerns = [c.strip().lower() for c in concerns.split(",") if c.strip()]
+        need = 0.0
+        if concerns:
+            try:
+                from app.models.product_knowledge import ProductKnowledge
+                pk = self.db.query(ProductKnowledge).filter_by(
+                    product_id=product.product_id).first()
+                if pk and pk.known_use_cases:
+                    uc = [u.strip().lower() for u in pk.known_use_cases.split(",")]
+                    need = round(len(set(concerns) & set(uc)) / len(concerns), 2)
+            except Exception:
+                pass
+
+        # evidence_score: from Evidence table (0.0 if none -> Hard Gate)
+        ev_score = 0.0
+        try:
+            from app.models.evidence import Evidence
+            evs = self.db.query(Evidence).filter_by(
+                product_id=product.product_id).all()
+            weights = {
+                "PEER_REVIEWED": 1.0, "CLINICAL_TRIAL": 1.0, "REGULATORY": 1.0,
+                "OFFICIAL_MANUFACTURER": 0.6, "MANUFACTURER": 0.6,
+                "REPUTABLE_RETAILER": 0.4, "SECONDARY": 0.2,
+            }
+            for e in evs:
+                s = weights.get((e.source_type or "").upper(), 0.0)
+                if s > ev_score:
+                    ev_score = s
+        except Exception:
+            pass
+
+        # inventory_score
+        inv = self.inventory_repo.find_by_product(product.product_id)
+        inv_score = 1.0 if inv and inv.quantity_available > 0 else 0.0
+
+        result = eng.calculate(need, ev_score, inv_score)
+        return result["final_score"]
