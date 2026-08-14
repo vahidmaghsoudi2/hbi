@@ -1,0 +1,9 @@
+[2026-08-14 21:06:53] === HBI Control Center started ===
+[2026-08-14 21:07:09] === Exit ===
+[2026-08-14 21:31:50] === HBI Control Center v2.1 started ===
+[2026-08-14 21:32:03] === Exit ===
+[2026-08-14 21:42:50] === HBI Control Center v2.1 started ===
+[2026-08-14 21:48:10] === HBI Control Center v2.1 started ===
+[2026-08-14 21:48:22] === Mapping availability and price ===
+[2026-08-14 21:48:22] [OK] Patched facades.py
+[2026-08-14 21:48:27] [OK] availability and price mapped

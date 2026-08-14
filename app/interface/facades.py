@@ -39,6 +39,33 @@ def _to_case_dto(c) -> CaseDTO:
         case_type=c.case_type
     )
 
+
+def _get_availability(r):
+    try:
+        from app.models.inventory import Inventory
+        from app.database import SessionLocal
+        s = SessionLocal()
+        inv = s.query(Inventory).filter_by(product_id=r.product_id).first()
+        s.close()
+        if not inv:
+            return "OUT_OF_STOCK"
+        return "AVAILABLE" if inv.quantity_available > 0 else "OUT_OF_STOCK"
+    except Exception:
+        return "UNKNOWN"
+
+def _get_price(r):
+    try:
+        from app.models.inventory import Inventory
+        from app.database import SessionLocal
+        s = SessionLocal()
+        inv = s.query(Inventory).filter_by(product_id=r.product_id).first()
+        price = inv.sale_price_toman if inv else None
+        s.close()
+        return price
+    except Exception:
+        return None
+
+
 def _to_recommendation_dto(r) -> RecommendationDTO:
     """Map Recommendation model to DTO with AD-3 Contract fields."""
     # Calculate confidence per AD-2: 0.4*need + 0.6*evidence
@@ -62,8 +89,8 @@ def _to_recommendation_dto(r) -> RecommendationDTO:
         evidence_score=getattr(r, 'evidence_score', None),
         evidence_refs=[],
         warnings=[],
-        availability=None,
-        price=None,
+        availability=_get_availability(r),
+        price=_get_price(r),
     )
 
 def _to_inventory_dto(i) -> InventoryDTO:
