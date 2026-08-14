@@ -40,6 +40,12 @@ def _to_case_dto(c) -> CaseDTO:
     )
 
 def _to_recommendation_dto(r) -> RecommendationDTO:
+    """Map Recommendation model to DTO with AD-3 Contract fields."""
+    # Calculate confidence per AD-2: 0.4*need + 0.6*evidence
+    need = r.need_match_score or 0.0
+    ev = getattr(r, 'evidence_score', None) or 0.0
+    confidence = round(min(1.0, 0.4 * need + 0.6 * ev), 2)
+
     return RecommendationDTO(
         recommendation_id=r.recommendation_id,
         case_id=r.case_id,
@@ -47,7 +53,17 @@ def _to_recommendation_dto(r) -> RecommendationDTO:
         need_match_score=r.need_match_score,
         eligibility_status=r.eligibility_status,
         ranking_score=r.ranking_score,
-        ranking_reasons=r.ranking_reasons
+        ranking_reasons=r.ranking_reasons,
+        # AD-3 Contract fields
+        final_score=r.ranking_score,
+        confidence=confidence,
+        eligibility=r.eligibility_status,
+        reasoning=r.ranking_reasons,
+        evidence_score=getattr(r, 'evidence_score', None),
+        evidence_refs=[],
+        warnings=[],
+        availability=None,
+        price=None,
     )
 
 def _to_inventory_dto(i) -> InventoryDTO:
