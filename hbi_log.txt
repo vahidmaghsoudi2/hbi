@@ -7,3 +7,8 @@
 [2026-08-14 21:48:22] === Mapping availability and price ===
 [2026-08-14 21:48:22] [OK] Patched facades.py
 [2026-08-14 21:48:27] [OK] availability and price mapped
+[2026-08-14 21:48:33] [OK] git commit: feat(contract): map availability and price in Recommendation DTO
+[2026-08-14 21:48:51] === Running E2E on real DB ===
+[2026-08-14 21:48:55] E2E exit code: 0
+[2026-08-14 21:49:06] === Injecting Evidence A & B ===
+[2026-08-14 21:49:09] Injected 0 records
