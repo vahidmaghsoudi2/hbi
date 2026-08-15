@@ -1,0 +1,18 @@
+GATE 6-1 VERIFICATION REPORT
+Date: 2026-08-17
+============================================================
+[FAIL] CHECK 1: Customer.name default
+        name=None
+
+[PASS] CHECK 2: PRAGMA foreign_keys
+        foreign_keys=1
+
+[PASS] CHECK 3: Model imports
+        All imports OK
+
+[INFO] CHECK 4: CHECK constraints
+        9 tables with CHECK | Product | Customer | ProductKnowledge | Evidence | Case | Inventory | Sale | Recommendation | SaleItem
+
+============================================================
+VERDICT: SOME CHECKS FAILED
+ACTION: DeepSeek must fix before Phase 2
