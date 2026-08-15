@@ -31,3 +31,7 @@
 [2026-08-14 23:39:30] === HBI Control Center v2.2 started ===
 [2026-08-14 23:41:18] === Injecting Evidence A & B ===
 [2026-08-14 23:41:21] Injected 0 records
+[2026-08-14 23:41:22] [OK] git commit: feat(data): inject ISDIN A&B evidence (via Control Center)
+[2026-08-14 23:43:20] === Project Status ===
+[2026-08-15 08:47:10] === HBI Control Center v2.2 started ===
+[2026-08-15 08:47:53] === Project Status ===
