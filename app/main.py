@@ -1,4 +1,6 @@
-﻿from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -8,7 +10,6 @@ from app.api.routers import (
     recommendations_router, inventory_router, sales_router, evidence_router,
 )
 
-# --- Safe Imports for Phase 1 Errors ---
 try:
     from app.interface.errors import NotFoundError
 except ImportError:
@@ -42,16 +43,24 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Explicit origins only. Production must provide HBI_CORS_ORIGINS.
+_cors_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "HBI_CORS_ORIGINS",
+        "http://localhost:3000,http://localhost:5173",
+    ).split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
-# --- Exception Handlers (Framework 5 aligned, Phase 1 compatible) ---
 
 if NotFoundError:
     @app.exception_handler(NotFoundError)
@@ -86,7 +95,6 @@ if ValidationError:
         )
 
 
-# --- Router Registration ---
 app.include_router(auth_router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(products_router, prefix="/api/v1/products", tags=["Products"])
 app.include_router(customers_router, prefix="/api/v1/customers", tags=["Customers"])
@@ -97,7 +105,6 @@ app.include_router(sales_router, prefix="/api/v1/sales", tags=["Sales"])
 app.include_router(evidence_router, prefix="/api/v1/evidence", tags=["Evidence"])
 
 
-# --- System Endpoints ---
 @app.get("/health", tags=["System"])
 async def health_check():
     return {"status": "ok", "phase": "2", "gate": "6-5"}
