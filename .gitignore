@@ -1,50 +1,68 @@
-# --- HBI Project .gitignore ---
+﻿# ═══════════════════════════════════════════════════════
+# HBI Project — .gitignore
+# Phase 3 — GIT-01 Cleanup
+# ═══════════════════════════════════════════════════════
 
-# Database (runtime artifact)
-data/*.db
-data/*.sqlite
-data/*.sqlite3
+# ─── Database Files (CRITICAL: Never commit) ──────────
+*.db
+*.sqlite
+*.sqlite3
+data/
+test.db
 
-# Python bytecode
+# ─── Backup Files ─────────────────────────────────────
+*.bak
+*.backup
+backups/
+
+# ─── Python Cache ─────────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+.Python
 
-# Virtual environments
-env/
+# ─── Virtual Environments ─────────────────────────────
 venv/
+env/
+ENV/
 .venv/
 
-# pytest cache
-.pytest_cache/
-
-# IDE
+# ─── IDE & Editor Files ───────────────────────────────
 .vscode/
 .idea/
 *.swp
+*.swo
+*~
 
-# OS
+# ─── OS Files ─────────────────────────────────────────
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Logs
+# ─── Logs ─────────────────────────────────────────────
 *.log
+migration.log
 
-# Temporary setup scripts
-setup_git*.bat
-hbi_setup_memory.py
-create_reference_docs.py
-
-# Stray files
-cd
-python
-type
-
-# Added by cleanup
-*.pyc
-*.bak
-
-# Security audit artifacts
+# ─── Temporary Files ──────────────────────────────────
+*.tmp
+*.temp
+*.zip
 hbi_security_audit.zip
 _security_audit_temp/
+
+# ─── Environment Variables ────────────────────────────
+.env
+.env.local
+.env.production
+
+# ─── Test Artifacts ───────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ─── Build Artifacts ──────────────────────────────────
+build/
+dist/
+*.egg-info/
