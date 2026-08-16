@@ -1,6 +1,7 @@
 ﻿import pytest
 from fastapi.testclient import TestClient
 from app.main import app
+from app.core.auth import create_access_token
 
 client = TestClient(app)
 
@@ -52,5 +53,8 @@ class TestInventoryEndpoints:
 
 class TestSalesEndpoints:
     def test_get_total_sales(self):
-        response = client.get("/api/v1/sales/total")
+        # Generate a valid access token for testing
+        test_token = create_access_token({"sub": "test-customer-id"})
+        headers = {"Authorization": f"Bearer {test_token}"}
+        response = client.get("/api/v1/sales/total", headers=headers)
         assert response.status_code == 200
