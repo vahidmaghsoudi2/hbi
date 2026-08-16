@@ -9,40 +9,31 @@ Date:        2026-08-18
 Final Commit: 72841f3 "security(gate-6-6): harden Phase 2 API per Grok audit"
 
 ═══════════════════════════════════════════════════════
-1. PROJECT OVERVIEW
+1. PROJECT STATUS
 ═══════════════════════════════════════════════════════
 
-HBI is a decision-support engine for health & beauty product
-recommendations. It combines product identity validation,
-evidence-based scoring, and customer need matching to generate
-personalized recommendations.
+Phase 1: ✅ COMPLETE
+  - 48/48 unit tests PASS
+  - Schema v1.1 LOCKED & APPROVED
+  - Products A & B (ISDIN) VERIFIED
+  - Products C & D UNIDENTIFIED (awaiting PO physical info)
 
-Architecture Layers:
-  HTTP → FastAPI Router → Pydantic V2 Schema → Facade → Service
-       → Repository → SQLAlchemy ORM → SQLite
-
-Key Principles:
-  - Schema v1.1 is LOCKED (no DB changes without Change Request)
-  - AD-1 to AD-4 Decision Locks are FROZEN
-  - Framework 1.D: Price/Stock NOT in ProductKnowledge (DYNAMIC)
-  - Framework 5: UNKNOWN/CONFLICT handling preserved (never guess)
-  - Claim Boundary Rules: INFERENCE never promoted to FACT
+Phase 2: ✅ COMPLETE
+  - 57/57 tests PASS (48 Phase 1 + 9 Phase 2 API)
+  - All 6 Gates APPROVED
+  - REST API Layer implemented
+  - Security audit completed (Grok Red Team)
 
 ═══════════════════════════════════════════════════════
-2. PHASE 2 SUMMARY (All Gates)
+2. GATES STATUS
 ═══════════════════════════════════════════════════════
 
-GATE 6-1: SQLAlchemy Models          ✅ APPROVED (Phase 1)
+GATE 6-1: SQLAlchemy Models          ✅ APPROVED
 GATE 6-2: API Contract / JWT Design  ✅ APPROVED
 GATE 6-3: Pydantic V2 Schemas        ✅ APPROVED (AD-3 16-field)
 GATE 6-4: FastAPI Foundation         ✅ APPROVED
 GATE 6-5: FastAPI Routers + Tests    ✅ APPROVED & COMMITTED
 GATE 6-6: Security Audit (Grok)      ✅ CONDITIONALLY APPROVED
-
-Test Suite:
-  - Phase 1 unit tests: 48/48 PASS
-  - Phase 2 API tests:  9/9 PASS
-  - Total:              57/57 PASS
 
 ═══════════════════════════════════════════════════════
 3. DECISION LOCKS (POD)
@@ -79,7 +70,7 @@ POD-005: Security Hardening = Phase 3
 ═══════════════════════════════════════════════════════
 
 KAF-001: Case Ownership Gap
-  Scope: cases.py:61-79, recommendations.py:69-80
+  Scope: cases.py, recommendations.py
   Status: ACCEPTED RISK (Phase 2 MVP)
   Impact: No verification that case_id belongs to authenticated customer
   Resolution: Add CaseFacade.find_by_id_and_customer() in Phase 3
