@@ -214,3 +214,101 @@ class SaleFacade:
 
     def get_total_sales(self) -> int:
         return self.service.get_total_sales()
+
+# ─── Evidence & ProductKnowledge Facades (Phase 3) ─────────────
+
+from app.services.evidence_service import EvidenceService
+from app.services.product_knowledge_service import ProductKnowledgeService
+from app.interface.dto import EvidenceDTO, ProductKnowledgeDTO, ConflictEntryDTO
+
+
+class EvidenceFacade:
+    def __init__(self, db: Session):
+        self.db = db
+        self.service = EvidenceService(db)
+
+    def add_evidence(self, evidence_data: Dict) -> EvidenceDTO:
+        evidence = self.service.add_evidence(evidence_data)
+        return self._to_evidence_dto(evidence)
+
+    def get_by_product(self, product_id: str) -> List[EvidenceDTO]:
+        evidences = self.service.repository.find_by_product(product_id)
+        return [self._to_evidence_dto(e) for e in evidences]
+
+    def verify_evidence(self, evidence_id: str, verdict: str) -> EvidenceDTO:
+        evidence = self.service.verify_evidence(evidence_id, verdict)
+        if not evidence:
+            raise NotFoundError(f"Evidence {evidence_id} not found")
+        return self._to_evidence_dto(evidence)
+
+    def detect_conflicts(self, product_id: str) -> List[ConflictEntryDTO]:
+        conflicts = self.service.detect_conflicts(product_id)
+        return [self._to_conflict_dto(c) for c in conflicts]
+
+    def resolve_conflict(self, evidence_id: str, resolution: str) -> EvidenceDTO:
+        evidence = self.service.resolve_conflict(evidence_id, resolution)
+        if not evidence:
+            raise NotFoundError(f"Evidence {evidence_id} not found")
+        return self._to_evidence_dto(evidence)
+
+    def _to_evidence_dto(self, evidence) -> EvidenceDTO:
+        return EvidenceDTO(
+            evidence_id=evidence.evidence_id,
+            product_id=evidence.product_id,
+            claim_id=evidence.claim_id,
+            field=evidence.field,
+            claim=evidence.claim,
+            claim_type=evidence.claim_type,
+            source_type=evidence.source_type,
+            source_reference=evidence.source_reference,
+            source_date=evidence.source_date,
+            evidence_date=evidence.evidence_date,
+            evidence_strength=evidence.evidence_strength,
+            evidence_status=evidence.evidence_status,
+            conflict_status=evidence.conflict_status,
+            market_region=evidence.market_region,
+            notes=evidence.notes,
+            qa_status=evidence.qa_status,
+            created_at=evidence.created_at
+        )
+
+    def _to_conflict_dto(self, conflict: Dict) -> ConflictEntryDTO:
+        return ConflictEntryDTO(
+            field=conflict.get("field"),
+            values=conflict.get("values", []),
+            evidence_ids=conflict.get("evidence_ids", []),
+            severity="HIGH",
+            status="UNRESOLVED"
+        )
+
+
+class ProductKnowledgeFacade:
+    def __init__(self, db: Session):
+        self.db = db
+        self.service = ProductKnowledgeService(db)
+
+    def get_by_product(self, product_id: str) -> ProductKnowledgeDTO:
+        knowledge = self.service.get_or_create(product_id)
+        return self._to_knowledge_dto(knowledge)
+
+    def refresh_from_evidence(self, product_id: str) -> ProductKnowledgeDTO:
+        knowledge = self.service.update_from_evidence(product_id)
+        return self._to_knowledge_dto(knowledge)
+
+    def _to_knowledge_dto(self, knowledge) -> ProductKnowledgeDTO:
+        return ProductKnowledgeDTO(
+            product_knowledge_id=knowledge.product_knowledge_id,
+            product_id=knowledge.product_id,
+            ingredients=knowledge.ingredients,
+            ingredient_roles=knowledge.ingredient_roles,
+            claimed_benefits=knowledge.claimed_benefits,
+            known_use_cases=knowledge.known_use_cases,
+            contraindications=knowledge.contraindications,
+            usage_instructions=knowledge.usage_instructions,
+            manufacturer_claims=knowledge.manufacturer_claims,
+            evidence_refs=knowledge.evidence_refs,
+            evidence_status=knowledge.evidence_status,
+            knowledge_confidence=knowledge.knowledge_confidence,
+            created_at=knowledge.created_at,
+            updated_at=knowledge.updated_at
+        )

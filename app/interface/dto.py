@@ -69,3 +69,52 @@ class SaleDTO:
     customer_id: str
     total_amount_toman: int
     items: Optional[List[SaleItemDTO]] = None
+
+# ─── Evidence & ProductKnowledge DTOs (Phase 3) ─────────────────
+
+@dataclass
+class EvidenceDTO:
+    evidence_id: str
+    product_id: str
+    claim_id: Optional[str] = None
+    field: Optional[str] = None
+    claim: Optional[str] = None
+    claim_type: Optional[str] = None
+    source_type: Optional[str] = None
+    source_reference: Optional[str] = None
+    source_date: Optional[str] = None
+    evidence_date: Optional[datetime] = None
+    evidence_strength: Optional[str] = None
+    evidence_status: Optional[str] = None
+    conflict_status: Optional[str] = None
+    market_region: Optional[str] = None
+    notes: Optional[str] = None
+    qa_status: Optional[str] = None
+    created_at: Optional[datetime] = None
+
+
+@dataclass
+class ProductKnowledgeDTO:
+    product_knowledge_id: str
+    product_id: str
+    ingredients: Optional[str] = None
+    ingredient_roles: Optional[str] = None
+    claimed_benefits: Optional[str] = None
+    known_use_cases: Optional[str] = None
+    contraindications: Optional[str] = None
+    usage_instructions: Optional[str] = None
+    manufacturer_claims: Optional[str] = None
+    evidence_refs: Optional[str] = None
+    evidence_status: Optional[str] = None
+    knowledge_confidence: Optional[float] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
+@dataclass
+class ConflictEntryDTO:
+    field: Optional[str] = None
+    values: List[str] = None
+    evidence_ids: List[str] = None
+    severity: str = "HIGH"
+    status: str = "UNRESOLVED"

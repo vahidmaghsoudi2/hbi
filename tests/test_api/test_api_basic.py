@@ -36,9 +36,12 @@ class TestProductEndpoints:
 
 
 class TestEvidenceEndpoints:
-    def test_evidence_returns_501(self):
-        response = client.get("/api/v1/evidence/")
-        assert response.status_code == 501
+    def test_evidence_returns_200(self):
+        """Evidence endpoints are now active (Phase 3 GATE 7-1)."""
+        test_token = create_access_token({"sub": "test-customer-id"})
+        headers = {"Authorization": f"Bearer {test_token}"}
+        response = client.get("/api/v1/evidence/", headers=headers)
+        assert response.status_code == 200
 
 
 class TestInventoryEndpoints:
@@ -53,7 +56,6 @@ class TestInventoryEndpoints:
 
 class TestSalesEndpoints:
     def test_get_total_sales(self):
-        # Generate a valid access token for testing
         test_token = create_access_token({"sub": "test-customer-id"})
         headers = {"Authorization": f"Bearer {test_token}"}
         response = client.get("/api/v1/sales/total", headers=headers)
