@@ -44,3 +44,7 @@ type
 # Added by cleanup
 *.pyc
 *.bak
+
+# Security audit artifacts
+hbi_security_audit.zip
+_security_audit_temp/
