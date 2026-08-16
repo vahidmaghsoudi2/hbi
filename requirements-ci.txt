@@ -1,0 +1,13 @@
+﻿# HBI CI Dependencies (Linux / GitHub Actions compatible)
+# Only packages required to run the test suite
+
+fastapi==0.141.1
+uvicorn==0.52.3
+pydantic==2.13.4
+SQLAlchemy==2.0.51
+pytest==9.1.1
+httpx==0.28.1
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.20
+bcrypt==4.2.1
