@@ -1,0 +1,186 @@
+{
+  "main": {
+    "id": "22e3cc516e63a5a3",
+    "type": "split",
+    "children": [
+      {
+        "id": "9f4d888e9e0af85c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "93cd60f4f6e4da4f",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "زبانه‌ی نو"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "98cc4d176e43441f",
+    "type": "split",
+    "children": [
+      {
+        "id": "0cd1e3c4559410ef",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "85af27ae529c3065",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "مرورگر پرونده"
+            }
+          },
+          {
+            "id": "aab579c85f30bb27",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "جست‌وجو"
+            }
+          },
+          {
+            "id": "8356935caba46700",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "نشانک‌ها"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "be522ed312474c9f",
+    "type": "split",
+    "children": [
+      {
+        "id": "1411c175dc88d19e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "0f063a196773919d",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "پشت‌وندها"
+            }
+          },
+          {
+            "id": "6f08c2b5a4ba867e",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "پیوندهای برون‌رو"
+            }
+          },
+          {
+            "id": "a7ddbc380715ae19",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "برچسب‌ها"
+            }
+          },
+          {
+            "id": "13e42343ed9379dc",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "همه‌ی ویژگی‌ها"
+            }
+          },
+          {
+            "id": "274ded6e708f3f86",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "نمای کلی"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:گشودن پرش سریع": false,
+      "graph:گشودن نمای نمودار": false,
+      "canvas:ساختن بوم نو": false,
+      "daily-notes:گشودن یادداشت امروز": false,
+      "templates:درج الگو": false,
+      "command-palette:گشودن فرمان‌دان": false,
+      "bases:ایجاد پایگاه جدید": false
+    }
+  },
+  "active": "93cd60f4f6e4da4f",
+  "lastOpenFiles": []
+}
