@@ -66,3 +66,11 @@ htmlcov/
 build/
 dist/
 *.egg-info/
+
+# Test and temporary files (added by Qwen)
+github_handshake*.py
+github_report*.py
+github_report*.json
+test_github*.ps1
+test_token*.py
+*.log
