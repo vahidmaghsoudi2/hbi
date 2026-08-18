@@ -1,4 +1,4 @@
-HBI QA Frameworks v0.1
+﻿HBI QA Frameworks v0.1
 Last Updated: 1405-05-20
 
 This document defines the Quality Assurance frameworks for the HBI project.
@@ -132,3 +132,49 @@ All unknown fields must be logged in an Unknown Register with:
 ═══════════════════════════════════════════════════════════
 END OF FRAMEWORKS
 ═══════════════════════════════════════════════════════════
+
+───────────────────────────────────────
+[FRAMEWORK 2] QA CHECKLIST v0.1 (Per Product)
+───────────────────────────────────────
+PHASE 1: IDENTITY (10 checks)
+⁃    product_id format valid (BRAND-MODEL-SIZE)
+⁃    brand matches manufacturer records
+⁃    canonical_name exact (not translated)
+⁃    variant specified
+⁃    size + unit correct
+⁃    barcode_gtin valid (13 digits)
+⁃    market_region specified
+⁃    packaging_version identified
+⁃    inventory_confirmation by PO
+⁃    inventory_confirmation_date recorded
+
+PHASE 2: EVIDENCE (8 checks)
+⁃    Every claim has a Source
+⁃    Source Type classified (OFFICIAL/REGULATORY/RETAILER/SECONDARY)
+⁃    Evidence Strength assigned (STRONG/MODERATE/WEAK/UNVERIFIED)
+⁃    Claim Type correctly classified
+⁃    No INFERENCE registered as FACT
+⁃    Source priority: Official > Regulatory > Retailer > Secondary
+⁃    Evidence date recorded
+⁃    Market region specified
+
+PHASE 3: DATA INTEGRITY (5 checks)
+⁃    All Required fields present
+⁃    Data types match Schema
+⁃    Enum values within allowed set
+⁃    No duplicate records
+⁃    Foreign keys valid
+
+PHASE 4: BUSINESS RULES (4 checks)
+⁃    Price NOT in ProductKnowledge
+⁃    Stock NOT in ProductKnowledge
+⁃    Dynamic fields marked DYNAMIC
+⁃    Purchase History NOT used as Evidence
+
+PHASE 5: FINAL CHECK (5 checks)
+⁃    Verdict assigned (VALID/INVALID/CONFLICT/UNKNOWN/NEEDS_REVIEW)
+⁃    All PENDING items resolved
+⁃    Conflict Register checked
+⁃    Unknown Register checked
+⁃    PO sign-off recorded
+
