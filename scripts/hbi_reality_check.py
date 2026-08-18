@@ -83,6 +83,11 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
         try:
             from app.models.base import Base
             Base.metadata.create_all(engine)
@@ -335,6 +340,7 @@ def check_8_database():
     try:
         uri = "file:" + str(DB_PATH).replace("\\", "/") + "?mode=ro"
         conn = sqlite3.connect(uri, uri=True)
+conn.execute('PRAGMA foreign_keys=ON')
         cursor = conn.cursor()
 
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")

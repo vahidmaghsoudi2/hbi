@@ -44,6 +44,7 @@ def verify_post(conn, expected_count):
 def run_migration():
     if not DB_PATH.exists(): raise FileNotFoundError(DB_PATH)
     with sqlite3.connect(DB_PATH) as conn:
+conn.execute('PRAGMA foreign_keys=ON')
         conn.execute("PRAGMA foreign_keys = ON")
         ver = get_user_version(conn)
         logger.info("Current schema version: %s", ver)
@@ -65,6 +66,7 @@ def run_migration():
 
 def run_rollback():
     with sqlite3.connect(DB_PATH) as conn:
+conn.execute('PRAGMA foreign_keys=ON')
         conn.execute("PRAGMA foreign_keys = OFF")
         if get_user_version(conn) != TARGET_VERSION: raise RuntimeError("Not v1.2")
         backup = backup_database()

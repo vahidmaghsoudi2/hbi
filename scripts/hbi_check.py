@@ -190,6 +190,7 @@ BEGIN UPDATE Inventory SET updated_at = CURRENT_TIMESTAMP WHERE inventory_id = N
 def main():
     print("Connecting to in-memory SQLite database...")
     conn = sqlite3.connect(":memory:")
+conn.execute('PRAGMA foreign_keys=ON')
     conn.execute("PRAGMA foreign_keys = ON;")
     
     print("Executing Schema v1.1 DDL...")
