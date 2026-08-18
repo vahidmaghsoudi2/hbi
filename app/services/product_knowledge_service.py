@@ -1,4 +1,4 @@
-﻿from typing import List, Optional, Dict
+from typing import List, Optional, Dict
 from sqlalchemy.orm import Session
 from app.models.product_knowledge import ProductKnowledge
 from app.models.evidence import Evidence

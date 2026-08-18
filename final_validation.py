@@ -1,4 +1,4 @@
-﻿import os
+import os
 from app.database import SessionLocal
 from sqlalchemy import text, inspect
 from datetime import datetime

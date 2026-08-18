@@ -1,4 +1,4 @@
-﻿from typing import List, Optional
+from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.models.evidence import Evidence
 from app.repositories.base import BaseRepository

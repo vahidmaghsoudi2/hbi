@@ -1,4 +1,3 @@
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.models.base import Base
@@ -21,10 +20,6 @@ class Inventory(Base):
     updated_at = Column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
 
     __table_args__ = (
-        CheckConstraint("quantity_available >= 0", name="ck_inventory_quantity_available"),
-        CheckConstraint("quantity_reserved >= 0", name="ck_inventory_quantity_reserved"),
-        CheckConstraint("quantity_damaged >= 0", name="ck_inventory_quantity_damaged"),
-        CheckConstraint(
             "stock_status IN ('AVAILABLE', 'RESERVED', 'DAMAGED', 'OUT_OF_STOCK')",
             name="ck_inventory_stock_status"
         ),

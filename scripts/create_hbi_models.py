@@ -1,3 +1,5 @@
+from sqlalchemy.engine import Engine
+from sqlalchemy import event
 import os
 from pathlib import Path
 
@@ -55,7 +57,6 @@ metadata = MetaData(naming_convention=convention)
 Base = declarative_base(metadata=metadata)
 '''
 
-files["product.py"] = '''from sqlalchemy import Column, String, Float, DateTime, CheckConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.models.base import Base
@@ -86,15 +87,12 @@ class Product(Base):
     updated_at = Column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
 
     __table_args__ = (
-        CheckConstraint(
             "identity_status IN ('VERIFIED', 'PARTIAL_IDENTITY', 'CONFLICT', 'NEEDS_REVIEW')",
             name="ck_product_identity_status"
         ),
-        CheckConstraint(
             "identity_confidence IS NULL OR (identity_confidence >= 0.0 AND identity_confidence <= 1.0)",
             name="ck_product_identity_confidence"
         ),
-        CheckConstraint(
             "qa_verdict IN ('PENDING', 'VALID', 'INVALID', 'CONFLICT', 'UNKNOWN', 'NEEDS_REVIEW')",
             name="ck_product_qa_verdict"
         ),
@@ -107,7 +105,6 @@ class Product(Base):
     sale_items = relationship("SaleItem", back_populates="product")
 '''
 
-files["product_knowledge.py"] = '''from sqlalchemy import Column, String, Float, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.models.base import Base
@@ -134,11 +131,9 @@ class ProductKnowledge(Base):
     updated_at = Column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
 
     __table_args__ = (
-        CheckConstraint(
             "evidence_status IS NULL OR evidence_status IN ('SUPPORTED', 'PARTIAL', 'CONFLICT', 'UNKNOWN')",
             name="ck_productknowledge_evidence_status"
         ),
-        CheckConstraint(
             "knowledge_confidence IS NULL OR (knowledge_confidence >= 0.0 AND knowledge_confidence <= 1.0)",
             name="ck_productknowledge_knowledge_confidence"
         ),
@@ -147,7 +142,6 @@ class ProductKnowledge(Base):
     product = relationship("Product", back_populates="product_knowledge")
 '''
 
-files["evidence.py"] = '''from sqlalchemy import Column, String, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.models.base import Base
@@ -172,15 +166,12 @@ class Evidence(Base):
     created_at = Column(DateTime, server_default=func.current_timestamp())
 
     __table_args__ = (
-        CheckConstraint(
             "claim_type IS NULL OR claim_type IN ('FACT', 'MANUFACTURER_CLAIM', 'EVIDENCE_SUPPORTED', 'INFERENCE', 'UNKNOWN')",
             name="ck_evidence_claim_type"
         ),
-        CheckConstraint(
             "evidence_status IS NULL OR evidence_status IN ('SUPPORTED', 'PARTIAL', 'CONFLICT', 'UNKNOWN')",
             name="ck_evidence_evidence_status"
         ),
-        CheckConstraint(
             "conflict_status IS NULL OR conflict_status IN ('NONE', 'CONFLICT')",
             name="ck_evidence_conflict_status"
         ),
@@ -189,7 +180,6 @@ class Evidence(Base):
     product = relationship("Product", back_populates="evidences")
 '''
 
-files["customer.py"] = '''from sqlalchemy import Column, String, Integer, DateTime, CheckConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.models.base import Base
@@ -218,7 +208,6 @@ class Customer(Base):
     updated_at = Column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
 
     __table_args__ = (
-        CheckConstraint(
             "consent_to_store_data IN (0, 1)",
             name="ck_customer_consent_to_store_data"
         ),
@@ -228,7 +217,6 @@ class Customer(Base):
     sales = relationship("Sale", back_populates="customer")
 '''
 
-files["case.py"] = '''from sqlalchemy import Column, String, Float, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.models.base import Base
@@ -250,7 +238,6 @@ class Case(Base):
     updated_at = Column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
 
     __table_args__ = (
-        CheckConstraint(
             "confidence IS NULL OR (confidence >= 0.0 AND confidence <= 1.0)",
             name="ck_case_confidence"
         ),
@@ -260,7 +247,6 @@ class Case(Base):
     recommendations = relationship("Recommendation", back_populates="case")
 '''
 
-files["recommendation.py"] = '''from sqlalchemy import Column, String, Float, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.models.base import Base
@@ -282,15 +268,12 @@ class Recommendation(Base):
     created_at = Column(DateTime, server_default=func.current_timestamp())
 
     __table_args__ = (
-        CheckConstraint(
             "need_match_score IS NULL OR (need_match_score >= 0.0 AND need_match_score <= 1.0)",
             name="ck_recommendation_need_match_score"
         ),
-        CheckConstraint(
             "evidence_score IS NULL OR (evidence_score >= 0.0 AND evidence_score <= 1.0)",
             name="ck_recommendation_evidence_score"
         ),
-        CheckConstraint(
             "eligibility_status IS NULL OR eligibility_status IN ('ELIGIBLE', 'INELIGIBLE_PENDING_VERIFICATION', 'INELIGIBLE_CONFLICT', 'INELIGIBLE_PENDING_REVIEW', 'INELIGIBLE_OUT_OF_STOCK')",
             name="ck_recommendation_eligibility_status"
         ),
@@ -300,7 +283,6 @@ class Recommendation(Base):
     product = relationship("Product", back_populates="recommendations")
 '''
 
-files["inventory.py"] = '''from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.models.base import Base
@@ -323,10 +305,6 @@ class Inventory(Base):
     updated_at = Column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
 
     __table_args__ = (
-        CheckConstraint("quantity_available >= 0", name="ck_inventory_quantity_available"),
-        CheckConstraint("quantity_reserved >= 0", name="ck_inventory_quantity_reserved"),
-        CheckConstraint("quantity_damaged >= 0", name="ck_inventory_quantity_damaged"),
-        CheckConstraint(
             "stock_status IN ('AVAILABLE', 'RESERVED', 'DAMAGED', 'OUT_OF_STOCK')",
             name="ck_inventory_stock_status"
         ),
@@ -335,7 +313,6 @@ class Inventory(Base):
     product = relationship("Product", back_populates="inventory")
 '''
 
-files["sale.py"] = '''from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.models.base import Base
@@ -350,14 +327,12 @@ class Sale(Base):
     created_at = Column(DateTime, server_default=func.current_timestamp())
 
     __table_args__ = (
-        CheckConstraint("total_amount_toman >= 0", name="ck_sale_total_amount_toman"),
     )
 
     customer = relationship("Customer", back_populates="sales")
     sale_items = relationship("SaleItem", back_populates="sale", cascade="all, delete-orphan")
 '''
 
-files["sale_item.py"] = '''from sqlalchemy import Column, String, Integer, ForeignKey, CheckConstraint
 from sqlalchemy.orm import relationship
 from app.models.base import Base
 
@@ -372,8 +347,6 @@ class SaleItem(Base):
     unit_price_toman = Column(Integer, nullable=False)
 
     __table_args__ = (
-        CheckConstraint("quantity > 0", name="ck_saleitem_quantity"),
-        CheckConstraint("unit_price_toman >= 0", name="ck_saleitem_unit_price_toman"),
     )
 
     sale = relationship("Sale", back_populates="sale_items")
@@ -396,6 +369,11 @@ import os
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/hbi.db")
 
 engine = create_engine(
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
     DATABASE_URL,
     connect_args={"check_same_thread": False}
 )

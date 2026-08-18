@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 HBI GitHub Direct Connector v2
 Fixed: URL encoding, branch detection, scope validation

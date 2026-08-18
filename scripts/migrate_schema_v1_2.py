@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 import argparse, logging, shutil, sqlite3
 from datetime import datetime
 from pathlib import Path

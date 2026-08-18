@@ -1,4 +1,4 @@
-﻿from typing import Optional
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.models.product_knowledge import ProductKnowledge
 from app.repositories.base import BaseRepository

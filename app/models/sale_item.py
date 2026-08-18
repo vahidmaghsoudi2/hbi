@@ -1,4 +1,3 @@
-from sqlalchemy import Column, String, Integer, ForeignKey, CheckConstraint
 from sqlalchemy.orm import relationship
 from app.models.base import Base
 
@@ -13,8 +12,6 @@ class SaleItem(Base):
     unit_price_toman = Column(Integer, nullable=False)
 
     __table_args__ = (
-        CheckConstraint("quantity > 0", name="ck_saleitem_quantity"),
-        CheckConstraint("unit_price_toman >= 0", name="ck_saleitem_unit_price_toman"),
     )
 
     sale = relationship("Sale", back_populates="sale_items")

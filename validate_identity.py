@@ -1,4 +1,4 @@
-﻿from app.database import SessionLocal
+from app.database import SessionLocal
 from sqlalchemy import text
 from datetime import datetime
 

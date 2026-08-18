@@ -1,4 +1,4 @@
-﻿from app.api.routers.auth import router as auth_router
+from app.api.routers.auth import router as auth_router
 from app.api.routers.products import router as products_router
 from app.api.routers.customers import router as customers_router
 from app.api.routers.cases import router as cases_router

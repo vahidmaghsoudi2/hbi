@@ -1,4 +1,4 @@
-﻿class HBIException(Exception):
+class HBIException(Exception):
     pass
 
 class NotFoundError(HBIException):

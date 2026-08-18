@@ -1,0 +1,51 @@
+========== EVIDENCE MODEL SCHEMA ==========
+PRIMARY_KEY: evidence_id
+
+COLUMNS:
+  name=evidence_id | type=VARCHAR | nullable=False | pk=True | default=no
+  name=product_id | type=VARCHAR | nullable=False | pk=False | default=no
+  name=claim_id | type=VARCHAR | nullable=True | pk=False | default=no
+  name=source_type | type=VARCHAR | nullable=False | pk=False | default=no
+  name=source_reference | type=VARCHAR | nullable=False | pk=False | default=no
+  name=claim | type=VARCHAR | nullable=False | pk=False | default=no
+  name=field | type=VARCHAR | nullable=True | pk=False | default=no
+  name=market_region | type=VARCHAR | nullable=True | pk=False | default=no
+  name=notes | type=VARCHAR | nullable=True | pk=False | default=no
+  name=claim_type | type=VARCHAR | nullable=True | pk=False | default=no
+  name=evidence_strength | type=VARCHAR | nullable=True | pk=False | default=no
+  name=evidence_status | type=VARCHAR | nullable=True | pk=False | default=no
+  name=conflict_status | type=VARCHAR | nullable=True | pk=False | default=no
+  name=source_date | type=VARCHAR | nullable=True | pk=False | default=no
+  name=evidence_date | type=DATETIME | nullable=True | pk=False | default=no
+  name=qa_status | type=VARCHAR | nullable=True | pk=False | default=no
+  name=created_at | type=DATETIME | nullable=True | pk=False | default=no
+
+========== ATTEMPT TEST INSERT ==========
+INSERT_RESULT: FAILED
+ERROR_TYPE: FlushError
+ERROR_MSG: Instance <Evidence at 0x26417f7d7f0> has a NULL identity key.  If this is an auto-generated value, check that the database table allows generation of new primary key values, and that the mapped Column object is configured to expect these generated values.  Ensure also that this flush() is not occurring at an inappropriate time, such as within a load() event.
+
+FULL_TRACEBACK:
+Traceback (most recent call last):
+  File "E:\HBI\diag_file.py", line 41, in <module>
+    db.flush()
+    ~~~~~~~~^^
+  File "C:\Users\F1\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 4353, in flush
+    self._flush(objects)
+    ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\F1\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 4488, in _flush
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\F1\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 122, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\F1\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 4455, in _flush
+    flush_context.finalize_flush_changes()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\F1\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 486, in finalize_flush_changes
+    self.session._register_persistent(other)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\F1\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 3365, in _register_persistent
+    raise exc.FlushError(
+    ...<8 lines>...
+    )
+sqlalchemy.orm.exc.FlushError: Instance <Evidence at 0x26417f7d7f0> has a NULL identity key.  If this is an auto-generated value, check that the database table allows generation of new primary key values, and that the mapped Column object is configured to expect these generated values.  Ensure also that this flush() is not occurring at an inappropriate time, such as within a load() event.

@@ -1,4 +1,4 @@
-﻿PRAGMA foreign_keys = OFF;
+PRAGMA foreign_keys = OFF;
 BEGIN TRANSACTION;
 
 CREATE TABLE Evidence_v1_1 (
@@ -8,9 +8,6 @@ CREATE TABLE Evidence_v1_1 (
     conflict_status VARCHAR NULL, source_date VARCHAR NULL, retrieved_at DATETIME NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES Product(product_id) ON DELETE RESTRICT,
-    CHECK (claim_type IS NULL OR claim_type IN ('FACT','MANUFACTURER_CLAIM','EVIDENCE_SUPPORTED','INFERENCE','UNKNOWN')),
-    CHECK (evidence_status IS NULL OR evidence_status IN ('SUPPORTED','PARTIAL','CONFLICT','UNKNOWN')),
-    CHECK (conflict_status IS NULL OR conflict_status IN ('NONE','CONFLICT'))
 );
 
 INSERT INTO Evidence_v1_1 (

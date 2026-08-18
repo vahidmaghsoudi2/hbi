@@ -1,4 +1,3 @@
-from sqlalchemy import Column, String, Integer, DateTime, CheckConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.models.base import Base
@@ -32,7 +31,6 @@ class Customer(Base):
 
 
     __table_args__ = (
-        CheckConstraint(
             "consent_to_store_data IN (0, 1)",
             name="ck_customer_consent_to_store_data"
         ),

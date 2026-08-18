@@ -1,4 +1,4 @@
-﻿from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from app.core.auth import TokenPair, RefreshRequest, refresh_access_token
 
 router = APIRouter()

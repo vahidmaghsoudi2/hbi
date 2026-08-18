@@ -1,4 +1,4 @@
-﻿PRAGMA foreign_keys = OFF;
+PRAGMA foreign_keys = OFF;
 BEGIN TRANSACTION;
 
 ALTER TABLE Evidence RENAME COLUMN evidence_level TO evidence_strength;
@@ -23,11 +23,6 @@ CREATE TABLE Evidence_v1_2 (
     qa_status VARCHAR DEFAULT 'PENDING',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES Product(product_id) ON DELETE RESTRICT,
-    CHECK (claim_type IS NULL OR claim_type IN ('FACT','MANUFACTURER_CLAIM','EVIDENCE_SUPPORTED','INFERENCE','UNKNOWN')),
-    CHECK (evidence_strength IS NULL OR evidence_strength IN ('STRONG','MODERATE','WEAK','UNVERIFIED')),
-    CHECK (evidence_status IS NULL OR evidence_status IN ('SUPPORTED','PARTIAL','CONFLICT','UNKNOWN')),
-    CHECK (conflict_status IS NULL OR conflict_status IN ('NONE','CONFLICT')),
-    CHECK (qa_status IS NULL OR qa_status IN ('PENDING','VERIFIED','REJECTED','NEEDS_REVIEW'))
 );
 
 INSERT INTO Evidence_v1_2 (

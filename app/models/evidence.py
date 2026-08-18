@@ -1,4 +1,3 @@
-﻿from sqlalchemy import Column, DateTime, ForeignKey, String, CheckConstraint, text
 from sqlalchemy.orm import relationship
 from app.models.base import Base
 
@@ -24,9 +23,4 @@ class Evidence(Base):
     product = relationship("Product", back_populates="evidences")
 
     __table_args__ = (
-        CheckConstraint("claim_type IS NULL OR claim_type IN ('FACT','MANUFACTURER_CLAIM','EVIDENCE_SUPPORTED','INFERENCE','UNKNOWN')", name="ck_evidence_claim_type_v1_2"),
-        CheckConstraint("evidence_strength IS NULL OR evidence_strength IN ('STRONG','MODERATE','WEAK','UNVERIFIED')", name="ck_evidence_strength_v1_2"),
-        CheckConstraint("evidence_status IS NULL OR evidence_status IN ('SUPPORTED','PARTIAL','CONFLICT','UNKNOWN')", name="ck_evidence_status_v1_2"),
-        CheckConstraint("conflict_status IS NULL OR conflict_status IN ('NONE','CONFLICT')", name="ck_evidence_conflict_status_v1_2"),
-        CheckConstraint("qa_status IS NULL OR qa_status IN ('PENDING','VERIFIED','REJECTED','NEEDS_REVIEW')", name="ck_evidence_qa_status_v1_2"),
     )

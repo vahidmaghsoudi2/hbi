@@ -1,3 +1,5 @@
+from sqlalchemy.engine import Engine
+from sqlalchemy import event
 """
 HBI Reality Check v0.1
 EXECUTE -> OBSERVE -> REPORT (NOT MODIFY)
@@ -76,6 +78,11 @@ def check_3_connectivity():
 
     try:
         engine = create_engine("sqlite:///:memory:")
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
         try:
             from app.models.base import Base
             Base.metadata.create_all(engine)

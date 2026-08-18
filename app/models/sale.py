@@ -1,4 +1,3 @@
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.models.base import Base
@@ -13,7 +12,6 @@ class Sale(Base):
     created_at = Column(DateTime, server_default=func.current_timestamp())
 
     __table_args__ = (
-        CheckConstraint("total_amount_toman >= 0", name="ck_sale_total_amount_toman"),
     )
 
     customer = relationship("Customer", back_populates="sales")

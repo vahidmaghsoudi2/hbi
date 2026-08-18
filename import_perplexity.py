@@ -1,4 +1,4 @@
-﻿from app.database import SessionLocal
+from app.database import SessionLocal
 from app.models.evidence import Evidence
 from datetime import datetime
 

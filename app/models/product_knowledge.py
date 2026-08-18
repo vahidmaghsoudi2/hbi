@@ -1,4 +1,3 @@
-from sqlalchemy import Column, String, Float, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.models.base import Base
@@ -25,11 +24,9 @@ class ProductKnowledge(Base):
     updated_at = Column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
 
     __table_args__ = (
-        CheckConstraint(
             "evidence_status IS NULL OR evidence_status IN ('SUPPORTED', 'PARTIAL', 'CONFLICT', 'UNKNOWN')",
             name="ck_productknowledge_evidence_status"
         ),
-        CheckConstraint(
             "knowledge_confidence IS NULL OR (knowledge_confidence >= 0.0 AND knowledge_confidence <= 1.0)",
             name="ck_productknowledge_knowledge_confidence"
         ),

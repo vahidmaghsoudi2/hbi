@@ -1,3 +1,5 @@
+from sqlalchemy.engine import Engine
+from sqlalchemy import event
 """e2e_real.py — E2E Test on REAL data/hbi.db"""
 import sys
 from pathlib import Path
@@ -21,6 +23,11 @@ print("=" * 55)
 
 # Connect to REAL DB with FK enabled
 engine = create_engine("sqlite:///" + str(P / "data" / "hbi.db"))
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 @event.listens_for(engine, "connect")
 def set_fk(dbapi_conn, conn_record):

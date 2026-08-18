@@ -1,0 +1,189 @@
+# Database Structure Search Report
+**Generated:** 2026-08-18 16:00:33
+
+## Total Tables: 9
+
+### All Tables:
+- Case
+- Customer
+- Evidence
+- Inventory
+- Product
+- ProductKnowledge
+- Recommendation
+- Sale
+- SaleItem
+
+## PRODUCT: ISDIN-FUSION-WATER-MAGIC-50
+
+### Found in: Product
+**Row count:** 1
+
+**Columns:**
+
+- ✓ product_id: ISDIN-FUSION-WATER-MAGIC-50
+- ✓ brand: ISDIN
+- ✓ product_name: Fusion Water MAGIC SPF 50
+- ❓ variant: NULL
+- ❓ size_value: NULL
+- ❓ size_unit: NULL
+- ❓ barcode_gtin: NULL
+- ❓ market_region: NULL
+- ❓ country_of_origin: NULL
+- ❓ packaging_version: NULL
+- ✓ identity_status: VERIFIED
+- ❓ identity_confidence: NULL
+- ❓ identity_source_refs: NULL
+- ✓ qa_verdict: NEEDS_REVIEW
+- ❓ qa_reviewed_at: NULL
+- ❓ qa_notes: NULL
+- ✓ created_at: 2026-08-14 13:56:28
+- ✓ updated_at: 2026-08-14 13:56:28
+
+### Found in: ProductKnowledge
+**Row count:** 1
+
+**Columns:**
+
+- ✓ product_knowledge_id: PK-A
+- ✓ product_id: ISDIN-FUSION-WATER-MAGIC-50
+- ❓ ingredients: NULL
+- ❓ ingredient_roles: NULL
+- ✓ claimed_benefits: SPF50, ultralight, non-greasy, oil control, non-comedogenic
+- ✓ known_use_cases: daily facial sun protection, oily-skin oil-control, daytime skincare
+- ❓ contraindications: NULL
+- ❓ usage_instructions: NULL
+- ❓ manufacturer_claims: NULL
+- ❓ evidence_refs: NULL
+- ❓ evidence_status: NULL
+- ❓ knowledge_confidence: NULL
+- ✓ created_at: 2026-08-14 13:56:28
+- ✓ updated_at: 2026-08-14 13:56:28
+
+### Found in: Inventory
+**Row count:** 1
+
+**Columns:**
+
+- ✓ inventory_id: INV-A-001
+- ✓ product_id: ISDIN-FUSION-WATER-MAGIC-50
+- ✓ quantity_available: 5
+- ✓ quantity_reserved: 0
+- ✓ quantity_damaged: 0
+- ✓ stock_status: AVAILABLE
+- ❓ purchase_price_toman: NULL
+- ✓ sale_price_toman: 2500000
+- ❓ price_updated_at: NULL
+- ✓ updated_at: 2026-08-15 10:25:30
+
+### Found in: Evidence
+**Row count:** 11
+
+**Columns:**
+
+- ✓ evidence_id: EV-A-001
+- ✓ product_id: ISDIN-FUSION-WATER-MAGIC-50
+- ✓ claim_id: EV-ISDIN-FUSION-WATER-MAGIC-50-1
+- ✓ source_type: OFFICIAL_MANUFACTURER
+- ✓ source_reference: https://www.isdin.com/en-GB/product/fotoprotector-isdin/magic-spf-50
+- ✓ claim: 50 ml SPF 50 product
+- ✓ field: spf_rating
+- ✓ market_region: Global
+- ✓ notes: Auto-matched keyword: SPF 50 | Strength auto-set to MODERATE based on source_typ
+- ✓ claim_type: FACT
+- ✓ evidence_strength: MODERATE
+- ✓ evidence_status: SUPPORTED
+- ✓ conflict_status: NONE
+- ✓ source_date: 2026-08-14
+- ❓ evidence_date: NULL
+- ✓ qa_status: PENDING
+- ✓ created_at: 2026-08-15 10:25:30
+
+**Summary:** Found in 4 table(s): Product, ProductKnowledge, Inventory, Evidence
+
+## PRODUCT: ISDIN-FOTOULTRA-ACTIVE-UNIFY-COLOR-50
+
+### Found in: Product
+**Row count:** 1
+
+**Columns:**
+
+- ✓ product_id: ISDIN-FOTOULTRA-ACTIVE-UNIFY-COLOR-50
+- ✓ brand: ISDIN
+- ✓ product_name: Fotoultra 100 Active Unify COLOR SPF 50+
+- ❓ variant: NULL
+- ❓ size_value: NULL
+- ❓ size_unit: NULL
+- ❓ barcode_gtin: NULL
+- ❓ market_region: NULL
+- ❓ country_of_origin: NULL
+- ❓ packaging_version: NULL
+- ✓ identity_status: VERIFIED
+- ❓ identity_confidence: NULL
+- ❓ identity_source_refs: NULL
+- ✓ qa_verdict: NEEDS_REVIEW
+- ❓ qa_reviewed_at: NULL
+- ❓ qa_notes: NULL
+- ✓ created_at: 2026-08-14 13:56:28
+- ✓ updated_at: 2026-08-14 13:56:28
+
+### Found in: ProductKnowledge
+**Row count:** 1
+
+**Columns:**
+
+- ✓ product_knowledge_id: PK-B
+- ✓ product_id: ISDIN-FOTOULTRA-ACTIVE-UNIFY-COLOR-50
+- ❓ ingredients: NULL
+- ❓ ingredient_roles: NULL
+- ✓ claimed_benefits: SPF50+, tinted, tone-evening, triple depigmenting, water resistant
+- ✓ known_use_cases: daily facial sun protection, tinted sunscreen, skin-tone-evening, pigmentation
+- ❓ contraindications: NULL
+- ❓ usage_instructions: NULL
+- ❓ manufacturer_claims: NULL
+- ❓ evidence_refs: NULL
+- ❓ evidence_status: NULL
+- ❓ knowledge_confidence: NULL
+- ✓ created_at: 2026-08-14 13:56:28
+- ✓ updated_at: 2026-08-14 13:56:28
+
+### Found in: Inventory
+**Row count:** 1
+
+**Columns:**
+
+- ✓ inventory_id: INV-B-001
+- ✓ product_id: ISDIN-FOTOULTRA-ACTIVE-UNIFY-COLOR-50
+- ✓ quantity_available: 3
+- ✓ quantity_reserved: 0
+- ✓ quantity_damaged: 0
+- ✓ stock_status: AVAILABLE
+- ❓ purchase_price_toman: NULL
+- ✓ sale_price_toman: 3200000
+- ❓ price_updated_at: NULL
+- ✓ updated_at: 2026-08-14 13:56:28
+
+### Found in: Evidence
+**Row count:** 12
+
+**Columns:**
+
+- ✓ evidence_id: EV-B-001
+- ✓ product_id: ISDIN-FOTOULTRA-ACTIVE-UNIFY-COLOR-50
+- ✓ claim_id: EV-ISDIN-FOTOULTRA-ACTIVE-UNIFY-COLOR-50-1
+- ✓ source_type: OFFICIAL_MANUFACTURER
+- ✓ source_reference: https://www.isdin.com/en-GB/product/foto-ultra-isdin/active-unify-color-spf-50
+- ✓ claim: Fotoultra 100 Active Unify COLOR SPF 50+ is a 50 ml product
+- ✓ field: spf_rating
+- ✓ market_region: Global
+- ✓ notes: Auto-matched keyword: SPF 50
+- ✓ claim_type: FACT
+- ✓ evidence_strength: MODERATE
+- ✓ evidence_status: SUPPORTED
+- ✓ conflict_status: NONE
+- ✓ source_date: 2026-08-14
+- ✓ evidence_date: 2026-08-14 00:00:00.000000
+- ✓ qa_status: PENDING
+- ✓ created_at: 2026-08-14 13:56:28
+
+**Summary:** Found in 4 table(s): Product, ProductKnowledge, Inventory, Evidence
