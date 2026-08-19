@@ -470,7 +470,6 @@ def conflict_action(resolvable, sources=None):
 class HbiSchemaContractTests(unittest.TestCase):
     def setUp(self):
         self.conn = sqlite3.connect(":memory:")
-conn.execute('PRAGMA foreign_keys=ON')
         self.conn.execute("PRAGMA foreign_keys = ON;")
         self.conn.executescript(SCHEMA_SQL)
         self.conn.commit()
