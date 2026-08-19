@@ -1,6 +1,4 @@
-from sqlalchemy.engine import Engine
-from sqlalchemy import event
-from sqlalchemy import create_engine, event, text
+﻿from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import sessionmaker
 from app.models.base import Base
 import os
@@ -8,11 +6,6 @@ import os
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/hbi.db")
 
 engine = create_engine(
-@event.listens_for(Engine, "connect")
-def set_sqlite_pragma(dbapi_connection, connection_record):
-    cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA foreign_keys=ON")
-    cursor.close()
     DATABASE_URL,
     connect_args={"check_same_thread": False}
 )
@@ -38,7 +31,6 @@ def init_db():
         case, recommendation, inventory, sale, sale_item
     )
     Base.metadata.create_all(bind=engine)
-
     with engine.connect() as conn:
         conn.execute(text("""
             CREATE VIEW IF NOT EXISTS CustomerPurchaseHistory AS
