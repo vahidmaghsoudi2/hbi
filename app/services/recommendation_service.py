@@ -1,3 +1,4 @@
+import logging
 from typing import Optional, List, Dict
 from sqlalchemy.orm import Session
 from app.models.recommendation import Recommendation
@@ -7,6 +8,9 @@ from app.repositories.product_repository import ProductRepository
 from app.repositories.inventory_repository import InventoryRepository
 from app.services.base import BaseService
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
+
 
 class RecommendationService(BaseService[Recommendation, RecommendationRepository]):
     def __init__(self, db: Session):
@@ -78,8 +82,13 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 if pk and pk.known_use_cases:
                     uc = [u.strip().lower() for u in pk.known_use_cases.split(",")]
                     need = round(len(set(concerns) & set(uc)) / len(concerns), 2)
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.error(
+                    "Failed to calculate need from ProductKnowledge: %s",
+                    exc,
+                    exc_info=True
+                )
+                need = 0.0
 
         # evidence_score: from Evidence table (0.0 if none -> Hard Gate)
         ev_score = 0.0
@@ -96,8 +105,13 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 s = weights.get((e.source_type or "").upper(), 0.0)
                 if s > ev_score:
                     ev_score = s
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.error(
+                "Failed to calculate evidence score: %s",
+                exc,
+                exc_info=True
+            )
+            ev_score = 0.0
 
         # inventory_score
         inv = self.inventory_repo.find_by_product(product.product_id)
@@ -124,5 +138,10 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 if s > mx:
                     mx = s
             return mx
-        except Exception:
+        except Exception as exc:
+            logger.error(
+                "Failed to get evidence score: %s",
+                exc,
+                exc_info=True
+            )
             return 0.0

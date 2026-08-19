@@ -1,4 +1,5 @@
 import uuid
+import logging
 from typing import List, Dict, Optional
 from datetime import datetime
 
@@ -8,6 +9,8 @@ from app.models.evidence import Evidence
 from app.repositories.evidence_repository import EvidenceRepository
 from app.services.base import BaseService
 from app.core.exceptions import ValidationError, ConflictError, NotFoundError
+
+logger = logging.getLogger(__name__)
 
 
 class EvidenceService(BaseService[Evidence, EvidenceRepository]):
@@ -52,15 +55,16 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
         verification, which is represented through the verification flow.
         """
         if claim_type == "FACT":
-            if source_type in ("MANUFACTURER", "OFFICIAL_MANUFACTURER"):
-                raise ValidationError(
-                    "Manufacturer claim cannot be promoted to FACT "
-                    "without independent verification."
-                )
+            allowed_sources = {
+                "PEER_REVIEWED",
+                "CLINICAL_TRIAL",
+                "REGULATORY",
+            }
 
-            if source_type == "UNKNOWN":
+            if source_type not in allowed_sources:
                 raise ValidationError(
-                    "UNKNOWN source cannot be promoted to FACT."
+                    "FACT claims require independent verification "
+                    "from PEER_REVIEWED, CLINICAL_TRIAL, or REGULATORY sources."
                 )
 
     # ─── ID Generators ───────────────────────────────────────
@@ -95,21 +99,14 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
     ) -> None:
         """
         Framework 5:
-        Record UNKNOWN evidence in the in-memory Unknown Register.
-
+        Record UNKNOWN evidence in the Unknown Register.
         Status is explicitly UNVERIFIED.
         """
-        if not hasattr(self, "_unknown_register"):
-            self._unknown_register = []
-
-        self._unknown_register.append(
-            {
-                "product_id": product_id,
-                "field": field,
-                "value": value,
-                "timestamp": datetime.utcnow().isoformat(),
-                "status": "UNVERIFIED",
-            }
+        logger.info(
+            "UNKNOWN evidence registered: product_id=%s, field=%s, value=%s, status=UNVERIFIED",
+            product_id,
+            field,
+            value
         )
 
     def _log_conflict(
@@ -120,22 +117,15 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
     ) -> None:
         """
         Framework 5:
-        Record an unresolved conflict in the in-memory Conflict Register.
+        Record an unresolved conflict in the Conflict Register.
 
         Conflicts are never silently resolved.
         """
-        if not hasattr(self, "_conflict_register"):
-            self._conflict_register = []
-
-        self._conflict_register.append(
-            {
-                "product_id": product_id,
-                "field": field,
-                "values": values,
-                "timestamp": datetime.utcnow().isoformat(),
-                "severity": "HIGH",
-                "status": "UNRESOLVED",
-            }
+        logger.warning(
+            "CONFLICT detected: product_id=%s, field=%s, values=%s, severity=HIGH, status=UNRESOLVED",
+            product_id,
+            field,
+            values
         )
 
     # ─── CRUD Operations ─────────────────────────────────────
