@@ -1,6 +1,6 @@
-﻿from sqlalchemy.sql import func
+﻿from sqlalchemy import CheckConstraint, Column, DateTime, Integer, String
+from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, String, Integer, DateTime
 from app.models.base import Base
 
 class Customer(Base):
@@ -22,6 +22,8 @@ class Customer(Base):
     operator_notes = Column(String, nullable=True)
     created_at = Column(DateTime, server_default=func.current_timestamp())
     updated_at = Column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
+
+    __table_args__ = (CheckConstraint("consent_to_store_data IN (0, 1)", name="ck_customer_consent_to_store_data"),)
 
     cases = relationship("Case", back_populates="customer")
     sales = relationship("Sale", back_populates="customer")

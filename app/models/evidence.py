@@ -1,3 +1,4 @@
+﻿from sqlalchemy import Column, DateTime, ForeignKey, String, text
 from sqlalchemy.orm import relationship
 from app.models.base import Base
 
@@ -21,6 +22,4 @@ class Evidence(Base):
     qa_status = Column(String, nullable=True, server_default=text("'PENDING'"))
     created_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
     product = relationship("Product", back_populates="evidences")
-
-    __table_args__ = (
-    )
+    __table_args__ = ()

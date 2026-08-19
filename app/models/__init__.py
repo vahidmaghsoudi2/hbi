@@ -1,4 +1,4 @@
-from app.models.base import Base
+﻿from app.models.base import Base
 from app.models.product import Product
 from app.models.product_knowledge import ProductKnowledge
 from app.models.evidence import Evidence
