@@ -4,6 +4,12 @@ from app.main import app
 from app.core.auth import create_access_token
 
 
+def _auth_headers():
+    """ساخت هدر Authorization با توکن معتبر تست"""
+    token = create_access_token({"sub": "testuser"})
+    return {"Authorization": f"Bearer {token}"}
+
+
 class TestHealthCheck:
     def test_health(self, client):
         response = client.get("/health")
@@ -30,7 +36,7 @@ class TestProductEndpoints:
 
 class TestEvidenceEndpoints:
     def test_evidence_returns_200(self, client):
-        response = client.get("/api/v1/evidence/")
+        response = client.get("/api/v1/evidence/", headers=_auth_headers())
         assert response.status_code == 200
 
 
@@ -46,5 +52,5 @@ class TestInventoryEndpoints:
 
 class TestSalesEndpoints:
     def test_get_total_sales(self, client):
-        response = client.get("/api/v1/sales/total")
+        response = client.get("/api/v1/sales/total", headers=_auth_headers())
         assert response.status_code == 200
