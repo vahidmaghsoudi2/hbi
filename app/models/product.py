@@ -1,7 +1,8 @@
-﻿from sqlalchemy import CheckConstraint, Column, DateTime, Float, String
+from sqlalchemy import CheckConstraint, Column, DateTime, Float, String
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.models.base import Base
+
 
 class Product(Base):
     __tablename__ = "Product"
@@ -25,12 +26,22 @@ class Product(Base):
     updated_at = Column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
 
     __table_args__ = (
-        CheckConstraint("identity_status IN ('VERIFIED', 'PARTIAL_IDENTITY', 'CONFLICT', 'NEEDS_REVIEW')", name="ck_product_identity_status"),
-        CheckConstraint("identity_confidence IS NULL OR (identity_confidence >= 0.0 AND identity_confidence <= 1.0)", name="ck_product_identity_confidence"),
-        CheckConstraint("qa_verdict IN ('PENDING', 'VALID', 'INVALID', 'CONFLICT', 'UNKNOWN', 'NEEDS_REVIEW')", name="ck_product_qa_verdict"),
+        CheckConstraint(
+            "identity_status IN ('VERIFIED', 'PARTIAL_IDENTITY', 'CONFLICT', 'NEEDS_REVIEW')",
+            name="ck_product_identity_status",
+        ),
+        CheckConstraint(
+            "identity_confidence IS NULL OR (identity_confidence >= 0.0 AND identity_confidence <= 1.0)",
+            name="ck_product_identity_confidence",
+        ),
+        CheckConstraint(
+            "qa_verdict IN ('PENDING', 'VALID', 'INVALID', 'CONFLICT', 'UNKNOWN', 'NEEDS_REVIEW')",
+            name="ck_product_qa_verdict",
+        ),
     )
 
-    product_knowledge = relationship("ProductKnowledge", back_populates="product", uselist=False)
+    # Note: product_knowledge relationship intentionally removed.
+    # ProductKnowledge links via product_id ForeignKey only (independent tables per Schema).
     evidences = relationship("Evidence", back_populates="product")
     inventory = relationship("Inventory", back_populates="product", uselist=False)
     recommendations = relationship("Recommendation", back_populates="product")
