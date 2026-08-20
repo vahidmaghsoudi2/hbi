@@ -1,4 +1,4 @@
-﻿"""
+"""
 reasoning_engine.py — GATE 7-3
 
 Orchestrator of the Reasoning Engine.
@@ -13,6 +13,7 @@ Also integrates:
 - OD-05 manual-only rule for HIGH/CRITICAL
 - Framework 4 via ClaimValidator
 - Framework 5 Unknown / Conflict protocol
+- MatchScoringEngine for final_score / evidence_score (when inputs provided)
 """
 
 from typing import List, Dict, Any, Optional
@@ -20,9 +21,10 @@ from datetime import datetime, timezone
 
 from .conflict_analyzer import ConflictAnalyzer, ConflictSeverity
 from .claim_validator import ClaimValidator
+from .scoring import MatchScoringEngine
 
 
-ENGINE_VERSION = "0.1.0-GATE-7-3"
+ENGINE_VERSION = "0.2.0-GATE-7-3-SCORE"
 
 
 class ReasoningEngine:
@@ -34,6 +36,7 @@ class ReasoningEngine:
     def __init__(self):
         self.conflict_analyzer = ConflictAnalyzer()
         self.claim_validator = ClaimValidator()
+        self.scoring_engine = MatchScoringEngine()
 
     def run(
         self,
@@ -41,11 +44,16 @@ class ReasoningEngine:
         product_knowledge_snapshot: Optional[Dict[str, Any]] = None,
         evidence_list: Optional[List[Dict[str, Any]]] = None,
         existing_conflicts: Optional[List[Dict[str, Any]]] = None,
+        need_match: Optional[float] = None,
+        evidence_score: Optional[float] = None,
+        inventory_score: Optional[float] = None,
     ) -> Dict[str, Any]:
         """
         Main entry point.
 
         Returns a complete ReasoningResult (computed only).
+        When need_match / evidence_score / inventory_score are supplied,
+        also computes final_score, confidence, eligibility via MatchScoringEngine.
         """
         evidence_list = evidence_list or []
         existing_conflicts = existing_conflicts or []
@@ -80,7 +88,7 @@ class ReasoningEngine:
         # 3. Claim boundary violations (Framework 4)
         claim_boundary_violations = self.claim_validator.check_list(evidence_list)
 
-        # 4. Unknowns (Framework 5) — simple surface for now
+        # 4. Unknowns (Framework 5)
         unknowns: List[Dict[str, Any]] = []
         for ev in evidence_list:
             if (ev.get("claim_type") or "").upper() == "UNKNOWN":
@@ -95,7 +103,17 @@ class ReasoningEngine:
                     "notes": ev.get("claim") or ev.get("notes"),
                 })
 
-        # 5. Build human-readable rationale
+        # 5. Scoring (when inputs provided) — logic lives HERE, not in RecommendationService
+        scoring_result: Optional[Dict[str, Any]] = None
+        if need_match is not None and evidence_score is not None and inventory_score is not None:
+            scoring_result = self.scoring_engine.calculate(
+                need_match=need_match,
+                evidence_score=evidence_score,
+                inventory_score=inventory_score,
+                evidence_refs=evidence_refs,
+            )
+
+        # 6. Build human-readable rationale
         rationale_parts = [
             f"ReasoningEngine v{ENGINE_VERSION}",
             f"Product: {product_id}",
@@ -115,23 +133,34 @@ class ReasoningEngine:
                     f"WARNING: {len(high_or_critical)} HIGH/CRITICAL conflict(s) require manual resolution (OD-05)."
                 )
 
+        if scoring_result:
+            rationale_parts.append(scoring_result.get("reasoning", ""))
+
         rationale = " | ".join(rationale_parts)
 
-        # 6. Assemble ReasoningResult — COMPUTED ONLY (OD-08)
-        result = {
+        # 7. Assemble ReasoningResult — COMPUTED ONLY (OD-08)
+        result: Dict[str, Any] = {
             "product_id": product_id,
             "product_knowledge_snapshot": product_knowledge_snapshot,
             "evidence_refs": evidence_refs,
             "conflicts": conflicts,
             "unknowns": unknowns,
-            "warnings": [],
+            "warnings": list(scoring_result.get("warnings", [])) if scoring_result else [],
             "rationale": rationale,
             "claim_boundary_violations": claim_boundary_violations,
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "engine_version": ENGINE_VERSION,
-            "persistence": "COMPUTED_ONLY",  # explicit OD-08 marker
+            "persistence": "COMPUTED_ONLY",
         }
 
-        # Hard guarantee: we never write this object anywhere.
-        return result
+        if scoring_result:
+            result["final_score"] = scoring_result["final_score"]
+            result["confidence"] = scoring_result["confidence"]
+            result["eligibility"] = scoring_result["eligibility"]
+            result["hard_gate_triggered"] = scoring_result["hard_gate_triggered"]
+            result["hard_gate_reasons"] = scoring_result["hard_gate_reasons"]
+            result["evidence_score"] = evidence_score
+            result["need_match"] = need_match
+            result["inventory_score"] = inventory_score
 
+        return result
