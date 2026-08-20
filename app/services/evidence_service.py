@@ -1,7 +1,7 @@
 import uuid
 import logging
 from typing import List, Dict, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
@@ -195,9 +195,10 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
             "PENDING"
         )
 
+        # Fixed: datetime.utcnow() deprecated → timezone-aware UTC
         evidence_data.setdefault(
             "evidence_date",
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         )
 
         evidence = self.repository.create(
@@ -371,10 +372,11 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
 
         current_notes = evidence.notes or ""
 
+        # Fixed: datetime.utcnow() deprecated → timezone-aware UTC
         new_notes = (
             f"{current_notes}\n"
             f"[RESOLVED] {resolution} "
-            f"at {datetime.utcnow().isoformat()}"
+            f"at {datetime.now(timezone.utc).isoformat()}"
         )
 
         return self.repository.update(
