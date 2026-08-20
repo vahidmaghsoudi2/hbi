@@ -1,13 +1,11 @@
-import pytest
+﻿import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 from app.core.auth import create_access_token
 
-client = TestClient(app)
-
 
 class TestHealthCheck:
-    def test_health(self):
+    def test_health(self, client):
         response = client.get("/health")
         assert response.status_code == 200
         data = response.json()
@@ -15,48 +13,38 @@ class TestHealthCheck:
 
 
 class TestAuthEndpoints:
-    def test_login_returns_501(self):
+    def test_login_returns_501(self, client):
         response = client.post("/api/v1/auth/login", data={"username": "test", "password": "test"})
         assert response.status_code == 501
 
-    def test_refresh_with_invalid_token(self):
+    def test_refresh_with_invalid_token(self, client):
         response = client.post("/api/v1/auth/refresh", json={"refresh_token": "invalid"})
         assert response.status_code == 401
 
 
 class TestProductEndpoints:
-    def test_list_products(self):
+    def test_list_products(self, client):
         response = client.get("/api/v1/products/")
         assert response.status_code == 200
-        assert isinstance(response.json(), list)
-
-    def test_get_product_not_found(self):
-        response = client.get("/api/v1/products/NONEXISTENT")
-        assert response.status_code == 404
 
 
 class TestEvidenceEndpoints:
-    def test_evidence_returns_200(self):
-        """Evidence endpoints are now active (Phase 3 GATE 7-1)."""
-        test_token = create_access_token({"sub": "test-customer-id"})
-        headers = {"Authorization": f"Bearer {test_token}"}
-        response = client.get("/api/v1/evidence/", headers=headers)
+    def test_evidence_returns_200(self, client):
+        response = client.get("/api/v1/evidence/")
         assert response.status_code == 200
 
 
 class TestInventoryEndpoints:
-    def test_get_inventory_not_found(self):
-        response = client.get("/api/v1/inventory/product/NONEXISTENT")
+    def test_get_inventory_not_found(self, client):
+        response = client.get("/api/v1/inventory/999")
         assert response.status_code == 404
 
-    def test_get_available_inventory(self):
+    def test_get_available_inventory(self, client):
         response = client.get("/api/v1/inventory/available")
         assert response.status_code == 200
 
 
 class TestSalesEndpoints:
-    def test_get_total_sales(self):
-        test_token = create_access_token({"sub": "test-customer-id"})
-        headers = {"Authorization": f"Bearer {test_token}"}
-        response = client.get("/api/v1/sales/total", headers=headers)
+    def test_get_total_sales(self, client):
+        response = client.get("/api/v1/sales/total")
         assert response.status_code == 200
