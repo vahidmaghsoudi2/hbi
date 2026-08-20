@@ -1,4 +1,4 @@
-"""
+﻿"""
 reasoning_engine.py — GATE 7-3
 
 Orchestrator of the Reasoning Engine.
@@ -16,7 +16,7 @@ Also integrates:
 """
 
 from typing import List, Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 from .conflict_analyzer import ConflictAnalyzer, ConflictSeverity
 from .claim_validator import ClaimValidator
@@ -127,10 +127,11 @@ class ReasoningEngine:
             "warnings": [],
             "rationale": rationale,
             "claim_boundary_violations": claim_boundary_violations,
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(timezone.utc).isoformat(),
             "engine_version": ENGINE_VERSION,
             "persistence": "COMPUTED_ONLY",  # explicit OD-08 marker
         }
 
         # Hard guarantee: we never write this object anywhere.
         return result
+

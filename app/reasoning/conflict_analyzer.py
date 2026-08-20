@@ -1,4 +1,4 @@
-"""
+﻿"""
 conflict_analyzer.py — GATE 7-3
 
 Implements:
@@ -11,7 +11,7 @@ Never silently discards conflicting values.
 """
 
 from typing import List, Dict, Optional, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 
 
@@ -94,7 +94,7 @@ class ConflictAnalyzer:
             "resolution_state": ResolutionState.UNRESOLVED.value,
             "resolution_rationale": None,
             "severity": severity.value,
-            "detected_at": datetime.utcnow().isoformat(),
+            "detected_at": datetime.now(timezone.utc).isoformat(),
             "auto_resolution_allowed": severity in (ConflictSeverity.MEDIUM, ConflictSeverity.LOW),
         }
 
@@ -133,7 +133,7 @@ class ConflictAnalyzer:
 
         conflict["resolution_state"] = ResolutionState.RESOLVED.value
         conflict["resolution_rationale"] = resolution_rationale.strip()
-        conflict["resolved_at"] = datetime.utcnow().isoformat()
+        conflict["resolved_at"] = datetime.now(timezone.utc).isoformat()
         return conflict
 
     def get_register(self) -> List[Dict[str, Any]]:
@@ -147,3 +147,4 @@ class ConflictAnalyzer:
         if product_id:
             items = [c for c in items if c["product_id"] == product_id]
         return items
+

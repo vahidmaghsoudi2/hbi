@@ -1,5 +1,6 @@
 from sqlalchemy import CheckConstraint, Column, DateTime, Float, ForeignKey, String
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from app.models.base import Base
 
 
@@ -23,6 +24,7 @@ class ProductKnowledge(Base):
     evidence_status = Column(String, nullable=True)
     knowledge_confidence = Column(Float, nullable=True)
     created_at = Column(DateTime, server_default=func.current_timestamp())
+    product = relationship("Product", back_populates="product_knowledge")
     updated_at = Column(
         DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp()
     )
@@ -40,3 +42,5 @@ class ProductKnowledge(Base):
 
     # Note: relationship to Product intentionally removed.
     # Link is maintained only via product_id ForeignKey (tables treated as independent per Schema).
+
+    product = relationship("Product", back_populates="product_knowledge")
