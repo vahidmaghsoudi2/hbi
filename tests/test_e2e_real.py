@@ -22,8 +22,7 @@ def test_e2e_real_pipeline():
     try:
         # ===== STEP 1: Create Customer =====
         print("\n[STEP 1] Create Customer")
-        customer = Customer(
-            name="E2E Real Test Customer",
+        customer = Customer(`n            customer_id="CUST_E2E_001",`n            name="E2E Real Test Customer",
             mobile="09129999999",
             consent_to_store_data=1
         )
@@ -68,3 +67,4 @@ def test_e2e_real_pipeline():
         session.query(Customer).filter_by(mobile="09129999999").delete()
         session.commit()
         session.close()
+
