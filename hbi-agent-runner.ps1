@@ -3,8 +3,7 @@
 .SYNOPSIS
   HBI Agent Runner — polls agent-jobs/pending, runs allowlisted commands only.
 .NOTES
-  Security: allowlist only, repo-root cwd, timeout, no free-form shell.
-  After each job: commits ONLY the specific results/<id>.log and pushes.
+  After each job: publish results log + print clear NEXT STEPS for PO.
   Stop: Ctrl+C
 #>
 $ErrorActionPreference = "Continue"
@@ -44,46 +43,68 @@ function Test-CommandAllowed([string]$Command, [string[]]$Allow) {
 }
 
 function Publish-ResultLog([string]$LogPath, [string]$JobId) {
-    if (-not $AutoPushResults) { return }
+    if (-not $AutoPushResults) { return $false }
     if (-not (Test-Path -LiteralPath $LogPath)) {
         Write-Host "[PUBLISH] log missing: $LogPath" -ForegroundColor Yellow
-        return
+        return $false
     }
     try {
-        # Explicit file path — Windows git does not expand *.log globs reliably
-        git add --literal-pathspec -- "$LogPath" 2>&1 | Out-Null
-        if ($LASTEXITCODE -ne 0) {
-            git add -- "$LogPath" 2>&1 | Out-Null
-        }
+        git add -- "$LogPath" 2>&1 | Out-Null
         $porcelain = git status --porcelain -- "agent-jobs/results"
         if (-not $porcelain) {
             Write-Host "[PUBLISH] nothing new to push" -ForegroundColor Gray
-            return
+            return $false
         }
         git commit -m "agent-result: $JobId" 2>&1 | Out-Null
         if ($LASTEXITCODE -ne 0) {
             Write-Host "[PUBLISH] commit skipped" -ForegroundColor Gray
-            return
+            return $false
         }
         git push origin master 2>&1 | Out-Null
         if ($LASTEXITCODE -eq 0) {
-            Write-Host "[PUBLISH] OK → $LogPath on GitHub" -ForegroundColor Green
+            Write-Host "[PUBLISH] OK on GitHub: agent-jobs/results/$JobId.log" -ForegroundColor Green
+            return $true
         }
-        else {
-            Write-Host "[PUBLISH] push failed — log is local: $LogPath" -ForegroundColor Yellow
-        }
+        Write-Host "[PUBLISH] push failed — log is LOCAL only" -ForegroundColor Yellow
+        return $false
     }
     catch {
         Write-Host "[PUBLISH] $($_.Exception.Message)" -ForegroundColor Yellow
+        return $false
     }
+}
+
+function Write-NextSteps([string]$JobId, [string]$LogPath, [bool]$Published) {
+    Write-Host ""
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host " NEXT STEPS (برای مهندس مقصودی / PO)" -ForegroundColor Cyan
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "1) Job تمام شد: $JobId"
+    Write-Host "2) Log محلی: $LogPath"
+    if ($Published) {
+        Write-Host "3) Log روی GitHub push شد — تیم می‌تواند بخواند." -ForegroundColor Green
+        Write-Host "   شما لازم نیست نتیجه را در چت کپی کنید." -ForegroundColor Green
+    }
+    else {
+        Write-Host "3) اگر push نشد، یک‌بار دستی:" -ForegroundColor Yellow
+        Write-Host "   git add agent-jobs/results/$JobId.log"
+        Write-Host "   git commit -m `"agent-result: $JobId`""
+        Write-Host "   git push origin master"
+    }
+    Write-Host "4) اگر هنوز کار می‌کنید و آنلاین هستید: همین پنجره را باز بگذارید."
+    Write-Host "5) برای توقف Runner: Ctrl+C"
+    Write-Host "6) بعد از Job مهم: به Qwen1/ChatGPT فقط بگویید Job ID تمام شد."
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host ""
 }
 
 function Write-Banner {
     Write-Host "========================================" -ForegroundColor Cyan
-    Write-Host " HBI Agent Runner v1.1 (Windows-safe)" -ForegroundColor Cyan
+    Write-Host " HBI Agent Runner v1.2" -ForegroundColor Cyan
     Write-Host " Repo : $RepoRoot" -ForegroundColor Cyan
     Write-Host " Poll : ${PollSeconds}s | AutoPush=$AutoPushResults" -ForegroundColor Cyan
-    Write-Host " Ctrl+C to stop" -ForegroundColor Cyan
+    Write-Host " پس از هر Job راهنمای NEXT STEPS چاپ می‌شود" -ForegroundColor Cyan
+    Write-Host " توقف: Ctrl+C" -ForegroundColor Cyan
     Write-Host "========================================" -ForegroundColor Cyan
 }
 
@@ -120,10 +141,12 @@ function Invoke-AgentJob([string]$JobPath) {
 
     Write-Host "[LOG] $log" -ForegroundColor Gray
 
+    $published = $false
     if (-not (Test-CommandAllowed -Command $cmd -Allow $allow)) {
         Add-Content -LiteralPath $log "STATUS=REJECTED_NOT_ALLOWLISTED"
         Write-Host "[REJECT] $id" -ForegroundColor Red
-        Publish-ResultLog -LogPath $log -JobId $id
+        $published = Publish-ResultLog -LogPath $log -JobId $id
+        Write-NextSteps -JobId $id -LogPath $log -Published $published
         return
     }
 
@@ -148,7 +171,8 @@ function Invoke-AgentJob([string]$JobPath) {
     else {
         Add-Content -LiteralPath $log "STATUS=REJECTED_UNSUPPORTED_EXECUTABLE"
         Write-Host "[REJECT] $id" -ForegroundColor Red
-        Publish-ResultLog -LogPath $log -JobId $id
+        $published = Publish-ResultLog -LogPath $log -JobId $id
+        Write-NextSteps -JobId $id -LogPath $log -Published $published
         return
     }
 
@@ -159,7 +183,6 @@ function Invoke-AgentJob([string]$JobPath) {
     $errFile = Join-Path $env:TEMP ("hbi-agent-" + $id + "-err.txt")
     Remove-Item -LiteralPath $outFile, $errFile -ErrorAction SilentlyContinue
 
-    $code = -999
     try {
         $p = Start-Process -FilePath $exe `
             -ArgumentList $argArray `
@@ -173,19 +196,17 @@ function Invoke-AgentJob([string]$JobPath) {
             try { $p.Kill() } catch {}
             Add-Content -LiteralPath $log "STATUS=TIMEOUT after ${timeout}s"
             Write-Host "[TIMEOUT] $id" -ForegroundColor Red
-            $code = -2
         }
         else {
-            # Windows: refresh process object before reading ExitCode
             try { $p.Refresh() } catch {}
             Start-Sleep -Milliseconds 200
-            if ($null -ne $p.ExitCode) { $code = [int]$p.ExitCode } else { $code = -1 }
+            $code = if ($null -ne $p.ExitCode) { [int]$p.ExitCode } else { -1 }
             Add-Content -LiteralPath $log "STATUS=EXIT_CODE=$code"
             if ($code -eq 0) {
                 Write-Host "[OK] $id exit=0" -ForegroundColor Green
             }
             else {
-                Write-Host "[FAIL] $id exit=$code (see log; pytest text may still show passed)" -ForegroundColor Yellow
+                Write-Host "[NOTE] $id exit=$code — متن log را بخوانید (ممکن است تست‌ها pass باشند)" -ForegroundColor Yellow
             }
         }
 
@@ -207,15 +228,15 @@ function Invoke-AgentJob([string]$JobPath) {
         Remove-Item -LiteralPath $outFile, $errFile -ErrorAction SilentlyContinue
         Add-Content -LiteralPath $log "----------------------------------------"
         Add-Content -LiteralPath $log "finished=$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
-        if (Test-Path -LiteralPath $log) {
-            Write-Host "[LOG written] $log" -ForegroundColor Gray
-        }
-        Publish-ResultLog -LogPath $log -JobId $id
+        Write-Host "[LOG written] $log" -ForegroundColor Gray
+        $published = Publish-ResultLog -LogPath $log -JobId $id
+        Write-NextSteps -JobId $id -LogPath $log -Published $published
     }
 }
 
 Write-Banner
 Write-Host "Allowlist: $((Get-AllowList).Count) entries" -ForegroundColor Gray
+Write-Host "در حال انتظار برای Job در agent-jobs/pending ..." -ForegroundColor Gray
 
 while ($true) {
     try { git pull --ff-only origin master 2>$null | Out-Null } catch {}
