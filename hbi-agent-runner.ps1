@@ -4,12 +4,12 @@
   HBI Agent Runner — polls agent-jobs/pending, runs allowlisted commands only.
 .NOTES
   Security: allowlist only, repo-root cwd, timeout, no free-form shell.
-  After each job: commits ONLY agent-jobs/results/*.log and pushes (closes the loop).
+  After each job: commits ONLY the specific results/<id>.log and pushes.
   Stop: Ctrl+C
 #>
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
 $RepoRoot = $PSScriptRoot
-if (-not $RepoRoot) { $RepoRoot = Get-Location }
+if (-not $RepoRoot) { $RepoRoot = (Get-Location).Path }
 Set-Location $RepoRoot
 
 $Pending = Join-Path $RepoRoot "agent-jobs\pending"
@@ -18,16 +18,17 @@ $Results = Join-Path $RepoRoot "agent-jobs\results"
 $Done = Join-Path $RepoRoot "agent-jobs\done"
 $AllowFile = Join-Path $RepoRoot "agent-jobs\allowed.txt"
 $PollSeconds = 15
-# Easy mode for PO: publish logs to GitHub so team reads results without your copy-paste
 $AutoPushResults = $true
 
 foreach ($d in @($Pending, $Running, $Results, $Done)) {
-    if (-not (Test-Path $d)) { New-Item -ItemType Directory -Path $d | Out-Null }
+    if (-not (Test-Path -LiteralPath $d)) {
+        New-Item -ItemType Directory -Path $d -Force | Out-Null
+    }
 }
 
 function Get-AllowList {
-    if (-not (Test-Path $AllowFile)) { return @() }
-    Get-Content $AllowFile | Where-Object {
+    if (-not (Test-Path -LiteralPath $AllowFile)) { return @() }
+    Get-Content -LiteralPath $AllowFile | Where-Object {
         $_ -and ($_ -notmatch '^\s*#') -and ($_ -notmatch '^\s*$')
     } | ForEach-Object { $_.Trim() }
 }
@@ -42,27 +43,34 @@ function Test-CommandAllowed([string]$Command, [string[]]$Allow) {
     return $false
 }
 
-function Publish-ResultsOnly([string]$JobId) {
+function Publish-ResultLog([string]$LogPath, [string]$JobId) {
     if (-not $AutoPushResults) { return }
+    if (-not (Test-Path -LiteralPath $LogPath)) {
+        Write-Host "[PUBLISH] log missing: $LogPath" -ForegroundColor Yellow
+        return
+    }
     try {
-        git add -- "agent-jobs/results/*.log" 2>$null
-        # Remove completed job from pending tracking on remote if still listed — only results staged
-        $status = git status --porcelain -- "agent-jobs/results"
-        if (-not $status) {
+        # Explicit file path — Windows git does not expand *.log globs reliably
+        git add --literal-pathspec -- "$LogPath" 2>&1 | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            git add -- "$LogPath" 2>&1 | Out-Null
+        }
+        $porcelain = git status --porcelain -- "agent-jobs/results"
+        if (-not $porcelain) {
             Write-Host "[PUBLISH] nothing new to push" -ForegroundColor Gray
             return
         }
-        git commit -m "agent-result: $JobId" 2>$null
+        git commit -m "agent-result: $JobId" 2>&1 | Out-Null
         if ($LASTEXITCODE -ne 0) {
-            Write-Host "[PUBLISH] commit skipped (no change or error)" -ForegroundColor Gray
+            Write-Host "[PUBLISH] commit skipped" -ForegroundColor Gray
             return
         }
-        git push origin master 2>$null
+        git push origin master 2>&1 | Out-Null
         if ($LASTEXITCODE -eq 0) {
-            Write-Host "[PUBLISH] results pushed → team can read on GitHub" -ForegroundColor Green
+            Write-Host "[PUBLISH] OK → $LogPath on GitHub" -ForegroundColor Green
         }
         else {
-            Write-Host "[PUBLISH] push failed — log is local only" -ForegroundColor Yellow
+            Write-Host "[PUBLISH] push failed — log is local: $LogPath" -ForegroundColor Yellow
         }
     }
     catch {
@@ -72,18 +80,18 @@ function Publish-ResultsOnly([string]$JobId) {
 
 function Write-Banner {
     Write-Host "========================================" -ForegroundColor Cyan
-    Write-Host " HBI Agent Runner (SECURE + AUTO RESULT)" -ForegroundColor Cyan
+    Write-Host " HBI Agent Runner v1.1 (Windows-safe)" -ForegroundColor Cyan
     Write-Host " Repo : $RepoRoot" -ForegroundColor Cyan
-    Write-Host " Poll : ${PollSeconds}s | AutoPushResults=$AutoPushResults" -ForegroundColor Cyan
+    Write-Host " Poll : ${PollSeconds}s | AutoPush=$AutoPushResults" -ForegroundColor Cyan
     Write-Host " Ctrl+C to stop" -ForegroundColor Cyan
     Write-Host "========================================" -ForegroundColor Cyan
 }
 
 function Invoke-AgentJob([string]$JobPath) {
     $name = [IO.Path]::GetFileNameWithoutExtension($JobPath)
-    $raw = Get-Content -Raw -Path $JobPath -Encoding UTF8
+    $raw = Get-Content -Raw -LiteralPath $JobPath -Encoding UTF8
     $job = $raw | ConvertFrom-Json
-    $id = if ($job.id) { $job.id } else { $name }
+    $id = if ($job.id) { [string]$job.id } else { $name }
     $timeout = 120
     if ($job.timeout_sec) { $timeout = [int]$job.timeout_sec }
     if ($timeout -lt 10) { $timeout = 10 }
@@ -93,124 +101,137 @@ function Invoke-AgentJob([string]$JobPath) {
     $argList = @()
     if ($job.args) { $argList = @($job.args | ForEach-Object { [string]$_ }) }
 
-    $fullForAllow = ($cmd + " " + ($argList -join " ")).Trim()
     $allow = Get-AllowList
-    $log = Join-Path $Results "$id.log"
+    $log = Join-Path $Results ($id + ".log")
     $stamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     $headSha = ""
     try { $headSha = (git rev-parse --short HEAD 2>$null) } catch {}
 
-    $header = @(
-        "HBI AGENT RESULT"
-        "id=$id"
-        "from=$($job.from)"
-        "started=$stamp"
-        "commit=$headSha"
-        "command=$cmd"
-        "args=$($argList -join ' ')"
-        "repo=$RepoRoot"
-        "----------------------------------------"
-    )
-    $header | Set-Content -Path $log -Encoding UTF8
+    @("HBI AGENT RESULT",
+      "id=$id",
+      "from=$($job.from)",
+      "started=$stamp",
+      "commit=$headSha",
+      "command=$cmd",
+      "args=$($argList -join ' ')",
+      "repo=$RepoRoot",
+      "----------------------------------------") |
+        Set-Content -LiteralPath $log -Encoding UTF8
+
+    Write-Host "[LOG] $log" -ForegroundColor Gray
 
     if (-not (Test-CommandAllowed -Command $cmd -Allow $allow)) {
-        Add-Content $log "STATUS=REJECTED_NOT_ALLOWLISTED"
-        Add-Content $log "Full=$fullForAllow"
-        Write-Host "[REJECT] $id — not allowlisted" -ForegroundColor Red
-        Publish-ResultsOnly -JobId $id
+        Add-Content -LiteralPath $log "STATUS=REJECTED_NOT_ALLOWLISTED"
+        Write-Host "[REJECT] $id" -ForegroundColor Red
+        Publish-ResultLog -LogPath $log -JobId $id
         return
     }
 
     $exe = $null
-    $passArgs = @()
+    $passArgs = New-Object System.Collections.Generic.List[string]
     if ($cmd -match '^python(\s|$)') {
         $exe = "python"
         $rest = $cmd.Substring(6).Trim()
-        if ($rest) { $passArgs += ($rest -split '\s+') }
-        $passArgs += $argList
+        if ($rest) {
+            foreach ($p in ($rest -split '\s+')) { if ($p) { [void]$passArgs.Add($p) } }
+        }
+        foreach ($a in $argList) { [void]$passArgs.Add($a) }
     }
     elseif ($cmd -match '^git(\s|$)') {
         $exe = "git"
         $rest = $cmd.Substring(3).Trim()
-        if ($rest) { $passArgs += ($rest -split '\s+') }
-        $passArgs += $argList
+        if ($rest) {
+            foreach ($p in ($rest -split '\s+')) { if ($p) { [void]$passArgs.Add($p) } }
+        }
+        foreach ($a in $argList) { [void]$passArgs.Add($a) }
     }
     else {
-        Add-Content $log "STATUS=REJECTED_UNSUPPORTED_EXECUTABLE"
-        Write-Host "[REJECT] $id — executable not python/git" -ForegroundColor Red
-        Publish-ResultsOnly -JobId $id
+        Add-Content -LiteralPath $log "STATUS=REJECTED_UNSUPPORTED_EXECUTABLE"
+        Write-Host "[REJECT] $id" -ForegroundColor Red
+        Publish-ResultLog -LogPath $log -JobId $id
         return
     }
 
-    Write-Host "[RUN] $id → $exe $($passArgs -join ' ')" -ForegroundColor Yellow
-    $outFile = Join-Path $env:TEMP "hbi-agent-$id-out.txt"
-    $errFile = Join-Path $env:TEMP "hbi-agent-$id-err.txt"
+    $argArray = $passArgs.ToArray()
+    Write-Host "[RUN] $id → $exe $($argArray -join ' ')" -ForegroundColor Yellow
 
+    $outFile = Join-Path $env:TEMP ("hbi-agent-" + $id + "-out.txt")
+    $errFile = Join-Path $env:TEMP ("hbi-agent-" + $id + "-err.txt")
+    Remove-Item -LiteralPath $outFile, $errFile -ErrorAction SilentlyContinue
+
+    $code = -999
     try {
-        $p = Start-Process -FilePath $exe -ArgumentList $passArgs `
+        $p = Start-Process -FilePath $exe `
+            -ArgumentList $argArray `
             -WorkingDirectory $RepoRoot `
             -RedirectStandardOutput $outFile `
             -RedirectStandardError $errFile `
             -NoNewWindow -PassThru
+
         $finished = $p.WaitForExit($timeout * 1000)
         if (-not $finished) {
             try { $p.Kill() } catch {}
-            Add-Content $log "STATUS=TIMEOUT after ${timeout}s"
+            Add-Content -LiteralPath $log "STATUS=TIMEOUT after ${timeout}s"
             Write-Host "[TIMEOUT] $id" -ForegroundColor Red
+            $code = -2
         }
         else {
-            $code = $p.ExitCode
-            if ($null -eq $code) { $code = -1 }
-            Add-Content $log "STATUS=EXIT_CODE=$code"
+            # Windows: refresh process object before reading ExitCode
+            try { $p.Refresh() } catch {}
+            Start-Sleep -Milliseconds 200
+            if ($null -ne $p.ExitCode) { $code = [int]$p.ExitCode } else { $code = -1 }
+            Add-Content -LiteralPath $log "STATUS=EXIT_CODE=$code"
             if ($code -eq 0) {
                 Write-Host "[OK] $id exit=0" -ForegroundColor Green
             }
             else {
-                Write-Host "[FAIL] $id exit=$code" -ForegroundColor Red
+                Write-Host "[FAIL] $id exit=$code (see log; pytest text may still show passed)" -ForegroundColor Yellow
             }
         }
-        if (Test-Path $outFile) {
-            Add-Content $log "--- STDOUT ---"
-            Get-Content $outFile -ErrorAction SilentlyContinue | Add-Content $log
+
+        if (Test-Path -LiteralPath $outFile) {
+            Add-Content -LiteralPath $log "--- STDOUT ---"
+            Get-Content -LiteralPath $outFile -ErrorAction SilentlyContinue | Add-Content -LiteralPath $log
         }
-        if (Test-Path $errFile) {
-            Add-Content $log "--- STDERR ---"
-            Get-Content $errFile -ErrorAction SilentlyContinue | Add-Content $log
+        if (Test-Path -LiteralPath $errFile) {
+            Add-Content -LiteralPath $log "--- STDERR ---"
+            Get-Content -LiteralPath $errFile -ErrorAction SilentlyContinue | Add-Content -LiteralPath $log
         }
     }
     catch {
-        Add-Content $log "STATUS=ERROR"
-        Add-Content $log $_.Exception.Message
+        Add-Content -LiteralPath $log "STATUS=ERROR"
+        Add-Content -LiteralPath $log $_.Exception.Message
         Write-Host "[ERROR] $id $($_.Exception.Message)" -ForegroundColor Red
     }
     finally {
-        Remove-Item $outFile, $errFile -ErrorAction SilentlyContinue
-        Add-Content $log "----------------------------------------"
-        Add-Content $log "finished=$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
-        Publish-ResultsOnly -JobId $id
+        Remove-Item -LiteralPath $outFile, $errFile -ErrorAction SilentlyContinue
+        Add-Content -LiteralPath $log "----------------------------------------"
+        Add-Content -LiteralPath $log "finished=$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+        if (Test-Path -LiteralPath $log) {
+            Write-Host "[LOG written] $log" -ForegroundColor Gray
+        }
+        Publish-ResultLog -LogPath $log -JobId $id
     }
 }
 
 Write-Banner
-Write-Host "Allowlist loaded: $((Get-AllowList).Count) entries" -ForegroundColor Gray
+Write-Host "Allowlist: $((Get-AllowList).Count) entries" -ForegroundColor Gray
 
 while ($true) {
-    try {
-        git pull --ff-only origin master 2>$null | Out-Null
-    } catch {}
+    try { git pull --ff-only origin master 2>$null | Out-Null } catch {}
 
-    $jobs = @(Get-ChildItem -Path $Pending -Filter "*.json" -File -ErrorAction SilentlyContinue)
+    $jobs = @(Get-ChildItem -LiteralPath $Pending -Filter "*.json" -File -ErrorAction SilentlyContinue)
     foreach ($j in $jobs) {
         $dest = Join-Path $Running $j.Name
         $donePath = Join-Path $Done $j.Name
         try {
-            Move-Item -Path $j.FullName -Destination $dest -Force
+            Move-Item -LiteralPath $j.FullName -Destination $dest -Force
             Invoke-AgentJob -JobPath $dest
-            Move-Item -Path $dest -Destination $donePath -Force -ErrorAction SilentlyContinue
-            if (Test-Path $dest) { Remove-Item -Path $dest -Force -ErrorAction SilentlyContinue }
+            Move-Item -LiteralPath $dest -Destination $donePath -Force -ErrorAction SilentlyContinue
+            if (Test-Path -LiteralPath $dest) { Remove-Item -LiteralPath $dest -Force -ErrorAction SilentlyContinue }
         }
         catch {
-            Write-Host "[ERROR] processing $($j.Name): $($_.Exception.Message)" -ForegroundColor Red
+            Write-Host "[ERROR] $($j.Name): $($_.Exception.Message)" -ForegroundColor Red
         }
     }
     Start-Sleep -Seconds $PollSeconds
