@@ -4,6 +4,7 @@
   HBI Agent Runner — polls agent-jobs/pending, runs allowlisted commands only.
 .NOTES
   Security: allowlist only, repo-root cwd, timeout, no free-form shell.
+  After each job: commits ONLY agent-jobs/results/*.log and pushes (closes the loop).
   Stop: Ctrl+C
 #>
 $ErrorActionPreference = "Stop"
@@ -14,10 +15,13 @@ Set-Location $RepoRoot
 $Pending = Join-Path $RepoRoot "agent-jobs\pending"
 $Running = Join-Path $RepoRoot "agent-jobs\running"
 $Results = Join-Path $RepoRoot "agent-jobs\results"
+$Done = Join-Path $RepoRoot "agent-jobs\done"
 $AllowFile = Join-Path $RepoRoot "agent-jobs\allowed.txt"
 $PollSeconds = 15
+# Easy mode for PO: publish logs to GitHub so team reads results without your copy-paste
+$AutoPushResults = $true
 
-foreach ($d in @($Pending, $Running, $Results)) {
+foreach ($d in @($Pending, $Running, $Results, $Done)) {
     if (-not (Test-Path $d)) { New-Item -ItemType Directory -Path $d | Out-Null }
 }
 
@@ -38,11 +42,40 @@ function Test-CommandAllowed([string]$Command, [string[]]$Allow) {
     return $false
 }
 
+function Publish-ResultsOnly([string]$JobId) {
+    if (-not $AutoPushResults) { return }
+    try {
+        git add -- "agent-jobs/results/*.log" 2>$null
+        # Remove completed job from pending tracking on remote if still listed — only results staged
+        $status = git status --porcelain -- "agent-jobs/results"
+        if (-not $status) {
+            Write-Host "[PUBLISH] nothing new to push" -ForegroundColor Gray
+            return
+        }
+        git commit -m "agent-result: $JobId" 2>$null
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "[PUBLISH] commit skipped (no change or error)" -ForegroundColor Gray
+            return
+        }
+        git push origin master 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "[PUBLISH] results pushed → team can read on GitHub" -ForegroundColor Green
+        }
+        else {
+            Write-Host "[PUBLISH] push failed — log is local only" -ForegroundColor Yellow
+        }
+    }
+    catch {
+        Write-Host "[PUBLISH] $($_.Exception.Message)" -ForegroundColor Yellow
+    }
+}
+
 function Write-Banner {
     Write-Host "========================================" -ForegroundColor Cyan
-    Write-Host " HBI Agent Runner (SECURE)" -ForegroundColor Cyan
+    Write-Host " HBI Agent Runner (SECURE + AUTO RESULT)" -ForegroundColor Cyan
     Write-Host " Repo : $RepoRoot" -ForegroundColor Cyan
-    Write-Host " Poll : ${PollSeconds}s | Ctrl+C to stop" -ForegroundColor Cyan
+    Write-Host " Poll : ${PollSeconds}s | AutoPushResults=$AutoPushResults" -ForegroundColor Cyan
+    Write-Host " Ctrl+C to stop" -ForegroundColor Cyan
     Write-Host "========================================" -ForegroundColor Cyan
 }
 
@@ -64,12 +97,15 @@ function Invoke-AgentJob([string]$JobPath) {
     $allow = Get-AllowList
     $log = Join-Path $Results "$id.log"
     $stamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $headSha = ""
+    try { $headSha = (git rev-parse --short HEAD 2>$null) } catch {}
 
     $header = @(
         "HBI AGENT RESULT"
         "id=$id"
         "from=$($job.from)"
         "started=$stamp"
+        "commit=$headSha"
         "command=$cmd"
         "args=$($argList -join ' ')"
         "repo=$RepoRoot"
@@ -81,10 +117,10 @@ function Invoke-AgentJob([string]$JobPath) {
         Add-Content $log "STATUS=REJECTED_NOT_ALLOWLISTED"
         Add-Content $log "Full=$fullForAllow"
         Write-Host "[REJECT] $id — not allowlisted" -ForegroundColor Red
+        Publish-ResultsOnly -JobId $id
         return
     }
 
-    # Only python or git as executable; args separate (no Invoke-Expression of whole string)
     $exe = $null
     $passArgs = @()
     if ($cmd -match '^python(\s|$)') {
@@ -102,6 +138,7 @@ function Invoke-AgentJob([string]$JobPath) {
     else {
         Add-Content $log "STATUS=REJECTED_UNSUPPORTED_EXECUTABLE"
         Write-Host "[REJECT] $id — executable not python/git" -ForegroundColor Red
+        Publish-ResultsOnly -JobId $id
         return
     }
 
@@ -122,12 +159,14 @@ function Invoke-AgentJob([string]$JobPath) {
             Write-Host "[TIMEOUT] $id" -ForegroundColor Red
         }
         else {
-            Add-Content $log "STATUS=EXIT_CODE=$($p.ExitCode)"
-            if ($p.ExitCode -eq 0) {
+            $code = $p.ExitCode
+            if ($null -eq $code) { $code = -1 }
+            Add-Content $log "STATUS=EXIT_CODE=$code"
+            if ($code -eq 0) {
                 Write-Host "[OK] $id exit=0" -ForegroundColor Green
             }
             else {
-                Write-Host "[FAIL] $id exit=$($p.ExitCode)" -ForegroundColor Red
+                Write-Host "[FAIL] $id exit=$code" -ForegroundColor Red
             }
         }
         if (Test-Path $outFile) {
@@ -148,6 +187,7 @@ function Invoke-AgentJob([string]$JobPath) {
         Remove-Item $outFile, $errFile -ErrorAction SilentlyContinue
         Add-Content $log "----------------------------------------"
         Add-Content $log "finished=$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+        Publish-ResultsOnly -JobId $id
     }
 }
 
@@ -156,21 +196,21 @@ Write-Host "Allowlist loaded: $((Get-AllowList).Count) entries" -ForegroundColor
 
 while ($true) {
     try {
-        # Optional quiet pull so jobs from GitHub appear (minimal network)
         git pull --ff-only origin master 2>$null | Out-Null
     } catch {}
 
     $jobs = @(Get-ChildItem -Path $Pending -Filter "*.json" -File -ErrorAction SilentlyContinue)
     foreach ($j in $jobs) {
         $dest = Join-Path $Running $j.Name
+        $donePath = Join-Path $Done $j.Name
         try {
             Move-Item -Path $j.FullName -Destination $dest -Force
             Invoke-AgentJob -JobPath $dest
-            Remove-Item -Path $dest -Force -ErrorAction SilentlyContinue
+            Move-Item -Path $dest -Destination $donePath -Force -ErrorAction SilentlyContinue
+            if (Test-Path $dest) { Remove-Item -Path $dest -Force -ErrorAction SilentlyContinue }
         }
         catch {
             Write-Host "[ERROR] processing $($j.Name): $($_.Exception.Message)" -ForegroundColor Red
-            # leave file in running for inspection
         }
     }
     Start-Sleep -Seconds $PollSeconds
