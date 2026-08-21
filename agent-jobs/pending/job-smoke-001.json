@@ -1,0 +1,7 @@
+{
+  "id": "job-smoke-001",
+  "from": "Grok1",
+  "timeout_sec": 90,
+  "command": "python -m pytest",
+  "args": ["tests/test_reasoning/", "-v", "--tb=line", "-q"]
+}
