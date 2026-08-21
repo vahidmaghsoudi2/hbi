@@ -88,3 +88,8 @@ On-demand Evidence Steward
 
 Product Owner:
 مهندس وحید مقصودی
+
+### TASK-009 2026-08-21
+- Completed TASK-007: Test count reconciliation (26/26 PASSED)
+- Created TASK-009: Fix test_evidence.py DB ref + add Authorization tests
+- Files modified: tests/test_evidence.py, tests/test_api/test_authorization.py
