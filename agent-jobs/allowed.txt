@@ -1,0 +1,9 @@
+# HBI Agent Runner — allowlist (one pattern per line)
+# Only these command prefixes are permitted.
+python -m pytest
+python -m py_compile
+python scripts/seed_test_db.py
+git status
+git pull
+git rev-parse
+git log
