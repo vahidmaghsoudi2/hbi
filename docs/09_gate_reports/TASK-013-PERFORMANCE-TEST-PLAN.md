@@ -1,111 +1,157 @@
-# TASK-013 — Performance Testing Plan
+# TASK-013 — HBI Performance Test Plan
 
 | Field | Value |
 |-------|--------|
 | **Task** | TASK-013 |
-| **Owner** | Grok1 (Hub A — Test / Red Team) |
-| **Status** | IN_PROGRESS |
-| **Phase** | Gate 7 |
-| **Date** | 2026-08-21 |
-| **Authority** | Qwen1 (execution) / PO (final) |
+| **Owner** | Grok1 |
+| **Supervision** | ChatGPT |
 | **Source of Truth** | `vahidmaghsoudi2/hbi` |
+| **Document version** | 1.0 |
+| **Date** | 2026-08-21 |
+| **Constraint** | No Production code change; no existing test edits |
 
-## 1. Purpose
+---
 
-Define a **minimal, measurable** performance baseline for HBI before production-like use.
+## 1. Goal
 
-This document is the **first Artifact** for TASK-013.  
-It is a **plan**, not a completed performance run.
+Provide a **repeatable** plan to measure whether HBI backend (API + Recommendation path) meets **MVP local** performance expectations before production-like deployment.
 
-## 2. Scope (IN)
+This Artifact is the **Plan only**. Execution results belong in a separate report file.
 
-| Area | What we measure |
-|------|------------------|
-| API health / list endpoints | Latency (p50/p95) under light load |
-| Evidence list / product list | Response time |
-| Reasoning path (unit) | Time for `ReasoningEngine.run` batch |
-| Pytest suite wall-clock | Full `tests/` duration as regression signal |
+---
 
-## 3. Scope (OUT) — explicit NO ASSUMPTION
+## 2. Performance scenarios
 
-- Load testing thousands of concurrent users (not required for Gate 7 MVP)
-- Production CDN / multi-region
-- Products C & D identity work (PO locked UNIDENTIFIED)
-- Changing scoring formulas for “speed”
+### S1 — Health / readiness
+- Endpoint: health (or equivalent root health check used by ops)
+- Load: sequential + light concurrent (see §4)
 
-## 4. Environment
+### S2 — Product list / verified products
+- Read path only
+- Dataset: seed or empty; **must record row counts**
 
-| Item | Requirement |
-|------|-------------|
-| Code | `origin/master` only |
-| DB | Prefer in-memory or local `data/hbi.db` from `init_db` + approved seed |
-| Runner | Optional: `hbi-agent-runner.ps1` + Job under `agent-jobs/pending/` |
-| Report | Must land in GitHub (`docs/09_gate_reports/` or `agent-jobs/results/`) |
+### S3 — Evidence list by product
+- Read path; Framework 3-related volume awareness
 
-## 5. Success criteria (MVP thresholds)
+### S4 — Recommendation generate (critical path)
+- Flow: Case + profile → `RecommendationService.generate_recommendations` → `ReasoningEngine.run`
+- Measures end-to-end service latency on PO machine / CI, not public internet
 
-Draft thresholds (adjust only with Qwen1/PO):
+### S5 — Reasoning engine isolated
+- Direct `ReasoningEngine.run` with fixed synthetic inputs (N repeats)
+- Separates scoring/reasoning cost from HTTP/ORM overhead
 
-| Metric | Target (MVP) |
-|--------|----------------|
-| `GET /health` (or equivalent) | p95 < 200 ms (local) |
-| Lightweight list endpoint | p95 < 500 ms (local, small dataset) |
-| `tests/test_reasoning/` | wall < 5 s |
-| Full `pytest tests/` | wall < 60 s on PO laptop (informative) |
+### S6 — Full automated regression wall-clock
+- `pytest tests/` and `pytest tests/test_reasoning/` duration as **smoke performance** signal (not load test)
 
-Failures against targets → YELLOW report, not silent pass.
+---
 
-## 6. Method
+## 3. Metrics
 
-### Phase A — Baseline (this plan)
-1. Record commit SHA under test
-2. Record machine class (PO laptop / CI)
-3. Run reasoning tests + full suite once; capture wall times
+| Metric | Definition |
+|--------|------------|
+| **Latency** | Time to complete one request/call (ms) |
+| **p50 / p95** | 50th / 95th percentile over N samples |
+| **Throughput** | Successful operations per second (ops/s) under fixed concurrency |
+| **Error rate** | Failed requests / total |
+| **Wall-clock suite** | Seconds for designated pytest paths |
 
-### Phase B — Micro-benchmarks
-1. Script or pytest markers for repeated `ReasoningEngine.run` (N=50)
-2. Optional: simple loop against TestClient health/list (N=20)
+**Not in MVP plan:** distributed tracing, GPU, multi-region.
 
-### Phase C — Report Artifact
-Publish:
+---
+
+## 4. Concurrent users (MVP definition)
+
+| Level | Concurrent clients | Purpose |
+|-------|-------------------|---------|
+| L0 | 1 | Baseline latency |
+| L1 | 5 | Light contention |
+| L2 | 10 | Stress smoke for MVP |
+
+> Gate 7 does **not** require 100+ virtual users. Higher levels need explicit PO/Qwen1 scope change.
+
+---
+
+## 5. Sensitive backend points
+
+| Area | Why sensitive |
+|------|----------------|
+| `RecommendationService.generate_recommendations` | Loops products + inventory + engine |
+| `ReasoningEngine.run` + `MatchScoringEngine` | CPU-bound scoring / conflict analysis |
+| Evidence queries per product | ORM + filter cost grows with evidence rows |
+| SQLite file DB on Windows | Locking / single-writer under concurrency |
+| Auth/JWT paths | Extra crypto cost on protected routes |
+| Facade DTO mapping | Extra queries (e.g. inventory lookups) |
+
+---
+
+## 6. PASS / FAIL criteria (MVP local)
+
+| ID | Criterion | PASS | FAIL |
+|----|-----------|------|------|
+| C1 | Health p95 (L0) | ≤ 200 ms | > 200 ms |
+| C2 | Product/Evidence list p95 (L0, small data) | ≤ 500 ms | > 500 ms |
+| C3 | Recommendation generate p95 (L0, ≤20 products) | ≤ 2000 ms | > 2000 ms |
+| C4 | ReasoningEngine.run p95 (N≥50 synthetic) | ≤ 50 ms | > 50 ms |
+| C5 | Error rate (L1) | ≤ 1% | > 1% |
+| C6 | `tests/test_reasoning/` wall | ≤ 5 s | > 5 s |
+| C7 | Full `pytest tests/` wall (informative) | ≤ 60 s | > 60 s (YELLOW, not auto Gate fail) |
+
+All runs must record: **git SHA**, machine, dataset size, timestamp.
+
+---
+
+## 7. Repeatable execution method
+
+### Preferred
+1. `git pull` → note SHA  
+2. Optional Job via `agent-jobs/pending/*.json` + `hbi-agent-runner.ps1`  
+3. Capture stdout to `agent-jobs/results/` or results markdown  
+4. Publish results to GitHub  
+
+### Commands (informative — execution is a later step)
 
 ```text
-docs/09_gate_reports/TASK-013-PERFORMANCE-RESULTS.md
+python -m pytest tests/test_reasoning/ -q
+python -m pytest tests/ -q
 ```
 
-Required fields: SHA, dates, raw timings, PASS/FAIL vs thresholds, limitations.
-
-## 7. Execution path (preferred)
+### Future script (NOT created in this task)
+Proposed only (needs approval before write):
 
 ```text
-Job JSON → agent-jobs/pending/
-    → hbi-agent-runner.ps1 (PO online)
-    → agent-jobs/results/*.log
-    → (auto-publish if enabled) GitHub
+scripts/perf_baseline.py
 ```
 
-Fallback: PO/DeepSeek runs commands; results committed under `docs/09_gate_reports/`.
+Would: hit health/list with timing loop, call ReasoningEngine N times, print JSON summary.  
+**No script file written under this Work Order without approval.**
 
-## 8. Deliverables checklist
+---
 
-- [x] Performance **Plan** (this file)
-- [ ] Baseline timing capture (commit SHA + wall times)
-- [ ] Optional micro-benchmark script (only if approved; keep under `scripts/` or `tests/`)
-- [ ] Results report on GitHub
-- [ ] WORK-REGISTRY update to COMPLETED when Results verified
+## 8. Required Artifacts
 
-## 9. Risks
+| Artifact | Path |
+|----------|------|
+| Plan (this file) | `docs/09_gate_reports/TASK-013-PERFORMANCE-TEST-PLAN.md` |
+| Results (later) | `docs/09_gate_reports/TASK-013-PERFORMANCE-RESULTS.md` |
+| Optional job logs | `agent-jobs/results/*.log` |
 
-| Risk | Mitigation |
-|------|------------|
-| Measuring only empty DB | State dataset size in report |
-| Confusing unit test speed with production load | Label metrics clearly |
-| Results only on laptop disk | Require GitHub Artifact |
+---
 
-## 10. Verdict on plan publication
+## 9. Current gaps
+
+- No published timing results yet on GitHub  
+- No dedicated perf script yet (by design under this order)  
+- Concurrent HTTP tooling (e.g. k6/locust) not in repo  
+- Production-like multi-user DB not assumed  
+
+---
+
+## 10. Plan verdict
 
 ```text
-ARTIFACT: docs/09_gate_reports/TASK-013-PERFORMANCE-TEST-PLAN.md
-OWNER: Grok1
-STATUS: PLAN PUBLISHED — execution not yet complete
+PLAN STATUS: COMPLETE (design)
+EXECUTION STATUS: NOT STARTED
+PRODUCTION CODE CHANGED: NO
+EXISTING TESTS CHANGED: NO
 ```
