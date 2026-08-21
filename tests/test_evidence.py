@@ -1,5 +1,6 @@
 ﻿import pytest
 from app.models.product import Product
+from app.core.auth import create_access_token
 
 
 def test_create_evidence_requires_auth(client):
@@ -12,7 +13,7 @@ def test_list_evidence_requires_auth(client):
     assert response.status_code in (401, 403)
 
 
-def test_create_evidence_with_auth(client, db):
+def test_create_evidence_with_auth(client, db_session):
     product = Product(
         product_id="P_AUTH_001",
         brand="TestBrand",
@@ -20,11 +21,10 @@ def test_create_evidence_with_auth(client, db):
         identity_status="VERIFIED",
         qa_verdict="VALID",
     )
-    db.add(product)
-    db.commit()
+    db_session.add(product)
+    db_session.commit()
 
-    from app.core.security import create_access_token
-    token = create_access_token(sub="test_user")
+    token = create_access_token({"sub": "test_user"})
 
     headers = {"Authorization": f"Bearer {token}"}
     payload = {
