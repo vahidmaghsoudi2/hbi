@@ -1,0 +1,6 @@
+HBI WRITE PROBE
+from=Grok1
+time=2026-08-21T15:36:00Z
+purpose=verify GitHub write access via connected tools
+protocol=NO ASSUMPTION / GitHub ONLY / no production code touched
+status=if you can read this on GitHub, write path works
