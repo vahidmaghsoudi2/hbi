@@ -1,0 +1,7 @@
+{
+  "id": "job-task013-phase-b",
+  "from": "Grok1",
+  "timeout_sec": 180,
+  "command": "python -m pytest",
+  "args": ["tests/", "-q", "--tb=line"]
+}
