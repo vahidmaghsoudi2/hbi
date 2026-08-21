@@ -1,5 +1,5 @@
-﻿# HBI WORK REGISTRY
-Last Updated: 1405-05-31 (2026-08-22)
+# HBI WORK REGISTRY
+Last Updated: 2026-08-21
 Source of Truth: vahidmaghsoudi2/hbi
 
 ═══════════════════════════════════════════════════════
@@ -67,11 +67,11 @@ Decision: DEFERRED to next version (per PO directive)
 TASK-013
 Owner: Grok1
 Phase: Q (Gate 7)
-Status: PENDING ⏳
-Purpose: Performance testing plan
-Artifact: [awaiting]
-Verified By: [awaiting]
-Decision: [awaiting]
+Status: IN_PROGRESS 🔄
+Purpose: Performance testing plan + baseline results
+Artifact: docs/09_gate_reports/TASK-013-PERFORMANCE-TEST-PLAN.md (commit 607f1d7)
+Verified By: [awaiting Reality Check]
+Decision: [awaiting — PLAN only; results not yet published]
 
 TASK-014
 Owner: Qwen2
@@ -90,4 +90,5 @@ CHANGE LOG
 2026-08-22: TASK-012 COMPLETED (E2E test passed)
 2026-08-22: TASK-011 DEFERRED (per PO directive)
 2026-08-22: Registry synchronized with Gate 7 status
+2026-08-21: TASK-013 IN_PROGRESS — Performance Test Plan published by Grok1 (607f1d7)
 ═══════════════════════════════════════════════════════
