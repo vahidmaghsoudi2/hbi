@@ -4,7 +4,7 @@ pydantic==2.13.4
 SQLAlchemy==2.0.51
 pytest==9.1.1
 requests==2.34.2
-numpy==2.5.1
+numpy==2.4.6
 pandas==2.3.3
 polars==1.43.0
 opencv-python==4.10.0.84
