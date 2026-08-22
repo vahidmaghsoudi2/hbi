@@ -1,14 +1,86 @@
-﻿name: HBI Auto Tasks
+name: HBI Auto Tasks
+
 on:
   workflow_dispatch:
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: pip install -r requirements.txt
-      - run: python -m pytest tests/ -v
+  push:
+    branches: [master]
+    paths:
+      - "app/**"
+      - "tests/**"
+      - "requirements.txt"
+      - ".github/workflows/hbi_auto.yml"
 
+jobs:
+  evidence:
+    name: Live test evidence
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Record commit identity
+        run: |
+          echo "REPO=vahidmaghsoudi2/hbi"
+          echo "SHA=${{ github.sha }}"
+          echo "REF=${{ github.ref }}"
+          echo "EVENT=${{ github.event_name }}"
+          git rev-parse HEAD
+          git log -1 --oneline
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov httpx
+
+      - name: PyCompile
+        run: python -m compileall app tests
+
+      - name: Pytest + coverage
+        id: pytest
+        run: |
+          set -o pipefail
+          python -m pytest tests/ -v --tb=line \
+            --cov=app --cov-report=term-missing \
+            --cov-report=xml --cov-report=html \
+            | tee pytest-output.txt
+          echo "PYTEST_EXIT=0" >> "$GITHUB_ENV"
+
+      - name: Write evidence summary
+        if: always()
+        run: |
+          {
+            echo "HBI GITHUB ACTIONS EVIDENCE"
+            echo "repo=vahidmaghsoudi2/hbi"
+            echo "sha=${{ github.sha }}"
+            echo "ref=${{ github.ref }}"
+            echo "event=${{ github.event_name }}"
+            echo "runner=ubuntu-latest"
+            echo "python=3.12"
+            echo "finished_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "----------------------------------------"
+            if [ -f pytest-output.txt ]; then
+              tail -n 40 pytest-output.txt
+            else
+              echo "pytest-output.txt missing"
+            fi
+          } > evidence-summary.txt
+          cat evidence-summary.txt
+
+      - name: Upload evidence artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hbi-evidence-${{ github.sha }}
+          path: |
+            pytest-output.txt
+            evidence-summary.txt
+            coverage.xml
+            htmlcov/
+          if-no-files-found: warn
