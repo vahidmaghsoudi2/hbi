@@ -1,4 +1,4 @@
-# HBI WORK REGISTRY
+﻿# HBI WORK REGISTRY
 Last Updated: 2026-08-21
 Source of Truth: vahidmaghsoudi2/hbi
 
@@ -69,7 +69,7 @@ Owner: Grok1
 Phase: Q (Gate 7)
 Status: IN_PROGRESS 🔄
 Purpose: Performance testing plan + baseline results
-Artifact: docs/09_gate_reports/TASK-013-PERFORMANCE-TEST-PLAN.md (commit 607f1d7)
+Artifact: docs/09_gate_reports/TASK-013-PERFORMANCE-TEST-PLAN.md (commit 7c59983f91c6adea4b8a5e9437eca986710b8c1b)
 Verified By: [awaiting Reality Check]
 Decision: [awaiting — PLAN only; results not yet published]
 
@@ -90,7 +90,7 @@ CHANGE LOG
 2026-08-22: TASK-012 COMPLETED (E2E test passed)
 2026-08-22: TASK-011 DEFERRED (per PO directive)
 2026-08-22: Registry synchronized with Gate 7 status
-2026-08-21: TASK-013 IN_PROGRESS — Performance Test Plan published by Grok1 (607f1d7)
+2026-08-21: TASK-013 IN_PROGRESS — Performance Test Plan published by Grok1 (7c59983f91c6adea4b8a5e9437eca986710b8c1b)
 ═══════════════════════════════════════════════════════
 
 ═══════════════════════════════════════════════════════
@@ -111,3 +111,4 @@ Impact:
 - Products A & B: VERIFIED (identity approved)
 - TASK-014 can proceed with this clarification
 ═══════════════════════════════════════════════════════
+
