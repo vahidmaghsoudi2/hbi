@@ -41,6 +41,10 @@ def client(monkeypatch):
         s = Session()
         try:
             yield s
+            s.commit()
+        except Exception:
+            s.rollback()
+            raise
         finally:
             s.close()
 
@@ -63,7 +67,6 @@ def test_pilot_token_and_generate_persist(client):
     access = tok.json()["access_token"]
     headers = {"Authorization": f"Bearer {access}"}
 
-    # unauthenticated generate must fail
     naked = c.post(
         "/api/v1/recommendations/generate",
         json={"case_id": "CASE-PILOT-1", "customer_profile": {"concerns": "ضدآفتاب روزانه صورت"}},
@@ -83,7 +86,6 @@ def test_pilot_token_and_generate_persist(client):
     assert isinstance(body, list)
     assert len(body) >= 1
 
-    # persistence
     s = Session()
     try:
         from app.models.recommendation import Recommendation
