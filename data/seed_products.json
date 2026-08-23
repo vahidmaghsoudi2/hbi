@@ -1,0 +1,70 @@
+{
+  "source": "docs/01_product_records/PRODUCT_{A,B,C,D}_RECORD.md",
+  "note": "No invented evidence. barcode/market UNKNOWN preserved. identity_status=VERIFIED per inventory_confirmation=YES in records.",
+  "products": [
+    {
+      "product_id": "ISDIN-FOTOUTRA100-50ML",
+      "brand": "ISDIN",
+      "product_name": "FotoUltra 100 Active Unify SPF 50+",
+      "variant": "بی‌رنگ",
+      "size_value": 50.0,
+      "size_unit": "ml",
+      "barcode_gtin": null,
+      "market_region": null,
+      "packaging_version": null,
+      "identity_status": "VERIFIED",
+      "qa_verdict": "PENDING",
+      "inventory_count": 3,
+      "category": "ضدآفتاب ضدلک صورت",
+      "spf": "SPF 50+"
+    },
+    {
+      "product_id": "ISDIN-FOTOUTRA100COLOR-50ML",
+      "brand": "ISDIN",
+      "product_name": "FotoUltra 100 Active Unify Color SPF 50+",
+      "variant": "رنگی",
+      "size_value": 50.0,
+      "size_unit": "ml",
+      "barcode_gtin": null,
+      "market_region": null,
+      "packaging_version": null,
+      "identity_status": "VERIFIED",
+      "qa_verdict": "PENDING",
+      "inventory_count": 3,
+      "category": "ضدآفتاب رنگی ضدلک صورت",
+      "spf": "SPF 50+"
+    },
+    {
+      "product_id": "ISDIN-FUSIONWATERMAGIC-50ML",
+      "brand": "ISDIN",
+      "product_name": "Fusion Water MAGIC SPF 50",
+      "variant": "بی‌رنگ",
+      "size_value": 50.0,
+      "size_unit": "ml",
+      "barcode_gtin": null,
+      "market_region": null,
+      "packaging_version": null,
+      "identity_status": "VERIFIED",
+      "qa_verdict": "PENDING",
+      "inventory_count": 3,
+      "category": "ضدآفتاب روزانه صورت",
+      "spf": "SPF 50"
+    },
+    {
+      "product_id": "ISDIN-AGEREVERSEDAY-50ML",
+      "brand": "ISDIN",
+      "product_name": "Isdinceutics A.G.E. Reverse Day",
+      "variant": "بی‌رنگ",
+      "size_value": 50.0,
+      "size_unit": "ml",
+      "barcode_gtin": null,
+      "market_region": null,
+      "packaging_version": null,
+      "identity_status": "VERIFIED",
+      "qa_verdict": "PENDING",
+      "inventory_count": 3,
+      "category": "کرم روزانه ضدپیری صورت",
+      "spf": "SPF 50 (PROJECT RECORD / PO CONFIRMATION)"
+    }
+  ]
+}
