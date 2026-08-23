@@ -1,4 +1,4 @@
-﻿from sqlalchemy import create_engine, event, text
+from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import sessionmaker
 from app.models.base import Base
 import os
@@ -19,6 +19,10 @@ def get_db():
     db = SessionLocal()
     try:
         yield db
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()
 
