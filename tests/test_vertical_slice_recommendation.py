@@ -23,10 +23,18 @@ def db_session(monkeypatch):
     database.init_db()
 
     from scripts.seed_products_from_records import seed
+    from app.models.customer import Customer
+    from app.models.case import Case
 
     Session = sessionmaker(bind=database.engine)
     session = Session()
     seed(session)
+    # Minimal fixtures for Recommendation.case_id FK (not product data invention)
+    if session.get(Customer, "CUST-VS-001") is None:
+        session.add(Customer(customer_id="CUST-VS-001", name="VS Fixture"))
+    if session.get(Case, "CASE-VS-002") is None:
+        session.add(Case(case_id="CASE-VS-002", customer_id="CUST-VS-001"))
+    session.commit()
     yield session
     session.close()
     if TEST_DB.exists():
@@ -45,9 +53,7 @@ def test_recommendation_with_evidence_persists(db_session):
     from app.services.recommendation_service import RecommendationService
 
     svc = RecommendationService(db_session)
-    # Exact category tokens from PRODUCT_C_RECORD (no invention)
     profile = {"concerns": "ضدآفتاب روزانه صورت"}
     recs = svc.generate_recommendations("CASE-VS-002", profile)
     assert isinstance(recs, list)
-    # With SECONDARY evidence_score=0.2 + inventory 1.0 + high need_match, score can pass 0.5
     assert len(recs) >= 1
