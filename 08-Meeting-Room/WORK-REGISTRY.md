@@ -1,124 +1,58 @@
-﻿# HBI WORK REGISTRY
-Last Updated: 2026-08-21
+# HBI WORK REGISTRY
+Last Updated: 2026-08-23
 Source of Truth: vahidmaghsoudi2/hbi
 
 ═══════════════════════════════════════════════════════
-COMPLETED TASKS
+FROZEN (until next project version)
 ═══════════════════════════════════════════════════════
 
-TASK-006
-Owner: DeepSeek
-Phase: Q
-Status: COMPLETED ✅
-Purpose: Interface test correction
-Artifact: commit SHA (verified)
-Verified By: ChatGPT
-Decision: APPROVED
-
-TASK-007
-Owner: DeepSeek
-Phase: Q
-Status: COMPLETED ✅
-Purpose: Test count reconciliation (24 vs 25 vs 26)
-Artifact: TEST COUNT RECONCILIATION report
-Verified By: ChatGPT
-Decision: APPROVED
-
-TASK-009
-Owner: DeepSeek
-Phase: Q
-Status: COMPLETED ✅
-Purpose: GATE 6-4 blockers (test_evidence.py in-memory DB, authorization tests)
-Artifact: commit e783d7f
-Verified By: ChatGPT + Qwen1
-Decision: APPROVED
-
-TASK-012
-Owner: DeepSeek
-Phase: Q (Gate 7)
-Status: COMPLETED ✅
-Purpose: E2E test with seed_test_db.py
-Artifact: E2E PASSED (1 passed)
-Verified By: Qwen1
-Decision: APPROVED
+PRODUCTS A–D
+Paths locked without direct PO order:
+- docs/01_product_records/*
+- data/seed_products.json
+No re-research, no invented evidence, no threshold gaming.
 
 ═══════════════════════════════════════════════════════
-ACTIVE TASKS (Gate 7)
+ACTIVE — DUAL GROK LINE
 ═══════════════════════════════════════════════════════
 
-TASK-010
-Owner: Qwen1 / PO
-Phase: Q (Gate 7)
-Status: COMPLETED ✅
-Purpose: Evidence Ledger for Products A & B
-Artifact: 07-Evidence/products_a_b_evidence.md
-Verified By: Qwen1
-Decision: APPROVED (with caveats)
+GROK2 — Evidence Layer Preparation
+Owner: Grok2
+Status: IN PROGRESS (see commits 9c1205b2 / bb329053 / 4bf4aa22)
+Scope: Evidence architecture + controlled EVIDENCE_MISSING + tests/CI
+Constraint: Do not alter Product A–D records/seed; do not invent evidence
 
-TASK-011
-Owner: PO
-Phase: Q (Gate 7)
-Status: DEFERRED ✅
-Purpose: Physical info for Products C & D
-Artifact: N/A
-Verified By: PO
-Decision: DEFERRED to next version (per PO directive)
+GROK1 — Knowledge / Data / QA
+Owner: Grok1
+Status: ACTIVE
+Scope: Registry/governance sync, QA blockers outside Evidence product rows
+Constraint: No A–D product mutation; no Evidence A–D without real dependency
 
-TASK-013: COMPLETED (SHA: 543b80d1cfa0041ae36d8fad6364c1cf27acb112) — Final results in docs/09_gate_reports/TASK-013-FINAL-RESULTS.md
+═══════════════════════════════════════════════════════
+COMPLETED (selected)
+═══════════════════════════════════════════════════════
+
+TASK-006 … TASK-012: see prior registry entries (Gate 6/7 history)
+TASK-013: COMPLETED — docs/09_gate_reports/TASK-013-FINAL-RESULTS.md
+TASK-010 Evidence Ledger docs: COMPLETED (docs path)
+Dual get_db: EXECUTED — app/core/deps.py SHA c0bb7acc… CI success
+Seed products from records: SHA 76d6a36f… CI success
+
+═══════════════════════════════════════════════════════
+PENDING
+═══════════════════════════════════════════════════════
+
 TASK-014
 Owner: Qwen2
-Phase: Q (Gate 7)
-Status: PENDING ⏳
+Status: PENDING
 Purpose: End-user documentation draft
-Artifact: [awaiting]
-Verified By: [awaiting]
-Decision: [awaiting]
+Note: Barcode/GTIN UNKNOWN acceptable per prior PO directive
 
 ═══════════════════════════════════════════════════════
 CHANGE LOG
 ═══════════════════════════════════════════════════════
-2026-08-22: TASK-009 COMPLETED (commit e783d7f)
-2026-08-22: TASK-010 COMPLETED (Evidence Ledger registered)
-2026-08-22: TASK-012 COMPLETED (E2E test passed)
-2026-08-22: TASK-011 DEFERRED (per PO directive)
-2026-08-22: Registry synchronized with Gate 7 status
-2026-08-21: TASK-013: COMPLETED (SHA: 543b80d1cfa0041ae36d8fad6364c1cf27acb112) — Final results in docs/09_gate_reports/TASK-013-FINAL-RESULTS.md
-TASK-014 Documentation Review
-Approved By: Qwen1 (Hub A) - Technical Review
-Authorized By: Engineer Maqsoudi (PO)
+2026-08-23: WORK ORDER dual-Grok + Product A–D FROZEN registered (Grok1)
+2026-08-23: Grok2 Evidence ledger/seed path commits (Evidence Layer)
+2026-08-22: EPIC-01 / Gate 7 closure log retained from prior registry
 
-Directive:
-- Product ID & Barcode/GTIN fields: UNKNOWN / UNVERIFIED
-- NOT a blocking defect
-- Does NOT prevent Product Identity approval
-- No further requests for these fields (NO ASSUMPTION)
-
-Impact:
-- Products C & D: PARTIALLY_IDENTIFIED (acceptable)
-- Products A & B: VERIFIED (identity approved)
-- TASK-014 can proceed with this clarification
-═══════════════════════════════════════════════════════
-
-
-
-
-═══════════════════════════════════════════════════════
-EPIC-01 COMPLETION LOG (Gate 7 Closed)
-═══════════════════════════════════════════════════════
-Date: 2026-08-22
-Commit SHA: b8b9bc752f1b8dde23db0fa165469784d630690d
-Owner: DeepSeek1 (Hub A)
-Reviewer: Qwen1 (Hub A)
-Final Authority: Engineer Maqsoudi (PO)
-
-Results:
-- Full Pytest: 101 PASSED, 0 FAILED, 0 ERRORS ✅
-- Artifact: docs/09_gate_reports/TASK-013-FINAL-RESULTS.md
-- Status: COMPLETED
-
-Framework 5 Note (MEDIUM Severity):
-- Dedicated performance scripts count: 0 (YELLOW)
-- Verdict: VALID with WARNING. Logged as Technical Debt for next phase. Does not block Gate 7 closure.
-
-Provenance: Generated by Qwen1, Approved by PO, Executed by PO
-═══════════════════════════════════════════════════════
+Provenance: Generated by Grok1, Reviewed by ChatGPT work order, Executed by Grok1
