@@ -1,19 +1,9 @@
-from typing import Generator
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.orm import Session
-from app.database import SessionLocal
+from app.database import get_db  # re-export — single implementation
 from app.core.auth import decode_token, validate_token_type
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)
-
-
-def get_db() -> Generator[Session, None, None]:
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 async def get_current_customer_id(token: str = Depends(oauth2_scheme)) -> str:
