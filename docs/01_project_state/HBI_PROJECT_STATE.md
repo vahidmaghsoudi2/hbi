@@ -1,26 +1,31 @@
 # HBI Project State
-Last Updated: 1405-05-22 (2026-08-13)
-Current Phase: Phase 7 - Reality Check Preparation
+Last Updated: 2026-08-23
+Current Phase: Post–Gate 7 / Dual-Grok Execution (HIGH THROUGHPUT)
 
-## Gate Status
+## Operational locks
+| Item | Status |
+|---|---|
+| Products A–D records + `data/seed_products.json` | **FROZEN** (no change without direct PO) |
+| EVIDENCE_MISSING hard-gate | **ACTIVE** (Grok2) |
+| Grok2 line | Recommendation / Backend / Integration |
+| Grok1 line | Knowledge / Data / QA |
+
+## Gate Status (summary)
 | Gate | Status | Notes |
 |---|---|---|
-| GATE 5 - Schema Lock v1.1 | LOCKED and APPROVED | Change only via Change Request |
-| GATE 6-1 - Models | APPROVED | 9 core models |
-| GATE 6-2 - Repositories | APPROVED | Evidence/ProductKnowledge Repos missing |
-| GATE 6-3 - Services | APPROVED | Evidence/ProductKnowledge Services missing |
-| GATE 6-4A - Interface Contract | CONDITIONALLY APPROVED | |
-| GATE 6-4B - Interface Implementation | READY FOR REVIEW | Awaiting final Independent Review |
+| GATE 5 - Schema Lock v1.1 | LOCKED | Change via Change Request only |
+| GATE 6-1 Models | APPROVED | GATE 6-1 fix commit history on master |
+| GATE 6-2 / 6-3 / 6-4 | APPROVED (historical) | See gate reports folder |
+| GATE 7 / EPIC-01 | CLOSED (2026-08-22) | 101 tests era; TASK-013 results in docs/09_gate_reports |
 
 ## Architecture Skeleton
-Customer -> Case -> Evidence/Knowledge -> Reasoning -> Recommendation -> Product/Inventory -> Outcome
+Customer → Case → Evidence/Knowledge → Reasoning → Recommendation → Product/Inventory → Outcome
 
-## Known Gaps (truly missing)
-- EvidenceRepository / EvidenceService
-- ProductKnowledgeRepository / ProductKnowledgeService
-- Real Reasoning Engine (currently _calculate_match_score returns fixed 0.75)
-- Consent management (update_consent, withdraw_consent)
+## Known Gaps (truthful)
+- Binary product DB not committed; seed JSON + scripts are SoT for fixtures
+- Clinical Evidence completeness constrained by NO ASSUMPTION / freeze
+- WORK-REGISTRY and these state docs must stay aligned with HEAD
 
-## Next Step
-After Reality Check, build the real HBI Reasoning Core to transform the system
-from a simple CRM into a Decision Support System.
+## Next (parallel)
+- Grok2: Recommendation pipeline integration under freeze + hard-gate
+- Grok1: continue Knowledge/Data/QA hygiene blockers

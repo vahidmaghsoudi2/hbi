@@ -1,13 +1,17 @@
 # Knowledge Base Index
-Last Updated: 1405-05-22 (2026-08-13)
+Last Updated: 2026-08-23
 
-This folder holds product and domain knowledge for HBI.
+Product and domain knowledge index for HBI.
 
 ## Structure
-- products/ - knowledge for each product (ingredients, use cases, evidence)
+- Canonical product identity: `docs/01_product_records/` (**FROZEN** A–D)
+- Seed materialization: `data/seed_products.json` (**FROZEN**)
+- Evidence ledger docs: `docs/03_evidence_ledger/`, `docs/07_evidence/`
 
 ## Product Status
-| Product | Identity Status | Gate |
+| Product | Identity | Notes |
 |---|---|---|
-| Products A and B (ISDIN) | VERIFIED | Awaiting Evidence |
-| Products C and D | UNIDENTIFIED | Awaiting PO physical info |
+| A–D (ISDIN) | Registered + seed present | **FROZEN** — no re-research; barcode/GTIN may remain UNKNOWN |
+
+## Rule
+No invented evidence. Knowledge updates for A–D require direct PO order.

@@ -1,13 +1,11 @@
 # Gate Reports Index
-Last Updated: 1405-05-22 (2026-08-13)
+Last Updated: 2026-08-23
 
-| Gate | Report File | Status |
+| Gate | Status | Pointer |
 |---|---|---|
-| GATE 5 - Schema Lock | GATE_5_SCHEMA_LOCK.md | LOCKED and APPROVED |
-| GATE 6-1 - Models | GATE_6-1_MODELS.md | APPROVED |
-| GATE 6-2 - Repositories | GATE_6-2_REPOSITORIES.md | APPROVED |
-| GATE 6-3 - Services | GATE_6-3_SERVICES.md | APPROVED |
-| GATE 6-4 - Interface | GATE_6-4_INTERFACE.md | READY FOR REVIEW |
-| GATE 7 - Reality Check | GATE_7_REALITY_CHECK.md | PENDING |
+| GATE 5 Schema Lock | LOCKED | Schema v1.1 |
+| GATE 6-x | APPROVED (historical) | models/repos/services/interface |
+| GATE 7 / EPIC-01 | CLOSED | `TASK-013-FINAL-RESULTS.md`, handover logs |
+| Post–Gate execution | ACTIVE | Dual-Grok: Evidence/Recommendation (Grok2) + Knowledge/QA (Grok1) |
 
-Each Gate report must be saved in this folder as a separate Markdown file.
+Active operational order: `08-Meeting-Room/HBI_GROK_EXECUTIVE_WORK_ORDER.md`
