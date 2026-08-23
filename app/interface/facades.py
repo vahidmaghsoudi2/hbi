@@ -40,35 +40,28 @@ def _to_case_dto(c) -> CaseDTO:
     )
 
 
-def _get_availability(r):
+def _get_availability(db: Session, product_id: str) -> str:
     try:
         from app.models.inventory import Inventory
-        from app.database import SessionLocal
-        s = SessionLocal()
-        inv = s.query(Inventory).filter_by(product_id=r.product_id).first()
-        s.close()
+        inv = db.query(Inventory).filter_by(product_id=product_id).first()
         if not inv:
             return "OUT_OF_STOCK"
         return "AVAILABLE" if inv.quantity_available > 0 else "OUT_OF_STOCK"
     except Exception:
         return "UNKNOWN"
 
-def _get_price(r):
+
+def _get_price(db: Session, product_id: str):
     try:
         from app.models.inventory import Inventory
-        from app.database import SessionLocal
-        s = SessionLocal()
-        inv = s.query(Inventory).filter_by(product_id=r.product_id).first()
-        price = inv.sale_price_toman if inv else None
-        s.close()
-        return price
+        inv = db.query(Inventory).filter_by(product_id=product_id).first()
+        return inv.sale_price_toman if inv else None
     except Exception:
         return None
 
 
-def _to_recommendation_dto(r) -> RecommendationDTO:
+def _to_recommendation_dto(r, db: Session) -> RecommendationDTO:
     """Map Recommendation model to DTO with AD-3 Contract fields."""
-    # Calculate confidence per AD-2: 0.4*need + 0.6*evidence
     need = r.need_match_score or 0.0
     ev = getattr(r, 'evidence_score', None) or 0.0
     confidence = round(min(1.0, 0.4 * need + 0.6 * ev), 2)
@@ -81,7 +74,6 @@ def _to_recommendation_dto(r) -> RecommendationDTO:
         eligibility_status=r.eligibility_status,
         ranking_score=r.ranking_score,
         ranking_reasons=r.ranking_reasons,
-        # AD-3 Contract fields
         final_score=r.ranking_score,
         confidence=confidence,
         eligibility=r.eligibility_status,
@@ -89,8 +81,8 @@ def _to_recommendation_dto(r) -> RecommendationDTO:
         evidence_score=getattr(r, 'evidence_score', None),
         evidence_refs=[],
         warnings=[],
-        availability=_get_availability(r),
-        price=_get_price(r),
+        availability=_get_availability(db, r.product_id),
+        price=_get_price(db, r.product_id),
     )
 
 def _to_inventory_dto(i) -> InventoryDTO:
@@ -162,15 +154,16 @@ class CaseFacade:
 
 class RecommendationFacade:
     def __init__(self, db: Session):
+        self.db = db
         self.service = RecommendationService(db)
 
     def generate(self, case_id: str, customer_profile: Dict) -> List[RecommendationDTO]:
         recommendations = self.service.generate_recommendations(case_id, customer_profile)
-        return [_to_recommendation_dto(r) for r in recommendations]
+        return [_to_recommendation_dto(r, self.db) for r in recommendations]
 
     def find_by_case(self, case_id: str) -> List[RecommendationDTO]:
         recommendations = self.service.find_by_case(case_id)
-        return [_to_recommendation_dto(r) for r in recommendations]
+        return [_to_recommendation_dto(r, self.db) for r in recommendations]
 
 class InventoryFacade:
     def __init__(self, db: Session):
@@ -214,8 +207,6 @@ class SaleFacade:
 
     def get_total_sales(self) -> int:
         return self.service.get_total_sales()
-
-# ─── Evidence & ProductKnowledge Facades (Phase 3) ─────────────
 
 from app.services.evidence_service import EvidenceService
 from app.services.product_knowledge_service import ProductKnowledgeService
