@@ -1,19 +1,20 @@
 # HBI Artifacts Index
-Last Updated: 1405-05-22 (2026-08-13)
+Last Updated: 2026-08-23
 
-Mapping between documentation and actual Backend code.
+| Artifact | Path | Notes |
+|---|---|---|
+| Models | app/models/ | GATE 6-1 approved lineage |
+| Repositories | app/repositories/ | Core domain |
+| Services | app/services/ | Includes RecommendationService |
+| Interface / Facades | app/interface/ | RecommendationFacade path |
+| API routers | app/api/routers/ | recommendations + auth pilot path |
+| Seed | data/seed_products.json | FROZEN with product records |
+| Evidence ledger docs | docs/03_evidence_ledger/ | Record-sourced |
+| Pilot QA package | docs/09_gate_reports/HBI_PILOT_READINESS_QA_PACKAGE.md | Current readiness SoT |
 
-| Artifact | Code Path | Gate | Status |
-|---|---|---|---|
-| Models | app/models/ | 6-1 | APPROVED |
-| Repositories | app/repositories/ | 6-2 | APPROVED |
-| Services | app/services/ | 6-3 | APPROVED |
-| Interface / Contracts | app/interface/ | 6-4 | READY FOR REVIEW |
-
-## Gaps
-| Artifact | Status |
+## Gaps (honest)
+| Item | Status |
 |---|---|
-| EvidenceRepository | MISSING |
-| ProductKnowledgeRepository | MISSING |
-| EvidenceService | MISSING |
-| ProductKnowledgeService | MISSING |
+| Dedicated EvidenceRepository/Service modules | May still be thin vs full domain ambition — verify code before claiming MISSING absolute |
+| Production auth (non pilot-token) | Deferred |
+| UI | Deferred |

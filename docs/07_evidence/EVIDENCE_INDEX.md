@@ -1,12 +1,15 @@
 # Evidence Index
-Last Updated: 1405-05-22 (2026-08-13)
-
-Product evidence is maintained per Framework 3 (Evidence Ledger).
+Last Updated: 2026-08-23
 
 ## Structure
-- products_a_b_isdin/ - evidence for VERIFIED products
-- products_c_d/ - awaiting identity information
+- Ledger (record-sourced): `docs/03_evidence_ledger/ISDIN_PRODUCTS_A_B_C_D_LEDGER.md`
+- Product records (FROZEN): `docs/01_product_records/`
+- Seed: `data/seed_products.json` (FROZEN)
 
 ## Status
-WARNING: No evidence has been registered yet.
-This section becomes active once EvidenceService is decided and implemented.
+- Identity / inventory FACTS from product records: registered in ledger (SECONDARY, PENDING QA)
+- Clinical / REGULATORY campaigns: not required for freeze; do not invent
+- Runtime: EVIDENCE_MISSING hard-gate remains ACTIVE on Recommendation path
+
+## Rule
+UNKNOWN stays UNKNOWN. Product A–D not re-researched without PO order.
