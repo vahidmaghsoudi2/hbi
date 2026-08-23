@@ -1,20 +1,28 @@
 # GATE: PRODUCTION READINESS
 
-**Date:** 2026-08-15
-**Authority:** Engineer Maqsoudi (PO)
+> **HISTORICAL DOCUMENT (2026-08-15)**  
+> **NOT** Source of Truth for Phase-1 Pilot Start.  
+> For Pilot vs Production vs Version Next use:  
+> `docs/09_gate_reports/HBI_FINAL_OPERATIONS_READINESS.md`  
+> and `docs/09_gate_reports/HBI_PILOT_READINESS_QA_PACKAGE.md`
+
+**Date:** 2026-08-15  
+**Authority:** Engineer Maqsoudi (PO)  
 **Prepared by:** Qwen (Data QA)
 
 ---
 
-## Verdict
+## Verdict (historical)
 
 ```
 CONDITIONALLY READY FOR PRODUCTION READINESS REVIEW
 ```
 
+This is **not** a current Pilot Start certificate.
+
 ---
 
-## Checklist
+## Checklist (as recorded 2026-08-15)
 
 | Item | Status | Evidence |
 |------|--------|----------|
@@ -30,26 +38,13 @@ CONDITIONALLY READY FOR PRODUCTION READINESS REVIEW
 
 ---
 
-## Conditions (must be met before full production)
+## Conditions (full production — still Version Next)
 
-1. Products C & D must be IDENTIFIED or explicitly deferred by PO
-2. barcode_gtin for A & B must be provided or marked as accepted risk
-3. availability and price mapping must be completed
-4. Independent Evidence source (REGULATORY) recommended for at least one claim per product
-
----
-
-## Blockers
-
-**None.** All critical blockers have been resolved.
+1. Products C & D identity policy (now: records exist + **FROZEN**)  
+2. barcode_gtin accepted UNKNOWN for Pilot  
+3. availability and price mapping  
+4. Independent REGULATORY evidence — not required for Phase-1 Pilot freeze  
 
 ---
 
-## Escalation
-
-- Products C & D: PO decision required
-- barcode_gtin: PO to provide physical product info
-
----
-
-*Generated on 2026-08-15*
+*Archived posture: retained for audit trail only.*
