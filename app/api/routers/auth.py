@@ -13,6 +13,7 @@ from app.core.auth import (
 )
 from app.core.deps import get_db
 from app.models.customer import Customer
+from app.core.audit import audit_event
 
 router = APIRouter()
 
@@ -36,17 +37,37 @@ async def pilot_token(
 ):
     """Dev/Pilot only: issue JWT for an existing customer_id. Disabled in production."""
     if os.getenv("HBI_ENV", "development").lower() == "production":
+        audit_event(
+            "pilot_token",
+            customer_id=request.customer_id,
+            path="/api/v1/auth/pilot-token",
+            outcome="denied",
+            detail="disabled_in_production",
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="pilot-token disabled in production",
         )
     customer = db.get(Customer, request.customer_id)
     if customer is None:
+        audit_event(
+            "pilot_token",
+            customer_id=request.customer_id,
+            path="/api/v1/auth/pilot-token",
+            outcome="denied",
+            detail="customer_not_found",
+        )
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Customer not found",
         )
     payload = {"sub": request.customer_id}
+    audit_event(
+        "pilot_token",
+        customer_id=request.customer_id,
+        path="/api/v1/auth/pilot-token",
+        outcome="ok",
+    )
     return TokenPair(
         access_token=create_access_token(payload),
         refresh_token=create_refresh_token(payload),
