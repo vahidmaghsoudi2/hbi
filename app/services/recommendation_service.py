@@ -68,22 +68,21 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         3. Call ReasoningEngine.run(...)
         4. Create Recommendation from engine result (final_score, eligibility, ...)
         """
-        products = self.product_repo.find_by_identity_status("VERIFIED")
         recommendations: List[Recommendation] = []
         rank = 1
 
-        concerns = customer_profile.get("concerns", "")
-        if isinstance(concerns, str):
-            concern_list = [c.strip().lower() for c in concerns.split(",") if c.strip()]
+        concerns_raw = customer_profile.get("concerns") or ""
+        if isinstance(concerns_raw, list):
+            concern_list = [c.strip().lower() for c in concerns_raw if c and str(c).strip()]
         else:
-            concern_list = [str(c).strip().lower() for c in (concerns or []) if str(c).strip()]
+            concern_list = [c.strip().lower() for c in str(concerns_raw).split(",") if c.strip()]
 
+        products = self.product_repo.find_verified()
         for product in products:
-            inventory = self.inventory_repo.find_by_product(product.product_id)
+            inventory = self.inventory_repo.get_by_product(product.product_id)
             if not inventory or inventory.quantity_available <= 0:
                 continue
 
-            # --- Data collection only (no scoring formula here) ---
             pk_snapshot = self._collect_product_knowledge_snapshot(product.product_id)
             evidence_list = self._collect_evidence_list(product.product_id)
 
@@ -107,6 +106,14 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             # Hard filter: only persist if score meets minimum threshold
             if final_score < 0.5:
                 continue
+
+            # Persistence contract alignment (AD-3 / CheckConstraint):
+            # Scoring may emit NEEDS_REVIEW; DB allows only:
+            # ELIGIBLE | INELIGIBLE_PENDING_VERIFICATION | INELIGIBLE_CONFLICT |
+            # INELIGIBLE_PENDING_REVIEW | INELIGIBLE_OUT_OF_STOCK
+            # Minimal map — no change to scoring / thresholds / hard-gate.
+            if eligibility == "NEEDS_REVIEW":
+                eligibility = "INELIGIBLE_PENDING_REVIEW"
 
             rec_id = f"REC_{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}_{rank}"
 
