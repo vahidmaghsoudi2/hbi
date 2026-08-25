@@ -5,6 +5,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.core.rate_limit import RateLimitMiddleware
+
 from app.api.routers import (
     auth_router, products_router, customers_router, cases_router,
     recommendations_router, inventory_router, sales_router, evidence_router,
@@ -60,6 +62,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# In-memory rate limiting for auth + recommendation generate (single-instance).
+app.add_middleware(RateLimitMiddleware)
 
 
 if NotFoundError:
