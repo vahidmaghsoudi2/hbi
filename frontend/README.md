@@ -1,26 +1,21 @@
-# HBI Frontend — Contract Foundation
+# HBI Frontend — Pilot UI
 
-Aligned with backend API contracts (no invented endpoints or fields).
+Vite + React + TypeScript. Contracts aligned with backend.
 
-## Corrected contracts (vs earlier package drafts)
+## Pages
+- `/` — public product catalog
+- `/pilot` — pilot-token auth → create Case
+- `/recommendation` — generate & display recommendations
 
-| Item | Correct shape |
-|------|----------------|
-| Case create | `{ customer_id, case_type? }` — **no `concerns`** |
-| TokenPair | `{ access_token, refresh_token, token_type }` |
-| RecommendationDTO | includes optional AD-3 fields (`final_score`, `confidence`, `eligibility`, `reasoning`, `availability`, `price`, …) |
-| Concerns | only inside `RecommendationRequest.customer_profile` |
+## Run
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Start backend on `http://127.0.0.1:8000`. Vite proxies `/api`.
 
-## Base URL
-
-Set `VITE_API_BASE` (default `/api/v1`).
-
-## Auth
-
-- `POST /auth/pilot-token` — development/pilot only
-- All Case / Recommendation calls require `Authorization: Bearer <access_token>`
-- Products listing is public
-
-## Next
-
-UI pages (home, case, recommendation) can be built on top of `src/api/client.ts` and `src/types/api.ts` without further contract changes.
+## Contracts respected
+- Case create: `{ customer_id, case_type? }` — no concerns
+- TokenPair includes refresh_token
+- concerns only in customer_profile on generate
