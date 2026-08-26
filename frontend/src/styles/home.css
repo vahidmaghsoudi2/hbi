@@ -1,0 +1,461 @@
+﻿/* ============================================================
+   ROOT VARIABLES
+   ============================================================ */
+:root {
+  --color-bg: #faf8f5;
+  --color-text: #2d2a24;
+  --color-accent: #6b7a5c;
+  --color-cta: #8b7a5c;
+  --color-card: #ffffff;
+  --color-border: #e5e0d6;
+  --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --spacing-section: 5rem;
+  --spacing-element: 1.5rem;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  direction: rtl;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.header {
+  padding: 1.25rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  background-color: var(--color-bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.brand {
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--color-text);
+}
+
+.nav {
+  display: flex;
+  gap: 2rem;
+}
+
+.nav a {
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+}
+
+.nav a:hover {
+  color: var(--color-accent);
+}
+
+.cta-primary {
+  background: var(--color-cta);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.8rem;
+  border-radius: 0.25rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.cta-primary:hover {
+  opacity: 0.85;
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero {
+  padding: 5rem 0 4rem;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 3.2rem;
+  font-weight: 300;
+  line-height: 1.2;
+  margin-bottom: 1.2rem;
+  letter-spacing: -0.02em;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  color: #5a554a;
+  margin-bottom: 2.5rem;
+}
+
+.hero-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.cta-hero {
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  padding: 0.75rem 2.8rem;
+  border-radius: 0.25rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cta-hero:hover {
+  background: #5a6b4c;
+}
+
+.cta-hero-secondary {
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  padding: 0.75rem 2.8rem;
+  border-radius: 0.25rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cta-hero-secondary:hover {
+  background: #f0ede7;
+}
+
+/* ============================================================
+   TRUST STRIP
+   ============================================================ */
+.trust {
+  padding: 2.5rem 0;
+  background: #f5f2ec;
+}
+
+.trust-inner {
+  display: flex;
+  justify-content: center;
+  gap: 4rem;
+  flex-wrap: wrap;
+}
+
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.trust-icon {
+  color: var(--color-accent);
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+/* ============================================================
+   NEED SELECTION
+   ============================================================ */
+.need {
+  padding: var(--spacing-section) 0;
+  text-align: center;
+}
+
+.need h2 {
+  font-size: 2rem;
+  font-weight: 300;
+  margin-bottom: 2rem;
+}
+
+.need-options {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.need-btn {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  padding: 0.8rem 2.5rem;
+  border-radius: 2.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.need-btn:hover {
+  border-color: var(--color-accent);
+  background: #f5f2ec;
+}
+
+/* ============================================================
+   APPROACH (HBI LOGIC)
+   ============================================================ */
+.approach {
+  padding: var(--spacing-section) 0;
+  background: #f5f2ec;
+  text-align: center;
+}
+
+.approach h2 {
+  font-size: 2rem;
+  font-weight: 300;
+  margin-bottom: 2.5rem;
+}
+
+.approach-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.step {
+  background: #fff;
+  padding: 2rem 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  text-align: center;
+}
+
+.step-num {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.step h3 {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.step p {
+  font-size: 0.95rem;
+  color: #5a554a;
+}
+
+/* ============================================================
+   PRODUCTS
+   ============================================================ */
+.products {
+  padding: var(--spacing-section) 0;
+}
+
+.products h2 {
+  font-size: 2rem;
+  font-weight: 300;
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.product-state {
+  text-align: center;
+  padding: 2rem 0;
+  color: #5a554a;
+  font-size: 1rem;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.8rem;
+}
+
+.product-card {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  transition: box-shadow 0.2s;
+}
+
+.product-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+}
+
+.product-card h4 {
+  font-size: 1.05rem;
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+}
+
+.product-brand {
+  font-size: 0.9rem;
+  color: #5a554a;
+  margin-bottom: 0.2rem;
+}
+
+.product-status {
+  font-size: 0.85rem;
+  color: #6b7a5c;
+  margin-bottom: 0.8rem;
+}
+
+.product-link {
+  display: inline-block;
+  background: var(--color-accent);
+  color: #fff;
+  padding: 0.4rem 1rem;
+  border-radius: 0.25rem;
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.product-link:hover {
+  background: #5a6b4c;
+}
+
+/* ============================================================
+   TRANSPARENCY
+   ============================================================ */
+.transparency {
+  padding: var(--spacing-section) 0;
+  background: #f5f2ec;
+  text-align: center;
+}
+
+.transparency h2 {
+  font-size: 2rem;
+  font-weight: 300;
+  margin-bottom: 1rem;
+}
+
+.transparency p {
+  max-width: 600px;
+  margin: 0 auto;
+  color: #5a554a;
+  font-size: 1.05rem;
+}
+
+/* ============================================================
+   HUMAN CONSULTATION
+   ============================================================ */
+.consultation {
+  padding: var(--spacing-section) 0;
+  text-align: center;
+}
+
+.consultation h2 {
+  font-size: 2rem;
+  font-weight: 300;
+  margin-bottom: 0.8rem;
+}
+
+.consultation p {
+  max-width: 500px;
+  margin: 0 auto 1.8rem;
+  color: #5a554a;
+}
+
+.cta-consult {
+  background: var(--color-cta);
+  color: #fff;
+  border: none;
+  padding: 0.75rem 2.8rem;
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.cta-consult:hover {
+  opacity: 0.85;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer {
+  padding: 2rem 0;
+  border-top: 1px solid var(--color-border);
+  text-align: center;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .header-inner {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  .nav {
+    gap: 1.2rem;
+  }
+  .hero h1 {
+    font-size: 2.2rem;
+  }
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+  .trust-inner {
+    gap: 2rem;
+  }
+  .need-options {
+    flex-direction: column;
+    align-items: center;
+  }
+  .need-btn {
+    width: 80%;
+  }
+  .approach-steps {
+    grid-template-columns: 1fr;
+  }
+  .product-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: 1.8rem;
+  }
+  .cta-hero, .cta-hero-secondary {
+    width: 100%;
+    text-align: center;
+  }
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+  .container {
+    padding: 0 1rem;
+  }
+}
