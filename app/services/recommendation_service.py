@@ -1,4 +1,4 @@
-﻿import logging
+import logging
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
 
@@ -77,10 +77,8 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             concern_list = [c.strip().lower() for c in concerns_raw if c and str(c).strip()]
         else:
             concern_list = [c.strip().lower() for c in str(concerns_raw).split(",") if c.strip()]
-
-        products = self.product_repo.find_verified()
         for product in products:
-            inventory = self.inventory_repo.get_by_product(product.product_id)
+            inventory = self.inventory_repo.find_by_product(product.product_id)
             if not inventory or inventory.quantity_available <= 0:
                 continue
 
@@ -208,4 +206,5 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             if w > mx:
                 mx = w
         return mx
+
 
