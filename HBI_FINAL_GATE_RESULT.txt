@@ -1,0 +1,192 @@
+﻿HBI FINAL DATABASE + PROJECT GATE
+DATE: 2026-08-26 02:09:12
+PATH: E:\hbi
+
+============================================================
+GIT STATE
+============================================================
+BRANCH: master
+HEAD: 97c5fb55d3550e8f364e181aabf3c456375614ff
+STATUS:
+ M app/models/product.py
+ M app/services/recommendation_service.py
+?? .hbi_executor_20260826_012452/
+?? .hbi_minimal_intake_20260826_020137/
+?? .hbi_vertical_slice_20260826_013313/
+?? HBI_EXECUTION_REPORT_20260826_012718.txt
+?? HBI_FINAL_GATE_RESULT.txt
+?? HBI_HOME_PAGE_AUTOBUILD_RESULT.txt
+?? HBI_HOME_PAGE_GATE_RESULT.txt
+?? HBI_NODE_ENV_AUDIT.txt
+?? HBI_NODE_INSTALL_RESULT.txt
+?? HBI_PRODUCT_LIFECYCLE_EXECUTION_20260826_012452.txt
+?? frontend/
+
+============================================================
+PYTHON ENVIRONMENT
+============================================================
+PYTHON: Python 3.14.6
+
+============================================================
+SQLITE RUNTIME
+============================================================
+  File "<string>", line 3
+    print(SQLITE_VERSION:, sqlite3.sqlite_version)
+                        ^
+SyntaxError: invalid syntax
+
+
+============================================================
+DATABASE DISCOVERY
+============================================================
+DATABASE COUNT: 9
+
+DATABASE FILE:
+E:\hbi\app.db
+SIZE: 0 bytes
+
+DATABASE FILE:
+E:\hbi\test_e2e_real.db
+SIZE: 102400 bytes
+
+DATABASE FILE:
+E:\hbi\test_evidence.db
+SIZE: 106496 bytes
+
+DATABASE FILE:
+E:\hbi\data\hbi.db
+SIZE: 118784 bytes
+
+DATABASE FILE:
+E:\hbi\data\hbi_backup_20260816_110531.db
+SIZE: 102400 bytes
+
+DATABASE FILE:
+E:\hbi\data\hbi_pilot_e2e.db
+SIZE: 106496 bytes
+
+DATABASE FILE:
+E:\hbi\data\hbi_rec_api_test.db
+SIZE: 106496 bytes
+
+DATABASE FILE:
+E:\hbi\data\hbi_vertical_slice_test.db
+SIZE: 106496 bytes
+
+DATABASE FILE:
+E:\hbi\data\backups\hbi_before_v1_2_20260816_113239.db
+SIZE: 102400 bytes
+
+============================================================
+DATABASE VALIDATION
+============================================================
+DATABASE VALIDATION SKIPPED: SQLite runtime unavailable.
+
+============================================================
+EVIDENCE / KNOWLEDGE DISCOVERY
+============================================================
+MATCHING FILE COUNT: 48
+E:\hbi\test_evidence.db
+E:\hbi\.hbi_executor_20260826_012452\backup\app\models\evidence.py
+E:\hbi\.hbi_executor_20260826_012452\backup\app\models\__pycache__\evidence.cpython-314.pyc
+E:\hbi\.hbi_vertical_slice_20260826_013313\backup\app\api\routers\evidence.py
+E:\hbi\.hbi_vertical_slice_20260826_013313\backup\app\models\evidence.py
+E:\hbi\.hbi_vertical_slice_20260826_013313\backup\app\models\product_knowledge.py
+E:\hbi\.hbi_vertical_slice_20260826_013313\backup\app\repositories\evidence_repository.py
+E:\hbi\.hbi_vertical_slice_20260826_013313\backup\app\repositories\product_knowledge_repository.py
+E:\hbi\.hbi_vertical_slice_20260826_013313\backup\app\services\evidence_service.py
+E:\hbi\.hbi_vertical_slice_20260826_013313\backup\app\services\product_knowledge_service.py
+E:\hbi\.venv\Lib\site-packages\cryptography\hazmat\primitives\kdf\kbkdf.py
+E:\hbi\.venv\Lib\site-packages\cryptography\hazmat\primitives\kdf\__pycache__\kbkdf.cpython-314.pyc
+E:\hbi\.venv\Lib\site-packages\numpy\lib\tests\test_packbits.py
+E:\hbi\.venv\Lib\site-packages\numpy\lib\tests\__pycache__\test_packbits.cpython-314.pyc
+E:\hbi\.venv\Lib\site-packages\pytz\zoneinfo\America\Montevideo
+E:\hbi\.venv\Lib\site-packages\tzdata\zoneinfo\America\Montevideo
+E:\hbi\07-Evidence\products_a_b_evidence.md
+E:\hbi\08-Meeting-Room\BLOCKER-EVIDENCE-MISSING-FOR-RECOMMENDATION.md
+E:\hbi\08-Meeting-Room\EVIDENCE_LAYER_STATUS.md
+E:\hbi\08-Meeting-Room\HBI_CLAIM_VS_EVIDENCE.md
+E:\hbi\08-Meeting-Room\MTG-001\01-Contributions\Perplexity-Evidence-Ledger.md
+E:\hbi\app\api\routers\evidence.py
+E:\hbi\app\api\routers\__pycache__\evidence.cpython-314.pyc
+E:\hbi\app\models\evidence.py
+E:\hbi\app\models\product_knowledge.py
+E:\hbi\app\models\__pycache__\evidence.cpython-314.pyc
+E:\hbi\app\models\__pycache__\product_knowledge.cpython-314.pyc
+E:\hbi\app\repositories\evidence_repository.py
+E:\hbi\app\repositories\product_knowledge_repository.py
+E:\hbi\app\repositories\__pycache__\evidence_repository.cpython-314.pyc
+E:\hbi\app\repositories\__pycache__\product_knowledge_repository.cpython-314.pyc
+E:\hbi\app\services\evidence_service.py
+E:\hbi\app\services\product_knowledge_service.py
+E:\hbi\app\services\__pycache__\evidence_service.cpython-314.pyc
+E:\hbi\app\services\__pycache__\product_knowledge_service.cpython-314.pyc
+E:\hbi\data\seed_evidence.json
+E:\hbi\docs\05_knowledge_base\KB_INDEX.md
+E:\hbi\docs\07_evidence\EVIDENCE_INDEX.md
+E:\hbi\docs\08_review_inbox\HBI_QWEN2_EVIDENCE_ARCH_AUDIT.md
+E:\hbi\docs\audit\HBI_GATE64A_EVIDENCE.txt
+E:\hbi\docs\reports\perplexity-evidence-import-2026-08-18.md
+E:\hbi\tests\test_evidence.py
+E:\hbi\tests\test_evidence_missing_hard_gate.py
+E:\hbi\tests\test_api\test_evidence.py
+E:\hbi\tests\test_api\__pycache__\test_evidence.cpython-314-pytest-9.1.1.pyc
+E:\hbi\tests\test_api\__pycache__\test_evidence.cpython-314.pyc
+E:\hbi\tests\__pycache__\test_evidence.cpython-314-pytest-9.1.1.pyc
+E:\hbi\tests\__pycache__\test_evidence_missing_hard_gate.cpython-314-pytest-9.1.1.pyc
+
+============================================================
+FRONTEND STATUS
+============================================================
+frontend exists: True
+package.json exists: True
+FRONTEND FILE COUNT: 4
+E:\hbi\frontend\.env.example
+E:\hbi\frontend\index.html
+E:\hbi\frontend\package.json
+E:\hbi\frontend\vite.config.js
+
+============================================================
+NODE / NPM
+============================================================
+NODE: NOT AVAILABLE
+NPM: NOT AVAILABLE
+
+============================================================
+FRONTEND BUILD
+============================================================
+BUILD: SKIPPED
+REASON: Node/NPM unavailable.
+
+============================================================
+FINAL GIT STATE
+============================================================
+ M app/models/product.py
+ M app/services/recommendation_service.py
+?? .hbi_executor_20260826_012452/
+?? .hbi_minimal_intake_20260826_020137/
+?? .hbi_vertical_slice_20260826_013313/
+?? HBI_EXECUTION_REPORT_20260826_012718.txt
+?? HBI_FINAL_GATE_RESULT.txt
+?? HBI_HOME_PAGE_AUTOBUILD_RESULT.txt
+?? HBI_HOME_PAGE_GATE_RESULT.txt
+?? HBI_NODE_ENV_AUDIT.txt
+?? HBI_NODE_INSTALL_RESULT.txt
+?? HBI_PRODUCT_LIFECYCLE_EXECUTION_20260826_012452.txt
+?? frontend/
+
+============================================================
+FINAL GATE
+============================================================
+FAIL: Python SQLite runtime unavailable.
+FRONTEND BUILD: NOT EXECUTED
+
+HBI_FINAL_GATE: FAIL
+
+============================================================
+OUTPUT
+============================================================
+RESULT FILE:
+E:\hbi\HBI_FINAL_GATE_RESULT.txt
+
+RESULT SIZE: 7134 characters
