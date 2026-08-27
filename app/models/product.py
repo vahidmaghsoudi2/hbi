@@ -1,4 +1,4 @@
-from sqlalchemy import CheckConstraint, Column, DateTime, Float, String
+﻿from sqlalchemy import CheckConstraint, Column, DateTime, Float, String
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.models.base import Base
@@ -22,6 +22,7 @@ class Product(Base):
     qa_verdict = Column(String, nullable=False, server_default="PENDING")
     qa_reviewed_at = Column(DateTime, nullable=True)
     qa_notes = Column(String, nullable=True)
+    status = Column(String, nullable=False, server_default="ACTIVE")
     created_at = Column(DateTime, server_default=func.current_timestamp())
     updated_at = Column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
 
@@ -33,6 +34,10 @@ class Product(Base):
         CheckConstraint(
             "identity_confidence IS NULL OR (identity_confidence >= 0.0 AND identity_confidence <= 1.0)",
             name="ck_product_identity_confidence",
+        ),
+        CheckConstraint(
+            "status IN ('DRAFT', 'ACTIVE')",
+            name="ck_product_status",
         ),
         CheckConstraint(
             "qa_verdict IN ('PENDING', 'VALID', 'INVALID', 'CONFLICT', 'UNKNOWN', 'NEEDS_REVIEW')",
@@ -47,3 +52,4 @@ class Product(Base):
     recommendations = relationship("Recommendation", back_populates="product")
     sale_items = relationship("SaleItem", back_populates="product")
     product_knowledge = relationship("ProductKnowledge", back_populates="product", uselist=False)
+

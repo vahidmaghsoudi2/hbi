@@ -1,4 +1,4 @@
-import logging
+﻿import logging
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
 
@@ -68,7 +68,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         3. Call ReasoningEngine.run(...)
         4. Create Recommendation from engine result (final_score, eligibility, ...)
         """
-        products = self.product_repo.find_by_identity_status("VERIFIED")
+        products = [p for p in self.product_repo.find_by_identity_status("VERIFIED") if p.status == "ACTIVE"]
         recommendations: List[Recommendation] = []
         rank = 1
 
@@ -200,3 +200,4 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             if w > mx:
                 mx = w
         return mx
+
