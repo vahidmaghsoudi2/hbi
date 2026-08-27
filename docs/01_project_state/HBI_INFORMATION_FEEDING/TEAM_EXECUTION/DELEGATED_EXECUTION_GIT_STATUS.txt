@@ -1,0 +1,15 @@
+﻿?? .hbi_executor_20260826_012452/
+?? .hbi_intake_impl_20260826_021329/
+?? .hbi_minimal_intake_20260826_020137/
+?? .hbi_vertical_slice_20260826_013313/
+?? HOME_PAGE_SETUP_RESULT.txt
+?? "Home Page GPT2.txt"
+?? TASK016_RECON_RAW.txt
+?? docs/01_project_state/HBI_INFORMATION_FEEDING/TEAM_EXECUTION/
+?? docs/04_frontend/
+?? frontend/package-lock.json
+?? hbi_auto_check.py
+?? tests/test_product_intake_service.py
+?? uvicorn_startup.log.err
+?? "\331\207\331\210\331\205 \330\250\333\214\330\254 \330\254\333\214 \330\250\333\214 \330\252\333\214\333\262..txt"
+?? "\331\207\331\210\331\205 \333\214\333\214\330\254 \332\251\331\210\333\214\331\206\333\261.txt"

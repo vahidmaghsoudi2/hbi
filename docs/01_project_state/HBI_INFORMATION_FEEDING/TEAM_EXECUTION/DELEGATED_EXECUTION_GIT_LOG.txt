@@ -1,0 +1,10 @@
+﻿02cc1a0 chore(archive): Save local Qwen1 audits, conflict registry, and execution reports to GitHub
+8439a3f docs: INFORMATION_FEEDING_FLOW — code-reality map (Grok1, no app change)
+d5e0ebc docs: INFORMATION_FEEDING_FLOW — repository reality map
+9fd3328 docs(roadmap): Register Information Feeding Master Roadmap (5 Shahrivar 1405)
+c33f21f docs(roadmap): Register Information Feeding Master Roadmap - Customer → Case → Recommendation (5 Shahrivar 1405)
+902a97e docs(roadmap): Register ChatGPT2 Home & Operational Experience Roadmap + Home Page updates (5 Shahrivar 1405)
+9791643 feat(home): Update Home Page + Register ChatGPT2 Operational Roadmap (5 Shahrivar 1405)
+981f2d3 docs(adr): Approve Home Page Architecture Decision with phased expansion roadmap (5 Shahrivar 1405)
+2b3430c Merge branch 'master' of https://github.com/vahidmaghsoudi2/hbi
+7de1f03 fix(backend): align Product model with database schema (status field)
