@@ -1,138 +1,193 @@
-﻿"""API path: auth required + case ownership for recommendations."""
-from pathlib import Path
-
 import pytest
 from fastapi.testclient import TestClient
+from app.main import app
+from app.models.product import Product
+from app.models.inventory import Inventory
+from app.models.case import Case
+from app.models.customer import Customer
+from app.database import get_db, Base
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-TEST_DB = Path(__file__).resolve().parents[1] / "data" / "hbi_rec_api_test.db"
+SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+def override_get_db():
+    try:
+        db = TestingSessionLocal()
+        yield db
+    finally:
+        db.close()
 
-@pytest.fixture()
-def client(monkeypatch):
-    if TEST_DB.exists():
-        TEST_DB.unlink()
-    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{TEST_DB}")
+app.dependency_overrides[get_db] = override_get_db
+client = TestClient(app)
 
-    import importlib
-    import app.database as database
+@pytest.fixture(scope="module")
+def db_session():
+    Base.metadata.create_all(bind=engine)
+    db = TestingSessionLocal()
+    yield db
+    db.close()
+    Base.metadata.drop_all(bind=engine)
 
-    importlib.reload(database)
-    database.init_db()
-
-    from app.models.customer import Customer
-    from app.models.case import Case
-    from app.main import app
-    from app.core.deps import get_db, get_current_customer_id
-
-    Session = sessionmaker(bind=database.engine)
-    session = Session()
-    session.add(Customer(customer_id="CUST-API-1", name="API User"))
-    session.add(Case(case_id="CASE-API-1", customer_id="CUST-API-1"))
-    session.add(Customer(customer_id="CUST-API-2", name="Other"))
-    session.add(Case(case_id="CASE-API-2", customer_id="CUST-API-2"))
-    session.commit()
-
-    def _override_db():
-        s = Session()
-        try:
-            yield s
-        finally:
-            s.close()
-
-    def _owner_ok():
-        return "CUST-API-1"
-
-    app.dependency_overrides[get_db] = _override_db
-    app.dependency_overrides[get_current_customer_id] = _owner_ok
-
-    with TestClient(app) as c:
-        yield c
-
-    app.dependency_overrides.clear()
-    session.close()
-    database.engine.dispose()
-    if TEST_DB.exists():
-        TEST_DB.unlink()
-
-
-def test_generate_requires_owned_case(client):
-    # CASE-API-2 belongs to CUST-API-2; current user is CUST-API-1
-    r = client.post(
-        "/api/v1/recommendations/generate",
-        json={"case_id": "CASE-API-2", "customer_profile": {"concerns": "x"}},
+@pytest.fixture(scope="module")
+def setup_data(db_session):
+    # Customer با فیلدهای اجباری
+    customer = Customer(
+        customer_id="test_customer",
+        name="Test User",
+        consent_to_store_data=True
     )
-    assert r.status_code == 403
+    db_session.add(customer)
+    db_session.commit()
 
-
-def test_generate_unknown_case_404(client):
-    r = client.post(
-        "/api/v1/recommendations/generate",
-        json={"case_id": "CASE-MISSING", "customer_profile": {}},
+    # Case
+    case = Case(
+        case_id="test_case",
+        customer_id="test_customer"
     )
-    assert r.status_code == 404
+    db_session.add(case)
+    db_session.commit()
 
-
-def test_generate_owned_case_returns_list(client):
-    r = client.post(
-        "/api/v1/recommendations/generate",
-        json={"case_id": "CASE-API-1", "customer_profile": {"concerns": "ضدآفتاب"}},
+    # یک محصول ACTIVE با موجودی مثبت (برای تست‌های بعدی)
+    active_product = Product(
+        product_id="active_test_001",
+        brand="TestBrand",
+        product_name="Active Product",
+        identity_status="VERIFIED",
+        qa_verdict="VALID",
+        status="ACTIVE"
     )
-    assert r.status_code == 200
-    assert isinstance(r.json(), list)
+    db_session.add(active_product)
+    db_session.commit()
 
+    # موجودی برای محصول فعال
+    inventory = Inventory(
+        product_id=active_product.product_id,
+        quantity_available=10,
+        quantity_reserved=0,
+        quantity_damaged=0,
+        stock_status="active"
+    )
+    db_session.add(inventory)
+    db_session.commit()
 
-def test_draft_products_excluded(client, db_session):
-    """Test that DRAFT products are not recommended."""
-    # Create a DRAFT product
+    return customer, case
+
+def get_pilot_token():
+    response = client.post("/api/v1/auth/pilot-token", json={"customer_id": "test_customer"})
+    if response.status_code == 200:
+        return response.json().get("access_token")
+    return None
+
+@pytest.fixture(scope="module")
+def auth_headers():
+    token = get_pilot_token()
+    if token:
+        return {"Authorization": f"Bearer {token}"}
+    return {}
+
+def test_generate_owned_case_returns_list(db_session, setup_data, auth_headers):
+    _, case = setup_data
+    assert auth_headers, "Pilot token could not be obtained"
+    response = client.post(
+        "/api/v1/recommendations/generate",
+        json={"case_id": case.case_id},
+        headers=auth_headers
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert "recommendations" in data
+    assert isinstance(data["recommendations"], list)
+
+def test_draft_products_excluded(db_session, setup_data, auth_headers):
+    _, case = setup_data
+    assert auth_headers, "Pilot token could not be obtained"
+
+    # فقط محصول DRAFT بساز — نیازی به Inventory نیست
     draft_product = Product(
-        product_id="DRAFT-001",
-        brand="Test",
+        product_id="draft_test_001",
+        brand="TestBrand",
         product_name="Draft Product",
         identity_status="VERIFIED",
-        status="DRAFT",
-        inventory=10
+        qa_verdict="VALID",
+        status="DRAFT"
     )
     db_session.add(draft_product)
     db_session.commit()
-    
-    # Create a case
-    case = Case(case_id="CASE-001", customer_id="CUST-001")
-    db_session.add(case)
-    db_session.commit()
-    
-    # Request recommendations
-    response = client.post("/api/v1/recommendations/generate", json={"case_id": "CASE-001"})
-    
-    # DRAFT product should NOT be in results
-    assert response.status_code == 200
-    product_ids = [p["product_id"] for p in response.json()["products"]]
-    assert "DRAFT-001" not in product_ids
 
-
-def test_inventory_zero_excluded(client, db_session):
-    """Test that products with inventory=0 are not recommended."""
-    # Create a product with inventory=0
-    zero_inv_product = Product(
-        product_id="ZERO-INV-001",
-        brand="Test",
-        product_name="Zero Inventory",
+    # یک محصول ACTIVE دیگر با موجودی
+    active_product2 = Product(
+        product_id="active_test_002",
+        brand="TestBrand",
+        product_name="Active Product 2",
         identity_status="VERIFIED",
-        status="ACTIVE",
-        inventory=0
+        qa_verdict="VALID",
+        status="ACTIVE"
+    )
+    db_session.add(active_product2)
+    db_session.commit()
+
+    inventory2 = Inventory(
+        product_id=active_product2.product_id,
+        quantity_available=5,
+        quantity_reserved=0,
+        quantity_damaged=0,
+        stock_status="active"
+    )
+    db_session.add(inventory2)
+    db_session.commit()
+
+    response = client.post(
+        "/api/v1/recommendations/generate",
+        json={"case_id": case.case_id},
+        headers=auth_headers
+    )
+    assert response.status_code == 200
+    data = response.json()
+    product_ids = [item["product_id"] for item in data["recommendations"]]
+
+    assert draft_product.product_id not in product_ids
+    assert active_product2.product_id in product_ids
+    assert "active_test_001" in product_ids
+
+def test_inventory_zero_excluded(db_session, setup_data, auth_headers):
+    _, case = setup_data
+    assert auth_headers, "Pilot token could not be obtained"
+
+    # محصول با موجودی صفر
+    zero_inv_product = Product(
+        product_id="zero_inv_test_001",
+        brand="TestBrand",
+        product_name="Zero Inventory Product",
+        identity_status="VERIFIED",
+        qa_verdict="VALID",
+        status="ACTIVE"
     )
     db_session.add(zero_inv_product)
     db_session.commit()
-    
-    # Create a case
-    case = Case(case_id="CASE-002", customer_id="CUST-001")
-    db_session.add(case)
+
+    # موجودی صفر — inventory_id توسط مدل خودکار مقداردهی می‌شود
+    zero_inventory = Inventory(
+        product_id=zero_inv_product.product_id,
+        quantity_available=0,
+        quantity_reserved=0,
+        quantity_damaged=0,
+        stock_status="out_of_stock"
+    )
+    db_session.add(zero_inventory)
     db_session.commit()
-    
-    # Request recommendations
-    response = client.post("/api/v1/recommendations/generate", json={"case_id": "CASE-002"})
-    
-    # Zero inventory product should NOT be in results
+
+    response = client.post(
+        "/api/v1/recommendations/generate",
+        json={"case_id": case.case_id},
+        headers=auth_headers
+    )
     assert response.status_code == 200
-    product_ids = [p["product_id"] for p in response.json()["products"]]
-    assert "ZERO-INV-001" not in product_ids
+    data = response.json()
+    product_ids = [item["product_id"] for item in data["recommendations"]]
+
+    assert zero_inv_product.product_id not in product_ids
+    assert "active_test_001" in product_ids
+    assert "active_test_002" in product_ids

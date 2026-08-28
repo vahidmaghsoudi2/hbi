@@ -1,4 +1,4 @@
-﻿from sqlalchemy import CheckConstraint, Column, DateTime, Float, String
+from sqlalchemy import CheckConstraint, Column, DateTime, Float, String
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.models.base import Base
@@ -48,8 +48,8 @@ class Product(Base):
     # Note: product_knowledge relationship intentionally removed.
     # ProductKnowledge links via product_id ForeignKey only (independent tables per Schema).
     evidences = relationship("Evidence", back_populates="product")
-    inventory = relationship("Inventory", back_populates="product", uselist=False)
     recommendations = relationship("Recommendation", back_populates="product")
     sale_items = relationship("SaleItem", back_populates="product")
     product_knowledge = relationship("ProductKnowledge", back_populates="product", uselist=False)
+
 
