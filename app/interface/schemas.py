@@ -272,3 +272,18 @@ class ConflictEntryResponse(BaseModel):
     evidence_ids: List[str] = []
     severity: str = "HIGH"
     status: str = "UNRESOLVED"
+
+class ProductCreate(BaseModel):
+    product_id: str
+    brand: str
+    product_name: str
+    variant: Optional[str] = None
+    size_value: Optional[float] = None
+    size_unit: Optional[str] = None
+    barcode_gtin: Optional[str] = None
+    market_region: Optional[str] = None
+    country_of_origin: Optional[str] = None
+    packaging_version: Optional[str] = None
+    identity_status: str = "NEEDS_REVIEW"
+    qa_verdict: str = "PENDING"
+    status: str = "DRAFT"
