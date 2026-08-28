@@ -287,3 +287,15 @@ class ProductCreate(BaseModel):
     identity_status: str = "NEEDS_REVIEW"
     qa_verdict: str = "PENDING"
     status: str = "DRAFT"
+
+class ProductUpdate(BaseModel):
+    identity_status: Optional[str] = None
+    status: Optional[str] = None
+    qa_verdict: Optional[str] = None
+    variant: Optional[str] = None
+    size_value: Optional[float] = None
+    size_unit: Optional[str] = None
+    barcode_gtin: Optional[str] = None
+    market_region: Optional[str] = None
+    country_of_origin: Optional[str] = None
+    packaging_version: Optional[str] = None
