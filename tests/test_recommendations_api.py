@@ -1,4 +1,4 @@
-"""API path: auth required + case ownership for recommendations."""
+﻿"""API path: auth required + case ownership for recommendations."""
 from pathlib import Path
 
 import pytest
@@ -51,6 +51,7 @@ def client(monkeypatch):
 
     app.dependency_overrides.clear()
     session.close()
+    database.engine.dispose()
     if TEST_DB.exists():
         TEST_DB.unlink()
 
@@ -79,3 +80,59 @@ def test_generate_owned_case_returns_list(client):
     )
     assert r.status_code == 200
     assert isinstance(r.json(), list)
+
+
+def test_draft_products_excluded(client, db_session):
+    """Test that DRAFT products are not recommended."""
+    # Create a DRAFT product
+    draft_product = Product(
+        product_id="DRAFT-001",
+        brand="Test",
+        product_name="Draft Product",
+        identity_status="VERIFIED",
+        status="DRAFT",
+        inventory=10
+    )
+    db_session.add(draft_product)
+    db_session.commit()
+    
+    # Create a case
+    case = Case(case_id="CASE-001", customer_id="CUST-001")
+    db_session.add(case)
+    db_session.commit()
+    
+    # Request recommendations
+    response = client.post("/api/v1/recommendations/generate", json={"case_id": "CASE-001"})
+    
+    # DRAFT product should NOT be in results
+    assert response.status_code == 200
+    product_ids = [p["product_id"] for p in response.json()["products"]]
+    assert "DRAFT-001" not in product_ids
+
+
+def test_inventory_zero_excluded(client, db_session):
+    """Test that products with inventory=0 are not recommended."""
+    # Create a product with inventory=0
+    zero_inv_product = Product(
+        product_id="ZERO-INV-001",
+        brand="Test",
+        product_name="Zero Inventory",
+        identity_status="VERIFIED",
+        status="ACTIVE",
+        inventory=0
+    )
+    db_session.add(zero_inv_product)
+    db_session.commit()
+    
+    # Create a case
+    case = Case(case_id="CASE-002", customer_id="CUST-001")
+    db_session.add(case)
+    db_session.commit()
+    
+    # Request recommendations
+    response = client.post("/api/v1/recommendations/generate", json={"case_id": "CASE-002"})
+    
+    # Zero inventory product should NOT be in results
+    assert response.status_code == 200
+    product_ids = [p["product_id"] for p in response.json()["products"]]
+    assert "ZERO-INV-001" not in product_ids

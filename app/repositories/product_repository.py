@@ -18,3 +18,11 @@ class ProductRepository(BaseRepository[Product]):
 
     def get_with_inventory(self, product_id: str):
         return self.db.query(Product).filter(Product.product_id == product_id).first()
+
+    def find_by_identity_status_and_active(self, identity_status: str) -> List[Product]:
+        """Find products with given identity_status, active status (not DRAFT), and positive inventory."""
+        return self.db.query(Product).filter(
+            Product.identity_status == identity_status,
+            Product.status != 'DRAFT',
+            Product.inventory > 0
+        ).all()
