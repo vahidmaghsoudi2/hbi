@@ -2,12 +2,9 @@
 
 | زمان | وضعیت | یادداشت |
 |------|--------|----------|
-| 2026-08-30 | Phase 0 شروع | Branch + Charter + Roadmap + Integration + Contract + Dictionary |
-| 2026-08-30 | PR #6 | در انتظار merge/نظر PO |
-| 2026-08-30 | تکمیل Phase 0 | Open Questions + Acceptance Outline |
-| 2026-08-30 | قرارداد Qwen1 | Recommendation-Data-Contract.md — Input `concerns`، No Hallucination، Do Not Touch |
+| 2026-08-30 | Phase 0 | اسناد + PR #6 |
+| 2026-08-30 | قرارداد Qwen1 | Recommendation-Data-Contract |
+| 2026-08-30 | تصمیم‌های باز | Decision-Log با دیدگاه مدیر گالری |
+| 2026-08-30 | کد additive | `build_recommendation_profile` + `register_guest` در CustomerService |
 
-**هدف فعلی:** رعایت قرارداد توصیه؛ توسعه Intake/Case بدون لمس scoring/seed.
-
-**Owner:** Grok1  
-**همکار Gate:** Qwen1 (Recommendation Lead)
+**هدف بعدی:** API/Intake برای concerns روی Case + تست یک مسیر Profile→generate بدون لمس scoring.
