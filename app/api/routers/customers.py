@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.deps import get_db, get_current_customer_id
 from app.interface.facades import CustomerFacade
 from app.services.customer_service import CustomerService
+from app.services.case_service import CaseService
 
 
 router = APIRouter()
@@ -35,6 +36,10 @@ class IntakeRequest(BaseModel):
     consent: int = 0
     skin_profile: Optional[str] = None
     guest: bool = False
+    open_case: bool = Field(
+        default=True,
+        description="اگر true باشد یک Case OPEN برای همین مشتری ساخته می‌شود",
+    )
 
 
 def _to_dict(obj):
@@ -84,7 +89,6 @@ async def register_guest(
     db: Session = Depends(get_db),
     _auth: str = Depends(get_current_customer_id),
 ):
-    """مشتری مهمان بدون موبایل — فقط واحد پروفایل."""
     svc = CustomerService(db)
     try:
         kwargs: Dict[str, Any] = {"consent_to_store_data": data.consent}
@@ -105,14 +109,13 @@ async def quick_intake(
 ):
     """
     Intake سریع گالری.
-    خروجی شامل recommendation_profile آماده برای
-    RecommendationFacade.generate(case_id, customer_profile).
+    برمی‌گرداند: customer + recommendation_profile + (اختیاری) case
+    آماده برای generate(case_id, recommendation_profile).
     """
     svc = CustomerService(db)
     mobile = data.mobile
     if mobile and mobile != customer_id and not data.guest:
-        # در حالت pilot-token گاهی customer_id همان موبایل است
-        if customer_id and not customer_id.startswith("CUST_"):
+        if customer_id and not str(customer_id).startswith("CUST_"):
             if mobile != customer_id:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
@@ -128,14 +131,35 @@ async def quick_intake(
             skin_profile=data.skin_profile,
             guest=data.guest or not mobile,
         )
-        db.commit()
         profile = svc.build_recommendation_profile(
             customer, concerns=data.concerns
         )
+
+        case_payload = None
+        if data.open_case:
+            # فقط فراخوانی CaseService — فایل‌های واحد cases ویرایش نمی‌شوند
+            case = CaseService(db).create_case(
+                customer_id=customer.customer_id,
+                case_type="OPEN",
+            )
+            case_payload = {
+                "case_id": case.case_id,
+                "customer_id": case.customer_id,
+                "case_type": case.case_type,
+            }
+
+        db.commit()
         return {
             "customer": _customer_public(customer),
+            "case": case_payload,
             "recommendation_profile": profile,
-            "next_step": "ایجاد Case با customer_id سپس generate(case_id, recommendation_profile)",
+            "generate_hint": {
+                "path": "POST /api/v1/recommendations/generate",
+                "body": {
+                    "case_id": case_payload["case_id"] if case_payload else "<case_id>",
+                    "customer_profile": profile,
+                },
+            },
         }
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
@@ -147,13 +171,9 @@ async def get_recommendation_profile(
     customer_id: str = Depends(get_current_customer_id),
     concerns: Optional[str] = None,
 ):
-    """
-    دیکشنری آماده قرارداد Qwen1.
-    اگر customer_id از نوع CUST_* باشد از روی id؛ وگرنه جست‌وجوی موبایل.
-    """
     svc = CustomerService(db)
     customer = None
-    if customer_id.startswith("CUST_"):
+    if str(customer_id).startswith("CUST_"):
         customer = svc.get_by_id(customer_id)
     else:
         customer = svc.find_by_mobile(customer_id)
