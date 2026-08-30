@@ -158,7 +158,7 @@ class RecommendationFacade:
         self.service = RecommendationService(db)
 
     def generate(self, case_id: str, customer_profile: Dict) -> List[RecommendationDTO]:
-        recommendations = self.service.generate_recommendations(case_id, customer_profile)
+        recommendations = self.service.generate_recommendations(case_id, customer_profile or {})
         return [_to_recommendation_dto(r, self.db) for r in recommendations]
 
     def find_by_case(self, case_id: str) -> List[RecommendationDTO]:
@@ -303,3 +303,4 @@ class ProductKnowledgeFacade:
             created_at=knowledge.created_at,
             updated_at=knowledge.updated_at
         )
+
