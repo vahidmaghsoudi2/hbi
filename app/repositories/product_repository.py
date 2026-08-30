@@ -1,6 +1,7 @@
 from typing import List
 from sqlalchemy.orm import Session
 from app.models.product import Product
+from app.models.inventory import Inventory
 from app.repositories.base import BaseRepository
 
 class ProductRepository(BaseRepository[Product]):
@@ -21,8 +22,10 @@ class ProductRepository(BaseRepository[Product]):
 
     def find_by_identity_status_and_active(self, identity_status: str) -> List[Product]:
         """Find products with given identity_status, active status (not DRAFT), and positive inventory."""
-        return self.db.query(Product).filter(
+        return self.db.query(Product).join(
+            Inventory, Product.product_id == Inventory.product_id
+        ).filter(
             Product.identity_status == identity_status,
             Product.status != 'DRAFT',
-            Product.inventory > 0
+            Inventory.quantity_available > 0
         ).all()
