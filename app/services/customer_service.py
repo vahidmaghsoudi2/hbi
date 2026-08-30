@@ -4,6 +4,12 @@ from app.models.customer import Customer
 from app.repositories.customer_repository import CustomerRepository
 from app.services.base import BaseService
 from datetime import datetime
+import uuid
+
+
+def _new_customer_id(prefix: str = "CUST") -> str:
+    """شناسه یکتا حتی در ثبت‌های هم‌ثانیه (تست و گالری شلوغ)."""
+    return f"{prefix}_{datetime.now().strftime('%Y%m%d%H%M%S%f')}_{uuid.uuid4().hex[:6]}"
 
 
 class CustomerService(BaseService[Customer, CustomerRepository]):
@@ -36,7 +42,7 @@ class CustomerService(BaseService[Customer, CustomerRepository]):
             kwargs["consent_date"] = datetime.now()
 
         customer = self.create(
-            customer_id=f"CUST_{datetime.now().strftime('%Y%m%d%H%M%S')}",
+            customer_id=_new_customer_id("CUST"),
             name=name,
             mobile=mobile,
             **kwargs,
@@ -52,7 +58,7 @@ class CustomerService(BaseService[Customer, CustomerRepository]):
         if consent == 1 and "consent_date" not in kwargs:
             kwargs["consent_date"] = datetime.now()
         return self.create(
-            customer_id=f"CUST_GUEST_{datetime.now().strftime('%Y%m%d%H%M%S')}",
+            customer_id=_new_customer_id("CUST_GUEST"),
             name=name or "مهمان",
             mobile=None,
             **kwargs,
@@ -68,11 +74,7 @@ class CustomerService(BaseService[Customer, CustomerRepository]):
         skin_profile: Optional[str] = None,
         guest: bool = False,
     ) -> Customer:
-        """
-        ثبت سریع گالری (≤۹۰ ثانیه هدف):
-        نام + (موبایل یا مهمان) + نگرانی امروز + رضایت.
-        اگر موبایل از قبل باشد، همان مشتری به‌روز می‌شود (concerns جلسه).
-        """
+        """ثبت سریع گالری: نام + موبایل/مهمان + نگرانی امروز + رضایت."""
         if consent not in (0, 1):
             raise ValueError("consent must be 0 or 1")
 

@@ -2,14 +2,10 @@
 
 | زمان | وضعیت |
 |------|--------|
-| Phase 0 + قرارداد Qwen1 | انجام |
-| Decision-Log گالری | انجام |
-| Service: guest / intake / profile | انجام |
-| API: /guest /intake /recommendation-profile | انجام |
-| intake + open_case | انجام |
-| تست واحد + smoke مسیر گالری | انجام |
-| راهنمای فروشنده | Gallery-Operator-Guide.md |
+| Phase 0 + قرارداد + API + راهنما | انجام |
+| تست واحد | ۲ fail به‌خاطر collision شناسه ثانیه‌ای |
+| fix کیفیت | customer_id = timestamp میکروثانیه + uuid کوتاه |
+
+**تصمیم مدیریتی (Grok1 به‌نیابت PO):** تا سبز شدن تست واحد، merge به master انجام نمی‌شود.
 
 **Branch:** feature/customer-profile-unit · **PR:** #6
-
-**بعدی پیشنهادی:** merge پس از تأیید PO · سپس در صورت نیاز بهبود Auth مهمان بدون دست زدن به recommendation.
