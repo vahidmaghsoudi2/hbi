@@ -89,3 +89,10 @@ export interface CustomerIntakeRequest {
   guest?: boolean;
   open_case?: boolean;
 }
+
+/** Guest create request (POST /api/v1/customers/guest) */
+export interface GuestCreateRequest {
+  name: string;
+  consent: number;
+  concerns?: string;
+}

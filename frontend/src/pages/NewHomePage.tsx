@@ -1,13 +1,11 @@
 ﻿import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { listProducts, pilotToken, customerIntake } from "../api/client";
-import type { ProductDTO, PilotTokenRequest, CustomerIntakeRequest } from "../types/api";
+import { listProducts, pilotToken, customerIntake, createGuest } from "../api/client";
+import type { ProductDTO, PilotTokenRequest, CustomerIntakeRequest, GuestCreateRequest } from "../types/api";
 
 export default function NewHomePage() {
   const [token, setToken] = useState<string | null>(() => sessionStorage.getItem("hbi_access_token"));
-  const [customerId, setCustomerId] = useState("");
-  const [tokenError, setTokenError] = useState<string | null>(null);
-  const [tokenBusy, setTokenBusy] = useState(false);
+  const [customerId, setCustomerId] = useState<string | null>(() => sessionStorage.getItem("hbi_customer_id"));
 
   const [name, setName] = useState("");
   const [concerns, setConcerns] = useState("");
@@ -31,36 +29,53 @@ export default function NewHomePage() {
     return () => { cancelled = true; };
   }, []);
 
-  const handleGetToken = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setTokenError(null);
-    setTokenBusy(true);
-    try {
-      const body: PilotTokenRequest = { customer_id: customerId.trim() };
-      const resp = await pilotToken(body);
-      sessionStorage.setItem("hbi_access_token", resp.access_token);
-      sessionStorage.setItem("hbi_refresh_token", resp.refresh_token);
-      setToken(resp.access_token);
-    } catch (e) {
-      setTokenError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setTokenBusy(false);
-    }
-  };
-
   const handleIntake = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token) { setIntakeError("ابتدا توکن دریافت کنید."); return; }
     setIntakeError(null);
     setIntakeBusy(true);
     try {
-      const body: CustomerIntakeRequest = {
+      let currentToken = token;
+      let currentCustomerId = customerId;
+
+      if (!currentToken) {
+        // ابتدا ساخت مهمان
+        const guestBody: GuestCreateRequest = {
+          name: name.trim(),
+          consent: 1,
+          concerns: concerns.trim(),
+        };
+        const guestResult: any = await createGuest(guestBody);
+        if (!guestResult?.customer_id) {
+          throw new Error("ساخت مهمان ناموفق بود.");
+        }
+        currentCustomerId = guestResult.customer_id;
+        sessionStorage.setItem("hbi_customer_id", currentCustomerId);
+        setCustomerId(currentCustomerId);
+
+        // دریافت توکن با customer_id مهمان
+        const tokenBody: PilotTokenRequest = { customer_id: currentCustomerId };
+        const tokenResp = await pilotToken(tokenBody);
+        sessionStorage.setItem("hbi_access_token", tokenResp.access_token);
+        sessionStorage.setItem("hbi_refresh_token", tokenResp.refresh_token);
+        currentToken = tokenResp.access_token;
+        setToken(currentToken);
+      }
+
+      // ثبت مراجعه
+      const intakeBody: CustomerIntakeRequest = {
         name: name.trim(),
         concerns: concerns.trim(),
         consent: 1,
         open_case: true,
       };
-      const result = await customerIntake(body, token);
+      const result: any = await customerIntake(intakeBody, currentToken);
+      if (result?.case?.case_id) {
+        sessionStorage.setItem("hbi_case_id", result.case.case_id);
+        if (result?.customer?.customer_id) {
+          sessionStorage.setItem("hbi_customer_id", result.customer.customer_id);
+          setCustomerId(result.customer.customer_id);
+        }
+      }
       setIntakeResult(result);
     } catch (e) {
       setIntakeError(e instanceof Error ? e.message : String(e));
@@ -77,30 +92,9 @@ export default function NewHomePage() {
         <div className="trust-strip">پشتیبانی‌شده توسط شواهد علمی واقعی</div>
       </div>
 
-      {!token && (
+      {!intakeResult && (
         <div className="card">
-          <h2>شروع سریع (Pilot)</h2>
-          <p>برای استفاده از امکانات، ابتدا یک توکن آزمایشی دریافت کنید.</p>
-          <form onSubmit={handleGetToken}>
-            <label htmlFor="customer_id">شناسه مشتری</label>
-            <input
-              id="customer_id"
-              value={customerId}
-              onChange={(e) => setCustomerId(e.target.value)}
-              placeholder="مثلاً CUST-123"
-              required
-            />
-            <button type="submit" disabled={tokenBusy}>
-              {tokenBusy ? "..." : "دریافت توکن"}
-            </button>
-            {tokenError && <div className="alert error">{tokenError}</div>}
-          </form>
-        </div>
-      )}
-
-      {token && !intakeResult && (
-        <div className="card">
-          <h2>چه کمکی نیاز دارید؟</h2>
+          <h2>شروع مراجعه</h2>
           <p>اطلاعات خود را وارد کنید تا مسیر توصیه آغاز شود.</p>
           <form onSubmit={handleIntake}>
             <label htmlFor="name">نام</label>
@@ -143,7 +137,7 @@ export default function NewHomePage() {
       <div className="card">
         <h2>مشاوره انسانی</h2>
         <p>در صورت نیاز به بررسی تخصصی، با مشاور ما در ارتباط باشید.</p>
-        <a className="btn secondary" href="#" onClick={(e) => e.preventDefault()}>درخواست مشاوره</a>
+        <a className="btn secondary" href="mailto:consultation@hbi.local">درخواست مشاوره</a>
       </div>
     </section>
   );

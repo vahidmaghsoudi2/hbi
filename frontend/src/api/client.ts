@@ -6,6 +6,7 @@ import type {
   CaseCreateRequest,
   CaseDTO,
   CustomerIntakeRequest,
+  GuestCreateRequest,
   PilotTokenRequest,
   ProductDTO,
   RecommendationDTO,
@@ -99,4 +100,14 @@ export function customerIntake(
     { method: "POST", body: JSON.stringify(body) },
     token
   );
+}
+
+/** Guest creation — no auth required (public) */
+export function createGuest(
+  body: GuestCreateRequest
+): Promise<unknown> {
+  return request<unknown>("/customers/guest", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
 }
