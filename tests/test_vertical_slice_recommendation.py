@@ -13,7 +13,10 @@ TEST_DB = Path(__file__).resolve().parents[1] / "data" / "hbi_vertical_slice_tes
 @pytest.fixture()
 def db_session(monkeypatch):
     if TEST_DB.exists():
-        TEST_DB.unlink()
+        try:
+            TEST_DB.unlink()
+        except PermissionError:
+            pass  # Ignore Windows file lock
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{TEST_DB}")
 
     import importlib
@@ -37,8 +40,15 @@ def db_session(monkeypatch):
     session.commit()
     yield session
     session.close()
+    try:
+        database.engine.dispose()
+    except Exception:
+        pass
     if TEST_DB.exists():
-        TEST_DB.unlink()
+        try:
+            TEST_DB.unlink()
+        except PermissionError:
+            pass  # Ignore Windows file lock
 
 
 def test_seed_products_and_evidence(db_session):
