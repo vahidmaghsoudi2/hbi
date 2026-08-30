@@ -1,10 +1,11 @@
-/**
+﻿/**
  * Minimal HBI API client — endpoints only as present on backend.
  * Base path: /api/v1
  */
 import type {
   CaseCreateRequest,
   CaseDTO,
+  CustomerIntakeRequest,
   PilotTokenRequest,
   ProductDTO,
   RecommendationDTO,
@@ -84,6 +85,18 @@ export function listRecommendationsByCase(
   return request<RecommendationDTO[]>(
     `/recommendations/case/${caseId}`,
     {},
+    token
+  );
+}
+
+/** Customer Intake — requires auth */
+export function customerIntake(
+  body: CustomerIntakeRequest,
+  token: string
+): Promise<unknown> {
+  return request<unknown>(
+    "/customers/intake",
+    { method: "POST", body: JSON.stringify(body) },
     token
   );
 }

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * HBI Frontend API contracts — aligned with backend HEAD.
  * Source of Truth: FastAPI routers + app/interface/dto.py
  * Do not invent endpoints or fields not present on the backend.
@@ -19,7 +19,6 @@ export interface PilotTokenRequest {
 /** POST /api/v1/cases/ body (backend CaseCreateRequest) */
 export interface CaseCreateRequest {
   customer_id: string;
-  /** defaults to "OPEN" on backend if omitted */
   case_type?: string;
 }
 
@@ -78,4 +77,15 @@ export interface ProductDTO {
   size_value?: number | null;
   size_unit?: string | null;
   [key: string]: unknown;
+}
+
+/** Customer intake request (POST /api/v1/customers/intake) */
+export interface CustomerIntakeRequest {
+  name: string;
+  mobile?: string;
+  concerns?: string;
+  consent: number;
+  skin_profile?: unknown;
+  guest?: boolean;
+  open_case?: boolean;
 }
