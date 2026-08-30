@@ -1,6 +1,6 @@
-from typing import Optional, Any, Dict
+from typing import Optional, Any, Dict, List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -61,6 +61,13 @@ def _customer_public(c) -> Dict[str, Any]:
     }
 
 
+def _looks_like_mobile(value: Optional[str]) -> bool:
+    if not value:
+        return False
+    digits = "".join(ch for ch in value if ch.isdigit())
+    return len(digits) >= 10
+
+
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def register_customer(
     data: CustomerCreateRequest,
@@ -114,13 +121,20 @@ async def quick_intake(
     """
     svc = CustomerService(db)
     mobile = data.mobile
-    if mobile and mobile != customer_id and not data.guest:
-        if customer_id and not str(customer_id).startswith("CUST_"):
-            if mobile != customer_id:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Customer identity mismatch",
-                )
+
+    # اگر هر دو طرف شبیه موبایل باشند و فرق کنند → رد
+    # در غیر این صورت (توکن اپراتور/pilot) اجازه ثبت مشتری گالری
+    if (
+        mobile
+        and not data.guest
+        and _looks_like_mobile(mobile)
+        and _looks_like_mobile(customer_id)
+        and mobile != customer_id
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Customer identity mismatch",
+        )
 
     try:
         customer = svc.record_intake(
@@ -137,7 +151,6 @@ async def quick_intake(
 
         case_payload = None
         if data.open_case:
-            # فقط فراخوانی CaseService — فایل‌های واحد cases ویرایش نمی‌شوند
             case = CaseService(db).create_case(
                 customer_id=customer.customer_id,
                 case_type="OPEN",
@@ -186,25 +199,55 @@ async def get_recommendation_profile(
     }
 
 
+@router.get("/search")
+async def search_customers_by_name(
+    q: str = Query(..., min_length=1, description="بخشی از نام مشتری"),
+    db: Session = Depends(get_db),
+    _auth: str = Depends(get_current_customer_id),
+) -> List[Dict[str, Any]]:
+    """جست‌وجوی سریع مشتری قبلی برای فروشنده گالری (≤۱۵ ثانیه هدف)."""
+    svc = CustomerService(db)
+    found = svc.find_by_name(q.strip())
+    return [_customer_public(c) for c in found[:20]]
+
+
+@router.get("/id/{target_customer_id}")
+async def get_customer_by_id(
+    target_customer_id: str,
+    db: Session = Depends(get_db),
+    _auth: str = Depends(get_current_customer_id),
+):
+    svc = CustomerService(db)
+    customer = svc.get_by_id(target_customer_id)
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    return _customer_public(customer)
+
+
 @router.get("/mobile/{mobile}")
 async def find_customer_by_mobile(
     mobile: str,
     db: Session = Depends(get_db),
     customer_id: str = Depends(get_current_customer_id),
 ):
-    if mobile != customer_id:
+    # فروشنده با توکن غیرموبایلی می‌تواند با موبایل جستجو کند
+    if _looks_like_mobile(customer_id) and mobile != customer_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied",
         )
 
     facade = CustomerFacade(db)
-    customer = facade.find_by_mobile(mobile)
+    try:
+        customer = facade.find_by_mobile(mobile)
+    except Exception:
+        customer = None
 
     if not customer:
-        raise HTTPException(
-            status_code=404,
-            detail="Customer not found",
-        )
+        svc = CustomerService(db)
+        raw = svc.find_by_mobile(mobile)
+        if not raw:
+            raise HTTPException(status_code=404, detail="Customer not found")
+        return _customer_public(raw)
 
     return _to_dict(customer)
