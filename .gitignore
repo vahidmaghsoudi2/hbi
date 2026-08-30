@@ -74,3 +74,15 @@ github_report*.json
 test_github*.ps1
 test_token*.py
 *.log
+
+HOME_FORENSIC.txt
+
+HOME_RECOVERY.txt
+
+RECOVERY_SCAN.txt
+
+test_mission_e2e_final.py
+
+frontend/build_output.txt
+
+frontend/package-lock.json

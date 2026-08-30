@@ -1,4 +1,4 @@
-# HBI Home Page Architecture Decision Record (ADR)
+﻿# HBI Home Page Architecture Decision Record (ADR)
 
 **Status:** APPROVED  
 **Date:** 5 Shahrivar 1405 (2026-08-27)  
