@@ -1,6 +1,8 @@
 from typing import Optional, Any, Dict, List
+from collections import defaultdict
+import time
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -11,6 +13,11 @@ from app.services.case_service import CaseService
 
 
 router = APIRouter()
+
+# Public guest bootstrap rate limit (process-local; Pilot hardening)
+_guest_rate_limit: Dict[str, List[float]] = defaultdict(list)
+_GUEST_RATE_WINDOW = 60  # seconds
+_GUEST_RATE_MAX = 10
 
 
 class CustomerCreateRequest(BaseModel):
@@ -68,6 +75,32 @@ def _looks_like_mobile(value: Optional[str]) -> bool:
     return len(digits) >= 10
 
 
+def _guest_client_ip(request: Request) -> str:
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    if request.client and request.client.host:
+        return request.client.host
+    return "unknown"
+
+
+def _enforce_guest_rate_limit(request: Request) -> None:
+    """IP-based limit for public POST /guest — max 10 per 60s."""
+    client_ip = _guest_client_ip(request)
+    now = time.time()
+    window = _GUEST_RATE_WINDOW
+    recent = [
+        t for t in _guest_rate_limit[client_ip] if now - t < window
+    ]
+    if len(recent) >= _GUEST_RATE_MAX:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many guest registration requests. Try again later.",
+        )
+    recent.append(now)
+    _guest_rate_limit[client_ip] = recent
+
+
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def register_customer(
     data: CustomerCreateRequest,
@@ -93,9 +126,16 @@ async def register_customer(
 @router.post("/guest", status_code=status.HTTP_201_CREATED)
 async def register_guest(
     data: GuestCreateRequest,
+    request: Request,
     db: Session = Depends(get_db),
-    _auth: str = Depends(get_current_customer_id),
 ):
+    """Public guest bootstrap for Home Front Door (no JWT).
+
+    Rate-limited by client IP (10 req / 60s). Enables:
+    createGuest → pilot-token → intake without auth chicken-and-egg.
+    """
+    _enforce_guest_rate_limit(request)
+
     svc = CustomerService(db)
     try:
         kwargs: Dict[str, Any] = {"consent_to_store_data": data.consent}
