@@ -19,6 +19,9 @@ class CustomerService(BaseService[Customer, CustomerRepository]):
     def get_with_cases(self, customer_id: str) -> Optional[Customer]:
         return self.repository.get_with_cases(customer_id)
 
+    def get_by_id(self, customer_id: str) -> Optional[Customer]:
+        return self.repository.get_by_id(customer_id)
+
     def register_customer(self, name: str, mobile: Optional[str] = None, **kwargs) -> Customer:
         if mobile:
             existing = self.find_by_mobile(mobile)
@@ -41,7 +44,7 @@ class CustomerService(BaseService[Customer, CustomerRepository]):
         return customer
 
     def register_guest(self, name: str = "مهمان", **kwargs) -> Customer:
-        """مشتری بدون موبایل — برای فروش/مشاوره سریع گالری."""
+        """مشتری بدون موبایل — فروش/مشاوره سریع گالری."""
         kwargs.pop("mobile", None)
         consent = kwargs.get("consent_to_store_data", 0)
         if consent not in (0, 1):
@@ -55,6 +58,42 @@ class CustomerService(BaseService[Customer, CustomerRepository]):
             **kwargs,
         )
 
+    def record_intake(
+        self,
+        *,
+        name: str,
+        mobile: Optional[str] = None,
+        concerns: Optional[str] = None,
+        consent: int = 0,
+        skin_profile: Optional[str] = None,
+        guest: bool = False,
+    ) -> Customer:
+        """
+        ثبت سریع گالری (≤۹۰ ثانیه هدف):
+        نام + (موبایل یا مهمان) + نگرانی امروز + رضایت.
+        اگر موبایل از قبل باشد، همان مشتری به‌روز می‌شود (concerns جلسه).
+        """
+        if consent not in (0, 1):
+            raise ValueError("consent must be 0 or 1")
+
+        fields: Dict[str, Any] = {}
+        if concerns is not None:
+            fields["concerns"] = concerns
+        if skin_profile is not None:
+            fields["skin_profile"] = skin_profile
+        fields["consent_to_store_data"] = consent
+        if consent == 1:
+            fields["consent_date"] = datetime.now()
+
+        if guest or not mobile:
+            return self.register_guest(name=name, **fields)
+
+        existing = self.find_by_mobile(mobile)
+        if existing:
+            return self.repository.update(existing.customer_id, **fields) or existing
+
+        return self.register_customer(name=name, mobile=mobile, **fields)
+
     def build_recommendation_profile(
         self,
         customer: Optional[Customer] = None,
@@ -62,14 +101,7 @@ class CustomerService(BaseService[Customer, CustomerRepository]):
         concerns: Optional[Any] = None,
         extra: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
-        """
-        ساخت customer_profile مطابق قرارداد Qwen1 برای RecommendationFacade.generate.
-
-        اولویت concerns:
-        1) آرگومان صریح concerns (پاسخ همین جلسه)
-        2) customer.concerns ذخیره‌شده
-        3) رشته خالی (موتور fallback امن دارد)
-        """
+        """customer_profile برای RecommendationFacade.generate — قرارداد Qwen1."""
         profile: Dict[str, Any] = {}
         if customer is not None:
             if customer.skin_profile:
