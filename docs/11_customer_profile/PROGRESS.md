@@ -4,9 +4,10 @@
 |------|--------|----------|
 | 2026-08-30 | Phase 0 شروع | Branch + Charter + Roadmap + Integration + Contract + Dictionary |
 | 2026-08-30 | PR #6 | در انتظار merge/نظر PO |
-| 2026-08-30 | تکمیل Phase 0 | Open Questions + Acceptance Outline + این Progress log |
+| 2026-08-30 | تکمیل Phase 0 | Open Questions + Acceptance Outline |
+| 2026-08-30 | قرارداد Qwen1 | Recommendation-Data-Contract.md — Input `concerns`، No Hallucination، Do Not Touch |
 
-**هدف فعلی:** بستن Phase 0 بدون شکستن Pilot؛ آماده‌سازی برای Phase 2 Backend حداقلی پس از تأیید.
+**هدف فعلی:** رعایت قرارداد توصیه؛ توسعه Intake/Case بدون لمس scoring/seed.
 
 **Owner:** Grok1  
-**قانون:** Product A–D / Seed / Scoring منجمد؛ Fact فقط با تأیید مشتری.
+**همکار Gate:** Qwen1 (Recommendation Lead)
