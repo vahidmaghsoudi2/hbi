@@ -1,21 +1,15 @@
 # گزارش پیشرفت واحد پروفایل مشتری
 
-| زمان | وضعیت | یادداشت |
-|------|--------|----------|
-| 2026-08-30 | خودارزیابی | مسیر درست؛ هدف واضح؛ بدون خرابکاری واحدهای دیگر |
-| 2026-08-30 | Intake کامل‌تر | open_case=true → case_id + recommendation_profile یکجا |
+| زمان | وضعیت |
+|------|--------|
+| Phase 0 + قرارداد Qwen1 | انجام |
+| Decision-Log گالری | انجام |
+| Service: guest / intake / profile | انجام |
+| API: /guest /intake /recommendation-profile | انجام |
+| intake + open_case | انجام |
+| تست واحد + smoke مسیر گالری | انجام |
+| راهنمای فروشنده | Gallery-Operator-Guide.md |
 
-**جریان فروشنده گالری (یک شات):**
-```
-POST /api/v1/customers/intake
-  { name, mobile?, concerns, consent, open_case: true }
-→
-{
-  customer,
-  case: { case_id },
-  recommendation_profile: { concerns },
-  generate_hint → POST /recommendations/generate
-}
-```
+**Branch:** feature/customer-profile-unit · **PR:** #6
 
-**محدوده:** فقط `customers` router/service + docs + تست واحد پروفایل.
+**بعدی پیشنهادی:** merge پس از تأیید PO · سپس در صورت نیاز بهبود Auth مهمان بدون دست زدن به recommendation.

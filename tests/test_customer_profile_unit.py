@@ -2,6 +2,7 @@
 import pytest
 from app.database import SessionLocal, init_db
 from app.services.customer_service import CustomerService
+from app.services.case_service import CaseService
 
 
 @pytest.fixture()
@@ -62,3 +63,19 @@ def test_empty_profile_still_has_concerns_key(db):
     profile = svc.build_recommendation_profile(None)
     assert "concerns" in profile
     assert profile["concerns"] == ""
+
+
+def test_gallery_flow_customer_case_profile(db):
+    """مسیر گالری: مشتری → Case → profile برای generate."""
+    svc = CustomerService(db)
+    c = svc.record_intake(
+        name="مینا",
+        mobile="09129990003",
+        concerns="ضدآفتاب, پوست چرب",
+        consent=1,
+    )
+    case = CaseService(db).create_case(customer_id=c.customer_id, case_type="OPEN")
+    profile = svc.build_recommendation_profile(c)
+    assert case.customer_id == c.customer_id
+    assert case.case_id.startswith("CASE_")
+    assert profile["concerns"] == "ضدآفتاب, پوست چرب"
