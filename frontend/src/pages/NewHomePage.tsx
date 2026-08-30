@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { listProducts, pilotToken, customerIntake, createGuest } from "../api/client";
+import { listProducts, pilotToken, customerIntake, createGuest, getProductEvidence } from "../api/client";
 import type { ProductDTO, PilotTokenRequest, CustomerIntakeRequest, GuestCreateRequest } from "../types/api";
 
 export default function NewHomePage() {
@@ -15,13 +15,32 @@ export default function NewHomePage() {
 
   const [product, setProduct] = useState<ProductDTO | null>(null);
   const [productError, setProductError] = useState<string | null>(null);
+  const [evidenceSummary, setEvidenceSummary] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const products = await listProducts();
-        if (!cancelled && products.length > 0) setProduct(products[0]);
+        if (!cancelled && products.length > 0) {
+          setProduct(products[0]);
+          const currentToken = sessionStorage.getItem("hbi_access_token");
+          if (currentToken) {
+            try {
+              const evidence = await getProductEvidence(products[0].product_id, currentToken);
+              if (!cancelled) {
+                if (Array.isArray(evidence)) {
+                  const count = evidence.length;
+                  setEvidenceSummary(`${count} evidence item(s) found`);
+                } else {
+                  setEvidenceSummary("Evidence available");
+                }
+              }
+            } catch {
+              // ignore evidence errors
+            }
+          }
+        }
       } catch (e) {
         if (!cancelled) setProductError(e instanceof Error ? e.message : String(e));
       }
@@ -38,7 +57,6 @@ export default function NewHomePage() {
       let currentCustomerId = customerId;
 
       if (!currentToken) {
-        // ابتدا ساخت مهمان
         const guestBody: GuestCreateRequest = {
           name: name.trim(),
           consent: 1,
@@ -52,7 +70,6 @@ export default function NewHomePage() {
         sessionStorage.setItem("hbi_customer_id", currentCustomerId);
         setCustomerId(currentCustomerId);
 
-        // دریافت توکن با customer_id مهمان
         const tokenBody: PilotTokenRequest = { customer_id: currentCustomerId };
         const tokenResp = await pilotToken(tokenBody);
         sessionStorage.setItem("hbi_access_token", tokenResp.access_token);
@@ -61,7 +78,9 @@ export default function NewHomePage() {
         setToken(currentToken);
       }
 
-      // ثبت مراجعه
+      // ذخیره concerns در sessionStorage
+      sessionStorage.setItem("hbi_concerns", concerns.trim());
+
       const intakeBody: CustomerIntakeRequest = {
         name: name.trim(),
         concerns: concerns.trim(),
@@ -129,6 +148,11 @@ export default function NewHomePage() {
             <small>شناسه: {product.product_id}</small>
             <br />
             <small>وضعیت: {product.identity_status} | QA: {product.qa_verdict}</small>
+            {evidenceSummary && (
+              <div className="evidence-summary">
+                <small>{evidenceSummary}</small>
+              </div>
+            )}
           </div>
         )}
         <p><Link to="/catalog">مشاهده کاتالوگ کامل</Link></p>

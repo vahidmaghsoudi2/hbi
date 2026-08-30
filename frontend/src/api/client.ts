@@ -111,3 +111,11 @@ export function createGuest(
     body: JSON.stringify(body),
   });
 }
+
+/** Get product evidence — requires auth */
+export function getProductEvidence(
+  productId: string,
+  token: string
+): Promise<unknown> {
+  return request<unknown>(`/evidence/?product_id=${productId}`, {}, token);
+}
