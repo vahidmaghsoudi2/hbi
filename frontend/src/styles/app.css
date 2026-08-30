@@ -101,3 +101,10 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 .step.active { border-color: var(--accent); color: var(--accent); background: rgba(61,156,240,0.1); }
 .step.done { border-color: var(--accent-2); color: var(--accent-2); }
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
