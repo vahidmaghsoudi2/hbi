@@ -1,5 +1,5 @@
-﻿/* ============================================================
-   ROOT VARIABLES
+/* ============================================================
+   HBI Home — گالری مقصودی (RTL digital front door)
    ============================================================ */
 :root {
   --color-bg: #faf8f5;
@@ -8,9 +8,9 @@
   --color-cta: #8b7a5c;
   --color-card: #ffffff;
   --color-border: #e5e0d6;
-  --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --spacing-section: 5rem;
-  --spacing-element: 1.5rem;
+  --color-muted: #5a554a;
+  --font-sans: "Segoe UI", system-ui, -apple-system, "Tahoma", sans-serif;
+  --spacing-section: 4.5rem;
 }
 
 * {
@@ -28,25 +28,24 @@ body {
   color: var(--color-text);
   font-family: var(--font-sans);
   direction: rtl;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 1.5rem;
 }
 
-/* ============================================================
-   HEADER
-   ============================================================ */
+/* Header */
 .header {
-  padding: 1.25rem 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-  background-color: var(--color-bg);
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  background: rgba(250, 248, 245, 0.92);
+  backdrop-filter: blur(8px);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 20;
 }
 
 .header-inner {
@@ -54,408 +53,419 @@ body {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.75rem 1.25rem;
 }
 
 .brand {
-  font-size: 1.3rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  color: var(--color-text);
+  font-size: 1.2rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
 }
 
 .nav {
   display: flex;
-  gap: 2rem;
+  flex-wrap: wrap;
+  gap: 1.25rem;
 }
 
 .nav a {
   color: var(--color-text);
   text-decoration: none;
-  font-size: 0.95rem;
-  transition: color 0.2s;
+  font-size: 0.92rem;
+  opacity: 0.85;
 }
 
 .nav a:hover {
   color: var(--color-accent);
+  opacity: 1;
 }
 
-.cta-primary {
+.cta-primary,
+.cta-hero,
+.cta-consult {
   background: var(--color-cta);
   color: #fff;
   border: none;
-  padding: 0.5rem 1.8rem;
-  border-radius: 0.25rem;
+  padding: 0.55rem 1.5rem;
+  border-radius: 999px;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: opacity 0.2s;
+  text-decoration: none;
+  display: inline-block;
+  font-family: inherit;
+  transition: opacity 0.2s, transform 0.15s;
 }
 
-.cta-primary:hover {
-  opacity: 0.85;
+.cta-primary:hover,
+.cta-hero:hover,
+.cta-consult:hover {
+  opacity: 0.9;
 }
 
-/* ============================================================
-   HERO
-   ============================================================ */
+.cta-consult:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Hero */
 .hero {
-  padding: 5rem 0 4rem;
+  padding: 4.5rem 0 3.25rem;
   text-align: center;
 }
 
 .hero h1 {
-  font-size: 3.2rem;
-  font-weight: 300;
-  line-height: 1.2;
-  margin-bottom: 1.2rem;
+  font-size: clamp(1.85rem, 4.5vw, 2.85rem);
+  font-weight: 320;
+  line-height: 1.25;
+  margin-bottom: 1rem;
   letter-spacing: -0.02em;
 }
 
 .hero-subtitle {
-  font-size: 1.2rem;
-  color: #5a554a;
-  margin-bottom: 2.5rem;
+  font-size: 1.08rem;
+  color: var(--color-muted);
+  margin-bottom: 2rem;
+  max-width: 36rem;
+  margin-inline: auto;
 }
 
 .hero-actions {
   display: flex;
   justify-content: center;
-  gap: 1.2rem;
+  gap: 0.85rem;
   flex-wrap: wrap;
-}
-
-.cta-hero {
-  background: var(--color-accent);
-  color: #fff;
-  border: none;
-  padding: 0.75rem 2.8rem;
-  border-radius: 0.25rem;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.cta-hero:hover {
-  background: #5a6b4c;
 }
 
 .cta-hero-secondary {
   background: transparent;
   color: var(--color-text);
   border: 1px solid var(--color-border);
-  padding: 0.75rem 2.8rem;
-  border-radius: 0.25rem;
-  font-size: 1.1rem;
+  padding: 0.55rem 1.4rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.2s;
+  font-family: inherit;
 }
 
 .cta-hero-secondary:hover {
-  background: #f0ede7;
+  border-color: var(--color-accent);
 }
 
-/* ============================================================
-   TRUST STRIP
-   ============================================================ */
+/* Trust */
 .trust {
-  padding: 2.5rem 0;
-  background: #f5f2ec;
+  padding: 1.5rem 0 2rem;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  background: #f3f0ea;
 }
 
 .trust-inner {
   display: flex;
   justify-content: center;
-  gap: 4rem;
+  gap: 2rem 2.5rem;
   flex-wrap: wrap;
+  font-size: 0.95rem;
 }
 
 .trust-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.95rem;
+  gap: 0.45rem;
 }
 
 .trust-icon {
   color: var(--color-accent);
   font-weight: 700;
-  font-size: 1.2rem;
 }
 
-/* ============================================================
-   NEED SELECTION
-   ============================================================ */
+/* Need */
 .need {
-  padding: var(--spacing-section) 0;
+  padding: var(--spacing-section) 0 3rem;
   text-align: center;
 }
 
-.need h2 {
-  font-size: 2rem;
-  font-weight: 300;
-  margin-bottom: 2rem;
+.need h2,
+.approach h2,
+.products h2,
+.transparency h2,
+.consultation h2 {
+  font-size: clamp(1.35rem, 3vw, 1.85rem);
+  font-weight: 400;
+  margin-bottom: 1.5rem;
+  text-align: center;
 }
 
 .need-options {
   display: flex;
-  justify-content: center;
-  gap: 1.5rem;
   flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.65rem;
 }
 
 .need-btn {
   background: #fff;
   border: 1px solid var(--color-border);
-  padding: 0.8rem 2.5rem;
-  border-radius: 2.5rem;
-  font-size: 1rem;
+  padding: 0.7rem 1.35rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.2s;
+  font-family: inherit;
+  color: var(--color-text);
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
 }
 
 .need-btn:hover {
   border-color: var(--color-accent);
-  background: #f5f2ec;
+  background: #f5f2eb;
 }
 
-/* ============================================================
-   APPROACH (HBI LOGIC)
-   ============================================================ */
+.need-btn-active {
+  border-color: var(--color-accent);
+  background: #eef2e8;
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.need-hint {
+  margin-top: 1.1rem;
+  color: var(--color-muted);
+  font-size: 0.92rem;
+}
+
+/* Approach */
 .approach {
-  padding: var(--spacing-section) 0;
-  background: #f5f2ec;
-  text-align: center;
-}
-
-.approach h2 {
-  font-size: 2rem;
-  font-weight: 300;
-  margin-bottom: 2.5rem;
+  padding: 2.5rem 0 var(--spacing-section);
+  background: #fff;
+  border-top: 1px solid var(--color-border);
 }
 
 .approach-steps {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 2rem;
-  max-width: 800px;
-  margin: 0 auto;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
 }
 
 .step {
-  background: #fff;
-  padding: 2rem 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1.35rem 1.2rem;
   text-align: center;
 }
 
 .step-num {
-  display: inline-block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-accent);
-  letter-spacing: 0.05em;
-  margin-bottom: 0.5rem;
+  width: 2rem;
+  height: 2rem;
+  margin: 0 auto 0.75rem;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
 }
 
 .step h3 {
-  font-size: 1.2rem;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
 }
 
 .step p {
-  font-size: 0.95rem;
-  color: #5a554a;
+  font-size: 0.9rem;
+  color: var(--color-muted);
 }
 
-/* ============================================================
-   PRODUCTS
-   ============================================================ */
+/* Products */
 .products {
   padding: var(--spacing-section) 0;
 }
 
-.products h2 {
-  font-size: 2rem;
-  font-weight: 300;
-  text-align: center;
-  margin-bottom: 2.5rem;
-}
-
 .product-state {
   text-align: center;
-  padding: 2rem 0;
-  color: #5a554a;
-  font-size: 1rem;
+  color: var(--color-muted);
+  margin-bottom: 1rem;
+}
+
+.product-state-error {
+  color: #8a3a3a;
+}
+
+.product-state-detail {
+  display: block;
+  font-size: 0.8rem;
+  margin-top: 0.35rem;
+  opacity: 0.8;
 }
 
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1.8rem;
+  gap: 1rem;
 }
 
 .product-card {
-  background: #fff;
+  background: var(--color-card);
   border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  transition: box-shadow 0.2s;
+  border-radius: 12px;
+  padding: 1.15rem 1.2rem;
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
 .product-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(45, 42, 36, 0.06);
 }
 
 .product-card h4 {
-  font-size: 1.05rem;
-  font-weight: 500;
-  margin-bottom: 0.3rem;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
 }
 
 .product-brand {
-  font-size: 0.9rem;
-  color: #5a554a;
-  margin-bottom: 0.2rem;
+  font-size: 0.88rem;
+  color: var(--color-muted);
 }
 
 .product-status {
-  font-size: 0.85rem;
-  color: #6b7a5c;
-  margin-bottom: 0.8rem;
+  font-size: 0.78rem;
+  margin-top: 0.65rem;
+  color: var(--color-accent);
 }
 
 .product-link {
   display: inline-block;
-  background: var(--color-accent);
-  color: #fff;
-  padding: 0.4rem 1rem;
-  border-radius: 0.25rem;
+  margin-top: 0.85rem;
   font-size: 0.85rem;
+  color: var(--color-cta);
   text-decoration: none;
-  transition: background 0.2s;
 }
 
 .product-link:hover {
-  background: #5a6b4c;
+  text-decoration: underline;
 }
 
-/* ============================================================
-   TRANSPARENCY
-   ============================================================ */
+/* Transparency */
 .transparency {
-  padding: var(--spacing-section) 0;
-  background: #f5f2ec;
-  text-align: center;
-}
-
-.transparency h2 {
-  font-size: 2rem;
-  font-weight: 300;
-  margin-bottom: 1rem;
+  padding: 2.5rem 0;
+  background: #f3f0ea;
+  border-top: 1px solid var(--color-border);
 }
 
 .transparency p {
-  max-width: 600px;
+  max-width: 40rem;
   margin: 0 auto;
-  color: #5a554a;
-  font-size: 1.05rem;
+  text-align: center;
+  color: var(--color-muted);
+  font-size: 0.98rem;
 }
 
-/* ============================================================
-   HUMAN CONSULTATION
-   ============================================================ */
+/* Consultation */
 .consultation {
   padding: var(--spacing-section) 0;
+}
+
+.consultation > .container > p {
   text-align: center;
+  color: var(--color-muted);
+  margin-bottom: 1.5rem;
 }
 
-.consultation h2 {
-  font-size: 2rem;
-  font-weight: 300;
-  margin-bottom: 0.8rem;
+.consult-form {
+  max-width: 28rem;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 1.5rem 1.35rem 1.6rem;
 }
 
-.consultation p {
-  max-width: 500px;
-  margin: 0 auto 1.8rem;
-  color: #5a554a;
+.consult-form label {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--color-muted);
+  margin-bottom: 0.35rem;
 }
 
-.cta-consult {
-  background: var(--color-cta);
-  color: #fff;
-  border: none;
-  padding: 0.75rem 2.8rem;
-  border-radius: 0.25rem;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: opacity 0.2s;
+.consult-form input,
+.consult-form textarea {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: #fcfbf9;
+  color: var(--color-text);
+  font: inherit;
+  margin-bottom: 0.95rem;
 }
 
-.cta-consult:hover {
-  opacity: 0.85;
+.consult-form input:focus,
+.consult-form textarea:focus {
+  outline: 2px solid rgba(107, 122, 92, 0.25);
+  border-color: var(--color-accent);
 }
 
-/* ============================================================
-   FOOTER
-   ============================================================ */
+.consult-form .cta-consult {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin-top: 0.25rem;
+}
+
+.consult-error {
+  background: #f8ecec;
+  border: 1px solid #e2b6b6;
+  color: #7a3030;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 0.85rem;
+  font-size: 0.9rem;
+}
+
+.consult-success {
+  max-width: 32rem;
+  margin: 0 auto;
+  text-align: center;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 1.75rem 1.5rem;
+}
+
+.consult-success-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.consult-success-meta {
+  color: var(--color-muted);
+  font-size: 0.95rem;
+}
+
+/* Footer */
 .footer {
-  padding: 2rem 0;
+  padding: 1.75rem 0;
   border-top: 1px solid var(--color-border);
   text-align: center;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: #888;
 }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
 @media (max-width: 768px) {
-  .header-inner {
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-  .nav {
-    gap: 1.2rem;
-  }
-  .hero h1 {
-    font-size: 2.2rem;
-  }
-  .hero-subtitle {
-    font-size: 1rem;
-  }
-  .trust-inner {
-    gap: 2rem;
-  }
-  .need-options {
-    flex-direction: column;
-    align-items: center;
-  }
-  .need-btn {
-    width: 80%;
-  }
   .approach-steps {
     grid-template-columns: 1fr;
   }
-  .product-grid {
-    grid-template-columns: 1fr 1fr;
+  .nav {
+    gap: 0.85rem;
   }
 }
 
 @media (max-width: 480px) {
-  .hero h1 {
-    font-size: 1.8rem;
-  }
-  .cta-hero, .cta-hero-secondary {
+  .cta-hero,
+  .cta-hero-secondary {
     width: 100%;
     text-align: center;
-  }
-  .product-grid {
-    grid-template-columns: 1fr;
-  }
-  .container {
-    padding: 0 1rem;
   }
 }
