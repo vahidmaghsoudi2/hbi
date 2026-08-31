@@ -1,461 +1,386 @@
-﻿/* ============================================================
-   ROOT VARIABLES
-   ============================================================ */
-:root {
-  --color-bg: #faf8f5;
-  --color-text: #2d2a24;
-  --color-accent: #6b7a5c;
-  --color-cta: #8b7a5c;
-  --color-card: #ffffff;
-  --color-border: #e5e0d6;
-  --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --spacing-section: 5rem;
-  --spacing-element: 1.5rem;
+/*
+ * Home — ظاهر روشن گالری (مستقل از تم تاریک app.css)
+ * همه استایل‌ها زیر .home-root تا تداخل با صفحات دیگر کم شود.
+ */
+
+.home-root {
+  --hm-bg: #f7f3ec;
+  --hm-paper: #ffffff;
+  --hm-ink: #2c281f;
+  --hm-muted: #6b6458;
+  --hm-line: #e4dccf;
+  --hm-green: #5f7350;
+  --hm-green-soft: #e8efe3;
+  --hm-gold: #9a7b4f;
+  --hm-danger: #9b3b3b;
+  --hm-danger-bg: #f8eaea;
+
+  min-height: 100vh;
+  background: var(--hm-bg);
+  color: var(--hm-ink);
+  font-family: "Segoe UI", Tahoma, "Iranian Sans", system-ui, sans-serif;
+  direction: rtl;
+  line-height: 1.65;
+  text-align: right;
 }
 
-* {
-  margin: 0;
-  padding: 0;
+.home-root *,
+.home-root *::before,
+.home-root *::after {
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  background-color: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-sans);
-  direction: rtl;
-  line-height: 1.6;
-}
-
-.container {
-  max-width: 1200px;
+.hm-wrap {
+  max-width: 720px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
 }
 
-/* ============================================================
-   HEADER
-   ============================================================ */
-.header {
-  padding: 1.25rem 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-  background-color: var(--color-bg);
+/* Top bar */
+.hm-top {
+  background: rgba(247, 243, 236, 0.95);
+  border-bottom: 1px solid var(--hm-line);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 30;
+  backdrop-filter: blur(10px);
 }
 
-.header-inner {
+.hm-top-inner {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
   gap: 1rem;
 }
 
-.brand {
-  font-size: 1.3rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  color: var(--color-text);
+.hm-logo {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--hm-ink);
 }
 
-.nav {
-  display: flex;
-  gap: 2rem;
+.hm-logo-sub {
+  font-size: 0.8rem;
+  color: var(--hm-muted);
+  margin-top: 0.15rem;
 }
 
-.nav a {
-  color: var(--color-text);
+.hm-link,
+.hm-link-center {
+  color: var(--hm-green);
   text-decoration: none;
   font-size: 0.95rem;
-  transition: color 0.2s;
+  font-weight: 600;
 }
 
-.nav a:hover {
-  color: var(--color-accent);
+.hm-link:hover,
+.hm-link-center:hover {
+  text-decoration: underline;
 }
 
-.cta-primary {
-  background: var(--color-cta);
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1.8rem;
-  border-radius: 0.25rem;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.cta-primary:hover {
-  opacity: 0.85;
-}
-
-/* ============================================================
-   HERO
-   ============================================================ */
-.hero {
-  padding: 5rem 0 4rem;
+.hm-link-center {
+  display: block;
   text-align: center;
+  margin-top: 1.25rem;
 }
 
-.hero h1 {
-  font-size: 3.2rem;
-  font-weight: 300;
-  line-height: 1.2;
-  margin-bottom: 1.2rem;
-  letter-spacing: -0.02em;
+/* Hero — توضیح واضح */
+.hm-hero {
+  padding-top: 2.5rem;
+  padding-bottom: 1.5rem;
 }
 
-.hero-subtitle {
-  font-size: 1.2rem;
-  color: #5a554a;
-  margin-bottom: 2.5rem;
+.hm-eyebrow {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--hm-gold);
+  background: #f0e6d6;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  margin-bottom: 0.85rem;
 }
 
-.hero-actions {
+.hm-hero h1 {
+  font-size: clamp(1.35rem, 4vw, 1.85rem);
+  font-weight: 650;
+  line-height: 1.45;
+  margin: 0 0 0.85rem;
+  color: var(--hm-ink);
+}
+
+.hm-accent {
+  color: var(--hm-green);
+  font-weight: 600;
+}
+
+.hm-lead {
+  margin: 0;
+  color: var(--hm-muted);
+  font-size: 1rem;
+  max-width: 36rem;
+}
+
+/* Path strip */
+.hm-path {
   display: flex;
-  justify-content: center;
-  gap: 1.2rem;
   flex-wrap: wrap;
+  gap: 0.65rem;
+  padding-bottom: 1.5rem;
 }
 
-.cta-hero {
-  background: var(--color-accent);
-  color: #fff;
-  border: none;
-  padding: 0.75rem 2.8rem;
-  border-radius: 0.25rem;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.cta-hero:hover {
-  background: #5a6b4c;
-}
-
-.cta-hero-secondary {
-  background: transparent;
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  padding: 0.75rem 2.8rem;
-  border-radius: 0.25rem;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.cta-hero-secondary:hover {
-  background: #f0ede7;
-}
-
-/* ============================================================
-   TRUST STRIP
-   ============================================================ */
-.trust {
-  padding: 2.5rem 0;
-  background: #f5f2ec;
-}
-
-.trust-inner {
-  display: flex;
-  justify-content: center;
-  gap: 4rem;
-  flex-wrap: wrap;
-}
-
-.trust-item {
+.hm-path-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.95rem;
+  gap: 0.45rem;
+  background: var(--hm-paper);
+  border: 1px solid var(--hm-line);
+  border-radius: 999px;
+  padding: 0.4rem 0.85rem 0.4rem 0.5rem;
+  font-size: 0.88rem;
+  color: var(--hm-muted);
 }
 
-.trust-icon {
-  color: var(--color-accent);
-  font-weight: 700;
-  font-size: 1.2rem;
-}
-
-/* ============================================================
-   NEED SELECTION
-   ============================================================ */
-.need {
-  padding: var(--spacing-section) 0;
-  text-align: center;
-}
-
-.need h2 {
-  font-size: 2rem;
-  font-weight: 300;
-  margin-bottom: 2rem;
-}
-
-.need-options {
-  display: flex;
+.hm-num {
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  gap: 1.5rem;
-  flex-wrap: wrap;
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 50%;
+  background: var(--hm-green);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
-.need-btn {
-  background: #fff;
-  border: 1px solid var(--color-border);
-  padding: 0.8rem 2.5rem;
-  border-radius: 2.5rem;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s;
+/* Main card */
+.hm-main {
+  padding-bottom: 2.5rem;
 }
 
-.need-btn:hover {
-  border-color: var(--color-accent);
-  background: #f5f2ec;
+.hm-card {
+  background: var(--hm-paper);
+  border: 1px solid var(--hm-line);
+  border-radius: 18px;
+  padding: 1.5rem 1.35rem 1.65rem;
+  box-shadow: 0 12px 40px rgba(44, 40, 31, 0.06);
 }
 
-/* ============================================================
-   APPROACH (HBI LOGIC)
-   ============================================================ */
-.approach {
-  padding: var(--spacing-section) 0;
-  background: #f5f2ec;
-  text-align: center;
-}
-
-.approach h2 {
-  font-size: 2rem;
-  font-weight: 300;
-  margin-bottom: 2.5rem;
-}
-
-.approach-steps {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 2rem;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.step {
-  background: #fff;
-  padding: 2rem 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-  text-align: center;
-}
-
-.step-num {
-  display: inline-block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-accent);
-  letter-spacing: 0.05em;
-  margin-bottom: 0.5rem;
-}
-
-.step h3 {
-  font-size: 1.2rem;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-.step p {
-  font-size: 0.95rem;
-  color: #5a554a;
-}
-
-/* ============================================================
-   PRODUCTS
-   ============================================================ */
-.products {
-  padding: var(--spacing-section) 0;
-}
-
-.products h2 {
-  font-size: 2rem;
-  font-weight: 300;
-  text-align: center;
-  margin-bottom: 2.5rem;
-}
-
-.product-state {
-  text-align: center;
-  padding: 2rem 0;
-  color: #5a554a;
-  font-size: 1rem;
-}
-
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1.8rem;
-}
-
-.product-card {
-  background: #fff;
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  transition: box-shadow 0.2s;
-}
-
-.product-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
-}
-
-.product-card h4 {
+.hm-step-title {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
   font-size: 1.05rem;
-  font-weight: 500;
-  margin-bottom: 0.3rem;
+  font-weight: 650;
+  margin: 1.35rem 0 0.45rem;
+  color: var(--hm-ink);
 }
 
-.product-brand {
+.hm-card > .hm-step-title:first-child {
+  margin-top: 0;
+}
+
+.hm-help {
+  margin: 0 0 0.85rem;
   font-size: 0.9rem;
-  color: #5a554a;
+  color: var(--hm-muted);
+}
+
+.hm-chips {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 520px) {
+  .hm-chips {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hm-chip {
+  text-align: right;
+  background: #faf8f4;
+  border: 1.5px solid var(--hm-line);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--hm-ink);
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.hm-chip strong {
+  display: block;
+  font-size: 0.98rem;
   margin-bottom: 0.2rem;
 }
 
-.product-status {
-  font-size: 0.85rem;
-  color: #6b7a5c;
-  margin-bottom: 0.8rem;
+.hm-chip small {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--hm-muted);
+  font-weight: 400;
 }
 
-.product-link {
-  display: inline-block;
-  background: var(--color-accent);
-  color: #fff;
-  padding: 0.4rem 1rem;
-  border-radius: 0.25rem;
-  font-size: 0.85rem;
-  text-decoration: none;
-  transition: background 0.2s;
+.hm-chip:hover {
+  border-color: var(--hm-green);
 }
 
-.product-link:hover {
-  background: #5a6b4c;
+.hm-chip-on {
+  background: var(--hm-green-soft);
+  border-color: var(--hm-green);
+  box-shadow: 0 0 0 1px var(--hm-green);
 }
 
-/* ============================================================
-   TRANSPARENCY
-   ============================================================ */
-.transparency {
-  padding: var(--spacing-section) 0;
-  background: #f5f2ec;
-  text-align: center;
+.hm-label {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--hm-muted);
+  margin: 0.75rem 0 0.35rem;
 }
 
-.transparency h2 {
-  font-size: 2rem;
-  font-weight: 300;
-  margin-bottom: 1rem;
+.hm-input {
+  width: 100%;
+  border: 1.5px solid var(--hm-line);
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+  font: inherit;
+  color: var(--hm-ink);
+  background: #fcfbf9;
+  margin-bottom: 0.35rem;
 }
 
-.transparency p {
-  max-width: 600px;
-  margin: 0 auto;
-  color: #5a554a;
-  font-size: 1.05rem;
+.hm-input:focus {
+  outline: none;
+  border-color: var(--hm-green);
+  box-shadow: 0 0 0 3px rgba(95, 115, 80, 0.18);
 }
 
-/* ============================================================
-   HUMAN CONSULTATION
-   ============================================================ */
-.consultation {
-  padding: var(--spacing-section) 0;
-  text-align: center;
+.hm-textarea {
+  resize: vertical;
+  min-height: 4rem;
 }
 
-.consultation h2 {
-  font-size: 2rem;
-  font-weight: 300;
-  margin-bottom: 0.8rem;
+.hm-summary {
+  margin: 0.85rem 0;
+  padding: 0.65rem 0.85rem;
+  background: var(--hm-green-soft);
+  border-radius: 10px;
+  font-size: 0.92rem;
+  color: var(--hm-ink);
 }
 
-.consultation p {
-  max-width: 500px;
-  margin: 0 auto 1.8rem;
-  color: #5a554a;
+.hm-error {
+  margin: 0.75rem 0;
+  padding: 0.7rem 0.85rem;
+  background: var(--hm-danger-bg);
+  color: var(--hm-danger);
+  border-radius: 10px;
+  font-size: 0.92rem;
 }
 
-.cta-consult {
-  background: var(--color-cta);
-  color: #fff;
+.hm-btn-primary {
+  width: 100%;
+  margin-top: 1rem;
   border: none;
-  padding: 0.75rem 2.8rem;
-  border-radius: 0.25rem;
+  border-radius: 12px;
+  padding: 0.95rem 1rem;
+  font: inherit;
+  font-weight: 700;
   font-size: 1rem;
+  color: #fff;
+  background: linear-gradient(180deg, #6a8058 0%, var(--hm-green) 100%);
   cursor: pointer;
-  transition: opacity 0.2s;
+  box-shadow: 0 8px 20px rgba(95, 115, 80, 0.28);
 }
 
-.cta-consult:hover {
-  opacity: 0.85;
+.hm-btn-primary:hover:not(:disabled) {
+  filter: brightness(1.05);
 }
 
-/* ============================================================
-   FOOTER
-   ============================================================ */
-.footer {
-  padding: 2rem 0;
-  border-top: 1px solid var(--color-border);
+.hm-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.hm-btn-ghost {
+  width: 100%;
+  margin-top: 0.65rem;
+  border: 1px solid var(--hm-line);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font: inherit;
+  background: transparent;
+  color: var(--hm-muted);
+  cursor: pointer;
+}
+
+.hm-success h2 {
+  margin: 0 0 0.65rem;
+  font-size: 1.25rem;
+}
+
+.hm-success p {
+  color: var(--hm-muted);
+  margin: 0 0 1.25rem;
+}
+
+/* Catalog strip */
+.hm-catalog {
+  padding: 2rem 0 3rem;
+  border-top: 1px solid var(--hm-line);
+}
+
+.hm-catalog h2 {
+  font-size: 1.15rem;
+  margin: 0 0 0.35rem;
   text-align: center;
-  font-size: 0.9rem;
-  color: #888;
 }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
-@media (max-width: 768px) {
-  .header-inner {
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-  .nav {
-    gap: 1.2rem;
-  }
-  .hero h1 {
-    font-size: 2.2rem;
-  }
-  .hero-subtitle {
-    font-size: 1rem;
-  }
-  .trust-inner {
-    gap: 2rem;
-  }
-  .need-options {
-    flex-direction: column;
-    align-items: center;
-  }
-  .need-btn {
-    width: 80%;
-  }
-  .approach-steps {
-    grid-template-columns: 1fr;
-  }
-  .product-grid {
-    grid-template-columns: 1fr 1fr;
-  }
+.hm-catalog .hm-help {
+  text-align: center;
 }
 
-@media (max-width: 480px) {
-  .hero h1 {
-    font-size: 1.8rem;
-  }
-  .cta-hero, .cta-hero-secondary {
-    width: 100%;
-    text-align: center;
-  }
-  .product-grid {
-    grid-template-columns: 1fr;
-  }
-  .container {
-    padding: 0 1rem;
-  }
+.hm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.hm-prod {
+  background: var(--hm-paper);
+  border: 1px solid var(--hm-line);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+}
+
+.hm-prod h3 {
+  margin: 0 0 0.25rem;
+  font-size: 0.92rem;
+  font-weight: 650;
+  color: var(--hm-ink);
+}
+
+.hm-prod p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--hm-muted);
+}
+
+.hm-foot {
+  border-top: 1px solid var(--hm-line);
+  padding: 1.25rem 0 1.75rem;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--hm-muted);
+  background: #f0ebe3;
 }
