@@ -1,4 +1,4 @@
-﻿/**
+/**
  * HBI Frontend API contracts — aligned with backend HEAD.
  * Source of Truth: FastAPI routers + app/interface/dto.py
  * Do not invent endpoints or fields not present on the backend.
@@ -16,17 +16,17 @@ export interface PilotTokenRequest {
   customer_id: string;
 }
 
-/** POST /api/v1/cases/ body (backend CaseCreateRequest) */
+/** POST /api/v1/cases/ body — backend CaseCreateRequest */
 export interface CaseCreateRequest {
   customer_id: string;
   case_type?: string;
 }
 
-/** Case response (minimal fields returned by CaseFacade) */
+/** Case response */
 export interface CaseDTO {
   case_id: string;
   customer_id: string;
-  case_type: string;
+  case_type?: string;
   [key: string]: unknown;
 }
 
@@ -54,7 +54,6 @@ export interface RecommendationDTO {
   eligibility_status?: string | null;
   ranking_score?: number | null;
   ranking_reasons?: string | null;
-  // AD-3 contract fields
   final_score?: number | null;
   confidence?: number | null;
   eligibility?: string | null;
@@ -95,4 +94,25 @@ export interface GuestCreateRequest {
   name: string;
   consent: number;
   concerns?: string;
+}
+
+/** POST /api/v1/sales/ body */
+export interface SaleItemInput {
+  product_id: string;
+  quantity: number;
+  unit_price_toman: number;
+}
+
+export interface SaleCreateRequest {
+  customer_id: string;
+  items: SaleItemInput[];
+}
+
+/** Sale response (backend may return ORM-shaped dict) */
+export interface SaleDTO {
+  sale_id?: string;
+  customer_id?: string;
+  total_amount_toman?: number;
+  items?: unknown;
+  [key: string]: unknown;
 }
