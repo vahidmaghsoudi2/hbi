@@ -5,6 +5,8 @@ import {
   customerIntake,
   createGuest,
   generateRecommendations,
+  createSale,
+  getTotalSales,
 } from "../api/client";
 import type {
   ProductDTO,
@@ -12,43 +14,29 @@ import type {
   PilotTokenRequest,
   CustomerIntakeRequest,
   GuestCreateRequest,
+  SaleDTO,
 } from "../types/api";
 
-/** موضوعات مشاوره — چک‌باکس‌های واقعی مسیر HBI */
 const CONCERN_OPTIONS = [
   { id: "spf", value: "ضدآفتاب", label: "ضدآفتاب / SPF" },
-  { id: "hydrate", value: "آبرسان", label: "آبرسانی و رطوبت پوست" },
-  { id: "spot", value: "لک صورت", label: "لک، تیرگی، یکنواختی" },
+  { id: "hydrate", value: "آبرسان", label: "آبرسانی پوست" },
+  { id: "spot", value: "لک صورت", label: "لک و تیرگی" },
   { id: "sensitive", value: "پوست حساس", label: "حساسیت / قرمزی" },
-  { id: "hair", value: "مراقبت مو", label: "مراقبت و تقویت مو" },
-  { id: "scalp", value: "پوست سر", label: "پوست سر / شوره" },
-  { id: "antiage", value: "ضدچروک", label: "خطوط و چروک" },
-  { id: "oil", value: "کنترل چربی", label: "پوست چرب / جوش" },
+  { id: "hair", value: "مراقبت مو", label: "مراقبت مو" },
+  { id: "scalp", value: "پوست سر", label: "پوست سر" },
+  { id: "antiage", value: "ضدچروک", label: "ضدچروک" },
+  { id: "oil", value: "کنترل چربی", label: "پوست چرب" },
 ] as const;
 
-const SKIN_OPTIONS = [
-  { id: "dry", label: "خشک" },
-  { id: "oily", label: "چرب" },
-  { id: "combo", label: "مختلط" },
-  { id: "normal", label: "معمولی" },
-  { id: "sensitive_skin", label: "حساس" },
-] as const;
+const SKIN_OPTIONS = ["خشک", "چرب", "مختلط", "معمولی", "حساس"] as const;
 
-type Panel = "consult" | "profile" | "catalog" | "results" | "about";
+type Panel = "consult" | "profile" | "catalog" | "results" | "sales" | "about";
 
 export default function NewHomePage() {
   const [active, setActive] = useState<Panel>("consult");
-
-  const [token, setToken] = useState<string | null>(() =>
-    sessionStorage.getItem("hbi_access_token")
-  );
-  const [customerId, setCustomerId] = useState<string | null>(() =>
-    sessionStorage.getItem("hbi_customer_id")
-  );
-  const [caseId, setCaseId] = useState<string | null>(() =>
-    sessionStorage.getItem("hbi_case_id")
-  );
-
+  const [token, setToken] = useState<string | null>(() => sessionStorage.getItem("hbi_access_token"));
+  const [customerId, setCustomerId] = useState<string | null>(() => sessionStorage.getItem("hbi_customer_id"));
+  const [caseId, setCaseId] = useState<string | null>(() => sessionStorage.getItem("hbi_case_id"));
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [isGuest, setIsGuest] = useState(true);
@@ -56,17 +44,20 @@ export default function NewHomePage() {
   const [concerns, setConcerns] = useState<string[]>([]);
   const [skin, setSkin] = useState<string[]>([]);
   const [note, setNote] = useState("");
-
   const [busy, setBusy] = useState(false);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
   const [products, setProducts] = useState<ProductDTO[]>([]);
   const [catalogError, setCatalogError] = useState<string | null>(null);
   const [catalogLoading, setCatalogLoading] = useState(true);
-
   const [recs, setRecs] = useState<RecommendationDTO[]>([]);
   const [recDone, setRecDone] = useState(false);
+  const [saleProductId, setSaleProductId] = useState("");
+  const [saleQty, setSaleQty] = useState(1);
+  const [salePrice, setSalePrice] = useState(0);
+  const [saleBusy, setSaleBusy] = useState(false);
+  const [lastSale, setLastSale] = useState<SaleDTO | null>(null);
+  const [totalSales, setTotalSales] = useState<number | null>(null);
 
   const loadProducts = useCallback(async () => {
     setCatalogLoading(true);
@@ -86,6 +77,23 @@ export default function NewHomePage() {
     void loadProducts();
   }, [loadProducts]);
 
+  const refreshSalesTotal = useCallback(async () => {
+    if (!token) {
+      setTotalSales(null);
+      return;
+    }
+    try {
+      const res = await getTotalSales(token);
+      setTotalSales(res.total_sales ?? 0);
+    } catch {
+      setTotalSales(null);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (active === "sales") void refreshSalesTotal();
+  }, [active, refreshSalesTotal]);
+
   const concernsText = useMemo(() => {
     const parts = [...concerns, ...skin.map((s) => `پوست ${s}`)];
     if (note.trim()) parts.push(note.trim());
@@ -103,28 +111,22 @@ export default function NewHomePage() {
 
   async function ensureSession(displayName: string, concernsForGuest: string) {
     let currentToken = token;
-    let currentCustomerId = customerId;
-
     if (!currentToken) {
-      const guestBody: GuestCreateRequest = {
+      const guest = (await createGuest({
         name: displayName,
         consent: consent ? 1 : 0,
         concerns: concernsForGuest || undefined,
-      };
-      const guest = (await createGuest(guestBody)) as { customer_id?: string };
+      })) as { customer_id?: string };
       if (!guest?.customer_id) throw new Error("ایجاد پروفایل مهمان ناموفق بود.");
-      currentCustomerId = guest.customer_id;
-      sessionStorage.setItem("hbi_customer_id", currentCustomerId);
-      setCustomerId(currentCustomerId);
-
-      const tokenBody: PilotTokenRequest = { customer_id: currentCustomerId };
-      const pair = await pilotToken(tokenBody);
+      sessionStorage.setItem("hbi_customer_id", guest.customer_id);
+      setCustomerId(guest.customer_id);
+      const pair = await pilotToken({ customer_id: guest.customer_id } as PilotTokenRequest);
       sessionStorage.setItem("hbi_access_token", pair.access_token);
       sessionStorage.setItem("hbi_refresh_token", pair.refresh_token);
       currentToken = pair.access_token;
       setToken(currentToken);
     }
-    return { currentToken: currentToken as string, currentCustomerId };
+    return currentToken as string;
   }
 
   async function runFullFlow(e: FormEvent) {
@@ -133,67 +135,41 @@ export default function NewHomePage() {
     setStatusMsg(null);
     setRecDone(false);
     setRecs([]);
-
-    if (!name.trim()) {
-      setError("نام الزامی است.");
-      return;
-    }
-    if (!consent) {
-      setError("برای ثبت مراجعه، رضایت ذخیره اطلاعات را تأیید کنید.");
-      return;
-    }
-    if (!concernsText) {
-      setError("حداقل یک موضوع مشاوره یا نوع پوست را انتخاب کنید.");
-      return;
-    }
-
+    if (!name.trim()) return setError("نام الزامی است.");
+    if (!consent) return setError("رضایت ذخیره اطلاعات را تأیید کنید.");
+    if (!concernsText) return setError("حداقل یک موضوع یا نوع پوست را انتخاب کنید.");
     setBusy(true);
     try {
-      const { currentToken } = await ensureSession(name.trim(), concernsText);
+      const currentToken = await ensureSession(name.trim(), concernsText);
       sessionStorage.setItem("hbi_concerns", concernsText);
-
-      const intakeBody: CustomerIntakeRequest = {
-        name: name.trim(),
-        mobile: isGuest || !mobile.trim() ? undefined : mobile.trim(),
-        concerns: concernsText,
-        consent: 1,
-        skin_profile: skin.length ? skin.join(",") : undefined,
-        guest: isGuest || !mobile.trim(),
-        open_case: true,
-      };
-
-      const intake = (await customerIntake(intakeBody, currentToken)) as {
-        case?: { case_id?: string };
-        customer?: { customer_id?: string };
-        recommendation_profile?: { concerns?: string };
-      };
-
-      const newCaseId = intake?.case?.case_id;
+      const intake = (await customerIntake(
+        {
+          name: name.trim(),
+          mobile: isGuest || !mobile.trim() ? undefined : mobile.trim(),
+          concerns: concernsText,
+          consent: 1,
+          skin_profile: skin.length ? skin.join(",") : undefined,
+          guest: isGuest || !mobile.trim(),
+          open_case: true,
+        } as CustomerIntakeRequest,
+        currentToken
+      )) as { case?: { case_id?: string }; customer?: { customer_id?: string } };
       if (intake?.customer?.customer_id) {
         sessionStorage.setItem("hbi_customer_id", intake.customer.customer_id);
         setCustomerId(intake.customer.customer_id);
       }
-      if (!newCaseId) throw new Error("پرونده مشاوره (Case) ساخته نشد.");
+      const newCaseId = intake?.case?.case_id;
+      if (!newCaseId) throw new Error("پرونده مشاوره ساخته نشد.");
       sessionStorage.setItem("hbi_case_id", newCaseId);
       setCaseId(newCaseId);
-
-      setStatusMsg("مراجعه و پرونده ثبت شد. در حال دریافت پیشنهاد…");
-
-      const profile = {
-        concerns: concernsText,
-        skin_type: skin.join(",") || undefined,
-      };
+      setStatusMsg("مراجعه ثبت شد. در حال دریافت پیشنهاد…");
       const list = await generateRecommendations(
-        { case_id: newCaseId, customer_profile: profile },
+        { case_id: newCaseId, customer_profile: { concerns: concernsText, skin_type: skin.join(",") || undefined } },
         currentToken
       );
       setRecs(Array.isArray(list) ? list : []);
       setRecDone(true);
-      setStatusMsg(
-        list?.length
-          ? `${list.length} پیشنهاد بر اساس شواهد آماده است.`
-          : "پیشنهادی با شواهد کافی یافت نشد (رفتار صحیح سیستم — بدون حدس)."
-      );
+      setStatusMsg(list?.length ? `${list.length} پیشنهاد آماده است.` : "پیشنهادی با شواهد کافی یافت نشد.");
       setActive("results");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -203,11 +179,9 @@ export default function NewHomePage() {
   }
 
   function clearSession() {
-    sessionStorage.removeItem("hbi_access_token");
-    sessionStorage.removeItem("hbi_refresh_token");
-    sessionStorage.removeItem("hbi_customer_id");
-    sessionStorage.removeItem("hbi_case_id");
-    sessionStorage.removeItem("hbi_concerns");
+    ["hbi_access_token", "hbi_refresh_token", "hbi_customer_id", "hbi_case_id", "hbi_concerns"].forEach((k) =>
+      sessionStorage.removeItem(k)
+    );
     setToken(null);
     setCustomerId(null);
     setCaseId(null);
@@ -216,9 +190,42 @@ export default function NewHomePage() {
     setStatusMsg("نشست پاک شد.");
   }
 
+  async function onSaleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    if (!token || !customerId) return setError("ابتدا مشاوره را ثبت کنید.");
+    if (!saleProductId.trim()) return setError("محصول را انتخاب کنید.");
+    if (saleQty < 1) return setError("تعداد نامعتبر است.");
+    setSaleBusy(true);
+    try {
+      const sale = await createSale(
+        {
+          customer_id: customerId,
+          items: [{ product_id: saleProductId.trim(), quantity: saleQty, unit_price_toman: salePrice }],
+        },
+        token
+      );
+      setLastSale(sale);
+      setStatusMsg(`فروش ثبت شد: ${sale.sale_id ?? "OK"}`);
+      await refreshSalesTotal();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSaleBusy(false);
+    }
+  }
+
+  const nav: [Panel, string][] = [
+    ["consult", "مشاوره"],
+    ["profile", "پروفایل"],
+    ["catalog", "محصولات"],
+    ["results", "پیشنهادها"],
+    ["sales", "فروش"],
+    ["about", "درباره HBI"],
+  ];
+
   return (
     <div className="home-root pro-home">
-      {/* ===== منوی اصلی ===== */}
       <header className="pro-header">
         <div className="pro-header-inner">
           <div className="pro-brand">
@@ -229,21 +236,8 @@ export default function NewHomePage() {
             </div>
           </div>
           <nav className="pro-nav" aria-label="بخش‌های صفحه">
-            {(
-              [
-                ["consult", "مشاوره"],
-                ["profile", "پروفایل"],
-                ["catalog", "محصولات"],
-                ["results", "پیشنهادها"],
-                ["about", "درباره HBI"],
-              ] as [Panel, string][]
-            ).map(([id, label]) => (
-              <button
-                key={id}
-                type="button"
-                className={active === id ? "pro-nav-btn on" : "pro-nav-btn"}
-                onClick={() => go(id)}
-              >
+            {nav.map(([id, label]) => (
+              <button key={id} type="button" className={active === id ? "pro-nav-btn on" : "pro-nav-btn"} onClick={() => go(id)}>
                 {label}
               </button>
             ))}
@@ -252,7 +246,6 @@ export default function NewHomePage() {
       </header>
 
       <main className="pro-main">
-        {/* نوار وضعیت زنده */}
         <div className="pro-status-bar">
           <span className={token ? "dot on" : "dot"} />
           <span>{token ? "نشست فعال" : "نشست ندارد"}</span>
@@ -274,158 +267,94 @@ export default function NewHomePage() {
           </div>
         ) : null}
 
-        {/* ===== پنل مشاوره ===== */}
         {active === "consult" && (
-          <section className="pro-panel" id="consult">
+          <section className="pro-panel">
             <h1>فرم مشاوره سریع</h1>
-            <p className="pro-lead">
-              با تکمیل این بخش، پروفایل مشتری، پرونده (Case) و پیشنهاد محصول روی
-              همین صفحه ساخته می‌شود.
-            </p>
-
+            <p className="pro-lead">پروفایل، پرونده و پیشنهاد روی همین صفحه ساخته می‌شود.</p>
             <form className="pro-form" onSubmit={runFullFlow}>
               <fieldset className="pro-fieldset">
-                <legend>۱) هویت مراجعه</legend>
+                <legend>۱) هویت</legend>
                 <div className="pro-grid-2">
                   <div>
-                    <label className="pro-label" htmlFor="name">
-                      نام <abbr title="الزامی">*</abbr>
-                    </label>
-                    <input
-                      id="name"
-                      className="pro-input"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="نام مشتری"
-                      autoComplete="name"
-                    />
+                    <label className="pro-label" htmlFor="name">نام *</label>
+                    <input id="name" className="pro-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="نام مشتری" />
                   </div>
                   <div>
-                    <label className="pro-label" htmlFor="mobile">
-                      موبایل (اختیاری)
-                    </label>
-                    <input
-                      id="mobile"
-                      className="pro-input"
-                      value={mobile}
-                      onChange={(e) => setMobile(e.target.value)}
-                      placeholder="09…"
-                      disabled={isGuest}
-                      inputMode="tel"
-                    />
+                    <label className="pro-label" htmlFor="mobile">موبایل</label>
+                    <input id="mobile" className="pro-input" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="09…" disabled={isGuest} />
                   </div>
                 </div>
                 <label className="pro-check">
-                  <input
-                    type="checkbox"
-                    checked={isGuest}
-                    onChange={(e) => setIsGuest(e.target.checked)}
-                  />
+                  <input type="checkbox" checked={isGuest} onChange={(e) => setIsGuest(e.target.checked)} />
                   مراجعه مهمان (بدون موبایل)
                 </label>
                 <label className="pro-check">
-                  <input
-                    type="checkbox"
-                    checked={consent}
-                    onChange={(e) => setConsent(e.target.checked)}
-                  />
-                  رضایت به ذخیره اطلاعات مراجعه برای مشاوره و پیگیری
+                  <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+                  رضایت ذخیره اطلاعات
                 </label>
               </fieldset>
-
               <fieldset className="pro-fieldset">
-                <legend>۲) موضوع مشاوره (چک‌باکس)</legend>
+                <legend>۲) موضوع مشاوره</legend>
                 <div className="pro-checks">
                   {CONCERN_OPTIONS.map((c) => (
                     <label key={c.id} className="pro-check-card">
-                      <input
-                        type="checkbox"
-                        checked={concerns.includes(c.value)}
-                        onChange={() => toggleIn(concerns, c.value, setConcerns)}
-                      />
+                      <input type="checkbox" checked={concerns.includes(c.value)} onChange={() => toggleIn(concerns, c.value, setConcerns)} />
                       <span>{c.label}</span>
                     </label>
                   ))}
                 </div>
               </fieldset>
-
               <fieldset className="pro-fieldset">
-                <legend>۳) نوع پوست (اختیاری)</legend>
+                <legend>۳) نوع پوست</legend>
                 <div className="pro-checks pro-checks-inline">
                   {SKIN_OPTIONS.map((s) => (
-                    <label key={s.id} className="pro-check-card sm">
-                      <input
-                        type="checkbox"
-                        checked={skin.includes(s.label)}
-                        onChange={() => toggleIn(skin, s.label, setSkin)}
-                      />
-                      <span>{s.label}</span>
+                    <label key={s} className="pro-check-card sm">
+                      <input type="checkbox" checked={skin.includes(s)} onChange={() => toggleIn(skin, s, setSkin)} />
+                      <span>{s}</span>
                     </label>
                   ))}
                 </div>
               </fieldset>
-
               <fieldset className="pro-fieldset">
-                <legend>۴) توضیح آزاد</legend>
-                <textarea
-                  className="pro-input pro-textarea"
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  rows={3}
-                  placeholder="نکته‌ای که فروشنده یا مشتری می‌خواهد ثبت شود…"
-                />
+                <legend>۴) توضیح</legend>
+                <textarea className="pro-input pro-textarea" value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder="نکته اختیاری…" />
                 {concernsText ? (
                   <p className="pro-summary">
-                    خلاصه ارسالی به موتور توصیه: <strong>{concernsText}</strong>
+                    خلاصه: <strong>{concernsText}</strong>
                   </p>
                 ) : null}
               </fieldset>
-
               <div className="pro-actions">
                 <button type="submit" className="pro-btn-primary" disabled={busy}>
-                  {busy
-                    ? "در حال اجرا…"
-                    : "ثبت مراجعه + دریافت پیشنهاد روی همین صفحه"}
+                  {busy ? "در حال اجرا…" : "ثبت مراجعه + دریافت پیشنهاد"}
                 </button>
-                <button
-                  type="button"
-                  className="pro-btn-secondary"
-                  onClick={() => go("catalog")}
-                >
-                  فقط مشاهده محصولات
+                <button type="button" className="pro-btn-secondary" onClick={() => go("catalog")}>
+                  محصولات
                 </button>
               </div>
             </form>
           </section>
         )}
 
-        {/* ===== پروفایل / نشست ===== */}
         {active === "profile" && (
           <section className="pro-panel">
-            <h1>پروفایل و نشست جاری</h1>
-            <p className="pro-lead">
-              اطلاعات از session مرورگر و API واحد پروفایل مشتری خوانده می‌شود.
-            </p>
+            <h1>پروفایل و نشست</h1>
             <dl className="pro-dl">
               <div>
-                <dt>شناسه مشتری</dt>
-                <dd>{customerId ?? "هنوز ثبت نشده"}</dd>
+                <dt>مشتری</dt>
+                <dd>{customerId ?? "—"}</dd>
               </div>
               <div>
-                <dt>شناسه پرونده (Case)</dt>
+                <dt>پرونده</dt>
                 <dd>{caseId ?? "—"}</dd>
               </div>
               <div>
-                <dt>توکن دسترسی</dt>
-                <dd>{token ? "فعال (در sessionStorage)" : "ندارد"}</dd>
+                <dt>توکن</dt>
+                <dd>{token ? "فعال" : "ندارد"}</dd>
               </div>
               <div>
-                <dt>آخرین concerns</dt>
+                <dt>concerns</dt>
                 <dd>{sessionStorage.getItem("hbi_concerns") ?? "—"}</dd>
-              </div>
-              <div>
-                <dt>نام فرم</dt>
-                <dd>{name || "—"}</dd>
               </div>
             </dl>
             <div className="pro-actions">
@@ -433,32 +362,22 @@ export default function NewHomePage() {
                 پاک کردن نشست
               </button>
               <button type="button" className="pro-btn-primary" onClick={() => go("consult")}>
-                بازگشت به مشاوره
+                مشاوره
               </button>
             </div>
           </section>
         )}
 
-        {/* ===== کاتالوگ ===== */}
         {active === "catalog" && (
           <section className="pro-panel">
             <div className="pro-panel-head">
-              <h1>محصولات تأییدشده</h1>
+              <h1>محصولات</h1>
               <button type="button" className="pro-btn-secondary" onClick={() => void loadProducts()}>
-                نوسازی فهرست
+                نوسازی
               </button>
             </div>
-            <p className="pro-lead">منبع: GET /api/v1/products/ — بدون داده جعلی</p>
-            {catalogLoading && <p className="pro-muted">در حال بارگذاری…</p>}
-            {catalogError && (
-              <div className="pro-alert">
-                اتصال برقرار نشد. Backend را روی پورت ۸۰۰۰ بررسی کنید.
-                <div className="pro-muted">{catalogError}</div>
-              </div>
-            )}
-            {!catalogLoading && !catalogError && products.length === 0 && (
-              <p className="pro-muted">محصولی برای نمایش نیست.</p>
-            )}
+            {catalogLoading && <p className="pro-muted">بارگذاری…</p>}
+            {catalogError && <div className="pro-alert">{catalogError}</div>}
             <div className="pro-product-grid">
               {products.map((p) => (
                 <article key={p.product_id} className="pro-product-card">
@@ -466,7 +385,6 @@ export default function NewHomePage() {
                   <p className="pro-muted">{p.brand}</p>
                   <div className="pro-tags">
                     <span className="pro-tag">{p.identity_status}</span>
-                    {p.qa_verdict ? <span className="pro-tag">{p.qa_verdict}</span> : null}
                   </div>
                   <code className="pro-code">{p.product_id}</code>
                 </article>
@@ -475,29 +393,14 @@ export default function NewHomePage() {
           </section>
         )}
 
-        {/* ===== نتایج توصیه ===== */}
         {active === "results" && (
           <section className="pro-panel">
-            <h1>پیشنهادهای این مراجعه</h1>
-            <p className="pro-lead">
-              خروجی موتور توصیه برای پرونده فعلی — روی همین صفحه، بدون خروج.
-            </p>
-            {!recDone && (
-              <p className="pro-muted">
-                هنوز پیشنهادی گرفته نشده. از منوی «مشاوره» فرم را تکمیل و ارسال
-                کنید.
-              </p>
-            )}
+            <h1>پیشنهادها</h1>
+            {!recDone && <p className="pro-muted">هنوز پیشنهادی گرفته نشده — از مشاوره شروع کنید.</p>}
             {recDone && recs.length === 0 && (
               <div className="pro-empty">
                 <strong>مورد منطبقی یافت نشد.</strong>
-                <p>
-                  این حالت عادی است وقتی شواهد محصول با نیاز هم‌خوان نیست —
-                  سیستم چیزی اختراع نمی‌کند.
-                </p>
-                <button type="button" className="pro-btn-primary" onClick={() => go("consult")}>
-                  تغییر موضوعات و تلاش دوباره
-                </button>
+                <p>شواهد کافی نبود؛ سیستم حدس نمی‌زند.</p>
               </div>
             )}
             <div className="pro-rec-list">
@@ -507,14 +410,10 @@ export default function NewHomePage() {
                   <div>
                     <h3>{r.product_id}</h3>
                     <p className="pro-muted">
-                      وضعیت: {r.eligibility_status ?? r.eligibility ?? "—"}
-                      {(r.final_score != null || r.ranking_score != null) && (
-                        <> · امتیاز: {r.final_score ?? r.ranking_score}</>
-                      )}
+                      {r.eligibility_status ?? r.eligibility ?? "—"}
+                      {r.final_score != null || r.ranking_score != null ? ` · ${r.final_score ?? r.ranking_score}` : ""}
                     </p>
-                    {(r.reasoning || r.ranking_reasons) && (
-                      <p className="pro-reason">{r.reasoning || r.ranking_reasons}</p>
-                    )}
+                    {(r.reasoning || r.ranking_reasons) && <p className="pro-reason">{r.reasoning || r.ranking_reasons}</p>}
                   </div>
                 </article>
               ))}
@@ -522,39 +421,99 @@ export default function NewHomePage() {
           </section>
         )}
 
-        {/* ===== درباره ===== */}
+        {active === "sales" && (
+          <section className="pro-panel" id="sales">
+            <h1>ثبت فروش</h1>
+            <p className="pro-lead">API: POST /api/v1/sales/ و GET /api/v1/sales/total — نیاز به نشست فعال.</p>
+            {!token || !customerId ? (
+              <div className="pro-empty">
+                <strong>ابتدا مشاوره را ثبت کنید.</strong>
+                <button type="button" className="pro-btn-primary" onClick={() => go("consult")}>
+                  رفتن به مشاوره
+                </button>
+              </div>
+            ) : (
+              <form className="pro-form" onSubmit={onSaleSubmit}>
+                <fieldset className="pro-fieldset">
+                  <legend>مشتری</legend>
+                  <p className="pro-muted">
+                    <code>{customerId}</code>
+                  </p>
+                  <p className="pro-muted">جمع فروش: {totalSales === null ? "—" : totalSales.toLocaleString("fa-IR")}</p>
+                </fieldset>
+                <fieldset className="pro-fieldset">
+                  <legend>اقلام</legend>
+                  <label className="pro-label" htmlFor="sale-product">
+                    محصول
+                  </label>
+                  <select id="sale-product" className="pro-input" value={saleProductId} onChange={(e) => setSaleProductId(e.target.value)}>
+                    <option value="">— انتخاب از کاتالوگ —</option>
+                    {products.map((p) => (
+                      <option key={p.product_id} value={p.product_id}>
+                        {p.product_name} ({p.brand})
+                      </option>
+                    ))}
+                  </select>
+                  <label className="pro-label" htmlFor="sale-manual">
+                    یا product_id دستی
+                  </label>
+                  <input id="sale-manual" className="pro-input" value={saleProductId} onChange={(e) => setSaleProductId(e.target.value)} />
+                  <div className="pro-grid-2">
+                    <div>
+                      <label className="pro-label" htmlFor="sale-qty">
+                        تعداد
+                      </label>
+                      <input id="sale-qty" className="pro-input" type="number" min={1} value={saleQty} onChange={(e) => setSaleQty(Number(e.target.value) || 1)} />
+                    </div>
+                    <div>
+                      <label className="pro-label" htmlFor="sale-price">
+                        قیمت واحد (تومان)
+                      </label>
+                      <input id="sale-price" className="pro-input" type="number" min={0} value={salePrice} onChange={(e) => setSalePrice(Number(e.target.value) || 0)} />
+                    </div>
+                  </div>
+                  <p className="pro-summary">
+                    مبلغ: <strong>{(saleQty * salePrice).toLocaleString("fa-IR")}</strong> تومان
+                  </p>
+                </fieldset>
+                <div className="pro-actions">
+                  <button type="submit" className="pro-btn-primary" disabled={saleBusy}>
+                    {saleBusy ? "در حال ثبت…" : "ثبت فروش"}
+                  </button>
+                  <button type="button" className="pro-btn-secondary" onClick={() => void refreshSalesTotal()}>
+                    بروزرسانی جمع
+                  </button>
+                </div>
+              </form>
+            )}
+            {lastSale && (
+              <div className="pro-rec-card" style={{ marginTop: "1rem" }}>
+                <div className="pro-rec-rank">✓</div>
+                <div>
+                  <h3>آخرین فروش</h3>
+                  <p className="pro-muted">
+                    {String(lastSale.sale_id ?? "—")} · {Number(lastSale.total_amount_toman ?? 0).toLocaleString("fa-IR")} تومان
+                  </p>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
         {active === "about" && (
           <section className="pro-panel">
-            <h1>HBI روی این صفحه چه می‌کند؟</h1>
+            <h1>مسیر HBI روی این صفحه</h1>
             <ol className="pro-ol">
-              <li>
-                <strong>پروفایل مشتری:</strong> نام، رضایت، موضوعات، نوع پوست →
-                API intake / guest
-              </li>
-              <li>
-                <strong>پرونده مشاوره (Case):</strong> با open_case ساخته می‌شود
-              </li>
-              <li>
-                <strong>موتور توصیه:</strong> generate با customer_profile.concerns
-              </li>
-              <li>
-                <strong>کاتالوگ:</strong> محصولات تأییدشده از backend
-              </li>
-              <li>
-                <strong>شفافیت:</strong> لیست خالی = نبود شواهد کافی، نه باگ
-              </li>
+              <li>پروفایل مشتری (intake / guest)</li>
+              <li>پرونده Case</li>
+              <li>موتور توصیه generate</li>
+              <li>کاتالوگ محصولات</li>
+              <li>ثبت فروش و کنترل موجودی</li>
             </ol>
-            <p className="pro-muted">
-              امتیازدهی و Seed محصول تغییر داده نمی‌شوند؛ این صفحه فقط رابط
-              یکپارچه همان قابلیت‌هاست.
-            </p>
           </section>
         )}
       </main>
-
-      <footer className="pro-footer">
-        HBI · گالری مقصودی · مشاوره مبتنی بر شواهد · یک صفحه برای کل مسیر
-      </footer>
+      <footer className="pro-footer">HBI · گالری مقصودی · مشاوره تا فروش در یک صفحه</footer>
     </div>
   );
 }

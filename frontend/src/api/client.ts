@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Minimal HBI API client — endpoints only as present on backend.
  * Base path: /api/v1
  */
@@ -12,6 +12,8 @@ import type {
   RecommendationDTO,
   RecommendationRequest,
   TokenPair,
+  SaleCreateRequest,
+  SaleDTO,
 } from "../types/api";
 
 const BASE = import.meta.env?.VITE_API_BASE ?? "/api/v1";
@@ -118,4 +120,21 @@ export function getProductEvidence(
   token: string
 ): Promise<unknown> {
   return request<unknown>(`/evidence/?product_id=${productId}`, {}, token);
+}
+
+/** POST /api/v1/sales/ — requires auth; customer_id must match token identity */
+export function createSale(
+  body: SaleCreateRequest,
+  token: string
+): Promise<SaleDTO> {
+  return request<SaleDTO>(
+    "/sales/",
+    { method: "POST", body: JSON.stringify(body) },
+    token
+  );
+}
+
+/** GET /api/v1/sales/total — requires auth */
+export function getTotalSales(token: string): Promise<{ total_sales: number }> {
+  return request<{ total_sales: number }>("/sales/total", {}, token);
 }
