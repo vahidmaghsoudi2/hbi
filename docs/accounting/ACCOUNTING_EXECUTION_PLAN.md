@@ -3,7 +3,7 @@
 **Implementation Owner:** Grok2  
 **Baseline SHA (Phase 00):** `8be7a97c3a27c51e05652671e4a33bbe9dc308d0`  
 **Phase 01 PASS:** `66f4338aa9fcf320cac5ac402522501d50c3a179`  
-**Last Updated:** 2026-09-01
+**Last Updated:** 2026-09-02
 
 ## Frozen decisions
 
@@ -18,11 +18,16 @@
 |-------|------|--------|-------|
 | 00 | Repository Audit | COMPLETE | Grok2 |
 | 01 | Accounting Architecture | **CLOSED / PASS** | Grok2 |
-| 02 | Data Model | **IMPLEMENTED — AWAITING GATE** | Grok2 |
-| 03+ | … | NOT STARTED | — |
+| 02 | Data Model + Schema Migration | **IMPLEMENTED + TESTED (clone) — AWAITING GATE** | Grok2 |
+| 03+ | … | **STOPPED** | — |
 
-## Evidence
+## Evidence (Phase 02)
 
 - `docs/accounting/PHASE-02_DATA_MODEL.md`
 - `tests/test_accounting_data_model.py`
 - `scripts/accounting_phase02_schema.sql`
+- `scripts/accounting_phase02_migrate.py` (additive, idempotent, clone-safe)
+- `tests/test_schema_migration_clone.py` (11 passed on disposable legacy clone)
+- `docs/accounting/PHASE-02_MIGRATION_PLAN_EVIDENCE.md`
+
+Real `data/hbi.db` was **not** migrated. PHASE 03 remains STOPPED.
