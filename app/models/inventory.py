@@ -12,8 +12,14 @@ class Inventory(Base):
     quantity_reserved = Column(Integer, nullable=False, default=0)
     quantity_damaged = Column(Integer, nullable=False, default=0)
     stock_status = Column(String, nullable=False, default="active")
-    purchase_price_toman = Column(Integer, nullable=True)
-    sale_price_toman = Column(Integer, nullable=True)
+    purchase_price_toman = Column(Integer, nullable=True)  # legacy; retained for migration
+    sale_price_toman = Column(Integer, nullable=True)  # legacy; retained for migration
+    # Accounting V1 — Currency of Record USD + FX snapshot (C-01)
+    purchase_price_usd = Column(Float, nullable=True)
+    sale_price_usd = Column(Float, nullable=True)
+    price_fx_rate_usd_to_irr = Column(Float, nullable=True)  # IRR per 1 USD at price set
+    purchase_price_irr = Column(Float, nullable=True)
+    sale_price_irr = Column(Float, nullable=True)
     price_updated_at = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 

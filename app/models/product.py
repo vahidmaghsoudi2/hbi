@@ -1,4 +1,4 @@
-from sqlalchemy import CheckConstraint, Column, DateTime, Float, String
+from sqlalchemy import CheckConstraint, Column, DateTime, Float, ForeignKey, String
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.models.base import Base
@@ -23,6 +23,8 @@ class Product(Base):
     qa_reviewed_at = Column(DateTime, nullable=True)
     qa_notes = Column(String, nullable=True)
     status = Column(String, nullable=False, server_default="ACTIVE")
+    # Accounting V1: optional FK to data-driven Category (nullable for legacy rows)
+    category_id = Column(String, ForeignKey("Category.category_id", ondelete="RESTRICT"), nullable=True, index=True)
     created_at = Column(DateTime, server_default=func.current_timestamp())
     updated_at = Column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
 
@@ -45,11 +47,8 @@ class Product(Base):
         ),
     )
 
-    # Note: product_knowledge relationship intentionally removed.
-    # ProductKnowledge links via product_id ForeignKey only (independent tables per Schema).
     evidences = relationship("Evidence", back_populates="product")
     recommendations = relationship("Recommendation", back_populates="product")
     sale_items = relationship("SaleItem", back_populates="product")
     product_knowledge = relationship("ProductKnowledge", back_populates="product", uselist=False)
-
-
+    category = relationship("Category", back_populates="products")
