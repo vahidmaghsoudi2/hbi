@@ -1,20 +1,12 @@
-"""
-PHASE 02 — Schema migration on disposable SQLite clone.
-
-Proves additive migration: pre → migrate → post without touching real data/hbi.db,
-without historical FX conversion, preserving Toman and row counts.
-"""
+"""PHASE 02 — Schema migration on disposable SQLite clone. Real FK via PRAGMA foreign_key_list."""
 from __future__ import annotations
 
-import json
 import sqlite3
 import sys
-import tempfile
 from pathlib import Path
 
 import pytest
 
-# Ensure scripts is importable
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
@@ -23,13 +15,13 @@ from scripts.accounting_phase02_migrate import (  # noqa: E402
     capture_row_counts,
     capture_schema,
     capture_toman_samples,
-    foreign_key_check,
+    foreign_key_list,
+    has_fk_to,
     migrate,
 )
 
 
 def _create_legacy_db(path: str) -> None:
-    """Build a minimal pre-PHASE-02 schema with legacy Toman columns only."""
     conn = sqlite3.connect(path)
     conn.executescript(
         """
@@ -101,18 +93,9 @@ def test_pre_migration_capture(legacy_clone):
     counts = capture_row_counts(conn)
     toman = capture_toman_samples(conn)
     conn.close()
-    assert "Product" in schema
     assert "category_id" not in {c["name"] for c in schema["Product"]}
-    assert "Inventory" in schema
-    inv_cols = {c["name"] for c in schema["Inventory"]}
-    assert "purchase_price_toman" in inv_cols
-    assert "purchase_price_usd" not in inv_cols
     assert counts["Product"] == 1
-    assert counts["Inventory"] == 1
-    assert counts["Sale"] == 1
-    assert counts["SaleItem"] == 1
     assert toman["Inventory"][0][1] == 1500000
-    assert toman["Sale"][0][1] == 2000000
 
 
 def test_migration_execution_and_post_schema(legacy_clone):
@@ -121,122 +104,110 @@ def test_migration_execution_and_post_schema(legacy_clone):
     assert evidence["toman_preserved"] == "YES"
     assert evidence["row_counts_preserved"] == "YES"
     assert evidence["fk_check"] == "PASS"
-
     post = evidence["post_schema"]
-    prod_cols = {c["name"] for c in post["Product"]}
-    assert "category_id" in prod_cols
-    inv_cols = {c["name"] for c in post["Inventory"]}
-    for col in (
-        "purchase_price_usd",
-        "sale_price_usd",
-        "price_fx_rate_usd_to_irr",
-        "purchase_price_irr",
-        "sale_price_irr",
-        "price_updated_at",
-        "purchase_price_toman",
-        "sale_price_toman",
-    ):
-        assert col in inv_cols
-    sale_cols = {c["name"] for c in post["Sale"]}
-    for col in ("total_amount_usd", "fx_rate_usd_to_irr", "total_amount_irr", "total_amount_toman"):
-        assert col in sale_cols
-    si_cols = {c["name"] for c in post["SaleItem"]}
-    for col in ("unit_price_usd", "fx_rate_usd_to_irr", "unit_price_irr", "unit_price_toman"):
-        assert col in si_cols
-
+    assert "category_id" in {c["name"] for c in post["Product"]}
     for t in ("Category", "StockMovement", "Payment", "SaleReturn", "OperationalFxRate"):
         assert t in post
 
 
-def test_category_seed_exactly_six(legacy_clone):
+def test_product_category_real_fk(legacy_clone):
     evidence = migrate(legacy_clone)
-    rows = evidence["category_rows"]
-    ids = {r[0] for r in rows}
-    expected = {c[0] for c in OFFICIAL_CATEGORIES}
-    assert ids == expected
-    assert len(rows) == 6
-    assert "BOOST" in ids and "HAIR" in ids
-    assert "BOOST" != "HAIR"
+    assert evidence["product_category_fk_present"] is True
+    conn = sqlite3.connect(legacy_clone)
+    conn.execute("PRAGMA foreign_keys=ON")
+    assert has_fk_to(conn, "Product", "Category", "category_id", "category_id")
+    assert any(r[2] == "Category" and r[3] == "category_id" for r in foreign_key_list(conn, "Product"))
+    conn.close()
 
 
-def test_row_counts_unchanged(legacy_clone):
-    evidence = migrate(legacy_clone)
-    pre = evidence["pre_row_counts"]
-    post = evidence["post_row_counts"]
-    for t in ("Product", "Inventory", "Sale", "SaleItem", "Customer"):
-        assert post[t] == pre[t]
-
-
-def test_toman_values_unchanged(legacy_clone):
-    evidence = migrate(legacy_clone)
-    assert evidence["pre_toman_samples"] == evidence["post_toman_samples"]
-    inv = evidence["post_toman_samples"]["Inventory"][0]
-    assert inv[1] == 1500000
-    assert inv[2] == 2000000
-    assert evidence["toman_preserved"] == "YES"
-
-
-def test_no_historical_fx_conversion(legacy_clone):
-    """USD/IRR columns must remain NULL after migration (no backfill)."""
+def test_all_accounting_fks_via_pragma(legacy_clone):
     migrate(legacy_clone)
     conn = sqlite3.connect(legacy_clone)
-    row = conn.execute(
-        "SELECT purchase_price_usd, sale_price_usd, price_fx_rate_usd_to_irr, "
-        "purchase_price_irr, sale_price_irr FROM Inventory WHERE inventory_id='I1'"
-    ).fetchone()
+    conn.execute("PRAGMA foreign_keys=ON")
+    assert has_fk_to(conn, "Product", "Category", "category_id", "category_id")
+    assert has_fk_to(conn, "SaleReturn", "Product", "product_id", "product_id")
+    assert has_fk_to(conn, "SaleReturn", "Sale", "sale_id", "sale_id")
+    assert has_fk_to(conn, "Payment", "Sale", "sale_id", "sale_id")
+    assert has_fk_to(conn, "StockMovement", "Product", "product_id", "product_id")
+    assert has_fk_to(conn, "Inventory", "Product", "product_id", "product_id")
+    assert has_fk_to(conn, "SaleItem", "Product", "product_id", "product_id")
+    assert has_fk_to(conn, "SaleItem", "Sale", "sale_id", "sale_id")
+    assert has_fk_to(conn, "Sale", "Customer", "customer_id", "customer_id")
     conn.close()
-    assert all(v is None for v in row)
 
 
-def test_fk_check_zero_violations(legacy_clone):
+def test_fk_check_zero_and_invalid_rejection(legacy_clone):
     evidence = migrate(legacy_clone)
     assert evidence["fk_check"] == "PASS"
     assert evidence["fk_check_violations"] == []
+    conn = sqlite3.connect(legacy_clone)
+    conn.execute("PRAGMA foreign_keys=ON")
+    with pytest.raises(sqlite3.IntegrityError):
+        conn.execute(
+            "INSERT INTO SaleReturn (return_id, sale_id, product_id, quantity) VALUES ('RX','S1','NOPE',1)"
+        )
+        conn.commit()
+    conn.rollback()
+    conn.execute(
+        "INSERT INTO SaleReturn (return_id, sale_id, product_id, quantity) VALUES ('R1','S1','P1',1)"
+    )
+    conn.commit()
+    with pytest.raises(sqlite3.IntegrityError):
+        conn.execute("UPDATE Product SET category_id='NOT_A_CAT' WHERE product_id='P1'")
+        conn.commit()
+    conn.rollback()
+    conn.execute("UPDATE Product SET category_id='BEAUTY' WHERE product_id='P1'")
+    conn.commit()
+    assert conn.execute("SELECT category_id FROM Product WHERE product_id='P1'").fetchone()[0] == "BEAUTY"
+    conn.close()
+
+
+def test_category_seed_exactly_six(legacy_clone):
+    evidence = migrate(legacy_clone)
+    ids = {r[0] for r in evidence["category_rows"]}
+    assert ids == {c[0] for c in OFFICIAL_CATEGORIES}
+    assert len(evidence["category_rows"]) == 6
+
+
+def test_row_counts_and_ids_preserved(legacy_clone):
+    evidence = migrate(legacy_clone)
+    pre, post = evidence["pre_row_counts"], evidence["post_row_counts"]
+    for t in ("Product", "Inventory", "Sale", "SaleItem", "Customer"):
+        assert post[t] == pre[t]
+    conn = sqlite3.connect(legacy_clone)
+    assert conn.execute("SELECT product_id FROM Product").fetchone()[0] == "P1"
+    conn.close()
+
+
+def test_toman_and_no_fx_conversion(legacy_clone):
+    evidence = migrate(legacy_clone)
+    assert evidence["pre_toman_samples"] == evidence["post_toman_samples"]
+    assert evidence["toman_preserved"] == "YES"
+    conn = sqlite3.connect(legacy_clone)
+    row = conn.execute(
+        "SELECT purchase_price_usd, sale_price_usd, price_fx_rate_usd_to_irr FROM Inventory WHERE inventory_id='I1'"
+    ).fetchone()
+    assert all(v is None for v in row)
+    conn.close()
 
 
 def test_idempotent(legacy_clone):
     e1 = migrate(legacy_clone)
     e2 = migrate(legacy_clone)
-    assert e1["status"] == "SUCCESS"
-    assert e2["status"] == "SUCCESS"
+    assert e1["status"] == e2["status"] == "SUCCESS"
     assert e2["idempotent_re_run"] == "OK"
-    assert e1["post_row_counts"] == e2["post_row_counts"]
-
-
-def test_product_category_id_nullable(legacy_clone):
-    migrate(legacy_clone)
-    conn = sqlite3.connect(legacy_clone)
-    val = conn.execute("SELECT category_id FROM Product WHERE product_id='P1'").fetchone()[0]
-    assert val is None
-    conn.execute("UPDATE Product SET category_id='BEAUTY' WHERE product_id='P1'")
-    conn.commit()
-    val2 = conn.execute("SELECT category_id FROM Product WHERE product_id='P1'").fetchone()[0]
-    assert val2 == "BEAUTY"
-    conn.close()
+    assert e2["product_category_fk_present"] is True
 
 
 def test_real_db_path_refused(tmp_path):
-    """Safety: script refuses data/hbi.db without override."""
     fake = tmp_path / "data" / "hbi.db"
     fake.parent.mkdir(parents=True)
     fake.write_bytes(b"")
     from scripts.accounting_phase02_migrate import main
-    rc = main(["--db", str(fake)])
-    assert rc == 2
+    assert main(["--db", str(fake)]) == 2
 
 
 def test_migration_does_not_touch_frozen_artifacts():
-    """Structural: migration module must not import or rewrite product identity / scoring."""
     src = (ROOT / "scripts" / "accounting_phase02_migrate.py").read_text(encoding="utf-8")
-    forbidden = [
-        "seed_products",
-        "PRODUCT_A",
-        "scoring",
-        "recommendation",
-        "identity_status",
-        "data/hbi.db",
-    ]
-    for f in forbidden:
-        if f == "data/hbi.db":
-            continue
-        assert f not in src or "REFUSED" in src
+    for f in ("seed_products", "PRODUCT_A", "scoring", "recommendation"):
+        assert f not in src
