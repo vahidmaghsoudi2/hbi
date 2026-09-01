@@ -18,16 +18,23 @@
 |-------|------|--------|-------|
 | 00 | Repository Audit | COMPLETE | Grok2 |
 | 01 | Accounting Architecture | **CLOSED / PASS** | Grok2 |
-| 02 | Data Model + Schema Migration (real SQLite FK) | **IMPLEMENTED + TESTED (clone) — AWAITING GATE** | Grok2 |
-| 03+ | … | **STOPPED** | — |
+| 02 | Data Model + Schema Migration (real SQLite FK) | **CLOSED / PASS** (prior gate) | Grok2 |
+| 03 | Accounting Home UI | **IMPLEMENTED + DOCUMENTED — AWAITING GATE** | Grok2 |
+| 04+ | … | **STOPPED** | — |
 
-## Evidence (Phase 02)
+## Evidence
 
+### Phase 02
 - `docs/accounting/PHASE-02_DATA_MODEL.md`
-- `tests/test_accounting_data_model.py`
-- `scripts/accounting_phase02_schema.sql`
-- `scripts/accounting_phase02_migrate.py` (Product rebuild for real FK; additive elsewhere)
-- `tests/test_schema_migration_clone.py` (11 passed; PRAGMA foreign_key_list assertions)
+- `scripts/accounting_phase02_migrate.py`
+- `tests/test_schema_migration_clone.py`
 - `docs/accounting/PHASE-02_MIGRATION_PLAN_EVIDENCE.md`
 
-Real `data/hbi.db` was **not** migrated. PHASE 03 remains STOPPED.
+### Phase 03
+- `frontend/src/pages/AccountingHomePage.tsx`
+- `frontend/src/styles/accounting.css`
+- Route: `/accounting`
+- Home entry: «حسابداری» on `NewHomePage`
+- `docs/accounting/PHASE-03_ACCOUNTING_HOME_UI_EVIDENCE.md`
+
+Real `data/hbi.db` was **not** touched. Phase 04+ remains STOPPED.
