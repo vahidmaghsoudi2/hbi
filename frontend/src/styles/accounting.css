@@ -1,0 +1,201 @@
+/* PHASE 03 — Accounting Home (reuses HBI dark palette) */
+.acc-root {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font, "Segoe UI", Tahoma, system-ui, sans-serif);
+  background: radial-gradient(1200px 600px at 20% -10%, #1a2a40 0%, var(--bg, #0f1419) 55%);
+  color: var(--text, #e8eef7);
+  direction: rtl;
+}
+
+.acc-header {
+  border-bottom: 1px solid var(--border, #2d3a4f);
+  background: rgba(15, 20, 25, 0.9);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.acc-header-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.acc-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.acc-brand-mark {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent, #3d9cf0);
+  font-size: 1.1rem;
+}
+
+.acc-brand-title {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.acc-brand-sub {
+  font-size: 0.8rem;
+  color: var(--muted, #9aa8bc);
+}
+
+.acc-back-btn {
+  appearance: none;
+  text-decoration: none;
+  font: inherit;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid var(--border, #2d3a4f);
+  background: var(--surface-2, #243044);
+  color: var(--text, #e8eef7);
+  font-weight: 600;
+}
+
+.acc-back-btn:hover {
+  border-color: var(--accent, #3d9cf0);
+}
+
+.acc-main {
+  flex: 1;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.25rem;
+}
+
+.acc-panel {
+  background: var(--surface, #1a2332);
+  border: 1px solid var(--border, #2d3a4f);
+  border-radius: var(--radius, 12px);
+  padding: 1.15rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.acc-panel h1 {
+  margin: 0 0 0.4rem;
+  font-size: 1.4rem;
+}
+
+.acc-panel h2 {
+  margin: 0 0 0.85rem;
+  font-size: 1.1rem;
+}
+
+.acc-lead {
+  color: var(--muted, #9aa8bc);
+  margin: 0;
+}
+
+.acc-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.85rem;
+}
+
+.acc-summary-card {
+  background: var(--surface-2, #243044);
+  border: 1px solid var(--border, #2d3a4f);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+}
+
+.acc-summary-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: var(--muted, #9aa8bc);
+  font-weight: 600;
+}
+
+.acc-summary-value {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.acc-unavailable {
+  color: var(--warn, #e6c07b);
+}
+
+.acc-summary-note {
+  margin: 0.4rem 0 0;
+  font-size: 0.75rem;
+  color: var(--muted, #9aa8bc);
+}
+
+.acc-menu {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.65rem;
+}
+
+.acc-menu-item {
+  appearance: none;
+  font: inherit;
+  text-align: right;
+  text-decoration: none;
+  color: var(--text, #e8eef7);
+  background: var(--surface-2, #243044);
+  border: 1px solid var(--border, #2d3a4f);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.acc-menu-item:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.acc-menu-item:not(:disabled):hover,
+.acc-menu-back:hover {
+  border-color: var(--accent, #3d9cf0);
+}
+
+.acc-menu-back {
+  border-color: var(--accent, #3d9cf0);
+  background: rgba(61, 156, 240, 0.12);
+}
+
+.acc-menu-label {
+  font-weight: 600;
+}
+
+.acc-menu-badge {
+  font-size: 0.72rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--border, #2d3a4f);
+  color: var(--muted, #9aa8bc);
+  white-space: nowrap;
+}
+
+.acc-footer {
+  text-align: center;
+  padding: 1rem;
+  color: var(--muted, #9aa8bc);
+  font-size: 0.85rem;
+  border-top: 1px solid var(--border, #2d3a4f);
+}
+
+@media (max-width: 640px) {
+  .acc-header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
