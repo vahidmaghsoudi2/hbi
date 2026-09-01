@@ -2,7 +2,9 @@
 # یک‌بار اجرا کنید: راست‌کلیک → Run with PowerShell
 
 $ErrorActionPreference = "Stop"
-$Root = Resolve-Path (Join-Path $PSScriptRoot "..")
+
+# Resolve-Path برمی‌گرداند PathInfo؛ برای Shortcut باید string باشد
+$Root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $Bat = Join-Path $Root "scripts\start-hbi.bat"
 
 if (-not (Test-Path $Bat)) {
@@ -19,7 +21,6 @@ $Sc.TargetPath = $Bat
 $Sc.WorkingDirectory = $Root
 $Sc.WindowStyle = 1
 $Sc.Description = "راه‌اندازی Home پروژه HBI — گالری مقصودی"
-# آیکون پیش‌فرض مرورگر/سیستم؛ در صورت داشتن .ico می‌توانید مسیر بدهید
 $Sc.IconLocation = "%SystemRoot%\System32\shell32.dll,13"
 $Sc.Save()
 
