@@ -14,6 +14,7 @@ import type {
   TokenPair,
   SaleCreateRequest,
   SaleDTO,
+  ProductCreateRequest,
 } from "../types/api";
 
 const BASE = import.meta.env?.VITE_API_BASE ?? "/api/v1";
@@ -137,4 +138,12 @@ export function createSale(
 /** GET /api/v1/sales/total — requires auth */
 export function getTotalSales(token: string): Promise<{ total_sales: number }> {
   return request<{ total_sales: number }>("/sales/total", {}, token);
+}
+
+/** POST /api/v1/products/ — public create (PO-confirmed draft) */
+export function createProduct(body: ProductCreateRequest): Promise<ProductDTO> {
+  return request<ProductDTO>("/products/", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
 }

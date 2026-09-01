@@ -116,3 +116,20 @@ export interface SaleDTO {
   items?: unknown;
   [key: string]: unknown;
 }
+
+/** POST /api/v1/products/ body — matches backend ProductCreate */
+export interface ProductCreateRequest {
+  product_id: string;
+  brand: string;
+  product_name: string;
+  variant?: string | null;
+  size_value?: number | null;
+  size_unit?: string | null;
+  barcode_gtin?: string | null;
+  market_region?: string | null;
+  country_of_origin?: string | null;
+  packaging_version?: string | null;
+  identity_status?: string;
+  qa_verdict?: string;
+  status?: string;
+}
