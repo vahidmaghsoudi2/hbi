@@ -4,6 +4,7 @@
 **Phase:** 01 — Architecture only (NO code / NO migration execution)  
 **PO decisions frozen:** C-01 APPROVED, C-02 APPROVED  
 **Mode:** NO ASSUMPTION · NO SCOPE CREEP · NO FROZEN ARTIFACT CHANGE  
+**C-01 unit correction:** 2026-09-01 (Conditional Pass remediation)  
 
 ---
 
@@ -95,25 +96,74 @@ Out of scope: double-entry GL, payroll, multi-warehouse, complex tax, FEFO, loya
 | Field | Purpose |
 |-------|--------|
 | `amount_usd` | Currency of record |
-| `fx_rate_usd_to_irr` | Rate used at posting (IRR per 1 USD) |
+| `fx_rate_usd_to_irr` | Rate used at posting (**IRR per 1 USD**) |
 | `amount_irr` / `amount_toman` | Snapshot display (stored or derived once at post) |
 
 **Invariant:** After commit, historical money rows are immutable w.r.t. FX. Updating “today’s rate” must not cascade-update Sale/SaleItem historical amounts.
 
-### 4.3 Migration strategy (Toman → USD) — DESIGN ONLY
+### 4.3 Units and conversion (C-01 correction — DESIGN ONLY)
 
-**Current evidence:** `Inventory.purchase_price_toman`, `Inventory.sale_price_toman`, `Sale.total_amount_toman`, `SaleItem.unit_price_toman`.
+#### 4.3.1 Unit definitions (locked)
 
-**Principles:**
+| Symbol / field | Unit | Definition |
+|----------------|------|------------|
+| `purchase_price_toman`, `sale_price_toman`, `unit_price_toman`, `total_amount_toman` | **Toman** | Legacy HBI money columns (integer). Evidence: `app/models/inventory.py`, `sale.py`, `sale_item.py`. |
+| **IRR (Rial)** | Iranian Rial | Display/legal denomination alongside Toman. |
+| **Toman ↔ IRR** | Fixed ratio | **1 Toman = 10 IRR** (1 IRR = 0.1 Toman). This is **not** an FX rate; it is denomination identity. |
+| `R` = `fx_rate_usd_to_irr` | **IRR per 1 USD** | Snapshot/operational FX. Example meaning: R = 1_000_000 means 1 USD = 1_000_000 IRR. |
+| `amount_usd` | **USD** | Currency of Record. |
 
-1. **Additive first:** add USD + snapshot columns/tables; keep legacy `*_toman` until validation PASS.
-2. **One conversion event:** migration job uses PO-supplied operational rate **R** at run time (not guessed in PHASE 01):
-   - `amount_usd = toman / R` (or equivalent rule locked at Phase 04),
-   - store `fx_rate_usd_to_irr = R`,
-   - leave original `*_toman` as audit until dual-read PASS.
-3. **No silent invention:** null prices stay null.
-4. **Frozen A–D:** do not rewrite seed identity content for Accounting convenience.
-5. **Rollback:** retain legacy columns until dual-read validated.
+**Forbidden:** `amount_usd = toman / R` when R is IRR-per-USD. That is dimensionally inconsistent (Toman ÷ (IRR/USD)) and causes a systematic **×10 error**.
+
+#### 4.3.2 Canonical conversion chain
+
+```text
+Toman  →  IRR  →  USD
+```
+
+1. `amount_irr = amount_toman × 10`  
+   Units: Toman × (IRR/Toman) → IRR
+
+2. `amount_usd = amount_irr / R`  
+   Units: IRR ÷ (IRR/USD) → USD  
+   Equivalent: `amount_usd = (amount_toman × 10) / R`
+
+3. New posts after cutover (record USD first):
+   - `amount_irr_snapshot = amount_usd × R`
+   - `amount_toman_snapshot = amount_irr_snapshot / 10`
+
+#### 4.3.3 Historical migration (design only — not executed in PHASE 01)
+
+For each legacy row with non-null `*_toman`:
+
+1. PO supplies migration-time rate **R** (IRR per 1 USD). PHASE 01 does not invent R.
+2. Compute once: `amount_irr = toman × 10`; `amount_usd = amount_irr / R`.
+3. Persist `amount_usd`, `fx_rate_usd_to_irr = R`, optional IRR/Toman snapshots for audit.
+4. Keep original `*_toman` until dual-read PASS and a later Gate allows drop.
+5. Null prices stay null.
+
+**Immutability:** After a historical row is written with its snapshot R, later changes to the operational FX table must **not** rewrite that row’s `amount_usd` or snapshot rate.
+
+#### 4.3.4 Numeric validation example (NOT a PO rate)
+
+Illustrative only — **not** an approved market rate:
+
+| Step | Value |
+|------|-------|
+| Legacy `purchase_price_toman` | 1_500_000 Toman |
+| → IRR | 1_500_000 × 10 = **15_000_000 IRR** |
+| Example R | **1_000_000 IRR / USD** |
+| → USD | 15_000_000 / 1_000_000 = **15.00 USD** |
+
+Incorrect `toman / R` would yield 1.5 USD and is **rejected**.
+
+#### 4.3.5 Migration strategy principles
+
+1. Additive first (USD + snapshot; retain `*_toman`).
+2. One conversion event with PO-supplied R at Phase 04+ execution.
+3. No silent invention of prices.
+4. Frozen A–D identity content not rewritten for Accounting convenience.
+5. Rollback path via retained legacy columns.
 
 PHASE 01 does **not** choose a live FX number, run SQL, or drop toman columns.
 
@@ -193,8 +243,10 @@ Without explicit PO: Frozen Scoring/Evidence, Product A–D record semantics, se
 
 ## 12. Gate recommendation
 
-PHASE 01 ready for review as architecture freeze of USD+FX rules, Category entity, single Product Master reuse, additive Toman→USD migration design.
+PHASE 01 architecture includes **unit-correct** C-01 conversion:
 
-**Request:** `GATE PHASE 01: PASS | CONDITIONAL | FAIL`
+`amount_usd = (amount_toman × 10) / R` where R is IRR per 1 USD.
+
+**Request:** `GATE PHASE 01: PASS` after review of §4.3.
 
 Only after PASS may PHASE 02 (Data Model) start.
