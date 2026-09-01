@@ -1,8 +1,9 @@
-﻿import { Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import NewHomePage from "./pages/NewHomePage";
 import CatalogPage from "./pages/CatalogPage";
 import PilotPage from "./pages/PilotPage";
 import RecommendationPage from "./pages/RecommendationPage";
+import AccountingHomePage from "./pages/AccountingHomePage";
 
 export default function App() {
   return (
@@ -11,6 +12,7 @@ export default function App() {
       <Route path="/catalog" element={<CatalogPage />} />
       <Route path="/pilot" element={<PilotPage />} />
       <Route path="/recommendation" element={<RecommendationPage />} />
+      <Route path="/accounting" element={<AccountingHomePage />} />
     </Routes>
   );
 }
