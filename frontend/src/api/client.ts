@@ -15,6 +15,7 @@ import type {
   SaleCreateRequest,
   SaleDTO,
   ProductCreateRequest,
+  ProductUpdateRequest,
 } from "../types/api";
 
 const BASE = import.meta.env?.VITE_API_BASE ?? "/api/v1";
@@ -144,6 +145,22 @@ export function getTotalSales(token: string): Promise<{ total_sales: number }> {
 export function createProduct(body: ProductCreateRequest): Promise<ProductDTO> {
   return request<ProductDTO>("/products/", {
     method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+/** GET /api/v1/products/{id} */
+export function getProduct(productId: string): Promise<ProductDTO> {
+  return request<ProductDTO>(`/products/${encodeURIComponent(productId)}`);
+}
+
+/** PATCH /api/v1/products/{id} — PO edit after save */
+export function updateProduct(
+  productId: string,
+  body: ProductUpdateRequest
+): Promise<ProductDTO> {
+  return request<ProductDTO>(`/products/${encodeURIComponent(productId)}`, {
+    method: "PATCH",
     body: JSON.stringify(body),
   });
 }
