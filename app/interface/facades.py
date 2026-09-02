@@ -159,7 +159,7 @@ class RecommendationFacade:
         recommendations = self.service.generate_recommendations(case_id, customer_profile or {})
         return [_to_recommendation_dto(r, self.db) for r in recommendations]
 
-    def find_by_case(self, case_id: str) -> List[CaseDTO]:
+    def find_by_case(self, case_id: str) -> List[RecommendationDTO]:
         recommendations = self.service.find_by_case(case_id)
         return [_to_recommendation_dto(r, self.db) for r in recommendations]
 
