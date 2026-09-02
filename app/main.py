@@ -10,7 +10,7 @@ from app.core.rate_limit import RateLimitMiddleware
 from app.api.routers import (
     auth_router, products_router, customers_router, cases_router,
     recommendations_router, inventory_router, sales_router, evidence_router,
-    payments_router,
+    payments_router, returns_router,
 )
 
 try:
@@ -107,6 +107,7 @@ app.include_router(recommendations_router, prefix="/api/v1/recommendations", tag
 app.include_router(inventory_router, prefix="/api/v1/inventory", tags=["Inventory"])
 app.include_router(sales_router, prefix="/api/v1/sales", tags=["Sales"])
 app.include_router(payments_router, prefix="/api/v1/payments", tags=["Payments"])
+app.include_router(returns_router, prefix="/api/v1/returns", tags=["Returns"])
 app.include_router(evidence_router, prefix="/api/v1/evidence", tags=["Evidence"])
 
 
