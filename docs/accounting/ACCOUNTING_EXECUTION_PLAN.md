@@ -1,8 +1,8 @@
 # HBI Accounting — Execution Plan (Tracking)
 **Contract:** HBI ACCOUNTING MASTER EXECUTION CONTRACT V1.0  
 **Implementation Owner:** Grok2  
-**Phase 07 baseline:** `720043e16d53a516c77603d2f1acda83b5a89167`  
 **Phase 08 baseline:** `623b5f65950531657ec59246d712b08e282cab23`  
+**Phase 09 baseline:** `74c6295f3acc25d2463bc911b35868ed93a00d1a`  
 **Last Updated:** 2026-09-02
 
 ## Frozen decisions
@@ -16,20 +16,18 @@
 
 | Phase | Name | Status | Owner |
 |-------|------|--------|-------|
-| 00–04 | … | **CLOSED / PASS** | Grok2 |
-| 05 | Inventory Management | **CLOSED / PASS** | Grok2 |
-| 06 | Stock Movement Ledger | **CLOSED / PASS** | Grok2 |
-| 07 | Stock-In Workflow | **CLOSED / PASS** | Grok2 |
+| 00–07 | … | **CLOSED / PASS** | Grok2 |
 | 08 | Sales Workflow | **CLOSED / PASS** | Grok2 |
-| 09+ | Payments / Returns / Reports | **STOPPED** | — |
+| 09 | Payment Workflow | **CLOSED / PASS** | Grok2 |
+| 10+ | Returns / Reports / … | **STOPPED** | — |
 
-## Phase 08 summary
+## Phase 09 summary
 
-- Atomic sale: Customer + ACTIVE Product + Inventory → Sale/SaleItem → qty decrease → `SALE` StockMovement.
-- FX rate required; C-01 USD/IRR/Toman on sale, items, movements.
-- API: `POST /api/v1/sales/` with `fx_rate_usd_to_irr`.
-- Tests: 10 dedicated + prior regression → **57 passed** total in combined run.
+- Existing `Payment` entity; methods CASH/CARD/TRANSFER/OTHER only.
+- `PaymentService` + API under `/api/v1/payments`.
+- Sale totals not mutated; FX on payment is snapshot.
+- Tests: 11 dedicated; combined accounting suite **68 passed**.
 - Real DB not written.
-- Evidence: `docs/accounting/PHASE-08_SALES_EVIDENCE.md`
+- Evidence: `docs/accounting/PHASE-09_PAYMENT_EVIDENCE.md`
 
-**Phase 09 not started.**
+**Phase 10 not started.**
