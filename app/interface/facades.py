@@ -42,11 +42,9 @@ def _to_case_dto(c) -> CaseDTO:
 
 def _get_availability(db: Session, product_id: str) -> str:
     try:
-        from app.models.inventory import Inventory
-        inv = db.query(Inventory).filter_by(product_id=product_id).first()
-        if not inv:
-            return "OUT_OF_STOCK"
-        return "AVAILABLE" if inv.quantity_available > 0 else "OUT_OF_STOCK"
+        from app.services.inventory_service import InventoryService
+        svc = InventoryService(db)
+        return "AVAILABLE" if svc.is_available(product_id, 1) else "OUT_OF_STOCK"
     except Exception:
         return "UNKNOWN"
 
@@ -161,7 +159,7 @@ class RecommendationFacade:
         recommendations = self.service.generate_recommendations(case_id, customer_profile or {})
         return [_to_recommendation_dto(r, self.db) for r in recommendations]
 
-    def find_by_case(self, case_id: str) -> List[RecommendationDTO]:
+    def find_by_case(self, case_id: str) -> List[CaseDTO]:
         recommendations = self.service.find_by_case(case_id)
         return [_to_recommendation_dto(r, self.db) for r in recommendations]
 
@@ -178,6 +176,9 @@ class InventoryFacade:
     def find_available(self) -> List[InventoryDTO]:
         items = self.service.find_available()
         return [_to_inventory_dto(i) for i in items]
+
+    def list_all(self) -> List[InventoryDTO]:
+        return [_to_inventory_dto(i) for i in self.service.list_all()]
 
 class SaleFacade:
     def __init__(self, db: Session):
@@ -303,4 +304,3 @@ class ProductKnowledgeFacade:
             created_at=knowledge.created_at,
             updated_at=knowledge.updated_at
         )
-
