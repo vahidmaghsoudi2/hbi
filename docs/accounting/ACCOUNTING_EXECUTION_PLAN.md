@@ -1,8 +1,8 @@
 # HBI Accounting — Execution Plan (Tracking)
 **Contract:** HBI ACCOUNTING MASTER EXECUTION CONTRACT V1.0  
 **Implementation Owner:** Grok2  
-**Phase 09 baseline:** `74c6295f3acc25d2463bc911b35868ed93a00d1a`  
 **Phase 10 baseline:** `4e59380c4395d41ea71073571e7794b2a7bcda37`  
+**Phase 11 baseline:** `a7c6c6db33c22c5fa66ba65bcb623d12fdb8811e`  
 **Last Updated:** 2026-09-02
 
 ## Frozen decisions
@@ -16,19 +16,18 @@
 
 | Phase | Name | Status | Owner |
 |-------|------|--------|-------|
-| 00–08 | … | **CLOSED / PASS** | Grok2 |
-| 09 | Payment Workflow | **CLOSED / PASS** | Grok2 |
+| 00–09 | … | **CLOSED / PASS** | Grok2 |
 | 10 | Returns Workflow | **CLOSED / PASS** | Grok2 |
-| 11+ | Reports / … | **STOPPED** | — |
+| 11 | Currency / FX Workflow | **CLOSED / PASS** | Grok2 |
+| 12+ | Reports / … | **STOPPED** | — |
 
-## Phase 10 summary
+## Phase 11 summary
 
-- Existing `SaleReturn`; product from original SaleItem only.
-- Inventory increase + `RETURN_IN` StockMovement; Sale totals immutable.
-- API: `/api/v1/returns/`.
-- No refund payment workflow (documented limitation).
-- Tests: 7 dedicated; combined suite **75 passed**.
+- Shared C-01 helpers in `currency_fx.py`.
+- `OperationalFxService` for current rate; never mutates historical snapshots.
+- API: `/api/v1/fx/current`, `/api/v1/fx/operational`.
+- Tests: 5 dedicated; combined suite **80 passed**.
 - Real DB not written.
-- Evidence: `docs/accounting/PHASE-10_RETURNS_EVIDENCE.md`
+- Evidence: `docs/accounting/PHASE-11_CURRENCY_FX_EVIDENCE.md`
 
-**Phase 11 not started.**
+**Phase 12 not started.**
