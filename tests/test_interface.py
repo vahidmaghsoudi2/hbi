@@ -167,14 +167,36 @@ def test_inventory_facade_get_by_product(db, sample_product, sample_inventory):
     assert dto.stock_status == "AVAILABLE"
 
 def test_sale_facade_create_sale(db, sample_product, sample_customer, sample_inventory):
+    """C-01: SaleFacade requires explicit fx_rate_usd_to_irr and unit_price_usd."""
     facade = SaleFacade(db)
-    items = [{"product_id": sample_product.product_id, "quantity": 2, "unit_price_toman": 50000}]
-    sale = facade.create_sale(sample_customer.customer_id, items)
+    # 0.5 USD * R=1_000_000 → IRR=500_000 → Toman=50_000 per unit; qty 2 → 100_000 Toman
+    items = [
+        {
+            "product_id": sample_product.product_id,
+            "quantity": 2,
+            "unit_price_usd": 0.5,
+        }
+    ]
+    sale = facade.create_sale(
+        sample_customer.customer_id,
+        items,
+        fx_rate_usd_to_irr=1_000_000.0,
+    )
     assert sale.total_amount_toman == 100000
     assert len(sale.items) == 1
 
 def test_sale_facade_insufficient_stock(db, sample_product, sample_customer, sample_inventory):
     facade = SaleFacade(db)
-    items = [{"product_id": sample_product.product_id, "quantity": 20, "unit_price_toman": 50000}]
+    items = [
+        {
+            "product_id": sample_product.product_id,
+            "quantity": 20,
+            "unit_price_usd": 0.5,
+        }
+    ]
     with pytest.raises(BusinessRuleError):
-        facade.create_sale(sample_customer.customer_id, items)
+        facade.create_sale(
+            sample_customer.customer_id,
+            items,
+            fx_rate_usd_to_irr=1_000_000.0,
+        )
