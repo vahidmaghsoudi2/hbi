@@ -1,8 +1,8 @@
 # HBI Accounting — Execution Plan (Tracking)
 **Contract:** HBI ACCOUNTING MASTER EXECUTION CONTRACT V1.0  
 **Implementation Owner:** Grok2  
-**Phase 05 baseline:** `34f2e177832e952ae18b545524c894bfff572c94`  
 **Phase 06 baseline:** `8f7c437d15ee0304c44e2b5885a97cc0c823597c`  
+**Phase 07 baseline:** `720043e16d53a516c77603d2f1acda83b5a89167`  
 **Last Updated:** 2026-09-02
 
 ## Frozen decisions
@@ -23,16 +23,17 @@
 | 04 | Real Database Migration | **CLOSED / PASS** | Grok2 + PO local |
 | 05 | Inventory Management | **CLOSED / PASS** | Grok2 |
 | 06 | Stock Movement Ledger | **CLOSED / PASS** | Grok2 |
-| 07+ | Stock-In / Sales / Returns workflows | **STOPPED** | — |
+| 07 | Stock-In Workflow | **CLOSED / PASS** | Grok2 |
+| 08+ | Sales / Payments / Returns | **STOPPED** | — |
 
-## Phase 06 summary
+## Phase 07 summary
 
-- Read ledger on existing `StockMovement` (no new entity).
-- Repository + service filters: product_id, movement_type (schema types only).
-- API: `GET /api/v1/inventory/movements`, `GET /api/v1/inventory/movements/{id}`.
-- Writes remain Phase 05 inventory mutation path only.
-- Tests: 9 Phase 06 + 9 Phase 05 + 16 Phase 02 = **34 passed**.
+- `StockInService`: product + inventory required; qty > 0; USD price; **caller-supplied** FX rate R.
+- C-01: `amount_irr = usd * R`, `amount_toman = irr / 10`.
+- Inventory qty + purchase price fields updated; `STOCK_IN` movement with FX snapshot.
+- API: `POST /api/v1/inventory/stock-in` (auth).
+- Tests: 13 Phase 07 + 9 + 9 + 16 = **47 passed**.
 - Real DB not written.
-- Evidence: `docs/accounting/PHASE-06_STOCK_MOVEMENT_EVIDENCE.md`
+- Evidence: `docs/accounting/PHASE-07_STOCK_IN_EVIDENCE.md`
 
-**Phase 07 not started.**
+**Phase 08 not started.**
