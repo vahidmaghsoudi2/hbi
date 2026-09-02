@@ -1,8 +1,8 @@
 # HBI Accounting — Execution Plan (Tracking)
 **Contract:** HBI ACCOUNTING MASTER EXECUTION CONTRACT V1.0  
 **Implementation Owner:** Grok2  
-**Phase 08 baseline:** `623b5f65950531657ec59246d712b08e282cab23`  
 **Phase 09 baseline:** `74c6295f3acc25d2463bc911b35868ed93a00d1a`  
+**Phase 10 baseline:** `4e59380c4395d41ea71073571e7794b2a7bcda37`  
 **Last Updated:** 2026-09-02
 
 ## Frozen decisions
@@ -16,18 +16,19 @@
 
 | Phase | Name | Status | Owner |
 |-------|------|--------|-------|
-| 00–07 | … | **CLOSED / PASS** | Grok2 |
-| 08 | Sales Workflow | **CLOSED / PASS** | Grok2 |
+| 00–08 | … | **CLOSED / PASS** | Grok2 |
 | 09 | Payment Workflow | **CLOSED / PASS** | Grok2 |
-| 10+ | Returns / Reports / … | **STOPPED** | — |
+| 10 | Returns Workflow | **CLOSED / PASS** | Grok2 |
+| 11+ | Reports / … | **STOPPED** | — |
 
-## Phase 09 summary
+## Phase 10 summary
 
-- Existing `Payment` entity; methods CASH/CARD/TRANSFER/OTHER only.
-- `PaymentService` + API under `/api/v1/payments`.
-- Sale totals not mutated; FX on payment is snapshot.
-- Tests: 11 dedicated; combined accounting suite **68 passed**.
+- Existing `SaleReturn`; product from original SaleItem only.
+- Inventory increase + `RETURN_IN` StockMovement; Sale totals immutable.
+- API: `/api/v1/returns/`.
+- No refund payment workflow (documented limitation).
+- Tests: 7 dedicated; combined suite **75 passed**.
 - Real DB not written.
-- Evidence: `docs/accounting/PHASE-09_PAYMENT_EVIDENCE.md`
+- Evidence: `docs/accounting/PHASE-10_RETURNS_EVIDENCE.md`
 
-**Phase 10 not started.**
+**Phase 11 not started.**
