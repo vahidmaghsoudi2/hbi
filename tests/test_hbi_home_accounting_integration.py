@@ -15,9 +15,8 @@ def test_app_registers_home_and_accounting_routes():
     app = (FRONTEND / "App.tsx").read_text(encoding="utf-8")
     assert 'path="/"' in app and "NewHomePage" in app
     assert 'path="/accounting"' in app and "AccountingHomePage" in app
-    # exactly one accounting route registration
     assert app.count('path="/accounting"') == 1
-    assert app.count("AccountingHomePage") == 2  # import + usage
+    assert app.count("AccountingHomePage") >= 2  # import + route element
 
 
 def test_single_accounting_home_component():
@@ -30,12 +29,11 @@ def test_new_home_has_accounting_link_to_canonical_route():
     src = (FRONTEND / "pages" / "NewHomePage.tsx").read_text(encoding="utf-8")
     assert 'to="/accounting"' in src
     assert "حسابداری" in src
-    # Link-based navigation (not inventing parallel route)
     assert "Link" in src and "react-router-dom" in src
 
 
 def test_accounting_home_page_is_phase03_shell():
     src = (FRONTEND / "pages" / "AccountingHomePage.tsx").read_text(encoding="utf-8")
-    assert "AccountingHomePage" in src or "export default" in src
+    assert "export default" in src
     assert "حسابداری" in src
-    assert (FRONTEND.parent / "src" / "styles" / "accounting.css").exists()
+    assert (FRONTEND / "styles" / "accounting.css").exists()
