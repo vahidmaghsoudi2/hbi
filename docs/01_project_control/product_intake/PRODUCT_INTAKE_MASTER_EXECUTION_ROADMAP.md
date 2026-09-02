@@ -1,230 +1,223 @@
 ﻿# PRODUCT INTAKE — MASTER EXECUTION ROADMAP
 
-**Project:** HBI — Health & Beauty Intelligence
-**Domain:** Product Intake / Product Information Feeding
-**Status:** ACTIVE
-**Source of Truth:** GitHub `master`
-**Owner:** Product Owner / Domain Architect
-**Last Updated:** 2026-09-02
+**Project:** HBI — Health & Beauty Intelligence  
+**Domain:** Product Intake / Product Information Feeding  
+**Status:** ACTIVE  
+**Source of Truth:** GitHub `master`  
+**Owner:** Product Owner / Domain Architect  
+**Last Reconciled:** 2026-09-02  
+**Current Phase:** PHASE 1 — PRODUCT INTAKE CONTRACT v1
+
+---
+
+## AUTHORITY
+
+This roadmap is subordinate to:
+
+`docs/01_project_control/PROJECT_RULES.md`
+
+It must be read with:
+
+- `docs/01_project_control/PRODUCT_INTAKE_STRATEGY_AND_GOVERNANCE.md`
+- `docs/01_project_control/product_intake/PRODUCT_INTAKE_GOVERNANCE_RECONCILIATION_2026-09-02.md`
+- `docs/01_project_control/product_intake/PRODUCT_INTAKE_LIVE_PROJECT_LEDGER.md`
+- `docs/01_project_control/product_intake/PRODUCT_INTAKE_EXECUTION_MISSION.md`
 
 ---
 
 ## PURPOSE
 
-This roadmap is the execution continuity map for the HBI Product Intake initiative.
+This roadmap provides one unambiguous execution path from the existing Product Intake capability to a governed Product Master lifecycle.
 
-It exists so that any future human or AI team member can determine:
+Product Intake is NOT a greenfield UI build.
 
-1. Where the work currently stands.
-2. What has already been decided.
-3. What remains open.
-4. What phase is currently active.
-5. What the next action is.
-6. What must NOT be changed.
+The objective is:
 
-This document is complementary to:
-
-`docs/01_project_control/PRODUCT_INTAKE_STRATEGY_AND_GOVERNANCE.md`
-
-The Strategy & Governance document defines WHAT and WHY.
-This roadmap defines the execution sequence.
+**CURRENT REALITY → GAP IDENTIFICATION → CONTRACT → COMPLETION**
 
 ---
 
-# EXECUTION ROADMAP
+# PHASE 0 — REALITY & BASELINE
 
-## PHASE 0 — REALITY & BASELINE
+**Status:** RECONCILED
 
-Purpose:
-Establish the actual repository state before implementation.
+Direct repository inspection confirms existing Product functionality in:
 
-Required inspection:
-- Product model
-- Product API
-- Product Intake UI/API
-- ProductKnowledge
-- Evidence
-- Inventory
-- Sales
-- Recommendation
-- Existing Product Master records
-- Existing downstream relationships
-- Current implementation gaps
+- Product model;
+- Product services/API;
+- ProductKnowledge;
+- Evidence;
+- Inventory;
+- Product A-D;
+- Home Page;
+- Product Gallery/listing;
+- Product Intake UI.
 
-Output:
-Reality Baseline.
+Important frontend reality includes:
 
-Status:
-PARTIALLY COMPLETED / BASELINE MUST BE VERIFIED AGAIN BEFORE CONTRACT FINALIZATION.
+- `frontend/src/pages/NewHomePage.tsx`
+- `frontend/src/pages/ProductIntakePanel.tsx`
+
+Therefore no greenfield Product Intake rebuild is authorized.
+
+Phase 0 completion means current implementation is explicitly separated from future proposed behavior.
 
 ---
 
-## PHASE 1 — PRODUCT INTAKE CONTRACT v1
+# PHASE 1 — PRODUCT INTAKE CONTRACT v1
+
+**Status:** ACTIVE / CURRENT
 
 Purpose:
-Convert the approved Strategy & Governance into an exact operational contract.
 
-Must define:
-- user inputs
-- AI research inputs
-- AI research outputs
-- field-level provenance
-- confidence
-- UNKNOWN handling
-- CONFLICT handling
-- duplicate detection result
-- validation rules
-- PO review
-- approval transition
-- Product Master registration
-- update behavior
-- error behavior
-- audit requirements
+Convert approved governance into an exact operational contract.
 
-Output:
+Contract must define:
+
+- User Inputs;
+- Product Master boundary;
+- AI Research Inputs;
+- AI Research Outputs;
+- Evidence boundary;
+- Product Knowledge boundary;
+- provenance;
+- confidence;
+- UNKNOWN handling;
+- CONFLICT handling;
+- duplicate detection result;
+- validation;
+- PO review/edit;
+- approval;
+- registration/activation;
+- update behavior;
+- error behavior;
+- audit requirements;
+- existing Home/Product Intake integration boundary.
+
+**Output:**
+
 `PRODUCT_INTAKE_CONTRACT_v1.md`
 
-Status:
-ACTIVE — CURRENT PHASE.
+**Implementation authorization: NO**
 
-NEXT ACTION:
-Complete and formally review Product Intake Contract v1 before implementation.
+No implementation of new Product Intake lifecycle behavior may begin before Contract v1 is formally accepted.
 
 ---
 
-## PHASE 2 — AI RESEARCH / INTAKE
+# PHASE 2 — AI RESEARCH / INTAKE
+
+Use the existing Product Intake entry capability as the starting point.
 
 Purpose:
-Allow a real introduced product to generate a structured research draft.
 
-AI responsibilities:
-- research
-- source collection
-- product information collection
-- ingredient information
-- claims
-- use cases
-- limitations
-- safety information
-- evidence discovery
-- conflicts
-- unknowns
-- structured dossier
-
-AI must NOT approve Product Master registration.
-
-Output:
-Research Draft / Product Research Dossier.
+Generate a structured, source-traceable Research Draft.
 
 Status:
+
 NOT STARTED.
 
 ---
 
-## PHASE 3 — VALIDATION & ENRICHMENT
+# PHASE 3 — VALIDATION & ENRICHMENT
 
 Purpose:
-Validate and enrich the research output.
 
-Information domains:
-- Identity
-- Composition / INCI
-- Ingredient roles
-- Functional claims
-- Benefits
-- Suitability
-- Safety
-- Usage
-- Evidence
-- Commercial information
+Validate and enrich research, Evidence and Knowledge while preserving:
 
-Information classification:
-FACT
-MANUFACTURER CLAIM
-EVIDENCE
-INFERENCE
-UNKNOWN
+FACT  
+MANUFACTURER CLAIM  
+EVIDENCE  
+INFERENCE  
+UNKNOWN  
 CONFLICT
 
 Status:
+
 NOT STARTED.
 
 ---
 
-## PHASE 4 — PO REVIEW & APPROVAL
+# PHASE 4 — PO REVIEW & APPROVAL
 
 Purpose:
-Provide an explicit human governance gate.
+
+Provide explicit human review and approval.
 
 PO must be able to:
-- inspect
-- edit
-- correct
-- review sources
-- inspect unknowns
-- inspect conflicts
-- approve
-- reject
 
-Critical rule:
+- inspect;
+- edit;
+- correct;
+- review sources;
+- inspect UNKNOWN;
+- inspect CONFLICT;
+- approve;
+- reject.
 
-Database creation is NOT equivalent to Product Master approval.
-
-Only authorized human approval can complete the approval gate.
+Database creation is not equivalent to approval.
 
 Status:
+
 NOT STARTED.
 
 ---
 
-## PHASE 5 — PRODUCT MASTER REGISTRATION & INTEGRATION
+# PHASE 5 — PRODUCT MASTER REGISTRATION & INTEGRATION
 
 Purpose:
-Register the approved product as the governed Product Master.
+
+Register approved products as the governed Product Master.
 
 Requirements:
-- authoritative `product_id`
-- ONE PRODUCT MASTER identity
-- downstream modules reference the same `product_id`
 
-Downstream domains:
-- Inventory
-- Sales
-- Accounting
-- Knowledge
-- Evidence
-- Recommendation
+- one authoritative `product_id`;
+- ONE PRODUCT MASTER;
+- downstream references use the same `product_id`.
+
+Domains:
+
+- Inventory;
+- Sales;
+- Accounting;
+- Knowledge;
+- Evidence;
+- Recommendation.
 
 Status:
+
 NOT STARTED.
 
 ---
 
-## PHASE 6 — UPDATE / VERSION / RE-VALIDATION
+# PHASE 6 — UPDATE / VERSION / RE-VALIDATION
 
 Purpose:
+
 Maintain Product Master integrity after registration.
 
-Required capabilities:
-- correction
-- enrichment
-- manufacturer updates
-- packaging/formulation updates
-- evidence updates
-- commercial updates
-- safety updates
-- version/history
-- controlled re-validation
+Required direction:
+
+- correction;
+- enrichment;
+- manufacturer updates;
+- packaging/formulation changes;
+- evidence updates;
+- commercial updates;
+- safety updates;
+- history/versioning;
+- controlled re-validation.
 
 Status:
+
 NOT STARTED.
 
 ---
 
-## PHASE 7 — REAL PRODUCT PILOT & ACCEPTANCE
+# PHASE 7 — REAL PRODUCT PILOT & ACCEPTANCE
 
 Purpose:
-Validate the complete Product Intake lifecycle on real products.
+
+Validate the complete lifecycle on real products.
 
 Flow:
 
@@ -236,112 +229,93 @@ INTRODUCE
 → PO REVIEW
 → APPROVE
 → REGISTER / ACTIVATE
-→ UPDATE / RE-VALIDATE WHEN REQUIRED
-
-Acceptance requirements:
-- no duplicate identity
-- no corruption of existing Product Master
-- source traceability
-- visible uncertainty
-- AI cannot approve
-- correct downstream `product_id`
-- operational continuity
-- auditable history
-
-Final sequence:
-QA → PO Acceptance → Production Readiness.
+→ UPDATE / RE-VALIDATE
 
 Status:
+
 NOT STARTED.
 
 ---
 
 # PHASE STATUS
 
-| Phase | Name | Status |
-|---|---|---|
-| 0 | Reality & Baseline | PARTIAL |
-| 1 | Product Intake Contract v1 | ACTIVE / CURRENT |
-| 2 | AI Research / Intake | NOT STARTED |
-| 3 | Validation & Enrichment | NOT STARTED |
-| 4 | PO Review & Approval | NOT STARTED |
-| 5 | Product Master / Integration | NOT STARTED |
-| 6 | Update / Version / Re-validation | NOT STARTED |
-| 7 | Real Product Pilot / Acceptance | NOT STARTED |
+| Phase | Status |
+|---|---|
+| P0 Reality & Baseline | RECONCILED |
+| P1 Contract v1 | ACTIVE / CURRENT |
+| P2 AI Research / Intake | NOT STARTED |
+| P3 Validation / Enrichment | NOT STARTED |
+| P4 PO Review / Approval | NOT STARTED |
+| P5 Product Master / Integration | NOT STARTED |
+| P6 Version / Update / Re-validation | NOT STARTED |
+| P7 Real Product Pilot / Acceptance | NOT STARTED |
 
 ---
 
 # ACCEPTANCE GATES
 
-These are acceptance gates, NOT execution phases.
+These are Gates, not Phases.
 
-G1 — Identity
-G2 — Research
-G3 — Validation
-G4 — Human Review
-G5 — Approval
-G6 — Integration
-G7 — Maintenance
+G1 — Identity  
+G2 — Research  
+G3 — Validation  
+G4 — Human Review  
+G5 — Approval  
+G6 — Integration  
+G7 — Maintenance  
 G8 — Real Product Pilot
-
-A phase may contain one or more gates.
 
 ---
 
 # NON-NEGOTIABLE RULES
 
-1. GitHub `master` is the Source of Truth.
-2. NO ASSUMPTION.
-3. NO INVENTED DATA.
-4. ONE PRODUCT MASTER.
-5. Same `product_id` downstream.
-6. AI researches but does not approve.
-7. PO is final Product Master approver.
-8. UNKNOWN remains UNKNOWN until established.
-9. CONFLICT must remain visible until resolved.
-10. Existing Product A-D identities are protected.
-11. Existing downstream relationships must not be broken.
-12. Do not rebuild accepted backend capabilities without explicit justification.
-13. Do not change a DECIDED business rule through implementation.
-14. OPEN decisions must remain OPEN until explicitly decided.
-15. Every completed phase requires evidence and a recorded commit/SHA.
-16. No phase is considered complete merely because code exists.
+1. GitHub `master` is Source of Truth.
+2. `PROJECT_RULES.md` is the mandatory Entry Gate.
+3. NO ASSUMPTION.
+4. NO INVENTED DATA.
+5. Find existing capability before building.
+6. Product Intake must not be rebuilt from zero.
+7. ONE PRODUCT MASTER.
+8. Same `product_id` downstream.
+9. Existing Product A-D are protected.
+10. AI researches but does not approve.
+11. PO is final Product Master approver.
+12. OPEN decisions remain OPEN.
+13. Current implementation is not automatically a business rule.
+14. Contract precedes new implementation.
+15. Every completed unit requires evidence, test, commit/SHA and Ledger update.
+16. Accounting V1 remains outside this workstream and frozen.
 
 ---
 
 # CURRENT POSITION
 
-CURRENT PHASE:
+**CURRENT PHASE:**  
 PHASE 1 — PRODUCT INTAKE CONTRACT v1
 
-CURRENT OBJECTIVE:
-Finalize the operational contract before implementation.
+**CURRENT OBJECTIVE:**  
+Finalize the operational contract against the verified existing implementation.
 
-CURRENT NEXT ACTION:
-Review the repository baseline and produce the formal Product Intake Contract v1.
+**CURRENT AUTHORIZED ACTION:**  
+Reality reconciliation → Contract finalization.
 
-DO NOT:
-- start implementation before the contract is accepted
-- redesign Product Master without explicit approval
-- invent missing fields
-- invent AI behavior
-- invent approval states
-- modify Accounting V1
-- create a competing Product identity
+**NOT AUTHORIZED:**  
+Implementation of new duplicate detection, approval workflow, lifecycle state machine, inventory policy or versioning.
 
 ---
 
-# CONTINUITY RULE
+# CONTINUITY
 
-When this project is resumed after interruption:
+On every resume:
 
-1. Read this roadmap.
-2. Read `PRODUCT_INTAKE_STRATEGY_AND_GOVERNANCE.md`.
-3. Inspect current GitHub `master`.
-4. Verify the current SHA.
-5. Check the Live Ledger.
-6. Resume only from the recorded CURRENT PHASE.
-7. Never infer that an OPEN decision has been resolved.
-8. Never assume that previous implementation still matches current `master`.
+1. Read `PROJECT_RULES.md`.
+2. Read Strategy & Governance.
+3. Read Governance Reconciliation Amendment.
+4. Read this Roadmap.
+5. Read Live Ledger.
+6. Inspect current `origin/master`.
+7. Record actual SHA.
+8. Inspect current Product Intake and Home Product functionality.
+9. Resume only from the recorded authorized action.
 
-This document is a continuity anchor, not a substitute for repository inspection.
+# END
