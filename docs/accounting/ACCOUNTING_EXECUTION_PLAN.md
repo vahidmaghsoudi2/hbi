@@ -1,8 +1,8 @@
 # HBI Accounting — Execution Plan (Tracking)
 **Contract:** HBI ACCOUNTING MASTER EXECUTION CONTRACT V1.0  
 **Implementation Owner:** Grok2  
-**Phase 10 baseline:** `4e59380c4395d41ea71073571e7794b2a7bcda37`  
 **Phase 11 baseline:** `a7c6c6db33c22c5fa66ba65bcb623d12fdb8811e`  
+**Phase 12 baseline:** `ef9b44e87cc3a81bfe6033f2c853d7d23b8d2294`  
 **Last Updated:** 2026-09-02
 
 ## Frozen decisions
@@ -16,18 +16,19 @@
 
 | Phase | Name | Status | Owner |
 |-------|------|--------|-------|
-| 00–09 | … | **CLOSED / PASS** | Grok2 |
-| 10 | Returns Workflow | **CLOSED / PASS** | Grok2 |
+| 00–10 | … | **CLOSED / PASS** | Grok2 |
 | 11 | Currency / FX Workflow | **CLOSED / PASS** | Grok2 |
-| 12+ | Reports / … | **STOPPED** | — |
+| 12 | Accounting Reports | **CLOSED / PASS** | Grok2 |
+| 13+ | (next gated work) | **STOPPED** | — |
 
-## Phase 11 summary
+## Phase 12 summary
 
-- Shared C-01 helpers in `currency_fx.py`.
-- `OperationalFxService` for current rate; never mutates historical snapshots.
-- API: `/api/v1/fx/current`, `/api/v1/fx/operational`.
-- Tests: 5 dedicated; combined suite **80 passed**.
+- Read-only `ReportService` + `/api/v1/reports/*`.
+- Sales periods/range; inventory all/by-category/low-stock; financial revenue/returns.
+- COGS/discounts/gross profit explicitly **UNSUPPORTED**.
+- BOOST ≠ HAIR enforced.
+- Tests: 6 dedicated; combined suite **86 passed**.
 - Real DB not written.
-- Evidence: `docs/accounting/PHASE-11_CURRENCY_FX_EVIDENCE.md`
+- Evidence: `docs/accounting/PHASE-12_REPORTS_EVIDENCE.md`
 
-**Phase 12 not started.**
+**Phase 13 not started.**
