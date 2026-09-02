@@ -1,8 +1,8 @@
 # HBI Accounting — Execution Plan (Tracking)
 **Contract:** HBI ACCOUNTING MASTER EXECUTION CONTRACT V1.0  
 **Implementation Owner:** Grok2  
-**Phase 11 baseline:** `a7c6c6db33c22c5fa66ba65bcb623d12fdb8811e`  
 **Phase 12 baseline:** `ef9b44e87cc3a81bfe6033f2c853d7d23b8d2294`  
+**Phase 13 baseline:** `81fb8798882afd0e7b3210f288170a241959b31d`  
 **Last Updated:** 2026-09-02
 
 ## Frozen decisions
@@ -16,19 +16,18 @@
 
 | Phase | Name | Status | Owner |
 |-------|------|--------|-------|
-| 00–10 | … | **CLOSED / PASS** | Grok2 |
-| 11 | Currency / FX Workflow | **CLOSED / PASS** | Grok2 |
+| 00–11 | … | **CLOSED / PASS** | Grok2 |
 | 12 | Accounting Reports | **CLOSED / PASS** | Grok2 |
-| 13+ | (next gated work) | **STOPPED** | — |
+| 13 | HBI Home Integration | **CLOSED / PASS** | Grok2 |
+| 14+ | (next gated work) | **STOPPED** | — |
 
-## Phase 12 summary
+## Phase 13 summary
 
-- Read-only `ReportService` + `/api/v1/reports/*`.
-- Sales periods/range; inventory all/by-category/low-stock; financial revenue/returns.
-- COGS/discounts/gross profit explicitly **UNSUPPORTED**.
-- BOOST ≠ HAIR enforced.
-- Tests: 6 dedicated; combined suite **86 passed**.
+- Reality audit: `NewHomePage` already links «حسابداری» → `/accounting`.
+- Single `AccountingHomePage` (Phase 03) reused; no duplicate route.
+- Static integration tests: **4 passed**; combined suite **90 passed**.
+- npm build not completed in agent (timeout) — documented, not fabricated.
 - Real DB not written.
-- Evidence: `docs/accounting/PHASE-12_REPORTS_EVIDENCE.md`
+- Evidence: `docs/accounting/PHASE-13_HBI_HOME_INTEGRATION_EVIDENCE.md`
 
-**Phase 13 not started.**
+**Phase 14 not started.**
