@@ -1,11 +1,10 @@
 """Phase 07 — Stock-In workflow.
 
 Uses existing Product + Inventory + StockMovement only.
-C-01 locked formula:
+C-01 locked formula (via app.services.currency_fx):
   R = IRR per 1 USD
   amount_irr = amount_usd * R
   amount_toman = amount_irr / 10
-  (equivalently amount_usd = (amount_toman * 10) / R)
 FX rate is never invented; caller must supply it.
 """
 from __future__ import annotations
@@ -19,18 +18,16 @@ from sqlalchemy.orm import Session
 from app.models.inventory import Inventory
 from app.models.product import Product
 from app.models.stock_movement import StockMovement
+from app.services.currency_fx import irr_to_toman, usd_to_irr, usd_to_toman, validate_fx_rate
 
-
-def usd_to_irr(amount_usd: float, fx_rate_usd_to_irr: float) -> float:
-    return float(amount_usd) * float(fx_rate_usd_to_irr)
-
-
-def irr_to_toman(amount_irr: float) -> float:
-    return float(amount_irr) / 10.0
-
-
-def usd_to_toman(amount_usd: float, fx_rate_usd_to_irr: float) -> float:
-    return irr_to_toman(usd_to_irr(amount_usd, fx_rate_usd_to_irr))
+# Re-export for legacy imports (sale/payment/return services)
+__all__ = [
+    "StockInService",
+    "usd_to_irr",
+    "irr_to_toman",
+    "usd_to_toman",
+    "validate_fx_rate",
+]
 
 
 class StockInService:
@@ -56,9 +53,7 @@ class StockInService:
         if purchase_price_usd is None or float(purchase_price_usd) < 0:
             raise ValueError("purchase_price_usd must be >= 0")
         purchase_price_usd = float(purchase_price_usd)
-        if fx_rate_usd_to_irr is None or float(fx_rate_usd_to_irr) <= 0:
-            raise ValueError("fx_rate_usd_to_irr must be > 0 (caller-supplied; never invented)")
-        fx_rate_usd_to_irr = float(fx_rate_usd_to_irr)
+        fx_rate_usd_to_irr = validate_fx_rate(fx_rate_usd_to_irr)
 
         product = (
             self.db.query(Product).filter(Product.product_id == product_id).first()
@@ -82,7 +77,6 @@ class StockInService:
         line_toman = irr_to_toman(line_irr)
 
         before_qty = inv.quantity_available
-        # Snapshot prior FX on inventory for assertion that past movements stay fixed
         prior_inv_fx = inv.price_fx_rate_usd_to_irr
 
         try:
