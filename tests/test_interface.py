@@ -41,6 +41,9 @@ def db():
         from app.models.recommendation import Recommendation
         from app.models.sale_item import SaleItem
         from app.models.sale import Sale
+        from app.models.payment import Payment
+        from app.models.sale_return import SaleReturn
+        from app.models.stock_movement import StockMovement
         from app.models.case import Case
         from app.models.inventory import Inventory
         from app.models.product_knowledge import ProductKnowledge
@@ -48,6 +51,9 @@ def db():
         from app.models.customer import Customer
         from app.models.product import Product
         session.query(Recommendation).delete(synchronize_session=False)
+        session.query(Payment).delete(synchronize_session=False)
+        session.query(SaleReturn).delete(synchronize_session=False)
+        session.query(StockMovement).delete(synchronize_session=False)
         session.query(SaleItem).delete(synchronize_session=False)
         session.query(Sale).delete(synchronize_session=False)
         session.query(Case).delete(synchronize_session=False)
@@ -130,7 +136,6 @@ def test_recommendation_facade_generate(db, sample_product, sample_customer, sam
     from app.models.product_knowledge import ProductKnowledge
     from app.models.evidence import Evidence
 
-    # Add ProductKnowledge for scoring
     pk = ProductKnowledge(
         product_knowledge_id="PK_TEST_001",
         product_id=sample_product.product_id,
@@ -139,7 +144,6 @@ def test_recommendation_facade_generate(db, sample_product, sample_customer, sam
     )
     db.add(pk)
 
-    # Add Evidence for scoring
     ev = Evidence(
         evidence_id="EV_TEST_001",
         product_id=sample_product.product_id,
@@ -169,7 +173,6 @@ def test_inventory_facade_get_by_product(db, sample_product, sample_inventory):
 def test_sale_facade_create_sale(db, sample_product, sample_customer, sample_inventory):
     """C-01: SaleFacade requires explicit fx_rate_usd_to_irr and unit_price_usd."""
     facade = SaleFacade(db)
-    # 0.5 USD * R=1_000_000 → IRR=500_000 → Toman=50_000 per unit; qty 2 → 100_000 Toman
     items = [
         {
             "product_id": sample_product.product_id,
