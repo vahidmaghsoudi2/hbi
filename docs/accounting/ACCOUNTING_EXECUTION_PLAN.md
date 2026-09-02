@@ -23,13 +23,12 @@
 | 01 | Accounting Architecture | **CLOSED / PASS** | Grok2 |
 | 02 | Data Model + Schema Migration (real SQLite FK) | **CLOSED / PASS** | Grok2 |
 | 03 | Accounting Home UI | **CLOSED / PASS** | Grok2 |
-| 04 | Real Database Migration | **CONDITIONAL PASS** | Grok2 + PO local |
-| 05+ | … | **STOPPED** | — |
+| 04 | Real Database Migration | **CLOSED / PASS** | Grok2 + PO local |
+| 05+ | … | **STOPPED** (not started) | — |
 
 ## Evidence
 
 ### Phase 02
-- `docs/accounting/PHASE-02_DATA_MODEL.md`
 - `scripts/accounting_phase02_migrate.py`
 - `tests/test_schema_migration_clone.py` (11 passed)
 - `tests/test_accounting_data_model.py` (5 passed)
@@ -37,17 +36,14 @@
 
 ### Phase 03
 - `frontend/src/pages/AccountingHomePage.tsx`
-- `frontend/src/styles/accounting.css`
 - Route: `/accounting`
-- Home entry: «حسابداری» on real `NewHomePage` (not stub)
 - `docs/accounting/PHASE-03_ACCOUNTING_HOME_UI_EVIDENCE.md`
 
 ### Phase 04
-- Local DB: `E:\hbi\data\hbi.db` (not in Git)
+- Local DB migrated: `E:\hbi\data\hbi.db` (not in Git)
 - Backup: `E:\hbi_backups\hbi_pre_phase04_20260902_105538.db`
-- Migrator: `status=SUCCESS`, `toman=YES`, `fk_check=PASS`, `product_fk=True`, exit 0
-- Pre-gate: integrity ok, 16 Phase 02 tests passed, size-matched backup
+- Migrator: SUCCESS · toman YES · fk PASS · exit 0
+- Post confirm: integrity ok · fk 0 · Product 19 · Category 6 · BOOST/HAIR/BEAUTY/TOOLS/PERFUME/OTHER
 - Evidence: `docs/accounting/PHASE-04_REAL_DATABASE_MIGRATION_EVIDENCE.md`
-- Post integrity / full counts / category dump in short paste: **NOT VERIFIED** → gate remains conditional until optional one-liner confirm
 
-**Phase 05 remains STOPPED.**
+**Phase 05 is not started.** Requires a separate execution mission.
