@@ -10,6 +10,7 @@ from app.interface.facades import InventoryFacade
 from app.interface.errors import NotFoundError
 from app.services.inventory_service import InventoryService
 from app.services.stock_movement_service import StockMovementService
+from app.services.stock_in_service import StockInService
 
 router = APIRouter()
 
@@ -31,6 +32,16 @@ class StockAdjustRequest(BaseModel):
     quantity: int = Field(..., gt=0)
     direction: str = Field(..., description="increase | decrease")
     note: Optional[str] = None
+
+
+class StockInRequest(BaseModel):
+    product_id: str
+    quantity: int = Field(..., gt=0)
+    purchase_price_usd: float = Field(..., ge=0)
+    fx_rate_usd_to_irr: float = Field(..., gt=0, description="IRR per 1 USD; required, never invented")
+    note: Optional[str] = None
+    reference_type: Optional[str] = None
+    reference_id: Optional[str] = None
 
 
 @router.get("/")
@@ -97,6 +108,39 @@ async def get_availability(product_id: str, db: Session = Depends(get_db)):
         "sellable_quantity": sellable,
         "status": "AVAILABLE" if available else "OUT_OF_STOCK",
     }
+
+
+@router.post("/stock-in")
+async def stock_in(
+    body: StockInRequest,
+    db: Session = Depends(get_db),
+    _auth: str = Depends(get_current_customer_id),
+):
+    """Phase 07 — Stock-In with USD price + FX snapshot + STOCK_IN movement."""
+    svc = StockInService(db)
+    try:
+        result = svc.stock_in(
+            product_id=body.product_id,
+            quantity=body.quantity,
+            purchase_price_usd=body.purchase_price_usd,
+            fx_rate_usd_to_irr=body.fx_rate_usd_to_irr,
+            note=body.note,
+            reference_type=body.reference_type,
+            reference_id=body.reference_id,
+        )
+        db.commit()
+        inv = result["inventory"]
+        mov = result["movement"]
+        db.refresh(inv)
+        db.refresh(mov)
+        return {
+            "inventory": _to_dict(inv),
+            "movement": _to_dict(mov),
+            "before_quantity": result["before_quantity"],
+        }
+    except ValueError as e:
+        db.rollback()
+        raise HTTPException(status_code=422, detail=str(e))
 
 
 @router.post("/adjust")
