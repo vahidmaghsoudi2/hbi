@@ -37,8 +37,10 @@ Verified baseline includes:
 - Home Page Product navigation;
 - Product Gallery/listing;
 - Product Intake UI;
-- rontend/src/pages/NewHomePage.tsx;
-- rontend/src/pages/ProductIntakePanel.tsx.
+- 
+- `frontend/src/pages/NewHomePage.tsx`;
+- 
+- `frontend/src/pages/ProductIntakePanel.tsx`.
 
 Therefore Product Intake is:
 
@@ -224,3 +226,4 @@ Then resume from the current phase.
 | 2026-09-02 | Governance / Roadmap / Ledger reconciliation | ACTIVE |
 
 # END
+
