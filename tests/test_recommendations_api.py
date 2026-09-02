@@ -1,8 +1,4 @@
-"""Recommendation API tests — fixture/auth only; no production logic changes.
-
-Uses in-memory SQLite + dependency override so pilot-token sees the same DB
-as the test setup (previous file-based module fixtures caused customer_not_found).
-"""
+"""Recommendation API tests — fixture/auth only; no production logic changes."""
 from __future__ import annotations
 
 import pytest
@@ -11,14 +7,21 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.main import app
+from app.main import app as fastapi_app
 from app.database import get_db
 from app.models.base import Base
-import app.models  # noqa: F401 — register all tables
 from app.models.product import Product
 from app.models.inventory import Inventory
 from app.models.case import Case
 from app.models.customer import Customer
+from app.models.category import Category  # noqa: F401
+from app.models.evidence import Evidence  # noqa: F401
+from app.models.recommendation import Recommendation  # noqa: F401
+from app.models.sale import Sale  # noqa: F401
+from app.models.sale_item import SaleItem  # noqa: F401
+from app.models.stock_movement import StockMovement  # noqa: F401
+from app.models.payment import Payment  # noqa: F401
+from app.models.sale_return import SaleReturn  # noqa: F401
 
 
 @pytest.fixture()
@@ -45,8 +48,8 @@ def api_env():
         finally:
             pass
 
-    app.dependency_overrides[get_db] = override_get_db
-    client = TestClient(app)
+    fastapi_app.dependency_overrides[get_db] = override_get_db
+    client = TestClient(fastapi_app)
 
     customer = Customer(
         customer_id="test_customer",
@@ -60,7 +63,7 @@ def api_env():
 
     yield client, db, case
 
-    app.dependency_overrides.clear()
+    fastapi_app.dependency_overrides.clear()
     db.close()
     Base.metadata.drop_all(bind=engine)
 
