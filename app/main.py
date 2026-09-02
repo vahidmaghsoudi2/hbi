@@ -10,6 +10,7 @@ from app.core.rate_limit import RateLimitMiddleware
 from app.api.routers import (
     auth_router, products_router, customers_router, cases_router,
     recommendations_router, inventory_router, sales_router, evidence_router,
+    payments_router,
 )
 
 try:
@@ -45,7 +46,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Explicit origins. Include both localhost and 127.0.0.1 for Vite dev.
 _cors_origins = [
     origin.strip()
     for origin in os.getenv(
@@ -63,7 +63,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# In-memory rate limiting for auth + recommendation generate (single-instance).
 app.add_middleware(RateLimitMiddleware)
 
 
@@ -107,6 +106,7 @@ app.include_router(cases_router, prefix="/api/v1/cases", tags=["Cases"])
 app.include_router(recommendations_router, prefix="/api/v1/recommendations", tags=["Recommendations"])
 app.include_router(inventory_router, prefix="/api/v1/inventory", tags=["Inventory"])
 app.include_router(sales_router, prefix="/api/v1/sales", tags=["Sales"])
+app.include_router(payments_router, prefix="/api/v1/payments", tags=["Payments"])
 app.include_router(evidence_router, prefix="/api/v1/evidence", tags=["Evidence"])
 
 
