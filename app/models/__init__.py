@@ -13,21 +13,12 @@ from app.models.stock_movement import StockMovement
 from app.models.payment import Payment
 from app.models.sale_return import SaleReturn
 from app.models.operational_fx_rate import OperationalFxRate
+from app.models.product_mutation_log import ProductMutationLog
+from app.models.user_role import UserRole
 
 __all__ = [
-    "Base",
-    "Product",
-    "ProductKnowledge",
-    "Evidence",
-    "Customer",
-    "Case",
-    "Recommendation",
-    "Inventory",
-    "Sale",
-    "SaleItem",
-    "Category",
-    "StockMovement",
-    "Payment",
-    "SaleReturn",
-    "OperationalFxRate",
+    "Base", "Product", "ProductKnowledge", "Evidence", "Customer", "Case",
+    "Recommendation", "Inventory", "Sale", "SaleItem", "Category",
+    "StockMovement", "Payment", "SaleReturn", "OperationalFxRate",
+    "ProductMutationLog", "UserRole",
 ]

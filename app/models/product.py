@@ -22,8 +22,8 @@ class Product(Base):
     qa_verdict = Column(String, nullable=False, server_default="PENDING")
     qa_reviewed_at = Column(DateTime, nullable=True)
     qa_notes = Column(String, nullable=True)
-    status = Column(String, nullable=False, server_default="ACTIVE")
-    # Accounting V1: optional FK to data-driven Category (nullable for legacy rows)
+    # P4 P0: new products always DRAFT; expanded lifecycle vocabulary
+    status = Column(String, nullable=False, server_default="DRAFT")
     category_id = Column(String, ForeignKey("Category.category_id", ondelete="RESTRICT"), nullable=True, index=True)
     created_at = Column(DateTime, server_default=func.current_timestamp())
     updated_at = Column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
@@ -38,7 +38,7 @@ class Product(Base):
             name="ck_product_identity_confidence",
         ),
         CheckConstraint(
-            "status IN ('DRAFT', 'ACTIVE')",
+            "status IN ('DRAFT', 'SUBMITTED', 'QA_REVIEW', 'APPROVED', 'ACTIVE', 'REJECTED', 'ARCHIVED')",
             name="ck_product_status",
         ),
         CheckConstraint(
