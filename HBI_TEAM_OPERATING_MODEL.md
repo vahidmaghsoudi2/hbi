@@ -1,27 +1,5 @@
-﻿# HBI Team Operating Model - RETIRED
+﻿## RETIRED
 
-**Status:** RETIRED  
-**Retired Date:** 2026-09-03  
-**Authority:** Product Owner - مهندس وحید مقصودی
+مدل قبلی Role/Hub از تاریخ 2026-09-03 باطل است.
 
-The previous role-based / hub-based operating model is retired.
-
-It must NOT be used as the current source of truth for team responsibilities.
-
-The HBI project now operates under:
-
-# HBI - شرح وظایف و مسئولیت اعضای پروه
-
-See:
-
-`HBI_TEAM_RESPONSIBILITIES.md`
-
-The current ownership rule is:
-
-> ONE TASK = ONE OWNER = END-TO-END ACCOUNTABILITY
-
-Every member who receives a Task / Mission is responsible for that work from zero to one hundred, including inspection, implementation, testing, verification, self-critique, documentation and final delivery.
-
-The previous permanent role assignments and Hub ownership model are no longer authoritative.
-
-**Established:** 2026-09-03
+مرجع جدید: HBI_TEAM_RESPONSIBILITIES.md
