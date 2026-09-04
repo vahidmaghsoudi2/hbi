@@ -46,6 +46,7 @@ def seed_products(db: Session) -> int:
                     packaging_version=p.get("packaging_version"),
                     identity_status=p["identity_status"],
                     qa_verdict=p.get("qa_verdict", "PENDING"),
+                    status=p.get("status", "ACTIVE"),
                 )
             )
         inv_id = f"INV-{p['product_id']}"
@@ -81,41 +82,38 @@ def seed_evidence(db: Session) -> int:
         return 0
     data = _load(SEED_EVIDENCE)
     n = 0
-    for e in data.get("evidence", []):
-        if db.get(Evidence, e["evidence_id"]) is None:
-            db.add(
-                Evidence(
-                    evidence_id=e["evidence_id"],
-                    product_id=e["product_id"],
-                    claim_id=e.get("claim_id"),
-                    claim=e["claim"],
-                    field=e.get("field"),
-                    claim_type=e.get("claim_type"),
-                    source_type=e["source_type"],
-                    source_reference=e["source_reference"],
-                    evidence_strength=e.get("evidence_strength"),
-                    qa_status=e.get("qa_status", "PENDING"),
-                )
+    for e in data.get("evidence", data if isinstance(data, list) else []):
+        eid = e.get("evidence_id")
+        if not eid or db.get(Evidence, eid) is not None:
+            continue
+        db.add(
+            Evidence(
+                evidence_id=eid,
+                product_id=e["product_id"],
+                claim=e.get("claim", ""),
+                source_type=e.get("source_type", "UNKNOWN"),
+                source_reference=e.get("source_reference", ""),
+                qa_status=e.get("qa_status", "PENDING"),
+                conflict_status=e.get("conflict_status", "NONE"),
             )
-            n += 1
+        )
+        n += 1
     db.commit()
     return n
 
 
-def seed(db: Session) -> tuple[int, int]:
-    return seed_products(db), seed_evidence(db)
-
-
-def main() -> None:
-    os.makedirs(ROOT / "data", exist_ok=True)
-    init_db()
-    db = SessionLocal()
+def seed(db: Session | None = None) -> None:
+    own = db is None
+    if own:
+        init_db()
+        db = SessionLocal()
     try:
-        np, ne = seed(db)
-        print(f"SEED_OK products={np} evidence={ne}")
+        seed_products(db)
+        seed_evidence(db)
     finally:
-        db.close()
+        if own:
+            db.close()
 
 
 if __name__ == "__main__":
-    main()
+    seed()
