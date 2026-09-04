@@ -59,137 +59,41 @@ class RecommendationBase(BaseModel):
     )
 
 
-# ──────────────────────────────────────────────
-# 2. CREATE SCHEMA (POST /recommendations)
-# ──────────────────────────────────────────────
 class RecommendationCreate(RecommendationBase):
-    """
-    Input schema for creating a Recommendation.
-    Note: If Recommendations are only created internally by the Reasoning
-    Engine, this schema may be restricted to admin/service use.
-    """
     pass
 
 
-# ──────────────────────────────────────────────
-# 3. UPDATE SCHEMA (PATCH /recommendations/{id})
-# ──────────────────────────────────────────────
 class RecommendationUpdate(BaseModel):
-    """
-    Partial update schema. Only mutable scoring fields.
-    Identity fields (recommendation_id, case_id, product_id) are immutable.
-    """
-
-    need_match_score: Optional[float] = Field(
-        None, description="Update match score"
-    )
-    evidence_score: Optional[float] = Field(
-        None, description="Update evidence score"
-    )
-    eligibility_status: Optional[str] = Field(
-        None, description="Update eligibility status"
-    )
-    ranking_score: Optional[float] = Field(
-        None, description="Update ranking score"
-    )
-    ranking_reasons: Optional[str] = Field(
-        None, description="Update ranking reasons"
-    )
+    need_match_score: Optional[float] = Field(None, description="Update match score")
+    evidence_score: Optional[float] = Field(None, description="Update evidence score")
+    eligibility_status: Optional[str] = Field(None, description="Update eligibility status")
+    ranking_score: Optional[float] = Field(None, description="Update ranking score")
+    ranking_reasons: Optional[str] = Field(None, description="Update ranking reasons")
 
 
-# ──────────────────────────────────────────────
-# 4. RESPONSE SCHEMA (Full AD-3 16-field contract)
-# ──────────────────────────────────────────────
 class RecommendationResponse(RecommendationBase):
-    """
-    Full AD-3 16-field Response DTO.
-    Includes:
-      - 8 DB-mapped fields (from RecommendationBase)
-      - 6 Computed fields (NOT in DB, from Reasoning Engine)
-      - 2 Dynamic fields (NOT in DB, from Inventory — Framework 1.D)
-      - 2 DB audit fields (exclusion_reasons, created_at)
-    Total: 18 fields in response (16 AD-3 + 2 audit).
-    """
-
-    # ── AD-3 COMPUTED FIELDS (NOT in DB) ──
-    final_score: Optional[float] = Field(
-        None,
-        description="[AD-3 COMPUTED] Final aggregated score from Reasoning Engine."
-    )
-    confidence: Optional[float] = Field(
-        None,
-        description="[AD-3 COMPUTED] Confidence level of the recommendation."
-    )
-    eligibility: Optional[str] = Field(
-        None,
-        description="[AD-3 COMPUTED] Eligibility verdict."
-    )
-    reasoning: Optional[str] = Field(
-        None,
-        description="[AD-3 COMPUTED] Human-readable reasoning explanation."
-    )
-    evidence_refs: Optional[List[str]] = Field(
-        None,
-        description="[AD-3 COMPUTED] List of evidence references (claim_ids)."
-    )
-    warnings: Optional[List[str]] = Field(
-        None,
-        description="[AD-3 COMPUTED] Warning messages from Framework 5 checks."
-    )
-
-    # ── AD-3 DYNAMIC FIELDS (NOT in DB, from Inventory) ──
-    availability: Optional[str] = Field(
-        None,
-        description="[AD-3 DYNAMIC] Availability from Inventory layer. "
-                    "Framework 1.D: NOT stored in ProductKnowledge."
-    )
-    price: Optional[int] = Field(
-        None,
-        description="[AD-3 DYNAMIC] Price in Toman from Inventory layer. "
-                    "Framework 1.D: NOT stored in ProductKnowledge."
-    )
-
-    # ── DB AUDIT FIELDS (in SQLAlchemy model, not in original DTO) ──
-    exclusion_reasons: Optional[str] = Field(
-        None,
-        description="[DB AUDIT] Exclusion reasons. Nullable in DB."
-    )
-    created_at: Optional[datetime] = Field(
-        None,
-        description="[DB AUDIT] Creation timestamp. server_default in DB."
-    )
-
+    final_score: Optional[float] = Field(None, description="[AD-3 COMPUTED] Final aggregated score from Reasoning Engine.")
+    confidence: Optional[float] = Field(None, description="[AD-3 COMPUTED] Confidence level of the recommendation.")
+    eligibility: Optional[str] = Field(None, description="[AD-3 COMPUTED] Eligibility verdict.")
+    reasoning: Optional[str] = Field(None, description="[AD-3 COMPUTED] Human-readable reasoning explanation.")
+    evidence_refs: Optional[List[str]] = Field(None, description="[AD-3 COMPUTED] List of evidence references (claim_ids).")
+    warnings: Optional[List[str]] = Field(None, description="[AD-3 COMPUTED] Warning messages from Framework 5 checks.")
+    availability: Optional[str] = Field(None, description="[AD-3 DYNAMIC] Availability from Inventory layer.")
+    price: Optional[int] = Field(None, description="[AD-3 DYNAMIC] Price in Toman from Inventory layer.")
+    exclusion_reasons: Optional[str] = Field(None, description="[DB AUDIT] Exclusion reasons. Nullable in DB.")
+    created_at: Optional[datetime] = Field(None, description="[DB AUDIT] Creation timestamp. server_default in DB.")
     model_config = ConfigDict(from_attributes=True)
 
 
-# ──────────────────────────────────────────────
-# 5. ERROR RESPONSE SCHEMA (Framework 5 aligned)
-# ──────────────────────────────────────────────
 class ErrorDetail(BaseModel):
-    """Structured error detail aligned with Framework 5."""
-
-    code: str = Field(
-        ...,
-        description="Error code. Examples: RECOMMENDATION_NOT_FOUND, "
-                    "PRODUCT_DATA_CONFLICT, UNKNOWN_FIELD_DETECTED"
-    )
-    message: str = Field(
-        ...,
-        description="Human-readable error message."
-    )
-    details: Optional[Dict[str, Any]] = Field(
-        None,
-        description="Additional structured details. "
-                    "For CONFLICT: include conflicting values and sources. "
-                    "For UNKNOWN: include field name and severity."
-    )
+    code: str = Field(..., description="Error code.")
+    message: str = Field(..., description="Human-readable error message.")
+    details: Optional[Dict[str, Any]] = Field(None, description="Additional structured details.")
 
 
 class ErrorResponse(BaseModel):
-    """Top-level error envelope."""
-
     error: ErrorDetail
-# ─── Evidence & ProductKnowledge Schemas (Phase 3) ─────────────
+
 
 class EvidenceCreate(BaseModel):
     product_id: str
@@ -273,7 +177,9 @@ class ConflictEntryResponse(BaseModel):
     severity: str = "HIGH"
     status: str = "UNRESOLVED"
 
+
 class ProductCreate(BaseModel):
+    """P4 P0: client cannot inject lifecycle/governance state."""
     product_id: str
     brand: str
     product_name: str
@@ -284,16 +190,13 @@ class ProductCreate(BaseModel):
     market_region: Optional[str] = None
     country_of_origin: Optional[str] = None
     packaging_version: Optional[str] = None
-    identity_status: str = "NEEDS_REVIEW"
-    qa_verdict: str = "PENDING"
-    status: str = "DRAFT"
+    category_id: Optional[str] = None
+
 
 class ProductUpdate(BaseModel):
+    """Informational fields only — governance fields forbidden (P4 P0)."""
     brand: Optional[str] = None
     product_name: Optional[str] = None
-    identity_status: Optional[str] = None
-    status: Optional[str] = None
-    qa_verdict: Optional[str] = None
     variant: Optional[str] = None
     size_value: Optional[float] = None
     size_unit: Optional[str] = None
@@ -301,3 +204,23 @@ class ProductUpdate(BaseModel):
     market_region: Optional[str] = None
     country_of_origin: Optional[str] = None
     packaging_version: Optional[str] = None
+    category_id: Optional[str] = None
+
+
+class ProductTransitionRequest(BaseModel):
+    reason: Optional[str] = None
+
+
+class ProductRejectRequest(BaseModel):
+    reason: str
+
+
+class ProductQARequest(BaseModel):
+    verdict: str
+    notes: Optional[str] = None
+
+
+class ProductIdentityVerifyRequest(BaseModel):
+    identity_status: str
+    source_refs: Optional[str] = None
+    confidence: Optional[float] = None
