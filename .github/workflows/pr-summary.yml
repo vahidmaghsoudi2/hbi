@@ -1,0 +1,25 @@
+---
+name: PR Creation Summary
+on:
+  workflow_dispatch:
+
+jobs:
+  create_pr_summary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create PR summary file
+        run: |
+          echo "Files added:" > pr-summary.txt
+          git diff --name-only origin/master...HEAD >> pr-summary.txt || true
+          echo "" >> pr-summary.txt
+          echo "Diff Summary:" >> pr-summary.txt
+          git --no-pager diff --stat origin/master...HEAD >> pr-summary.txt || true
+
+      - name: Upload PR summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-summary-${{ github.sha }}
+          path: pr-summary.txt
