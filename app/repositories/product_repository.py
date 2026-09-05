@@ -20,17 +20,21 @@ class ProductRepository(BaseRepository[Product]):
         return super().update(id, **kwargs)
 
     def update_governance_privileged(
-        self, id: str, *, authorized: bool = False, **kwargs
+        self, id: str, *, confirm_escape_hatch: bool = False, **kwargs
     ) -> Optional[Product]:
-        """Internal escape hatch for governance fields only.
+        """Internal escape hatch for governance fields (tests / controlled tooling).
 
-        Callers MUST pass authorized=True. Lifecycle transitions belong in
-        ProductTransitionService — not this method. Public service/API layers
-        must not expose this without an explicit authorization decision.
+        This is NOT an AuthZ / security boundary.
+        Any caller that can reach the repository can pass confirm_escape_hatch=True.
+
+        Purpose: require *explicit intent* so accidental bare calls fail fast.
+        Lifecycle mutations belong in ProductTransitionService (role-checked).
+        Public service/API layers must not expose this method.
         """
-        if not authorized:
+        if not confirm_escape_hatch:
             raise ValidationError(
-                "update_governance_privileged requires authorized=True; "
+                "update_governance_privileged requires confirm_escape_hatch=True "
+                "(explicit intent only — not AuthZ); "
                 "use ProductTransitionService for controlled lifecycle changes"
             )
         return super().update(id, **kwargs)

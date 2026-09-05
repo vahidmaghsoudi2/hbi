@@ -69,7 +69,6 @@ def db():
 @pytest.fixture
 def sample_product(db):
     repo = ProductRepository(db)
-    # create product with base attributes
     p = repo.create(
         product_id="P001",
         brand="TestBrand",
@@ -77,8 +76,10 @@ def sample_product(db):
         identity_status="VERIFIED",
         qa_verdict="VALID"
     )
-    # P4 WP-01: privileged API requires authorized=True (explicit intent)
-    repo.update_governance_privileged(p.product_id, authorized=True, status="ACTIVE")
+    # Explicit-intent escape hatch for test fixture only (NOT AuthZ).
+    repo.update_governance_privileged(
+        p.product_id, confirm_escape_hatch=True, status="ACTIVE"
+    )
     return p
 
 @pytest.fixture
