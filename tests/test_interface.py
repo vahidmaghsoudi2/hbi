@@ -69,13 +69,18 @@ def db():
 @pytest.fixture
 def sample_product(db):
     repo = ProductRepository(db)
-    return repo.create(
+    # create product with base attributes
+    p = repo.create(
         product_id="P001",
         brand="TestBrand",
         product_name="Test Product",
         identity_status="VERIFIED",
         qa_verdict="VALID"
     )
+    # P4-compliant: use governance-privileged API to set lifecycle state required by tests
+    # This uses existing repository API intended for governance fields (no direct model mutation).
+    repo.update_governance_privileged(p.product_id, status="ACTIVE")
+    return p
 
 @pytest.fixture
 def sample_customer(db):
