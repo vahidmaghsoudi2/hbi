@@ -5,6 +5,13 @@
 **مرجع قوانین:** `docs/01_project_control/PROJECT_RULES.md`  
 **تاریخ:** 2026-09-05
 
+## Reality Note
+Existing coverage was inspected before defining remaining scope.
+
+Reference: `tests/test_product_compliance.py`
+
+این Note ادعا نمی‌کند که همه الزامات قرارداد §18 پوشش کامل دارند؛ فقط ثبت می‌کند که قبل از تعریف Scope باقی‌مانده، پوشش موجود بررسی شده است.
+
 ## هدف
 این سند مسیر اجرای Work Packageهای P4 را برای اعضای تیم و AIها روشن می‌کند.
 
@@ -17,7 +24,7 @@
 ## جریان کار کوتاه
 1. Issue را از Backlog بردارید و کامنت بگذارید: «این کار را برمی‌دارم — ETA: <روز>».
 2. شاخه بسازید: `p4/wp<id>-short-desc` از `origin/master`.
-3. فقط تغییر حداقلی + تست.
+3. فقط تغییر حداقلی + تست روی **gap باقی‌مانده**.
 4. تست محلی:
    ```
    pip install -r requirements.txt
@@ -27,25 +34,25 @@
 5. PR با قالب رسمی باز کنید و **CURRENT MASTER SHA** را در بدنه بنویسید.
 6. درخواست بررسی PO؛ Merge فقط پس از خط تأیید PO.
 
-## Work Packageهای تعریف‌شده
-| WP | عنوان | اولویت |
-|----|--------|--------|
-| WP-01 | محدودسازی update_governance_privileged | بالا |
-| WP-02 | تست جلوگیری از دور زدن PATCH عمومی | بالا |
-| WP-03 | پوشش Evidence readiness | متوسط |
-| WP-04 | تست Mutation log برای lifecycle | متوسط |
-| WP-05 | تست یکپارچه مجوز API | بالا |
-| WP-06 | مستندات و CI حاکمیتی | پایین |
+## Work Packageها (Scope پس از Reality Alignment)
+| WP | Issue | Scope باقی‌مانده |
+|----|-------|------------------|
+| WP-01 | #15 | Guard/محدودسازی `update_governance_privileged`؛ TransitionService از این متد استفاده نمی‌کند؛ call site تست: `test_interface.py` |
+| WP-02 | #16 | فقط gapهای facade/API که compliance پوشش نداده |
+| WP-03 | #17 | فقط شاخه‌های evaluate تست‌نشده در EvidenceReadiness |
+| WP-04 | #18 | QA_CHANGE / APPROVE / ACTIVATE / REJECT / ARCHIVE / IDENTITY — نه CREATE/SUBMIT |
+| WP-05 | #19 | خانه‌های missing ماتریس §16؛ پوشش کامل NOT VERIFIED |
+| WP-06 | #20 | CI governance-tests job + branch protection پس از توافق PO (قالب/Guide در PR #21) |
 
 ## Project Board پیشنهادی
 نام: **P4 Governance Implementation**  
 ستون‌ها: Backlog → To Do → In Progress → Review → QA → Done
 
-کارت‌ها را به Issueهای WP-01 تا WP-06 لینک کنید.
+کارت‌ها را به Issueهای #15 تا #20 لینک کنید.
 
 ## حفاظت شاخه master (برای ادمین)
 - Require PR reviews (حداقل ۱ — ترجیحاً شامل PO)
-- Require status checks: unit-tests و (پس از ایجاد) governance-tests
+- Require status checks: job تست موجود در `test.yml` و (در صورت ایجاد) governance-tests
 - Enforce CODEOWNERS
 - جلوگیری از force-push و حذف شاخه
 
