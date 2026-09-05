@@ -233,7 +233,7 @@ Execution Package باید شامل:
 - Decisions
 - Open Decisions
 - Inputs
-- Goals
+- Outputs
 - Artifacts
 - Paths
 - API / Data boundaries
