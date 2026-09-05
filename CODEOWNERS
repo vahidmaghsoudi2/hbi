@@ -1,5 +1,5 @@
 # CODEOWNERS
-
+#
 # Format: <pattern> <owner>
 # Owners can be GitHub usernames or teams (org/team)
 
@@ -7,6 +7,9 @@
 /.github/ @vahidmaghsoudi2
 HBI_MANIFEST.md @vahidmaghsoudi2
 HBI_Handover.txt @vahidmaghsoudi2
+/docs/01_project_control/ @vahidmaghsoudi2
+/docs/P4_PRODUCT_INTAKE_GOVERNANCE_CONTRACT_V1.md @vahidmaghsoudi2
+/docs/P4_IMPLEMENTATION_GUIDE.md @vahidmaghsoudi2
 
 # Evidence and tests
 /07-Evidence/ @vahidmaghsoudi2
@@ -20,7 +23,12 @@ verify_gate61.py @vahidmaghsoudi2
 /docs/ @vahidmaghsoudi2
 /08-Meeting-Room/ @vahidmaghsoudi2
 
+# Core product services (PO until team handles exist)
+/app/services/product_service.py @vahidmaghsoudi2
+/app/repositories/ @vahidmaghsoudi2
+
 # Default fallback
 * @vahidmaghsoudi2
 
-# NOTE: Replace @vahidmaghsoudi2 with team aliases when organizational teams are available.
+# NOTE: When org teams are created, replace with @org/team-governance etc.
+# Do not invent team handles that do not exist.

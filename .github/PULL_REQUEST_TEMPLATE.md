@@ -1,43 +1,46 @@
-<!-- HBI Pull Request Template -->
+<!-- قالب درخواست ادغام HBI / HBI Pull Request Template -->
 
-## Summary
+## عنوان پیشنهادی
+`[P4] <عنوان کوتاه> — <شماره WP یا Issue>`
 
-<!-- Short summary of what changed -->
+## خلاصه
+<!-- توضیح کوتاه تغییر -->
 
-## What & Why
-- What changed:
-- Why this change is necessary:
+## Issue مرتبط
+Related Issue(s): #<number>
 
-## Files changed
-<!-- list or describe the main files changed -->
+## CURRENT MASTER SHA
+`<paste-sha>`
 
-## Tests
-- Commands run:
-- Test results (attach artifacts):
+## علت / ارجاع Finding
+- لینک به Finding یا Issue:
 
-## Evidence
-- Artifact names and links (coverage.xml, pytest-output.txt, evidence-summary.txt):
-- Commit SHA used as source of truth:
+## تغییرات
+- لیست فایل‌های تغییر یافته و دلیل کوتاه:
 
-## Security & Data Impact
-- Security impact? (yes/no) – describe
-- Customer-data impact? (yes/no) – describe
+## تست‌های اجراشده
+- محلی: `pytest -q <tests>` — نتیجه:
+- CI: لینک به run (در صورت موجود بودن):
 
-## Migration
-- Migration required? (yes/no) – if yes, describe rollback plan
+## ریسک و Rollback
+- یادداشت کوتاه:
 
-## Gate / Review
-- Which Gate does this PR address?
-- Reviewers:
-- PO approval required? (yes/no)
+## معیار پذیرش (از Issue)
+- [ ] ...
 
-## Agent provenance
-- Agent-generated? (yes/no)
-- If yes, agent name and evidence of commands used:
+## بررسی‌کننده(ها)
+@vahidmaghsoudi2
 
-## Checklist
-- [ ] I have not modified master directly
-- [ ] I included evidence artifacts
-- [ ] I updated docs/manifest if docs or structure changed
+## تأیید Product Owner (اجباری برای Merge)
+- PO باید این خط را بنویسد:  
+  `PO approval: I approve merge — <date>`
 
-<!-- Add additional notes below -->
+## قوانین مهم
+- تا زمان تأیید صریح PO ادغام نکنید.
+- CURRENT MASTER SHA حتماً در بدنه PR باشد.
+- تغییرات غیرمرتبط با Scope را وارد نکنید.
+
+## چک‌لیست
+- [ ] master را مستقیم تغییر نداده‌ام
+- [ ] Evidence / تست‌ها پیوست شده
+- [ ] در صورت تغییر docs، مستندات به‌روز شده
