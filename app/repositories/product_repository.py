@@ -19,7 +19,20 @@ class ProductRepository(BaseRepository[Product]):
             )
         return super().update(id, **kwargs)
 
-    def update_governance_privileged(self, id: str, **kwargs) -> Optional[Product]:
+    def update_governance_privileged(
+        self, id: str, *, authorized: bool = False, **kwargs
+    ) -> Optional[Product]:
+        """Internal escape hatch for governance fields only.
+
+        Callers MUST pass authorized=True. Lifecycle transitions belong in
+        ProductTransitionService — not this method. Public service/API layers
+        must not expose this without an explicit authorization decision.
+        """
+        if not authorized:
+            raise ValidationError(
+                "update_governance_privileged requires authorized=True; "
+                "use ProductTransitionService for controlled lifecycle changes"
+            )
         return super().update(id, **kwargs)
 
     def find_by_brand(self, brand: str) -> List[Product]:

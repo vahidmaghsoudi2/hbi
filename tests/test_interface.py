@@ -77,9 +77,8 @@ def sample_product(db):
         identity_status="VERIFIED",
         qa_verdict="VALID"
     )
-    # P4-compliant: use governance-privileged API to set lifecycle state required by tests
-    # This uses existing repository API intended for governance fields (no direct model mutation).
-    repo.update_governance_privileged(p.product_id, status="ACTIVE")
+    # P4 WP-01: privileged API requires authorized=True (explicit intent)
+    repo.update_governance_privileged(p.product_id, authorized=True, status="ACTIVE")
     return p
 
 @pytest.fixture
