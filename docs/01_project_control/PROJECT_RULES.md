@@ -1,10 +1,11 @@
-﻿# HBI — قوانین پروژه / PROJECT RULES
+# HBI — قوانین پروژه / PROJECT RULES
 
 **Status:** ACTIVE
 **Authority:** Project-wide Mandatory Rule
 **Source of Truth:** GitHub `master`
 **Project:** HBI — Health & Beauty Intelligence
 **Effective Date:** 2026-09-02
+**Last Governance Update:** 2026-09-05 (PO Execution Order — pending PO merge approval)
 
 ---
 
@@ -66,6 +67,11 @@
 - CONFLICT
 - DECIDED
 - OPEN
+
+If data is missing, the AI must answer explicitly using one of:
+UNKNOWN | I DON’T KNOW | NOT VERIFIED | CONFLICT DETECTED | EVIDENCE REQUIRED
+
+“I don’t know” or “unknown” is acceptable; presenting unverified assertions as facts is forbidden.
 
 ---
 
@@ -404,21 +410,70 @@ Completion نیازمند:
 
 ---
 
-# 23. FROZEN / ACCEPTED AREAS
+# 23. FROZEN / ACCEPTED AREAS (RE-DEFINED 2026-09-05)
 
-قابلیت‌های Freeze یا Accept شده بدون Change رسمی نباید شکسته یا بازطراحی شوند.
+## Canonical definitions (PO Execution Order 2026-09-05)
 
-به‌طور خاص:
-- Accounting V1
+- **FROZEN BY DEFAULT** — REOPEN ONLY WITH EVIDENCE, IMPACT ANALYSIS AND PO AUTHORIZATION
+- **ACCEPTED** — PROTECTED BY DEFAULT
+
+Meaning:
+- Frozen/Accepted areas are protected; changes are disallowed unless justified by evidence, impact analysis, and PO approval.
+- Frozen ≠ Untouchable; Accepted ≠ permanently immutable — but reopening must follow the Reopen Process below.
+- No AI may unilaterally change a Frozen/Accepted area.
+
+### Declared Frozen areas (non-exhaustive)
+- Accounting V1 — Status: **FROZEN BY DEFAULT — Protection: ACTIVE**
 - Product Master
-- Product A-D
+- Product A–D (existing seed/catalog reality)
 - Existing Home capabilities
 
-باید محافظت شوند.
+### Reopen Process (mandatory when Frozen/Accepted appears to block work)
+
+If an AI discovers a Frozen/Accepted area materially blocking quality, integrity, or objectives:
+
+1. DO NOT change code directly.
+2. Create a documented FINDING containing:
+   - FINDING: precise problem statement
+   - EVIDENCE: concrete repository citations (file + line + commit) or test failures
+   - IMPACT: what happens if unchanged
+   - DEPENDENCIES: items/components affected
+   - UNKNOWN: what remains unclear
+   - RECOMMENDATION: suggested remediation (if any)
+   - PO_DECISION_REQUIRED: YES / NO
+3. Submit the Finding to the PO for decision (no further action until PO decides).
+
+PO will accept/reject Reopen. If accepted, follow the Post-Reopen Mandatory Workflow.
+
+### Post-Reopen Mandatory Workflow (if PO authorizes Reopen)
+
+1. Create a specific Work Package (WP) with scope, acceptance criteria, tests, and owner.
+2. Record CURRENT REALITY (master SHA, failing tests, affected files).
+3. Perform Impact Analysis (list of changed files, components, data effects, security/permission implications).
+4. Implement only the scoped changes in a dedicated branch (pattern: `p4/wp-<id>-short-desc`).
+5. Add/modify tests required by the contract.
+6. Run targeted tests and CI; fix regressions.
+7. Update documentation and Project Memory.
+8. Make a single commit (or minimal commits) on branch; DO NOT merge to master.
+9. Provide commit SHA(s) and open PR referencing the Finding and PO decision.
+10. QA verifies the branch; PO performs final acceptance before merge (separate explicit instruction).
+
+No open-ended redesign allowed. All changes must be traceable to the Finding and PO approval.
 
 ---
 
-# 24. AI ROLE BOUNDARY
+# 24. AI ROLE BOUNDARY & END-TO-END ACCOUNTABILITY (PO Order 2026-09-05)
+
+## Principle — End-to-End Accountability for AI agents
+
+Every AI assigned a task is responsible for understanding the full context necessary to complete the task and for carrying it from investigation through verification and delivery.
+
+Interpretation:
+- Roles = specialization only. Roles do NOT limit the intellectual scope or ownership of a task.
+- Any AI given a task must inspect: relevant documentation, architecture, code, contracts, tests, dependencies, and side-effects.
+- Ownership covers: Investigation → Analysis → Design → Implementation → Testing → Verification → Documentation → Delivery.
+- Invoking other AIs for help does NOT transfer ownership.
+- **ONE TASK = ONE OWNER = END-TO-END ACCOUNTABILITY**
 
 AI می‌تواند Inspect، Research، Analyze، Implement، Test، Document و Report کند.
 
@@ -596,6 +651,21 @@ HANDOFF REQUIRED: ACCEPTED
 CONFLICT
 
 ثبت می‌شود تا تصمیم معتبر گرفته شود.
+
+---
+
+# 35. PO EXECUTION ORDER RECORD (2026-09-05)
+
+**Source:** Product Owner — مهندس مقصودی  
+**Subject:** Formalize AI member end-to-end responsibility model and re-define Frozen / Accepted policy for HBI.  
+**Record location:** this file (`docs/01_project_control/PROJECT_RULES.md`)  
+**Branch of introduction:** `governance/policy-update-20260905-PO`  
+**Master SHA at introduction:** `448bbd3cc654b71f00d585036cda70a31cacb538`  
+**Status until PO merge approval:** DRAFT / PENDING PO ACCEPTANCE (not yet in effect on master)
+
+This Order reinforces and formalizes sections 2, 3, 10, 23 and 24 above. Full operational text of the Order is retained in the governance PR body and in repository history.
+
+**Limitations of this Order:** It does NOT authorize arbitrary architecture/coding changes. Immediate scope is governance clarification and policy recording only.
 
 ---
 
