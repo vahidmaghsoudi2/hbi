@@ -1,0 +1,60 @@
+name: Inspector Report
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1' # weekly on Monday at 06:00 UTC
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  actions: read
+
+jobs:
+  inspector:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Gather repository overview
+        env:
+          REPO: ${{ github.repository }}
+          API_URL: https://api.github.com/repos/${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          echo "HBI INSPECTOR REPORT" > inspector-report.txt
+          echo "repo=${REPO}" >> inspector-report.txt
+          echo "run_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> inspector-report.txt
+          echo "----------------------------------------" >> inspector-report.txt
+
+          echo "Last 5 commits:" >> inspector-report.txt
+          curl -s -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github+json" "${API_URL}/commits?per_page=5" | jq -r '.[] | "- \(.sha) \(.commit.author.name) \(.commit.author.date) \(.commit.message|gsub("\n"; " "))"' >> inspector-report.txt || true
+
+          echo "" >> inspector-report.txt
+          echo "Open PRs:" >> inspector-report.txt
+          curl -s -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github+json" "${API_URL}/pulls?state=open&per_page=50" | jq -r '.[] | "- PR#\(.number) \(.user.login) \(.title)"' >> inspector-report.txt || true
+
+          echo "" >> inspector-report.txt
+          echo "Recent failed workflow runs:" >> inspector-report.txt
+          curl -s -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github+json" "${API_URL}/actions/runs?status=failure&per_page=20" | jq -r '.workflow_runs[]? | "- id:\(.id) name:\(.name) conclusion:\(.conclusion) updated_at:\(.updated_at)"' >> inspector-report.txt || true
+
+          echo "" >> inspector-report.txt
+          echo "Security alerts summary (if available):" >> inspector-report.txt
+          curl -s -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github+json" "${API_URL}/dependabot/alerts?per_page=50" | jq -r '.[]? | "- id:\(.id) dependency:\(.security_advisory.summary)"' >> inspector-report.txt || true
+
+          echo "" >> inspector-report.txt
+          echo ".github/workflows/ list:" >> inspector-report.txt
+          ls -la .github/workflows >> inspector-report.txt || true
+
+          echo "" >> inspector-report.txt
+          echo "Inspector run complete" >> inspector-report.txt
+
+      - name: Upload inspector artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hbi-inspector-${{ github.sha }}
+          path: inspector-report.txt
+

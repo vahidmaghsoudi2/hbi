@@ -1,0 +1,26 @@
+# CODEOWNERS
+
+# Format: <pattern> <owner>
+# Owners can be GitHub usernames or teams (org/team)
+
+# Governance and PO
+/.github/ @vahidmaghsoudi2
+HBI_MANIFEST.md @vahidmaghsoudi2
+HBI_Handover.txt @vahidmaghsoudi2
+
+# Evidence and tests
+/07-Evidence/ @vahidmaghsoudi2
+/tests/ @vahidmaghsoudi2
+
+# Gates and verification
+/02-Gates/ @vahidmaghsoudi2
+verify_gate61.py @vahidmaghsoudi2
+
+# Docs and Meeting Room
+/docs/ @vahidmaghsoudi2
+/08-Meeting-Room/ @vahidmaghsoudi2
+
+# Default fallback
+* @vahidmaghsoudi2
+
+# NOTE: Replace @vahidmaghsoudi2 with team aliases when organizational teams are available.
