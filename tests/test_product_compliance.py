@@ -401,3 +401,55 @@ def test_mutation_log_archive(db_session):
     assert row.resulting_state == "ARCHIVED"
     assert "ACTIVE" in (row.before_state or "")
     assert "ARCHIVED" in (row.after_state or "")
+
+
+# ==============================================================================
+# WP-05: API Authorization Matrix Tests (Section 16 Missing Coverage)
+# ==============================================================================
+
+def test_editor_cannot_change_qa_fields(db_session):
+    """Editor MUST NOT change QA-controlled fields (Section 16: Editor -> Change QA-controlled fields = NO)"""
+    _make_product(db_session, "P_WP05_QA_ED")
+    with pytest.raises(ValidationError):
+        ProductRepository(db_session).update("P_WP05_QA_ED", qa_verdict="VERIFIED")
+
+def test_qa_can_perform_qa_review(db_session):
+    """Reviewer/QA CAN perform QA Review (Section 16: Reviewer/QA -> QA Review = YES)"""
+    _make_product(db_session, "P_WP05_QA_REV")
+    tr = ProductTransitionService(db_session)
+    tr.submit("P_WP05_QA_REV", "qa1", {ROLE_REVIEWER_QA})
+    result = tr.enter_qa_review("P_WP05_QA_REV", "qa1", {ROLE_REVIEWER_QA})
+    assert result.status == "QA_REVIEW"
+
+def test_po_can_activate_product(db_session):
+    """PO CAN Activate Product (Section 16: PO -> Activate Product = YES)"""
+    _make_product(db_session, "P_WP05_PO_ACT")
+    _seed_role(db_session, "po1", ROLE_PO, "UR_WP05_PO1")
+    tr = ProductTransitionService(db_session)
+    tr.submit("P_WP05_PO_ACT", "po1", {ROLE_PO})
+    tr.enter_qa_review("P_WP05_PO_ACT", "po1", {ROLE_PO})
+    tr.approve("P_WP05_PO_ACT", "po1", {ROLE_PO})
+    result = tr.activate("P_WP05_PO_ACT", "po1", {ROLE_PO})
+    assert result.status == "ACTIVE"
+
+def test_po_can_archive_product(db_session):
+    """PO CAN Archive Product (Section 16: PO -> Archive Product = YES)"""
+    _make_product(db_session, "P_WP05_PO_ARC")
+    _seed_role(db_session, "po2", ROLE_PO, "UR_WP05_PO2")
+    tr = ProductTransitionService(db_session)
+    result = tr.archive("P_WP05_PO_ARC", "po2", {ROLE_PO}, reason="Test archive")
+    assert result.status == "ARCHIVED"
+
+def test_admin_cannot_bypass_governance(db_session):
+    """Admin/Technical MUST NOT bypass governance controls like Approve/Activate (Section 16 & 17: No Bypass Rule)"""
+    _make_product(db_session, "P_WP05_ADMIN_BYPASS")
+    admin_roles = {"ADMIN"}
+    tr = ProductTransitionService(db_session)
+    tr.submit("P_WP05_ADMIN_BYPASS", "admin1", admin_roles)
+    tr.enter_qa_review("P_WP05_ADMIN_BYPASS", "admin1", admin_roles)
+    
+    with pytest.raises(ValidationError):
+        tr.approve("P_WP05_ADMIN_BYPASS", "admin1", admin_roles)
+    
+    with pytest.raises(ValidationError):
+        tr.activate("P_WP05_ADMIN_BYPASS", "admin1", admin_roles)
