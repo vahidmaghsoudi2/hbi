@@ -194,7 +194,10 @@ class ProductCreate(BaseModel):
 
 
 class ProductUpdate(BaseModel):
-    """Informational fields only — governance fields forbidden (P4 P0)."""
+    """Informational fields only — governance fields forbidden (P4 P0).
+    extra=\"forbid\" ensures any governance key in PATCH body is rejected at schema boundary
+    (Pydantic v2 default is ignore, which would silently discard status/identity_status/qa_verdict).
+    """
     brand: Optional[str] = None
     product_name: Optional[str] = None
     variant: Optional[str] = None
@@ -205,6 +208,7 @@ class ProductUpdate(BaseModel):
     country_of_origin: Optional[str] = None
     packaging_version: Optional[str] = None
     category_id: Optional[str] = None
+    model_config = ConfigDict(extra="forbid")
 
 
 class ProductTransitionRequest(BaseModel):

@@ -143,3 +143,58 @@ def test_readiness_pass_and_approve(db_session):
 
 def test_active_grandfathered(db_session):
     assert _make_product(db_session, "P_CMP_LEGACY", status="ACTIVE").status == "ACTIVE"
+
+
+def test_patch_rejects_status_only(client, db_session):
+    """WP-02: governance field alone must be rejected at schema boundary (422)."""
+    _make_product(db_session, "P_CMP_WP02_A")
+    _seed_role(db_session, "ed_wp02", ROLE_EDITOR, "UR_WP02_A")
+    r = client.patch(
+        "/api/v1/products/P_CMP_WP02_A",
+        json={"status": "APPROVED"},
+        headers=_auth_header("ed_wp02"),
+    )
+    assert r.status_code == 422
+    body = r.json()
+    assert "status" in str(body).lower() or "extra" in str(body).lower() or "forbidden" in str(body).lower()
+
+
+def test_patch_rejects_identity_status(client, db_session):
+    """WP-02: identity_status via generic PATCH must be rejected."""
+    _make_product(db_session, "P_CMP_WP02_B")
+    _seed_role(db_session, "ed_wp02b", ROLE_EDITOR, "UR_WP02_B")
+    r = client.patch(
+        "/api/v1/products/P_CMP_WP02_B",
+        json={"identity_status": "VERIFIED"},
+        headers=_auth_header("ed_wp02b"),
+    )
+    assert r.status_code == 422
+
+
+def test_patch_rejects_qa_verdict(client, db_session):
+    """WP-02: qa_verdict via generic PATCH must be rejected."""
+    _make_product(db_session, "P_CMP_WP02_C")
+    _seed_role(db_session, "ed_wp02c", ROLE_EDITOR, "UR_WP02_C")
+    r = client.patch(
+        "/api/v1/products/P_CMP_WP02_C",
+        json={"qa_verdict": "VALID"},
+        headers=_auth_header("ed_wp02c"),
+    )
+    assert r.status_code == 422
+
+
+def test_patch_rejects_mixed_governance(client, db_session):
+    """WP-02: informational + governance in same PATCH must reject entire payload."""
+    _make_product(db_session, "P_CMP_WP02_D", brand="Original")
+    _seed_role(db_session, "ed_wp02d", ROLE_EDITOR, "UR_WP02_D")
+    r = client.patch(
+        "/api/v1/products/P_CMP_WP02_D",
+        json={"brand": "Legitimate Update", "status": "APPROVED"},
+        headers=_auth_header("ed_wp02d"),
+    )
+    assert r.status_code == 422
+    # brand must not have been applied
+    from app.services.product_service import ProductService
+    p = ProductService(db_session).get_by_id("P_CMP_WP02_D")
+    assert p.brand == "Original"
+    assert p.status == "DRAFT"
