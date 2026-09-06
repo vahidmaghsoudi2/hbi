@@ -2,12 +2,13 @@
 
 **Policy ID:** HBI-GOV-IOV-001  
 **Version:** V1.0  
-**Status:** PROPOSED FOR REGISTRATION (pending PO merge approval)  
+**Status:** REGISTERED & ACTIVE (Merged to master)  
 **Authority:** Product Owner — Vahid Maghsoudi  
 **Repository:** vahidmaghsoudi2/hbi  
+**Merge Commit SHA:** `adbd45025a36e8b054853e160f986392f24e3aae`  
 **Branch of introduction:** `governance/independent-output-verification-policy`  
 **Baseline master SHA at drafting:** `231310cfef4cab128450eabc61ebf66cbfe32092`  
-**Effective:** upon merge to `master` and explicit PO acceptance
+**Effective:** 2026-09-06 (Merged in `adbd450` with PO acceptance)
 
 ---
 
