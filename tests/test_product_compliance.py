@@ -294,3 +294,110 @@ def test_patch_rejects_mixed_governance(client, db_session):
     p = ProductService(db_session).get_by_id("P_CMP_WP02_D")
     assert p.brand == "Original"
     assert p.status == "DRAFT"
+
+
+# ─── WP-04: Mutation log for remaining lifecycle actions (Issue #18) ───
+# Existing: test_mutation_log_persists covers CREATE + SUBMIT only.
+
+
+def _logs_by_action(db, product_id, action):
+    return [l for l in MutationLogService(db).list_for_product(product_id) if l.action == action]
+
+
+def _seed_ready_evidence(db, product_id, eid="E_WP04"):
+    db.add(Evidence(
+        evidence_id=eid, product_id=product_id, source_type="PEER_REVIEWED",
+        source_reference="s1", claim="c1", qa_status="VERIFIED", conflict_status="NONE"))
+    db.flush()
+
+
+def test_mutation_log_qa_change(db_session):
+    """WP-04: QA_CHANGE must persist before/after and actor."""
+    _make_product(db_session, "P_ML_QA", status="QA_REVIEW")
+    ProductTransitionService(db_session).set_product_qa(
+        "P_ML_QA", "rev_ml", {ROLE_REVIEWER_QA}, "VALID", notes="ok")
+    rows = _logs_by_action(db_session, "P_ML_QA", "QA_CHANGE")
+    assert len(rows) == 1
+    row = rows[0]
+    assert row.actor_id == "rev_ml"
+    assert row.actor_role == ROLE_REVIEWER_QA
+    assert row.before_state and "PENDING" in row.before_state
+    assert row.after_state and "VALID" in row.after_state
+    assert row.resulting_state == "QA_REVIEW"
+
+
+def test_mutation_log_identity_change(db_session):
+    """WP-04: IDENTITY_CHANGE must persist before/after."""
+    _make_product(db_session, "P_ML_ID", status="QA_REVIEW", identity_status="NEEDS_REVIEW")
+    ProductTransitionService(db_session).verify_identity(
+        "P_ML_ID", "rev_ml", {ROLE_REVIEWER_QA}, "VERIFIED", source_refs="ref1", confidence=0.9)
+    rows = _logs_by_action(db_session, "P_ML_ID", "IDENTITY_CHANGE")
+    assert len(rows) == 1
+    row = rows[0]
+    assert row.actor_id == "rev_ml"
+    assert "NEEDS_REVIEW" in (row.before_state or "")
+    assert "VERIFIED" in (row.after_state or "")
+    assert row.resulting_state == "QA_REVIEW"
+
+
+def test_mutation_log_approve(db_session):
+    """WP-04: APPROVE must log status transition QA_REVIEW → APPROVED."""
+    _make_product(db_session, "P_ML_AP", status="QA_REVIEW",
+                  qa_verdict="VALID", identity_status="VERIFIED")
+    _seed_ready_evidence(db_session, "P_ML_AP", "E_ML_AP")
+    ProductTransitionService(db_session).approve("P_ML_AP", "po_ml", {ROLE_PO})
+    rows = _logs_by_action(db_session, "P_ML_AP", "APPROVE")
+    assert len(rows) == 1
+    row = rows[0]
+    assert row.actor_id == "po_ml"
+    assert row.actor_role == ROLE_PO
+    assert row.resulting_state == "APPROVED"
+    assert "QA_REVIEW" in (row.before_state or "")
+    assert "APPROVED" in (row.after_state or "")
+
+
+def test_mutation_log_activate(db_session):
+    """WP-04: ACTIVATE must log APPROVED → ACTIVE."""
+    _make_product(db_session, "P_ML_AC", status="APPROVED",
+                  qa_verdict="VALID", identity_status="VERIFIED")
+    _seed_ready_evidence(db_session, "P_ML_AC", "E_ML_AC")
+    ProductTransitionService(db_session).activate("P_ML_AC", "po_ml", {ROLE_PO})
+    rows = _logs_by_action(db_session, "P_ML_AC", "ACTIVATE")
+    assert len(rows) == 1
+    row = rows[0]
+    assert row.actor_id == "po_ml"
+    assert row.resulting_state == "ACTIVE"
+    assert "APPROVED" in (row.before_state or "")
+    assert "ACTIVE" in (row.after_state or "")
+
+
+def test_mutation_log_reject_with_reason(db_session):
+    """WP-04: REJECT must log reason and resulting REJECTED."""
+    _make_product(db_session, "P_ML_RJ", status="QA_REVIEW")
+    ProductTransitionService(db_session).reject(
+        "P_ML_RJ", "rev_ml", {ROLE_REVIEWER_QA}, "quality failure")
+    rows = _logs_by_action(db_session, "P_ML_RJ", "REJECT")
+    assert len(rows) == 1
+    row = rows[0]
+    assert row.actor_id == "rev_ml"
+    assert row.reason == "quality failure"
+    assert row.resulting_state == "REJECTED"
+    assert "QA_REVIEW" in (row.before_state or "")
+    assert "REJECTED" in (row.after_state or "")
+
+
+def test_mutation_log_archive(db_session):
+    """WP-04: ARCHIVE must log ACTIVE → ARCHIVED."""
+    _make_product(db_session, "P_ML_AR", status="ACTIVE",
+                  qa_verdict="VALID", identity_status="VERIFIED")
+    ProductTransitionService(db_session).archive(
+        "P_ML_AR", "po_ml", {ROLE_PO}, reason="end of life")
+    rows = _logs_by_action(db_session, "P_ML_AR", "ARCHIVE")
+    assert len(rows) == 1
+    row = rows[0]
+    assert row.actor_id == "po_ml"
+    assert row.actor_role == ROLE_PO
+    assert row.reason == "end of life"
+    assert row.resulting_state == "ARCHIVED"
+    assert "ACTIVE" in (row.before_state or "")
+    assert "ARCHIVED" in (row.after_state or "")
