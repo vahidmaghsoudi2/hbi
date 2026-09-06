@@ -143,3 +143,99 @@ def test_readiness_pass_and_approve(db_session):
 
 def test_active_grandfathered(db_session):
     assert _make_product(db_session, "P_CMP_LEGACY", status="ACTIVE").status == "ACTIVE"
+
+
+# ─── WP-03: Evidence Readiness branch coverage (Issue #17) ───
+
+def test_readiness_conflict_blocks_approve(db_session):
+    """GAP-1: VERIFIED + CONFLICT must block readiness and approve."""
+    _make_product(db_session, "P_CMP_RDY_CF", status="QA_REVIEW",
+                  qa_verdict="VALID", identity_status="VERIFIED")
+    db_session.add(Evidence(
+        evidence_id="E_CF_1", product_id="P_CMP_RDY_CF", source_type="PEER_REVIEWED",
+        source_reference="s1", claim="c1", qa_status="VERIFIED", conflict_status="CONFLICT"))
+    db_session.flush()
+    result = EvidenceReadinessService(db_session).evaluate("P_CMP_RDY_CF")
+    assert result.ready is False
+    assert "E_CF_1" in result.blocking_conflicts
+    with pytest.raises(ValidationError):
+        ProductTransitionService(db_session).approve("P_CMP_RDY_CF", "po", {ROLE_PO})
+
+
+def test_readiness_rejected_evidence_blocks_approve(db_session):
+    """GAP-2: REJECTED evidence must appear in unacceptable and block approve."""
+    _make_product(db_session, "P_CMP_RDY_RJ", status="QA_REVIEW",
+                  qa_verdict="VALID", identity_status="VERIFIED")
+    db_session.add(Evidence(
+        evidence_id="E_RJ_1", product_id="P_CMP_RDY_RJ", source_type="PEER_REVIEWED",
+        source_reference="s1", claim="c1", qa_status="REJECTED", conflict_status="NONE"))
+    db_session.flush()
+    result = EvidenceReadinessService(db_session).evaluate("P_CMP_RDY_RJ")
+    assert result.ready is False
+    assert "E_RJ_1" in result.unacceptable_evidence_ids
+    with pytest.raises(ValidationError):
+        ProductTransitionService(db_session).approve("P_CMP_RDY_RJ", "po", {ROLE_PO})
+
+
+def test_readiness_pending_qa_blocks_approve(db_session):
+    """GAP-3: PENDING QA must appear in incomplete_qa and block approve."""
+    _make_product(db_session, "P_CMP_RDY_PN", status="QA_REVIEW",
+                  qa_verdict="VALID", identity_status="VERIFIED")
+    db_session.add(Evidence(
+        evidence_id="E_PN_1", product_id="P_CMP_RDY_PN", source_type="PEER_REVIEWED",
+        source_reference="s1", claim="c1", qa_status="PENDING", conflict_status="NONE"))
+    db_session.flush()
+    result = EvidenceReadinessService(db_session).evaluate("P_CMP_RDY_PN")
+    assert result.ready is False
+    assert "E_PN_1" in result.incomplete_qa_evidence_ids
+    with pytest.raises(ValidationError):
+        ProductTransitionService(db_session).approve("P_CMP_RDY_PN", "po", {ROLE_PO})
+
+
+def test_readiness_needs_review_blocks_approve(db_session):
+    """GAP-4: NEEDS_REVIEW QA must appear in incomplete_qa and block approve."""
+    _make_product(db_session, "P_CMP_RDY_NR", status="QA_REVIEW",
+                  qa_verdict="VALID", identity_status="VERIFIED")
+    db_session.add(Evidence(
+        evidence_id="E_NR_1", product_id="P_CMP_RDY_NR", source_type="PEER_REVIEWED",
+        source_reference="s1", claim="c1", qa_status="NEEDS_REVIEW", conflict_status="NONE"))
+    db_session.flush()
+    result = EvidenceReadinessService(db_session).evaluate("P_CMP_RDY_NR")
+    assert result.ready is False
+    assert "E_NR_1" in result.incomplete_qa_evidence_ids
+    with pytest.raises(ValidationError):
+        ProductTransitionService(db_session).approve("P_CMP_RDY_NR", "po", {ROLE_PO})
+
+
+def test_readiness_approved_evidence_passes(db_session):
+    """GAP-5: qa_status=APPROVED is an acceptable QA state (not only VERIFIED)."""
+    _make_product(db_session, "P_CMP_RDY_AP", status="QA_REVIEW",
+                  qa_verdict="VALID", identity_status="VERIFIED")
+    db_session.add(Evidence(
+        evidence_id="E_AP_1", product_id="P_CMP_RDY_AP", source_type="PEER_REVIEWED",
+        source_reference="s1", claim="c1", qa_status="APPROVED", conflict_status="NONE"))
+    db_session.flush()
+    result = EvidenceReadinessService(db_session).evaluate("P_CMP_RDY_AP")
+    assert result.ready is True
+    assert result.missing_required == []
+    assert ProductTransitionService(db_session).approve(
+        "P_CMP_RDY_AP", "po", {ROLE_PO}).status == "APPROVED"
+
+
+def test_readiness_acceptable_plus_incomplete_still_blocks(db_session):
+    """GAP-6: one acceptable evidence does not override incomplete QA on another."""
+    _make_product(db_session, "P_CMP_RDY_MX", status="QA_REVIEW",
+                  qa_verdict="VALID", identity_status="VERIFIED")
+    db_session.add(Evidence(
+        evidence_id="E_MX_OK", product_id="P_CMP_RDY_MX", source_type="PEER_REVIEWED",
+        source_reference="s1", claim="c1", qa_status="VERIFIED", conflict_status="NONE"))
+    db_session.add(Evidence(
+        evidence_id="E_MX_PEND", product_id="P_CMP_RDY_MX", source_type="PEER_REVIEWED",
+        source_reference="s2", claim="c2", qa_status="PENDING", conflict_status="NONE"))
+    db_session.flush()
+    result = EvidenceReadinessService(db_session).evaluate("P_CMP_RDY_MX")
+    assert result.ready is False
+    assert "E_MX_PEND" in result.incomplete_qa_evidence_ids
+    assert result.missing_required == []  # acceptable_count > 0
+    with pytest.raises(ValidationError):
+        ProductTransitionService(db_session).approve("P_CMP_RDY_MX", "po", {ROLE_PO})
