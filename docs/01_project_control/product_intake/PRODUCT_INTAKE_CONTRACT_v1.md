@@ -1,12 +1,13 @@
 # HBI — PRODUCT INTAKE CONTRACT v1
 
 **Contract ID:** HBI-PI-CONTRACT-001  
-**Version:** V1.0-DRAFT  
-**Status:** DRAFT — PENDING PO ACCEPTANCE  
+**Version:** V1.0  
+**Status:** PO ACCEPTED  
 **Baseline HEAD:** `42cc77ec5f8692407df58bb4be9d8a71fc93c52f`  
 **Repository:** `vahidmaghsoudi2/hbi` @ `master`  
 **Owner:** Product Owner  
 **Drafted:** 2026-09-07  
+**Accepted:** 2026-09-07 — Product Owner مقصودی («میپذیرم»)  
 **Implementation authorized by this document:** NO
 
 ---
@@ -23,12 +24,14 @@ Document order:
 4. **this Contract** (operational intake path)
 5. Live Ledger / Roadmap (execution position)
 
-If this draft conflicts with P4 lifecycle, roles, or PATCH rules: **P4 wins**.  
-If this draft conflicts with Strategy business rules (ONE PRODUCT MASTER, AI does not approve, PO is final approver): **Strategy wins** and the conflict must return to PO.  
-This draft does not rewrite P4 and does not authorize rebuild of existing Product / Home / Intake UI.
+If this contract conflicts with P4 lifecycle, roles, or PATCH rules: **P4 wins**.  
+If this contract conflicts with Strategy business rules (ONE PRODUCT MASTER, AI does not approve, PO is final approver): **Strategy wins** and the conflict must return to PO.  
+This contract does not rewrite P4 and does not authorize rebuild of existing Product / Home / Intake UI.
 
-**This file is not accepted until the Product Owner explicitly marks Status = PO ACCEPTED.**  
-Until that mark: no Product Intake implementation, no new lifecycle, no parallel Approve API.
+PO acceptance of this file supersedes Strategy §20 OPEN items that P4 already locked (approval state machine; default create = DRAFT).
+
+**PO ACCEPTED does not authorize implementation.**  
+Implementation starts only after the Product Owner authorizes a named technical-design / WP. No new lifecycle. No parallel Approve API.
 
 ---
 
@@ -67,6 +70,7 @@ Inherited and **not reopenable by this contract**:
 |---|---|
 | INTRODUCE | `POST /products` → DRAFT |
 | IDENTITY / DUPLICATE CHECK | occurs at or before DRAFT; does not create a new P4 state |
+| SUBMIT | P4 `submit` DRAFT → SUBMITTED (mandatory; not skippable) |
 | RESEARCH / ENRICH | work against DRAFT (and after Submit, against SUBMITTED/QA_REVIEW); writes Evidence/Knowledge, not governance fields |
 | VALIDATE | QA_REVIEW |
 | PO REVIEW | inspect/edit informational fields + P4 identity/QA transitions |
@@ -112,7 +116,7 @@ At HEAD `42cc77ec` the following are baseline and must be reused or extended:
 
 Greenfield Home, Gallery, Catalog, Intake panel, Product Master, or TransitionService is **out of scope forever unless PO reopens**.
 
-Known consumer gap (not a missing P4 machine): Intake UI still sends `status` / `identity_status` / `qa_verdict` and defaults to ACTIVE/VERIFIED. After **this contract is accepted**, the first implementation unit may align that consumer with P4. That unit is not authorization for Research implementation.
+Known consumer gap (not a missing P4 machine): Intake UI still sends `status` / `identity_status` / `qa_verdict` and defaults to ACTIVE/VERIFIED. After a **named WP is authorized**, the first implementation unit may align that consumer with P4. That unit is not authorization for Research implementation.
 
 ---
 
@@ -175,7 +179,7 @@ Before a **new** `product_id` is treated as a distinct Product Master, Intake mu
 | `EXISTING` | same business product | reuse existing `product_id`; do not create a duplicate |
 
 Exact matching algorithm, weights, and GTIN/name/size rules remain **OPEN**.  
-Implementation of the detector is **not authorized** until this contract is PO-accepted **and** a later technical design chooses the algorithm.
+Implementation of the detector is **not authorized** until a later technical design chooses the algorithm and PO authorizes that WP.
 
 Gate G1 (Identity) passes only when this result is produced and reviewed where not `NEW`.
 
@@ -215,11 +219,11 @@ Each non-empty assertion must be classifiable as:
 
 Research Draft is not a P4 status.  
 V1 persistence: reuse Evidence and ProductKnowledge bound to `product_id` where they already exist; do not invent a second product identity.  
-A dedicated research-dossier table is **OPEN** and not required to accept this contract.
+A dedicated research-dossier table is **OPEN** and is not required by this acceptance.
 
 ### 8.5 Research tier / cost / model selection
 
-**OPEN.** Not needed for Contract acceptance.
+**OPEN.** Not authorized by this acceptance.
 
 ---
 
@@ -325,7 +329,9 @@ Frozen / out of this workstream:
 
 ---
 
-## 17. ROLES (REUSE P4 — NO NEW ROLES)
+## 17. ROLES (P4 PERMISSIONS REUSED)
+
+P4 permission roles are not extended.
 
 | Role | Intake-relevant authority |
 |---|---|
@@ -333,13 +339,14 @@ Frozen / out of this workstream:
 | Reviewer / QA | QA, identity verify, reject |
 | PO | approve, activate, archive, exceptions |
 | Admin | technical only; not Product governance |
-| AI Research Agent | research draft only |
+
+AI Research Agent (Strategy) is an operational actor for research drafts only. It is not a P4 permission role and cannot approve or activate.
 
 ---
 
 ## 18. DECISION REGISTER
 
-### LOCKED by Strategy or P4 (this contract restates, does not reopen)
+### LOCKED by Strategy, P4, or this PO acceptance
 
 - ONE PRODUCT MASTER / same `product_id`
 - independently sold item = independent Product
@@ -349,6 +356,7 @@ Frozen / out of this workstream:
 - P4 lifecycle, roles, PATCH denylist, create DRAFT, mutation log
 - save row ≠ Product Master approval
 - no greenfield Intake rebuild
+- P4 is the only V1 approval/activation machine
 
 ### OPEN (must stay OPEN until PO decides)
 
@@ -379,19 +387,23 @@ No implementer may silently close an OPEN item.
 | G7 Maintenance | updates leave mutation history |
 | G8 Pilot | real products, no duplicate masters, A–D unharmed |
 
-None of G1–G8 is passed by publication of this draft.
+None of G1–G8 is passed by PO acceptance of this contract.
 
 ---
 
-## 20. WHAT HAPPENS AFTER PO ACCEPTANCE
+## 20. WHAT HAPPENS AFTER THIS ACCEPTANCE
 
-When Status on this file becomes **PO ACCEPTED**:
+Status is **PO ACCEPTED**.
 
-1. Technical Design for the **next implementation unit** (default candidate: align existing Intake UI/API client with P4 — stop governance injection; map «ذخیره» to create DRAFT and «تصویب» to P4 approve).
-2. Only then: implementation of that unit, tests, evidence, Ledger update.
-3. AI Research implementation remains a later phase (Roadmap Phase 2) and needs its own design after this contract.
+Next authorized unit is **Technical Design of a named WP**, not code.
 
-Until PO ACCEPTED:
+Default candidate WP (still requires explicit PO authorization before coding):
+
+align existing Intake UI/API client with P4 — stop governance injection; map «ذخیره» to create DRAFT and «تصویب» to P4 approve. P4 `submit` remains mandatory.
+
+AI Research implementation remains Roadmap Phase 2 and needs its own design.
+
+Until a named WP is authorized:
 
 **NO implementation. NO Product A–D change. NO P4 rebuild. NO parallel workflow.**
 
@@ -405,14 +417,14 @@ P4 contract changes follow P4 §22, not this file.
 
 ---
 
-## 22. PO ACCEPTANCE BLOCK (TO BE SIGNED)
+## 22. PO ACCEPTANCE BLOCK (SIGNED)
 
-- [ ] I accept this Contract v1 as the operational intake contract on baseline `42cc77ec`.
-- [ ] I confirm P4 remains the only V1 approval/activation machine.
-- [ ] Implementation remains unauthorized until I authorize a named technical-design / WP.
+- [x] I accept this Contract v1 as the operational intake contract on baseline `42cc77ec`.
+- [x] I confirm P4 remains the only V1 approval/activation machine.
+- [x] Implementation remains unauthorized until I authorize a named technical-design / WP.
 
-**PO signature / date:** _pending_
+**PO signature / date:** مقصودی — 2026-09-07 («میپذیرم»)
 
 ---
 
-**END OF CONTRACT v1 DRAFT**
+**END OF CONTRACT v1**
