@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import pytest
 from app.core.auth import create_access_token
+from app.interface.dto import RecommendationDTO
 from app.interface.facades import RecommendationFacade
 from app.services.customer_service import CustomerService
 
@@ -229,8 +230,13 @@ def test_recommendation_facade_invoked_with_profile(client, db_session):
     facade = RecommendationFacade(db_session)
     result = facade.generate(case_id, profile)
     assert isinstance(result, list)
-    # Empty catalog still returns a real list (no crash / no invented rows)
-    assert all(hasattr(item, "product_id") or isinstance(item, object) for item in result)
+    # Empty catalog is a valid real result (list, possibly empty — no invented rows).
+    # When items exist, each must match RecommendationDTO contract fields.
+    for item in result:
+        assert isinstance(item, RecommendationDTO), type(item)
+        assert isinstance(item.recommendation_id, str) and item.recommendation_id
+        assert item.case_id == case_id
+        assert isinstance(item.product_id, str) and item.product_id
 
 
 def test_recommendation_facade_handles_none_profile(db_session):
