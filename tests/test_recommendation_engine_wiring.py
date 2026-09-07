@@ -24,6 +24,8 @@ def _seed_verified_product(db, pid="P_G63A_001"):
         status="ACTIVE",
     )
     db.add(p)
+    db.flush()  # ensure Product PK exists before Inventory/Evidence FKs
+
     db.add(
         Inventory(
             inventory_id=f"INV-{pid}",
@@ -94,7 +96,6 @@ def test_generate_scores_not_hardcoded_stub_values(db_session):
     )
     assert len(recs) == 1
     rec = recs[0]
-    # Engine-driven: must not be the exact historical stub triple on every field
     stub_triple = (
         rec.need_match_score == 0.8
         and rec.evidence_score == 0.7
@@ -113,19 +114,6 @@ def test_generate_scores_not_hardcoded_stub_values(db_session):
 
 
 def test_out_of_stock_maps_eligibility(db_session):
-    pid = "P_G63A_OOS"
-    db_session.add(
-        Product(
-            product_id=pid,
-            brand="B",
-            product_name="OOS Product",
-            identity_status="VERIFIED",
-            qa_verdict="VALID",
-            status="ACTIVE",
-        )
-    )
-    # find_by_identity_status_and_active requires quantity_available > 0 —
-    # so this product will not appear in generate list. Guard the mapper directly.
     svc = RecommendationService(db_session)
     status = svc._map_eligibility({"eligibility": "ELIGIBLE", "conflicts": []}, 0.0)
     assert status == "INELIGIBLE_OUT_OF_STOCK"
