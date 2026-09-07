@@ -1,10 +1,10 @@
-﻿# PRODUCT INTAKE — LIVE PROJECT LEDGER
+# PRODUCT INTAKE — LIVE PROJECT LEDGER
 
 **Project:** HBI — Health & Beauty Intelligence  
 **Domain:** Product Intake  
 **Source of Truth:** GitHub master  
 **Owner:** Product Owner / Domain Architect  
-**Last Reconciled:** 2026-09-02
+**Last Reconciled:** 2026-09-07
 
 ---
 
@@ -12,11 +12,11 @@
 
 **CURRENT PHASE:** PHASE 1 — PRODUCT INTAKE CONTRACT v1
 
-**CURRENT STATUS:** 🟡 ACTIVE — CONTRACT DEFINITION
+**CURRENT STATUS:** DRAFT ON BRANCH — PENDING PO ACCEPTANCE
 
 **CURRENT OBJECTIVE:**
 
-Finalize the operational Product Intake Contract against the verified existing repository capability.
+PO review and accept `PRODUCT_INTAKE_CONTRACT_v1.md`.
 
 **IMPLEMENTATION AUTHORIZED:** NO
 
@@ -24,47 +24,46 @@ Finalize the operational Product Intake Contract against the verified existing r
 
 # 2. CURRENT VERIFIED BASELINE
 
-The repository already contains Product Intake-related capability.
+**HEAD at last reconcile:** `42cc77ec5f8692407df58bb4be9d8a71fc93c52f`  
+**Commit:** P4 WP-06: governance-tests CI job — #20
 
 Verified baseline includes:
 
-- Product model;
-- Product create/update;
-- ProductKnowledge;
-- Evidence;
-- Inventory;
-- Product A-D;
+- Product model and P4 lifecycle machine (DRAFT…ARCHIVED);
+- Product create/update with governance injection blocked;
+- ProductTransitionService and ProductMutationLog;
+- Evidence readiness gating on approve/activate;
+- ProductKnowledge and Evidence relations;
+- Inventory / Sales / Accounting / Recommendation on same `product_id`;
+- Product A–D protected;
 - Home Page Product navigation;
 - Product Gallery/listing;
-- Product Intake UI;
-- 
-- `frontend/src/pages/NewHomePage.tsx`;
-- 
-- `frontend/src/pages/ProductIntakePanel.tsx`.
+- Product Intake UI: `frontend/src/pages/ProductIntakePanel.tsx`;
+- `frontend/src/pages/NewHomePage.tsx`.
 
-Therefore Product Intake is:
+Product Intake is **EXISTING / PARTIAL**. It is NOT a greenfield feature.
 
-**EXISTING / PARTIAL**
-
-It is NOT a greenfield feature.
+P4 Governance Contract V1 is **PO APPROVED** and implemented at this HEAD.  
+Intake operational Contract v1 is **DRAFTED, not yet PO ACCEPTED**.
 
 ---
 
 # 3. CURRENT RECONCILIATION
 
-The previous execution interpretation has been corrected.
+2026-09-02 amendment still holds: do not rebuild Home / Gallery / Intake UI.
 
-Old assumption:
+2026-09-07 Group-1 assessment (Qwen1 + Grok1, PO confirmed):
 
-Product Intake UI must be built.
-
-Current authoritative interpretation:
-
-Existing Product Intake functionality must be audited, formalized, completed and integrated.
+- P4 architecture at `42cc77ec` is the locked governance baseline.
+- This Ledger and the Master Execution Roadmap were stale relative to P4 (they still listed approval state machine and default status as OPEN).
+- Those items are now **LOCKED by P4**, restated in Contract v1 draft.
+- Only authorized Product Intake action: draft → PO accept Contract v1.
 
 Reference:
 
-PRODUCT_INTAKE_GOVERNANCE_RECONCILIATION_2026-09-02.md
+- `PRODUCT_INTAKE_GOVERNANCE_RECONCILIATION_2026-09-02.md`
+- `docs/P4_PRODUCT_INTAKE_GOVERNANCE_CONTRACT_V1.md`
+- `PRODUCT_INTAKE_CONTRACT_v1.md`
 
 ---
 
@@ -81,28 +80,29 @@ PRODUCT_INTAKE_GOVERNANCE_RECONCILIATION_2026-09-02.md
 | PO is final Product Master approver | DECIDED |
 | Source traceability | DECIDED |
 | Product remains editable | DECIDED |
-| Product history/versioning required direction | DECIDED |
-| Existing Home Product Intake must be reused/extended | DECIDED |
+| Product history/versioning V1 = ProductMutationLog | DECIDED (P4) |
+| Existing Home / Product Intake must be reused/extended | DECIDED |
 | Product A-D are protected | DECIDED |
+| P4 lifecycle is the V1 approval state machine | DECIDED (P4 @ 42cc77ec) |
+| Default create status = DRAFT (server-side) | DECIDED (P4) |
+| Creating a row is not Product Master approval | DECIDED |
+| No parallel Approve API | DECIDED |
 
 ---
 
 # 5. OPEN DECISIONS
 
-These remain OPEN:
+Remain OPEN until PO decides (Contract v1 does not close them):
 
 - duplicate matching algorithm;
-- duplicate result semantics;
-- default Product status;
-- default inventory behavior;
-- approval mechanism;
-- approval state machine;
-- provisional/shadow mechanism;
-- Product/Variant technical model;
-- source-tier taxonomy;
-- AI research tier/cost;
-- history/version schema;
-- Product Intake API Contract.
+- source-tier taxonomy detail;
+- AI research tier/cost/model;
+- Product/Variant/SKU technical model;
+- provisional/shadow operational mechanism;
+- dedicated research-dossier schema;
+- re-validation trigger matrix beyond V1 minimum;
+- complex history/version schema beyond mutation log;
+- default inventory behaviour for non-ACTIVE products.
 
 No AI may silently resolve these.
 
@@ -110,21 +110,15 @@ No AI may silently resolve these.
 
 # 6. KNOWN GAPS
 
-Current known gaps include:
+- Contract v1 not yet PO ACCEPTED;
+- Intake UI still injects governance fields (consumer mismatch with P4);
+- formal duplicate detection not implemented;
+- AI research workflow not implemented;
+- systematic Intake-time Evidence/Knowledge enrichment not implemented;
+- Evidence API governance not at Product-mutation enforcement level (P4 §15 remainder);
+- G1–G8 not passed.
 
-- formal duplicate detection;
-- formal validation workflow;
-- explicit PO approval transition;
-- complete research workflow;
-- integrated enrichment workflow;
-- stronger provenance enforcement;
-- systematic Evidence attachment;
-- systematic Knowledge enrichment;
-- version/history;
-- controlled re-validation;
-- complete lifecycle state behavior.
-
-These gaps are NOT authorization for uncontrolled redesign.
+Gaps are NOT authorization for uncontrolled redesign.
 
 ---
 
@@ -133,13 +127,15 @@ These gaps are NOT authorization for uncontrolled redesign.
 | Phase | Status |
 |---|---|
 | P0 Reality & Baseline | RECONCILED |
-| P1 Contract v1 | ACTIVE / CURRENT |
+| P1 Contract v1 | DRAFTED / PENDING PO ACCEPTANCE |
 | P2 AI Research | NOT STARTED |
 | P3 Validation / Enrichment | NOT STARTED |
-| P4 PO Review / Approval | NOT STARTED |
-| P5 Product Master / Integration | NOT STARTED |
-| P6 Version / Update / Re-validation | NOT STARTED |
+| P4 PO Review / Approval (intake operational UX) | P4 machine EXISTS; intake review UX NOT STARTED |
+| P5 Product Master / Integration | PARTIAL (identity exists; governed registration path = P4 activate) |
+| P6 Version / Update / Re-validation | PARTIAL (mutation log exists; re-validation matrix OPEN) |
 | P7 Real Product Pilot | NOT STARTED |
+
+Note: Roadmap Phase 4 is operational PO review of intake dossiers. It must reuse P4 transitions, not rebuild them.
 
 ---
 
@@ -149,9 +145,9 @@ G1 Identity — NOT PASSED
 G2 Research — NOT PASSED  
 G3 Validation — NOT PASSED  
 G4 Human Review — NOT PASSED  
-G5 Approval — NOT PASSED  
-G6 Integration — NOT PASSED  
-G7 Maintenance — NOT PASSED  
+G5 Approval — P4 control EXISTS; intake process NOT PASSED  
+G6 Integration — PARTIAL (same product_id); intake process NOT PASSED  
+G7 Maintenance — PARTIAL (mutation log); NOT PASSED  
 G8 Real Product Pilot — NOT PASSED
 
 ---
@@ -171,15 +167,16 @@ Do not modify:
 
 # 10. CURRENT SHA
 
-Current SHA must be obtained at resume time with:
+Recorded at this reconcile: `42cc77ec5f8692407df58bb4be9d8a71fc93c52f`
 
+On every resume:
+
+```
 git fetch origin master
-
 git rev-parse origin/master
+```
 
-The SHA recorded by this update is the commit created by this reconciliation operation.
-
-Never treat a historical SHA as the current SHA.
+Never treat a historical SHA as current without fetching.
 
 ---
 
@@ -187,13 +184,12 @@ Never treat a historical SHA as the current SHA.
 
 **ONLY:**
 
-Finalize and formally review:
+Product Owner reviews and either:
 
-PRODUCT_INTAKE_CONTRACT_v1.md
+- accepts `PRODUCT_INTAKE_CONTRACT_v1.md` (Status → PO ACCEPTED), or
+- returns comments for a revised draft.
 
-Then:
-
-Contract Acceptance → Technical Design → Implementation.
+Then: Contract Acceptance → Technical Design of a named WP → Implementation.
 
 No implementation before Contract acceptance.
 
@@ -206,10 +202,11 @@ Every successor must read:
 1. PROJECT_RULES.md
 2. Strategy & Governance
 3. Governance Reconciliation Amendment
-4. Master Execution Roadmap
-5. this Live Ledger
-6. current master
-7. Contract v1 when available
+4. P4 Product Intake Governance Contract V1
+5. PRODUCT_INTAKE_CONTRACT_v1.md
+6. Master Execution Roadmap
+7. this Live Ledger
+8. current master SHA
 
 Then resume from the current phase.
 
@@ -221,9 +218,9 @@ Then resume from the current phase.
 |---|---|---|
 | 2026-09-02 | Product Intake Roadmap established | ACTIVE |
 | 2026-09-02 | Live Project Ledger established | ACTIVE |
-| 2026-09-02 | Project Rules established | ACTIVE |
 | 2026-09-02 | Home/Product Intake reality reconciled | EXISTING PARTIAL |
-| 2026-09-02 | Governance / Roadmap / Ledger reconciliation | ACTIVE |
+| 2026-09-07 | P4 WP-06 on master `42cc77ec` | P4 V1 machine LOCKED |
+| 2026-09-07 | Group-1 Final Assessment | PASS for Contract drafting; Implementation NOT AUTHORIZED |
+| 2026-09-07 | Contract v1 drafted; Ledger/Roadmap aligned | PENDING PO ACCEPTANCE |
 
 # END
-
