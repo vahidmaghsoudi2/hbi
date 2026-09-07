@@ -17,25 +17,12 @@ from app.reasoning.scoring_constants import (
     ELIGIBILITY_ELIGIBLE,
     ELIGIBILITY_NEEDS_REVIEW,
     ELIGIBILITY_INELIGIBLE,
-    INVENTORY_SCORE_AVAILABLE,
-    INVENTORY_SCORE_UNAVAILABLE,
 )
 
 logger = logging.getLogger(__name__)
 
-# Source-type weights used only to *collect* evidence_score input for the engine.
-# Scoring formula itself lives in MatchScoringEngine / ReasoningEngine.
-_EVIDENCE_WEIGHTS = {
-    "PEER_REVIEWED": 1.0,
-    "CLINICAL_TRIAL": 1.0,
-    "REGULATORY": 1.0,
-    "OFFICIAL_MANUFACTURER": 0.6,
-    "MANUFACTURER": 0.6,
-    "REPUTABLE_RETAILER": 0.4,
-    "SECONDARY": 0.2,
-}
-
 # Recommendation.eligibility_status CHECK constraint values (schema-locked).
+# Mapping engine eligibility → persistence shape is data-assembly, not scoring.
 _STATUS_ELIGIBLE = "ELIGIBLE"
 _STATUS_PENDING_REVIEW = "INELIGIBLE_PENDING_REVIEW"
 _STATUS_OUT_OF_STOCK = "INELIGIBLE_OUT_OF_STOCK"
@@ -44,14 +31,19 @@ _STATUS_CONFLICT = "INELIGIBLE_CONFLICT"
 
 class RecommendationService(BaseService[Recommendation, RecommendationRepository]):
     """
-    RecommendationService — thin orchestration layer.
+    RecommendationService — data assembly / orchestration only.
 
-    Responsibilities:
-    - Collect verified products + inventory + evidence + knowledge snapshots
-    - Call ReasoningEngine.run() for scoring / conflict / claim checks
-    - Build in-memory Recommendation rows from engine output
+    Owns:
+    - Load VERIFIED products, inventory, evidence, knowledge snapshots
+    - Parse customer profile concerns (raw strings)
+    - Call MatchScoringEngine input-score helpers (via ReasoningEngine.scoring_engine)
+    - Call ReasoningEngine.run for decision / scoring / conflict / claims
+    - Map engine result onto Recommendation schema fields
 
-    Does NOT own the scoring formula (that lives in ReasoningEngine / MatchScoringEngine).
+    Does NOT own:
+    - need_match / evidence_score / inventory_score derivation formulas
+    - final_score / confidence / eligibility decision (MatchScoringEngine.calculate)
+    - claim boundary / conflict analysis (ReasoningEngine submodules)
     """
 
     def __init__(self, db: Session):
@@ -74,23 +66,15 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
     def generate_recommendations(
         self, case_id: str, customer_profile: Dict = None
     ) -> List[Recommendation]:
-        """
-        Generate recommendations via ReasoningEngine.
-
-        Flow:
-        1. Load VERIFIED products with available inventory (active, not DRAFT)
-        2. For each product: gather PK snapshot + evidence list + input scores
-        3. Call ReasoningEngine.run(...)
-        4. Create Recommendation from engine result (scores, eligibility, rationale)
-        """
+        """Assemble inputs → ReasoningEngine.run → Recommendation rows."""
         if customer_profile is None:
             customer_profile = {}
 
         products = self.product_repo.find_by_identity_status_and_active("VERIFIED")
         recommendations: List[Recommendation] = []
         rank = 1
-
         concern_list = self._parse_concerns(customer_profile)
+        scorer = self.reasoning_engine.scoring_engine
 
         for product in products:
             evidence_rows = self.evidence_repo.find_by_product(product.product_id)
@@ -99,9 +83,22 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             pk_snapshot = self._knowledge_snapshot(knowledge, product)
             inventory = self.inventory_repo.find_by_product(product.product_id)
 
-            need_match = self._compute_need_match(concern_list, product, knowledge)
-            evidence_score = self._compute_evidence_score(evidence_rows)
-            inventory_score = self._compute_inventory_score(inventory)
+            # Input scores: owned by MatchScoringEngine (not this service).
+            need_match = scorer.score_need_match(
+                concern_list,
+                product_name=getattr(product, "product_name", None) or "",
+                brand=getattr(product, "brand", None) or "",
+                known_use_cases=(knowledge.known_use_cases if knowledge else None) or "",
+                claimed_benefits=(knowledge.claimed_benefits if knowledge else None) or "",
+                ingredients=(knowledge.ingredients if knowledge else None) or "",
+            )
+            evidence_score = scorer.score_evidence_from_source_types(
+                [(ev.source_type or "") for ev in evidence_rows]
+            )
+            inventory_score = scorer.score_inventory(
+                quantity_available=getattr(inventory, "quantity_available", None) if inventory else None,
+                stock_status=getattr(inventory, "stock_status", None) if inventory else None,
+            )
 
             result = self.reasoning_engine.run(
                 product_id=product.product_id,
@@ -113,7 +110,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 inventory_score=inventory_score,
             )
 
-            eligibility_status = self._map_eligibility(result, inventory_score)
+            eligibility_status = self._map_eligibility_to_schema(result, inventory_score)
             ranking_score = float(result.get("final_score") or 0.0)
             ranking_reasons = (result.get("rationale") or "")[:2000]
             exclusion_reasons = self._exclusion_reasons(result)
@@ -122,8 +119,16 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 recommendation_id=f"rec_{case_id}_{product.product_id}_{rank}",
                 case_id=case_id,
                 product_id=product.product_id,
-                need_match_score=float(result.get("need_match") if result.get("need_match") is not None else need_match),
-                evidence_score=float(result.get("evidence_score") if result.get("evidence_score") is not None else evidence_score),
+                need_match_score=float(
+                    result.get("need_match")
+                    if result.get("need_match") is not None
+                    else need_match
+                ),
+                evidence_score=float(
+                    result.get("evidence_score")
+                    if result.get("evidence_score") is not None
+                    else evidence_score
+                ),
                 eligibility_status=eligibility_status,
                 ranking_score=ranking_score,
                 ranking_reasons=ranking_reasons,
@@ -180,53 +185,8 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         }
 
     @staticmethod
-    def _compute_need_match(
-        concern_list: List[str], product, knowledge: Optional[ProductKnowledge]
-    ) -> float:
-        """Simple token-overlap input for the engine (not the final ranking formula)."""
-        if not concern_list:
-            return 0.5
-        corpus_parts = [
-            getattr(product, "product_name", None) or "",
-            getattr(product, "brand", None) or "",
-        ]
-        if knowledge:
-            corpus_parts.extend(
-                [
-                    knowledge.known_use_cases or "",
-                    knowledge.claimed_benefits or "",
-                    knowledge.ingredients or "",
-                ]
-            )
-        corpus = " ".join(corpus_parts).lower()
-        if not corpus.strip():
-            return 0.3
-        hits = sum(1 for c in concern_list if c and c in corpus)
-        return round(min(1.0, hits / max(len(concern_list), 1)), 2)
-
-    @staticmethod
-    def _compute_evidence_score(evidence_rows: List[Evidence]) -> float:
-        if not evidence_rows:
-            return 0.0
-        total = 0.0
-        for ev in evidence_rows:
-            st = (ev.source_type or "").upper()
-            total += _EVIDENCE_WEIGHTS.get(st, 0.1)
-        return round(min(1.0, total / len(evidence_rows)), 2)
-
-    @staticmethod
-    def _compute_inventory_score(inventory) -> float:
-        if inventory is None:
-            return INVENTORY_SCORE_UNAVAILABLE
-        qty = getattr(inventory, "quantity_available", 0) or 0
-        status = (getattr(inventory, "stock_status", None) or "").upper()
-        if qty <= 0 or status == "OUT_OF_STOCK":
-            return INVENTORY_SCORE_UNAVAILABLE
-        return INVENTORY_SCORE_AVAILABLE
-
-    @staticmethod
-    def _map_eligibility(result: Dict[str, Any], inventory_score: float) -> str:
-        """Map engine eligibility strings onto Recommendation CHECK constraint values."""
+    def _map_eligibility_to_schema(result: Dict[str, Any], inventory_score: float) -> str:
+        """Schema adapter only — maps engine eligibility onto Recommendation CHECK values."""
         if inventory_score <= 0.0:
             return _STATUS_OUT_OF_STOCK
         if result.get("conflicts"):
