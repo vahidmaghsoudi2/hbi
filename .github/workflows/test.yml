@@ -1,4 +1,4 @@
-﻿name: HBI CI
+name: HBI CI
 
 on:
   push:
@@ -39,3 +39,33 @@ jobs:
           path: |
             htmlcov/
             coverage.xml
+
+  # WP-06 / Issue #20: dedicated governance gate for P4 Contract §16–§18
+  # Justification: stable named status check for future branch protection;
+  # faster targeted feedback without re-running accounting/inventory suites.
+  # Scope files are the P4 compliance + API auth matrix suites on master.
+  governance-tests:
+    name: governance-tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest httpx
+
+      - name: Run P4 governance test suites
+        run: |
+          python -m pytest -q \
+            tests/test_product_compliance.py \
+            tests/test_wp05_api_auth_matrix.py \
+            --tb=short
