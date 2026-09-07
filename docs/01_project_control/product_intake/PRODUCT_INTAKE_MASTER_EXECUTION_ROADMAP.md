@@ -6,7 +6,7 @@
 **Source of Truth:** GitHub `master`  
 **Owner:** Product Owner / Domain Architect  
 **Last Reconciled:** 2026-09-07  
-**Current Phase:** PHASE 1 — PRODUCT INTAKE CONTRACT v1 (DRAFTED / PENDING PO ACCEPTANCE)
+**Current Phase:** PHASE 1 — PRODUCT INTAKE CONTRACT v1 (**PO ACCEPTED** on branch; merge pending)
 
 ---
 
@@ -51,11 +51,11 @@ No greenfield Product Intake rebuild is authorized.
 
 # PHASE 1 — PRODUCT INTAKE CONTRACT v1
 
-**Status:** DRAFTED / PENDING PO ACCEPTANCE
+**Status:** **PO ACCEPTED** (on branch head; merge to master pending)
 
 **Output:** `PRODUCT_INTAKE_CONTRACT_v1.md`
 
-**Implementation authorization: NO** until PO ACCEPTED + named technical design.
+**Implementation authorization: NO** until PO authorizes a named technical design / WP (PO acceptance of Contract alone does not authorize code).
 
 ---
 
@@ -118,7 +118,7 @@ INTRODUCE → DUPLICATE CHECK → RESEARCH → ENRICH → VALIDATE → PO REVIEW
 | Phase | Status |
 |---|---|
 | P0 Reality & Baseline | RECONCILED |
-| P1 Contract v1 | DRAFTED / PENDING PO ACCEPTANCE |
+| P1 Contract v1 | **PO ACCEPTED** (on branch; merge pending) |
 | P2 AI Research / Intake | NOT STARTED |
 | P3 Validation / Enrichment | NOT STARTED |
 | P4 PO Review / Approval | MACHINE EXISTS; UX NOT STARTED |
@@ -154,9 +154,9 @@ G1 Identity · G2 Research · G3 Validation · G4 Human Review · G5 Approval ·
 
 # CURRENT POSITION
 
-**CURRENT PHASE:** PHASE 1 — CONTRACT v1 DRAFTED
+**CURRENT PHASE:** PHASE 1 — CONTRACT v1 **PO ACCEPTED** (on branch)
 
-**CURRENT AUTHORIZED ACTION:** PO acceptance (or comment-return) of `PRODUCT_INTAKE_CONTRACT_v1.md`.
+**CURRENT AUTHORIZED ACTION:** Merge PR #33 to master; then only a PO-authorized named technical-design / WP (no implementation without that).
 
 **NOT AUTHORIZED:** implementation of duplicate detector, AI research, new approval workflow, lifecycle rebuild, inventory policy change, versioning schema, Product A-D mutation.
 
