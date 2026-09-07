@@ -12,11 +12,11 @@
 
 **CURRENT PHASE:** PHASE 1 — PRODUCT INTAKE CONTRACT v1
 
-**CURRENT STATUS:** DRAFT ON BRANCH — PENDING PO ACCEPTANCE
+**CURRENT STATUS:** PO ACCEPTED (branch docs; pending merge to master)
 
 **CURRENT OBJECTIVE:**
 
-PO review and accept `PRODUCT_INTAKE_CONTRACT_v1.md`.
+Merge PR #33 to master; then authorize a named technical-design WP only if PO decides (implementation still NO until then).
 
 **IMPLEMENTATION AUTHORIZED:** NO
 
@@ -44,7 +44,7 @@ Verified baseline includes:
 Product Intake is **EXISTING / PARTIAL**. It is NOT a greenfield feature.
 
 P4 Governance Contract V1 is **PO APPROVED** and implemented at this HEAD.  
-Intake operational Contract v1 is **DRAFTED, not yet PO ACCEPTED**.
+Intake operational Contract v1 is **PO ACCEPTED** on branch head (baseline `42cc77ec`); merge to master still required for Source-of-Truth lock.
 
 ---
 
@@ -110,7 +110,7 @@ No AI may silently resolve these.
 
 # 6. KNOWN GAPS
 
-- Contract v1 not yet PO ACCEPTED;
+- Contract v1 **PO ACCEPTED** on branch (Ledger/Roadmap aligned 2026-09-07);
 - Intake UI still injects governance fields (consumer mismatch with P4);
 - formal duplicate detection not implemented;
 - AI research workflow not implemented;
@@ -127,7 +127,7 @@ Gaps are NOT authorization for uncontrolled redesign.
 | Phase | Status |
 |---|---|
 | P0 Reality & Baseline | RECONCILED |
-| P1 Contract v1 | DRAFTED / PENDING PO ACCEPTANCE |
+| P1 Contract v1 | **PO ACCEPTED** (on branch; merge to master pending) |
 | P2 AI Research | NOT STARTED |
 | P3 Validation / Enrichment | NOT STARTED |
 | P4 PO Review / Approval (intake operational UX) | P4 machine EXISTS; intake review UX NOT STARTED |
@@ -184,14 +184,12 @@ Never treat a historical SHA as current without fetching.
 
 **ONLY:**
 
-Product Owner reviews and either:
+1. Merge PR #33 so Contract v1 + aligned Ledger/Roadmap land on `master`.
+2. Product Owner may then authorize a **named technical-design / WP** (optional next step).
 
-- accepts `PRODUCT_INTAKE_CONTRACT_v1.md` (Status → PO ACCEPTED), or
-- returns comments for a revised draft.
+**Still forbidden without a named WP authorization:** implementation code, duplicate detector, AI research, parallel approval workflow, Product A–D mutation.
 
-Then: Contract Acceptance → Technical Design of a named WP → Implementation.
-
-No implementation before Contract acceptance.
+Contract is **PO ACCEPTED** on this branch; acceptance alone does **not** authorize implementation.
 
 ---
 
@@ -221,6 +219,8 @@ Then resume from the current phase.
 | 2026-09-02 | Home/Product Intake reality reconciled | EXISTING PARTIAL |
 | 2026-09-07 | P4 WP-06 on master `42cc77ec` | P4 V1 machine LOCKED |
 | 2026-09-07 | Group-1 Final Assessment | PASS for Contract drafting; Implementation NOT AUTHORIZED |
-| 2026-09-07 | Contract v1 drafted; Ledger/Roadmap aligned | PENDING PO ACCEPTANCE |
+| 2026-09-07 | Contract v1 drafted; Ledger/Roadmap aligned | DRAFT |
+| 2026-09-07 | PO «میپذیرم» — Contract status PO ACCEPTED on branch | PO ACCEPTED |
+| 2026-09-07 | Ledger/Roadmap status reconciled to PO ACCEPTED (option B) | ALIGNED |
 
 # END
