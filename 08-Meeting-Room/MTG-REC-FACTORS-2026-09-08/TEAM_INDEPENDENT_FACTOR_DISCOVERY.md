@@ -1,75 +1,236 @@
-# HBI — Independent Recommendation Factor Discovery
+# HBI — Independent Recommendation Factor Discovery (Team Aggregate)
 
-**Meeting / consultation record**  
-**Date:** 2026-09-08  
-**Mission:** Identify factors that should influence product Recommendation ranking inside the **current HBI Gallery / Inventory** (offline scope).  
-**Rules for this stage:** No formula · No weight · No percentage · No implementation · Independent opinions · Do not close Issue #37 from this file.
-
-**Related governance:**
-- Issue #37 — Recommendation Parameter Weighting (OPEN / NOT AUTHORIZED)
-- ADR-REC-INPUT-001 — input semantics (separate track)
-- PR #36 — HOLD / DO NOT MERGE (not a precedent for factors or weights)
-
-**Scope constraint (shared):**
+**Location:** `08-Meeting-Room/MTG-REC-FACTORS-2026-09-08/`  
+**Date recorded:** 2026-09-08  
+**Mission stage:** Factor Discovery & Prioritization only  
+**Rules:** No formula · No weight · No percentage · No implementation  
+**Gallery scope:** Offline HBI Gallery / Inventory (not global market search)
 
 ```
-Customer Need
-      ↓
-Available Products in HBI Gallery / Inventory
-      ↓
-Eligibility / Suitability
-      ↓
-Recommendation
+Customer Need → Available Products in HBI Gallery → Eligibility / Suitability → Recommendation
 ```
 
-Not a global market search engine in the current phase.
+**Governance links:**
+- Issue #37 — Recommendation Parameter Weighting (**OPEN / NOT AUTHORIZED**)
+- ADR-REC-INPUT-001 — input semantics (separate)
+- PR #36 — HOLD / DO NOT MERGE (not a precedent)
+
+**How to participate:** append or revise only your own member section; do not overwrite others.
 
 ---
 
-## How to append other team members
+## Member: Grok (xAI) — Independent
 
-Add a new section below using the same format (max 20 numbered factors, most important first). Do not edit another member’s list without labeling it as a later revision.
+1. **ایمنی و منع مصرف** — تضاد با ریسک/آلرژی/محدودیت مشتری، قبل از هر رتبه‌بندی کیفی  
+2. **تناسب نیاز–اندیکاسیون** — تطابق نیاز/وضعیت مشتری با کاربرد مشروع محصول  
+3. **Ingredients و تناسب فرمولاسیون** — مادهٔ مؤثر و فرم مناسب نیاز (نه ادعای بازاریابی)  
+4. **کیفیت شواهد مرتبط با همان نیاز** — Evidence تأییدشده برای منافع واقعاً مرتبط  
+5. **اعتماد به سابقهٔ محصول (Identity / QA)** — رکورد قابل اتکا برای توصیه  
+6. **محدودیت‌های پروفایل مشتری** — پوست/مو/پوست سر و مشابه  
+7. **کامل بودن Product Knowledge برای مشاوره** — دادهٔ کافی برای توجیه عملی توصیه  
+8. **موجودی قابل فروش در HBI** — واقعیت آفلاین؛ در دسترس نبودن = محدودیت eligibility  
+9. **تعارض شواهد / نقض مرز ادعا** — conflict یا claim نامعتبر  
+10. **علائم منع و کنارگذاری در دانش محصول**  
+11. **تجربهٔ اپراتور/فروشنده (محلی و ساخت‌یافته)** — سیگنال، نه جایگزین Evidence  
+12. **الگوی فروش–مرجوعی برای پروفایل مشابه** — فقط اگر دادهٔ محلی قابل اتکا باشد  
+13. **دسترس‌پذیری اقتصادی برای زمینهٔ مشتری** — قید عملی، نه امتیاز کیفیت  
+14. **اعتبار برند/رگولاتوری فقط وقتی به ایمنی یا اصالت مربوط است**  
+15. **بازخورد رضایت مصرف‌کننده (اگر حاکمیتی و محلی باشد)**  
+16. **پروکسی تکرار خرید / پذیرش (اگر وجود داشته باشد)** — ضعیف و فرعی  
+17. **محبوبیت بازار / روند** — تجاری؛ اولویت پایین برای مأموریت بالینی HBI  
+18. **سیگنال شبکه‌های اجتماعی** — پرنویز؛ اولویت بسیار پایین  
+19. **تأمین خارج از Gallery** — فقط Exception آینده، نه عامل رتبه‌بندی فعلی  
+20. **تازگی یا کمپین تبلیغاتی** — پایین‌ترین  
 
----
-
-## Member: Grok (xAI) — Independent contribution
-
-**Stance:** Clinical-safety and evidence-first recommender for an offline gallery, not a popularity or advertising ranker. Commercial signals are secondary and must not override safety or suitability.
-
-1. **Safety / contraindication fit** — product must not conflict with customer risks, allergies, or stated constraints; non-negotiable eligibility before ranking quality.
-2. **Need–indication suitability** — match between customer need/condition and the product’s legitimate use context (dermatology / use-case fit).
-3. **Active ingredients & formulation relevance** — presence and appropriateness of actives/vehicle for that need (not marketing claims alone).
-4. **Strength of relevant verified evidence** — quality of evidence supporting benefits that matter for *this* need (not generic “has some evidence”).
-5. **Product record trust (identity / QA)** — only products with trustworthy identity and acceptable QA status should rank as recommendable.
-6. **Customer profile constraints** — skin/hair/scalp (and similar) profile limits that change suitability even when the headline need matches.
-7. **Completeness of Product Knowledge for counselling** — enough structured knowledge to justify and explain the recommendation operationally.
-8. **Sellable availability in HBI inventory** — offline gallery reality: cannot responsibly rank what cannot be fulfilled now (availability as eligibility/access, not “popularity”).
-9. **Unresolved evidence conflict / unsafe claim boundary** — open conflicts or disallowed claim promotions should suppress or block confidence in ranking.
-10. **Known adverse / exclusion signals in knowledge** — contraindications and exclusion reasons already captured in product knowledge.
-11. **Operator / seller observed outcomes (local)** — structured experience with similar customers in *this* gallery context (signal, not substitute for evidence).
-12. **Historical sales–return pattern for similar profiles** — if reliable local outcome data exists; weak or biased data must not dominate.
-13. **Economic accessibility for the customer context** — price as a practical constraint on “best available,” not as a quality score.
-14. **Regulatory / brand credibility only where it informs safety or authenticity** — brand prestige alone is not ranking value.
-15. **Consumer satisfaction feedback (if governed and local)** — offline-governed feedback only; noisy external ratings stay low priority.
-16. **Repeat-purchase or adherence proxy (local, if any)** — weak secondary signal of real-world acceptability.
-17. **Market popularity / trend velocity** — commercial interest, not clinical priority for HBI’s core mission.
-18. **Social / consumer web signals** — high noise; optional later signal, not a primary ranking basis offline.
-19. **Out-of-gallery exception supply** — possible future *exception process*, not a current ranking factor among gallery candidates.
-20. **Novelty or campaign-driven promotion** — lowest; must not outrank safety, suitability, ingredients, or verified evidence.
-
-**Notes (non-weight):**
-- Several items above may later be classified as Gate / Filter / Constraint rather than Score factors (especially 1, 5, 8, 9).
-- This list is **not** a weight policy and does **not** authorize percentages.
-- Independent of PO candidate priority order on Issue #37; comparison is deferred to a later synthesis round.
+**Note:** Several items may later be Gate/Filter rather than Weight. Not a weight policy.
 
 ---
 
-## Member: _pending_
+## Member: Qwen-2 — Independent
 
-*(PO will supply other team members’ independent lists; append below without overwriting Grok’s section.)*
+1. **موانع ایمنی و منع مصرف (Contraindications):** Gate مطلق، نه امتیاز  
+2. **تطابق مستقیم نیاز با ماده مؤثره (Active Ingredient Match)**  
+3. **پروفایل بیولوژیکی مشتری** — پوست، مو، سن، شرایط فیزیولوژیک  
+4. **قدرت شواهد علمی (Evidence Strength)**  
+5. **کیفیت و پایداری فرمولاسیون** — غلظت، pH، پایداری  
+6. **موجودی لحظه‌ای در گالری (Inventory Availability)**  
+7. **سابقه واکنش مشتری (Historical Response)**  
+8. **تأییدیه و مداخله اپراتور/متخصص**  
+9. **سازگاری با روتین فعلی مشتری**  
+10. **همخوانی با بودجه مشتری**  
+11. **پذیرش حسی و آرایشی (Cosmetic Elegance)**  
+12. **اعتبار بالینی برند**  
+13. **بازخورد واقعی مصرف‌کنندگان (Consumer Signals) در اکوسیستم HBI**  
+14. **تازگی و تاریخ انقضا**  
+15. **سهولت استفاده و پیچیدگی روتین**  
+16. **هم‌افزایی سبد خرید (Cross-sell Synergy)**  
+17. **ویژگی‌های اخلاقی و پایداری** — ترجیحی نه الزامی  
+18. **روندهای محبوبیت بازار** — سیگنال ضعیف  
+19. **پتانسیل تأمین استثنایی (Exception Sourcing)** — آینده  
+20. **زیبایی بصری بسته‌بندی** — کم‌اهمیت‌ترین در سیستم مبتنی بر شواهد  
+
+---
+
+## Member: Grok-2 — Independent (as submitted by PO)
+
+1. **ایمنی و منع مصرف** — ناسازگاری با شرایط پوست/بدن، بارداری، آلرژی یا تداخل  
+2. **تناسب با نیاز واقعی مشتری** — دغدغه، ناحیه مصرف و هدف مراجعهٔ امروز  
+3. **موجودی قابل‌فروش در Gallery**  
+4. **هویت و وضعیت حاکمیتی محصول**  
+5. **ترکیبات و فرمولاسیون واقعی**  
+6. **کیفیت و نوع شواهد**  
+7. **شدت و قطعیت شواهد برای همان ادعا**  
+8. **ریسک تحریک، حساسیت و آسیب تجمعی**  
+9. **قابلیت استفاده عملی در شرایط مشتری**  
+10. **سابقه و زمینهٔ همان مشتری در HBI**  
+11. **وضوح دانش محصول (Product Knowledge)**  
+12. **قیمت و تناسب اقتصادی همان مراجعه**  
+13. **تجربه و مشاهدهٔ اپراتور حضوری**  
+14. **بازخورد و نتیجهٔ مصرف‌کنندگان قبلی همان محصول در HBI**  
+15. **فروش و تکرار خرید واقعی همان گالری**  
+16. **پایداری و اعتبار برند در حد همان دسته**  
+17. **سازگاری با سبد پیشنهادی چندمحصولی**  
+18. **تازگی، بچ و شرایط نگهداری مؤثر بر کیفیت**  
+19. **سیگنال‌های بیرونی بازار و شبکهٔ اجتماعی**  
+20. **تأمین خارج از موجودی به‌عنوان استثنا**  
+
+---
+
+## Member: Qwen-1 — Independent
+
+1. **ایمنی و منع مصرف (Contraindications)** — Hard Gate  
+2. **انطباق علمی ترکیبات با نیاز (Ingredient-to-Need Alignment)**  
+3. **وضعیت موجودی قابل‌فروش (Sellable Inventory)**  
+4. **قدرت و نوع منبع شواهد (Evidence Strength & Source Type)**  
+5. **وضعیت تأیید کیفیت شواهد (QA Status)**  
+6. **تضاد در شواهد (Evidence Conflict)** — کاهش Confidence  
+7. **اطمینان از دانش محصول (Product Knowledge Confidence)**  
+8. **پروفایل دقیق مشتری (Customer Profile Nuances)**  
+9. **بازخورد و تجربه واقعی مصرف‌کننده (Consumer Feedback)**  
+10. **سابقه و اعتبار برند (Brand Reputation)**  
+11. **قیمت و تناسب اقتصادی (Price Affordability)**  
+12. **یادداشت‌ها و مداخله اپراتور (Operator Context)**  
+13. **سازگاری با روتین فعلی (Routine Compatibility)**  
+14. **پیچیدگی دستور مصرف (Usage Complexity)**  
+15. **منطقه جغرافیایی و اقلیم (Regional Suitability)**  
+16. **نوع بسته‌بندی و بهداشت (Packaging Hygiene)**  
+17. **روندهای بازار و محبوبیت (Market Trends)** — Soft Signal  
+18. **تازگی فرمولاسیون یا سری ساخت (Formulation Freshness)**  
+19. **پتانسیل تأمین استثنایی (Exception Sourcing Potential)**  
+20. **پایداری زیست‌محیطی و اخلاقی (Sustainability/Ethics)**  
+
+---
+
+## Member: GPT-1 — Independent
+
+1. تناسب با نیاز واقعی مشتری  
+2. ایمنی و منع مصرف  
+3. ترکیبات و ویژگی‌های واقعی فرمولاسیون  
+4. کیفیت و قدرت شواهد علمی  
+5. شواهد اختصاصی محصول  
+6. Product Knowledge ساختاریافته و معتبر  
+7. وضعیت و کیفیت شواهد مربوط به ادعاهای محصول (Supported/Partial/Conflict/Unknown)  
+8. مناسب‌بودن محصول برای وضعیت پوستی/مویی مشتری  
+9. میزان تطابق با محدودیت‌ها و ترجیحات صریح مشتری  
+10. موجودی و قابلیت فروش واقعی در HBI Gallery  
+11. کیفیت داده و کامل‌بودن اطلاعات تصمیم  
+12. Conflict بین شواهد، ادعاها یا اطلاعات مشتری و محصول  
+13. تجربه و بازخورد واقعی مصرف‌کنندگان  
+14. نتایج فروش واقعی محصول — سیگنال تجاری، نه معادل اثربخشی علمی  
+15. تجربه و قضاوت اپراتور/فروشنده  
+16. قیمت و تناسب اقتصادی با شرایط مشتری  
+17. اعتبار و ثبات برند/تأمین‌کننده  
+18. رفتار و ترجیحات خرید مشتری  
+19. روند زمانی و تغییرات محبوبیت بازار  
+20. Consumer/Social Signals — سیگنال کمکی نه شواهد علمی  
+
+---
+
+## Member: DeepSeek-1 — Independent
+
+1. **ایمنی / Contraindication** — Gate نه Weight  
+2. **شرایط بالینی / Need Match**  
+3. **شواهد علمی (Evidence Quality)**  
+4. **وضعیت موجودی (Availability)**  
+5. **تطابق با پروفایل مشتری**  
+6. **ترکیبات مؤثر (Ingredients)**  
+7. **عوارض جانبی شناخته‌شده**  
+8. **برند و اعتبار تولیدکننده**  
+9. **قیمت / مقرون‌به‌صرفه‌بودن**  
+10. **بازخورد مصرف‌کنندگان (Reviews)**  
+11. **تجربه فروشنده / اپراتور**  
+12. **سابقه خرید مشتری**  
+13. **روندهای بازار (Trends)**  
+14. **تازگی محصول (Newness)**  
+15. **وضعیت تاییدیه‌ها (QA/Regulatory)**  
+16. **محصولات جایگزین (Alternatives)**  
+17. **فصل / شرایط محیطی**  
+18. **ترجیحات شخصی مشتری**  
+19. **شبکه‌های اجتماعی و Consumer Signals**  
+20. **قابلیت ترکیب با سایر محصولات**  
+
+**DeepSeek-1 classification note (not weights):** Gates suggested for safety / need / inventory; other items as Weight or Signal candidates — for later discussion only.
+
+---
+
+## Member: Perplexity — Independent
+
+1. ایمنی و منع مصرف مشتری  
+2. هدف مشخص مشتری در همین مراجعه  
+3. صلاحیت و هویت محصول  
+4. موجودی واقعی و قابل فروش  
+5. شواهد معتبر درباره کاربرد محصول  
+6. Conflictهای حل‌نشده  
+7. کیفیت و استقلال Evidence  
+8. سازگاری با شرایط خوداظهاری مشتری  
+9. روش مصرف و قابلیت اجرای واقعی  
+10. تجربه قبلی همان مشتری  
+11. ترکیبات و هشدارهای واقعی محصول  
+12. داده‌های Unknown، کهنه یا تأییدنشده — نباید به امتیاز مثبت تبدیل شوند  
+13. ترجیحات صریح مشتری  
+14. سازگاری با روتین فعلی  
+15. ارزش اقتصادی برای همان مشتری  
+16. تازگی و کیفیت فیزیکی کالا  
+17. قابلیت توضیح توصیه (explainability برای فروشنده/مشتری)  
+18. اولویت و تأیید انسانی فروشنده — بدون جایگزینی Evidence  
+19. بازخورد بازار و مصرف‌کنندگان — در offline عامل فرعی  
+20. محصول خارج از موجودی گالری — فعلاً Recommendation اصلی نیست  
+
+---
+
+## Member: GPT-2 — Independent
+
+1. **ایمنی و منع مصرف**  
+2. **تناسب با نیاز واقعی مشتری**  
+3. **موجودی قابل‌فروش در Gallery**  
+4. **هویت و وضعیت حاکمیتی محصول**  
+5. **ترکیبات و فرمولاسیون واقعی**  
+6. **کیفیت و نوع شواهد**  
+7. **شدت و قطعیت شواهد برای همان ادعا**  
+8. **ریسک تحریک، حساسیت و آسیب تجمعی**  
+9. **قابلیت استفاده عملی در شرایط مشتری**  
+10. **سابقه و زمینهٔ همان مشتری در HBI**  
+11. **وضوح دانش محصول (Product Knowledge)**  
+12. **قیمت و تناسب اقتصادی همان مراجعه**  
+13. **تجربه و مشاهدهٔ اپراتور حضوری**  
+14. **بازخورد و نتیجهٔ مصرف‌کنندگان قبلی همان محصول در HBI**  
+15. **فروش و تکرار خرید واقعی همان گالری**  
+16. **پایداری و اعتبار برند در حد همان دسته**  
+17. **سازگاری با سبد پیشنهادی چندمحصولی**  
+18. **تازگی، بچ و شرایط نگهداری مؤثر بر کیفیت**  
+19. **سیگنال‌های بیرونی بازار و شبکهٔ اجتماعی**  
+20. **تأمین خارج از موجودی به‌عنوان استثنا**  
+
+---
+
+## Member: DeepSeek-2 — Submission note
+
+متن ارسالی DeepSeek-2 در این دور عمدتاً **تأیید دریافت BIG MISSION / وضعیت گالری / تعهد قوانین** بود و **فهرست ۲۰عاملی Factor Discovery** نداشت.  
+در این فایل به‌عنوان «بدون لیست عوامل در این دور» ثبت می‌شود. در صورت ارسال لیست مستقل بعدی، بخش جدا اضافه شود.
 
 ---
 
 ## Synthesis status
 
-**Not started.** Multi-member comparison, gap detection, and role classification (Weight vs Gate vs Filter vs Signal) are future steps. Issue #37 remains OPEN.
+**Not started.** Comparison, gap detection, Gate vs Weight vs Signal classification, and any weighting remain **future work**.  
+**Issue #37 stays OPEN.** No percentages derived from these lists.
