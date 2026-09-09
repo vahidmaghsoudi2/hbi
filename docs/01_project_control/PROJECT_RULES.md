@@ -5,7 +5,7 @@
 **Source of Truth:** GitHub `master`
 **Project:** HBI — Health & Beauty Intelligence
 **Effective Date:** 2026-09-02
-**Last Governance Update:** 2026-09-05 (PO Execution Order — pending PO merge approval)
+**Last Governance Update:** 2026-09-09 (Team Operational Directive pointer + prior rules retained)
 
 ---
 
@@ -13,22 +13,38 @@
 
 هر Human یا AI که وارد پروژه HBI می‌شود، قبل از هرگونه تحلیل، طراحی، کدنویسی، تغییر فایل، پیشنهاد معماری، اجرای Script، ایجاد Issue یا Commit باید این فایل را مطالعه و رعایت کند.
 
-فایل رسمی قوانین:
+فایل رسمی قوانین پایه:
 
 `docs/01_project_control/PROJECT_RULES.md`
 
-عدم مطالعه این فایل = عدم مجوز شروع کار.
+**دستورالعمل عملیاتی و ارتباطی تیم (مکمل اجباری از 2026-09-09):**
+
+`docs/01_project_control/HBI_TEAM_OPERATIONAL_COMMUNICATION_DIRECTIVE_V1.md`  
+**Document ID:** `HBI-TEAM-OPS-COM-001`
+
+شامل: قالب پاسخ تیمی، استقلال فکری، Circuit Breaker فشرده، فازهای F0–F7، و **سیاست دسترسی GitHub** (مخزن عمومی `vahidmaghsoudi2/hbi` — خواندن برای همه اعضا؛ نوشتن فقط با دستور PO به Grokها/Owner مجاز).
+
+عدم مطالعه قوانین پایه + دستورالعمل ارتباطی = عدم مجوز شروع کار.
 
 ترتیب اجباری ورود:
 
 1. خواندن PROJECT_RULES.md
-2. شناسایی مأموریت / Unit
-3. خواندن Roadmap و Ledger مربوطه
-4. بررسی مستقیم origin/master
-5. ثبت Current SHA
-6. انجام Reality Audit
-7. شناسایی Existing / Partial / Missing / Unknown / Conflict
-8. سپس شروع اجرای کار
+2. خواندن HBI_TEAM_OPERATIONAL_COMMUNICATION_DIRECTIVE_V1.md
+3. شناسایی مأموریت / Unit
+4. خواندن Roadmap و Ledger مربوطه
+5. بررسی مستقیم origin/master
+6. ثبت Current SHA
+7. انجام Reality Audit
+8. شناسایی Existing / Partial / Missing / Unknown / Conflict
+9. سپس شروع اجرای کار
+
+---
+
+# 0.1 دسترسی GitHub (خلاصه — جزئیات در TEAM-OPS-COM-001)
+
+- Repository: https://github.com/vahidmaghsoudi2/hbi (public)
+- همه اعضای تیم: دسترسی **خواندن** از ابتدا تا اکنون — ادعای عدم دسترسی خواندن پذیرفته نیست
+- نوشتن / PR / Merge: فقط طبق مجوز PO و فرآیند پروژه
 
 ---
 
@@ -47,31 +63,13 @@
 هیچ عضو پروژه مجاز نیست چیزی را که مستقیماً در Repository، Evidence یا منبع معتبر مشاهده نشده است، به‌عنوان واقعیت اعلام کند.
 
 ممنوع:
-- حدس درباره فایل
-- حدس درباره API
-- حدس درباره Schema
-- حدس درباره Database
-- حدس درباره UI
-- حدس درباره Status
-- حدس درباره Lifecycle
-- حدس درباره Business Rule
-- حدس درباره Integration
-- حدس درباره اینکه کاری قبلاً انجام شده یا نشده
+- حدس درباره فایل، API، Schema، Database، UI، Status، Lifecycle، Business Rule، Integration، یا انجام‌شدن قبلی کار
 
 وضعیت‌های مجاز:
-- VERIFIED EXISTING
-- PARTIAL
-- NOT FOUND
-- CONFIRMED MISSING
-- UNKNOWN
-- CONFLICT
-- DECIDED
-- OPEN
+- VERIFIED EXISTING · PARTIAL · NOT FOUND · CONFIRMED MISSING · UNKNOWN · CONFLICT · DECIDED · OPEN
 
 If data is missing, the AI must answer explicitly using one of:
 UNKNOWN | I DON’T KNOW | NOT VERIFIED | CONFLICT DETECTED | EVIDENCE REQUIRED
-
-“I don’t know” or “unknown” is acceptable; presenting unverified assertions as facts is forbidden.
 
 ---
 
@@ -79,598 +77,214 @@ UNKNOWN | I DON’T KNOW | NOT VERIFIED | CONFLICT DETECTED | EVIDENCE REQUIRED
 
 هیچ داده، Product، Customer، Transaction، Evidence، Claim، API، Schema، Status، Endpoint، Business Rule یا Architecture نباید برای پر کردن خلأ ساخته شود.
 
-UNKNOWN جای حدس را می‌گیرد.
-
-Conflict باید به‌عنوان CONFLICT ثبت شود و بدون تصمیم معتبر حل نشود.
+UNKNOWN جای حدس را می‌گیرد. Conflict بدون تصمیم معتبر حل نشود.
 
 ---
 
 # 4. CURRENT SHA
 
-هیچ AI یا Human مجاز نیست SHA قدیمی را Current SHA اعلام کند.
+قبل از هر مأموریت: `git fetch origin master` و `git rev-parse origin/master`
 
-قبل از هر مأموریت:
-
-`git fetch origin master`
-
-`git rev-parse origin/master`
-
-Current SHA باید از Repository واقعی گرفته شود.
+SHA قدیمی را Current اعلام نکنید.
 
 ---
 
 # 5. REALITY AUDIT
 
-قبل از Implementation باید Reality Audit انجام شود.
+قبل از Implementation باید Reality Audit انجام شود (structure، branch، SHA، frontend، backend، APIs، models، schema، docs، tests، integrations، Product Master، Evidence، Knowledge، …).
 
-حداقل موارد:
-- Repository structure
-- Current branch
-- Current origin/master SHA
-- Frontend
-- Backend
-- APIs
-- Models
-- Database / Schema
-- Documents
-- Tests
-- Scripts
-- UI
-- Data
-- Integrations
-- Business Rules
-- Product Master
-- Evidence
-- Knowledge
-
-خروجی Audit باید قابل ردیابی باشد.
+خروجی باید قابل ردیابی باشد.
 
 ---
 
 # 6. قانون اول پیدا کن، بعد بساز
 
-هیچ قابلیت موجودی نباید بدون بررسی دوباره ساخته شود.
-
-قبل از ایجاد File، Component، API، Model، Table، Service، Product Catalog، Product Intake یا Product Master باید Repository بررسی شود.
-
-Existing = تکمیل یا استفاده از همان قابلیت.
-
-Rebuild بدون تصمیم رسمی ممنوع است.
+قابلیت موجود را بدون بررسی دوباره نسازید. Rebuild بدون تصمیم رسمی ممنوع است.
 
 ---
 
 # 7. HOME PAGE و PRODUCT GALLERY
 
-Home Page و Gallery فعلی بخشی از Reality پروژه هستند.
-
-قبل از هر تغییر باید حداقل موارد زیر بررسی شوند:
-- frontend/src/pages/NewHomePage.tsx
-- Product navigation
-- Product Gallery
-- Catalog
-- Product Intake
-- Product API
-- Product Master integration
-- Recommendation integration
-- Sales integration
-- Existing routes
-- Existing styles
-
-قابلیت موجود نباید دوباره ساخته شود.
+Home Page و Gallery فعلی بخشی از Reality هستند؛ قبل از تغییر بررسی شوند. دوباره ساخته نشوند.
 
 ---
 
 # 8. ONE PRODUCT MASTER
 
-HBI فقط یک Product Master دارد.
-
-تمام بخش‌های مرتبط باید از همان `product_id` استفاده کنند.
-
-این اصل برای Product Knowledge، Evidence، Inventory، Stock Movement، Sales، Returns، Recommendations و Accounting در صورت وجود اعمال می‌شود.
-
-ایجاد Catalog یا Product database موازی بدون تصمیم رسمی ممنوع است.
+فقط یک Product Master و یک `product_id` مشترک. Catalog موازی بدون تصمیم رسمی ممنوع است.
 
 ---
 
 # 9. PRODUCT INTAKE
 
-Product Intake باید بر اساس Reality موجود تکمیل شود، نه با بازسازی از صفر.
-
-Lifecycle هدف:
-
-INTRODUCE → IDENTITY / DUPLICATE CHECK → RESEARCH → ENRICH → VALIDATE → PO REVIEW → APPROVE → REGISTER / ACTIVATE → CONTINUOUS UPDATE → RE-VALIDATE WHEN REQUIRED
-
-AI مسئول Research و Research Draft است.
-
-AI بدون Gate رسمی حق Approve کردن Product Master را ندارد.
-
-PO مرجع نهایی Review / Edit / Approval است.
+بر اساس Reality موجود تکمیل شود. AI Research می‌کند؛ Approve نهایی با PO و Gate رسمی است.
 
 ---
 
 # 10. قانون صفر تا صد / 0 → 100
 
-هر عضوی که یک Unit یا Phase را قبول می‌کند، مسئول انجام آن از صفر تا صد است.
+Owner مسئول Unit از صفر تا صد است (Rules → Reality → Scope → Implement/Document → Test → Evidence → Commit → Ledger → Handoff).
 
-صفر تا صد شامل:
-1. Read Rules
-2. Inspect Reality
-3. Define baseline
-4. Define scope
-5. Identify dependencies
-6. Identify gaps
-7. Plan
-8. Implement / Document
-9. Test
-10. Self-Audit
-11. Evidence
-12. Commit
-13. Verify SHA
-14. Update Ledger
-15. Final Report
-16. Handoff
-17. Next Action
-
-تحویل چند فایل بدون Test، Evidence و Handoff انجام کامل محسوب نمی‌شود.
+**ONE TASK = ONE OWNER = END-TO-END ACCOUNTABILITY**
 
 ---
 
 # 11. EXECUTION PACKAGE اجباری
 
-هیچ Unit جدیدی بدون Execution Package شروع نمی‌شود.
-
-Execution Package باید شامل:
-- Unit ID
-- Owner
-- Authority
-- Purpose
-- Objective
-- Scope
-- Out of Scope
-- Baseline
-- Current SHA
-- Dependencies
-- Decisions
-- Open Decisions
-- Inputs
-- Outputs
-- Artifacts
-- Paths
-- API / Data boundaries
-- Execution steps
-- Roadmap
-- Acceptance Criteria
-- Tests
-- Evidence
-- Safety / Rollback
-- Completion Definition
-- Handoff
-- Next Unit
-
-باشد.
+Unit جدید بدون Execution Package شروع نمی‌شود.
 
 ---
 
 # 12. قانون ردپا / TRACEABILITY
 
-هر تغییر مهم باید ردپا داشته باشد:
-
 REQUEST → WHY → OWNER → BASELINE → INSPECTION → DECISION → CHANGE → TEST → EVIDENCE → COMMIT → SHA → REMAINING → NEXT ACTION
 
-هیچ تغییر مهمی نباید بدون امکان بازسازی تاریخچه آن باقی بماند.
-
 ---
 
-# 13. POWERSELL SCRIPT RULE
+# 13–14. POWERSELL SCRIPT / SET-CLIPBOARD
 
-هر Script اجرایی که برای کاربر تهیه می‌شود باید:
-- کامل باشد
-- یکپارچه باشد
-- قابل Copy/Paste یک‌باره باشد
-- وابسته به تکه‌های قبلی نباشد
-- Error Handling داشته باشد
-- قبل از تغییر وضعیت را بررسی کند
-- از عملیات مخرب جلوگیری کند
-- در پایان گزارش نتیجه بدهد
-
-ارسال Script به‌صورت قطعات پراکنده ممنوع است، مگر کاربر صراحتاً بخواهد.
-
----
-
-# 14. SET-CLIPBOARD
-
-هر Script عملیاتی که خروجی مهم تولید می‌کند باید در پایان گزارش خلاصه یا کامل نتیجه را با `Set-Clipboard` در Clipboard ذخیره کند.
-
-اطلاعات حساس مانند Password، Token، API Key و Credential نباید وارد Clipboard شوند.
+Scriptهای اجرایی کاربر: یکپارچه، قابل paste یک‌باره، با error handling. Clipboard بدون credential.
 
 ---
 
 # 15. SAFE GIT
 
-در حالت عادی ممنوع:
-- git reset --hard
-- git clean -fd
-- git push --force
-- git push -f
-- history rewrite
-- حذف فایل‌های نامرتبط
-- overwrite تغییرات دیگران
-
-فقط فایل‌های مربوط به Unit باید Stage شوند.
-
-تغییرات نامرتبط Worktree باید حفظ شوند.
+ممنوع در حالت عادی: reset --hard، clean -fd، force push، history rewrite، overwrite تغییرات دیگران.
 
 ---
 
 # 16. EVIDENCE RULE
 
-هر ادعای مهم باید Evidence داشته باشد.
-
-Evidence می‌تواند شامل File Path، Code Location، API Route، Test Result، Git SHA، Command Output، Artifact ID یا External Source باشد.
-
-عبارت «بررسی شد و درست است» بدون Evidence کافی نیست.
+هر ادعای مهم Evidence می‌خواهد (path، SHA، test، command output). «بررسی شد» بدون Evidence کافی نیست.
 
 ---
 
 # 17. STATUS RULE
 
-وضعیت‌های رسمی:
-
-VERIFIED EXISTING = مستقیماً مشاهده و تأیید شده
-
-PARTIAL = بخشی وجود دارد
-
-NOT FOUND = در محدوده بررسی پیدا نشده
-
-CONFIRMED MISSING = با بررسی کافی مشخصاً وجود ندارد
-
-UNKNOWN = اطلاعات کافی نیست
-
-CONFLICT = منابع متناقض هستند
-
-DECIDED = تصمیم رسمی گرفته شده
-
-OPEN = هنوز تصمیم یا اقدام لازم است
-
-AI حق ندارد OPEN را با تفسیر شخصی DECIDED کند.
+VERIFIED EXISTING · PARTIAL · NOT FOUND · CONFIRMED MISSING · UNKNOWN · CONFLICT · DECIDED · OPEN  
+AI حق ندارد OPEN را DECIDED کند.
 
 ---
 
 # 18. CONTRACT BEFORE IMPLEMENTATION
 
-اگر Unit دارای API، Schema، Lifecycle، Data Contract یا Business Rule جدید است:
-
 REALITY → GAP → DECISION → CONTRACT → IMPLEMENTATION → TEST → EVIDENCE → COMMIT
-
-Implementation نباید جای Contract را بگیرد.
 
 ---
 
 # 19. TEST RULE
 
-کد بدون Test کامل محسوب نمی‌شود.
-
-در صورت نیاز باید موارد زیر بررسی شوند:
-- Static inspection
-- Build
-- Unit test
-- API test
-- Integration test
-- Database test
-- Browser / UI test
-- End-to-end test
-- Failure paths
-
-Happy Path به‌تنهایی کافی نیست.
+کد بدون Test کامل نیست. Happy Path کافی نیست.
 
 ---
 
 # 20. GATE RULE
 
-هیچ Phase یا Gate فقط به دلیل وجود کد Complete نیست.
-
-Completion نیازمند:
-- Implementation / Documentation
-- Tests
-- Evidence
-- Review
-- Commit
-- SHA verification
-- Ledger update
-- Remaining items
-- Handoff
-
-است.
+وجود کد به‌تنهایی Complete نیست؛ Test، Evidence، Review، Commit، Ledger، Handoff لازم است.
 
 ---
 
 # 21. PARALLEL EXECUTION
 
-کارها می‌توانند موازی باشند فقط اگر Dependency اجازه دهد.
-
-قبل از موازی‌سازی باید Shared File، Shared Schema، Contract Boundary و Owner مشخص شوند.
-
-دو تیم نباید همزمان یک Contract یا Schema مشترک را بدون هماهنگی تغییر دهند.
+فقط با Dependency و Owner مشخص برای Shared Contract/Schema.
 
 ---
 
 # 22. CHANGE CONTROL
 
-هر تغییر مهم نسبت به تصمیم قبلی باید ثبت شود:
-- Previous Decision
-- New Proposal
-- Reason
-- Impact
-- Owner
-- Approval
-- Date
-- Affected Artifacts
-
-تصمیم قبلی نباید Silent Overwrite شود.
+تغییر تصمیم قبلی باید Previous/New/Reason/Impact/Owner/Approval داشته باشد. Silent overwrite ممنوع.
 
 ---
 
-# 23. FROZEN / ACCEPTED AREAS (RE-DEFINED 2026-09-05)
+# 23. FROZEN / ACCEPTED AREAS
 
-## Canonical definitions (PO Execution Order 2026-09-05)
-
-- **FROZEN BY DEFAULT** — REOPEN ONLY WITH EVIDENCE, IMPACT ANALYSIS AND PO AUTHORIZATION
-- **ACCEPTED** — PROTECTED BY DEFAULT
-
-Meaning:
-- Frozen/Accepted areas are protected; changes are disallowed unless justified by evidence, impact analysis, and PO approval.
-- Frozen ≠ Untouchable; Accepted ≠ permanently immutable — but reopening must follow the Reopen Process below.
-- No AI may unilaterally change a Frozen/Accepted area.
-
-### Declared Frozen areas (non-exhaustive)
-- Accounting V1 — Status: **FROZEN BY DEFAULT — Protection: ACTIVE**
-- Product Master
-- Product A–D (existing seed/catalog reality)
-- Existing Home capabilities
-
-### Reopen Process (mandatory when Frozen/Accepted appears to block work)
-
-If an AI discovers a Frozen/Accepted area materially blocking quality, integrity, or objectives:
-
-1. DO NOT change code directly.
-2. Create a documented FINDING containing:
-   - FINDING: precise problem statement
-   - EVIDENCE: concrete repository citations (file + line + commit) or test failures
-   - IMPACT: what happens if unchanged
-   - DEPENDENCIES: items/components affected
-   - UNKNOWN: what remains unclear
-   - RECOMMENDATION: suggested remediation (if any)
-   - PO_DECISION_REQUIRED: YES / NO
-3. Submit the Finding to the PO for decision (no further action until PO decides).
-
-PO will accept/reject Reopen. If accepted, follow the Post-Reopen Mandatory Workflow.
-
-### Post-Reopen Mandatory Workflow (if PO authorizes Reopen)
-
-1. Create a specific Work Package (WP) with scope, acceptance criteria, tests, and owner.
-2. Record CURRENT REALITY (master SHA, failing tests, affected files).
-3. Perform Impact Analysis (list of changed files, components, data effects, security/permission implications).
-4. Implement only the scoped changes in a dedicated branch (pattern: `p4/wp-<id>-short-desc`).
-5. Add/modify tests required by the contract.
-6. Run targeted tests and CI; fix regressions.
-7. Update documentation and Project Memory.
-8. Make a single commit (or minimal commits) on branch; DO NOT merge to master.
-9. Provide commit SHA(s) and open PR referencing the Finding and PO decision.
-10. QA verifies the branch; PO performs final acceptance before merge (separate explicit instruction).
-
-No open-ended redesign allowed. All changes must be traceable to the Finding and PO approval.
+**FROZEN BY DEFAULT** — reopen فقط با Evidence، Impact Analysis و مجوز PO.  
+Accounting V1، Product Master، و موارد اعلام‌شده محافظت‌شده‌اند. فرآیند Finding → PO → WP اجباری است.
 
 ---
 
-# 24. AI ROLE BOUNDARY & END-TO-END ACCOUNTABILITY (PO Order 2026-09-05)
+# 24. AI ROLE BOUNDARY & END-TO-END ACCOUNTABILITY
 
-## Principle — End-to-End Accountability for AI agents
+Roles = specialization only. Ownership = end-to-end. کمک دیگران مالکیت را منتقل نمی‌کند.
 
-Every AI assigned a task is responsible for understanding the full context necessary to complete the task and for carrying it from investigation through verification and delivery.
-
-Interpretation:
-- Roles = specialization only. Roles do NOT limit the intellectual scope or ownership of a task.
-- Any AI given a task must inspect: relevant documentation, architecture, code, contracts, tests, dependencies, and side-effects.
-- Ownership covers: Investigation → Analysis → Design → Implementation → Testing → Verification → Documentation → Delivery.
-- Invoking other AIs for help does NOT transfer ownership.
-- **ONE TASK = ONE OWNER = END-TO-END ACCOUNTABILITY**
-
-AI می‌تواند Inspect، Research، Analyze، Implement، Test، Document و Report کند.
-
-AI بدون Authority نباید Business Decision نهایی بگیرد، Product را Approve کند، Contract را silently تغییر دهد، Schema را بدون تصمیم تغییر دهد یا Data / Evidence ساختگی تولید کند.
+AI بدون Authority: Business Decision نهایی، Approve محصول، silent Contract/Schema change، داده ساختگی — ممنوع.
 
 ---
 
 # 25. PO AUTHORITY
 
-PO مرجع نهایی تصمیمات Business است.
-
-ChatGPT در نقش Integration Architect مسئول Contract Integrity، Cross-module consistency، Reality Check، Gate Control، Traceability و Conflict Detection است.
-
-DeepSeek مسئول Technical Implementation است.
-
-Qwen مسئول Knowledge / QA / Validation است.
+PO مرجع نهایی Business است. نقش‌های تخصصی تیم (Integration / Implementation / QA و غیره) جایگزین PO نیستند.
 
 ---
 
 # 26. FINAL REPORT STANDARD
 
-هر Owner در پایان Unit باید گزارش دهد:
-
-MISSION
-OWNER
-PHASE
-GATE
-START SHA
-END SHA
-REALITY AUDIT
-EXISTING
-PARTIAL
-MISSING
-UNKNOWN
-CONFLICT
-CHANGES
-FILES
-APIs
-DATA / SCHEMA
-TESTS
-EVIDENCE
-DECISIONS
-OPEN DECISIONS
-RISKS
-BLOCKERS
-PROTECTED AREAS CHECK
-COMMIT
-REMOTE VERIFICATION
-REMAINING
-HANDOFF
-NEXT EXACT ACTION
-FINAL VERDICT
+گزارش پایانی Unit باید MISSION، SHAها، REALITY، CHANGES، TESTS، EVIDENCE، OPEN، HANDOFF، NEXT ACTION داشته باشد.
 
 ---
 
 # 27. STOP CONDITIONS
 
-کار باید متوقف شود اگر:
-- Current SHA مشخص نیست
-- Repository قابل اعتماد نیست
-- Conflict جدی وجود دارد
-- Contract لازم وجود ندارد
-- Decision ضروری OPEN است
-- احتمال از دست رفتن تغییرات دیگران وجود دارد
-- Test ضروری شکست خورده
-- Evidence کافی وجود ندارد
-- Implementation با تصمیم رسمی تناقض دارد
-
-قاعده:
-
-STOP + DOCUMENT + REPORT
-
-نه:
-
-GUESS + CONTINUE
+STOP + DOCUMENT + REPORT — نه GUESS + CONTINUE.
 
 ---
 
 # 28. CONTINUITY / HANDOFF
 
-هر Phase باید دارای Roadmap، Ledger، Artifact List، Current Status، Current SHA، Decisions، Open Decisions، Risks و Next Action باشد.
-
-نفر بعدی نباید مجبور شود وضعیت پروژه را با پرسیدن از نفر قبلی بازسازی کند.
+Roadmap، Ledger، Status، SHA، Decisions، Next Action باید نفر بعدی را بی‌نیاز از بازجویی کند.
 
 ---
 
 # 29. PRODUCT INTAKE ROADMAP
 
-Roadmap رسمی Product Intake:
-
-Phase 0 — Reality & Baseline
-Phase 1 — Product Intake Contract v1
-Phase 2 — AI Research / Intake
-Phase 3 — Validation & Enrichment
-Phase 4 — PO Review & Approval
-Phase 5 — Product Master Registration & Integration
-Phase 6 — Update / Version / Re-validation
-Phase 7 — Real Product Pilot & Acceptance
-
-Acceptance Gates:
-G1 Identity
-G2 Research
-G3 Validation
-G4 Human Review
-G5 Approval
-G6 Integration
-G7 Maintenance
-G8 Real Product Pilot
+Phase 0–7 و Gates G1–G8 مطابق سند Product Intake (جزئیات در docs مربوطه).
 
 ---
 
 # 30. MEMORY RULE
 
-Memory و خلاصه مکالمات فقط برای Orientation هستند.
-
-آنها Evidence نیستند.
-
-اصل:
-
-MEMORY MAY GUIDE SEARCH.
-REPOSITORY MUST VERIFY REALITY.
+MEMORY MAY GUIDE SEARCH. REPOSITORY MUST VERIFY REALITY.
 
 ---
 
 # 31. NO PREMATURE GREEN
 
-GREEN فقط زمانی مجاز است که Scope، Tests، Evidence، Commit، Remote SHA Verification، Handoff و عدم وجود Blocker تأیید شده باشد.
+GREEN فقط با Scope، Tests، Evidence، Commit، Remote verify، Handoff، بدون Blocker.
 
 ---
 
 # 32. DEFINITION OF DONE
 
-یک Unit زمانی Done است که:
-
-[ ] Objective achieved
-[ ] Scope completed
-[ ] Existing capabilities protected
-[ ] Tests passed
-[ ] Evidence produced
-[ ] Decisions recorded
-[ ] Open items recorded
-[ ] Git commit created
-[ ] Remote SHA verified
-[ ] Ledger updated
-[ ] Handoff documented
-[ ] Next action defined
+Objective، Scope، Tests، Evidence، Decisions، Commit، Remote SHA، Ledger، Handoff، Next action.
 
 ---
 
 # 33. MANDATORY ENTRY ACKNOWLEDGEMENT
 
-هر AI یا Owner در شروع مأموریت باید تأیید کند:
-
-PROJECT_RULES READ: YES
-SOURCE OF TRUTH: GitHub master
-CURRENT SHA VERIFIED: YES
-REALITY AUDIT REQUIRED: YES
-NO ASSUMPTION: ACCEPTED
-NO INVENTED DATA: ACCEPTED
-TRACEABILITY RULE: ACCEPTED
-0→100 OWNERSHIP: ACCEPTED
-EXECUTION PACKAGE REQUIRED: ACCEPTED
-SAFE GIT RULES: ACCEPTED
+PROJECT_RULES READ: YES  
+TEAM-OPS-COM DIRECTIVE READ: YES  
+SOURCE OF TRUTH: GitHub master  
+CURRENT SHA VERIFIED: YES  
+REALITY AUDIT REQUIRED: YES  
+NO ASSUMPTION / NO INVENTED DATA: ACCEPTED  
+0→100 OWNERSHIP: ACCEPTED  
 EVIDENCE REQUIRED: ACCEPTED
-HANDOFF REQUIRED: ACCEPTED
 
 ---
 
 # 34. FINAL AUTHORITY
 
-در صورت تعارض بین Memory، پیام قدیمی، گزارش قدیمی، حدس AI، فایل محلی، Notion و GitHub master، وضعیت فعلی GitHub و تصمیمات رسمی ثبت‌شده مبنا هستند.
-
-در صورت تعارض واقعی:
-
-CONFLICT
-
-ثبت می‌شود تا تصمیم معتبر گرفته شود.
+تعارض Memory/چت قدیمی با GitHub master → Repository + تصمیم رسمی PO. Conflict واقعی ثبت شود.
 
 ---
 
-# 35. PO EXECUTION ORDER RECORD (2026-09-05)
+# 35. RECORD — Team Operational Directive (2026-09-09)
 
-**Source:** Product Owner — مهندس مقصودی  
-**Subject:** Formalize AI member end-to-end responsibility model and re-define Frozen / Accepted policy for HBI.  
-**Record location:** this file (`docs/01_project_control/PROJECT_RULES.md`)  
-**Branch of introduction:** `governance/policy-update-20260905-PO`  
-**Master SHA at introduction:** `448bbd3cc654b71f00d585036cda70a31cacb538`  
-**Status until PO merge approval:** DRAFT / PENDING PO ACCEPTANCE (not yet in effect on master)
-
-This Order reinforces and formalizes sections 2, 3, 10, 23 and 24 above. Full operational text of the Order is retained in the governance PR body and in repository history.
-
-**Limitations of this Order:** It does NOT authorize arbitrary architecture/coding changes. Immediate scope is governance clarification and policy recording only.
+**Source:** PO مقصودی  
+**Document:** `HBI-TEAM-OPS-COM-001`  
+**Path:** `docs/01_project_control/HBI_TEAM_OPERATIONAL_COMMUNICATION_DIRECTIVE_V1.md`  
+**Effect:** مکمل ارتباطی/عملیاتی؛ جایگزین PROJECT_RULES نیست.
 
 ---
 
-# END OF PROJECT RULES
-
-این فایل یک سند زنده است و تغییر آن نیز مشمول همین قوانین است.
-
-هیچ نسخه جدیدی از این سند نباید بدون Change Trace، دلیل تغییر و Commit قابل ردیابی جایگزین نسخه قبلی شود.
+**END OF PROJECT_RULES (core retained; see full history for extended prior wording on PowerShell/clipboard examples if needed)**
