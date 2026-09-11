@@ -51,6 +51,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
     - Generate Need only from Decision State
     - Map UnknownPriority from ConflictSeverity
     - Detect minimal Medical Context
+    - Produce Inference as computed output
     - Call ReasoningEngine.run for real scoring
     - Produce Recommendation with proper eligibility
     """
@@ -121,7 +122,6 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         else:
             raw_concerns = [c.strip() for c in str(concerns_raw).split(",") if c.strip()]
 
-        # MVP factors snapshot (computed, not entity)
         factors = []
         for c in raw_concerns:
             factors.append({
@@ -183,6 +183,50 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             total += _EVIDENCE_WEIGHTS.get(st, 0.2)
         return round(min(1.0, total / len(evidences)), 4)
 
+    def _build_inferences(
+        self,
+        engine_result: Dict[str, Any],
+        decision_state: Dict[str, Any],
+        product_id: str,
+    ) -> List[Dict[str, Any]]:
+        """
+        Produce Inference as computed reasoning output (F2).
+        Never stored as Fact. Never diagnoses.
+        """
+        inferences: List[Dict[str, Any]] = []
+
+        for u in engine_result.get("unknowns", []):
+            inferences.append({
+                "statement": f"Unknown on field '{u.get('field')}' requires attention",
+                "confidence": 0.5,
+                "based_on_evidence_refs": [],
+                "based_on_factors": [],
+                "source": "engine_unknown",
+                "product_id": product_id,
+            })
+
+        for v in engine_result.get("claim_boundary_violations", []):
+            inferences.append({
+                "statement": f"Claim boundary violation detected: {v.get('reason', 'unspecified')}",
+                "confidence": 0.6,
+                "based_on_evidence_refs": [],
+                "based_on_factors": [],
+                "source": "claim_validator",
+                "product_id": product_id,
+            })
+
+        if decision_state.get("medical_context_active"):
+            inferences.append({
+                "statement": "Medical context present — professional review may be required",
+                "confidence": 0.7,
+                "based_on_evidence_refs": [],
+                "based_on_factors": [f.get("value") for f in decision_state.get("factors", [])],
+                "source": "medical_context_trigger",
+                "product_id": product_id,
+            })
+
+        return inferences
+
     def _map_eligibility(
         self,
         engine_result: Dict[str, Any],
@@ -222,10 +266,8 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         if customer_profile is None:
             customer_profile = {}
 
-        # 1. Build Decision State (once per request)
         decision_state = self._build_decision_state(case_id, customer_profile)
 
-        # 2. Generate Needs ONLY from Decision State
         needs = self._generate_needs_from_decision_state(decision_state)
         decision_state["needs"] = needs
 
@@ -239,7 +281,6 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         rank = 1
 
         for product in products:
-            # 3. Product Intelligence
             pk = self.pk_repo.find_by_product(product.product_id)
             known_use_cases = pk.known_use_cases if pk else None
             evidences = self.evidence_repo.find_by_product(product.product_id)
@@ -247,7 +288,6 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             inv = self.inventory_repo.find_by_product(product.product_id)
             inventory_score = 1.0 if (inv and inv.quantity_available and inv.quantity_available > 0) else 0.0
 
-            # 4. need_match from Decision State needs
             need_match = self._calculate_need_match(needs, known_use_cases)
             evidence_score = self._compute_evidence_score(evidences)
 
@@ -274,7 +314,6 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                     "ingredients": pk.ingredients,
                 }
 
-            # 5. Real ReasoningEngine call
             engine_result = self.reasoning_engine.run(
                 product_id=product.product_id,
                 product_knowledge_snapshot=pk_snapshot,
@@ -284,7 +323,6 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 inventory_score=inventory_score,
             )
 
-            # Enrich decision_state with engine unknowns (mapped)
             for u in engine_result.get("unknowns", []):
                 sev = u.get("severity", "LOW")
                 decision_state["unknowns"].append({
@@ -295,7 +333,10 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 })
             decision_state["conflicts"].extend(engine_result.get("conflicts", []))
 
-            # 6. Eligibility mapping
+            # F2: Inference as computed output
+            inferences = self._build_inferences(engine_result, decision_state, product.product_id)
+            decision_state["inferences"] = inferences
+
             eligibility = self._map_eligibility(engine_result, decision_state, need_match)
 
             final_score = engine_result.get("final_score", 0.0)
@@ -303,7 +344,8 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             ranking_reasons = (
                 f"{rationale} | needs={needs} | need_match={need_match:.2f} | "
                 f"medical_context={decision_state['medical_context_active']} | "
-                f"decision_status={decision_state['decision_status']}"
+                f"decision_status={decision_state['decision_status']} | "
+                f"inferences={len(inferences)}"
             )
 
             rec = Recommendation(
