@@ -1,5 +1,5 @@
 # Decision Log Index
-Last Updated: 2026-09-10
+Last Updated: 2026-09-13
 
 Every major project decision is recorded as an ADR or PO Decision record.
 
@@ -10,5 +10,6 @@ Every major project decision is recorded as an ADR or PO Decision record.
 | ADR-003 | Use GitHub as Source of Truth for project memory | PROPOSED | 1405-05-22 (2026-08-13) |
 | **HBI-PO-DEC-WP-CORE-01-001** | **WP-CORE-01 Domain Contract v1 — PO ACCEPTED; Implementation NOT AUTHORIZED** | **RECORDED** | **2026-09-09** |
 | **HBI-PO-DEC-F2-ARCH-001** | **F2 Architectural Decisions — Decision State, Unknown (3 levels), Medical Context, Need, Factor** | **RECORDED** | **2026-09-10** |
+| **HBI-PO-DEC-GAP04-001** | **GAP-04 Recommendation Persistence (MVP) — must persist + traceable to Case/Decision** | **DECISION RESOLVED — IMPLEMENTATION PENDING** | **2026-09-13** |
 
 To add a new decision, create a file in this folder and add a row to the table above.
