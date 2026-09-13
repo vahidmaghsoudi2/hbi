@@ -44,12 +44,13 @@ _MEDICAL_TOKENS = {
 
 class RecommendationService(BaseService[Recommendation, RecommendationRepository]):
     """
-    RecommendationService — F2 + GAP-01
+    RecommendationService — F2 + GAP-01 + GAP-03
 
     Responsibilities:
     - Build Case Decision State Computed Snapshot (shared, Customer/Problem/Need oriented)
     - Generate Need only from Decision State
     - Per-product Product Evaluation State (unknowns/conflicts/inferences isolated)
+    - GAP-03: eliminate Inventory=0 candidates before Reasoning
     - Map UnknownPriority from ConflictSeverity
     - Detect minimal Medical Context (Case-level)
     - Produce Inference as computed output (product-scoped)
@@ -273,13 +274,14 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
 
     def generate_recommendations(self, case_id: str, customer_profile: Dict = None) -> List[Recommendation]:
         """
-        F2 + GAP-01 Recommendation Decision Pipeline.
+        F2 + GAP-01 + GAP-03 Recommendation Decision Pipeline.
 
         Flow:
         Customer Data → Case Decision State → Needs
-        → per Product: Product Evaluation State → ReasoningEngine → Recommendation
+        → per Product: eliminate OOS (GAP-03) → Product Evaluation State → ReasoningEngine → Recommendation
 
         GAP-01: Product-level Unknown/Conflict never mutates shared Case Decision State.
+        GAP-03: Inventory=0 → Candidate Elimination before Reasoning/Ranking/Recommendation.
         """
         if customer_profile is None:
             customer_profile = {}
@@ -308,6 +310,11 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
 
             inv = self.inventory_repo.find_by_product(product.product_id)
             inventory_score = 1.0 if (inv and inv.quantity_available and inv.quantity_available > 0) else 0.0
+
+            # GAP-03 (HBI-PO-DEC-GAP03-001 Option A):
+            # Inventory = 0 → Candidate Elimination before Reasoning / Ranking / Recommendation
+            if inventory_score <= 0.0:
+                continue
 
             need_match = self._calculate_need_match(needs, known_use_cases)
             evidence_score = self._compute_evidence_score(evidences)
