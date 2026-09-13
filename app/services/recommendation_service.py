@@ -44,13 +44,14 @@ _MEDICAL_TOKENS = {
 
 class RecommendationService(BaseService[Recommendation, RecommendationRepository]):
     """
-    RecommendationService — F2 + GAP-01 + GAP-03
+    RecommendationService — F2 + GAP-01 + GAP-03 + GAP-04
 
     Responsibilities:
     - Build Case Decision State Computed Snapshot (shared, Customer/Problem/Need oriented)
     - Generate Need only from Decision State
     - Per-product Product Evaluation State (unknowns/conflicts/inferences isolated)
     - GAP-03: eliminate Inventory=0 candidates before Reasoning
+    - GAP-04: persist Current Recommendation with upsert per Case+Product
     - Map UnknownPriority from ConflictSeverity
     - Detect minimal Medical Context (Case-level)
     - Produce Inference as computed output (product-scoped)
@@ -268,20 +269,68 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             return "ELIGIBLE"
         return "INELIGIBLE_PENDING_REVIEW"
 
+    def _stable_recommendation_id(self, case_id: str, product_id: str) -> str:
+        """GAP-04: stable id for the single current Recommendation per Case+Product."""
+        return f"rec_{case_id}_{product_id}"
+
+    def _upsert_current_recommendation(
+        self,
+        *,
+        case_id: str,
+        product_id: str,
+        need_match: float,
+        evidence_score: float,
+        eligibility: str,
+        ranking_score: float,
+        ranking_reasons: str,
+        exclusion_reasons: str = "",
+    ) -> Recommendation:
+        """
+        GAP-04 Option B: Create or update the single current Recommendation
+        for (case_id, product_id). Does not create history rows.
+
+        Only treat SQLAlchemy Recommendation instances as existing rows.
+        (Mock sessions may return truthy MagicMock from .first() — those are not rows.)
+        """
+        existing = self.repository.find_by_case_and_product(case_id, product_id)
+        if isinstance(existing, Recommendation):
+            existing.need_match_score = need_match
+            existing.evidence_score = evidence_score
+            existing.eligibility_status = eligibility
+            existing.ranking_score = ranking_score
+            existing.ranking_reasons = ranking_reasons[:2000] if ranking_reasons else ""
+            existing.exclusion_reasons = exclusion_reasons or ""
+            self.db.flush()
+            return existing
+
+        return self.repository.create(
+            recommendation_id=self._stable_recommendation_id(case_id, product_id),
+            case_id=case_id,
+            product_id=product_id,
+            need_match_score=need_match,
+            evidence_score=evidence_score,
+            eligibility_status=eligibility,
+            ranking_score=ranking_score,
+            ranking_reasons=ranking_reasons[:2000] if ranking_reasons else "",
+            exclusion_reasons=exclusion_reasons or "",
+        )
+
     # ------------------------------------------------------------------
     # Main entry
     # ------------------------------------------------------------------
 
     def generate_recommendations(self, case_id: str, customer_profile: Dict = None) -> List[Recommendation]:
         """
-        F2 + GAP-01 + GAP-03 Recommendation Decision Pipeline.
+        F2 + GAP-01 + GAP-03 + GAP-04 Recommendation Decision Pipeline.
 
         Flow:
         Customer Data → Case Decision State → Needs
-        → per Product: eliminate OOS (GAP-03) → Product Evaluation State → ReasoningEngine → Recommendation
+        → per Product: eliminate OOS (GAP-03) → Product Evaluation State → ReasoningEngine
+        → Upsert Current Recommendation (GAP-04)
 
         GAP-01: Product-level Unknown/Conflict never mutates shared Case Decision State.
         GAP-03: Inventory=0 → Candidate Elimination before Reasoning/Ranking/Recommendation.
+        GAP-04: one current Recommendation per Case+Product; re-generate updates in place.
         """
         if customer_profile is None:
             customer_profile = {}
@@ -384,15 +433,15 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 f"inferences={len(inferences)}"
             )
 
-            rec = Recommendation(
-                recommendation_id=f"rec_{case_id}_{product.product_id}_{rank}",
+            # GAP-04: persist / upsert current Recommendation (stable id, no duplicates)
+            rec = self._upsert_current_recommendation(
                 case_id=case_id,
                 product_id=product.product_id,
-                need_match_score=need_match,
+                need_match=need_match,
                 evidence_score=evidence_score,
-                eligibility_status=eligibility,
+                eligibility=eligibility,
                 ranking_score=final_score,
-                ranking_reasons=ranking_reasons[:2000] if ranking_reasons else "",
+                ranking_reasons=ranking_reasons,
                 exclusion_reasons="",
             )
             recommendations.append(rec)
