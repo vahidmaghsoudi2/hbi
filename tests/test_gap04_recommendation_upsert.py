@@ -11,7 +11,6 @@ Required scenarios:
 8. GAP-01 regression: product unknowns do not mutate Case Decision State
 """
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 import pytest
 from sqlalchemy import create_engine, event
@@ -38,7 +37,6 @@ def db_session(tmp_path):
         cur.execute("PRAGMA foreign_keys=ON")
         cur.close()
 
-    # Import all models so create_all sees them
     import app.models.product  # noqa
     import app.models.product_knowledge  # noqa
     import app.models.evidence  # noqa
@@ -52,46 +50,47 @@ def db_session(tmp_path):
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    # Minimal seed
     session.add(Customer(customer_id="CUST-G04", name="Gap04 User"))
     session.add(Case(case_id="CASE-G04", customer_id="CUST-G04"))
-    session.add(Product(
-        product_id="PROD-A",
-        brand="BrandA",
-        product_name="Product A",
-        identity_status="VERIFIED",
-        status="ACTIVE",
-    ))
-    session.add(Product(
-        product_id="PROD-B",
-        brand="BrandB",
-        product_name="Product B",
-        identity_status="VERIFIED",
-        status="ACTIVE",
-    ))
-    session.add(Product(
-        product_id="PROD-OOS",
-        brand="BrandOOS",
-        product_name="Out of Stock",
-        identity_status="VERIFIED",
-        status="ACTIVE",
-    ))
+    session.flush()
+
+    for pid, brand, name in [
+        ("PROD-A", "BrandA", "Product A"),
+        ("PROD-B", "BrandB", "Product B"),
+        ("PROD-OOS", "BrandOOS", "Out of Stock"),
+    ]:
+        session.add(Product(
+            product_id=pid,
+            brand=brand,
+            product_name=name,
+            identity_status="VERIFIED",
+            status="ACTIVE",
+            qa_verdict="VALID",
+        ))
+    session.flush()
+
     session.add(Inventory(
         inventory_id="INV-A",
         product_id="PROD-A",
         quantity_available=10,
+        quantity_reserved=0,
+        quantity_damaged=0,
         stock_status="AVAILABLE",
     ))
     session.add(Inventory(
         inventory_id="INV-B",
         product_id="PROD-B",
         quantity_available=5,
+        quantity_reserved=0,
+        quantity_damaged=0,
         stock_status="AVAILABLE",
     ))
     session.add(Inventory(
         inventory_id="INV-OOS",
         product_id="PROD-OOS",
         quantity_available=0,
+        quantity_reserved=0,
+        quantity_damaged=0,
         stock_status="OUT_OF_STOCK",
     ))
     session.commit()
@@ -147,7 +146,8 @@ def test_4_second_generate_updates_values(db_session):
     row1 = db_session.query(Recommendation).filter_by(
         case_id="CASE-G04", product_id="PROD-A"
     ).first()
-    old_reasons = row1.ranking_reasons
+    assert row1 is not None
+    rid = row1.recommendation_id
 
     svc.generate_recommendations("CASE-G04", {"concerns": "barrier repair, dry skin"})
     db_session.commit()
@@ -155,8 +155,7 @@ def test_4_second_generate_updates_values(db_session):
     row2 = db_session.query(Recommendation).filter_by(
         case_id="CASE-G04", product_id="PROD-A"
     ).first()
-    assert row2.recommendation_id == row1.recommendation_id
-    # Values may change; at minimum the row is the same object identity in DB
+    assert row2.recommendation_id == rid
     assert row2.case_id == "CASE-G04"
     assert row2.product_id == "PROD-A"
 
@@ -179,7 +178,6 @@ def test_6_unique_constraint_rejects_duplicate(db_session):
     svc.generate_recommendations("CASE-G04", {"concerns": "hydration"})
     db_session.commit()
 
-    # Direct attempt to insert duplicate (case_id, product_id)
     dup = Recommendation(
         recommendation_id="rec_CASE-G04_PROD-A_DUP",
         case_id="CASE-G04",
@@ -196,7 +194,6 @@ def test_6_unique_constraint_rejects_duplicate(db_session):
 def test_7_gap03_inventory_zero_no_recommendation(db_session):
     svc = _svc(db_session)
 
-    # Spy on ReasoningEngine to ensure it is NOT called for OOS product
     original_run = svc.reasoning_engine.run
     called_for = []
 
@@ -206,7 +203,7 @@ def test_7_gap03_inventory_zero_no_recommendation(db_session):
 
     svc.reasoning_engine.run = spy_run
 
-    recs = svc.generate_recommendations("CASE-G04", {"concerns": "hydration"})
+    svc.generate_recommendations("CASE-G04", {"concerns": "hydration"})
     db_session.commit()
 
     oos_rows = db_session.query(Recommendation).filter_by(
@@ -220,7 +217,6 @@ def test_8_gap01_product_unknowns_do_not_mutate_case_state(db_session):
     """Regression: product-level unknowns must not leak into Case Decision State."""
     svc = _svc(db_session)
 
-    # Force engine to return an unknown for a product
     def fake_run(product_id, **kwargs):
         return {
             "product_id": product_id,
@@ -241,7 +237,5 @@ def test_8_gap01_product_unknowns_do_not_mutate_case_state(db_session):
     svc.generate_recommendations("CASE-G04", {"concerns": "hydration"})
     db_session.commit()
 
-    # If GAP-01 holds, Case-level unknowns stay empty (we cannot read decision_state
-    # after the call, but we assert no crash and recommendations still produced).
     rows = db_session.query(Recommendation).filter_by(case_id="CASE-G04").all()
     assert len(rows) >= 1
