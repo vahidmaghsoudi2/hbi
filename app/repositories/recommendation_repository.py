@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.models.recommendation import Recommendation
 from app.repositories.base import BaseRepository
@@ -15,3 +15,14 @@ class RecommendationRepository(BaseRepository[Recommendation]):
 
     def find_eligible(self) -> List[Recommendation]:
         return self.db.query(Recommendation).filter(Recommendation.eligibility_status == "ELIGIBLE").all()
+
+    def find_by_case_and_product(self, case_id: str, product_id: str) -> Optional[Recommendation]:
+        """GAP-04: locate the single current Recommendation for Case + Product."""
+        return (
+            self.db.query(Recommendation)
+            .filter(
+                Recommendation.case_id == case_id,
+                Recommendation.product_id == product_id,
+            )
+            .first()
+        )
