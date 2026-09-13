@@ -27,6 +27,7 @@ def _product(pid):
 
 
 def test_product_unknowns_do_not_mutate_case_decision_state():
+    """Direct invariant: product-level Unknown/Conflict must not appear on Case Decision State."""
     svc = _make_svc()
     svc.product_repo.find_by_identity_status_and_active.return_value = [
         _product("PROD_A"),
@@ -42,8 +43,15 @@ def test_product_unknowns_do_not_mutate_case_decision_state():
         pid = kwargs.get("product_id")
         if pid == "PROD_A":
             return {
-                "unknowns": [{"field": "ingredient_x", "severity": "CRITICAL", "action": "ESCALATE", "notes": "missing"}],
-                "conflicts": [{"id": "c1"}],
+                "unknowns": [
+                    {
+                        "field": "ingredient_x",
+                        "severity": "CRITICAL",
+                        "action": "ESCALATE",
+                        "notes": "missing",
+                    }
+                ],
+                "conflicts": [{"id": "c1", "source": "product_a"}],
                 "claim_boundary_violations": [],
                 "eligibility": "NEEDS_REVIEW",
                 "final_score": 0.1,
@@ -60,18 +68,35 @@ def test_product_unknowns_do_not_mutate_case_decision_state():
 
     svc.reasoning_engine.run.side_effect = engine_side_effect
 
-    # Capture decision_state mutations by wrapping generate path indirectly:
-    # after generate, case-level unknowns must still be empty (no product leakage).
-    # We assert via eligibility isolation + by re-building and checking map with empty case unknowns.
+    # Capture the same Case Decision State object used inside generate_recommendations
+    captured = {}
+    original_build = svc._build_decision_state
+
+    def capture_build(case_id, customer_profile):
+        ds = original_build(case_id, customer_profile)
+        captured["decision_state"] = ds
+        return ds
+
+    svc._build_decision_state = capture_build
 
     recs = svc.generate_recommendations("CASE1", {"concerns": "dry skin"})
     assert len(recs) == 2
+
+    ds = captured["decision_state"]
+    # DIRECT invariant (GAP-01): product loop must not mutate Case Decision State
+    assert ds["unknowns"] == [], (
+        "GAP-01 violation: product-level unknowns leaked into Case Decision State: "
+        f"{ds['unknowns']}"
+    )
+    assert ds["conflicts"] == [], (
+        "GAP-01 violation: product-level conflicts leaked into Case Decision State: "
+        f"{ds['conflicts']}"
+    )
 
     by_id = {r.product_id: r for r in recs}
     # PROD_A has critical product unknown → pending review
     assert by_id["PROD_A"].eligibility_status == "INELIGIBLE_PENDING_REVIEW"
     # PROD_B must NOT inherit PROD_A critical unknown via shared Case Decision State
-    # (need_match may still gate; ensure engine ELIGIBLE path is reachable for B)
     assert by_id["PROD_B"].eligibility_status == "ELIGIBLE"
 
 
