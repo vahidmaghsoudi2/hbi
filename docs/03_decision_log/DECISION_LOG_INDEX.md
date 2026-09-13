@@ -12,5 +12,6 @@ Every major project decision is recorded as an ADR or PO Decision record.
 | **HBI-PO-DEC-F2-ARCH-001** | **F2 Architectural Decisions — Decision State, Unknown (3 levels), Medical Context, Need, Factor** | **RECORDED** | **2026-09-10** |
 | **HBI-PO-DEC-GAP04-001** | **GAP-04 Recommendation Persistence (MVP) — must persist + traceable to Case/Decision** | **DECISION RESOLVED — IMPLEMENTATION PENDING** | **2026-09-13** |
 | **HBI-PO-DEC-CORE-001** | **HBI Core Definition v1 — Problem-Centered, Evidence-Bound Decision Support** | **DECIDED / ACCEPTED** | **2026-09-13** |
+| **HBI-PO-DEC-GAP02-001** | **GAP-02 Factor vs Concern — Domain Concept / computed; Entity NOT REQUIRED FOR MVP** | **DECISION RESOLVED** | **2026-09-13** |
 
 To add a new decision, create a file in this folder and add a row to the table above.
