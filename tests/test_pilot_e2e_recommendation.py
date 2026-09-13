@@ -2,9 +2,8 @@
 
 Uses existing seed_products/seed_evidence JSON (does not modify Product A–D source files).
 
-Note: current RecommendationService returns in-memory Recommendation objects and does
-not db.add()/persist them. Phase 15 test remediation therefore validates the HTTP
-response contract, not an incorrect DB-row assumption.
+Note: RecommendationService persists the current Recommendation for each Case+Product;
+this E2E test therefore validates both the HTTP response contract and the persisted-row behavior.
 """
 from pathlib import Path
 
@@ -89,7 +88,7 @@ def test_pilot_token_and_generate_persist(client):
     body = r.json()
     assert isinstance(body, list)
     assert len(body) >= 1
-    # Response-scoped recommendations (service does not currently persist rows)
+    # RecommendationService persists the current recommendation for this Case+Product.
     assert body[0].get("case_id") == "CASE-PILOT-1"
     assert body[0].get("product_id")
 
