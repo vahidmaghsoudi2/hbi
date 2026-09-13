@@ -44,14 +44,15 @@ _MEDICAL_TOKENS = {
 
 class RecommendationService(BaseService[Recommendation, RecommendationRepository]):
     """
-    RecommendationService — F2 Implementation
+    RecommendationService — F2 + GAP-01
 
     Responsibilities:
-    - Build Decision State Computed Snapshot
+    - Build Case Decision State Computed Snapshot (shared, Customer/Problem/Need oriented)
     - Generate Need only from Decision State
+    - Per-product Product Evaluation State (unknowns/conflicts/inferences isolated)
     - Map UnknownPriority from ConflictSeverity
-    - Detect minimal Medical Context
-    - Produce Inference as computed output
+    - Detect minimal Medical Context (Case-level)
+    - Produce Inference as computed output (product-scoped)
     - Call ReasoningEngine.run for real scoring
     - Produce Recommendation with proper eligibility
     """
@@ -74,7 +75,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         return self.repository.find_eligible()
 
     # ------------------------------------------------------------------
-    # F2 Helpers
+    # F2 / GAP-01 Helpers
     # ------------------------------------------------------------------
 
     def _map_unknown_priority(self, severity: str) -> str:
@@ -114,7 +115,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         case_id: str,
         customer_profile: Dict,
     ) -> Dict[str, Any]:
-        """Build the Decision State Computed Snapshot (F2)."""
+        """Build the Case Decision State Computed Snapshot (shared; Customer/Problem/Need)."""
         raw_concerns = []
         concerns_raw = customer_profile.get("concerns") or ""
         if isinstance(concerns_raw, list):
@@ -139,6 +140,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             "raw_concerns": raw_concerns,
             "evidence_refs": [],
             "evidence_gaps": [],
+            # Case-level only. Product-level unknowns must NOT be written here (GAP-01).
             "unknowns": [],
             "conflicts": [],
             "factors": factors,
@@ -191,7 +193,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
     ) -> List[Dict[str, Any]]:
         """
         Produce Inference as computed reasoning output (F2).
-        Never stored as Fact. Never diagnoses.
+        Never stored as Fact. Never diagnoses. Product-scoped.
         """
         inferences: List[Dict[str, Any]] = []
 
@@ -232,8 +234,22 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         engine_result: Dict[str, Any],
         decision_state: Dict[str, Any],
         need_match: float,
+        product_unknowns: Optional[List[Dict[str, Any]]] = None,
     ) -> str:
-        """Map to statuses compatible with existing DB CheckConstraint."""
+        """
+        Map to statuses compatible with existing DB CheckConstraint.
+
+        GAP-01: product_unknowns are per-product only and must not come from
+        a shared Case Decision State that was mutated by other products.
+        Case-level unknowns (decision_state["unknowns"]) remain for elevated
+        Customer/Problem/Need/Safety items only.
+        """
+        product_unknowns = product_unknowns or []
+
+        for u in product_unknowns:
+            if u.get("unknown_priority") == "CRITICAL_UNKNOWN":
+                return "INELIGIBLE_PENDING_REVIEW"
+
         for u in decision_state.get("unknowns", []):
             if u.get("unknown_priority") == "CRITICAL_UNKNOWN":
                 return "INELIGIBLE_PENDING_REVIEW"
@@ -257,11 +273,13 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
 
     def generate_recommendations(self, case_id: str, customer_profile: Dict = None) -> List[Recommendation]:
         """
-        F2 Implementation of Recommendation Decision Pipeline.
+        F2 + GAP-01 Recommendation Decision Pipeline.
 
         Flow:
-        Customer Data → Decision State → Needs → Product Intelligence
-        → ReasoningEngine → Recommendation
+        Customer Data → Case Decision State → Needs
+        → per Product: Product Evaluation State → ReasoningEngine → Recommendation
+
+        GAP-01: Product-level Unknown/Conflict never mutates shared Case Decision State.
         """
         if customer_profile is None:
             customer_profile = {}
@@ -279,6 +297,9 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         products = self.product_repo.find_by_identity_status_and_active("VERIFIED")
         recommendations: List[Recommendation] = []
         rank = 1
+
+        # Snapshot case-level unknowns length for leakage self-check (should stay 0 from product path)
+        case_unknowns_before_loop = len(decision_state.get("unknowns", []))
 
         for product in products:
             pk = self.pk_repo.find_by_product(product.product_id)
@@ -323,21 +344,27 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 inventory_score=inventory_score,
             )
 
+            # GAP-01: Product Evaluation State — per-product only; do NOT mutate Case Decision State
+            product_unknowns: List[Dict[str, Any]] = []
             for u in engine_result.get("unknowns", []):
                 sev = u.get("severity", "LOW")
-                decision_state["unknowns"].append({
+                product_unknowns.append({
                     "field": u.get("field"),
                     "unknown_priority": self._map_unknown_priority(sev),
                     "action": u.get("action"),
                     "notes": u.get("notes"),
+                    "product_id": product.product_id,
                 })
-            decision_state["conflicts"].extend(engine_result.get("conflicts", []))
+            product_conflicts = list(engine_result.get("conflicts", []))
 
-            # F2: Inference as computed output
             inferences = self._build_inferences(engine_result, decision_state, product.product_id)
-            decision_state["inferences"] = inferences
 
-            eligibility = self._map_eligibility(engine_result, decision_state, need_match)
+            eligibility = self._map_eligibility(
+                engine_result,
+                decision_state,
+                need_match,
+                product_unknowns=product_unknowns,
+            )
 
             final_score = engine_result.get("final_score", 0.0)
             rationale = engine_result.get("rationale", "")
@@ -345,6 +372,8 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 f"{rationale} | needs={needs} | need_match={need_match:.2f} | "
                 f"medical_context={decision_state['medical_context_active']} | "
                 f"decision_status={decision_state['decision_status']} | "
+                f"product_unknowns={len(product_unknowns)} | "
+                f"product_conflicts={len(product_conflicts)} | "
                 f"inferences={len(inferences)}"
             )
 
@@ -361,6 +390,15 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             )
             recommendations.append(rec)
             rank += 1
+
+        # GAP-01 invariant: product loop must not have mutated case-level unknowns
+        if len(decision_state.get("unknowns", [])) != case_unknowns_before_loop:
+            logger.error(
+                "GAP-01 violation: Case Decision State unknowns mutated during product loop "
+                "(before=%s after=%s)",
+                case_unknowns_before_loop,
+                len(decision_state.get("unknowns", [])),
+            )
 
         recommendations.sort(key=lambda r: (r.ranking_score or 0.0), reverse=True)
         return recommendations
