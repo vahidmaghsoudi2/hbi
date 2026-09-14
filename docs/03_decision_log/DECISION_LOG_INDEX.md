@@ -16,5 +16,6 @@ Every major project decision is recorded as an ADR or PO Decision record.
 | **HBI-PO-DEC-GAP02-001** | **GAP-02 Factor vs Concern — Domain Concept / computed; Entity NOT REQUIRED FOR MVP** | **DECISION RESOLVED** | **2026-09-13** |
 | **HBI-PO-DEC-GAP03-001** | **GAP-03 Out-of-Stock Candidate Elimination Policy — eliminate before Reasoning** | **DECISION RESOLVED — IMPLEMENTED** | **2026-09-13** |
 | **HBI-PO-DEC-GAP04-002** | **GAP-04 Option B — one current Recommendation per Case+Product; re-Generate updates** | **DECISION RESOLVED — IMPLEMENTED** | **2026-09-13** |
+| **HBI-PO-DEC-REC-SCOPE-001** | **Recommendation Policy Scope v1 — Need Match, Inventory, Evidence in scope; Ingredients and Seller/Operator Experience out of scope for now** | **DECISION RESOLVED** | **2026-09-14** |
 
 To add a new decision, create a file in this folder and add a row to the table above.
