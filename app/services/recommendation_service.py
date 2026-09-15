@@ -140,13 +140,18 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         return round(len(need_tokens & use_tokens) / max(len(need_tokens), 1), 4)
 
     def _compute_evidence_score(self, evidences: List[Evidence]) -> float:
-        if not evidences:
+        """Score only Evidence explicitly approved by QA for decision use."""
+        approved_evidences = [
+            ev for ev in evidences
+            if (getattr(ev, "qa_status", None) or "").strip().upper() == "APPROVED"
+        ]
+        if not approved_evidences:
             return 0.0
         total = 0.0
-        for ev in evidences:
+        for ev in approved_evidences:
             st = (ev.source_type or "SECONDARY").upper()
             total += _EVIDENCE_WEIGHTS.get(st, 0.2)
-        return round(min(1.0, total / len(evidences)), 4)
+        return round(min(1.0, total / len(approved_evidences)), 4)
 
     def _build_inferences(self, engine_result: Dict[str, Any], decision_state: Dict[str, Any], product_id: str) -> List[Dict[str, Any]]:
         inferences: List[Dict[str, Any]] = []
