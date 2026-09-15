@@ -1,4 +1,5 @@
 from typing import Optional, List, Dict
+import json
 from sqlalchemy.orm import Session
 from app.services.product_service import ProductService
 from app.services.customer_service import CustomerService
@@ -58,6 +59,18 @@ def _get_price(db: Session, product_id: str):
         return None
 
 
+def _decode_json_list(value):
+    if not value:
+        return []
+    if isinstance(value, list):
+        return value
+    try:
+        decoded = json.loads(value)
+        return decoded if isinstance(decoded, list) else []
+    except (TypeError, ValueError):
+        return []
+
+
 def _to_recommendation_dto(r, db: Session) -> RecommendationDTO:
     """Map Recommendation model to DTO with AD-3 Contract fields."""
     need = r.need_match_score or 0.0
@@ -77,8 +90,8 @@ def _to_recommendation_dto(r, db: Session) -> RecommendationDTO:
         eligibility=r.eligibility_status,
         reasoning=r.ranking_reasons,
         evidence_score=getattr(r, 'evidence_score', None),
-        evidence_refs=[],
-        warnings=[],
+        evidence_refs=_decode_json_list(getattr(r, 'evidence_refs', None)),
+        warnings=_decode_json_list(getattr(r, 'warnings', None)),
         availability=_get_availability(db, r.product_id),
         price=_get_price(db, r.product_id),
     )

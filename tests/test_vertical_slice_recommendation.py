@@ -1,6 +1,8 @@
 """Vertical-slice: Product Record → Evidence → RecommendationService.
 
 Sources: data/seed_products.json + data/seed_evidence.json (from SoT docs only).
+The recommendation happy path adds one explicit QA-approved independent evidence
+fixture because Runtime-003 excludes pending evidence from scoring.
 """
 from pathlib import Path
 
@@ -16,7 +18,7 @@ def db_session(monkeypatch):
         try:
             TEST_DB.unlink()
         except PermissionError:
-            pass  # Ignore Windows file lock
+            pass
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{TEST_DB}")
 
     import importlib
@@ -28,11 +30,27 @@ def db_session(monkeypatch):
     from scripts.seed_products_from_records import seed
     from app.models.customer import Customer
     from app.models.case import Case
+    from app.models.evidence import Evidence
+    from app.models.product_knowledge import ProductKnowledge
 
     Session = sessionmaker(bind=database.engine)
     session = Session()
     seed(session)
-    # Minimal fixtures for Recommendation.case_id FK (not product data invention)
+    pk = session.query(ProductKnowledge).filter_by(
+        product_id="ISDIN-FOTOUTRA100-50ML"
+    ).one()
+    pk.known_use_cases = "sun protection"
+    session.add(Evidence(
+        evidence_id="EV-VS-APPROVED-001",
+        product_id="ISDIN-FOTOUTRA100-50ML",
+        source_type="INDEPENDENT",
+        source_reference="TEST-VERTICAL-FIXTURE",
+        claim="approved test support for sunscreen use case",
+        claim_type="FACT",
+        evidence_status="SUPPORTED",
+        qa_status="APPROVED",
+        conflict_status="NONE",
+    ))
     if session.get(Customer, "CUST-VS-001") is None:
         session.add(Customer(customer_id="CUST-VS-001", name="VS Fixture"))
     if session.get(Case, "CASE-VS-002") is None:
@@ -48,7 +66,7 @@ def db_session(monkeypatch):
         try:
             TEST_DB.unlink()
         except PermissionError:
-            pass  # Ignore Windows file lock
+            pass
 
 
 def test_seed_products_and_evidence(db_session):
@@ -63,7 +81,8 @@ def test_recommendation_with_evidence_persists(db_session):
     from app.services.recommendation_service import RecommendationService
 
     svc = RecommendationService(db_session)
-    profile = {"concerns": "ضدآفتاب روزانه صورت"}
+    profile = {"concerns": "ضدآفتاب"}
     recs = svc.generate_recommendations("CASE-VS-002", profile)
     assert isinstance(recs, list)
     assert len(recs) >= 1
+    assert recs[0].product_id == "ISDIN-FOTOUTRA100-50ML"
