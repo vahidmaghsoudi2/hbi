@@ -191,6 +191,9 @@ class InventoryFacade:
         return [_to_inventory_dto(i) for i in items]
 
     def list_all(self) -> List[InventoryDTO]:
+        return [_to_inventory_dto(i) for i in items]
+
+    def list_all(self) -> List[InventoryDTO]:
         return [_to_inventory_dto(i) for i in self.service.list_all()]
 
 class SaleFacade:
@@ -276,16 +279,16 @@ class EvidenceFacade:
             market_region=evidence.market_region,
             notes=evidence.notes,
             qa_status=evidence.qa_status,
-            created_at=evidence.created_at,
+            created_at=evidence.created_at
         )
 
-    def _to_conflict_dto(self, conflict) -> ConflictEntryDTO:
+    def _to_conflict_dto(self, conflict: Dict) -> ConflictEntryDTO:
         return ConflictEntryDTO(
             field=conflict.get("field"),
             values=conflict.get("values", []),
             evidence_ids=conflict.get("evidence_ids", []),
-            severity=conflict.get("severity", "HIGH"),
-            status=conflict.get("status", "UNRESOLVED"),
+            severity="HIGH",
+            status="UNRESOLVED"
         )
 
 
@@ -295,22 +298,27 @@ class ProductKnowledgeFacade:
         self.service = ProductKnowledgeService(db)
 
     def get_by_product(self, product_id: str) -> ProductKnowledgeDTO:
-        pk = self.service.repository.find_by_product(product_id)
-        if not pk:
-            raise NotFoundError(f"ProductKnowledge for product {product_id} not found")
+        knowledge = self.service.get_or_create(product_id)
+        return self._to_knowledge_dto(knowledge)
+
+    def refresh_from_evidence(self, product_id: str) -> ProductKnowledgeDTO:
+        knowledge = self.service.update_from_evidence(product_id)
+        return self._to_knowledge_dto(knowledge)
+
+    def _to_knowledge_dto(self, knowledge) -> ProductKnowledgeDTO:
         return ProductKnowledgeDTO(
-            product_knowledge_id=pk.product_knowledge_id,
-            product_id=pk.product_id,
-            ingredients=pk.ingredients,
-            ingredient_roles=pk.ingredient_roles,
-            claimed_benefits=pk.claimed_benefits,
-            known_use_cases=pk.known_use_cases,
-            contraindications=pk.contraindications,
-            usage_instructions=pk.usage_instructions,
-            manufacturer_claims=pk.manufacturer_claims,
-            evidence_refs=pk.evidence_refs,
-            evidence_status=pk.evidence_status,
-            knowledge_confidence=pk.knowledge_confidence,
-            created_at=pk.created_at,
-            updated_at=pk.updated_at,
+            product_knowledge_id=knowledge.product_knowledge_id,
+            product_id=knowledge.product_id,
+            ingredients=knowledge.ingredients,
+            ingredient_roles=knowledge.ingredient_roles,
+            claimed_benefits=knowledge.claimed_benefits,
+            known_use_cases=knowledge.known_use_cases,
+            contraindications=knowledge.contraindications,
+            usage_instructions=knowledge.usage_instructions,
+            manufacturer_claims=knowledge.manufacturer_claims,
+            evidence_refs=knowledge.evidence_refs,
+            evidence_status=knowledge.evidence_status,
+            knowledge_confidence=knowledge.knowledge_confidence,
+            created_at=knowledge.created_at,
+            updated_at=knowledge.updated_at
         )
