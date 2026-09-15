@@ -77,7 +77,7 @@ The GAP-05 L1 normalizer uses an explicit approved synonym/phrase map. Exact app
 The existing end-of-loop log checks whether the case-level unknown count changed, which therefore does not capture product-level unknowns.
 
 **Classification:** OBSERVED FACT.
-**Potential impact:** the in-memory Case Decision State does not appear to accumulate product-level uncertainty/conflict despite the contract describing uncertainty/conflict as part of the decision object. This is a strong integration-gap candidate and needs independent review.
+**Potential impact:** the in-memory Case Decision State does not appear to accumulate product-level unknowns/conflicts despite the contract describing uncertainty/conflict as part of the decision object. This is a strong integration-gap candidate and needs independent review.
 
 ### F08 — Recommendation DTO derives confidence separately from the engine's confidence
 
@@ -142,3 +142,30 @@ No implementation change is proposed by this initial audit.
 - Evidence retrieval method: GitHub repository file/tree/API reads at the declared baseline
 - CI/test execution: NOT RUN in this audit step
 - Confidence: HIGH for the listed code facts; MEDIUM for policy-conformance impact until independent verification and broader test/runtime evidence are available
+
+## 8. Execution / Integration Addendum
+
+**Status:** WP-01 INTEGRATION COMPLETE / READY FOR INDEPENDENT FINAL VERIFICATION
+
+This addendum records the integration findings already established during WP-01 execution. It does not authorize or perform implementation changes.
+
+### 8.1 Confirmed integration trace
+
+- Customer → Case ownership is enforced at the `/generate` entry point.
+- `generate` does not automatically load the stored Customer profile; it consumes the `customer_profile` supplied by the caller.
+- Decision State is constructed from the caller-supplied profile.
+- Need normalization is controlled through the approved GAP-05 mapping and does not silently guess unresolved input.
+- Recommendation reasoning and Recommendation upsert are connected through the current runtime path.
+- CP-01 helper path `build_recommendation_profile` → `generate_hint` was confirmed as the existing profile/hint path relevant to the integration audit.
+
+### 8.2 Candidate API authority gap
+
+The `/generate` contract currently permits a caller-supplied `customer_profile` rather than deriving the authoritative profile from the authenticated Customer record. This remains a **CANDIDATE GAP**, not an approved implementation change or confirmed policy violation.
+
+### 8.3 Verification handoff
+
+WP-01 is now packaged for independent final verification against the repository state. The final verifier must treat the GitHub branch/file state as the source of truth and independently verify the integration claims and candidate gaps.
+
+**Implementation:** NOT PERFORMED.
+**Master:** UNCHANGED.
+**Final acceptance:** NOT YET GRANTED.
