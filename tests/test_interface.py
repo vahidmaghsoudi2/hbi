@@ -69,7 +69,6 @@ def db():
 @pytest.fixture
 def sample_product(db):
     repo = ProductRepository(db)
-    # create product with base attributes
     p = repo.create(
         product_id="P001",
         brand="TestBrand",
@@ -77,8 +76,6 @@ def sample_product(db):
         identity_status="VERIFIED",
         qa_verdict="VALID"
     )
-    # P4-compliant: use governance-privileged API to set lifecycle state required by tests
-    # This uses existing repository API intended for governance fields (no direct model mutation).
     repo.update_governance_privileged(p.product_id, status="ACTIVE")
     return p
 
@@ -152,11 +149,12 @@ def test_recommendation_facade_generate(db, sample_product, sample_customer, sam
     ev = Evidence(
         evidence_id="EV_TEST_001",
         product_id=sample_product.product_id,
-        source_type="OFFICIAL_MANUFACTURER",
+        source_type="INDEPENDENT",
         source_reference="TEST-SOURCE",
         claim="Test claim for oily skin",
         claim_type="FACT",
-        evidence_status="SUPPORTED"
+        evidence_status="SUPPORTED",
+        qa_status="APPROVED",
     )
     db.add(ev)
     db.commit()
