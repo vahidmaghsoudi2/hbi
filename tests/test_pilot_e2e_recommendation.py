@@ -1,9 +1,8 @@
 """Pilot E2E: pilot-token → generate recommendations.
 
 Uses existing seed_products/seed_evidence JSON (does not modify Product A–D source files).
-
-Note: RecommendationService persists the current Recommendation for each Case+Product;
-this E2E test therefore validates both the HTTP response contract and the persisted-row behavior.
+The test adds one explicit QA-approved independent evidence fixture so the happy path
+remains valid under Runtime-003's approved-only scoring contract.
 """
 from pathlib import Path
 
@@ -30,12 +29,24 @@ def client(monkeypatch):
     from scripts.seed_products_from_records import seed
     from app.models.customer import Customer
     from app.models.case import Case
+    from app.models.evidence import Evidence
     from app.main import app
     from app.core.deps import get_db
 
     Session = sessionmaker(bind=database.engine)
     session = Session()
     seed(session)
+    session.add(Evidence(
+        evidence_id="EV-PILOT-APPROVED-001",
+        product_id="ISDIN-FOTOUTRA100-50ML",
+        source_type="INDEPENDENT",
+        source_reference="TEST-PILOT-FIXTURE",
+        claim="approved test support for sunscreen use case",
+        claim_type="FACT",
+        evidence_status="SUPPORTED",
+        qa_status="APPROVED",
+        conflict_status="NONE",
+    ))
     session.add(Customer(customer_id="CUST-PILOT-1", name="Pilot User"))
     session.add(Case(case_id="CASE-PILOT-1", customer_id="CUST-PILOT-1"))
     session.commit()
@@ -72,7 +83,7 @@ def test_pilot_token_and_generate_persist(client):
 
     naked = c.post(
         "/api/v1/recommendations/generate",
-        json={"case_id": "CASE-PILOT-1", "customer_profile": {"concerns": "ضدآفتاب روزانه صورت"}},
+        json={"case_id": "CASE-PILOT-1", "customer_profile": {"concerns": "ضدآفتاب ضدلک صورت"}},
     )
     assert naked.status_code == 401
 
@@ -81,14 +92,13 @@ def test_pilot_token_and_generate_persist(client):
         headers=headers,
         json={
             "case_id": "CASE-PILOT-1",
-            "customer_profile": {"concerns": "ضدآفتاب روزانه صورت"},
+            "customer_profile": {"concerns": "ضدآفتاب ضدلک صورت"},
         },
     )
     assert r.status_code == 200, r.text
     body = r.json()
     assert isinstance(body, list)
     assert len(body) >= 1
-    # RecommendationService persists the current recommendation for this Case+Product.
     assert body[0].get("case_id") == "CASE-PILOT-1"
     assert body[0].get("product_id")
 
