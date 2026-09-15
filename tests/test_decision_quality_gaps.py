@@ -10,6 +10,7 @@ from app.services.recommendation_service import RecommendationService
 def _service():
     db = MagicMock()
     service = RecommendationService(db)
+    service.repository = MagicMock()
     service.product_repo = MagicMock()
     service.inventory_repo = MagicMock()
     service.pk_repo = MagicMock()
