@@ -118,10 +118,14 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
 
     def _generate_needs_from_decision_state(self, decision_state: Dict[str, Any]) -> List[str]:
         """Need ONLY from Decision State (F2 + GAP-05 L1). No silent guessing."""
-        needs, mappings, unmapped = normalize_needs_from_factors(decision_state.get("factors", []))
+        needs, mappings, unmapped, ambiguous = normalize_needs_from_factors(
+            decision_state.get("factors", [])
+        )
         decision_state["need_mappings"] = mappings
         decision_state["unmapped_need_factors"] = unmapped
-        if unmapped and not needs:
+        decision_state["ambiguous_need_factors"] = ambiguous
+        # Insufficient when nothing canonical was produced and unresolved input exists
+        if not needs and (unmapped or ambiguous):
             decision_state["decision_status"] = "INSUFFICIENT"
         return needs
 
@@ -242,7 +246,8 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 f"decision_status={decision_state['decision_status']} | "
                 f"product_unknowns={len(product_unknowns)} | product_conflicts={len(product_conflicts)} | "
                 f"inferences={len(inferences)} | need_mappings={len(decision_state.get('need_mappings') or [])} | "
-                f"unmapped_need_factors={len(decision_state.get('unmapped_need_factors') or [])}"
+                f"unmapped_need_factors={len(decision_state.get('unmapped_need_factors') or [])} | "
+                f"ambiguous_need_factors={len(decision_state.get('ambiguous_need_factors') or [])}"
             )
             rec = self._upsert_current_recommendation(
                 case_id=case_id, product_id=product.product_id, need_match=need_match,
