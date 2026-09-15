@@ -156,7 +156,12 @@ class ReasoningEngine:
         if scoring_result:
             result["final_score"] = scoring_result["final_score"]
             result["confidence"] = scoring_result["confidence"]
-            result["eligibility"] = scoring_result["eligibility"]
+            # Evidence/existing conflicts apply eligibility pressure without changing
+            # frozen score weights/formula (HBI-RUNTIME-002 / OD-05 alignment).
+            elig = scoring_result["eligibility"]
+            if conflicts and elig == "ELIGIBLE":
+                elig = "NEEDS_REVIEW"
+            result["eligibility"] = elig
             result["hard_gate_triggered"] = scoring_result["hard_gate_triggered"]
             result["hard_gate_reasons"] = scoring_result["hard_gate_reasons"]
             result["evidence_score"] = evidence_score
