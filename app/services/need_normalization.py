@@ -5,6 +5,7 @@ Contract: docs/03_decision_log/HBI-PO-DEC-GAP05-001.md
 - Canonical vocabulary + approved synonym/phrase mappings
 - Auditable Factor → Need mapping
 - Unmapped / ambiguous input is NOT silently guessed into a Need
+- Materially ambiguous input remains explicit/uncertain (distinct from pure unmapped)
 - Scoring/weights unchanged; only Need surface fed to matching may change
 """
 from __future__ import annotations
@@ -27,7 +28,7 @@ CANONICAL_NEEDS = {
 }
 
 # Approved synonym / phrase → canonical Need id (lowercase match after light normalize).
-# Only explicitly listed phrases map; everything else stays unmapped.
+# Only explicitly listed phrases map; everything else stays unmapped or ambiguous.
 _SYNONYM_TO_CANONICAL: Dict[str, str] = {
     "hydration": "hydration",
     "hydrate": "hydration",
@@ -122,28 +123,85 @@ def map_phrase_to_canonical(phrase: str) -> Optional[str]:
     return _SYNONYM_TO_CANONICAL.get(key2)
 
 
+def _token_canonical_hits(phrase: str) -> set:
+    """Return set of canonical ids hit by any individual token of the phrase."""
+    key = _light_normalize(phrase)
+    if not key:
+        return set()
+    hits = set()
+    for tok in key.replace("-", " ").replace("_", " ").split():
+        if not tok:
+            continue
+        cid = _SYNONYM_TO_CANONICAL.get(tok)
+        if cid:
+            hits.add(cid)
+    return hits
+
+
+def classify_phrase(phrase: str) -> Tuple[Optional[str], str]:
+    """
+    Deterministic classification of a phrase.
+
+    Returns:
+      (canonical_id, reason) where reason is one of:
+        - "approved_synonym_map"
+        - "ambiguous"          (partial/multi-concept token hits; not exact approved phrase)
+        - "no_approved_mapping" (no token hits any approved synonym)
+    """
+    key = _light_normalize(phrase)
+    if not key:
+        return None, "no_approved_mapping"
+
+    # Exact approved phrase wins.
+    if key in _SYNONYM_TO_CANONICAL:
+        return _SYNONYM_TO_CANONICAL[key], "approved_synonym_map"
+    key2 = key.replace("-", " ").replace("_", " ")
+    key2 = " ".join(key2.split())
+    if key2 in _SYNONYM_TO_CANONICAL:
+        return _SYNONYM_TO_CANONICAL[key2], "approved_synonym_map"
+
+    # Material ambiguity: one or more tokens hit approved synonyms, but the
+    # full phrase is not an approved mapping. Never invent a Need.
+    hits = _token_canonical_hits(phrase)
+    if hits:
+        return None, "ambiguous"
+
+    return None, "no_approved_mapping"
+
+
 def normalize_needs_from_factors(
     factors: List[Dict[str, Any]],
-) -> Tuple[List[str], List[Dict[str, Any]], List[Dict[str, Any]]]:
+) -> Tuple[List[str], List[Dict[str, Any]], List[Dict[str, Any]], List[Dict[str, Any]]]:
     """
     Derive canonical Needs from Decision State factors.
 
     Returns:
       needs: ordered unique canonical Need surface strings
-      mappings: audit trail {factor_value, canonical, rule}
-      unmapped: factors that did not map (explicit, not invented)
+      mappings: audit trail {factor_value, canonical, rule, ...}
+      unmapped: factors with no approved mapping (reason=no_approved_mapping)
+      ambiguous: factors that are materially ambiguous (reason=ambiguous / uncertain)
     """
     needs: List[str] = []
     mappings: List[Dict[str, Any]] = []
     unmapped: List[Dict[str, Any]] = []
+    ambiguous: List[Dict[str, Any]] = []
     seen = set()
 
     for f in factors or []:
         raw = (f.get("value") or "").strip()
         if not raw:
             continue
-        canonical_id = map_phrase_to_canonical(raw)
-        if canonical_id is None:
+        canonical_id, reason = classify_phrase(raw)
+        if reason == "ambiguous":
+            ambiguous.append({
+                "factor_value": raw,
+                "source": f.get("source"),
+                "validity": f.get("validity"),
+                "reason": "ambiguous",
+                "status": "uncertain",
+            })
+            continue
+        if reason == "no_approved_mapping" or canonical_id is None:
             unmapped.append({
                 "factor_value": raw,
                 "source": f.get("source"),
@@ -151,6 +209,7 @@ def normalize_needs_from_factors(
                 "reason": "no_approved_mapping",
             })
             continue
+        # approved_synonym_map
         canonical_surface = CANONICAL_NEEDS[canonical_id]
         mappings.append({
             "factor_value": raw,
@@ -164,4 +223,4 @@ def normalize_needs_from_factors(
             seen.add(canonical_surface)
             needs.append(canonical_surface)
 
-    return needs, mappings, unmapped
+    return needs, mappings, unmapped, ambiguous
