@@ -14,14 +14,15 @@ from app.models.product import Product
 from app.models.inventory import Inventory
 from app.models.case import Case
 from app.models.customer import Customer
-from app.models.category import Category  # noqa: F401
-from app.models.evidence import Evidence  # noqa: F401
+from app.models.product_knowledge import ProductKnowledge
+from app.models.evidence import Evidence
 from app.models.recommendation import Recommendation  # noqa: F401
 from app.models.sale import Sale  # noqa: F401
 from app.models.sale_item import SaleItem  # noqa: F401
 from app.models.stock_movement import StockMovement  # noqa: F401
 from app.models.payment import Payment  # noqa: F401
 from app.models.sale_return import SaleReturn  # noqa: F401
+from app.models.category import Category  # noqa: F401
 
 
 @pytest.fixture()
@@ -102,6 +103,23 @@ def test_draft_products_excluded(api_env):
     db.add(active)
     db.flush()
 
+    db.add(ProductKnowledge(
+        product_knowledge_id="PK-active_test_001",
+        product_id=active.product_id,
+        known_use_cases="test",
+    ))
+    db.add(Evidence(
+        evidence_id="EV-active_test_001",
+        product_id=active.product_id,
+        source_type="INDEPENDENT",
+        source_reference="TEST-SOURCE",
+        claim="test use case",
+        claim_type="FACT",
+        evidence_status="SUPPORTED",
+        qa_status="APPROVED",
+        conflict_status="NONE",
+    ))
+
     inv = Inventory(
         inventory_id="inv-active_test_001",
         product_id=active.product_id,
@@ -125,9 +143,7 @@ def test_draft_products_excluded(api_env):
     assert response.status_code == 200, response.text
     data = response.json()
     if isinstance(data, list):
-        product_ids = [
-            item.get("product_id") for item in data if isinstance(item, dict)
-        ]
+        product_ids = [item.get("product_id") for item in data if isinstance(item, dict)]
     else:
         product_ids = [
             item.get("product_id")
@@ -176,9 +192,7 @@ def test_inventory_zero_excluded(api_env):
     assert response.status_code == 200, response.text
     data = response.json()
     if isinstance(data, list):
-        product_ids = [
-            item.get("product_id") for item in data if isinstance(item, dict)
-        ]
+        product_ids = [item.get("product_id") for item in data if isinstance(item, dict)]
     else:
         product_ids = [
             item.get("product_id")
