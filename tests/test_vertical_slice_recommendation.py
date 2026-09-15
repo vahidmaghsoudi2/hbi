@@ -76,7 +76,7 @@ def test_recommendation_with_evidence_persists(db_session):
     from app.services.recommendation_service import RecommendationService
 
     svc = RecommendationService(db_session)
-    profile = {"concerns": "ضدآفتاب ضدلک صورت"}
+    profile = {"concerns": "ضدآفتاب"}
     recs = svc.generate_recommendations("CASE-VS-002", profile)
     assert isinstance(recs, list)
     assert len(recs) >= 1

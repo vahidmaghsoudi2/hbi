@@ -35,7 +35,9 @@ def test_product_unknowns_do_not_mutate_case_decision_state():
         _product("PROD_B"),
     ]
     svc.repository.find_by_case.return_value = []
-    svc.pk_repo.find_by_product.return_value = MagicMock(known_use_cases="dry skin")
+    svc.repository.find_by_case_and_product.return_value = None
+    svc.repository.create.side_effect = lambda **kwargs: MagicMock(**kwargs)
+    svc.pk_repo.find_by_product.return_value = MagicMock(known_use_cases="dry skin", claimed_benefits="", contraindications="", ingredients="")
     svc.evidence_repo.find_by_product.return_value = []
     inv = MagicMock()
     inv.quantity_available = 5
@@ -45,12 +47,7 @@ def test_product_unknowns_do_not_mutate_case_decision_state():
         pid = kwargs.get("product_id")
         if pid == "PROD_A":
             return {
-                "unknowns": [{
-                    "field": "ingredient_x",
-                    "severity": "CRITICAL",
-                    "action": "ESCALATE",
-                    "notes": "missing",
-                }],
+                "unknowns": [{"field": "ingredient_x", "severity": "CRITICAL", "action": "ESCALATE", "notes": "missing"}],
                 "conflicts": [{"id": "c1", "source": "product_a"}],
                 "claim_boundary_violations": [],
                 "eligibility": "NEEDS_REVIEW",

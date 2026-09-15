@@ -19,12 +19,23 @@ def _service():
     return service, db
 
 
+def _complete_pk(**overrides):
+    values = {
+        "known_use_cases": "dry skin",
+        "claimed_benefits": "hydration",
+        "contraindications": "",
+        "ingredients": "",
+    }
+    values.update(overrides)
+    return SimpleNamespace(**values)
+
+
 def test_hard_gated_candidate_is_not_persisted_or_ranked():
     service, db = _service()
     product = SimpleNamespace(product_id="P1")
     service.product_repo.find_by_identity_status_and_active.return_value = [product]
     service.repository.find_by_case.return_value = []
-    service.pk_repo.find_by_product.return_value = SimpleNamespace(known_use_cases="dry skin")
+    service.pk_repo.find_by_product.return_value = _complete_pk()
     service.inventory_repo.find_by_product.return_value = SimpleNamespace(quantity_available=1)
     service.evidence_repo.find_by_product.return_value = []
     service.reasoning_engine.run.return_value = {
@@ -56,7 +67,7 @@ def test_eligible_recommendation_persists_trace():
     )
     service.product_repo.find_by_identity_status_and_active.return_value = [product]
     service.repository.find_by_case.return_value = []
-    service.pk_repo.find_by_product.return_value = SimpleNamespace(known_use_cases="dry skin")
+    service.pk_repo.find_by_product.return_value = _complete_pk()
     service.inventory_repo.find_by_product.return_value = SimpleNamespace(quantity_available=1)
     service.evidence_repo.find_by_product.return_value = [evidence]
     service.reasoning_engine.run.return_value = {

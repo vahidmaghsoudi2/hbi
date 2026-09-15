@@ -106,14 +106,17 @@ def test_draft_products_excluded(api_env):
     db.add(ProductKnowledge(
         product_knowledge_id="PK-active_test_001",
         product_id=active.product_id,
-        known_use_cases="test",
+        known_use_cases="sun protection",
+        claimed_benefits="sun protection",
+        contraindications="",
+        ingredients="",
     ))
     db.add(Evidence(
         evidence_id="EV-active_test_001",
         product_id=active.product_id,
         source_type="INDEPENDENT",
         source_reference="TEST-SOURCE",
-        claim="test use case",
+        claim="sun protection use case",
         claim_type="FACT",
         evidence_status="SUPPORTED",
         qa_status="APPROVED",
@@ -136,7 +139,7 @@ def test_draft_products_excluded(api_env):
         "/api/v1/recommendations/generate",
         json={
             "case_id": case.case_id,
-            "customer_profile": {"concerns": "test"},
+            "customer_profile": {"concerns": "ضدآفتاب"},
         },
         headers={"Authorization": f"Bearer {token}"},
     )

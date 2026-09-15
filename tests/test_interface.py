@@ -65,7 +65,6 @@ def db():
         session.commit()
         session.close()
 
-
 @pytest.fixture
 def sample_product(db):
     repo = ProductRepository(db)
@@ -141,8 +140,10 @@ def test_recommendation_facade_generate(db, sample_product, sample_customer, sam
     pk = ProductKnowledge(
         product_knowledge_id="PK_TEST_001",
         product_id=sample_product.product_id,
-        known_use_cases="oily skin care, daily protection",
-        claimed_benefits="oil control"
+        known_use_cases="oil control",
+        claimed_benefits="oil control",
+        contraindications="",
+        ingredients="",
     )
     db.add(pk)
 
@@ -162,7 +163,7 @@ def test_recommendation_facade_generate(db, sample_product, sample_customer, sam
     case_facade = CaseFacade(db)
     case = case_facade.create(customer_id=sample_customer.customer_id)
     rec_facade = RecommendationFacade(db)
-    recs = rec_facade.generate(case.case_id, {"concerns": "oily skin care"})
+    recs = rec_facade.generate(case.case_id, {"concerns": "oily skin"})
     assert len(recs) >= 1
     assert recs[0].case_id == case.case_id
 

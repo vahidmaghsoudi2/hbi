@@ -83,7 +83,7 @@ def test_pilot_token_and_generate_persist(client):
 
     naked = c.post(
         "/api/v1/recommendations/generate",
-        json={"case_id": "CASE-PILOT-1", "customer_profile": {"concerns": "ضدآفتاب ضدلک صورت"}},
+        json={"case_id": "CASE-PILOT-1", "customer_profile": {"concerns": "ضدآفتاب"}},
     )
     assert naked.status_code == 401
 
@@ -92,7 +92,7 @@ def test_pilot_token_and_generate_persist(client):
         headers=headers,
         json={
             "case_id": "CASE-PILOT-1",
-            "customer_profile": {"concerns": "ضدآفتاب ضدلک صورت"},
+            "customer_profile": {"concerns": "ضدآفتاب"},
         },
     )
     assert r.status_code == 200, r.text
