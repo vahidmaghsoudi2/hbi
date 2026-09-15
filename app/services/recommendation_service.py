@@ -124,7 +124,6 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         decision_state["need_mappings"] = mappings
         decision_state["unmapped_need_factors"] = unmapped
         decision_state["ambiguous_need_factors"] = ambiguous
-        # Insufficient when nothing canonical was produced and unresolved input exists
         if not needs and (unmapped or ambiguous):
             decision_state["decision_status"] = "INSUFFICIENT"
         return needs
@@ -204,6 +203,23 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             exclusion_reasons=exclusion_reasons or "",
         )
 
+    def _existing_conflicts_from_evidence(self, evidences: List[Evidence], product_id: str) -> List[Dict[str, Any]]:
+        """Build existing_conflicts for ReasoningEngine from Evidence.conflict_status=CONFLICT."""
+        conflicts: List[Dict[str, Any]] = []
+        for ev in evidences or []:
+            status = (getattr(ev, "conflict_status", None) or "").strip().upper()
+            if status != "CONFLICT":
+                continue
+            conflicts.append({
+                "field": (getattr(ev, "field", None) or "general"),
+                "conflicting_values": [getattr(ev, "claim", None) or ""],
+                "values": [getattr(ev, "claim", None) or ""],
+                "evidence_refs": [getattr(ev, "evidence_id", None)],
+                "sources": [getattr(ev, "source_reference", None)],
+                "product_id": product_id,
+            })
+        return conflicts
+
     def generate_recommendations(self, case_id: str, customer_profile: Dict = None) -> List[Recommendation]:
         if customer_profile is None:
             customer_profile = {}
@@ -227,11 +243,31 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 continue
             need_match = self._calculate_need_match(needs, known_use_cases)
             evidence_score = self._compute_evidence_score(evidences)
-            evidence_list = [{"evidence_id": ev.evidence_id, "claim_id": ev.claim_id, "field": ev.field, "claim_type": ev.claim_type, "source_reference": ev.source_reference, "source_type": ev.source_type, "evidence_strength": ev.evidence_strength, "qa_status": ev.qa_status, "claim": ev.claim} for ev in evidences]
+            evidence_list = [{
+                "evidence_id": ev.evidence_id,
+                "claim_id": ev.claim_id,
+                "field": ev.field,
+                "claim_type": ev.claim_type,
+                "source_reference": ev.source_reference,
+                "source_type": ev.source_type,
+                "evidence_strength": ev.evidence_strength,
+                "qa_status": ev.qa_status,
+                "claim": ev.claim,
+                "conflict_status": getattr(ev, "conflict_status", None),
+            } for ev in evidences]
+            existing_conflicts = self._existing_conflicts_from_evidence(evidences, product.product_id)
             pk_snapshot = {}
             if pk:
                 pk_snapshot = {"known_use_cases": pk.known_use_cases, "claimed_benefits": pk.claimed_benefits, "contraindications": pk.contraindications, "ingredients": pk.ingredients}
-            engine_result = self.reasoning_engine.run(product_id=product.product_id, product_knowledge_snapshot=pk_snapshot, evidence_list=evidence_list, need_match=need_match, evidence_score=evidence_score, inventory_score=inventory_score)
+            engine_result = self.reasoning_engine.run(
+                product_id=product.product_id,
+                product_knowledge_snapshot=pk_snapshot,
+                evidence_list=evidence_list,
+                existing_conflicts=existing_conflicts,
+                need_match=need_match,
+                evidence_score=evidence_score,
+                inventory_score=inventory_score,
+            )
             product_unknowns = []
             for u in engine_result.get("unknowns", []):
                 product_unknowns.append({"field": u.get("field"), "unknown_priority": self._map_unknown_priority(u.get("severity", "LOW")), "action": u.get("action"), "notes": u.get("notes"), "product_id": product.product_id})
