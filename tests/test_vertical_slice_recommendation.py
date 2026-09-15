@@ -31,10 +31,15 @@ def db_session(monkeypatch):
     from app.models.customer import Customer
     from app.models.case import Case
     from app.models.evidence import Evidence
+    from app.models.product_knowledge import ProductKnowledge
 
     Session = sessionmaker(bind=database.engine)
     session = Session()
     seed(session)
+    pk = session.query(ProductKnowledge).filter_by(
+        product_id="ISDIN-FOTOUTRA100-50ML"
+    ).one()
+    pk.known_use_cases = "sun protection"
     session.add(Evidence(
         evidence_id="EV-VS-APPROVED-001",
         product_id="ISDIN-FOTOUTRA100-50ML",
