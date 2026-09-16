@@ -1,5 +1,5 @@
 # Decision Log Index
-Last Updated: 2026-09-14
+Last Updated: 2026-09-16
 
 Every major project decision is recorded as an ADR or PO Decision record.
 
@@ -17,5 +17,6 @@ Every major project decision is recorded as an ADR or PO Decision record.
 | **HBI-PO-DEC-GAP03-001** | **GAP-03 Out-of-Stock Candidate Elimination Policy — eliminate before Reasoning** | **DECISION RESOLVED — IMPLEMENTED** | **2026-09-13** |
 | **HBI-PO-DEC-GAP04-002** | **GAP-04 Option B — one current Recommendation per Case+Product; re-Generate updates** | **DECISION RESOLVED — IMPLEMENTED** | **2026-09-13** |
 | **HBI-PO-DEC-GAP05-001** | **GAP-05 L1 — Controlled Semantic Need Normalization Contract; Implementation NOT AUTHORIZED** | **RECORDED — CONTRACT COMPLETE** | **2026-09-14** |
+| **HBI-PO-DEC-IOV-001** | **IOV Policy V1.0 activation — ACTIVE / PO ACCEPTED; docs-only** | **DECISION RESOLVED — ACTIVE** | **2026-09-16** |
 
 To add a new decision, create a file in this folder and add a row to the table above.
