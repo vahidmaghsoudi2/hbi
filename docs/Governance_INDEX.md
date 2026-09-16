@@ -11,7 +11,7 @@ This is the canonical index for HBI governance, documentation, and evidence. It 
 
 ## Core project control (mandatory)
 - `docs/01_project_control/PROJECT_RULES.md` — Project-wide mandatory rules (NO ASSUMPTION, Reality Audit, Evidence, ONE OWNER, Frozen/Accepted, etc.).
-- `docs/01_project_control/HBI_INDEPENDENT_OUTPUT_VERIFICATION_POLICY.md` — **Independent Output Verification & Trust Control** (DONE ≠ VERIFIED ≠ ACCEPTED ≠ MERGED; Independent Verifier; risk-based verification; operational trust). Complements PROJECT_RULES; does not replace them.
+- `docs/01_project_control/HBI_INDEPENDENT_OUTPUT_VERIFICATION_POLICY.md` — **Independent Output Verification & Trust Control (ACTIVE — PO ACCEPTED, 2026-09-16)** (DONE ≠ VERIFIED ≠ ACCEPTED ≠ MERGED; Independent Verifier; risk-based verification; operational trust). Complements PROJECT_RULES; does not replace them.
 - `docs/01_project_state/MISSION_OWNERSHIP_POLICY.md` — End-to-end mission ownership.
 - `docs/P4_PRODUCT_INTAKE_GOVERNANCE_CONTRACT_V1.md` — P4 Product Intake & Governance Contract.
 - `docs/P4_IMPLEMENTATION_GUIDE.md` — P4 implementation guidance.
@@ -40,5 +40,5 @@ This is the canonical index for HBI governance, documentation, and evidence. It 
 1. Do not duplicate canonical documents — update them in-place and reference them from this index.
 2. Preserve .obsidian and ensure any renames update internal links.
 3. Use AGENTS.md for agent policy; do not bypass it.
-4. Independent Verification of work-product claims is governed by `HBI_INDEPENDENT_OUTPUT_VERIFICATION_POLICY.md` (IOV-001).
+4. Independent Verification of work-product claims is governed by `HBI_INDEPENDENT_OUTPUT_VERIFICATION_POLICY.md` (IOV-001) — **ACTIVE policy**.
 
