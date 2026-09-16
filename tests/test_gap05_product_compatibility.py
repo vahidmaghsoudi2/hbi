@@ -22,6 +22,14 @@ def test_unknown_product_use_case_is_not_guessed():
     assert unmapped == ["کاربرد ناشناخته محصول"]
 
 
+def test_product_surface_does_not_fall_back_to_customer_vocabulary():
+    # This phrase exists in the customer-side Need vocabulary but is not
+    # independently approved in the product-side vocabulary.
+    ids, unmapped = normalize_product_use_cases("عبارت مشتری نامشخص")
+    assert ids == []
+    assert unmapped == ["عبارت مشتری نامشخص"]
+
+
 def test_matching_is_canonical_to_canonical_not_raw_token_overlap():
     svc = RecommendationService.__new__(RecommendationService)
     assert svc._calculate_need_match(["hydration"], "آبرسانی") == 1.0
