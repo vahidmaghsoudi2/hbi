@@ -61,15 +61,12 @@ def test_materially_ambiguous_not_normalized():
         assert a["status"] == "uncertain"
         assert a["source"] == "customer_input"
         assert a["validity"] == "DECLARED"
-    # classify_phrase API
     cid, reason = classify_phrase("dry oily skin")
     assert cid is None and reason == "ambiguous"
 
 
 def test_partial_single_token_is_ambiguous_not_guessed():
     """A token that exists in the map but the full phrase is not approved → ambiguous."""
-    # "skin" alone is not in the approved map; "dry skin" is.
-    # "oily" alone maps as exact, but compound with unknown word is checked via tokens.
     cid, reason = classify_phrase("oily unknown")
     assert cid is None and reason == "ambiguous"
     needs, mappings, unmapped, ambiguous = normalize_needs_from_factors(
@@ -143,13 +140,14 @@ def test_only_unmapped_or_ambiguous_marks_insufficient():
     assert ds2["ambiguous_need_factors"][0]["status"] == "uncertain"
 
 
-def test_need_match_uses_canonical_surface_unchanged_formula():
-    """Frozen formula: intersection / len(need_tokens); input may be canonical."""
+def test_need_match_uses_explicit_controlled_product_surface():
+    """Product compatibility accepts only explicitly approved product-side phrases."""
     svc = RecommendationService.__new__(RecommendationService)
-    score = svc._calculate_need_match(["hydration"], "hydration moisturizing face")
-    assert score > 0.0
-    score2 = svc._calculate_need_match(["hydration"], "unrelated product text")
-    assert score2 == 0.0
+    assert svc._calculate_need_match(["hydration"], "hydration") == 1.0
+    assert svc._calculate_need_match(["hydration"], "آبرسانی") == 1.0
+    assert svc._calculate_need_match(["hydration"], "hydration moisturizing face") == 0.0
+    assert svc._calculate_need_match(["hydration"], "moisturizing face") == 0.0
+    assert svc._calculate_need_match(["hydration"], "unrelated product text") == 0.0
 
 
 def test_canonical_ids_are_stable_keys():
