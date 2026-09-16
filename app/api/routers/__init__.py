@@ -10,9 +10,11 @@ from app.api.routers.payments import router as payments_router
 from app.api.routers.returns import router as returns_router
 from app.api.routers.fx import router as fx_router
 from app.api.routers.reports import router as reports_router
+from app.api.routers.specialist import router as specialist_router
 
 __all__ = [
     "auth_router", "products_router", "customers_router", "cases_router",
     "recommendations_router", "inventory_router", "sales_router", "evidence_router",
     "payments_router", "returns_router", "fx_router", "reports_router",
+    "specialist_router",
 ]

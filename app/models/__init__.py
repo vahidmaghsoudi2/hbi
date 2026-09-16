@@ -15,10 +15,12 @@ from app.models.sale_return import SaleReturn
 from app.models.operational_fx_rate import OperationalFxRate
 from app.models.product_mutation_log import ProductMutationLog
 from app.models.user_role import UserRole
+from app.models.specialist_override import SpecialistOverride
+from app.models.feedback import Feedback
 
 __all__ = [
     "Base", "Product", "ProductKnowledge", "Evidence", "Customer", "Case",
     "Recommendation", "Inventory", "Sale", "SaleItem", "Category",
     "StockMovement", "Payment", "SaleReturn", "OperationalFxRate",
-    "ProductMutationLog", "UserRole",
+    "ProductMutationLog", "UserRole", "SpecialistOverride", "Feedback",
 ]

@@ -164,3 +164,65 @@ export function updateProduct(
     body: JSON.stringify(body),
   });
 }
+
+/** Mission B — Specialist Override.
+ * specialist_id is NOT sent; backend derives operator from authenticated token only.
+ */
+export function createSpecialistOverride(
+  body: {
+    recommendation_id: string;
+    case_id: string;
+    action: string;
+    reason: string;
+    notes?: string;
+  },
+  token: string
+): Promise<Record<string, unknown>> {
+  return request<Record<string, unknown>>(
+    "/specialist/overrides",
+    { method: "POST", body: JSON.stringify(body) },
+    token
+  );
+}
+
+export function listOverridesByCase(
+  caseId: string,
+  token: string
+): Promise<Record<string, unknown>[]> {
+  return request<Record<string, unknown>[]>(
+    `/specialist/overrides/case/${encodeURIComponent(caseId)}`,
+    {},
+    token
+  );
+}
+
+/** Mission B — Feedback / Follow-up */
+export function createFeedback(
+  body: {
+    case_id: string;
+    source: string;
+    outcome?: string;
+    rating?: string;
+    comment?: string;
+    recommendation_id?: string;
+    follow_up_at?: string;
+  },
+  token: string
+): Promise<Record<string, unknown>> {
+  return request<Record<string, unknown>>(
+    "/specialist/feedback",
+    { method: "POST", body: JSON.stringify(body) },
+    token
+  );
+}
+
+export function listFeedbackByCase(
+  caseId: string,
+  token: string
+): Promise<Record<string, unknown>[]> {
+  return request<Record<string, unknown>[]>(
+    `/specialist/feedback/case/${encodeURIComponent(caseId)}`,
+    {},
+    token
+  );
+}
