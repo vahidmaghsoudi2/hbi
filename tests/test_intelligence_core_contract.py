@@ -130,19 +130,29 @@ def test_eligibility_gate_rejects_candidate_before_ranking_result_is_accepted():
 
 
 def test_generate_path_does_not_persist_gated_candidate():
+    """Non-ELIGIBLE candidates must not be returned or persisted from generate."""
     service = _service()
 
+    # RecommendationService wires real repository classes; replace collaborators
+    # with mocks so the generate path can be exercised without a DB.
     product = MagicMock(product_id="P-1")
+    service.product_repo = MagicMock()
     service.product_repo.find_by_identity_status_and_active.return_value = [product]
+    service.pk_repo = MagicMock()
     service.pk_repo.find_by_product.return_value = MagicMock(
         known_use_cases="hydration",
         claimed_benefits="",
         contraindications="",
         ingredients="",
     )
+    service.evidence_repo = MagicMock()
     service.evidence_repo.find_by_product.return_value = []
+    service.inventory_repo = MagicMock()
     service.inventory_repo.find_by_product.return_value = MagicMock(quantity_available=10)
+    service.repository = MagicMock()
     service.repository.find_by_case.return_value = []
+    service.repository.find_by_case_and_product.return_value = None
+    service.reasoning_engine = MagicMock()
     service.reasoning_engine.run.return_value = {
         "eligibility": "ELIGIBLE",
         "final_score": 0.99,
@@ -154,6 +164,7 @@ def test_generate_path_does_not_persist_gated_candidate():
         "claim_boundary_violations": [],
     }
 
+    # Unmapped concern → no canonical Need → need_match gate → not ELIGIBLE
     result = service.generate_recommendations(
         "CASE-GATE",
         {"customer_id": "C-GATE", "concerns": "پوست شاداب"},
@@ -161,3 +172,4 @@ def test_generate_path_does_not_persist_gated_candidate():
 
     assert result == []
     service.repository.create.assert_not_called()
+    service.repository.find_by_case_and_product.assert_not_called()
