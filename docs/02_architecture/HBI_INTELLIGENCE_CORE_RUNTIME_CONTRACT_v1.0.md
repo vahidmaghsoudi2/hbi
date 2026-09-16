@@ -1,8 +1,8 @@
 # HBI Intelligence Core Runtime Contract v1.0
 
 **Mission:** HBI — MISSION A | INTELLIGENCE CORE 0→100  
-**Baseline:** `fc27967d3c759c32a1e5c5136dbfdf0aa53e7c08`  
-**Status:** MISSION-A IMPLEMENTATION BASELINE  
+**Baseline:** `d72609e7b15a5f89f97374d0d1fbd07352ca84bd`  
+**Status:** ACTIVE  
 **Scope:** Intelligence Core runtime boundary and consumption contract
 
 ## 1. Purpose
