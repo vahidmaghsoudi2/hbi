@@ -1,0 +1,1 @@
+PO authorized GAP-05 ProductKnowledge compatibility implementation on 2026-09-16.
