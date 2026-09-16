@@ -4,7 +4,7 @@ Covers:
 - Case ownership enforcement
 - Override does not mutate Recommendation
 - Feedback + follow_up_at via API
-- specialist_id defaults from authenticated identity
+- specialist_id ALWAYS from authenticated identity (client cannot forge)
 - Auth required
 """
 from datetime import datetime, timezone, timedelta
@@ -62,7 +62,6 @@ def test_create_override_via_api_preserves_recommendation(api_client):
     r = client.post("/api/v1/specialist/overrides", json={
         "recommendation_id": "rec_CASE-API-MB_PROD-API-MB",
         "case_id": "CASE-API-MB",
-        "specialist_id": "SPEC-API-1",
         "action": "REJECT",
         "reason": "Clinical note not reflected in engine output",
     })
@@ -70,6 +69,7 @@ def test_create_override_via_api_preserves_recommendation(api_client):
     body = r.json()
     assert body["action"] == "REJECT"
     assert body["original_eligibility"] == "ELIGIBLE"
+    assert body["specialist_id"] == "CUST-API-MB"  # from auth only
     assert body["reason"]
 
     rec = db.get(Recommendation, "rec_CASE-API-MB_PROD-API-MB")
@@ -78,6 +78,22 @@ def test_create_override_via_api_preserves_recommendation(api_client):
 
     case = db.get(Case, "CASE-API-MB")
     assert case.operator_override == body["override_id"]
+
+
+def test_forged_specialist_id_in_body_is_ignored(api_client):
+    """Client-supplied specialist_id must not become the operator."""
+    client, _ = api_client
+    r = client.post("/api/v1/specialist/overrides", json={
+        "recommendation_id": "rec_CASE-API-MB_PROD-API-MB",
+        "case_id": "CASE-API-MB",
+        "specialist_id": "FORGED-ATTACKER-ID",
+        "action": "ACCEPT",
+        "reason": "Attempting to forge operator identity",
+    })
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["specialist_id"] == "CUST-API-MB"
+    assert body["specialist_id"] != "FORGED-ATTACKER-ID"
 
 
 def test_override_forbidden_for_other_customer_case(api_client):
@@ -127,11 +143,9 @@ def test_override_requires_reason_api(api_client):
 
 
 def test_api_full_path_override_then_feedback_with_follow_up(api_client):
-    """Customer-owned case: Override → Feedback(FOLLOW_UP_NEEDED) → list both."""
     client, db = api_client
     follow_at = (datetime.now(timezone.utc) + timedelta(days=3)).isoformat()
 
-    # specialist_id omitted → defaults to authenticated identity CUST-API-MB
     ovr = client.post("/api/v1/specialist/overrides", json={
         "recommendation_id": "rec_CASE-API-MB_PROD-API-MB",
         "case_id": "CASE-API-MB",
