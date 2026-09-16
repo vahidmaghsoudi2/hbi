@@ -177,7 +177,8 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         for u in decision_state.get("unknowns", []):
             if u.get("unknown_priority") == "CRITICAL_UNKNOWN":
                 return "INELIGIBLE_PENDING_REVIEW"
-        if decision_state.get("medical_context_active") and decision_state.get("decision_status") == "REFERRAL":
+        # Hard gate: any active Medical Context forces pending review (independent of Need).
+        if decision_state.get("medical_context_active"):
             return "INELIGIBLE_PENDING_REVIEW"
         if need_match < NEED_MATCH_SUFFICIENT or not decision_state.get("needs"):
             return "INELIGIBLE_PENDING_REVIEW"
@@ -245,8 +246,9 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         decision_state["needs"] = needs
         if not needs:
             decision_state["decision_status"] = "INSUFFICIENT"
+        # Hard gate: Medical Context always forces REFERRAL (independent of presence of Need).
         if decision_state["medical_context_active"]:
-            decision_state["decision_status"] = "REFERRAL" if not needs else decision_state["decision_status"]
+            decision_state["decision_status"] = "REFERRAL"
         products = self.product_repo.find_by_identity_status_and_active("VERIFIED")
         recommendations: List[Recommendation] = []
         existing_case_recs = list(self.repository.find_by_case(case_id))
