@@ -1,4 +1,3 @@
-from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 from app.services.need_normalization import (
@@ -49,7 +48,7 @@ def test_unmapped_need_is_not_guessed():
 
 
 def test_partial_mapping_remains_ambiguous():
-    canonical, reason = classify_phrase("خیلی پوست خشک")
+    canonical, reason = classify_phrase("خیلی آبرسان")
 
     assert canonical is None
     assert reason == "ambiguous"
