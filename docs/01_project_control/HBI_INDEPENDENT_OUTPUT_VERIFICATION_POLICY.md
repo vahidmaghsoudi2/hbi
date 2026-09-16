@@ -2,12 +2,14 @@
 
 **Policy ID:** HBI-GOV-IOV-001  
 **Version:** V1.0  
-**Status:** PROPOSED FOR REGISTRATION (pending PO merge approval)  
+**Status:** ACTIVE — PO ACCEPTED  
 **Authority:** Product Owner — Vahid Maghsoudi  
 **Repository:** vahidmaghsoudi2/hbi  
 **Branch of introduction:** `governance/independent-output-verification-policy`  
 **Baseline master SHA at drafting:** `231310cfef4cab128450eabc61ebf66cbfe32092`  
-**Effective:** upon merge to `master` and explicit PO acceptance
+**Activation baseline:** `origin/master` at authorization (P-IOV-1 / P-IOV-2 on Issue #84)  
+**Effective:** 2026-09-16 — explicit PO acceptance of P-IOV-1 and P-IOV-2  
+**Scope note:** Governance-only activation; no Runtime, Scoring, Issue #37, or F3 change.
 
 ---
 
