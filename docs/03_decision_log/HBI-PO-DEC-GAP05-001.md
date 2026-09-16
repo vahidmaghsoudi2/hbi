@@ -1,9 +1,10 @@
 # HBI-PO-DEC-GAP05-001 — GAP-05 L1 Semantic Need Contract
 
-**Status:** PO DECISION RECORDED — CONTRACT DEFINITION COMPLETE — IMPLEMENTATION NOT AUTHORIZED  
-**Date:** 2026-09-14  
+**Status:** PO DECISION RECORDED — CONTRACT DEFINITION COMPLETE — IMPLEMENTATION AUTHORIZED AND REALIZED  
+**Date:** 2026-09-16  
 **Mission:** A2A-COM-004  
 **Related:** F4 / GAP-05 — Semantic Need Derivation & Requirement Quality
+**Runtime baseline:** `master @ 7d273e84856086a61d2c9d272fa170c2d7dbca99`
 
 ## 1. Decision
 
@@ -46,11 +47,11 @@ Matching must operate on the normalized/canonical Need representation against an
 
 For MVP design, a Need has sufficient minimum meaning only when it resolves to an approved canonical concept through an explicit normalization rule or mapping.
 
-If the input cannot be resolved deterministically, the system must preserve the unresolved/unknown state rather than inventing meaning. Exact gating behavior for insufficient Need meaning is a design/implementation acceptance criterion and is not claimed as current runtime behavior by this record.
+If the input cannot be resolved deterministically, the system must preserve the unresolved/unknown state rather than inventing meaning. The implemented runtime applies this boundary through GAP-05 L1 normalization and its acceptance tests.
 
 ## 5. Acceptance criteria for implementation
 
-An implementation of this contract is acceptable only if it demonstrates, with tests/evidence:
+The implementation of this contract is acceptable only if it demonstrates, with tests/evidence:
 
 - equivalent approved terms resolve to the same canonical Need;
 - approved synonym/phrase mappings are deterministic;
@@ -64,6 +65,8 @@ An implementation of this contract is acceptable only if it demonstrates, with t
 - scoring weights/formula are unchanged;
 - no new Problem/Assessment entity is introduced as an implicit consequence of GAP-05.
 
+These criteria are realized by the current master implementation and its focused regression/acceptance evidence.
+
 ## 6. Explicitly deferred
 
 The following are **not selected or authorized** by this decision:
@@ -75,17 +78,22 @@ The following are **not selected or authorized** by this decision:
 - scoring or weighting changes;
 - reopening GAP-01, GAP-03, or GAP-04;
 - changing Issue #37 status;
-- broad refactoring outside the GAP-05 contract;
-- implementation itself.
+- broad refactoring outside the GAP-05 contract.
+
+GAP-05 L1 implementation itself is no longer deferred: it was explicitly authorized by the PO and is present on the current master baseline.
 
 ## 7. Current Reality vs target contract
 
-Current runtime reality remains the F4 finding: customer concerns are converted into Decision State factors, Needs are currently derived largely by copying factor values, and current product matching uses token-overlap heuristics. The L1 decision defines the target MVP contract; it does **not** claim that the target behavior already exists.
+The current runtime on master realizes the GAP-05 L1 boundary: Decision State factors are normalized into bounded canonical Needs; Product matching uses the explicitly approved ProductKnowledge `known_use_cases` semantic surface; Product-side vocabulary is independent from Customer vocabulary; unmapped/ambiguous input is not silently guessed; and the existing scoring/weighting formula remains unchanged.
 
-Therefore:
+Therefore, for GAP-05:
 
-`CURRENT REALITY ≠ L1 CONTRACT ≠ IMPLEMENTATION AUTHORIZATION`
+`CURRENT RUNTIME = IMPLEMENTED L1 CONTRACT`
+
+Implementation status is established by the merged runtime and its acceptance evidence, not by this decision record alone.
 
 ## 8. Authorization boundary
 
-This record permanently records the PO's L1 decision and the contract definition. **Implementation is NOT AUTHORIZED by this record.** A separate explicit PO authorization is required before code/PR work begins.
+The PO separately authorized GAP-05 L1 implementation after the contract decision. That authorization has been executed and verified on the current master baseline `7d273e84856086a61d2c9d272fa170c2d7dbca99`.
+
+This record therefore no longer states that GAP-05 implementation is unauthorized or deferred.

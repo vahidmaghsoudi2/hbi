@@ -1,8 +1,8 @@
 # HBI Decision Contract v1.0
 
 **Mission:** HBI-ARCH-001 — Decision Architecture & Contract Baseline  
-**Baseline:** `master @ 87d83e4e6ba4f6c85e19d6a1fb595ce7a360bf6d`  
-**Status:** PO ACCEPTED — CONTRACT DRAFT FOR REVIEW  
+**Baseline:** `master @ 7d273e84856086a61d2c9d272fa170c2d7dbca99`  
+**Status:** PO ACCEPTED — ACTIVE DECISION CONTRACT  
 **Scope:** Architecture / Decision / Governance only
 
 ## 1. Purpose
@@ -11,7 +11,7 @@ This document converts the six PO-accepted architecture decisions of HBI-ARCH-00
 
 The contract defines what HBI must know before recommending a product, what can eliminate a candidate, what only affects ranking, what minimum meaning is required from a Need, which decision information should be durable, which domain concepts remain future architecture, and how feedback/learning is bounded.
 
-This document does **not** authorize implementation by itself.
+This document does not by itself authorize future implementation outside separately authorized work. GAP-05 L1 implementation has already been explicitly authorized by the PO and is realized on the current master baseline.
 
 ## 2. Governing principles
 
@@ -40,7 +40,7 @@ For an MVP decision, HBI must be able to represent at least:
 - ranking signals for retained candidates;
 - uncertainty/conflict and medical-context flags when applicable.
 
-A Decision State may remain computed/in-memory in MVP. Persistence is addressed separately in Section 7.
+A Decision State may remain computed/in-memory in MVP. Persistence is addressed separately in Section 6.
 
 ## 4. Gate / Filter / Ranking / Signal contract
 
@@ -89,7 +89,7 @@ Therefore:
 
 Minimum meaning is semantic, not merely lexical: a matching string alone is insufficient unless the mapping is approved.
 
-The existing GAP-05 L1 normalization implementation is the runtime realization of this boundary; this document defines the architectural contract.
+The GAP-05 L1 normalization implementation is the runtime realization of this boundary; this document defines the architectural contract.
 
 ## 6. Decision State persistence contract
 
@@ -174,7 +174,7 @@ Where a future Problem/Assessment runtime is introduced, the target trace may be
 
 The future chain must not be retrofitted into MVP merely for structural completeness.
 
-## 11. Acceptance criteria for future implementation
+## 11. Acceptance criteria for implementation
 
 An implementation claiming conformance to this contract must demonstrate:
 
@@ -193,6 +193,8 @@ An implementation claiming conformance to this contract must demonstrate:
 13. feedback cannot silently modify production behavior;
 14. all policy/threshold/weight changes require explicit PO decision.
 
+The current GAP-05 L1 implementation has been accepted against the applicable runtime criteria on master; future implementations remain subject to this contract.
+
 ## 12. Explicit non-authorizations
 
 This contract does not authorize:
@@ -206,11 +208,14 @@ This contract does not authorize:
 - reopening GAP-01, GAP-03, or GAP-04;
 - changing Issue #37 status;
 - direct push to `master`;
-- implementation without a separate authorization where required by governance.
+- implementation of future capabilities without their required PO authorization.
+
+These non-authorizations do not negate the separately recorded and executed GAP-05 L1 implementation authorization.
 
 ## 13. Decision Package status
 
 **Architecture decisions:** ACCEPTED by PO for all six items.  
-**Contract:** drafted here for repository review and independent verification.  
-**Implementation authorization:** NOT GRANTED by this document.  
-**Next governance step:** independent review by Grok-1, then PO/Team integration and explicit implementation authorization only where necessary.
+**Contract:** ACTIVE and aligned with the current master runtime baseline.  
+**GAP-05 L1 implementation:** AUTHORIZED, IMPLEMENTED, MERGED, and operationally accepted on the current baseline.  
+**Future implementation:** remains subject to explicit PO authorization where required.  
+**Next governance step:** close the stale documentation limitation and continue with the next explicitly authorized project mission.
