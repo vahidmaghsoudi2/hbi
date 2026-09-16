@@ -25,9 +25,9 @@ def test_unknown_product_use_case_is_not_guessed():
 def test_product_surface_does_not_fall_back_to_customer_vocabulary():
     # This phrase exists in the customer-side Need vocabulary but is not
     # independently approved in the product-side vocabulary.
-    ids, unmapped = normalize_product_use_cases("خشکی پوست")
+    ids, unmapped = normalize_product_use_cases("پوسته‌پوسته")
     assert ids == []
-    assert unmapped == ["خشکی پوست"]
+    assert unmapped == ["پوسته‌پوسته"]
 
 
 def test_matching_is_canonical_to_canonical_not_raw_token_overlap():
