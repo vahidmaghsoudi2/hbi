@@ -2,12 +2,14 @@
 
 Creates an audit record against an existing Recommendation.
 Never mutates the original Recommendation row (engine output preserved).
+Optionally records override_id on Case.operator_override as a pointer only.
 """
 from typing import Optional
 from uuid import uuid4
 
 from sqlalchemy.orm import Session
 
+from app.models.case import Case
 from app.models.recommendation import Recommendation
 from app.models.specialist_override import SpecialistOverride
 from app.services.base import BaseService
@@ -74,6 +76,13 @@ class SpecialistOverrideService(BaseService[SpecialistOverride, SpecialistOverri
         )
         self.db.add(override)
         self.db.flush()
+
+        # Pointer only on Case — does not alter Recommendation engine output
+        case = self.db.get(Case, case_id)
+        if case is not None:
+            case.operator_override = override.override_id
+            self.db.flush()
+
         return override
 
     def list_by_case(self, case_id: str):
