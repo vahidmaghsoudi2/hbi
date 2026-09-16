@@ -3,11 +3,14 @@
 Path proven:
   Customer + Case + Product + Recommendation (persisted)
   → Specialist Override (non-mutating)
-  → Feedback / Follow-up
+  → Feedback with follow_up_at
+  → Case.operator_override pointer
 
 Does not invent Problem/Need/Decision entities.
 Does not change scoring/weights. Issue #37 remains OPEN.
 """
+from datetime import datetime, timezone, timedelta
+
 from app.models.customer import Customer
 from app.models.case import Case
 from app.models.product import Product
@@ -65,21 +68,32 @@ def test_full_path_customer_case_rec_override_feedback(db_session):
     assert refreshed.ranking_score == original_rank
     assert ovr.original_eligibility == "ELIGIBLE"
 
-    # 5. Feedback / Follow-up
+    # Case pointer updated (not Recommendation)
+    case = db_session.get(Case, "CASE-E2E-MB")
+    assert case.operator_override == ovr.override_id
+
+    # 5. Feedback + Follow-up
+    follow_at = datetime.now(timezone.utc) + timedelta(days=7)
     fb_svc = FeedbackService(db_session)
     fb = fb_svc.create_feedback(
         case_id="CASE-E2E-MB",
         source="SPECIALIST",
-        outcome="ACCEPTED",
+        outcome="FOLLOW_UP_NEEDED",
         recommendation_id=rec.recommendation_id,
-        comment="Path complete",
+        comment="Schedule follow-up in 7 days",
+        follow_up_at=follow_at,
     )
     db_session.commit()
 
     assert fb.case_id == "CASE-E2E-MB"
     assert fb.recommendation_id == rec.recommendation_id
-    assert fb.outcome == "ACCEPTED"
+    assert fb.outcome == "FOLLOW_UP_NEEDED"
+    assert fb.follow_up_at is not None
 
-    # Traceability: both lists non-empty for the case
-    assert len(ovr_svc.list_by_case("CASE-E2E-MB")) == 1
-    assert len(fb_svc.list_by_case("CASE-E2E-MB")) == 1
+    # Traceability: both lists non-empty; follow-up retrievable
+    overrides = ovr_svc.list_by_case("CASE-E2E-MB")
+    feedbacks = fb_svc.list_by_case("CASE-E2E-MB")
+    assert len(overrides) == 1
+    assert len(feedbacks) == 1
+    assert feedbacks[0].follow_up_at is not None
+    assert feedbacks[0].outcome == "FOLLOW_UP_NEEDED"
