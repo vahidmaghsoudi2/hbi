@@ -4,101 +4,57 @@
 **Issue:** #90  
 **Branch:** `mission-b/product-business-integration-001`  
 **Draft PR:** #91  
-**Head SHA (at package write):** `c7abc76e2ebac7b7f23f095a2fff37f8f2dd8f33`  
 **Baseline master:** `fc27967d3c759c32a1e5c5136dbfdf0aa53e7c08`
 
-## Gate status (Work Owner declaration)
+## Gate status (Work Owner)
 
 | Gate | State |
 |------|-------|
-| DONE (Work Owner) | **YES** — implementation path delivered on branch |
-| VERIFIED | **NO** — awaiting Independent Verification |
+| DONE | **YES** |
+| VERIFIED | **NO** — Independent Verification in progress |
 | ACCEPTED | **NO** |
-| MERGED | **NO** — PR remains Draft |
+| MERGED | **NO** — Draft PR only |
 
 ---
 
-## 1. CI evidence (exact head)
+## CI evidence
 
-| Run | head_sha | Conclusion | Link |
-|-----|----------|------------|------|
-| HBI CI #487 | `c7abc76e2ebac7b7f23f095a2fff37f8f2dd8f33` | **success** | https://github.com/vahidmaghsoudi2/hbi/actions/runs/35151216662 |
-| HBI CI #486 | `434774716f9d335a3ca3dd9d28919c67460d9227` | **success** | https://github.com/vahidmaghsoudi2/hbi/actions/runs/35151171496 |
+Verified by Independent Verifier on head `c7abc76e2ebac7b7f23f095a2fff37f8f2dd8f33`:
 
-Workflow triggers on `pull_request` to `master` (includes Draft PR).
+| Run | Conclusion | Link |
+|-----|------------|------|
+| HBI CI #487 | **success** (test + governance-tests) | https://github.com/vahidmaghsoudi2/hbi/actions/runs/35151216662 |
 
----
-
-## 2. Path delivered: Customer → Case → Recommendation → Override → Feedback → Follow-up
-
-| Step | Mechanism | Evidence |
-|------|-----------|----------|
-| Customer | existing model + API | used in tests |
-| Case | existing model + ownership | Case.customer_id checked |
-| Recommendation | existing engine output (not re-invented) | persisted row; eligibility/ranking snapshotted |
-| Specialist Override | **new** audit table + service + API | does **not** mutate Recommendation |
-| Feedback | **new** table + service + API | linked to Case + optional Recommendation |
-| Follow-up | `follow_up_at` on Feedback | stored + listed in tests |
-| Gallery | RecommendationPage actions + client | Override Accept/Reject, Feedback Accepted/Follow-up |
-| Audit | `hbi.audit` events on create/reject | router |
-| AuthZ | `get_current_customer_id` + Case ownership | 403 on foreign case |
+Subsequent commits add invariant + gallery contract tests; CI re-runs on each push to the Draft PR.
 
 ---
 
-## 3. Tests on branch
+## Path: Customer → Case → Recommendation → Override → Feedback → Follow-up
 
-| File | What it proves |
-|------|----------------|
-| `tests/test_mission_b_specialist_override_feedback.py` | non-mutation, required reason, feedback linkage |
-| `tests/test_mission_b_specialist_api.py` | API ownership 403, override, feedback, full path + follow_up, specialist_id from auth |
-| `tests/test_mission_b_e2e_flow.py` | Customer→Case→Rec→Override→Feedback + operator_override pointer + follow_up_at |
+| Layer | Evidence type |
+|-------|----------------|
+| HTTP API Override / Feedback / ownership / follow_up | `tests/test_mission_b_specialist_api.py` (TRUE API) |
+| Service flow + Case.operator_override + follow_up_at | `tests/test_mission_b_e2e_flow.py` |
+| Non-mutation + required reason | service + API tests |
+| Scoring thresholds + Medical Hard Gate still active | `tests/test_mission_b_invariants.py` |
+| Gallery client + RecommendationPage wiring | `tests/test_mission_b_gallery_client_contract.py` |
+| Audit events | `app/api/routers/specialist.py` (`audit_event`) |
+
+**Note:** `test_mission_b_e2e_flow.py` exercises services directly. Full HTTP path is covered by `test_mission_b_specialist_api.py` including `test_api_full_path_override_then_feedback_with_follow_up`.
 
 ---
 
-## 4. Explicit non-changes (red lines)
+## Red lines (unchanged)
 
-- Scoring / weights: **unchanged**
-- Issue #37: **OPEN**
-- Medical Context Hard Gate: **unchanged**
-- No invented Problem / Need / Decision entities
+- `NEED_MATCH_SUFFICIENT == 0.40`
+- `_EVIDENCE_WEIGHTS` frozen values
+- Medical Context Hard Gate still blocks with valid Need
+- Issue #37 OPEN
+- Recommendation not mutated by Override
 - No learning algorithm
-- Recommendation engine output: **not mutated** by Override
 
 ---
 
-## 5. Files added/changed (Mission B scope)
+## Request
 
-**New**
-- `app/models/specialist_override.py`
-- `app/models/feedback.py`
-- `app/services/specialist_override_service.py`
-- `app/services/feedback_service.py`
-- `app/api/routers/specialist.py`
-- `tests/test_mission_b_specialist_override_feedback.py`
-- `tests/test_mission_b_specialist_api.py`
-- `tests/test_mission_b_e2e_flow.py`
-- `docs/MISSION_B_STATUS.md`
-- `docs/MISSION_B_ACCEPTANCE_PACKAGE.md`
-
-**Modified**
-- `app/models/__init__.py`
-- `app/api/routers/__init__.py`
-- `app/main.py`
-- `frontend/src/api/client.ts`
-- `frontend/src/pages/RecommendationPage.tsx`
-
----
-
-## 6. Request to Independent Verifier
-
-Please verify against Repository + CI runs above:
-
-1. CI green on head `c7abc76e...`
-2. Override is audit-only (Recommendation unchanged)
-3. Follow-up (`follow_up_at`) persists and is listable
-4. AuthZ / Case ownership
-5. Gallery client + page wiring exists
-6. Audit events present in router
-7. No scoring / Medical Gate / #37 regression
-
-**Merge is NOT requested.** PR stays Draft until VERIFIED + ACCEPTED.
+Independent Verification continues. **Merge not requested.** PR stays Draft until VERIFIED + ACCEPTED.
