@@ -3,6 +3,7 @@
 - Override creates an audit record; never mutates Recommendation.
 - Feedback is linked to Case (and optional Recommendation).
 - Case ownership enforced via customer_id from auth.
+- Security audit events emitted via hbi.audit.
 """
 from typing import Optional, List
 from datetime import datetime
@@ -12,6 +13,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_customer_id
+from app.core.audit import audit_event
 from app.models.case import Case
 from app.services.specialist_override_service import SpecialistOverrideService
 from app.services.feedback_service import FeedbackService
@@ -31,7 +33,7 @@ def _assert_case_owned(db: Session, case_id: str, customer_id: str) -> Case:
 class OverrideRequest(BaseModel):
     recommendation_id: str
     case_id: str
-    specialist_id: str
+    specialist_id: Optional[str] = None  # defaults to authenticated identity
     action: str = Field(..., description="ACCEPT | REJECT | MODIFY_SELECTION")
     reason: str
     notes: Optional[str] = None
@@ -83,18 +85,39 @@ async def create_override(
     customer_id: str = Depends(get_current_customer_id),
 ) -> dict:
     _assert_case_owned(db, body.case_id, customer_id)
+    specialist_id = (body.specialist_id or "").strip() or customer_id
     svc = SpecialistOverrideService(db)
     try:
         ovr = svc.create_override(
             recommendation_id=body.recommendation_id,
             case_id=body.case_id,
-            specialist_id=body.specialist_id,
+            specialist_id=specialist_id,
             action=body.action,
             reason=body.reason,
             notes=body.notes,
         )
         db.commit()
+        audit_event(
+            "specialist_override_created",
+            customer_id=customer_id,
+            path="/api/v1/specialist/overrides",
+            outcome="ok",
+            detail=ovr.override_id,
+            extra={
+                "recommendation_id": body.recommendation_id,
+                "case_id": body.case_id,
+                "action": ovr.action,
+                "specialist_id": specialist_id,
+            },
+        )
     except ValueError as e:
+        audit_event(
+            "specialist_override_rejected",
+            customer_id=customer_id,
+            path="/api/v1/specialist/overrides",
+            outcome="error",
+            detail=str(e),
+        )
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
     return _override_to_dict(ovr)
 
@@ -129,7 +152,27 @@ async def create_feedback(
             follow_up_at=body.follow_up_at,
         )
         db.commit()
+        audit_event(
+            "feedback_created",
+            customer_id=customer_id,
+            path="/api/v1/specialist/feedback",
+            outcome="ok",
+            detail=fb.feedback_id,
+            extra={
+                "case_id": body.case_id,
+                "source": fb.source,
+                "outcome": fb.outcome,
+                "recommendation_id": body.recommendation_id,
+            },
+        )
     except ValueError as e:
+        audit_event(
+            "feedback_rejected",
+            customer_id=customer_id,
+            path="/api/v1/specialist/feedback",
+            outcome="error",
+            detail=str(e),
+        )
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
     return _feedback_to_dict(fb)
 
