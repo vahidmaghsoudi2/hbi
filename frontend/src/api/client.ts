@@ -165,12 +165,13 @@ export function updateProduct(
   });
 }
 
-/** Mission B — Specialist Override (audit record; does not mutate Recommendation) */
+/** Mission B — Specialist Override.
+ * specialist_id is NOT sent; backend derives operator from authenticated token only.
+ */
 export function createSpecialistOverride(
   body: {
     recommendation_id: string;
     case_id: string;
-    specialist_id: string;
     action: string;
     reason: string;
     notes?: string;
