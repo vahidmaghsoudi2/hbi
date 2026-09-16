@@ -15,7 +15,7 @@ from app.repositories.inventory_repository import InventoryRepository
 from app.repositories.product_knowledge_repository import ProductKnowledgeRepository
 from app.repositories.evidence_repository import EvidenceRepository
 from app.services.base import BaseService
-from app.services.need_normalization import normalize_needs_from_factors
+from app.services.need_normalization import normalize_needs_from_factors, CANONICAL_NEEDS
 from app.services.product_compatibility import product_compatibility_ids
 from app.reasoning.reasoning_engine import ReasoningEngine
 from app.reasoning.conflict_analyzer import ConflictSeverity
@@ -133,18 +133,13 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
     def _calculate_need_match(self, generated_needs: List[str], known_use_cases: Optional[str]) -> float:
         """Match canonical customer Needs to canonical ProductKnowledge use cases.
 
-        The scoring formula remains unchanged: intersection size divided by the
-        number of canonical Need ids. Only the semantic input surface changes.
+        The frozen scoring formula is unchanged: intersection size divided by
+        the number of canonical Need ids. Only the semantic input surface changes.
         """
         if not generated_needs:
             return 0.0
-        generated_ids = set()
-        for need in generated_needs:
-            # generated_needs are canonical surfaces (e.g. "dry skin").
-            for cid, surface in __import__("app.services.need_normalization", fromlist=["CANONICAL_NEEDS"]).CANONICAL_NEEDS.items():
-                if need == surface:
-                    generated_ids.add(cid)
-                    break
+        surface_to_id = {surface: cid for cid, surface in CANONICAL_NEEDS.items()}
+        generated_ids = {surface_to_id[n] for n in generated_needs if n in surface_to_id}
         if not generated_ids:
             return 0.0
         product_ids = set(product_compatibility_ids(known_use_cases))
