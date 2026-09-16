@@ -56,11 +56,11 @@ export default function RecommendationPage() {
       return;
     }
     try {
+      // specialist_id is NOT sent — backend derives operator from authenticated token only
       const ovr = await createSpecialistOverride(
         {
           recommendation_id: String(rec.recommendation_id),
           case_id: caseId.trim(),
-          specialist_id: sessionStorage.getItem("hbi_customer_id") || "SPECIALIST",
           action,
           reason: reason.trim(),
         },
@@ -103,6 +103,7 @@ export default function RecommendationPage() {
       <p className="lead">
         <code>POST /api/v1/recommendations/generate</code> با مالکیت Case.
         Specialist Override و Feedback بدون تغییر مخفی Recommendation اصلی.
+        هویت Operator فقط از توکن احراز هویت.
       </p>
       <form className="card" onSubmit={onGenerate}>
         <label htmlFor="case_id">Case ID</label>
