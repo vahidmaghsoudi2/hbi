@@ -78,6 +78,7 @@ def test_seed_products_and_evidence(db_session):
 
 
 def test_recommendation_with_evidence_persists(db_session):
+    from app.models.recommendation import Recommendation
     from app.services.recommendation_service import RecommendationService
 
     svc = RecommendationService(db_session)
@@ -86,3 +87,10 @@ def test_recommendation_with_evidence_persists(db_session):
     assert isinstance(recs, list)
     assert len(recs) >= 1
     assert recs[0].product_id == "ISDIN-FOTOUTRA100-50ML"
+
+    persisted = db_session.query(Recommendation).filter_by(
+        case_id="CASE-VS-002",
+        product_id="ISDIN-FOTOUTRA100-50ML",
+    ).one()
+    assert persisted.need_match_score == 1.0
+    assert persisted.eligibility_status == "ELIGIBLE"

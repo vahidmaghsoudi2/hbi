@@ -15,7 +15,8 @@ from app.repositories.inventory_repository import InventoryRepository
 from app.repositories.product_knowledge_repository import ProductKnowledgeRepository
 from app.repositories.evidence_repository import EvidenceRepository
 from app.services.base import BaseService
-from app.services.need_normalization import normalize_needs_from_factors
+from app.services.need_normalization import normalize_needs_from_factors, CANONICAL_NEEDS
+from app.services.product_compatibility import product_compatibility_ids
 from app.reasoning.reasoning_engine import ReasoningEngine
 from app.reasoning.conflict_analyzer import ConflictSeverity
 
@@ -130,15 +131,19 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         return needs
 
     def _calculate_need_match(self, generated_needs: List[str], known_use_cases: Optional[str]) -> float:
+        """Match canonical customer Needs to canonical ProductKnowledge use cases.
+
+        The frozen scoring formula is unchanged: intersection size divided by
+        the number of canonical Need ids. Only the semantic input surface changes.
+        """
         if not generated_needs:
             return 0.0
-        need_tokens = set()
-        for n in generated_needs:
-            need_tokens |= self._normalize_tokens(n)
-        use_tokens = self._normalize_tokens(known_use_cases or "")
-        if not need_tokens:
+        surface_to_id = {surface: cid for cid, surface in CANONICAL_NEEDS.items()}
+        generated_ids = {surface_to_id[n] for n in generated_needs if n in surface_to_id}
+        if not generated_ids:
             return 0.0
-        return round(len(need_tokens & use_tokens) / max(len(need_tokens), 1), 4)
+        product_ids = set(product_compatibility_ids(known_use_cases))
+        return round(len(generated_ids & product_ids) / max(len(generated_ids), 1), 4)
 
     def _compute_evidence_score(self, evidences: List[Evidence]) -> float:
         """Score only Evidence explicitly approved by QA for decision use."""
@@ -303,7 +308,6 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 f"unmapped_need_factors={len(decision_state.get('unmapped_need_factors') or [])} | "
                 f"ambiguous_need_factors={len(decision_state.get('ambiguous_need_factors') or [])}"
             )
-            # Gate before persistence/ranking: non-eligible candidates cannot become Recommendation records.
             if eligibility != "ELIGIBLE":
                 continue
             rec = self._upsert_current_recommendation(
@@ -314,7 +318,6 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             )
             kept_product_ids.add(product.product_id)
             recommendations.append(rec)
-        # Remove stale current rows so a prior gated Recommendation cannot leak through GET /case.
         for old in existing_case_recs:
             if old.product_id not in kept_product_ids:
                 self.db.delete(old)
