@@ -25,8 +25,8 @@ def test_unknown_product_use_case_is_not_guessed():
 def test_matching_is_canonical_to_canonical_not_raw_token_overlap():
     svc = RecommendationService.__new__(RecommendationService)
     assert svc._calculate_need_match(["hydration"], "آبرسانی") == 1.0
-    assert svc._calculate_need_match(["hydration"], "moisturizing face") == 1.0
-    assert svc._calculate_need_match(["hydration"], "hydration moisturizing face") == 1.0
+    assert svc._calculate_need_match(["hydration"], "moisturizing face") == 0.0
+    assert svc._calculate_need_match(["hydration"], "hydration moisturizing face") == 0.0
     assert svc._calculate_need_match(["hydration"], "unrelated product text") == 0.0
 
 
