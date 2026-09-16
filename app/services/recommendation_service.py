@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
@@ -185,8 +186,10 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
     def _stable_recommendation_id(self, case_id: str, product_id: str) -> str:
         return f"rec_{case_id}_{product_id}"
 
-    def _upsert_current_recommendation(self, *, case_id: str, product_id: str, need_match: float, evidence_score: float, eligibility: str, ranking_score: float, ranking_reasons: str, exclusion_reasons: str = "") -> Recommendation:
+    def _upsert_current_recommendation(self, *, case_id: str, product_id: str, need_match: float, evidence_score: float, eligibility: str, ranking_score: float, ranking_reasons: str, exclusion_reasons: str = "", evidence_refs: Optional[List[Dict[str, Any]]] = None, warnings: Optional[List[str]] = None) -> Recommendation:
         existing = self.repository.find_by_case_and_product(case_id, product_id)
+        evidence_refs_json = json.dumps(evidence_refs or [], ensure_ascii=False, sort_keys=True)
+        warnings_json = json.dumps(warnings or [], ensure_ascii=False)
         if isinstance(existing, Recommendation):
             existing.need_match_score = need_match
             existing.evidence_score = evidence_score
@@ -194,6 +197,8 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             existing.ranking_score = ranking_score
             existing.ranking_reasons = ranking_reasons[:2000] if ranking_reasons else ""
             existing.exclusion_reasons = exclusion_reasons or ""
+            existing.evidence_refs = evidence_refs_json
+            existing.warnings = warnings_json
             self.db.flush()
             return existing
         return self.repository.create(
@@ -206,6 +211,8 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             ranking_score=ranking_score,
             ranking_reasons=ranking_reasons[:2000] if ranking_reasons else "",
             exclusion_reasons=exclusion_reasons or "",
+            evidence_refs=evidence_refs_json,
+            warnings=warnings_json,
         )
 
     def _existing_conflicts_from_evidence(self, evidences: List[Evidence], product_id: str) -> List[Dict[str, Any]]:
@@ -237,6 +244,8 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             decision_state["decision_status"] = "REFERRAL" if not needs else decision_state["decision_status"]
         products = self.product_repo.find_by_identity_status_and_active("VERIFIED")
         recommendations: List[Recommendation] = []
+        existing_case_recs = list(self.repository.find_by_case(case_id))
+        kept_product_ids = set()
         case_unknowns_before_loop = len(decision_state.get("unknowns", []))
         for product in products:
             pk = self.pk_repo.find_by_product(product.product_id)
@@ -281,6 +290,10 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             eligibility = self._map_eligibility(engine_result, decision_state, need_match, product_unknowns=product_unknowns)
             final_score = engine_result.get("final_score", 0.0)
             rationale = engine_result.get("rationale", "")
+            trace_evidence_refs = list(engine_result.get("evidence_refs", []))
+            trace_warnings = list(engine_result.get("warnings", []))
+            if eligibility != "ELIGIBLE" and not trace_warnings:
+                trace_warnings.append(f"Recommendation gated: {eligibility}")
             ranking_reasons = (
                 f"{rationale} | needs={needs} | need_match={need_match:.2f} | "
                 f"medical_context={decision_state['medical_context_active']} | "
@@ -290,12 +303,22 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 f"unmapped_need_factors={len(decision_state.get('unmapped_need_factors') or [])} | "
                 f"ambiguous_need_factors={len(decision_state.get('ambiguous_need_factors') or [])}"
             )
+            # Gate before persistence/ranking: non-eligible candidates cannot become Recommendation records.
+            if eligibility != "ELIGIBLE":
+                continue
             rec = self._upsert_current_recommendation(
                 case_id=case_id, product_id=product.product_id, need_match=need_match,
                 evidence_score=evidence_score, eligibility=eligibility, ranking_score=final_score,
                 ranking_reasons=ranking_reasons, exclusion_reasons="",
+                evidence_refs=trace_evidence_refs, warnings=trace_warnings,
             )
+            kept_product_ids.add(product.product_id)
             recommendations.append(rec)
+        # Remove stale current rows so a prior gated Recommendation cannot leak through GET /case.
+        for old in existing_case_recs:
+            if old.product_id not in kept_product_ids:
+                self.db.delete(old)
+        self.db.flush()
         if len(decision_state.get("unknowns", [])) != case_unknowns_before_loop:
             logger.error("GAP-01 violation: Case Decision State unknowns mutated during product loop")
         recommendations.sort(key=lambda r: (r.ranking_score or 0.0), reverse=True)

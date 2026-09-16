@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, event, text
+from sqlalchemy import create_engine, event, text, inspect
 from sqlalchemy.orm import sessionmaker
 from app.models.base import Base
 import os
@@ -26,9 +26,22 @@ def get_db():
     finally:
         db.close()
 
+def _ensure_recommendation_trace_columns():
+    """Additive compatibility migration for Decision-Quality trace fields."""
+    inspector = inspect(engine)
+    if "Recommendation" not in inspector.get_table_names():
+        return
+    columns = {c["name"] for c in inspector.get_columns("Recommendation")}
+    with engine.begin() as conn:
+        if "evidence_refs" not in columns:
+            conn.execute(text('ALTER TABLE "Recommendation" ADD COLUMN evidence_refs TEXT'))
+        if "warnings" not in columns:
+            conn.execute(text('ALTER TABLE "Recommendation" ADD COLUMN warnings TEXT'))
+
 def init_db():
     from app.models import product, product_knowledge, evidence, customer, case, recommendation, inventory, sale, sale_item, category, stock_movement, payment, sale_return, operational_fx_rate, product_mutation_log, user_role
     Base.metadata.create_all(bind=engine)
+    _ensure_recommendation_trace_columns()
     with engine.connect() as conn:
         conn.execute(text("CREATE VIEW IF NOT EXISTS CustomerPurchaseHistory AS SELECT c.customer_id, si.product_id, si.quantity, s.created_at AS purchase_date FROM Sale s JOIN SaleItem si ON s.sale_id = si.sale_id JOIN Customer c ON s.customer_id = c.customer_id"))
         conn.commit()
