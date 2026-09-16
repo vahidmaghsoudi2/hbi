@@ -97,6 +97,20 @@ def test_medical_context_sets_referral_boundary_without_creating_need():
     assert "تحت درمان" in state["medical_context_notes"]
 
 
+def test_medical_context_maps_to_pending_review_eligibility():
+    service = _service()
+    engine_result = {"eligibility": "ELIGIBLE", "final_score": 0.99}
+    decision_state = {
+        "needs": ["dry skin"],
+        "medical_context_active": True,
+        "unknowns": [],
+    }
+
+    eligibility = service._map_eligibility(engine_result, decision_state, 1.0)
+
+    assert eligibility == "INELIGIBLE_PENDING_REVIEW"
+
+
 def test_eligibility_gate_rejects_candidate_before_ranking_result_is_accepted():
     service = _service()
     engine_result = {
@@ -113,3 +127,37 @@ def test_eligibility_gate_rejects_candidate_before_ranking_result_is_accepted():
     eligibility = service._map_eligibility(engine_result, decision_state, 0.0)
 
     assert eligibility == "INELIGIBLE_PENDING_REVIEW"
+
+
+def test_generate_path_does_not_persist_gated_candidate():
+    service = _service()
+
+    product = MagicMock(product_id="P-1")
+    service.product_repo.find_by_identity_status_and_active.return_value = [product]
+    service.pk_repo.find_by_product.return_value = MagicMock(
+        known_use_cases="hydration",
+        claimed_benefits="",
+        contraindications="",
+        ingredients="",
+    )
+    service.evidence_repo.find_by_product.return_value = []
+    service.inventory_repo.find_by_product.return_value = MagicMock(quantity_available=10)
+    service.repository.find_by_case.return_value = []
+    service.reasoning_engine.run.return_value = {
+        "eligibility": "ELIGIBLE",
+        "final_score": 0.99,
+        "rationale": "test",
+        "evidence_refs": [],
+        "warnings": [],
+        "unknowns": [],
+        "conflicts": [],
+        "claim_boundary_violations": [],
+    }
+
+    result = service.generate_recommendations(
+        "CASE-GATE",
+        {"customer_id": "C-GATE", "concerns": "پوست شاداب"},
+    )
+
+    assert result == []
+    service.repository.create.assert_not_called()
