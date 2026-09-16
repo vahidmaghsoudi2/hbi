@@ -5,7 +5,7 @@ from app.services.recommendation_service import RecommendationService
 
 
 def test_product_use_case_exact_synonyms_normalize_to_canonical_ids():
-    ids, unmapped = normalize_product_use_cases("آبرسانی, ضدآفتاب, ضدچروک")
+    ids, unmapped = normalize_product_use_cases("آبرسانی, ضدآفتاب, ضدپیری")
     assert ids == ["hydration", "sun_protection", "anti_aging"]
     assert unmapped == []
 
