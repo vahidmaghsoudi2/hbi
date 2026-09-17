@@ -1,6 +1,7 @@
 from typing import Optional, Any, Dict, List
 from collections import defaultdict
 import time
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
 from pydantic import BaseModel, Field
@@ -158,12 +159,15 @@ async def quick_intake(
     Intake سریع گالری.
     برمی‌گرداند: customer + recommendation_profile + (اختیاری) case
     آماده برای generate(case_id, recommendation_profile).
+
+    Home flow: createGuest → pilot-token → intake.
+    When the JWT already identifies a customer (e.g. CUST_GUEST_*), reuse that
+    row instead of creating a second guest — otherwise Case belongs to B while
+    token is A → generate returns 403 Access denied.
     """
     svc = CustomerService(db)
     mobile = data.mobile
 
-    # اگر هر دو طرف شبیه موبایل باشند و فرق کنند → رد
-    # در غیر این صورت (توکن اپراتور/pilot) اجازه ثبت مشتری گالری
     if (
         mobile
         and not data.guest
@@ -177,14 +181,32 @@ async def quick_intake(
         )
 
     try:
-        customer = svc.record_intake(
-            name=data.name,
-            mobile=None if data.guest else mobile,
-            concerns=data.concerns,
-            consent=data.consent,
-            skin_profile=data.skin_profile,
-            guest=data.guest or not mobile,
-        )
+        authenticated = svc.get_by_id(customer_id)
+        if authenticated is not None:
+            # Continue the same identity as the JWT (Home Front Door path).
+            fields: Dict[str, Any] = {
+                "name": data.name,
+                "consent_to_store_data": data.consent,
+            }
+            if data.concerns is not None:
+                fields["concerns"] = data.concerns
+            if data.skin_profile is not None:
+                fields["skin_profile"] = data.skin_profile
+            if data.consent == 1:
+                fields["consent_date"] = datetime.now()
+            if mobile and not data.guest:
+                fields["mobile"] = mobile
+            customer = svc.repository.update(authenticated.customer_id, **fields) or authenticated
+        else:
+            customer = svc.record_intake(
+                name=data.name,
+                mobile=None if data.guest else mobile,
+                concerns=data.concerns,
+                consent=data.consent,
+                skin_profile=data.skin_profile,
+                guest=data.guest or not mobile,
+            )
+
         profile = svc.build_recommendation_profile(
             customer, concerns=data.concerns
         )
@@ -270,7 +292,6 @@ async def find_customer_by_mobile(
     db: Session = Depends(get_db),
     customer_id: str = Depends(get_current_customer_id),
 ):
-    # فروشنده با توکن غیرموبایلی می‌تواند با موبایل جستجو کند
     if _looks_like_mobile(customer_id) and mobile != customer_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
