@@ -44,6 +44,13 @@ if errorlevel 1 (
   exit /b 1
 )
 
+where curl >nul 2>&1
+if errorlevel 1 (
+  echo [خطا] curl برای بررسی آماده‌بودن Home پیدا نشد.
+  pause
+  exit /b 1
+)
+
 REM ------------------------------------------------------------
 REM 1) محافظت از تغییرات محلی
 REM ------------------------------------------------------------
@@ -149,7 +156,7 @@ echo  در انتظار آماده‌شدن Home...
 
 set "READY=0"
 for /L %%N in (1,1,30) do (
-  powershell -NoProfile -Command "try { Invoke-WebRequest -UseBasicParsing -TimeoutSec 1 http://127.0.0.1:5173/ ^| Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
+  curl.exe --fail --silent --show-error --max-time 2 http://127.0.0.1:5173/ >nul 2>&1
   if not errorlevel 1 (
     set "READY=1"
     goto :open_home
