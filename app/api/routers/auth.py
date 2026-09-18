@@ -13,6 +13,7 @@ from app.core.auth import (
 )
 from app.core.deps import get_db
 from app.models.customer import Customer
+from app.models.user_role import UserRole, ROLE_EDITOR
 from app.core.audit import audit_event
 from app.core.brute_force import clear_failures, is_locked, make_key, record_failure
 
@@ -103,6 +104,53 @@ async def pilot_token(
         path="/api/v1/auth/pilot-token",
         outcome="ok",
         extra={"client_ip": client_ip},
+    )
+    return TokenPair(
+        access_token=create_access_token(payload),
+        refresh_token=create_refresh_token(payload),
+        token_type="bearer",
+    )
+
+
+@router.post("/pilot-operator-token", response_model=TokenPair)
+async def pilot_operator_token(
+    http_request: Request,
+    db: Session = Depends(get_db),
+):
+    """Dev/Pilot only: issue a scoped Editor token for Product Intake operations."""
+    if os.getenv("HBI_ENV", "development").lower() == "production":
+        audit_event(
+            "pilot_operator_token",
+            path="/api/v1/auth/pilot-operator-token",
+            outcome="denied",
+            detail="disabled_in_production",
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="pilot-operator-token disabled in production",
+        )
+
+    subject_id = os.getenv("HBI_PILOT_OPERATOR_SUBJECT", "USR_PILOT_EDITOR")
+    role = db.query(UserRole).filter(
+        UserRole.subject_id == subject_id,
+        UserRole.role == ROLE_EDITOR,
+    ).first()
+    if role is None:
+        db.add(UserRole(
+            user_role_id=f"UR-{subject_id}-{ROLE_EDITOR.replace('/', '-')}",
+            subject_id=subject_id,
+            role=ROLE_EDITOR,
+        ))
+        db.commit()
+
+    payload = {"sub": subject_id}
+    client_ip = http_request.client.host if http_request.client else "unknown"
+    audit_event(
+        "pilot_operator_token",
+        customer_id=subject_id,
+        path="/api/v1/auth/pilot-operator-token",
+        outcome="ok",
+        extra={"client_ip": client_ip, "role": ROLE_EDITOR},
     )
     return TokenPair(
         access_token=create_access_token(payload),

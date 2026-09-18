@@ -129,18 +129,12 @@ export interface ProductCreateRequest {
   market_region?: string | null;
   country_of_origin?: string | null;
   packaging_version?: string | null;
-  identity_status?: string;
-  qa_verdict?: string;
-  status?: string;
 }
 
 /** PATCH /api/v1/products/{id} — matches backend ProductUpdate */
 export interface ProductUpdateRequest {
   brand?: string | null;
   product_name?: string | null;
-  identity_status?: string | null;
-  status?: string | null;
-  qa_verdict?: string | null;
   variant?: string | null;
   size_value?: number | null;
   size_unit?: string | null;
