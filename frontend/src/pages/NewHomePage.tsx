@@ -2,6 +2,7 @@ import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   listProducts,
+  listManageableProducts,
   pilotToken,
   pilotOperatorToken,
   customerIntake,
@@ -67,7 +68,9 @@ export default function NewHomePage() {
     setCatalogLoading(true);
     setCatalogError(null);
     try {
-      const data = await listProducts();
+      const operatorToken = await ensureProductSession();
+      if (!operatorToken) throw new Error("نشست اپراتور برای مشاهده محصولات در دسترس نیست.");
+      const data = await listManageableProducts(operatorToken);
       setProducts(Array.isArray(data) ? data : []);
     } catch (e) {
       setCatalogError(e instanceof Error ? e.message : String(e));
