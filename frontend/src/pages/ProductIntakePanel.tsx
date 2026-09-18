@@ -39,9 +39,9 @@ const EMPTY: Draft = {
   barcode_gtin: "",
   market_region: "IR",
   packaging_version: "",
-  identity_status: "VERIFIED",
+  identity_status: "NEEDS_REVIEW",
   qa_verdict: "PENDING",
-  status: "ACTIVE",
+  status: "DRAFT",
 };
 
 /** Complete protocol fields from intro text — extract only, no invented medical claims. */
@@ -92,9 +92,9 @@ export function completeFromIntro(raw: string): Draft {
     .replace(/--+/g, "-")
     .slice(0, 64);
 
-  d.identity_status = "VERIFIED";
+  d.identity_status = "NEEDS_REVIEW";
   d.qa_verdict = "PENDING";
-  d.status = "ACTIVE";
+  d.status = "DRAFT";
   d.market_region = "IR";
   return d;
 }

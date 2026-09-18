@@ -31,6 +31,9 @@ class ProductRepository(BaseRepository[Product]):
     def find_by_qa_verdict(self, verdict: str) -> List[Product]:
         return self.db.query(Product).filter(Product.qa_verdict == verdict).all()
 
+    def list_all(self) -> List[Product]:
+        return self.db.query(Product).order_by(Product.product_id.asc()).all()
+
     def get_with_inventory(self, product_id: str):
         return self.db.query(Product).filter(Product.product_id == product_id).first()
 

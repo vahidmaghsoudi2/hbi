@@ -41,6 +41,14 @@ async def list_products(db: Session = Depends(get_db)):
     return [_to_dict(p) for p in ProductFacade(db).get_verified_products()]
 
 
+@router.get("/manage")
+async def list_manageable_products(
+    db: Session = Depends(get_db),
+    auth=Depends(require_any_role(ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
+):
+    return [_to_dict(p) for p in ProductFacade(db).list_all()]
+
+
 @router.get("/{product_id}")
 async def get_product(product_id: str, db: Session = Depends(get_db)):
     product = ProductFacade(db).get_by_id(product_id)
