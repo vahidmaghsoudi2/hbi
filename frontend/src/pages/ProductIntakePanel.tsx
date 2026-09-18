@@ -190,9 +190,6 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
           barcode_gtin: draft.barcode_gtin || null,
           market_region: draft.market_region || null,
           packaging_version: draft.packaging_version || null,
-          identity_status: draft.identity_status || "VERIFIED",
-          qa_verdict: draft.qa_verdict || "PENDING",
-          status: draft.status || "ACTIVE",
         };
         const created = await createProduct(body, activeToken);
         setMsg(`ذخیره شد: ${created.product_id}`);
