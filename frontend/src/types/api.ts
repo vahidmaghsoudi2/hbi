@@ -79,6 +79,16 @@ export interface ProductDTO {
 }
 
 /** Customer intake request (POST /api/v1/customers/intake) */
+export interface CustomerSearchResult {
+  customer_id: string;
+  name: string;
+  mobile?: string | null;
+  consent_to_store_data?: number;
+  concerns?: string | null;
+  skin_profile?: string | null;
+}
+
+/** POST /api/v1/customers/intake request */
 export interface CustomerIntakeRequest {
   name: string;
   mobile?: string;
