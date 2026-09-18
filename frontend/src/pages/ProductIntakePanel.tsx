@@ -3,6 +3,7 @@ import { createProduct, updateProduct } from "../api/client";
 import type { ProductCreateRequest, ProductDTO, ProductUpdateRequest } from "../types/api";
 
 type Props = {
+  token?: string | null;
   onRegistered?: (productId: string) => void;
   editProduct?: ProductDTO | null;
   onCancelEdit?: () => void;
@@ -116,7 +117,7 @@ function fromProduct(p: ProductDTO): Draft {
   };
 }
 
-export default function ProductIntakePanel({ onRegistered, editProduct, onCancelEdit }: Props) {
+export default function ProductIntakePanel({ token, onRegistered, editProduct, onCancelEdit }: Props) {
   const [intro, setIntro] = useState("");
   const [draft, setDraft] = useState<Draft>(EMPTY);
   const [busy, setBusy] = useState(false);
@@ -156,6 +157,10 @@ export default function ProductIntakePanel({ onRegistered, editProduct, onCancel
       setErr("شناسه، برند و نام محصول الزامی است.");
       return;
     }
+    if (!token) {
+      setErr("برای ثبت یا ویرایش محصول، ابتدا یک نشست فعال ایجاد کنید.");
+      return;
+    }
     setBusy(true);
     try {
       if (editing) {
@@ -172,7 +177,7 @@ export default function ProductIntakePanel({ onRegistered, editProduct, onCancel
           qa_verdict: draft.qa_verdict,
           status: draft.status,
         };
-        const updated = await updateProduct(draft.product_id.trim(), body);
+        const updated = await updateProduct(draft.product_id.trim(), body, token);
         setMsg(`به‌روزرسانی شد: ${updated.product_id}`);
         onRegistered?.(updated.product_id);
       } else {
@@ -190,7 +195,7 @@ export default function ProductIntakePanel({ onRegistered, editProduct, onCancel
           qa_verdict: draft.qa_verdict || "PENDING",
           status: draft.status || "ACTIVE",
         };
-        const created = await createProduct(body);
+        const created = await createProduct(body, token);
         setMsg(`ذخیره شد: ${created.product_id}`);
         setIntro("");
         onRegistered?.(created.product_id);

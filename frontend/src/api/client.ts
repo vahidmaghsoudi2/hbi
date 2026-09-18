@@ -141,12 +141,12 @@ export function getTotalSales(token: string): Promise<{ total_sales: number }> {
   return request<{ total_sales: number }>("/sales/total", {}, token);
 }
 
-/** POST /api/v1/products/ — public create (PO-confirmed draft) */
-export function createProduct(body: ProductCreateRequest): Promise<ProductDTO> {
+/** POST /api/v1/products/ — requires the active pilot/customer JWT */
+export function createProduct(body: ProductCreateRequest, token: string): Promise<ProductDTO> {
   return request<ProductDTO>("/products/", {
     method: "POST",
     body: JSON.stringify(body),
-  });
+  }, token);
 }
 
 /** GET /api/v1/products/{id} */
@@ -157,12 +157,13 @@ export function getProduct(productId: string): Promise<ProductDTO> {
 /** PATCH /api/v1/products/{id} — PO edit after save */
 export function updateProduct(
   productId: string,
-  body: ProductUpdateRequest
+  body: ProductUpdateRequest,
+  token: string
 ): Promise<ProductDTO> {
   return request<ProductDTO>(`/products/${encodeURIComponent(productId)}`, {
     method: "PATCH",
     body: JSON.stringify(body),
-  });
+  }, token);
 }
 
 /** Mission B — Specialist Override.
