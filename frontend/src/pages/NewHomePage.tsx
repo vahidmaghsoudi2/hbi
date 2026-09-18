@@ -438,8 +438,6 @@ export default function NewHomePage() {
                 <div><label className="pro-label" htmlFor="profile-name">نام *</label><input id="profile-name" className="pro-input" value={name} onChange={(e) => setName(e.target.value)} /></div>
                 <div><label className="pro-label" htmlFor="profile-mobile">موبایل</label><input id="profile-mobile" className="pro-input" value={mobile} onChange={(e) => setMobile(e.target.value)} disabled={isGuest} placeholder="09…" /></div>
               </div>
-              <label className="pro-check"><input type="checkbox" checked={isGuest} onChange={(e) => setIsGuest(e.target.checked)} /> مشتری مهمان بدون موبایل</label>
-              <label className="pro-check"><input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} /> رضایت ذخیره اطلاعات</label>
             </fieldset>
             <dl className="pro-dl">
               <div>
