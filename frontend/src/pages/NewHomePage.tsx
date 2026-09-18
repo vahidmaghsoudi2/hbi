@@ -44,8 +44,6 @@ export default function NewHomePage() {
   const [caseId, setCaseId] = useState<string | null>(() => sessionStorage.getItem("hbi_case_id"));
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
-  const [isGuest, setIsGuest] = useState(true);
-  const [consent, setConsent] = useState(true);
   const [concerns, setConcerns] = useState<string[]>([]);
   const [skin, setSkin] = useState<string[]>([]);
   const [note, setNote] = useState("");
@@ -123,7 +121,7 @@ export default function NewHomePage() {
     if (!currentToken) {
       const guest = (await createGuest({
         name: displayName,
-        consent: consent ? 1 : 0,
+        consent: 0,
         concerns: concernsForGuest || undefined,
       })) as { customer_id?: string };
       if (!guest?.customer_id) throw new Error("ایجاد پروفایل مهمان ناموفق بود.");
@@ -153,7 +151,6 @@ export default function NewHomePage() {
       if (profile.name) setName(profile.name);
       if (profile.mobile) {
         setMobile(profile.mobile);
-        setIsGuest(false);
       }
       if (profile.concerns) {
         const saved = profile.concerns.split(",").map((x) => x.trim()).filter(Boolean);
@@ -175,17 +172,16 @@ export default function NewHomePage() {
     setError(null);
     setStatusMsg(null);
     if (!name.trim()) return setError("نام الزامی است.");
-    if (!consent) return setError("رضایت ذخیره اطلاعات را تأیید کنید.");
     setProfileSaving(true);
     try {
       const currentToken = await ensureSession(name.trim(), concernsText);
       const intake = (await customerIntake({
         name: name.trim(),
-        mobile: isGuest || !mobile.trim() ? undefined : mobile.trim(),
+        mobile: mobile.trim() || undefined,
         concerns: concernsText || undefined,
-        consent: 1,
+        consent: 0,
         skin_profile: skin.length ? skin.join(",") : undefined,
-        guest: isGuest || !mobile.trim(),
+        guest: false,
         open_case: false,
       } as CustomerIntakeRequest, currentToken)) as { customer?: { customer_id?: string } };
       const resolvedId = intake?.customer?.customer_id ?? sessionStorage.getItem("hbi_customer_id");
@@ -209,7 +205,6 @@ export default function NewHomePage() {
     setCaseId(null);
     setName("");
     setMobile("");
-    setIsGuest(true);
     setConcerns([]);
     setSkin([]);
     setNote("");
@@ -226,7 +221,6 @@ export default function NewHomePage() {
     setRecDone(false);
     setRecs([]);
     if (!name.trim()) return setError("نام الزامی است.");
-    if (!consent) return setError("رضایت ذخیره اطلاعات را تأیید کنید.");
     if (!concernsText) return setError("حداقل یک موضوع یا نوع پوست را انتخاب کنید.");
     setBusy(true);
     try {
@@ -235,11 +229,11 @@ export default function NewHomePage() {
       const intake = (await customerIntake(
         {
           name: name.trim(),
-          mobile: isGuest || !mobile.trim() ? undefined : mobile.trim(),
+          mobile: mobile.trim() || undefined,
           concerns: concernsText,
-          consent: 1,
+          consent: 0,
           skin_profile: skin.length ? skin.join(",") : undefined,
-          guest: isGuest || !mobile.trim(),
+          guest: false,
           open_case: true,
         } as CustomerIntakeRequest,
         currentToken
@@ -368,18 +362,10 @@ export default function NewHomePage() {
                   </div>
                   <div>
                     <label className="pro-label" htmlFor="mobile">موبایل</label>
-                    <input id="mobile" className="pro-input" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="09…" disabled={isGuest} />
+                    <input id="mobile" className="pro-input" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="09…" />
                   </div>
                 </div>
-                <label className="pro-check">
-                  <input type="checkbox" checked={isGuest} onChange={(e) => setIsGuest(e.target.checked)} />
-                  مراجعه مهمان (بدون موبایل)
-                </label>
-                <label className="pro-check">
-                  <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
-                  رضایت ذخیره اطلاعات
-                </label>
-              </fieldset>
+                </fieldset>
               <fieldset className="pro-fieldset">
                 <legend>۲) موضوع مشاوره</legend>
                 <div className="pro-checks">
@@ -436,7 +422,7 @@ export default function NewHomePage() {
               <legend>اطلاعات مشتری فعال</legend>
               <div className="pro-grid-2">
                 <div><label className="pro-label" htmlFor="profile-name">نام *</label><input id="profile-name" className="pro-input" value={name} onChange={(e) => setName(e.target.value)} /></div>
-                <div><label className="pro-label" htmlFor="profile-mobile">موبایل</label><input id="profile-mobile" className="pro-input" value={mobile} onChange={(e) => setMobile(e.target.value)} disabled={isGuest} placeholder="09…" /></div>
+                <div><label className="pro-label" htmlFor="profile-mobile">موبایل</label><input id="profile-mobile" className="pro-input" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="09…" /></div>
               </div>
             </fieldset>
             <dl className="pro-dl">
@@ -628,7 +614,7 @@ export default function NewHomePage() {
           <section className="pro-panel">
             <h1>مسیر HBI روی این صفحه</h1>
             <ol className="pro-ol">
-              <li>پروفایل مشتری (intake / guest)</li>
+              <li>پروفایل مشتری (intake)</li>
               <li>پرونده Case</li>
               <li>موتور توصیه generate</li>
               <li>کاتالوگ محصولات</li>
