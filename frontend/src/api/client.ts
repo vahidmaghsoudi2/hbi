@@ -79,6 +79,15 @@ export function listCasesByCustomer(
   return request<CaseDTO[]>(`/cases/customer/${customerId}`, {}, token);
 }
 
+/** Active customer profile — requires the active customer token. */
+export function getCustomerById(customerId: string, token: string): Promise<Record<string, unknown>> {
+  return request<Record<string, unknown>>(
+    `/customers/id/${encodeURIComponent(customerId)}`,
+    {},
+    token
+  );
+}
+
 export function generateRecommendations(
   body: RecommendationRequest,
   token: string
