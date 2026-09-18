@@ -415,6 +415,7 @@ export default function NewHomePage() {
         {active === "intake" && (
           <ProductIntakePanel
             token={token}
+            onEnsureSession={() => ensureSession(name.trim() || "مشتری مهمان", sessionStorage.getItem("hbi_concerns") || "")}
             editProduct={editProduct}
             onCancelEdit={() => setEditProduct(null)}
             onRegistered={() => {
