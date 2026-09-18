@@ -83,9 +83,6 @@ if errorlevel 1 (
 
 REM ------------------------------------------------------------
 REM 3) انتخاب نسخه اجرا
-REM    - اگر HEAD در master است: origin/master
-REM    - در غیر این صورت branch جاری، در صورت وجود remote
-REM    - برای detached HEAD، اولین remote branch حاوی HEAD
 REM ------------------------------------------------------------
 set "TARGET_REF="
 
@@ -114,7 +111,7 @@ if not defined TARGET_REF (
 )
 
 set "TARGET_REF=%TARGET_REF: =%"
- 
+
 :sync
 echo [۲/۵] همگام‌سازی با %TARGET_REF%...
 git -C "%ROOT%" checkout --detach "%TARGET_REF%"
@@ -143,8 +140,10 @@ if not exist "%ROOT%\frontend\node_modules\" (
 )
 
 REM ------------------------------------------------------------
-REM 5) اجرای Backend + Frontend و انتظار برای آماده‌شدن واقعی
+REM 5) Backend + Frontend + readiness + browser
 REM ------------------------------------------------------------
+set "HOME_URL=http://127.0.0.1:5173/"
+
 echo [۴/۵] اجرای Backend روی 8000...
 start "HBI-Backend" /D "%ROOT%" cmd /k "python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload"
 
@@ -152,53 +151,53 @@ echo [۵/۵] اجرای Frontend روی 5173...
 start "HBI-Frontend" /D "%ROOT%\frontend" cmd /k "npm run dev -- --host 127.0.0.1 --port 5173"
 
 echo.
-echo  در انتظار آماده‌شدن Home...
+echo  در انتظار آماده‌شدن Home روی %HOME_URL% ...
 
 set "READY=0"
-for /L %%N in (1,1,30) do (
-  curl.exe --noproxy "*" --fail --silent --show-error --connect-timeout 1 --max-time 2 http://127.0.0.1:5173/ >nul 2>&1
-  if not errorlevel 1 (
+for /L %%N in (1,1,45) do (
+  REM Prefer explicit exit code check with delayed expansion (FOR-block safe).
+  curl.exe --noproxy "*" --silent --show-error --connect-timeout 1 --max-time 2 --output NUL --write-out "%%{http_code}" http://127.0.0.1:5173/ > "%TEMP%\hbi_home_code.txt" 2>NUL
+  set "CODE="
+  set /p CODE=<"%TEMP%\hbi_home_code.txt"
+  if "!CODE!"=="200" (
     set "READY=1"
-    goto :open_home
+    echo Home آماده است ^(تلاش %%N^).
+    goto :open_browser
   )
   timeout /t 1 /nobreak >nul
 )
 
-:open_home
-if "%READY%"=="1" (
-  echo Home آماده است.
-  REM Prefer an installed Chrome/Firefox; fall back to Windows default browser.
-  set "HOME_URL=http://127.0.0.1:5173/"
-  if exist "%ProgramFiles%\Google\Chrome\Application\chrome.exe" (
-    start "" "%ProgramFiles%\Google\Chrome\Application\chrome.exe" "%HOME_URL%"
-    goto :browser_opened
-  )
-  if exist "%LocalAppData%\Google\Chrome\Application\chrome.exe" (
-    start "" "%LocalAppData%\Google\Chrome\Application\chrome.exe" "%HOME_URL%"
-    goto :browser_opened
-  )
-  if exist "%ProgramFiles%\Mozilla Firefox\firefox.exe" (
-    start "" "%ProgramFiles%\Mozilla Firefox\firefox.exe" "%HOME_URL%"
-    goto :browser_opened
-  )
-  if exist "%ProgramFiles(x86)%\Mozilla Firefox\firefox.exe" (
-    start "" "%ProgramFiles(x86)%\Mozilla Firefox\firefox.exe" "%HOME_URL%"
-    goto :browser_opened
-  )
-  start "" "%HOME_URL%"
-  :browser_opened
+:open_browser
+if "!READY!"=="1" (
+  echo باز کردن مرورگر...
 ) else (
-  echo [خطا] Home در زمان مقرر آماده نشد.
-  echo پنجره‌های Backend و Frontend را برای بررسی باز نگه دارید.
-  pause
-  exit /b 1
+  echo [هشدار] curl در ۴۵ ثانیه کد ۲۰۰ نگرفت؛ Backend/Vite را در پنجره‌های جدا ببینید.
+  echo مرورگر را به‌هرحال باز می‌کنیم تا مسیر دستی هم در دسترس باشد.
 )
 
+REM Always open browser — do NOT hard-fail if readiness probe is flaky.
+REM Avoid labels inside IF blocks (invalid Batch structure).
+if exist "%ProgramFiles%\Google\Chrome\Application\chrome.exe" (
+  start "" "%ProgramFiles%\Google\Chrome\Application\chrome.exe" "%HOME_URL%"
+  goto :done
+)
+if exist "%LocalAppData%\Google\Chrome\Application\chrome.exe" (
+  start "" "%LocalAppData%\Google\Chrome\Application\chrome.exe" "%HOME_URL%"
+  goto :done
+)
+if exist "%ProgramFiles%\Mozilla Firefox\firefox.exe" (
+  start "" "%ProgramFiles%\Mozilla Firefox\firefox.exe" "%HOME_URL%"
+  goto :done
+)
+start "" "%HOME_URL%"
+
+:done
 echo.
 echo  ========================================
-echo   HBI با موفقیت راه‌اندازی شد.
+echo   HBI راه‌اندازی شد.
 echo   نسخه اجرا: %TARGET_REF%
-echo   Home: http://127.0.0.1:5173/
+echo   Home: %HOME_URL%
+echo   دو پنجره Backend و Frontend را باز نگه دارید.
 echo  ========================================
 echo.
 exit /b 0
