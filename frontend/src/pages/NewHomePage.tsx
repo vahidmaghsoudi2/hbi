@@ -12,6 +12,7 @@ import {
   createSale,
   getTotalSales,
   getCustomerById,
+  searchCustomers,
   getInventoryByProduct,
 } from "../api/client";
 import ProductIntakePanel from "./ProductIntakePanel";
@@ -21,6 +22,7 @@ import type {
   PilotTokenRequest,
   CustomerIntakeRequest,
   GuestCreateRequest,
+  CustomerSearchResult,
   SaleDTO,
 } from "../types/api";
 
@@ -37,7 +39,7 @@ const CONCERN_OPTIONS = [
 
 const SKIN_OPTIONS = ["خشک", "چرب", "مختلط", "معمولی", "حساس"] as const;
 
-type Panel = "consult" | "profile" | "catalog" | "intake" | "results" | "sales" | "about";
+type Panel = "consult" | "previous" | "profile" | "catalog" | "intake" | "results" | "sales" | "about";
 
 export default function NewHomePage() {
   const [active, setActive] = useState<Panel>("consult");
@@ -67,6 +69,9 @@ export default function NewHomePage() {
   const [totalSales, setTotalSales] = useState<number | null>(null);
   const [editProduct, setEditProduct] = useState<ProductDTO | null>(null);
   const [profileSaving, setProfileSaving] = useState(false);
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [customerSearchResults, setCustomerSearchResults] = useState<CustomerSearchResult[]>([]);
+  const [customerSearchBusy, setCustomerSearchBusy] = useState(false);
 
   const loadProducts = useCallback(async () => {
     setCatalogLoading(true);
@@ -113,6 +118,57 @@ export default function NewHomePage() {
 
   function toggleIn(list: string[], value: string, setter: (v: string[]) => void) {
     setter(list.includes(value) ? list.filter((x) => x !== value) : [...list, value]);
+  }
+
+  async function searchPreviousCustomers() {
+    const query = customerSearch.trim();
+    if (!query) {
+      setCustomerSearchResults([]);
+      return;
+    }
+    setError(null);
+    setCustomerSearchBusy(true);
+    try {
+      const operatorToken = await ensureProductSession();
+      if (!operatorToken) throw new Error("نشست جست‌وجوی مشتری در دسترس نیست.");
+      const found = await searchCustomers(query, operatorToken);
+      setCustomerSearchResults(Array.isArray(found) ? found : []);
+    } catch (err) {
+      setCustomerSearchResults([]);
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setCustomerSearchBusy(false);
+    }
+  }
+
+  async function selectPreviousCustomer(customer: CustomerSearchResult) {
+    setError(null);
+    setStatusMsg(null);
+    setBusy(true);
+    try {
+      const pair = await pilotToken({ customer_id: customer.customer_id });
+      sessionStorage.setItem("hbi_access_token", pair.access_token);
+      sessionStorage.setItem("hbi_refresh_token", pair.refresh_token);
+      sessionStorage.setItem("hbi_customer_id", customer.customer_id);
+      sessionStorage.removeItem("hbi_case_id");
+      setToken(pair.access_token);
+      setCustomerId(customer.customer_id);
+      setCaseId(null);
+      setName(customer.name ?? "");
+      setMobile(customer.mobile ?? "");
+      setConcerns(customer.concerns ? customer.concerns.split(",").map((x) => x.trim()).filter(Boolean) : []);
+      setSkin(customer.skin_profile ? customer.skin_profile.split(",").map((x) => x.trim()).filter(Boolean) : []);
+      setNote("");
+      setRecs([]);
+      setRecDone(false);
+      setStatusMsg("مشتری قبلی انتخاب شد. اطلاعات سابقه بارگذاری شد؛ مشکل امروز را ثبت کنید.");
+      setCustomerSearchResults([]);
+      setActive("consult");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(false);
+    }
   }
 
   function go(panel: Panel) {
@@ -352,6 +408,7 @@ export default function NewHomePage() {
 
   const nav: [Panel, string][] = [
     ["consult", "مشاوره"],
+    ["previous", "مشتری قبلی / جست‌وجو"],
     ["profile", "پروفایل"],
     ["catalog", "محصولات"],
     ["intake", "ورود محصول"],
@@ -405,6 +462,41 @@ export default function NewHomePage() {
             {error}
           </div>
         ) : null}
+
+        {active === "previous" && (
+          <section className="pro-panel">
+            <h1>مشتری قبلی / جست‌وجو</h1>
+            <p className="pro-lead">مشتری را پیدا کنید، سابقه او را بارگذاری کنید و سپس مشکل امروز را در یک پرونده جدید ثبت کنید.</p>
+            <form className="pro-actions" onSubmit={(e) => { e.preventDefault(); void searchPreviousCustomers(); }}>
+              <input
+                className="pro-input"
+                value={customerSearch}
+                onChange={(e) => setCustomerSearch(e.target.value)}
+                placeholder="نام مشتری…"
+                aria-label="جست‌وجوی مشتری قبلی"
+              />
+              <button type="submit" className="pro-btn-primary" disabled={customerSearchBusy}>
+                {customerSearchBusy ? "در حال جست‌وجو…" : "جست‌وجو"}
+              </button>
+            </form>
+            {customerSearchResults.length > 0 ? (
+              <div className="pro-product-grid" style={{ marginTop: "1rem" }}>
+                {customerSearchResults.map((customer) => (
+                  <article key={customer.customer_id} className="pro-product-card">
+                    <h3>{customer.name}</h3>
+                    <p className="pro-muted">{customer.mobile ?? "موبایل ثبت نشده"}</p>
+                    <p className="pro-muted">{customer.concerns ?? "سابقه دغدغه ثبت نشده"}</p>
+                    <button type="button" className="pro-btn-primary" onClick={() => void selectPreviousCustomer(customer)} disabled={busy}>
+                      انتخاب مشتری
+                    </button>
+                  </article>
+                ))}
+              </div>
+            ) : customerSearch.trim() && !customerSearchBusy ? (
+              <div className="pro-empty"><strong>مشتری‌ای با این نام پیدا نشد.</strong></div>
+            ) : null}
+          </section>
+        )}
 
         {active === "consult" && (
           <section className="pro-panel">
