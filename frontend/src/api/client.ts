@@ -53,6 +53,13 @@ export function pilotToken(body: PilotTokenRequest): Promise<TokenPair> {
   });
 }
 
+/** Dev/Pilot only — operator session for Product Intake governance actions. */
+export function pilotOperatorToken(): Promise<TokenPair> {
+  return request<TokenPair>("/auth/pilot-operator-token", {
+    method: "POST",
+  });
+}
+
 /** Requires auth; body must use case_type, NOT concerns */
 export function createCase(
   body: CaseCreateRequest,
