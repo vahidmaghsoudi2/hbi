@@ -156,6 +156,11 @@ export function createProduct(body: ProductCreateRequest, token: string): Promis
   }, token);
 }
 
+/** Operational catalog — includes DRAFT products; requires operator role. */
+export function listManageableProducts(token: string): Promise<ProductDTO[]> {
+  return request<ProductDTO[]>("/products/manage", {}, token);
+}
+
 /** GET /api/v1/products/{id} */
 export function getProduct(productId: string): Promise<ProductDTO> {
   return request<ProductDTO>(`/products/${encodeURIComponent(productId)}`);
