@@ -37,6 +37,10 @@ class ProductService(BaseService[Product, ProductRepository]):
     def get_products_with_valid_qa(self) -> List[Product]:
         return self.repository.find_by_qa_verdict("VALID")
 
+    def list_all(self) -> List[Product]:
+        """Return all products for authorized operational catalog views."""
+        return self.repository.list_all()
+
     def update(self, id: str, **kwargs) -> Optional[Product]:
         blocked = set(kwargs.keys()) & PRODUCT_GOVERNANCE_KEYS
         if blocked:
