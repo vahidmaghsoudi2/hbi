@@ -160,7 +160,7 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
     }
     setBusy(true);
     try {
-      const activeToken = token ?? (await onEnsureSession?.());
+      const activeToken = (await onEnsureSession?.()) ?? token;
       if (!activeToken) {
         setErr("برای ثبت یا ویرایش محصول، نشست فعال ایجاد نشد.");
         return;
