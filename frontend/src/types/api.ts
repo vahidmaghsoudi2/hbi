@@ -106,6 +106,7 @@ export interface SaleItemInput {
 export interface SaleCreateRequest {
   customer_id: string;
   items: SaleItemInput[];
+  fx_rate_usd_to_irr: number;
 }
 
 /** Sale response (backend may return ORM-shaped dict) */
