@@ -34,6 +34,8 @@ def test_product_candidates_require_active_and_valid_qa():
             qa_verdict=qa,
             status=status,
         ))
+    db.commit()
+    for pid in ("P-DRAFT", "P-APPROVED", "P-ACTIVE-BAD-QA", "P-ACTIVE"):
         db.add(Inventory(
             inventory_id=f"INV-{pid}",
             product_id=pid,
