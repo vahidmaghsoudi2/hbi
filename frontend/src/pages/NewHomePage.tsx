@@ -7,7 +7,7 @@ import {
   pilotOperatorToken,
   customerIntake,
   createGuest,
-  generateRecommendations,
+  generateRecommendations,\n  listRecommendationsByCase,
   createSale,
   getTotalSales,
   getCustomerById,
