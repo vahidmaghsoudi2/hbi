@@ -210,7 +210,7 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
     <section className="pro-panel">
       <h1>{editing ? "ویرایش محصول" : "ورود محصول (تکمیل هوشمند + تأیید مدیر)"}</h1>
       <p className="pro-lead">
-        خلاصه را بنویسید → تکمیل خودکار فیلدهای پروتکل → ویرایش شما → تأیید و ذخیره. ادعای درمانی اختراع نمی‌شود.
+        خلاصه را بنویسید → تکمیل خودکار فیلدهای اطلاعاتی → بررسی شما → ذخیره به‌صورت Draft. وضعیت هویتی، QA و چرخه انتشار توسط سرور و نقش‌های مربوط کنترل می‌شود.
       </p>
       {err && <div className="pro-alert">{err}</div>}
       {msg && <div className="pro-status-msg">{msg}</div>}
@@ -280,28 +280,16 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
             <input className="pro-input" value={draft.market_region} onChange={(e) => setField("market_region", e.target.value)} />
           </div>
           <div>
-            <label className="pro-label">identity_status</label>
-            <select className="pro-input" value={draft.identity_status} onChange={(e) => setField("identity_status", e.target.value)}>
-              <option value="VERIFIED">VERIFIED</option>
-              <option value="NEEDS_REVIEW">NEEDS_REVIEW</option>
-              <option value="PARTIAL_IDENTITY">PARTIAL_IDENTITY</option>
-              <option value="CONFLICT">CONFLICT</option>
-            </select>
+            <label className="pro-label">identity_status (سروری)</label>
+            <input className="pro-input" value={draft.identity_status} readOnly />
           </div>
           <div>
-            <label className="pro-label">status</label>
-            <select className="pro-input" value={draft.status} onChange={(e) => setField("status", e.target.value)}>
-              <option value="ACTIVE">ACTIVE</option>
-              <option value="DRAFT">DRAFT</option>
-            </select>
+            <label className="pro-label">status (سروری)</label>
+            <input className="pro-input" value={draft.status} readOnly />
           </div>
           <div>
-            <label className="pro-label">qa_verdict</label>
-            <select className="pro-input" value={draft.qa_verdict} onChange={(e) => setField("qa_verdict", e.target.value)}>
-              <option value="PENDING">PENDING</option>
-              <option value="VALID">VALID</option>
-              <option value="INVALID">INVALID</option>
-            </select>
+            <label className="pro-label">qa_verdict (سروری)</label>
+            <input className="pro-input" value={draft.qa_verdict} readOnly />
           </div>
         </div>
       </fieldset>
