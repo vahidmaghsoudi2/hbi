@@ -188,10 +188,14 @@ async def quick_intake(
                 "name": data.name,
                 "consent_to_store_data": data.consent,
             }
-            if data.concerns is not None:
-                fields["concerns"] = data.concerns
-            if data.skin_profile is not None:
-                fields["skin_profile"] = data.skin_profile
+            # A consultation is case-scoped input. Do not overwrite the
+            # persistent customer profile here: Recommendation combines the
+            # saved profile with today's consultation payload.
+            if not data.open_case:
+                if data.concerns is not None:
+                    fields["concerns"] = data.concerns
+                if data.skin_profile is not None:
+                    fields["skin_profile"] = data.skin_profile
             if data.consent == 1:
                 fields["consent_date"] = datetime.now()
             if mobile and not data.guest:
