@@ -430,7 +430,6 @@ export default function NewHomePage() {
             onRegistered={() => {
               setEditProduct(null);
               void loadProducts();
-              go("catalog");
             }}
           />
         )}
