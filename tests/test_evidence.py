@@ -25,6 +25,9 @@ def test_create_evidence_with_auth(client, db_session):
     db_session.commit()
 
     token = create_access_token({"sub": "test_user"})
+    from app.models.user_role import UserRole, ROLE_REVIEWER_QA
+    db_session.add(UserRole(user_role_id="UR_AUTH_001", subject_id="test_user", role=ROLE_REVIEWER_QA))
+    db_session.commit()
 
     headers = {"Authorization": f"Bearer {token}"}
     payload = {

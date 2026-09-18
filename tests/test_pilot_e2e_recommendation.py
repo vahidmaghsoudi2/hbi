@@ -79,6 +79,7 @@ def client(monkeypatch):
 
     app.dependency_overrides.clear()
     session.close()
+    database.engine.dispose()
     if TEST_DB.exists():
         TEST_DB.unlink()
 

@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_customer_id
+from app.core.authorization import require_any_role
 from app.core.exceptions import NotFoundError, ValidationError, ConflictError
 from app.interface.schemas import (
     EvidenceCreate, EvidenceUpdate, EvidenceResponse,
@@ -10,6 +11,7 @@ from app.interface.schemas import (
     ProductKnowledgeResponse, ConflictEntryResponse
 )
 from app.interface.facades import EvidenceFacade, ProductKnowledgeFacade
+from app.models.user_role import ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN
 
 router = APIRouter()
 
@@ -18,7 +20,7 @@ router = APIRouter()
 async def create_evidence(
     data: EvidenceCreate,
     db: Session = Depends(get_db),
-    customer_id: str = Depends(get_current_customer_id),
+    auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
 ):
     facade = EvidenceFacade(db)
     try:
@@ -56,7 +58,7 @@ async def get_product_knowledge(
 async def refresh_product_knowledge(
     product_id: str,
     db: Session = Depends(get_db),
-    customer_id: str = Depends(get_current_customer_id),
+    auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
 ):
     facade = ProductKnowledgeFacade(db)
     dto = facade.refresh_from_evidence(product_id)
@@ -98,7 +100,7 @@ async def verify_evidence(
     evidence_id: str,
     request: VerifyRequest,
     db: Session = Depends(get_db),
-    customer_id: str = Depends(get_current_customer_id),
+    auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
 ):
     facade = EvidenceFacade(db)
     try:
@@ -115,7 +117,7 @@ async def resolve_conflict(
     evidence_id: str,
     request: ResolveConflictRequest,
     db: Session = Depends(get_db),
-    customer_id: str = Depends(get_current_customer_id),
+    auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
 ):
     facade = EvidenceFacade(db)
     try:

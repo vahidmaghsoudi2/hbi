@@ -129,6 +129,9 @@ export interface ProductCreateRequest {
   market_region?: string | null;
   country_of_origin?: string | null;
   packaging_version?: string | null;
+  knowledge_use_cases?: string | null;
+  knowledge_evidence_claim?: string | null;
+  knowledge_evidence_source_reference?: string | null;
 }
 
 /** PATCH /api/v1/products/{id} — matches backend ProductUpdate */

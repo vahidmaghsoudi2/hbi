@@ -11,6 +11,8 @@ from app.core.governance import (
 )
 from app.core.exceptions import ValidationError, NotFoundError, ConflictError
 from app.services.mutation_log_service import MutationLogService
+from app.services.evidence_service import EvidenceService
+from app.services.product_knowledge_service import ProductKnowledgeService
 from app.models.user_role import ROLE_ADMIN, ROLE_EDITOR, ROLE_PO, ROLE_REVIEWER_QA
 
 
@@ -56,6 +58,9 @@ class ProductService(BaseService[Product, ProductRepository]):
         if roles and not can_create_product(roles):
             raise ValidationError("Unauthorized to CREATE Product")
         data = dict(product_data)
+        knowledge_use_cases = data.pop("knowledge_use_cases", None)
+        knowledge_evidence_claim = data.pop("knowledge_evidence_claim", None)
+        knowledge_evidence_source_reference = data.pop("knowledge_evidence_source_reference", None)
         product_id = data.get("product_id")
         if product_id and self.get_by_id(product_id):
             raise ConflictError(f"Product {product_id} already exists")
@@ -83,6 +88,25 @@ class ProductService(BaseService[Product, ProductRepository]):
             target_id=product.product_id, before=None,
             after=self.log.product_snapshot(product), resulting_state=product.status,
         )
+
+        # Product Intake now creates the governed knowledge/evidence seed used
+        # by Recommendation. The seed remains UNKNOWN/PENDING until QA verifies it.
+        if knowledge_use_cases:
+            EvidenceService(self.db).add_evidence({
+                "product_id": product.product_id,
+                "source_type": "OPERATOR_DECLARATION",
+                "source_reference": knowledge_evidence_source_reference or "PRODUCT_INTAKE",
+                "claim": knowledge_evidence_claim or knowledge_use_cases,
+                "claim_type": "UNKNOWN",
+                "field": "known_use_cases",
+                "market_region": product.market_region,
+                "evidence_strength": "UNVERIFIED",
+                "evidence_status": "UNKNOWN",
+                "qa_status": "PENDING",
+            })
+            knowledge = ProductKnowledgeService(self.db)
+            knowledge.update_from_evidence(product.product_id)
+
         return product
 
     def edit_informational(self, product_id: str, updates: dict, actor_id: str, roles: Set[str]) -> Product:

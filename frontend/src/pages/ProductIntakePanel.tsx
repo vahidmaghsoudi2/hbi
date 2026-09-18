@@ -52,7 +52,7 @@ export function completeFromIntro(raw: string): Draft {
   const spfM = text.match(/SPF\s*(\d+\+?)/i);
   d.spf = spfM ? `SPF ${spfM[1]}` : "";
 
-  const sizeM = text.match(/(\d+(?:\.\d+)?)\s*(ml|میلی\s*لیتر|میلیلیتر|گرم|g\b)/i);
+  const sizeM = text.match(/(\d+(?:\.\d+)?)\s*(ml|میلی[\s‌]*لیتر|میلیلیتر|گرم|g\b)/i);
   if (sizeM) {
     d.size_value = parseFloat(sizeM[1]);
     d.size_unit = /گرم|\bg\b/i.test(sizeM[2]) ? "g" : "ml";
@@ -61,7 +61,6 @@ export function completeFromIntro(raw: string): Draft {
   if (/رنگی|tint|color/i.test(text)) d.variant = "tinted";
   else if (/بی\s*رنگ|بدون\s*رنگ|clear|بی‌رنگ/i.test(text)) d.variant = "clear";
 
-  // Prefer an explicit brand marker so multi-word brands are preserved.
   const brandMarker = text.match(/(?:برند|brand)\s*[:：-]?\s*([^،,;؛|]+?)(?=\s*(?:[،,;؛|]|\b(?:حجم|volume|spf|SPF)\b)|$)/i);
   if (brandMarker?.[1]?.trim()) {
     d.brand = brandMarker[1].trim().replace(/\s+/g, " ");
@@ -84,9 +83,8 @@ export function completeFromIntro(raw: string): Draft {
   else if (/ضدچروک|anti.?age/i.test(text)) d.category = "ضدپیری صورت";
   else d.category = "مراقبت پوست";
 
-  // When the input explicitly separates product and brand, keep the product name clean.
-  const nameBeforeBrand = text.match(/^(.*?)(?=\s*(?:،|,)\s*(?:برند|brand)\b)/i);
-  let name = (nameBeforeBrand?.[1] ?? text).trim().replace(/\s+/g, " ").slice(0, 100);
+  const nameBeforeMetadata = text.match(/^(.*?)(?=\s*(?:،|,)\s*(?:برند|brand)\b|\s+(?:حجم|volume)\s+\d|\s+(?:SPF)\s*\d+\+?\s*(?:حجم|volume)\b)/i);
+  let name = (nameBeforeMetadata?.[1] ?? text).trim().replace(/\s+/g, " ").slice(0, 100);
   if (d.spf && !/SPF/i.test(name)) name = name + " (" + d.spf + ")";
   d.product_name = name;
 
@@ -196,6 +194,9 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
           barcode_gtin: draft.barcode_gtin || null,
           market_region: draft.market_region || null,
           packaging_version: draft.packaging_version || null,
+          knowledge_use_cases: draft.category || null,
+          knowledge_evidence_claim: draft.category || null,
+          knowledge_evidence_source_reference: "PRODUCT_INTAKE",
         };
         const created = await createProduct(body, activeToken);
         setMsg(`ذخیره شد: ${created.product_id}`);
@@ -216,7 +217,12 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
         خلاصه را بنویسید → تکمیل خودکار فیلدهای اطلاعاتی → بررسی شما → ذخیره به‌صورت Draft. وضعیت هویتی، QA و چرخه انتشار توسط سرور و نقش‌های مربوط کنترل می‌شود.
       </p>
       {err && <div className="pro-alert">{err}</div>}
-      {msg && <div className="pro-status-msg">{msg}</div>}
+      {msg && (
+        <div className="pro-status-msg" role="status" aria-live="polite">
+          <strong>✓ عملیات با موفقیت انجام شد</strong>
+          <div style={{ marginTop: "0.25rem" }}>{msg}</div>
+        </div>
+      )}
 
       {!editing && (
         <div className="pro-form">
