@@ -124,6 +124,10 @@ class ProductFacade:
         products = self.service.get_verified_products()
         return [_to_product_dto(p) for p in products]
 
+    def list_all(self) -> List[ProductDTO]:
+        products = self.service.list_all()
+        return [_to_product_dto(p) for p in products]
+
 class CustomerFacade:
     def __init__(self, db: Session):
         self.service = CustomerService(db)
