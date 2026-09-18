@@ -100,7 +100,9 @@ export interface GuestCreateRequest {
 export interface SaleItemInput {
   product_id: string;
   quantity: number;
-  unit_price_toman: number;
+  /** Optional: backend derives the authoritative sale price from inventory when omitted. */
+  unit_price_toman?: number;
+  unit_price_usd?: number;
 }
 
 export interface SaleCreateRequest {
