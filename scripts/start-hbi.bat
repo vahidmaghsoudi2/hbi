@@ -156,7 +156,7 @@ echo  در انتظار آماده‌شدن Home...
 
 set "READY=0"
 for /L %%N in (1,1,30) do (
-  curl.exe --fail --silent --show-error --max-time 2 http://127.0.0.1:5173/ >nul 2>&1
+  curl.exe --noproxy "*" --fail --silent --show-error --connect-timeout 1 --max-time 2 http://127.0.0.1:5173/ >nul 2>&1
   if not errorlevel 1 (
     set "READY=1"
     goto :open_home
