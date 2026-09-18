@@ -190,7 +190,6 @@ class ProductCreate(BaseModel):
     market_region: Optional[str] = None
     country_of_origin: Optional[str] = None
     packaging_version: Optional[str] = None
-    category_id: Optional[str] = None
     knowledge_use_cases: Optional[str] = None
     knowledge_evidence_claim: Optional[str] = None
     knowledge_evidence_source_reference: Optional[str] = None
