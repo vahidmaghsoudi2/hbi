@@ -89,3 +89,33 @@ def test_pilot_operator_token_disabled_in_production(api_env, monkeypatch):
 
     assert response.status_code == 403
     assert "disabled in production" in response.json()["detail"]
+
+
+def test_duplicate_product_id_returns_conflict(api_env):
+    client, _ = api_env
+
+    token_response = client.post("/api/v1/auth/pilot-operator-token")
+    token = token_response.json()["access_token"]
+    payload = {
+        "product_id": "PILOT-DUPLICATE-001",
+        "brand": "HBI Test",
+        "product_name": "Duplicate Product",
+        "variant": "clear",
+        "size_value": 50,
+        "size_unit": "ml",
+    }
+
+    first = client.post(
+        "/api/v1/products/",
+        headers={"Authorization": f"Bearer {token}"},
+        json=payload,
+    )
+    assert first.status_code == 201, first.text
+
+    second = client.post(
+        "/api/v1/products/",
+        headers={"Authorization": f"Bearer {token}"},
+        json=payload,
+    )
+    assert second.status_code == 409, second.text
+    assert "already exists" in second.json()["detail"]
