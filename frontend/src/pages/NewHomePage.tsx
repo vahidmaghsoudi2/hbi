@@ -132,6 +132,14 @@ export default function NewHomePage() {
     return currentToken as string;
   }
 
+  async function ensureProductSession(): Promise<string | null> {
+    const cached = sessionStorage.getItem("hbi_operator_access_token");
+    if (cached) return cached;
+    const pair = await pilotOperatorToken();
+    sessionStorage.setItem("hbi_operator_access_token", pair.access_token);
+    return pair.access_token;
+  }
+
   async function runFullFlow(e: FormEvent) {
     e.preventDefault();
     setError(null);
@@ -415,7 +423,7 @@ export default function NewHomePage() {
         {active === "intake" && (
           <ProductIntakePanel
             token={token}
-            onEnsureSession={() => ensureSession(name.trim() || "مشتری مهمان", sessionStorage.getItem("hbi_concerns") || "")}
+            onEnsureSession={ensureProductSession}
             editProduct={editProduct}
             onCancelEdit={() => setEditProduct(null)}
             onRegistered={() => {
