@@ -52,7 +52,7 @@ export function completeFromIntro(raw: string): Draft {
   const spfM = text.match(/SPF\s*(\d+\+?)/i);
   d.spf = spfM ? `SPF ${spfM[1]}` : "";
 
-  const sizeM = text.match(/(\d+(?:\.\d+)?)\s*(ml|میلی\s*لیتر|میلیلیتر|گرم|g\b)/i);
+  const sizeM = text.match(/(\d+(?:\.\d+)?)\s*(ml|میلی[\s‌]*لیتر|میلیلیتر|گرم|g\b)/i);
   if (sizeM) {
     d.size_value = parseFloat(sizeM[1]);
     d.size_unit = /گرم|\bg\b/i.test(sizeM[2]) ? "g" : "ml";
@@ -219,7 +219,7 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
         خلاصه را بنویسید → تکمیل خودکار فیلدهای اطلاعاتی → بررسی شما → ذخیره به‌صورت Draft. وضعیت هویتی، QA و چرخه انتشار توسط سرور و نقش‌های مربوط کنترل می‌شود.
       </p>
       {err && <div className="pro-alert">{err}</div>}
-      {msg && <div className="pro-status-msg">{msg}</div>}
+      {msg && (\n        <div className="pro-status-msg" role="status" aria-live="polite">\n          <strong>✓ عملیات با موفقیت انجام شد</strong>\n          <div style={{ marginTop: "0.25rem" }}>{msg}</div>\n        </div>\n      )}
 
       {!editing && (
         <div className="pro-form">
