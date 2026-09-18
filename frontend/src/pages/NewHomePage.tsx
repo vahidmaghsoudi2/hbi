@@ -12,6 +12,7 @@ import {
   createSale,
   getTotalSales,
   getCustomerById,
+  getInventoryByProduct,
 } from "../api/client";
 import ProductIntakePanel from "./ProductIntakePanel";
 import type {
@@ -58,7 +59,8 @@ export default function NewHomePage() {
   const [recDone, setRecDone] = useState(false);
   const [saleProductId, setSaleProductId] = useState("");
   const [saleQty, setSaleQty] = useState(1);
-  const [salePrice, setSalePrice] = useState(0);
+  const [salePrice, setSalePrice] = useState<number | null>(null);
+  const [saleStock, setSaleStock] = useState<number | null>(null);
   const [saleFxRate, setSaleFxRate] = useState(1);
   const [saleBusy, setSaleBusy] = useState(false);
   const [lastSale, setLastSale] = useState<SaleDTO | null>(null);
@@ -297,18 +299,43 @@ export default function NewHomePage() {
     setStatusMsg("نشست مشتری پاک شد. نشست اپراتور محصولات حفظ شده است.");
   }
 
+  useEffect(() => {
+    if (!saleProductId || !token) {
+      setSalePrice(null);
+      setSaleStock(null);
+      return;
+    }
+    let cancelled = false;
+    void getInventoryByProduct(saleProductId, token)
+      .then((inv) => {
+        if (cancelled) return;
+        setSalePrice(inv.sale_price_toman ?? null);
+        setSaleStock(Math.max(0, (inv.quantity_available ?? 0) - (inv.quantity_reserved ?? 0)));
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setSalePrice(null);
+        setSaleStock(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [saleProductId, token]);
+
   async function onSaleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     if (!token || !customerId) return setError("ابتدا مشاوره را ثبت کنید.");
     if (!saleProductId.trim()) return setError("محصول را انتخاب کنید.");
     if (saleQty < 1) return setError("تعداد نامعتبر است.");
+    if (salePrice == null) return setError("قیمت فروش این محصول از موجودی دریافت نشد.");
+    if (saleStock != null && saleQty > saleStock) return setError(`موجودی قابل فروش: ${saleStock}`);
     setSaleBusy(true);
     try {
       const sale = await createSale(
         {
           customer_id: customerId,
-          items: [{ product_id: saleProductId.trim(), quantity: saleQty, unit_price_toman: salePrice }],
+          items: [{ product_id: saleProductId.trim(), quantity: saleQty }],
           fx_rate_usd_to_irr: saleFxRate,
         },
         token
@@ -607,14 +634,17 @@ export default function NewHomePage() {
                       <input id="sale-qty" className="pro-input" type="number" min={1} value={saleQty} onChange={(e) => setSaleQty(Number(e.target.value) || 1)} />
                     </div>
                     <div>
-                      <label className="pro-label" htmlFor="sale-price">
-                        قیمت واحد (تومان)
-                      </label>
-                      <input id="sale-price" className="pro-input" type="number" min={0} value={salePrice} onChange={(e) => setSalePrice(Number(e.target.value) || 0)} />
+                      <span className="pro-label">قیمت واحد (تومان)</span>
+                      <p className="pro-input" aria-live="polite">
+                        {salePrice == null ? "در حال دریافت…" : salePrice.toLocaleString("fa-IR")}
+                      </p>
                     </div>
                   </div>
+                  <p className="pro-muted">
+                    موجودی قابل فروش: {saleStock == null ? "در حال دریافت…" : saleStock.toLocaleString("fa-IR")}
+                  </p>
                   <p className="pro-summary">
-                    مبلغ: <strong>{(saleQty * salePrice).toLocaleString("fa-IR")}</strong> تومان
+                    مبلغ: <strong>{salePrice == null ? "—" : (saleQty * salePrice).toLocaleString("fa-IR")}</strong> تومان
                   </p>
                 </fieldset>
                 <div className="pro-actions">

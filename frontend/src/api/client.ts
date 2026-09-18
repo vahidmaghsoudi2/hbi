@@ -175,6 +175,18 @@ export function getProduct(productId: string): Promise<ProductDTO> {
   return request<ProductDTO>(`/products/${encodeURIComponent(productId)}`);
 }
 
+/** GET /api/v1/inventory/product/{id} — authoritative sell price and stock. */
+export function getInventoryByProduct(
+  productId: string,
+  token: string
+): Promise<{ product_id: string; quantity_available: number; quantity_reserved: number; stock_status: string; sale_price_toman?: number | null }> {
+  return request(
+    `/inventory/product/${encodeURIComponent(productId)}`,
+    {},
+    token
+  );
+}
+
 /** PATCH /api/v1/products/{id} — PO edit after save */
 export function updateProduct(
   productId: string,
