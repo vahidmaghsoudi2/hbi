@@ -61,7 +61,6 @@ export function completeFromIntro(raw: string): Draft {
   if (/رنگی|tint|color/i.test(text)) d.variant = "tinted";
   else if (/بی\s*رنگ|بدون\s*رنگ|clear|بی‌رنگ/i.test(text)) d.variant = "clear";
 
-  // Prefer an explicit brand marker so multi-word brands are preserved.
   const brandMarker = text.match(/(?:برند|brand)\s*[:：-]?\s*([^،,;؛|]+?)(?=\s*(?:[،,;؛|]|\b(?:حجم|volume|spf|SPF)\b)|$)/i);
   if (brandMarker?.[1]?.trim()) {
     d.brand = brandMarker[1].trim().replace(/\s+/g, " ");
@@ -84,9 +83,8 @@ export function completeFromIntro(raw: string): Draft {
   else if (/ضدچروک|anti.?age/i.test(text)) d.category = "ضدپیری صورت";
   else d.category = "مراقبت پوست";
 
-  // When the input explicitly separates product and brand, keep the product name clean.
-  const nameBeforeBrand = text.match(/^(.*?)(?=\s*(?:،|,)\s*(?:برند|brand)\b)/i);
-  let name = (nameBeforeBrand?.[1] ?? text).trim().replace(/\s+/g, " ").slice(0, 100);
+  const nameBeforeMetadata = text.match(/^(.*?)(?=\s*(?:،|,)\s*(?:برند|brand)\b|\s+(?:حجم|volume)\s+\d|\s+(?:SPF)\s*\d+\+?\s*(?:حجم|volume)\b)/i);
+  let name = (nameBeforeMetadata?.[1] ?? text).trim().replace(/\s+/g, " ").slice(0, 100);
   if (d.spf && !/SPF/i.test(name)) name = name + " (" + d.spf + ")";
   d.product_name = name;
 
@@ -219,7 +217,12 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
         خلاصه را بنویسید → تکمیل خودکار فیلدهای اطلاعاتی → بررسی شما → ذخیره به‌صورت Draft. وضعیت هویتی، QA و چرخه انتشار توسط سرور و نقش‌های مربوط کنترل می‌شود.
       </p>
       {err && <div className="pro-alert">{err}</div>}
-      {msg && (\n        <div className="pro-status-msg" role="status" aria-live="polite">\n          <strong>✓ عملیات با موفقیت انجام شد</strong>\n          <div style={{ marginTop: "0.25rem" }}>{msg}</div>\n        </div>\n      )}
+      {msg && (
+        <div className="pro-status-msg" role="status" aria-live="polite">
+          <strong>✓ عملیات با موفقیت انجام شد</strong>
+          <div style={{ marginTop: "0.25rem" }}>{msg}</div>
+        </div>
+      )}
 
       {!editing && (
         <div className="pro-form">
