@@ -149,7 +149,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         """Score only Evidence explicitly approved by QA for decision use."""
         approved_evidences = [
             ev for ev in evidences
-            if (getattr(ev, "qa_status", None) or "").strip().upper() == "APPROVED"
+            if (getattr(ev, "qa_status", None) or "").strip().upper() in {"APPROVED", "VERIFIED"}
         ]
         if not approved_evidences:
             return 0.0

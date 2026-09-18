@@ -204,3 +204,61 @@ def test_inventory_zero_excluded(api_env):
         ]
 
     assert zero_inv.product_id not in product_ids
+
+
+def test_verified_evidence_is_decision_usable(api_env):
+    client, db, case = api_env
+
+    product = Product(
+        product_id="verified_evidence_test_001",
+        brand="TestBrand",
+        product_name="Verified Evidence Product",
+        identity_status="VERIFIED",
+        qa_verdict="VALID",
+        status="ACTIVE",
+    )
+    db.add(product)
+    db.flush()
+
+    db.add(ProductKnowledge(
+        product_knowledge_id="PK-verified_evidence_test_001",
+        product_id=product.product_id,
+        known_use_cases="sun protection",
+        claimed_benefits="sun protection",
+        contraindications="",
+        ingredients="",
+    ))
+    db.add(Evidence(
+        evidence_id="EV-verified_evidence_test_001",
+        product_id=product.product_id,
+        source_type="INDEPENDENT",
+        source_reference="TEST-VERIFIED-SOURCE",
+        claim="sun protection use case",
+        claim_type="FACT",
+        evidence_status="SUPPORTED",
+        qa_status="VERIFIED",
+        conflict_status="NONE",
+    ))
+    db.add(Inventory(
+        inventory_id="inv-verified_evidence_test_001",
+        product_id=product.product_id,
+        quantity_available=10,
+        quantity_reserved=0,
+        quantity_damaged=0,
+        stock_status="active",
+    ))
+    db.commit()
+
+    token = _token(client)
+    response = client.post(
+        "/api/v1/recommendations/generate",
+        json={
+            "case_id": case.case_id,
+            "customer_profile": {"concerns": "ضدآفتاب"},
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert product.product_id in [item["product_id"] for item in data]
