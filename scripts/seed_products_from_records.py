@@ -49,6 +49,7 @@ def seed_products(db: Session) -> int:
                     status=p.get("status", "ACTIVE"),
                 )
             )
+            db.flush()
         inv_id = f"INV-{p['product_id']}"
         if db.get(Inventory, inv_id) is None:
             qty = int(p.get("inventory_count") or 0)
