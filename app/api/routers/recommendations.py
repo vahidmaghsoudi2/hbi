@@ -1,7 +1,7 @@
 from typing import Dict, Any, List
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_customer_id
@@ -17,7 +17,7 @@ router = APIRouter()
 
 class RecommendationRequest(BaseModel):
     case_id: str
-    customer_profile: Dict[str, Any] = {}
+    customer_profile: Dict[str, Any] = Field(default_factory=dict)
 
 
 def _to_dict(obj) -> dict:
