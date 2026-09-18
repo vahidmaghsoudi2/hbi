@@ -160,7 +160,26 @@ for /L %%N in (1,1,30) do (
 :open_home
 if "%READY%"=="1" (
   echo Home آماده است.
-  start "" "http://127.0.0.1:5173/"
+  REM Prefer an installed Chrome/Firefox; fall back to Windows default browser.
+  set "HOME_URL=http://127.0.0.1:5173/"
+  if exist "%ProgramFiles%\Google\Chrome\Application\chrome.exe" (
+    start "" "%ProgramFiles%\Google\Chrome\Application\chrome.exe" "%HOME_URL%"
+    goto :browser_opened
+  )
+  if exist "%LocalAppData%\Google\Chrome\Application\chrome.exe" (
+    start "" "%LocalAppData%\Google\Chrome\Application\chrome.exe" "%HOME_URL%"
+    goto :browser_opened
+  )
+  if exist "%ProgramFiles%\Mozilla Firefox\firefox.exe" (
+    start "" "%ProgramFiles%\Mozilla Firefox\firefox.exe" "%HOME_URL%"
+    goto :browser_opened
+  )
+  if exist "%ProgramFiles(x86)%\Mozilla Firefox\firefox.exe" (
+    start "" "%ProgramFiles(x86)%\Mozilla Firefox\firefox.exe" "%HOME_URL%"
+    goto :browser_opened
+  )
+  start "" "%HOME_URL%"
+  :browser_opened
 ) else (
   echo [خطا] Home در زمان مقرر آماده نشد.
   echo پنجره‌های Backend و Frontend را برای بررسی باز نگه دارید.
