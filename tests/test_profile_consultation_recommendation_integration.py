@@ -1,5 +1,7 @@
 """Integration reality test: persistent customer profile + today's consultation -> recommendation."""
 
+import asyncio
+
 from app.api.routers.recommendations import RecommendationRequest, generate_recommendations
 from app.models.case import Case
 from app.models.customer import Customer
@@ -44,14 +46,14 @@ def test_persistent_profile_plus_current_consultation_reaches_recommendation(db_
     db_session.add(inventory)
     db_session.commit()
 
-    result = generate_recommendations(
+    result = asyncio.run(generate_recommendations(
         RecommendationRequest(
             case_id=case.case_id,
             customer_profile={"concerns": "آبرسان", "skin_profile": "پوست حساس"},
         ),
         db_session,
         customer.customer_id,
-    )
+    ))
 
     assert len(result) == 1
     dto = result[0]
