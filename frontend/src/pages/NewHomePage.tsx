@@ -59,6 +59,7 @@ export default function NewHomePage() {
   const [saleProductId, setSaleProductId] = useState("");
   const [saleQty, setSaleQty] = useState(1);
   const [salePrice, setSalePrice] = useState(0);
+  const [saleFxRate, setSaleFxRate] = useState(1);
   const [saleBusy, setSaleBusy] = useState(false);
   const [lastSale, setLastSale] = useState<SaleDTO | null>(null);
   const [totalSales, setTotalSales] = useState<number | null>(null);
@@ -308,6 +309,7 @@ export default function NewHomePage() {
         {
           customer_id: customerId,
           items: [{ product_id: saleProductId.trim(), quantity: saleQty, unit_price_toman: salePrice }],
+          fx_rate_usd_to_irr: saleFxRate,
         },
         token
       );
