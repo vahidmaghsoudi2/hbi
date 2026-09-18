@@ -39,6 +39,7 @@ class ProductRepository(BaseRepository[Product]):
             Inventory, Product.product_id == Inventory.product_id
         ).filter(
             Product.identity_status == identity_status,
-            Product.status != "DRAFT",
+            Product.status == "ACTIVE",
+            Product.qa_verdict == "VALID",
             Inventory.quantity_available > 0
         ).all()
