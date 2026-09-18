@@ -4,6 +4,7 @@ import type { ProductCreateRequest, ProductDTO, ProductUpdateRequest } from "../
 
 type Props = {
   token?: string | null;
+  onEnsureSession?: () => Promise<string | null>;
   onRegistered?: (productId: string) => void;
   editProduct?: ProductDTO | null;
   onCancelEdit?: () => void;
@@ -117,7 +118,7 @@ function fromProduct(p: ProductDTO): Draft {
   };
 }
 
-export default function ProductIntakePanel({ token, onRegistered, editProduct, onCancelEdit }: Props) {
+export default function ProductIntakePanel({ token, onEnsureSession, onRegistered, editProduct, onCancelEdit }: Props) {
   const [intro, setIntro] = useState("");
   const [draft, setDraft] = useState<Draft>(EMPTY);
   const [busy, setBusy] = useState(false);
@@ -157,12 +158,13 @@ export default function ProductIntakePanel({ token, onRegistered, editProduct, o
       setErr("شناسه، برند و نام محصول الزامی است.");
       return;
     }
-    if (!token) {
-      setErr("برای ثبت یا ویرایش محصول، ابتدا یک نشست فعال ایجاد کنید.");
-      return;
-    }
     setBusy(true);
     try {
+      const activeToken = token ?? (await onEnsureSession?.());
+      if (!activeToken) {
+        setErr("برای ثبت یا ویرایش محصول، نشست فعال ایجاد نشد.");
+        return;
+      }
       if (editing) {
         const body: ProductUpdateRequest = {
           brand: draft.brand.trim(),
@@ -177,7 +179,7 @@ export default function ProductIntakePanel({ token, onRegistered, editProduct, o
           qa_verdict: draft.qa_verdict,
           status: draft.status,
         };
-        const updated = await updateProduct(draft.product_id.trim(), body, token);
+        const updated = await updateProduct(draft.product_id.trim(), body, activeToken);
         setMsg(`به‌روزرسانی شد: ${updated.product_id}`);
         onRegistered?.(updated.product_id);
       } else {
@@ -195,7 +197,7 @@ export default function ProductIntakePanel({ token, onRegistered, editProduct, o
           qa_verdict: draft.qa_verdict || "PENDING",
           status: draft.status || "ACTIVE",
         };
-        const created = await createProduct(body, token);
+        const created = await createProduct(body, activeToken);
         setMsg(`ذخیره شد: ${created.product_id}`);
         setIntro("");
         onRegistered?.(created.product_id);
