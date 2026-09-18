@@ -61,15 +61,19 @@ export function completeFromIntro(raw: string): Draft {
   if (/رنگی|tint|color/i.test(text)) d.variant = "tinted";
   else if (/بی\s*رنگ|بدون\s*رنگ|clear|بی‌رنگ/i.test(text)) d.variant = "clear";
 
-  if (/پرودرما|proderma/i.test(text)) d.brand = "Proderma";
+  // Prefer an explicit brand marker so multi-word brands are preserved.
+  const brandMarker = text.match(/(?:برند|brand)\s*[:：-]?\s*([^،,;؛|]+?)(?=\s*(?:[،,;؛|]|\b(?:حجم|volume|spf|SPF)\b)|$)/i);
+  if (brandMarker?.[1]?.trim()) {
+    d.brand = brandMarker[1].trim().replace(/\s+/g, " ");
+  } else if (/پرودرما|proderma/i.test(text)) d.brand = "Proderma";
   else if (/ایزدین|isdin/i.test(text)) d.brand = "ISDIN";
   else if (/لاروش|la\s*roche|laroche/i.test(text)) d.brand = "La Roche-Posay";
   else if (/بیودرما|bioderma/i.test(text)) d.brand = "Bioderma";
   else if (/اوین|eucerin/i.test(text)) d.brand = "Eucerin";
   else if (/نوتروژنا|neutrogena/i.test(text)) d.brand = "Neutrogena";
   else {
-    const latin = text.match(/\b([A-Z][A-Za-z0-9\-']{1,28})\b/);
-    d.brand = latin ? latin[1] : "Gallery";
+    const latin = text.match(/\b([A-Z][A-Za-z0-9\-']{1,28}(?:\s+[A-Z][A-Za-z0-9\-']{1,28}){0,3})\b/);
+    d.brand = latin ? latin[1].trim() : "Gallery";
   }
 
   if (/ضد\s*آفتاب|ضدآفتاب|sunscreen|spf/i.test(text)) {
@@ -80,8 +84,10 @@ export function completeFromIntro(raw: string): Draft {
   else if (/ضدچروک|anti.?age/i.test(text)) d.category = "ضدپیری صورت";
   else d.category = "مراقبت پوست";
 
-  let name = text.replace(/\s+/g, " ").slice(0, 100);
-  if (d.spf && !/SPF/i.test(name)) name = `${name} (${d.spf})`;
+  // When the input explicitly separates product and brand, keep the product name clean.
+  const nameBeforeBrand = text.match(/^(.*?)(?=\s*(?:،|,)\s*(?:برند|brand)\b)/i);
+  let name = (nameBeforeBrand?.[1] ?? text).trim().replace(/\s+/g, " ").slice(0, 100);
+  if (d.spf && !/SPF/i.test(name)) name = name + " (" + d.spf + ")";
   d.product_name = name;
 
   const slugBrand =
