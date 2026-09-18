@@ -328,6 +328,7 @@ export default function NewHomePage() {
     if (!token || !customerId) return setError("ابتدا مشاوره را ثبت کنید.");
     if (!saleProductId.trim()) return setError("محصول را انتخاب کنید.");
     if (saleQty < 1) return setError("تعداد نامعتبر است.");
+    if (!Number.isFinite(saleFxRate) || saleFxRate <= 0) return setError("نرخ تبدیل باید بزرگ‌تر از صفر باشد.");
     if (salePrice == null) return setError("قیمت فروش این محصول از موجودی دریافت نشد.");
     if (saleStock != null && saleQty > saleStock) return setError(`موجودی قابل فروش: ${saleStock}`);
     setSaleBusy(true);
@@ -639,6 +640,11 @@ export default function NewHomePage() {
                         {salePrice == null ? "در حال دریافت…" : salePrice.toLocaleString("fa-IR")}
                       </p>
                     </div>
+                  </div>
+                  <div>
+                    <label className="pro-label" htmlFor="sale-fx-rate">نرخ تبدیل دلار به ریال *</label>
+                    <input id="sale-fx-rate" className="pro-input" type="number" min={0.000001} step="any" value={saleFxRate} onChange={(e) => setSaleFxRate(Number(e.target.value))} />
+                    <p className="pro-muted">این نرخ در محاسبه نهایی فروش ثبت می‌شود.</p>
                   </div>
                   <p className="pro-muted">
                     موجودی قابل فروش: {saleStock == null ? "در حال دریافت…" : saleStock.toLocaleString("fa-IR")}
