@@ -9,7 +9,7 @@ from app.core.governance import (
     ACTION_CREATE, ACTION_EDIT, PRODUCT_GOVERNANCE_KEYS, PRODUCT_INFORMATIONAL_KEYS,
     can_create_product, can_edit_informational,
 )
-from app.core.exceptions import ValidationError, NotFoundError
+from app.core.exceptions import ValidationError, NotFoundError, ConflictError
 from app.services.mutation_log_service import MutationLogService
 from app.models.user_role import ROLE_ADMIN, ROLE_EDITOR, ROLE_PO, ROLE_REVIEWER_QA
 
@@ -52,6 +52,9 @@ class ProductService(BaseService[Product, ProductRepository]):
         if roles and not can_create_product(roles):
             raise ValidationError("Unauthorized to CREATE Product")
         data = dict(product_data)
+        product_id = data.get("product_id")
+        if product_id and self.get_by_id(product_id):
+            raise ConflictError(f"Product {product_id} already exists")
         for k in list(PRODUCT_GOVERNANCE_KEYS):
             data.pop(k, None)
         data["status"] = "DRAFT"
