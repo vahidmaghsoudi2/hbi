@@ -10,6 +10,7 @@ import {
   generateRecommendations,
   createSale,
   getTotalSales,
+  getCustomerById,
 } from "../api/client";
 import ProductIntakePanel from "./ProductIntakePanel";
 import type {
@@ -63,6 +64,7 @@ export default function NewHomePage() {
   const [lastSale, setLastSale] = useState<SaleDTO | null>(null);
   const [totalSales, setTotalSales] = useState<number | null>(null);
   const [editProduct, setEditProduct] = useState<ProductDTO | null>(null);
+  const [profileSaving, setProfileSaving] = useState(false);
 
   const loadProducts = useCallback(async () => {
     setCatalogLoading(true);
@@ -144,6 +146,79 @@ export default function NewHomePage() {
     return pair.access_token;
   }
 
+  async function loadActiveCustomerProfile() {
+    if (!token || !customerId) return;
+    try {
+      const profile = (await getCustomerById(customerId, token)) as { name?: string; mobile?: string | null; concerns?: string | null; skin_profile?: string | null };
+      if (profile.name) setName(profile.name);
+      if (profile.mobile) {
+        setMobile(profile.mobile);
+        setIsGuest(false);
+      }
+      if (profile.concerns) {
+        const saved = profile.concerns.split(",").map((x) => x.trim()).filter(Boolean);
+        setConcerns((prev) => prev.length ? prev : CONCERN_OPTIONS.filter((x) => saved.includes(x.value)).map((x) => x.value));
+      }
+      if (profile.skin_profile) {
+        setSkin((prev) => prev.length ? prev : profile.skin_profile!.split(",").map((x) => x.trim()).filter(Boolean));
+      }
+    } catch {
+      // The active session remains usable even if profile hydration fails.
+    }
+  }
+
+  useEffect(() => {
+    void loadActiveCustomerProfile();
+  }, [token, customerId]);
+
+  async function saveActiveProfile() {
+    setError(null);
+    setStatusMsg(null);
+    if (!name.trim()) return setError("نام الزامی است.");
+    if (!consent) return setError("رضایت ذخیره اطلاعات را تأیید کنید.");
+    setProfileSaving(true);
+    try {
+      const currentToken = await ensureSession(name.trim(), concernsText);
+      const intake = (await customerIntake({
+        name: name.trim(),
+        mobile: isGuest || !mobile.trim() ? undefined : mobile.trim(),
+        concerns: concernsText || undefined,
+        consent: 1,
+        skin_profile: skin.length ? skin.join(",") : undefined,
+        guest: isGuest || !mobile.trim(),
+        open_case: false,
+      } as CustomerIntakeRequest, currentToken)) as { customer?: { customer_id?: string } };
+      const resolvedId = intake?.customer?.customer_id ?? sessionStorage.getItem("hbi_customer_id");
+      if (resolvedId) {
+        sessionStorage.setItem("hbi_customer_id", resolvedId);
+        setCustomerId(resolvedId);
+      }
+      sessionStorage.setItem("hbi_concerns", concernsText);
+      setStatusMsg("پروفایل مشتری فعال ذخیره شد. همین مشتری در مشاوره، پرونده و فروش استفاده می‌شود.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setProfileSaving(false);
+    }
+  }
+
+  function startNewCustomer() {
+    ["hbi_access_token", "hbi_refresh_token", "hbi_customer_id", "hbi_case_id", "hbi_concerns"].forEach((k) => sessionStorage.removeItem(k));
+    setToken(null);
+    setCustomerId(null);
+    setCaseId(null);
+    setName("");
+    setMobile("");
+    setIsGuest(true);
+    setConcerns([]);
+    setSkin([]);
+    setNote("");
+    setRecs([]);
+    setRecDone(false);
+    setStatusMsg("مشتری جدید آماده ثبت است. نشست محصولات/اپراتور دست‌نخورده باقی ماند.");
+    setActive("profile");
+  }
+
   async function runFullFlow(e: FormEvent) {
     e.preventDefault();
     setError(null);
@@ -194,15 +269,8 @@ export default function NewHomePage() {
   }
 
   function clearSession() {
-    ["hbi_access_token", "hbi_refresh_token", "hbi_customer_id", "hbi_case_id", "hbi_concerns"].forEach((k) =>
-      sessionStorage.removeItem(k)
-    );
-    setToken(null);
-    setCustomerId(null);
-    setCaseId(null);
-    setRecs([]);
-    setRecDone(false);
-    setStatusMsg("نشست پاک شد.");
+    startNewCustomer();
+    setStatusMsg("نشست مشتری پاک شد. نشست اپراتور محصولات حفظ شده است.");
   }
 
   async function onSaleSubmit(e: FormEvent) {
@@ -357,7 +425,22 @@ export default function NewHomePage() {
 
         {active === "profile" && (
           <section className="pro-panel">
-            <h1>پروفایل و نشست</h1>
+            <div className="pro-panel-head">
+              <div>
+                <h1>پروفایل مشتری</h1>
+                <p className="pro-lead">این مشتری فعال، مرجع مشترک مشاوره، پرونده، پیشنهاد و فروش است.</p>
+              </div>
+              <button type="button" className="pro-btn-secondary" onClick={startNewCustomer}>مشتری جدید</button>
+            </div>
+            <fieldset className="pro-fieldset">
+              <legend>اطلاعات مشتری فعال</legend>
+              <div className="pro-grid-2">
+                <div><label className="pro-label" htmlFor="profile-name">نام *</label><input id="profile-name" className="pro-input" value={name} onChange={(e) => setName(e.target.value)} /></div>
+                <div><label className="pro-label" htmlFor="profile-mobile">موبایل</label><input id="profile-mobile" className="pro-input" value={mobile} onChange={(e) => setMobile(e.target.value)} disabled={isGuest} placeholder="09…" /></div>
+              </div>
+              <label className="pro-check"><input type="checkbox" checked={isGuest} onChange={(e) => setIsGuest(e.target.checked)} /> مشتری مهمان بدون موبایل</label>
+              <label className="pro-check"><input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} /> رضایت ذخیره اطلاعات</label>
+            </fieldset>
             <dl className="pro-dl">
               <div>
                 <dt>مشتری</dt>
@@ -377,12 +460,11 @@ export default function NewHomePage() {
               </div>
             </dl>
             <div className="pro-actions">
-              <button type="button" className="pro-btn-secondary" onClick={clearSession}>
-                پاک کردن نشست
+              <button type="button" className="pro-btn-primary" disabled={profileSaving} onClick={() => void saveActiveProfile()}>
+                {profileSaving ? "در حال ذخیره…" : "ذخیره پروفایل مشتری"}
               </button>
-              <button type="button" className="pro-btn-primary" onClick={() => go("consult")}>
-                مشاوره
-              </button>
+              <button type="button" className="pro-btn-secondary" onClick={() => go("consult")}>مشاوره همین مشتری</button>
+              <button type="button" className="pro-btn-secondary" onClick={clearSession}>مشتری جدید</button>
             </div>
           </section>
         )}
