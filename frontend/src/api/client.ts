@@ -6,6 +6,7 @@ import type {
   CaseCreateRequest,
   CaseDTO,
   CustomerIntakeRequest,
+  CustomerSearchResult,
   GuestCreateRequest,
   PilotTokenRequest,
   ProductDTO,
@@ -80,6 +81,15 @@ export function listCasesByCustomer(
 }
 
 /** Active customer profile — requires the active customer token. */
+/** Search existing customers by name — requires an authenticated operational/customer access token. */
+export function searchCustomers(query: string, token: string): Promise<CustomerSearchResult[]> {
+  return request<CustomerSearchResult[]>(
+    `/customers/search?q=${encodeURIComponent(query)}`,
+    {},
+    token
+  );
+}
+
 export function getCustomerById(customerId: string, token: string): Promise<Record<string, unknown>> {
   return request<Record<string, unknown>>(
     `/customers/id/${encodeURIComponent(customerId)}`,
