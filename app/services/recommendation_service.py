@@ -177,8 +177,17 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         for u in decision_state.get("unknowns", []):
             if u.get("unknown_priority") == "CRITICAL_UNKNOWN":
                 return "INELIGIBLE_PENDING_REVIEW"
-        # Hard gate: any active Medical Context forces pending review (independent of Need).
+        # Hard gates: medical context, claim-boundary violations, and HIGH/CRITICAL conflicts
+        # must never become an ordinary recommendation even if the numeric score is high.
         if decision_state.get("medical_context_active"):
+            return "INELIGIBLE_PENDING_REVIEW"
+        if engine_result.get("claim_boundary_violations"):
+            return "INELIGIBLE_PENDING_REVIEW"
+        high_or_critical = [
+            c for c in (engine_result.get("conflicts") or [])
+            if c.get("severity") in (ConflictSeverity.HIGH.value, ConflictSeverity.CRITICAL.value)
+        ]
+        if high_or_critical:
             return "INELIGIBLE_PENDING_REVIEW"
         if need_match < NEED_MATCH_SUFFICIENT or not decision_state.get("needs"):
             return "INELIGIBLE_PENDING_REVIEW"
