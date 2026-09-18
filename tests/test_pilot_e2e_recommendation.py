@@ -30,6 +30,8 @@ def client(monkeypatch):
     from app.models.customer import Customer
     from app.models.case import Case
     from app.models.evidence import Evidence
+    from app.models.product import Product
+    from app.models.product import Product
     from app.models.product_knowledge import ProductKnowledge
     from app.main import app
     from app.core.deps import get_db
@@ -37,6 +39,9 @@ def client(monkeypatch):
     Session = sessionmaker(bind=database.engine)
     session = Session()
     seed(session)
+    product = session.query(Product).filter_by(product_id="ISDIN-FOTOUTRA100-50ML").one()
+    product.status = "ACTIVE"
+    product.qa_verdict = "VALID"
     pk = session.query(ProductKnowledge).filter_by(
         product_id="ISDIN-FOTOUTRA100-50ML"
     ).one()
