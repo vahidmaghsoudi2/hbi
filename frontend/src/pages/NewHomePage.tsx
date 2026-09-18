@@ -414,6 +414,7 @@ export default function NewHomePage() {
 
         {active === "intake" && (
           <ProductIntakePanel
+            token={token}
             editProduct={editProduct}
             onCancelEdit={() => setEditProduct(null)}
             onRegistered={() => {
