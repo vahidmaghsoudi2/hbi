@@ -8,6 +8,7 @@ import {
   customerIntake,
   createGuest,
   generateRecommendations,
+  listRecommendationsByCase,
   createSale,
   getTotalSales,
   getCustomerById,
@@ -167,6 +168,32 @@ export default function NewHomePage() {
   useEffect(() => {
     void loadActiveCustomerProfile();
   }, [token, customerId]);
+
+  useEffect(() => {
+    if (active !== "results") return;
+    const storedCaseId = sessionStorage.getItem("hbi_case_id");
+    if (storedCaseId && storedCaseId !== caseId) setCaseId(storedCaseId);
+    if (!token || !storedCaseId) {
+      setRecs([]);
+      setRecDone(false);
+      return;
+    }
+    let cancelled = false;
+    void listRecommendationsByCase(storedCaseId, token)
+      .then((list) => {
+        if (cancelled) return;
+        setRecs(Array.isArray(list) ? list : []);
+        setRecDone(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setRecs([]);
+        setRecDone(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [active, token, caseId]);
 
   async function saveActiveProfile() {
     setError(null);
