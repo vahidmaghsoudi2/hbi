@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.deps import get_db
 from app.core.authorization import get_current_subject_and_roles, require_any_role
-from app.core.exceptions import NotFoundError, ValidationError
+from app.core.exceptions import NotFoundError, ValidationError, ConflictError
 from app.core.governance import can_view_mutation_log
 from app.interface.facades import ProductFacade
 from app.interface.schemas import (
@@ -31,6 +31,8 @@ def _http_from_domain(exc):
         raise HTTPException(status_code=404, detail=str(exc))
     if isinstance(exc, ValidationError):
         raise HTTPException(status_code=422, detail=str(exc))
+    if isinstance(exc, ConflictError):
+        raise HTTPException(status_code=409, detail=str(exc))
     raise exc
 
 
