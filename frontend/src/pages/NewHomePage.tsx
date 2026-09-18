@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   listProducts,
   pilotToken,
+  pilotOperatorToken,
   customerIntake,
   createGuest,
   generateRecommendations,
