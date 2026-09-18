@@ -172,6 +172,7 @@ export default function NewHomePage() {
     setError(null);
     setStatusMsg(null);
     if (!name.trim()) return setError("نام الزامی است.");
+    if (!mobile.trim()) return setError("شماره موبایل الزامی است.");
     setProfileSaving(true);
     try {
       const currentToken = await ensureSession(name.trim(), concernsText);
@@ -221,6 +222,7 @@ export default function NewHomePage() {
     setRecDone(false);
     setRecs([]);
     if (!name.trim()) return setError("نام الزامی است.");
+    if (!mobile.trim()) return setError("شماره موبایل الزامی است.");
     if (!concernsText) return setError("حداقل یک موضوع یا نوع پوست را انتخاب کنید.");
     setBusy(true);
     try {
