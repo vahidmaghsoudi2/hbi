@@ -110,6 +110,7 @@ export interface GuestCreateRequest {
 export interface SaleItemInput {
   product_id: string;
   quantity: number;
+  recommendation_id?: string;
   /** Optional: backend derives the authoritative sale price from inventory when omitted. */
   unit_price_toman?: number;
   unit_price_usd?: number;
@@ -126,7 +127,7 @@ export interface SaleDTO {
   sale_id?: string;
   customer_id?: string;
   total_amount_toman?: number;
-  items?: unknown;
+  items?: Array<{ product_id?: string; quantity?: number; recommendation_id?: string | null }>;
   [key: string]: unknown;
 }
 
