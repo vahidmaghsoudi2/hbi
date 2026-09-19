@@ -61,7 +61,8 @@ def test_persistent_profile_plus_current_consultation_reaches_recommendation(db_
     assert dto["eligibility_status"] == "ELIGIBLE"
     assert dto["need_match_score"] == 0.5
     assert dto["evidence_score"] == 1.0
-    assert dto["availability"] == 10
+    # availability is a status string from inventory gate, not raw quantity
+    assert dto["availability"] == "AVAILABLE"
 
     persisted_customer = db_session.get(Customer, customer.customer_id)
     assert persisted_customer.concerns == "خشکی"
