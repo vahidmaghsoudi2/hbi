@@ -5,13 +5,17 @@ PO Controlled Hybrid (Option 3):
   Engine-Ready requires governed Identity + Evidence + Product QA,
   with claim-level (non-identity) acceptable evidence.
 
+Acceptance Matrix (claim-level):
+  field in {claimed_benefits, known_use_cases}
+  OR claim_type in {BENEFIT, CLAIM, USE, SAFETY, INDICATION}
+  Identity fields never count as claim-level.
+
 Does not change scoring weights, Need vocabulary, or Issue #37.
-Does not invent medical standards — uses existing Evidence.field / claim_type.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List, Optional, Set
+from typing import List
 
 from sqlalchemy.orm import Session
 
@@ -23,7 +27,6 @@ from app.services.evidence_readiness_service import (
 
 # --- Acceptance Matrix (executable) ---
 
-# Evidence that only supports product identity / catalog identity.
 IDENTITY_FIELDS: frozenset = frozenset(
     {
         "brand",
@@ -35,22 +38,15 @@ IDENTITY_FIELDS: frozenset = frozenset(
     }
 )
 
-# ProductKnowledge / claim surfaces already used in repository.
+# Explicit claim surfaces from the mission Acceptance Matrix only.
 CLAIM_FIELDS: frozenset = frozenset(
     {
         "claimed_benefits",
         "known_use_cases",
-        "ingredients",
-        "contraindications",
-        "benefits",
-        "use_case",
-        "use_cases",
-        "indication",
-        "indications",
-        "safety",
     }
 )
 
+# Explicit claim_type set from the mission Acceptance Matrix (no FACT).
 CLAIM_TYPES: frozenset = frozenset(
     {
         "BENEFIT",
@@ -58,7 +54,6 @@ CLAIM_TYPES: frozenset = frozenset(
         "USE",
         "SAFETY",
         "INDICATION",
-        "FACT",  # non-identity FACT may still be claim-surface if field is claim
     }
 )
 
@@ -78,17 +73,16 @@ class HybridReadinessResult:
 
 
 def _is_claim_level(ev: Evidence) -> bool:
+    """True only when field/claim_type match the Acceptance Matrix."""
     field_name = (getattr(ev, "field", None) or "").strip().lower()
     claim_type = (getattr(ev, "claim_type", None) or "").strip().upper()
 
     if field_name in IDENTITY_FIELDS:
-        # Explicit claim_type on identity field does not upgrade to claim-level.
         return False
     if field_name in CLAIM_FIELDS:
         return True
-    if claim_type in {"BENEFIT", "CLAIM", "USE", "SAFETY", "INDICATION"}:
+    if claim_type in CLAIM_TYPES:
         return True
-    # Unknown field + FACT/empty: not claim-level (no guessing).
     return False
 
 

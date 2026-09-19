@@ -99,3 +99,41 @@ def test_approve_still_allows_identity_only_claim_ready(db_session):
     _ev(db_session, pid, "E_AP", field="brand", claim_type="FACT")
     product = ProductTransitionService(db_session).approve(pid, "po", PO)
     assert product.status == "APPROVED"
+
+
+def test_ingredients_alone_not_engine_ready(db_session):
+    """ingredients without matrix claim_type must not create Engine-Ready."""
+    pid = "P_HYB_ING"
+    _product(db_session, pid)
+    _ev(db_session, pid, "E_ING", field="ingredients", claim_type="FACT")
+    result = ControlledHybridPolicy(db_session).evaluate(pid)
+    assert result.claim_ready is True
+    assert result.engine_ready is False
+    assert "E_ING" in result.identity_only_evidence_ids
+
+
+def test_unknown_field_without_claim_type_not_engine_ready(db_session):
+    pid = "P_HYB_UNK"
+    _product(db_session, pid)
+    _ev(db_session, pid, "E_UNK", field="mystery_attribute", claim_type="FACT")
+    result = ControlledHybridPolicy(db_session).evaluate(pid)
+    assert result.claim_ready is True
+    assert result.engine_ready is False
+
+
+def test_claim_type_safety_on_non_matrix_field_is_engine_ready(db_session):
+    """Acceptance Matrix: claim_type SAFETY qualifies even if field is not listed."""
+    pid = "P_HYB_SAFETY"
+    _product(db_session, pid)
+    _ev(db_session, pid, "E_SF", field="contraindications", claim_type="SAFETY")
+    result = ControlledHybridPolicy(db_session).evaluate(pid)
+    assert result.engine_ready is True
+    assert "E_SF" in result.claim_evidence_ids
+
+
+def test_known_use_cases_field_is_engine_ready(db_session):
+    pid = "P_HYB_KUC"
+    _product(db_session, pid)
+    _ev(db_session, pid, "E_KUC", field="known_use_cases", claim_type="FACT")
+    result = ControlledHybridPolicy(db_session).evaluate(pid)
+    assert result.engine_ready is True
