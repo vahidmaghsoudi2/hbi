@@ -12,6 +12,7 @@ from app.core.governance import (
 from app.models.product import Product
 from app.models.user_role import ROLE_PO, ROLE_REVIEWER_QA
 from app.services.evidence_readiness_service import EvidenceReadinessService
+from app.services.controlled_hybrid_policy import ControlledHybridPolicy
 from app.services.mutation_log_service import MutationLogService
 
 
@@ -20,6 +21,7 @@ class ProductTransitionService:
         self.db = db
         self.log = MutationLogService(db)
         self.readiness = EvidenceReadinessService(db)
+        self.hybrid = ControlledHybridPolicy(db)
 
     def _get_product(self, product_id: str) -> Product:
         product = self.db.query(Product).filter(Product.product_id == product_id).first()
@@ -54,9 +56,7 @@ class ProductTransitionService:
 
     def submit(self, product_id, actor_id, roles):
         product = self._get_product(product_id)
-        if product.status != "DRAFT":
-            raise ValidationError("SUBMIT requires status=DRAFT")
-        if not (product.brand and product.product_name):
+        if not (product.brand and str(product.brand).strip() and product.product_name and str(product.product_name).strip()):
             raise ValidationError("SUBMIT requires brand and product_name")
         return self._transition(product_id, ACTION_SUBMIT, actor_id, roles)
 
@@ -93,9 +93,12 @@ class ProductTransitionService:
             raise ValidationError("ACTIVATE requires qa_verdict=VALID")
         if product.identity_status != "VERIFIED":
             raise ValidationError("ACTIVATE requires identity_status=VERIFIED")
-        readiness = self.readiness.evaluate(product_id)
-        if not readiness.ready:
-            raise ValidationError(f"Evidence Readiness FAIL: {readiness.summary}")
+        # Controlled Hybrid: ACTIVATE = Engine-Ready (claim-level evidence required).
+        hybrid = self.hybrid.evaluate(product_id)
+        if not hybrid.engine_ready:
+            raise ValidationError(
+                f"Controlled Hybrid Engine-Ready FAIL: {hybrid.summary}"
+            )
         return self._transition(product_id, ACTION_ACTIVATE, actor_id, roles)
 
     def archive(self, product_id, actor_id, roles, reason=None):
@@ -103,42 +106,41 @@ class ProductTransitionService:
 
     def set_product_qa(self, product_id, actor_id, roles, verdict, notes=None):
         if not roles.intersection({ROLE_REVIEWER_QA, ROLE_PO}):
-            raise ValidationError("Product QA decision requires Reviewer/QA or PO")
+            raise ValidationError("QA_CHANGE requires REVIEWER_QA or PO")
         allowed = {"PENDING", "VALID", "INVALID", "CONFLICT", "UNKNOWN", "NEEDS_REVIEW"}
         if verdict not in allowed:
             raise ValidationError(f"Invalid qa_verdict: {verdict}")
         product = self._get_product(product_id)
+        actor_role = ROLE_PO if ROLE_PO in roles else ROLE_REVIEWER_QA
         before = self.log.product_snapshot(product)
         product.qa_verdict = verdict
         product.qa_reviewed_at = datetime.now(timezone.utc)
-        if notes is not None:
-            product.qa_notes = notes
+        product.qa_notes = notes
         self.db.flush()
         after = self.log.product_snapshot(product)
-        role = ROLE_PO if ROLE_PO in roles else ROLE_REVIEWER_QA
-        self.log.append(actor_id=actor_id, actor_role=role, action=ACTION_QA_CHANGE,
+        self.log.append(actor_id=actor_id, actor_role=actor_role, action=ACTION_QA_CHANGE,
                         target_id=product_id, before=before, after=after,
-                        resulting_state=product.status)
+                        reason=notes, resulting_state=product.status)
         return product
 
-    def verify_identity(self, product_id, actor_id, roles, identity_status,
-                        source_refs=None, confidence=None):
+    def verify_identity(self, product_id, actor_id, roles, status, source_refs=None, confidence=None):
         if not roles.intersection({ROLE_REVIEWER_QA, ROLE_PO}):
-            raise ValidationError("Identity verification requires Reviewer/QA or PO")
-        allowed = {"VERIFIED", "PARTIAL_IDENTITY", "CONFLICT", "NEEDS_REVIEW"}
-        if identity_status not in allowed:
-            raise ValidationError(f"Invalid identity_status: {identity_status}")
+            raise ValidationError("IDENTITY_CHANGE requires REVIEWER_QA or PO")
+        allowed = {"VERIFIED", "NEEDS_REVIEW", "REJECTED", "UNKNOWN"}
+        if status not in allowed:
+            raise ValidationError(f"Invalid identity_status: {status}")
         product = self._get_product(product_id)
+        actor_role = ROLE_PO if ROLE_PO in roles else ROLE_REVIEWER_QA
         before = self.log.product_snapshot(product)
-        product.identity_status = identity_status
+        product.identity_status = status
         if source_refs is not None:
             product.identity_source_refs = source_refs
         if confidence is not None:
             product.identity_confidence = confidence
+        product.identity_verified_at = datetime.now(timezone.utc)
         self.db.flush()
         after = self.log.product_snapshot(product)
-        role = ROLE_PO if ROLE_PO in roles else ROLE_REVIEWER_QA
-        self.log.append(actor_id=actor_id, actor_role=role, action=ACTION_IDENTITY_CHANGE,
+        self.log.append(actor_id=actor_id, actor_role=actor_role, action=ACTION_IDENTITY_CHANGE,
                         target_id=product_id, before=before, after=after,
-                        resulting_state=product.status)
+                        reason=source_refs, resulting_state=product.status)
         return product
