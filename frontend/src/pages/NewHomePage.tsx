@@ -60,6 +60,7 @@ export default function NewHomePage() {
   const [recs, setRecs] = useState<RecommendationDTO[]>([]);
   const [recDone, setRecDone] = useState(false);
   const [saleProductId, setSaleProductId] = useState("");
+  const [selectedRecommendationId, setSelectedRecommendationId] = useState<string | null>(null);
   const [saleQty, setSaleQty] = useState(1);
   const [salePrice, setSalePrice] = useState<number | null>(null);
   const [saleStock, setSaleStock] = useState<number | null>(null);
@@ -299,6 +300,13 @@ export default function NewHomePage() {
     setRecDone(false);
     setStatusMsg("مشتری جدید آماده ثبت است. نشست محصولات/اپراتور دست‌نخورده باقی ماند.");
     setActive("profile");
+  }
+
+  function selectRecommendationForSale(r: RecommendationDTO) {
+    setSaleProductId(r.product_id);
+    setSelectedRecommendationId(r.recommendation_id);
+    setStatusMsg(`پیشنهاد ${r.recommendation_id} برای فروش انتخاب شد.`);
+    setActive("sales");
   }
 
   async function runFullFlow(e: FormEvent) {
