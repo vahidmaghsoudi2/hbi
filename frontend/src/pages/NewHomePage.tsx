@@ -162,6 +162,9 @@ export default function NewHomePage() {
       setNote("");
       setRecs([]);
       setRecDone(false);
+      setSelectedRecommendationId(null);
+      setSaleProductId("");
+      setLastSale(null);
       setStatusMsg("مشتری قبلی انتخاب شد. اطلاعات سابقه بارگذاری شد؛ مشکل امروز را ثبت کنید.");
       setCustomerSearchResults([]);
       setActive("consult");
@@ -298,6 +301,9 @@ export default function NewHomePage() {
     setNote("");
     setRecs([]);
     setRecDone(false);
+    setSelectedRecommendationId(null);
+    setSaleProductId("");
+    setLastSale(null);
     setStatusMsg("مشتری جدید آماده ثبت است. نشست محصولات/اپراتور دست‌نخورده باقی ماند.");
     setActive("profile");
   }
@@ -405,6 +411,8 @@ export default function NewHomePage() {
         token
       );
       setLastSale(sale);
+      setSelectedRecommendationId(null);
+      setSaleProductId("");
       setStatusMsg(`فروش ثبت شد: ${sale.sale_id ?? "OK"}`);
       await refreshSalesTotal();
     } catch (err) {
@@ -714,7 +722,10 @@ export default function NewHomePage() {
                   <label className="pro-label" htmlFor="sale-product">
                     محصول
                   </label>
-                  <select id="sale-product" className="pro-input" value={saleProductId} onChange={(e) => setSaleProductId(e.target.value)}>
+                  <select id="sale-product" className="pro-input" value={saleProductId} onChange={(e) => {
+                      setSaleProductId(e.target.value);
+                      setSelectedRecommendationId(null);
+                    }}>
                     <option value="">— انتخاب از کاتالوگ —</option>
                     {products.map((p) => (
                       <option key={p.product_id} value={p.product_id}>
@@ -725,7 +736,10 @@ export default function NewHomePage() {
                   <label className="pro-label" htmlFor="sale-manual">
                     یا product_id دستی
                   </label>
-                  <input id="sale-manual" className="pro-input" value={saleProductId} onChange={(e) => setSaleProductId(e.target.value)} />
+                  <input id="sale-manual" className="pro-input" value={saleProductId} onChange={(e) => {
+                      setSaleProductId(e.target.value);
+                      setSelectedRecommendationId(null);
+                    }} />
                   <div className="pro-grid-2">
                     <div>
                       <label className="pro-label" htmlFor="sale-qty">
