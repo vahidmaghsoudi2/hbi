@@ -40,7 +40,17 @@ def _setup(db_session):
         evidence_refs="[]",
         warnings="[]",
     )
-    db_session.add_all([customer, case, product, inventory, recommendation])
+    # Explicit parent-first commits: under PRAGMA foreign_keys=ON, a single
+    # add_all/flush can insert Inventory before Product and fail FK.
+    db_session.add(customer)
+    db_session.commit()
+    db_session.add(case)
+    db_session.commit()
+    db_session.add(product)
+    db_session.commit()
+    db_session.add(inventory)
+    db_session.commit()
+    db_session.add(recommendation)
     db_session.commit()
     return customer, case, product, inventory, recommendation
 
@@ -96,7 +106,9 @@ def test_recommendation_product_consistency_is_enforced(db_session):
         quantity_available=2,
         sale_price_usd=10.0,
     )
-    db_session.add_all([other_product, other_inventory])
+    db_session.add(other_product)
+    db_session.commit()
+    db_session.add(other_inventory)
     db_session.commit()
 
     try:
@@ -120,6 +132,7 @@ def test_legacy_unlinked_sale_remains_valid(db_session):
     db_session.commit()
     item = db_session.query(SaleItem).filter(SaleItem.sale_id == sale.sale_id).one()
     assert item.recommendation_id is None
+
 
 def test_non_eligible_recommendation_cannot_be_linked_to_sale(db_session):
     _, _, _, _, recommendation = _setup(db_session)
