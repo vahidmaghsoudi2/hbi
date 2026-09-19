@@ -167,6 +167,18 @@ export function getTotalSales(token: string): Promise<{ total_sales: number }> {
   return request<{ total_sales: number }>("/sales/total", {}, token);
 }
 
+/** GET /api/v1/sales/customer/{customerId} — purchase history for authenticated customer */
+export function listSalesByCustomer(
+  customerId: string,
+  token: string
+): Promise<SaleDTO[]> {
+  return request<SaleDTO[]>(
+    `/sales/customer/${encodeURIComponent(customerId)}`,
+    {},
+    token
+  );
+}
+
 /** POST /api/v1/products/ — requires the active pilot/customer JWT */
 export function createProduct(body: ProductCreateRequest, token: string): Promise<ProductDTO> {
   return request<ProductDTO>("/products/", {

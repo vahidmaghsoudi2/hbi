@@ -64,3 +64,20 @@ async def get_total_sales(
 ):
     facade = SaleFacade(db)
     return {"total_sales": facade.get_total_sales()}
+
+
+@router.get("/customer/{customer_id}")
+async def list_sales_for_customer(
+    customer_id: str,
+    db: Session = Depends(get_db),
+    auth_customer_id: str = Depends(get_current_customer_id),
+):
+    """Purchase history for a customer (Sale + SaleItem + recommendation_id when present)."""
+    if customer_id != auth_customer_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied",
+        )
+    facade = SaleFacade(db)
+    sales = facade.find_by_customer(customer_id)
+    return [_to_dict(s) for s in sales]

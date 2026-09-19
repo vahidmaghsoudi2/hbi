@@ -229,6 +229,33 @@ class SaleFacade:
     def get_total_sales(self) -> int:
         return self.service.get_total_sales()
 
+    def find_by_customer(self, customer_id: str) -> List[SaleDTO]:
+        """Customer purchase history with SaleItem + optional recommendation_id."""
+        sales = self.service.find_by_customer(customer_id)
+        out: List[SaleDTO] = []
+        for sale in sales:
+            sale_items = self.service.get_sale_items(sale.sale_id)
+            item_dtos = [
+                SaleItemDTO(
+                    sale_item_id=si.sale_item_id,
+                    sale_id=si.sale_id,
+                    product_id=si.product_id,
+                    recommendation_id=getattr(si, "recommendation_id", None),
+                    quantity=si.quantity,
+                    unit_price_toman=si.unit_price_toman,
+                )
+                for si in sale_items
+            ]
+            out.append(
+                SaleDTO(
+                    sale_id=sale.sale_id,
+                    customer_id=sale.customer_id,
+                    total_amount_toman=sale.total_amount_toman,
+                    items=item_dtos,
+                )
+            )
+        return out
+
 from app.services.evidence_service import EvidenceService
 from app.services.product_knowledge_service import ProductKnowledgeService
 from app.interface.dto import EvidenceDTO, ProductKnowledgeDTO, ConflictEntryDTO
