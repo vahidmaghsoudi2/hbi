@@ -305,9 +305,11 @@ def _logs_by_action(db, product_id, action):
 
 
 def _seed_ready_evidence(db, product_id, eid="E_WP04"):
+    # Claim-level evidence so ACTIVATE satisfies Controlled Hybrid Engine-Ready.
     db.add(Evidence(
         evidence_id=eid, product_id=product_id, source_type="PEER_REVIEWED",
-        source_reference="s1", claim="c1", qa_status="VERIFIED", conflict_status="NONE"))
+        source_reference="s1", claim="c1", field="claimed_benefits",
+        claim_type="BENEFIT", qa_status="VERIFIED", conflict_status="NONE"))
     db.flush()
 
 
