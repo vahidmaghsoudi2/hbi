@@ -212,6 +212,7 @@ class SaleFacade:
                     sale_item_id=si.sale_item_id,
                     sale_id=si.sale_id,
                     product_id=si.product_id,
+                    recommendation_id=getattr(si, "recommendation_id", None),
                     quantity=si.quantity,
                     unit_price_toman=si.unit_price_toman
                 ) for si in sale_items
