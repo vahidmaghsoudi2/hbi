@@ -7,6 +7,7 @@ class SaleItem(Base):
     sale_item_id = Column(String, primary_key=True)
     sale_id = Column(String, ForeignKey("Sale.sale_id", ondelete="CASCADE"), nullable=False)
     product_id = Column(String, ForeignKey("Product.product_id", ondelete="RESTRICT"), nullable=False)
+    recommendation_id = Column(String, ForeignKey("Recommendation.recommendation_id", ondelete="SET NULL"), nullable=True)
     quantity = Column(Integer, nullable=False)
     unit_price_toman = Column(Integer, nullable=False)  # legacy retained
     unit_price_usd = Column(Float, nullable=True)
@@ -15,3 +16,4 @@ class SaleItem(Base):
     __table_args__ = ()
     sale = relationship("Sale", back_populates="sale_items")
     product = relationship("Product", back_populates="sale_items")
+    recommendation = relationship("Recommendation")
