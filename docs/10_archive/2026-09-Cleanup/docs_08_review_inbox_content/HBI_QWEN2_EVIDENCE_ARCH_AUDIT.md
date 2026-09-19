@@ -1,3 +1,7 @@
-# HBI — Qwen2 Evidence Architecture Audit (archived)
+STATUS: REVIEW INPUT
+VERIFICATION: NOT YET REPOSITORY-VERIFIED (raw body not uploaded to GitHub at integration time)
+SOURCE: External team review — Qwen2 Evidence Architecture
 
-Transient review-inbox artifact. Archived 2026-09 hygiene cleanup.
+SCOPE REQUESTED:
+Evidence Source → Record → Storage/Ledger → Scoring → Recommendation
+No new Evidence data. Product A–D frozen.

@@ -1,3 +1,7 @@
-# Review Inbox (archived)
+# Review Inbox
 
-Former `docs/08_review_inbox` contents archived under 2026-09 Cleanup.
+**STATUS:** REVIEW INPUT storage  
+**VERIFICATION:** Files here are NOT Source of Truth  
+**SOURCE:** External team reviews (paste bodies when available)
+
+Hierarchy: GitHub master → files → tests → CI → commits → review findings.

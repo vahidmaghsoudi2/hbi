@@ -1,3 +1,7 @@
-# HBI — DeepSeek1 Security Audit (archived)
+STATUS: REVIEW INPUT
+VERIFICATION: NOT YET REPOSITORY-VERIFIED (raw body not uploaded to GitHub at integration time)
+SOURCE: External team review — DeepSeek1 Security
 
-Transient review-inbox artifact. Archived 2026-09 hygiene cleanup.
+SCOPE REQUESTED:
+Authentication Boundary; Pilot Token Exposure; Dev vs Production; Authorization;
+Secrets/Config; Error Leakage; Unsafe Endpoints; Production 403 Behavior
