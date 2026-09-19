@@ -11,6 +11,7 @@ import {
   listRecommendationsByCase,
   createSale,
   getTotalSales,
+  listSalesByCustomer,
   getCustomerById,
   searchCustomers,
   getInventoryByProduct,
@@ -67,6 +68,8 @@ export default function NewHomePage() {
   const [saleFxRate, setSaleFxRate] = useState(1);
   const [saleBusy, setSaleBusy] = useState(false);
   const [lastSale, setLastSale] = useState<SaleDTO | null>(null);
+  const [purchaseHistory, setPurchaseHistory] = useState<SaleDTO[]>([]);
+  const [historyBusy, setHistoryBusy] = useState(false);
   const [totalSales, setTotalSales] = useState<number | null>(null);
   const [editProduct, setEditProduct] = useState<ProductDTO | null>(null);
   const [profileSaving, setProfileSaving] = useState(false);
@@ -165,7 +168,17 @@ export default function NewHomePage() {
       setSelectedRecommendationId(null);
       setSaleProductId("");
       setLastSale(null);
-      setStatusMsg("مشتری قبلی انتخاب شد. اطلاعات سابقه بارگذاری شد؛ مشکل امروز را ثبت کنید.");
+      setPurchaseHistory([]);
+      setHistoryBusy(true);
+      try {
+        const hist = await listSalesByCustomer(customer.customer_id, pair.access_token);
+        setPurchaseHistory(Array.isArray(hist) ? hist : []);
+      } catch {
+        setPurchaseHistory([]);
+      } finally {
+        setHistoryBusy(false);
+      }
+      setStatusMsg("مشتری قبلی انتخاب شد. سابقه خرید بارگذاری شد؛ مشکل امروز را ثبت کنید.");
       setCustomerSearchResults([]);
       setActive("consult");
     } catch (err) {
@@ -304,6 +317,7 @@ export default function NewHomePage() {
     setSelectedRecommendationId(null);
     setSaleProductId("");
     setLastSale(null);
+    setPurchaseHistory([]);
     setStatusMsg("مشتری جدید آماده ثبت است. نشست محصولات/اپراتور دست‌نخورده باقی ماند.");
     setActive("profile");
   }
@@ -511,12 +525,60 @@ export default function NewHomePage() {
             ) : customerSearch.trim() && !customerSearchBusy ? (
               <div className="pro-empty"><strong>مشتری‌ای با این نام پیدا نشد.</strong></div>
             ) : null}
+
+            {historyBusy ? <p className="pro-muted">در حال بارگذاری سابقه خرید…</p> : null}
+            {purchaseHistory.length > 0 ? (
+              <div className="pro-rec-list" style={{ marginTop: "1rem" }}>
+                <h2>سابقه خرید</h2>
+                {purchaseHistory.map((sale) => (
+                  <article key={sale.sale_id} className="pro-rec-card">
+                    <div>
+                      <h3>{sale.sale_id}</h3>
+                      <p className="pro-muted">مبلغ: {sale.total_amount_toman ?? "—"}</p>
+                      <ul>
+                        {(sale.items ?? []).map((it, idx) => (
+                          <li key={`${sale.sale_id}-${it.product_id}-${idx}`}>
+                            {it.product_id} × {it.quantity}
+                            {it.recommendation_id ? ` · Rec: ${it.recommendation_id}` : " · بدون پیوند پیشنهاد"}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : customerId && !historyBusy ? (
+              <p className="pro-muted" style={{ marginTop: "1rem" }}>سابقه خرید ثبت‌شده‌ای برای این مشتری نیست.</p>
+            ) : null}
+
           </section>
         )}
 
         {active === "consult" && (
           <section className="pro-panel">
             <h1>فرم مشاوره سریع</h1>
+
+            {purchaseHistory.length > 0 ? (
+              <div className="pro-rec-list" style={{ marginBottom: "1rem" }}>
+                <h2>سابقه خرید مشتری</h2>
+                {purchaseHistory.map((sale) => (
+                  <article key={sale.sale_id} className="pro-rec-card">
+                    <div>
+                      <h3>{sale.sale_id}</h3>
+                      <ul>
+                        {(sale.items ?? []).map((it, idx) => (
+                          <li key={`${sale.sale_id}-${it.product_id}-${idx}`}>
+                            {it.product_id} × {it.quantity}
+                            {it.recommendation_id ? ` · Rec: ${it.recommendation_id}` : ""}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : null}
+
             <p className="pro-lead">پروفایل، پرونده و پیشنهاد روی همین صفحه ساخته می‌شود.</p>
             <form className="pro-form" onSubmit={runFullFlow}>
               <fieldset className="pro-fieldset">
