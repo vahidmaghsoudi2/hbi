@@ -11,6 +11,7 @@ from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
+from app.models.case import Case
 from app.models.customer import Customer
 from app.models.inventory import Inventory
 from app.models.product import Product
@@ -79,7 +80,7 @@ class SaleService(BaseService[Sale, SaleRepository]):
                 recommendation = self.db.query(Recommendation).filter(Recommendation.recommendation_id == recommendation_id).first()
                 if not recommendation:
                     raise ValueError(f"Recommendation {recommendation_id} not found")
-                case = self.db.query(__import__("app.models.case", fromlist=["Case"]).Case).filter_by(case_id=recommendation.case_id).first()
+                case = self.db.query(Case).filter_by(case_id=recommendation.case_id).first()
                 if not case or case.customer_id != customer_id:
                     raise ValueError("Recommendation does not belong to the sale customer")
                 if recommendation.product_id != product_id:
