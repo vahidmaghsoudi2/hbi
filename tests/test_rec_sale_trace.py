@@ -136,7 +136,8 @@ def test_legacy_unlinked_sale_remains_valid(db_session):
 
 def test_non_eligible_recommendation_cannot_be_linked_to_sale(db_session):
     _, _, _, _, recommendation = _setup(db_session)
-    recommendation.eligibility_status = "INELIGIBLE"
+    # Must use a value allowed by Recommendation CHECK constraint
+    recommendation.eligibility_status = "INELIGIBLE_PENDING_REVIEW"
     db_session.commit()
 
     try:
