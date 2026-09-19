@@ -60,6 +60,7 @@ export default function NewHomePage() {
   const [recs, setRecs] = useState<RecommendationDTO[]>([]);
   const [recDone, setRecDone] = useState(false);
   const [saleProductId, setSaleProductId] = useState("");
+  const [selectedRecommendationId, setSelectedRecommendationId] = useState<string | null>(null);
   const [saleQty, setSaleQty] = useState(1);
   const [salePrice, setSalePrice] = useState<number | null>(null);
   const [saleStock, setSaleStock] = useState<number | null>(null);
@@ -161,6 +162,9 @@ export default function NewHomePage() {
       setNote("");
       setRecs([]);
       setRecDone(false);
+      setSelectedRecommendationId(null);
+      setSaleProductId("");
+      setLastSale(null);
       setStatusMsg("مشتری قبلی انتخاب شد. اطلاعات سابقه بارگذاری شد؛ مشکل امروز را ثبت کنید.");
       setCustomerSearchResults([]);
       setActive("consult");
@@ -297,8 +301,18 @@ export default function NewHomePage() {
     setNote("");
     setRecs([]);
     setRecDone(false);
+    setSelectedRecommendationId(null);
+    setSaleProductId("");
+    setLastSale(null);
     setStatusMsg("مشتری جدید آماده ثبت است. نشست محصولات/اپراتور دست‌نخورده باقی ماند.");
     setActive("profile");
+  }
+
+  function selectRecommendationForSale(r: RecommendationDTO) {
+    setSaleProductId(r.product_id);
+    setSelectedRecommendationId(r.recommendation_id);
+    setStatusMsg(`پیشنهاد ${r.recommendation_id} برای فروش انتخاب شد.`);
+    setActive("sales");
   }
 
   async function runFullFlow(e: FormEvent) {
@@ -391,12 +405,14 @@ export default function NewHomePage() {
       const sale = await createSale(
         {
           customer_id: customerId,
-          items: [{ product_id: saleProductId.trim(), quantity: saleQty }],
+          items: [{ product_id: saleProductId.trim(), quantity: saleQty, ...(selectedRecommendationId ? { recommendation_id: selectedRecommendationId } : {}) }],
           fx_rate_usd_to_irr: saleFxRate,
         },
         token
       );
       setLastSale(sale);
+      setSelectedRecommendationId(null);
+      setSaleProductId("");
       setStatusMsg(`فروش ثبت شد: ${sale.sale_id ?? "OK"}`);
       await refreshSalesTotal();
     } catch (err) {
@@ -673,7 +689,7 @@ export default function NewHomePage() {
                       {r.eligibility_status ?? r.eligibility ?? "—"}
                       {r.final_score != null || r.ranking_score != null ? ` · ${r.final_score ?? r.ranking_score}` : ""}
                     </p>
-                    {(r.reasoning || r.ranking_reasons) && <p className="pro-reason">{r.reasoning || r.ranking_reasons}</p>}
+                    {(r.reasoning || r.ranking_reasons) && <p className="pro-reason">{r.reasoning || r.ranking_reasons}</p>}<button type="button" className="pro-btn-primary" onClick={() => selectRecommendationForSale(r)}>انتخاب این پیشنهاد برای فروش</button>
                   </div>
                 </article>
               ))}
@@ -706,7 +722,10 @@ export default function NewHomePage() {
                   <label className="pro-label" htmlFor="sale-product">
                     محصول
                   </label>
-                  <select id="sale-product" className="pro-input" value={saleProductId} onChange={(e) => setSaleProductId(e.target.value)}>
+                  <select id="sale-product" className="pro-input" value={saleProductId} onChange={(e) => {
+                      setSaleProductId(e.target.value);
+                      setSelectedRecommendationId(null);
+                    }}>
                     <option value="">— انتخاب از کاتالوگ —</option>
                     {products.map((p) => (
                       <option key={p.product_id} value={p.product_id}>
@@ -717,7 +736,10 @@ export default function NewHomePage() {
                   <label className="pro-label" htmlFor="sale-manual">
                     یا product_id دستی
                   </label>
-                  <input id="sale-manual" className="pro-input" value={saleProductId} onChange={(e) => setSaleProductId(e.target.value)} />
+                  <input id="sale-manual" className="pro-input" value={saleProductId} onChange={(e) => {
+                      setSaleProductId(e.target.value);
+                      setSelectedRecommendationId(null);
+                    }} />
                   <div className="pro-grid-2">
                     <div>
                       <label className="pro-label" htmlFor="sale-qty">

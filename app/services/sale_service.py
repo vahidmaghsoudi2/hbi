@@ -11,9 +11,11 @@ from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
+from app.models.case import Case
 from app.models.customer import Customer
 from app.models.inventory import Inventory
 from app.models.product import Product
+from app.models.recommendation import Recommendation
 from app.models.sale import Sale
 from app.models.sale_item import SaleItem
 from app.models.stock_movement import StockMovement
@@ -60,6 +62,7 @@ class SaleService(BaseService[Sale, SaleRepository]):
         validated = []
         for item_data in items:
             product_id = item_data.get("product_id")
+            recommendation_id = item_data.get("recommendation_id")
             if not product_id:
                 raise ValueError("product_id is required on each item")
             try:
@@ -72,6 +75,18 @@ class SaleService(BaseService[Sale, SaleRepository]):
             product = self.db.query(Product).filter(Product.product_id == product_id).first()
             if not product:
                 raise ValueError(f"Product {product_id} not found")
+            recommendation = None
+            if recommendation_id:
+                recommendation = self.db.query(Recommendation).filter(Recommendation.recommendation_id == recommendation_id).first()
+                if not recommendation:
+                    raise ValueError(f"Recommendation {recommendation_id} not found")
+                case = self.db.query(Case).filter_by(case_id=recommendation.case_id).first()
+                if not case or case.customer_id != customer_id:
+                    raise ValueError("Recommendation does not belong to the sale customer")
+                if recommendation.product_id != product_id:
+                    raise ValueError("Recommendation product does not match sale product")
+                if recommendation.eligibility_status != "ELIGIBLE":
+                    raise ValueError("Only an ELIGIBLE recommendation can be linked to a sale")
             if getattr(product, "status", None) != "ACTIVE":
                 raise ValueError(f"Product {product_id} is not ACTIVE")
 
@@ -107,6 +122,7 @@ class SaleService(BaseService[Sale, SaleRepository]):
                     "unit_irr": unit_irr,
                     "unit_toman": unit_toman,
                     "inventory": inv,
+                    "recommendation_id": recommendation_id,
                 }
             )
 
@@ -146,6 +162,7 @@ class SaleService(BaseService[Sale, SaleRepository]):
                     sale_item_id=str(uuid.uuid4()),
                     sale_id=sale_id,
                     product_id=line["product_id"],
+                    recommendation_id=line["recommendation_id"],
                     quantity=qty,
                     unit_price_toman=int(round(line["unit_toman"])),
                     unit_price_usd=line["unit_usd"],

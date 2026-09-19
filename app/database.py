@@ -37,6 +37,13 @@ def _ensure_recommendation_trace_columns():
             conn.execute(text('ALTER TABLE "Recommendation" ADD COLUMN evidence_refs TEXT'))
         if "warnings" not in columns:
             conn.execute(text('ALTER TABLE "Recommendation" ADD COLUMN warnings TEXT'))
+    sale_item_inspector = inspect(engine)
+    if "SaleItem" not in sale_item_inspector.get_table_names():
+        return
+    sale_item_columns = {c["name"] for c in sale_item_inspector.get_columns("SaleItem")}
+    with engine.begin() as conn:
+        if "recommendation_id" not in sale_item_columns:
+            conn.execute(text('ALTER TABLE "SaleItem" ADD COLUMN recommendation_id TEXT'))
 
 def init_db():
     from app.models import product, product_knowledge, evidence, customer, case, recommendation, inventory, sale, sale_item, category, stock_movement, payment, sale_return, operational_fx_rate, product_mutation_log, user_role
