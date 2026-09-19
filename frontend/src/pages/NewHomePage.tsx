@@ -392,9 +392,9 @@ export default function NewHomePage() {
     let cancelled = false;
     void getInventoryByProduct(saleProductId, token)
       .then((inv) => {
-      if (cancelled) return;
-      setSalePrice(inv.sale_price_toman ?? null);
-      setSaleStock(Math.max(0, (inv.quantity_available ?? 0) - (inv.quantity_reserved ?? 0)));
+        if (cancelled) return;
+        setSalePrice(inv.sale_price_toman ?? null);
+        setSaleStock(Math.max(0, (inv.quantity_available ?? 0) - (inv.quantity_reserved ?? 0)));
       })
       .catch(() => {
         if (cancelled) return;
@@ -751,8 +751,7 @@ export default function NewHomePage() {
                       {r.eligibility_status ?? r.eligibility ?? "—"}
                       {r.final_score != null || r.ranking_score != null ? ` · ${r.final_score ?? r.ranking_score}` : ""}
                     </p>
-                    {(r.reasoning || r.ranking_reasons) && <p className="pro-reason">{r.reasoning || r.ranking_reasons}</p>}
-                    <button type="button" className="pro-btn-primary" onClick={() => selectRecommendationForSale(r)}>انتخاب این پیشنهاد برای فروش</button>
+                    {(r.reasoning || r.ranking_reasons) && <p className="pro-reason">{r.reasoning || r.ranking_reasons}</p>}<button type="button" className="pro-btn-primary" onClick={() => selectRecommendationForSale(r)}>انتخاب این پیشنهاد برای فروش</button>
                   </div>
                 </article>
               ))}
