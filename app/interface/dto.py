@@ -62,6 +62,7 @@ class SaleItemDTO:
     product_id: str
     quantity: int
     unit_price_toman: int
+    recommendation_id: Optional[str] = None
 
 @dataclass
 class SaleDTO:
