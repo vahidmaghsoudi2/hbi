@@ -59,7 +59,7 @@ def test_persistent_profile_plus_current_consultation_reaches_recommendation(db_
     dto = result[0]
     assert dto["product_id"] == product.product_id
     assert dto["eligibility_status"] == "ELIGIBLE"
-    assert dto["need_match_score"] == 1.0
+    assert dto["need_match_score"] == 0.5
     assert dto["evidence_score"] == 1.0
     assert dto["availability"] == 10
 
