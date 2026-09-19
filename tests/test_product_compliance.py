@@ -145,7 +145,10 @@ def test_active_grandfathered(db_session):
     assert _make_product(db_session, "P_CMP_LEGACY", status="ACTIVE").status == "ACTIVE"
 
 
+# ─── WP-03: Evidence Readiness branch coverage (Issue #17) ───
+
 def test_readiness_conflict_blocks_approve(db_session):
+    """GAP-1: VERIFIED + CONFLICT must block readiness and approve."""
     _make_product(db_session, "P_CMP_RDY_CF", status="QA_REVIEW",
                   qa_verdict="VALID", identity_status="VERIFIED")
     db_session.add(Evidence(
@@ -160,6 +163,7 @@ def test_readiness_conflict_blocks_approve(db_session):
 
 
 def test_readiness_rejected_evidence_blocks_approve(db_session):
+    """GAP-2: REJECTED evidence must appear in unacceptable and block approve."""
     _make_product(db_session, "P_CMP_RDY_RJ", status="QA_REVIEW",
                   qa_verdict="VALID", identity_status="VERIFIED")
     db_session.add(Evidence(
@@ -174,6 +178,7 @@ def test_readiness_rejected_evidence_blocks_approve(db_session):
 
 
 def test_readiness_pending_qa_blocks_approve(db_session):
+    """GAP-3: PENDING QA must appear in incomplete_qa and block approve."""
     _make_product(db_session, "P_CMP_RDY_PN", status="QA_REVIEW",
                   qa_verdict="VALID", identity_status="VERIFIED")
     db_session.add(Evidence(
@@ -188,6 +193,7 @@ def test_readiness_pending_qa_blocks_approve(db_session):
 
 
 def test_readiness_needs_review_blocks_approve(db_session):
+    """GAP-4: NEEDS_REVIEW QA must appear in incomplete_qa and block approve."""
     _make_product(db_session, "P_CMP_RDY_NR", status="QA_REVIEW",
                   qa_verdict="VALID", identity_status="VERIFIED")
     db_session.add(Evidence(
@@ -202,6 +208,7 @@ def test_readiness_needs_review_blocks_approve(db_session):
 
 
 def test_readiness_approved_evidence_passes(db_session):
+    """GAP-5: qa_status=APPROVED is an acceptable QA state (not only VERIFIED)."""
     _make_product(db_session, "P_CMP_RDY_AP", status="QA_REVIEW",
                   qa_verdict="VALID", identity_status="VERIFIED")
     db_session.add(Evidence(
@@ -216,6 +223,7 @@ def test_readiness_approved_evidence_passes(db_session):
 
 
 def test_readiness_acceptable_plus_incomplete_still_blocks(db_session):
+    """GAP-6: one acceptable evidence does not override incomplete QA on another."""
     _make_product(db_session, "P_CMP_RDY_MX", status="QA_REVIEW",
                   qa_verdict="VALID", identity_status="VERIFIED")
     db_session.add(Evidence(
@@ -228,12 +236,15 @@ def test_readiness_acceptable_plus_incomplete_still_blocks(db_session):
     result = EvidenceReadinessService(db_session).evaluate("P_CMP_RDY_MX")
     assert result.ready is False
     assert "E_MX_PEND" in result.incomplete_qa_evidence_ids
-    assert result.missing_required == []
+    assert result.missing_required == []  # acceptable_count > 0
     with pytest.raises(ValidationError):
         ProductTransitionService(db_session).approve("P_CMP_RDY_MX", "po", {ROLE_PO})
 
 
+# ─── WP-02: Generic PATCH governance rejection (Issue #16) ───
+
 def test_patch_rejects_status_only(client, db_session):
+    """WP-02: governance field alone must be rejected at schema boundary (422)."""
     _make_product(db_session, "P_CMP_WP02_A")
     _seed_role(db_session, "ed_wp02", ROLE_EDITOR, "UR_WP02_A")
     r = client.patch(
@@ -242,9 +253,12 @@ def test_patch_rejects_status_only(client, db_session):
         headers=_auth_header("ed_wp02"),
     )
     assert r.status_code == 422
+    body = r.json()
+    assert "status" in str(body).lower() or "extra" in str(body).lower() or "forbidden" in str(body).lower()
 
 
 def test_patch_rejects_identity_status(client, db_session):
+    """WP-02: identity_status via generic PATCH must be rejected."""
     _make_product(db_session, "P_CMP_WP02_B")
     _seed_role(db_session, "ed_wp02b", ROLE_EDITOR, "UR_WP02_B")
     r = client.patch(
@@ -256,6 +270,7 @@ def test_patch_rejects_identity_status(client, db_session):
 
 
 def test_patch_rejects_qa_verdict(client, db_session):
+    """WP-02: qa_verdict via generic PATCH must be rejected."""
     _make_product(db_session, "P_CMP_WP02_C")
     _seed_role(db_session, "ed_wp02c", ROLE_EDITOR, "UR_WP02_C")
     r = client.patch(
@@ -267,6 +282,7 @@ def test_patch_rejects_qa_verdict(client, db_session):
 
 
 def test_patch_rejects_mixed_governance(client, db_session):
+    """WP-02: informational + governance in same PATCH must reject entire payload."""
     _make_product(db_session, "P_CMP_WP02_D", brand="Original")
     _seed_role(db_session, "ed_wp02d", ROLE_EDITOR, "UR_WP02_D")
     r = client.patch(
@@ -278,6 +294,10 @@ def test_patch_rejects_mixed_governance(client, db_session):
     p = ProductService(db_session).get_by_id("P_CMP_WP02_D")
     assert p.brand == "Original"
     assert p.status == "DRAFT"
+
+
+# ─── WP-04: Mutation log for remaining lifecycle actions (Issue #18) ───
+# Existing: test_mutation_log_persists covers CREATE + SUBMIT only.
 
 
 def _logs_by_action(db, product_id, action):
