@@ -120,3 +120,18 @@ def test_legacy_unlinked_sale_remains_valid(db_session):
     db_session.commit()
     item = db_session.query(SaleItem).filter(SaleItem.sale_id == sale.sale_id).one()
     assert item.recommendation_id is None
+
+def test_non_eligible_recommendation_cannot_be_linked_to_sale(db_session):
+    _, _, _, _, recommendation = _setup(db_session)
+    recommendation.eligibility_status = "INELIGIBLE"
+    db_session.commit()
+
+    try:
+        SaleService(db_session).create_sale(
+            "CUST-TRACE",
+            [{"product_id": "PROD-TRACE", "quantity": 1, "recommendation_id": recommendation.recommendation_id}],
+            fx_rate_usd_to_irr=500000.0,
+        )
+        assert False, "non-ELIGIBLE recommendation must be rejected"
+    except ValueError as exc:
+        assert "Only an ELIGIBLE recommendation" in str(exc)
