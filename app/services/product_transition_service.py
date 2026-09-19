@@ -108,7 +108,7 @@ class ProductTransitionService:
 
     def set_product_qa(self, product_id, actor_id, roles, verdict, notes=None):
         if not roles.intersection({ROLE_REVIEWER_QA, ROLE_PO}):
-            raise ValidationError("QA verdict requires Reviewer/QA or PO")
+            raise ValidationError("Product QA decision requires Reviewer/QA or PO")
         allowed = {"PENDING", "VALID", "INVALID", "CONFLICT", "UNKNOWN", "NEEDS_REVIEW"}
         if verdict not in allowed:
             raise ValidationError(f"Invalid qa_verdict: {verdict}")
