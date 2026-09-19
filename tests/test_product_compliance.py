@@ -314,6 +314,12 @@ def _seed_ready_evidence(db, product_id, eid="E_WP04"):
 def test_mutation_log_qa_change(db_session):
     """WP-04: QA_CHANGE must persist before/after and actor."""
     _make_product(db_session, "P_ML_QA", status="QA_REVIEW")
+    # D3 Conditional: QA VALID requires APPROVED/VERIFIED Evidence (identity-only product).
+    db_session.add(Evidence(
+        evidence_id="E_ML_QA", product_id="P_ML_QA", source_type="SECONDARY",
+        source_reference="s1", claim="brand is BrandX", field="brand", claim_type="FACT",
+        qa_status="APPROVED", conflict_status="NONE"))
+    db_session.flush()
     ProductTransitionService(db_session).set_product_qa(
         "P_ML_QA", "rev_ml", {ROLE_REVIEWER_QA}, "VALID", notes="ok")
     rows = _logs_by_action(db_session, "P_ML_QA", "QA_CHANGE")

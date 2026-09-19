@@ -22,8 +22,8 @@ PID = "P_CATALOG_INTAKE_E2E_001"
 
 
 def test_governed_intake_reaches_engine_ready_and_recommendation(db_session):
-    """create → submit → QA_REVIEW → QA VALID → identity VERIFIED →
-    evidence readiness PASS → APPROVE → ACTIVATE → engine candidate → rec.
+    """create → submit → QA_REVIEW → identity VERIFIED → claim Evidence +
+    ProductKnowledge → QA VALID → readiness → APPROVE → ACTIVATE → rec.
     """
     svc = ProductService(db_session)
     transitions = ProductTransitionService(db_session)
@@ -44,12 +44,11 @@ def test_governed_intake_reaches_engine_ready_and_recommendation(db_session):
     assert transitions.submit(PID, "po_catalog", PO).status == "SUBMITTED"
     assert transitions.enter_qa_review(PID, "po_catalog", PO).status == "QA_REVIEW"
 
-    transitions.set_product_qa(PID, "po_catalog", PO, "VALID", notes="Mission 144 readiness")
     transitions.verify_identity(
         PID, "po_catalog", PO, "VERIFIED", source_refs="test://mission-144", confidence=1.0
     )
 
-    # Governed readiness requires acceptable evidence QA (not PENDING leftovers).
+    # Evidence + claim surface before QA VALID (D3 Conditional: claim Evidence required).
     db_session.add(
         Evidence(
             evidence_id=f"EV-{PID}-READY",
@@ -77,6 +76,8 @@ def test_governed_intake_reaches_engine_ready_and_recommendation(db_session):
         )
     )
     db_session.flush()
+
+    transitions.set_product_qa(PID, "po_catalog", PO, "VALID", notes="Mission 144 readiness")
 
     readiness = EvidenceReadinessService(db_session).evaluate(PID)
     assert readiness.ready is True, readiness.summary
