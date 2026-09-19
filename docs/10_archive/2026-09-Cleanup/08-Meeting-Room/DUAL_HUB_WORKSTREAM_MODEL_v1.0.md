@@ -1,4 +1,4 @@
-﻿# HBI — DUAL-HUB WORKSTREAM MODEL v1.0
+# HBI — DUAL-HUB WORKSTREAM MODEL v1.0
 Date: 2026-08-22
 Authorized By: Engineer Maqsoudi (Product Owner)
 

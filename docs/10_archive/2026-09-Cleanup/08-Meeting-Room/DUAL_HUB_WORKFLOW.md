@@ -1,4 +1,4 @@
-﻿# HBI Dual-Hub Workflow Protocol v1.0
+# HBI Dual-Hub Workflow Protocol v1.0
 
 ## تاریخ ثبت: ۱۴۰۵-۰۵-۳۱ (۲۰۲۶-۰۸-۲۲)
 ## منبع: دستور مستقیم Product Owner

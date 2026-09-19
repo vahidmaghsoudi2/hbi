@@ -1,4 +1,4 @@
-﻿# مأموریت بازیابی Home و آشتی واقعیت
+# مأموریت بازیابی Home و آشتی واقعیت
 ## Home Recovery and Reality Reconciliation
 
 تاریخ صدور: ۳۰ اوت ۲۰۲۶

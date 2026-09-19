@@ -1,4 +1,4 @@
-﻿# Pilot Test 001 - Workflow v2 Verification
+# Pilot Test 001 - Workflow v2 Verification
 - Task: TASK-TEST-001
 - Owner: DeepSeek2
 - Status: SUCCESS
