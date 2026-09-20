@@ -14,6 +14,7 @@ import {
   getCustomerById,
   searchCustomers,
   getInventoryByProduct,
+  listSalesByCustomer,
 } from "../api/client";
 import ProductIntakePanel from "./ProductIntakePanel";
 import type {
@@ -72,6 +73,7 @@ export default function NewHomePage() {
   const [profileSaving, setProfileSaving] = useState(false);
   const [customerSearch, setCustomerSearch] = useState("");
   const [customerSearchResults, setCustomerSearchResults] = useState<CustomerSearchResult[]>([]);
+  const [purchaseHistory, setPurchaseHistory] = useState<SaleDTO[]>([]);
   const [customerSearchBusy, setCustomerSearchBusy] = useState(false);
 
   const loadProducts = useCallback(async () => {
@@ -165,7 +167,9 @@ export default function NewHomePage() {
       setSelectedRecommendationId(null);
       setSaleProductId("");
       setLastSale(null);
-      setStatusMsg("مشتری قبلی انتخاب شد. اطلاعات سابقه بارگذاری شد؛ مشکل امروز را ثبت کنید.");
+      const history = await listSalesByCustomer(customer.customer_id, pair.access_token);
+      setPurchaseHistory(Array.isArray(history) ? history : []);
+      setStatusMsg(`مشتری قبلی انتخاب شد. \${history.length} خرید قبلی بارگذاری شد؛ مشکل امروز را ثبت کنید.`);
       setCustomerSearchResults([]);
       setActive("consult");
     } catch (err) {
@@ -495,6 +499,24 @@ export default function NewHomePage() {
                 {customerSearchBusy ? "در حال جست‌وجو…" : "جست‌وجو"}
               </button>
             </form>
+            {purchaseHistory.length > 0 ? (
+              <div className="pro-panel" style={{ marginTop: "1rem" }}>
+                <h2>سابقه خرید</h2>
+                <div className="pro-product-grid">
+                  {purchaseHistory.map((sale) => (
+                    <article key={sale.sale_id} className="pro-product-card">
+                      <h3>{sale.sale_id}</h3>
+                      <p className="pro-muted">تاریخ: {sale.sale_date ?? "—"}</p>
+                      {(sale.items ?? []).map((item) => (
+                        <p key={item.sale_item_id} className="pro-muted">
+                          محصول: {item.product_id} · تعداد: {item.quantity} · Recommendation: {item.recommendation_id ?? "—"}
+                        </p>
+                      ))}
+                    </article>
+                  ))}
+                </div>
+              </div>
+            ) : null}
             {customerSearchResults.length > 0 ? (
               <div className="pro-product-grid" style={{ marginTop: "1rem" }}>
                 {customerSearchResults.map((customer) => (
