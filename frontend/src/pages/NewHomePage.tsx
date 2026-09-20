@@ -538,6 +538,23 @@ export default function NewHomePage() {
 
         {active === "consult" && (
           <section className="pro-panel">
+            {purchaseHistory.length > 0 ? (
+              <div className="pro-panel" style={{ marginBottom: "1rem" }}>
+                <h2>سابقه خرید مشتری</h2>
+                <div className="pro-product-grid">
+                  {purchaseHistory.map((sale) => (
+                    <article key={sale.sale_id} className="pro-product-card">
+                      <h3>{sale.sale_id}</h3>
+                      {(sale.items ?? []).map((item) => (
+                        <p key={item.sale_item_id} className="pro-muted">
+                          محصول: {item.product_id} · تعداد: {item.quantity} · Recommendation: {item.recommendation_id ?? "—"}
+                        </p>
+                      ))}
+                    </article>
+                  ))}
+                </div>
+              </div>
+            ) : null}
             <h1>فرم مشاوره سریع</h1>
             <p className="pro-lead">پروفایل، پرونده و پیشنهاد روی همین صفحه ساخته می‌شود.</p>
             <form className="pro-form" onSubmit={runFullFlow}>
