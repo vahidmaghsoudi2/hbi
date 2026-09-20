@@ -1,6 +1,8 @@
 """AuthZ regression tests for POST /cases/{case_id}/close.
 
 Contract source: Issue #157 / Team 3 Integration Reality GAP.
+
+The fixtures honor the Case.customer_id foreign key.
 """
 from app.core.auth import create_access_token
 from app.models.case import Case
