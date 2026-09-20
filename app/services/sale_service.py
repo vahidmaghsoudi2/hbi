@@ -36,8 +36,8 @@ class SaleService(BaseService[Sale, SaleRepository]):
     def find_with_items(self, sale_id: str) -> Optional[Sale]:
         return self.repository.find_with_items(sale_id)
 
-    def get_total_sales(self) -> int:
-        return self.repository.get_total_sales()
+    def get_total_sales(self, customer_id: str) -> int:
+        return self.repository.get_total_sales(customer_id)
 
     def get_sale_items(self, sale_id: str) -> List[SaleItem]:
         return self.sale_item_repo.find_by_sale(sale_id)

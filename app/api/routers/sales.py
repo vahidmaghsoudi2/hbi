@@ -63,7 +63,7 @@ async def get_total_sales(
     customer_id: str = Depends(get_current_customer_id),
 ):
     facade = SaleFacade(db)
-    return {"total_sales": facade.get_total_sales()}
+    return {"total_sales": facade.get_total_sales(customer_id)}
 
 
 @router.get("/customer/{target_customer_id}")

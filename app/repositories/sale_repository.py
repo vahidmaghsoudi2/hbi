@@ -13,6 +13,10 @@ class SaleRepository(BaseRepository[Sale]):
     def find_with_items(self, sale_id: str):
         return self.db.query(Sale).filter(Sale.sale_id == sale_id).first()
 
-    def get_total_sales(self) -> int:
-        result = self.db.query(Sale.total_amount_toman).all()
-        return sum([r[0] for r in result]) if result else 0
+    def get_total_sales(self, customer_id: str) -> int:
+        result = (
+            self.db.query(Sale.total_amount_toman)
+            .filter(Sale.customer_id == customer_id)
+            .all()
+        )
+        return sum((r[0] or 0) for r in result)

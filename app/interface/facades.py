@@ -226,8 +226,8 @@ class SaleFacade:
         except ValueError as e:
             raise BusinessRuleError(str(e))
 
-    def get_total_sales(self) -> int:
-        return self.service.get_total_sales()
+    def get_total_sales(self, customer_id: str) -> int:
+        return self.service.get_total_sales(customer_id)
 
     def list_by_customer(self, customer_id: str) -> List[SaleDTO]:
         """Purchase history for one customer; caller must enforce AuthZ."""

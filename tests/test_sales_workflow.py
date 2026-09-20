@@ -209,3 +209,32 @@ def test_purchase_toman_preserved(session):
     session.commit()
     inv = session.get(Inventory, "INV-P-SALE-1")
     assert inv.purchase_price_toman == 1_500_000
+
+
+def test_total_sales_is_customer_scoped(session):
+    _seed(session, qty=10)
+    other = Customer(customer_id="CUST-2", name="Other Buyer", consent_to_store_data=1)
+    session.add(other)
+    session.flush()
+
+    first = Sale(
+        sale_id="SALE-CUST-1",
+        customer_id="CUST-1",
+        total_amount_toman=2_000_000,
+        total_amount_usd=20.0,
+        total_amount_irr=20_000_000.0,
+        fx_rate_usd_to_irr=1_000_000.0,
+    )
+    second = Sale(
+        sale_id="SALE-CUST-2",
+        customer_id="CUST-2",
+        total_amount_toman=9_000_000,
+        total_amount_usd=90.0,
+        total_amount_irr=90_000_000.0,
+        fx_rate_usd_to_irr=1_000_000.0,
+    )
+    session.add_all([first, second])
+    session.commit()
+
+    assert SaleService(session).get_total_sales("CUST-1") == 2_000_000
+    assert SaleService(session).get_total_sales("CUST-2") == 9_000_000
