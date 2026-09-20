@@ -786,7 +786,7 @@ export default function NewHomePage() {
                       setSelectedRecommendationId(null);
                     }}>
                     <option value="">— انتخاب از کاتالوگ —</option>
-                    {products.map((p) => (
+                    {sellableProducts.map((p) => (
                       <option key={p.product_id} value={p.product_id}>
                         {p.product_name} ({p.brand})
                       </option>
