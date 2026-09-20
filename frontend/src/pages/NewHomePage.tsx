@@ -14,7 +14,6 @@ import {
   getCustomerById,
   searchCustomers,
   getInventoryByProduct,
-  listSalesByCustomer,
 } from "../api/client";
 import ProductIntakePanel from "./ProductIntakePanel";
 import type {
@@ -166,13 +165,7 @@ export default function NewHomePage() {
       setSelectedRecommendationId(null);
       setSaleProductId("");
       setLastSale(null);
-      try {
-        const history = await listSalesByCustomer(customer.customer_id, pair.access_token);
-        const count = Array.isArray(history) ? history.length : 0;
-        setStatusMsg(`مشتری قبلی انتخاب شد. ${count} سابقه خرید بارگذاری شد؛ مشکل امروز را ثبت کنید.`);
-      } catch {
-        setStatusMsg("مشتری قبلی انتخاب شد. اطلاعات سابقه بارگذاری شد؛ مشکل امروز را ثبت کنید.");
-      }
+      setStatusMsg("مشتری قبلی انتخاب شد. اطلاعات سابقه بارگذاری شد؛ مشکل امروز را ثبت کنید.");
       setCustomerSearchResults([]);
       setActive("consult");
     } catch (err) {
