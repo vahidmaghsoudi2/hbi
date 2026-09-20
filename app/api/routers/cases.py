@@ -65,15 +65,19 @@ async def close_case(
     customer_id: str = Depends(get_current_customer_id),
 ):
     # Authentication is mandatory here.
-    # Ownership by case_id requires a case lookup method that is not
-    # currently exposed by the supplied CaseFacade; do not guess schema.
     facade = CaseFacade(db)
-    case = facade.close(case_id)
+    case = facade.get_by_id(case_id)
 
     if not case:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Case not found",
         )
 
-    return _to_dict(case)
+    if case.customer_id != customer_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied",
+        )
+
+    return _to_dict(facade.close(case_id))
