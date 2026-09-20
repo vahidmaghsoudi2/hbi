@@ -64,3 +64,38 @@ async def get_total_sales(
 ):
     facade = SaleFacade(db)
     return {"total_sales": facade.get_total_sales()}
+
+
+@router.get("/customer/{target_customer_id}")
+async def list_customer_purchase_history(
+    target_customer_id: str,
+    db: Session = Depends(get_db),
+    customer_id: str = Depends(get_current_customer_id),
+):
+    """Return purchase history only for the authenticated customer (no cross-customer leak)."""
+    if target_customer_id != customer_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied",
+        )
+    facade = SaleFacade(db)
+    sales = facade.list_by_customer(customer_id)
+    return [
+        {
+            "sale_id": s.sale_id,
+            "customer_id": s.customer_id,
+            "total_amount_toman": s.total_amount_toman,
+            "items": [
+                {
+                    "sale_item_id": it.sale_item_id,
+                    "sale_id": it.sale_id,
+                    "product_id": it.product_id,
+                    "recommendation_id": it.recommendation_id,
+                    "quantity": it.quantity,
+                    "unit_price_toman": it.unit_price_toman,
+                }
+                for it in (s.items or [])
+            ],
+        }
+        for s in sales
+    ]
