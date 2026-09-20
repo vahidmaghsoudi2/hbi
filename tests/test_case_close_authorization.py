@@ -4,13 +4,22 @@ Contract source: Issue #157 / Team 3 Integration Reality GAP.
 """
 from app.core.auth import create_access_token
 from app.models.case import Case
+from app.models.customer import Customer
 
 
 def _auth_header(customer_id: str):
     return {"Authorization": f"Bearer {create_access_token({'sub': customer_id})}"}
 
 
+def _make_customer(db, customer_id: str):
+    customer = Customer(customer_id=customer_id, name=customer_id)
+    db.add(customer)
+    db.flush()
+    return customer
+
+
 def _make_case(db, case_id: str, customer_id: str, case_type: str = "OPEN"):
+    _make_customer(db, customer_id)
     case = Case(case_id=case_id, customer_id=customer_id, case_type=case_type)
     db.add(case)
     db.flush()
