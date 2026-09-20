@@ -167,6 +167,32 @@ export function getTotalSales(token: string): Promise<{ total_sales: number }> {
   return request<{ total_sales: number }>("/sales/total", {}, token);
 }
 
+/** GET /api/v1/sales/customer/{customerId} — auth required; path must match token identity */
+export function listSalesByCustomer(
+  customerId: string,
+  token: string
+): Promise<
+  Array<{
+    sale_id: string;
+    customer_id: string;
+    total_amount_toman: number;
+    items?: Array<{
+      sale_item_id: string;
+      sale_id: string;
+      product_id: string;
+      recommendation_id?: string | null;
+      quantity: number;
+      unit_price_toman: number;
+    }>;
+  }>
+> {
+  return request(
+    `/sales/customer/${encodeURIComponent(customerId)}`,
+    {},
+    token
+  );
+}
+
 /** POST /api/v1/products/ — requires the active pilot/customer JWT */
 export function createProduct(body: ProductCreateRequest, token: string): Promise<ProductDTO> {
   return request<ProductDTO>("/products/", {
