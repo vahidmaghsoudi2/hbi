@@ -308,6 +308,7 @@ export default function NewHomePage() {
     setSelectedRecommendationId(null);
     setSaleProductId("");
     setLastSale(null);
+    setPurchaseHistory([]);
     setStatusMsg("مشتری جدید آماده ثبت است. نشست محصولات/اپراتور دست‌نخورده باقی ماند.");
     setActive("profile");
   }
@@ -506,7 +507,6 @@ export default function NewHomePage() {
                   {purchaseHistory.map((sale) => (
                     <article key={sale.sale_id} className="pro-product-card">
                       <h3>{sale.sale_id}</h3>
-                      <p className="pro-muted">تاریخ: {sale.sale_date ?? "—"}</p>
                       {(sale.items ?? []).map((item) => (
                         <p key={item.sale_item_id} className="pro-muted">
                           محصول: {item.product_id} · تعداد: {item.quantity} · Recommendation: {item.recommendation_id ?? "—"}
