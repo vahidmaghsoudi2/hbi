@@ -56,6 +56,7 @@ export default function NewHomePage() {
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [products, setProducts] = useState<ProductDTO[]>([]);
+  const [sellableProducts, setSellableProducts] = useState<ProductDTO[]>([]);
   const [catalogError, setCatalogError] = useState<string | null>(null);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [recs, setRecs] = useState<RecommendationDTO[]>([]);
@@ -95,6 +96,19 @@ export default function NewHomePage() {
   useEffect(() => {
     void loadProducts();
   }, [loadProducts]);
+
+  const loadSellableProducts = useCallback(async () => {
+    try {
+      const data = await listProducts();
+      setSellableProducts(Array.isArray(data) ? data : []);
+    } catch {
+      setSellableProducts([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadSellableProducts();
+  }, [loadSellableProducts]);
 
   const refreshSalesTotal = useCallback(async () => {
     if (!token) {
@@ -420,6 +434,12 @@ export default function NewHomePage() {
       setSaleProductId("");
       setStatusMsg(`فروش ثبت شد: ${sale.sale_id ?? "OK"}`);
       await refreshSalesTotal();
+      try {
+        const updatedHistory = await listSalesByCustomer(customerId, token);
+        setPurchaseHistory(Array.isArray(updatedHistory) ? updatedHistory : []);
+      } catch {
+        // The sale is already committed; history refresh is best-effort.
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -493,8 +513,8 @@ export default function NewHomePage() {
                 className="pro-input"
                 value={customerSearch}
                 onChange={(e) => setCustomerSearch(e.target.value)}
-                placeholder="نام مشتری…"
-                aria-label="جست‌وجوی مشتری قبلی"
+                placeholder="نام یا شماره موبایل مشتری…"
+                aria-label="جست‌وجوی مشتری قبلی با نام یا موبایل"
               />
               <button type="submit" className="pro-btn-primary" disabled={customerSearchBusy}>
                 {customerSearchBusy ? "در حال جست‌وجو…" : "جست‌وجو"}
@@ -766,7 +786,7 @@ export default function NewHomePage() {
                       setSelectedRecommendationId(null);
                     }}>
                     <option value="">— انتخاب از کاتالوگ —</option>
-                    {products.map((p) => (
+                    {sellableProducts.map((p) => (
                       <option key={p.product_id} value={p.product_id}>
                         {p.product_name} ({p.brand})
                       </option>
