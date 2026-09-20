@@ -266,14 +266,18 @@ async def get_recommendation_profile(
 
 
 @router.get("/search")
-async def search_customers_by_name(
-    q: str = Query(..., min_length=1, description="بخشی از نام مشتری"),
+async def search_customers_by_name_or_mobile(
+    q: str = Query(..., min_length=1, description="بخشی از نام یا شماره موبایل مشتری"),
     db: Session = Depends(get_db),
     _auth: str = Depends(get_current_customer_id),
 ) -> List[Dict[str, Any]]:
-    """جست‌وجوی سریع مشتری قبلی برای فروشنده گالری (≤۱۵ ثانیه هدف)."""
+    """جست‌وجوی سریع مشتری قبلی با نام یا شماره موبایل برای فروشنده گالری."""
     svc = CustomerService(db)
-    found = svc.find_by_name(q.strip())
+    query = q.strip()
+    if _looks_like_mobile(query):
+        found = svc.find_by_mobile(query)
+        return [_customer_public(found)] if found else []
+    found = svc.find_by_name(query)
     return [_customer_public(c) for c in found[:20]]
 
 
