@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_customer_id
 from app.services.payment_service import PaymentService
+from app.models.sale import Sale
 
 router = APIRouter()
 
@@ -37,6 +38,12 @@ async def record_payment(
     db: Session = Depends(get_db),
     _auth: str = Depends(get_current_customer_id),
 ):
+    sale = db.query(Sale).filter(Sale.sale_id == body.sale_id).first()
+    if not sale:
+        raise HTTPException(status_code=404, detail=f"Sale {body.sale_id} not found")
+    if sale.customer_id != _auth:
+        raise HTTPException(status_code=403, detail="Access denied")
+
     svc = PaymentService(db)
     try:
         payment = svc.record_payment(
@@ -60,6 +67,12 @@ async def list_payments_for_sale(
     db: Session = Depends(get_db),
     _auth: str = Depends(get_current_customer_id),
 ):
+    sale = db.query(Sale).filter(Sale.sale_id == sale_id).first()
+    if not sale:
+        raise HTTPException(status_code=404, detail=f"Sale {sale_id} not found")
+    if sale.customer_id != _auth:
+        raise HTTPException(status_code=403, detail="Access denied")
+
     svc = PaymentService(db)
     return [_to_dict(p) for p in svc.list_by_sale(sale_id)]
 
@@ -74,4 +87,7 @@ async def get_payment(
     payment = svc.get_by_id(payment_id)
     if not payment:
         raise HTTPException(status_code=404, detail=f"Payment {payment_id} not found")
+    sale = db.query(Sale).filter(Sale.sale_id == payment.sale_id).first()
+    if not sale or sale.customer_id != _auth:
+        raise HTTPException(status_code=403, detail="Access denied")
     return _to_dict(payment)
