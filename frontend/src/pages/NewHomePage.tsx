@@ -169,7 +169,7 @@ export default function NewHomePage() {
       setLastSale(null);
       const history = await listSalesByCustomer(customer.customer_id, pair.access_token);
       setPurchaseHistory(Array.isArray(history) ? history : []);
-      setStatusMsg(`مشتری قبلی انتخاب شد. \${history.length} خرید قبلی بارگذاری شد؛ مشکل امروز را ثبت کنید.`);
+      setStatusMsg(`مشتری قبلی انتخاب شد. ${history.length} خرید قبلی بارگذاری شد؛ مشکل امروز را ثبت کنید.`);
       setCustomerSearchResults([]);
       setActive("consult");
     } catch (err) {
