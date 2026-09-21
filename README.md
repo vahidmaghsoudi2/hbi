@@ -56,7 +56,7 @@ The `scripts/` directory is intended for generators and one-time operational too
 
 Historical evidence files should remain traceable. A report is moved or archived only after checking repository references so that evidence links are not broken.
 
-The repository currently contains both `scripts/fix_customer_name.py` and `scripts/fix_customer_name2.py`. Their relationship and usage should be reviewed before either file is removed, merged, or renamed.
+The repository currently contains both root-level `fix_customer_name.py` and `fix_customer_name2.py`. Their relationship and usage should be reviewed before either file is removed, merged, or renamed.
 
 ## PROJECT RULES — MANDATORY ENTRY GATE
 
