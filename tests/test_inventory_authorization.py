@@ -10,7 +10,7 @@ from app.models.user_role import ROLE_ADMIN, UserRole
 
 
 def _headers(subject_id: str):
-    return {"Authorization": f"Bearer {create_access_token({"sub": subject_id})}"}
+    return {'Authorization': f"Bearer {create_access_token({'sub': subject_id})}"}
 
 
 def _seed_inventory(db_session):
