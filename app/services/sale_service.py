@@ -100,17 +100,16 @@ class SaleService(BaseService[Sale, SaleRepository]):
                     f"sellable={sellable}, requested={quantity}"
                 )
 
-            if "unit_price_usd" in item_data and item_data["unit_price_usd"] is not None:
-                unit_usd = float(item_data["unit_price_usd"])
-            elif inv.sale_price_usd is not None:
-                unit_usd = float(inv.sale_price_usd)
-            else:
+            # Inventory.sale_price_usd is the sole authoritative sale-price source.
+            # Client-supplied unit_price_usd is intentionally ignored so callers cannot
+            # bypass the approved inventory price and alter the sale snapshot.
+            if inv.sale_price_usd is None:
                 raise ValueError(
-                    f"unit_price_usd required for product {product_id} "
-                    "(not provided and inventory.sale_price_usd is empty)"
+                    f"Inventory sale_price_usd required for product {product_id}"
                 )
+            unit_usd = float(inv.sale_price_usd)
             if unit_usd < 0:
-                raise ValueError("unit_price_usd must be >= 0")
+                raise ValueError("inventory.sale_price_usd must be >= 0")
 
             unit_irr = usd_to_irr(unit_usd, fx_rate)
             unit_toman = irr_to_toman(unit_irr)
