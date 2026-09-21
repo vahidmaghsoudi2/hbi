@@ -4,6 +4,7 @@ from app.models.case import Case
 from app.repositories.case_repository import CaseRepository
 from app.services.base import BaseService
 from datetime import datetime
+from uuid import uuid4
 
 class CaseService(BaseService[Case, CaseRepository]):
     def __init__(self, db: Session):
@@ -19,7 +20,11 @@ class CaseService(BaseService[Case, CaseRepository]):
         return self.repository.get_with_recommendations(case_id)
 
     def create_case(self, customer_id: str, case_type: str = "OPEN") -> Case:
-        case_id = f"CASE_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        # Microseconds + short uuid: concurrent creates in the same second stay unique.
+        # Prefix CASE_ retained for existing contract/trace consumers.
+        case_id = (
+            f"CASE_{datetime.now().strftime('%Y%m%d%H%M%S%f')}_{uuid4().hex[:8]}"
+        )
         return self.create(
             case_id=case_id,
             customer_id=customer_id,
