@@ -5,10 +5,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_db, get_current_customer_id
+from app.core.deps import get_db
+from app.core.authorization import require_any_role
+from app.models.user_role import ROLE_ADMIN
 from app.services.operational_fx_service import OperationalFxService
 
 router = APIRouter()
+
+_require_fx_admin = require_any_role(ROLE_ADMIN)
 
 
 def _to_dict(obj):
@@ -41,7 +45,7 @@ async def get_current_fx(db: Session = Depends(get_db)):
 async def set_operational_fx(
     body: FxSetRequest,
     db: Session = Depends(get_db),
-    _auth: str = Depends(get_current_customer_id),
+    _authz: tuple = Depends(_require_fx_admin),
 ):
     svc = OperationalFxService(db)
     try:
