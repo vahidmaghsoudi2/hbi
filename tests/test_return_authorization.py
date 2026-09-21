@@ -20,6 +20,10 @@ def _setup(db_session):
             qa_verdict="PENDING",
             status="ACTIVE",
         ),
+    ])
+    db_session.commit()
+    # Persist Product before Inventory because SQLite FK enforcement is enabled in conftest.
+    db_session.add(
         Inventory(
             inventory_id="RET-INV1",
             product_id="RET-P1",
@@ -30,8 +34,8 @@ def _setup(db_session):
             sale_price_usd=10.0,
             sale_price_toman=1_000_000,
             purchase_price_toman=800_000,
-        ),
-    ])
+        )
+    )
     db_session.commit()
     sale = SaleService(db_session).create_sale(
         "RET-C1",
