@@ -31,6 +31,32 @@ Last Updated: 1405-05-22 (2026-08-13)
 
 ---
 
+
+## Start Here
+
+If you are new to HBI, read these in order:
+
+1. `docs/01_project_control/PROJECT_RULES.md` — mandatory project rules
+2. `docs/01_project_state/HBI_PROJECT_STATE.md` — current project state
+3. `docs/02_architecture/HBI_ARCHITECTURE.md` — system architecture
+4. `docs/03_decision_log/DECISION_LOG_INDEX.md` — key decisions
+5. `docs/07_evidence/` — verification evidence
+6. `docs/09_gate_reports/` — gate/review reports
+
+For day-to-day work, **GitHub `master` is the source of truth**. Historical reports are evidence of past states and should not be treated as the current state without checking the current Master SHA.
+
+## Verification
+
+HBI has automated GitHub Actions verification. The current CI pipeline runs both the main test suite and governance tests; recent post-merge runs have completed successfully on Master.
+
+The repository currently contains a substantial automated test suite. Test coverage and pass counts should be taken from the CI run for the exact commit being reviewed rather than from a static README claim.
+
+## Repository Hygiene
+
+The `scripts/` directory is intended for generators and one-time operational tools. Before adding another maintenance script, first check whether an existing tool can be extended or reused.
+
+Historical evidence files should remain traceable. A report is moved or archived only after checking repository references so that evidence links are not broken.
+
 ## PROJECT RULES — MANDATORY ENTRY GATE
 
 Before performing any project work, every human or AI contributor MUST read:
