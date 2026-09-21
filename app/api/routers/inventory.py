@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import get_db
 from app.core.authorization import require_any_role
-from app.models.user_role import ROLE_ADMIN
+from app.models.user_role import ROLE_ADMIN, ROLE_EDITOR
 from app.interface.facades import InventoryFacade
 from app.interface.errors import NotFoundError
 from app.services.inventory_service import InventoryService
@@ -17,6 +17,8 @@ from app.services.stock_in_service import StockInService
 router = APIRouter()
 
 _require_inventory_admin = require_any_role(ROLE_ADMIN)
+# Home Sales actor: Operator (Editor) or Admin — never bare customer JWT.
+_require_inventory_sell_read = require_any_role(ROLE_ADMIN, ROLE_EDITOR)
 
 
 def _to_dict(obj):
@@ -106,8 +108,14 @@ async def get_stock_movement(
 async def get_inventory_by_product(
     product_id: str,
     db: Session = Depends(get_db),
-    _authz: tuple = Depends(_require_inventory_admin),
+    _authz: tuple = Depends(_require_inventory_sell_read),
 ):
+    """Read-only sell support for Home Sales.
+
+    Operational model: Operator/Admin acts on behalf of a selected customer.
+    Bare customer JWT is denied (403). List/ledger/mutations stay Admin-only.
+    Not public: Bearer + role required.
+    """
     facade = InventoryFacade(db)
     try:
         inv = facade.get_by_product(product_id)

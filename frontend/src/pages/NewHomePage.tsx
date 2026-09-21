@@ -389,13 +389,18 @@ export default function NewHomePage() {
   }
 
   useEffect(() => {
-    if (!saleProductId || !token) {
+    if (!saleProductId) {
       setSalePrice(null);
       setSaleStock(null);
       return;
     }
     let cancelled = false;
-    void getInventoryByProduct(saleProductId, token)
+    // Inventory sell-read requires Operator/Admin — not the customer JWT.
+    void ensureProductSession()
+      .then((operatorToken) => {
+        if (cancelled || !operatorToken) throw new Error("operator session unavailable");
+        return getInventoryByProduct(saleProductId, operatorToken);
+      })
       .then((inv) => {
         if (cancelled) return;
         setSalePrice(inv.sale_price_toman ?? null);
@@ -409,7 +414,7 @@ export default function NewHomePage() {
     return () => {
       cancelled = true;
     };
-  }, [saleProductId, token]);
+  }, [saleProductId]);
 
   async function onSaleSubmit(e: FormEvent) {
     e.preventDefault();
