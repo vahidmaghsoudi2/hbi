@@ -57,7 +57,6 @@ READ_CASES = [
     ("/api/v1/inventory/available", 200),
     ("/api/v1/inventory/movements", 200),
     ("/api/v1/inventory/movements/MISSING", 404),
-    ("/api/v1/inventory/product/INV-AUTHZ-P1", 200),
     ("/api/v1/inventory/availability/INV-AUTHZ-P1", 200),
 ]
 
@@ -169,3 +168,57 @@ def test_admin_can_stock_in_and_adjust_inventory(client, db_session):
         headers=_headers("admin-user"),
     )
     assert movement.status_code == 200, movement.text
+
+
+def test_product_inventory_read_allows_authenticated_customer(client, db_session):
+    """Home Sales actor: authenticated customer may read single-product inventory."""
+    _seed_inventory(db_session)
+    assert client.get("/api/v1/inventory/product/INV-AUTHZ-P1").status_code == 401
+    assert client.get(
+        "/api/v1/inventory/product/INV-AUTHZ-P1",
+        headers={"Authorization": "Bearer invalid-token"},
+    ).status_code == 401
+
+    ordinary = client.get(
+        "/api/v1/inventory/product/INV-AUTHZ-P1",
+        headers=_headers("ordinary-customer"),
+    )
+    assert ordinary.status_code == 200, ordinary.text
+    body = ordinary.json()
+    assert body["product_id"] == "INV-AUTHZ-P1"
+    assert body["sale_price_toman"] == 1_000_000
+    assert body["quantity_available"] == 5
+
+
+def test_product_inventory_read_allows_admin(client, db_session):
+    _seed_inventory(db_session)
+    _grant_admin(db_session)
+    r = client.get(
+        "/api/v1/inventory/product/INV-AUTHZ-P1",
+        headers=_headers("admin-user"),
+    )
+    assert r.status_code == 200, r.text
+
+
+def test_product_inventory_read_missing_returns_404(client, db_session):
+    r = client.get(
+        "/api/v1/inventory/product/NO-SUCH-PRODUCT",
+        headers=_headers("ordinary-customer"),
+    )
+    assert r.status_code == 404
+
+
+def test_inventory_list_still_admin_only_after_product_read_exception(client, db_session):
+    """Mutations and list endpoints remain Admin-only (no AuthZ rollback)."""
+    _seed_inventory(db_session)
+    assert client.get("/api/v1/inventory/", headers=_headers("ordinary-customer")).status_code == 403
+    assert client.post(
+        "/api/v1/inventory/stock-in",
+        json={
+            "product_id": "INV-AUTHZ-P1",
+            "quantity": 1,
+            "purchase_price_usd": 1.0,
+            "fx_rate_usd_to_irr": 1_000_000.0,
+        },
+        headers=_headers("ordinary-customer"),
+    ).status_code == 403
