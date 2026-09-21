@@ -31,7 +31,6 @@ Last Updated: 1405-05-22 (2026-08-13)
 
 ---
 
-
 ## Start Here
 
 If you are new to HBI, read these in order:
@@ -56,6 +55,8 @@ The repository currently contains a substantial automated test suite. Test cover
 The `scripts/` directory is intended for generators and one-time operational tools. Before adding another maintenance script, first check whether an existing tool can be extended or reused.
 
 Historical evidence files should remain traceable. A report is moved or archived only after checking repository references so that evidence links are not broken.
+
+The repository currently contains both `scripts/fix_customer_name.py` and `scripts/fix_customer_name2.py`. Their relationship and usage should be reviewed before either file is removed, merged, or renamed.
 
 ## PROJECT RULES — MANDATORY ENTRY GATE
 
