@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_customer_id
 from app.interface.facades import CaseFacade
+from app.interface.errors import NotFoundError
+from app.models.case import Case
 
 
 router = APIRouter()
@@ -16,6 +18,22 @@ class CaseCreateRequest(BaseModel):
 
 def _to_dict(obj):
     return vars(obj) if hasattr(obj, "__dict__") else obj
+
+
+def _assert_case_owned(db: Session, case_id: str, customer_id: str) -> Case:
+    """Load case and enforce ownership. 404 if missing, 403 if not owner."""
+    case = db.get(Case, case_id)
+    if case is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Case not found",
+        )
+    if case.customer_id != customer_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied",
+        )
+    return case
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
@@ -64,16 +82,14 @@ async def close_case(
     db: Session = Depends(get_db),
     customer_id: str = Depends(get_current_customer_id),
 ):
-    # Authentication is mandatory here.
-    # Ownership by case_id requires a case lookup method that is not
-    # currently exposed by the supplied CaseFacade; do not guess schema.
+    """Close a case. Auth required; only the owning customer may close."""
+    _assert_case_owned(db, case_id, customer_id)
     facade = CaseFacade(db)
-    case = facade.close(case_id)
-
-    if not case:
+    try:
+        case = facade.close(case_id)
+    except NotFoundError:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Case not found",
         )
-
     return _to_dict(case)
