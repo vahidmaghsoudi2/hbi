@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_customer_id
+from app.core.authorization import require_any_role
+from app.models.user_role import ROLE_ADMIN
 from app.interface.facades import InventoryFacade
 from app.interface.errors import NotFoundError
 from app.services.inventory_service import InventoryService
@@ -13,6 +15,8 @@ from app.services.stock_movement_service import StockMovementService
 from app.services.stock_in_service import StockInService
 
 router = APIRouter()
+
+_require_inventory_admin = require_any_role(ROLE_ADMIN)
 
 
 def _to_dict(obj):
@@ -45,13 +49,19 @@ class StockInRequest(BaseModel):
 
 
 @router.get("/")
-async def list_inventory(db: Session = Depends(get_db)):
+async def list_inventory(
+    db: Session = Depends(get_db),
+    _authz: tuple = Depends(_require_inventory_admin),
+):
     facade = InventoryFacade(db)
     return [_to_dict(i) for i in facade.list_all()]
 
 
 @router.get("/available")
-async def get_available_inventory(db: Session = Depends(get_db)):
+async def get_available_inventory(
+    db: Session = Depends(get_db),
+    _authz: tuple = Depends(_require_inventory_admin),
+):
     facade = InventoryFacade(db)
     return [_to_dict(i) for i in facade.find_available()]
 
@@ -59,6 +69,7 @@ async def get_available_inventory(db: Session = Depends(get_db)):
 @router.get("/movements")
 async def list_stock_movements(
     db: Session = Depends(get_db),
+    _authz: tuple = Depends(_require_inventory_admin),
     product_id: Optional[str] = Query(None),
     movement_type: Optional[str] = Query(None),
     limit: int = Query(100, ge=1, le=500),
@@ -79,7 +90,11 @@ async def list_stock_movements(
 
 
 @router.get("/movements/{movement_id}")
-async def get_stock_movement(movement_id: str, db: Session = Depends(get_db)):
+async def get_stock_movement(
+    movement_id: str,
+    db: Session = Depends(get_db),
+    _authz: tuple = Depends(_require_inventory_admin),
+):
     svc = StockMovementService(db)
     row = svc.get_by_id(movement_id)
     if not row:
@@ -88,7 +103,11 @@ async def get_stock_movement(movement_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/product/{product_id}")
-async def get_inventory_by_product(product_id: str, db: Session = Depends(get_db)):
+async def get_inventory_by_product(
+    product_id: str,
+    db: Session = Depends(get_db),
+    _authz: tuple = Depends(_require_inventory_admin),
+):
     facade = InventoryFacade(db)
     try:
         inv = facade.get_by_product(product_id)
@@ -98,7 +117,11 @@ async def get_inventory_by_product(product_id: str, db: Session = Depends(get_db
 
 
 @router.get("/availability/{product_id}")
-async def get_availability(product_id: str, db: Session = Depends(get_db)):
+async def get_availability(
+    product_id: str,
+    db: Session = Depends(get_db),
+    _authz: tuple = Depends(_require_inventory_admin),
+):
     svc = InventoryService(db)
     sellable = svc.sellable_quantity(product_id)
     available = svc.is_available(product_id, 1)
@@ -114,7 +137,7 @@ async def get_availability(product_id: str, db: Session = Depends(get_db)):
 async def stock_in(
     body: StockInRequest,
     db: Session = Depends(get_db),
-    _auth: str = Depends(get_current_customer_id),
+    _authz: tuple = Depends(_require_inventory_admin),
 ):
     """Phase 07 — Stock-In with USD price + FX snapshot + STOCK_IN movement."""
     svc = StockInService(db)
