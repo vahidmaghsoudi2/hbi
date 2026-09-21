@@ -184,3 +184,43 @@ def test_rollback_on_failure(session):
         )
     session.rollback()
     assert session.query(Payment).count() == 0
+
+
+def test_payment_authorization_service_owner_and_foreign_create(session):
+    sale = _sale(session)
+    svc = PaymentService(session)
+    pay = svc.record_payment(sale_id=sale.sale_id, customer_id="C1", method="CASH", amount_usd=1.0, fx_rate_usd_to_irr=1_000_000.0)
+    session.commit()
+    assert pay.sale_id == sale.sale_id
+    before = session.query(Payment).count()
+    with pytest.raises(PermissionError, match="Access denied"):
+        svc.record_payment(sale_id=sale.sale_id, customer_id="C2", method="CARD", amount_usd=1.0, fx_rate_usd_to_irr=1_000_000.0)
+    session.rollback()
+    assert session.query(Payment).count() == before
+
+
+def test_payment_authorization_http_contract(client, db_session):
+    from app.core.auth import create_access_token
+    db_session.add_all([
+        Customer(customer_id="HTTP-C1", name="Owner", consent_to_store_data=1),
+        Customer(customer_id="HTTP-C2", name="Foreign", consent_to_store_data=1),
+    ])
+    db_session.flush()
+    db_session.add(Sale(sale_id="HTTP-SALE-1", customer_id="HTTP-C1", total_amount_toman=1_000_000, total_amount_usd=10.0, total_amount_irr=10_000_000.0, fx_rate_usd_to_irr=1_000_000.0))
+    db_session.commit()
+    owner_h = {"Authorization": f"Bearer {create_access_token({'sub': 'HTTP-C1'})}"}
+    foreign_h = {"Authorization": f"Bearer {create_access_token({'sub': 'HTTP-C2'})}"}
+    payload = {"sale_id":"HTTP-SALE-1","method":"CASH","amount_usd":1.0,"fx_rate_usd_to_irr":1_000_000.0}
+    assert client.post("/api/v1/payments/", json=payload, headers=owner_h).status_code == 200
+    count = db_session.query(Payment).count()
+    assert client.post("/api/v1/payments/", json=payload, headers=foreign_h).status_code == 403
+    assert db_session.query(Payment).count() == count
+    payment = db_session.query(Payment).one()
+    assert client.get(f"/api/v1/payments/{payment.payment_id}", headers=owner_h).status_code == 200
+    assert client.get(f"/api/v1/payments/{payment.payment_id}", headers=foreign_h).status_code == 403
+    assert client.get("/api/v1/payments/sale/HTTP-SALE-1", headers=owner_h).status_code == 200
+    assert client.get("/api/v1/payments/sale/HTTP-SALE-1", headers=foreign_h).status_code == 403
+    assert client.post("/api/v1/payments/", json=payload).status_code == 401
+    assert client.post("/api/v1/payments/", json=payload, headers={"Authorization":"Bearer invalid-token"}).status_code == 401
+    assert client.get("/api/v1/payments/sale/MISSING", headers=owner_h).status_code == 404
+    assert client.get("/api/v1/payments/NO-PAYMENT", headers=owner_h).status_code == 404
