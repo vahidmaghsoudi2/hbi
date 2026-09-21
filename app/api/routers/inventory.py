@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_db
+from app.core.deps import get_db, get_current_customer_id
 from app.core.authorization import require_any_role
 from app.models.user_role import ROLE_ADMIN
 from app.interface.facades import InventoryFacade
@@ -106,8 +106,14 @@ async def get_stock_movement(
 async def get_inventory_by_product(
     product_id: str,
     db: Session = Depends(get_db),
-    _authz: tuple = Depends(_require_inventory_admin),
+    _customer_id: str = Depends(get_current_customer_id),
 ):
+    """Read-only sell support for Home Sales.
+
+    Authenticated subject (customer or role-bearing operator) may read a single
+    product's inventory row for price/stock. List/ledger/mutations stay Admin-only
+    (INVENTORY-AUTHZ-001). Not public: Bearer required.
+    """
     facade = InventoryFacade(db)
     try:
         inv = facade.get_by_product(product_id)
