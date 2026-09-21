@@ -6,7 +6,7 @@ from app.core.auth import create_access_token
 from app.models.inventory import Inventory
 from app.models.product import Product
 from app.models.stock_movement import StockMovement
-from app.models.user_role import ROLE_ADMIN, UserRole
+from app.models.user_role import ROLE_ADMIN, ROLE_EDITOR, UserRole
 
 
 def _headers(subject_id: str):
@@ -170,48 +170,38 @@ def test_admin_can_stock_in_and_adjust_inventory(client, db_session):
     assert movement.status_code == 200, movement.text
 
 
-def test_product_inventory_read_allows_authenticated_customer(client, db_session):
-    """Home Sales actor: authenticated customer may read single-product inventory."""
+def test_product_inventory_read_denies_customer_allows_operator_and_admin(client, db_session):
+    """Sell-read: customer 403; Editor/Admin 200; unauth 401."""
     _seed_inventory(db_session)
-    assert client.get("/api/v1/inventory/product/INV-AUTHZ-P1").status_code == 401
-    assert client.get(
-        "/api/v1/inventory/product/INV-AUTHZ-P1",
-        headers={"Authorization": "Bearer invalid-token"},
-    ).status_code == 401
+    path = "/api/v1/inventory/product/INV-AUTHZ-P1"
+    assert client.get(path).status_code == 401
+    assert client.get(path, headers={"Authorization": "Bearer invalid-token"}).status_code == 401
+    assert client.get(path, headers=_headers("ordinary-customer")).status_code == 403
 
-    ordinary = client.get(
-        "/api/v1/inventory/product/INV-AUTHZ-P1",
-        headers=_headers("ordinary-customer"),
-    )
-    assert ordinary.status_code == 200, ordinary.text
-    body = ordinary.json()
-    assert body["product_id"] == "INV-AUTHZ-P1"
-    assert body["sale_price_toman"] == 1_000_000
-    assert body["quantity_available"] == 5
+    db_session.add(UserRole(user_role_id="ROLE-op-Editor", subject_id="op-editor", role=ROLE_EDITOR))
+    db_session.commit()
+    assert client.get(path, headers=_headers("op-editor")).status_code == 200
 
-
-def test_product_inventory_read_allows_admin(client, db_session):
-    _seed_inventory(db_session)
     _grant_admin(db_session)
-    r = client.get(
-        "/api/v1/inventory/product/INV-AUTHZ-P1",
-        headers=_headers("admin-user"),
-    )
-    assert r.status_code == 200, r.text
+    assert client.get(path, headers=_headers("admin-user")).status_code == 200
 
 
-def test_product_inventory_read_missing_returns_404(client, db_session):
+def test_product_inventory_read_missing_returns_404_for_operator(client, db_session):
+    db_session.add(UserRole(user_role_id="ROLE-op2", subject_id="op2", role=ROLE_EDITOR))
+    db_session.commit()
     r = client.get(
         "/api/v1/inventory/product/NO-SUCH-PRODUCT",
-        headers=_headers("ordinary-customer"),
+        headers=_headers("op2"),
     )
     assert r.status_code == 404
 
 
-def test_inventory_list_still_admin_only_after_product_read_exception(client, db_session):
-    """Mutations and list endpoints remain Admin-only (no AuthZ rollback)."""
+def test_inventory_list_and_mutations_still_admin_only(client, db_session):
     _seed_inventory(db_session)
-    assert client.get("/api/v1/inventory/", headers=_headers("ordinary-customer")).status_code == 403
+    db_session.add(UserRole(user_role_id="ROLE-ed", subject_id="editor-only", role=ROLE_EDITOR))
+    db_session.commit()
+    assert client.get("/api/v1/inventory/product/INV-AUTHZ-P1", headers=_headers("editor-only")).status_code == 200
+    assert client.get("/api/v1/inventory/", headers=_headers("editor-only")).status_code == 403
     assert client.post(
         "/api/v1/inventory/stock-in",
         json={
@@ -220,5 +210,6 @@ def test_inventory_list_still_admin_only_after_product_read_exception(client, db
             "purchase_price_usd": 1.0,
             "fx_rate_usd_to_irr": 1_000_000.0,
         },
-        headers=_headers("ordinary-customer"),
+        headers=_headers("editor-only"),
     ).status_code == 403
+    assert client.get("/api/v1/inventory/", headers=_headers("ordinary-customer")).status_code == 403
