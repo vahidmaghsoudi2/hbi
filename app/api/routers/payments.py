@@ -63,7 +63,7 @@ async def record_payment(
 async def list_payments_for_sale(
     sale_id: str,
     db: Session = Depends(get_db),
-    _auth: str = Depends(get_current_customer_id),
+    customer_id: str = Depends(get_current_customer_id),
 ):
     svc = PaymentService(db)
     try:
@@ -78,7 +78,7 @@ async def list_payments_for_sale(
 async def get_payment(
     payment_id: str,
     db: Session = Depends(get_db),
-    _auth: str = Depends(get_current_customer_id),
+    customer_id: str = Depends(get_current_customer_id),
 ):
     svc = PaymentService(db)
     try:
