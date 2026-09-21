@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_customer_id
 from app.services.return_service import ReturnService
+from app.models.sale import Sale
 
 router = APIRouter()
 
@@ -37,8 +38,13 @@ class ReturnCreateRequest(BaseModel):
 async def create_return(
     body: ReturnCreateRequest,
     db: Session = Depends(get_db),
-    _auth: str = Depends(get_current_customer_id),
+    customer_id: str = Depends(get_current_customer_id),
 ):
+    sale = db.query(Sale).filter(Sale.sale_id == body.sale_id).first()
+    if not sale:
+        raise HTTPException(status_code=404, detail=f"Sale {body.sale_id} not found")
+    if sale.customer_id != customer_id:
+        raise HTTPException(status_code=403, detail="Access denied")
     svc = ReturnService(db)
     try:
         ret = svc.create_return(
@@ -60,7 +66,12 @@ async def create_return(
 async def list_returns_for_sale(
     sale_id: str,
     db: Session = Depends(get_db),
-    _auth: str = Depends(get_current_customer_id),
+    customer_id: str = Depends(get_current_customer_id),
 ):
+    sale = db.query(Sale).filter(Sale.sale_id == sale_id).first()
+    if not sale:
+        raise HTTPException(status_code=404, detail=f"Sale {sale_id} not found")
+    if sale.customer_id != customer_id:
+        raise HTTPException(status_code=403, detail="Access denied")
     svc = ReturnService(db)
     return [_to_dict(r) for r in svc.list_by_sale(sale_id)]
