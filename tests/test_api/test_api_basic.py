@@ -2,6 +2,7 @@
 from fastapi.testclient import TestClient
 from app.main import app
 from app.core.auth import create_access_token
+from app.models.user_role import ROLE_ADMIN, UserRole
 
 
 def _auth_headers():
@@ -45,8 +46,10 @@ class TestInventoryEndpoints:
         response = client.get("/api/v1/inventory/999")
         assert response.status_code == 404
 
-    def test_get_available_inventory(self, client):
-        response = client.get("/api/v1/inventory/available")
+    def test_get_available_inventory(self, client, db_session):
+        db_session.add(UserRole(user_role_id="BASIC-ADMIN-ROLE", subject_id="testuser", role=ROLE_ADMIN))
+        db_session.commit()
+        response = client.get("/api/v1/inventory/available", headers=_auth_headers())
         assert response.status_code == 200
 
 
