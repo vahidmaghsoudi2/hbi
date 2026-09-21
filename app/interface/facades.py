@@ -161,6 +161,10 @@ class CaseFacade:
         cases = self.service.find_by_customer(customer_id)
         return [_to_case_dto(c) for c in cases]
 
+    def get_by_id(self, case_id: str) -> Optional[CaseDTO]:
+        case = self.service.get_by_id(case_id)
+        return _to_case_dto(case) if case else None
+
     def close(self, case_id: str) -> CaseDTO:
         case = self.service.close_case(case_id)
         if not case:
