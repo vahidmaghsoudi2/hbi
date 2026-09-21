@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_db, get_current_customer_id
+from app.core.deps import get_db
 from app.core.authorization import require_any_role
 from app.models.user_role import ROLE_ADMIN
 from app.interface.facades import InventoryFacade
