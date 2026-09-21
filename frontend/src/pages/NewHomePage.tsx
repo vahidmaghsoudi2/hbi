@@ -14,6 +14,7 @@ import {
   getCustomerById,
   searchCustomers,
   getInventoryByProduct,
+  getCurrentFx,
   listSalesByCustomer,
 } from "../api/client";
 import ProductIntakePanel from "./ProductIntakePanel";
@@ -66,7 +67,7 @@ export default function NewHomePage() {
   const [saleQty, setSaleQty] = useState(1);
   const [salePrice, setSalePrice] = useState<number | null>(null);
   const [saleStock, setSaleStock] = useState<number | null>(null);
-  const [saleFxRate, setSaleFxRate] = useState(1);
+  const [saleFxRate, setSaleFxRate] = useState<number | null>(null);
   const [saleBusy, setSaleBusy] = useState(false);
   const [lastSale, setLastSale] = useState<SaleDTO | null>(null);
   const [totalSales, setTotalSales] = useState<number | null>(null);
@@ -396,20 +397,32 @@ export default function NewHomePage() {
     }
     let cancelled = false;
     // Inventory sell-read requires Operator/Admin — not the customer JWT.
+    setSalePrice(null);
+    setSaleFxRate(null);
     void ensureProductSession()
-      .then((operatorToken) => {
+      .then(async (operatorToken) => {
         if (cancelled || !operatorToken) throw new Error("operator session unavailable");
-        return getInventoryByProduct(saleProductId, operatorToken);
+        const [inv, fx] = await Promise.all([
+          getInventoryByProduct(saleProductId, operatorToken),
+          getCurrentFx(),
+        ]);
+        if (fx.fx_rate_usd_to_irr == null) throw new Error("نرخ عملیاتی ارز در دسترس نیست؛ فروش متوقف شد.");
+        if (inv.sale_price_usd == null) throw new Error("قیمت فروش دلاری محصول ثبت نشده است؛ فروش متوقف شد.");
+        const priceToman = Math.round((inv.sale_price_usd * fx.fx_rate_usd_to_irr) / 10);
+        return { inv, fxRate: fx.fx_rate_usd_to_irr, priceToman };
       })
-      .then((inv) => {
+      .then(({ inv, fxRate, priceToman }) => {
         if (cancelled) return;
-        setSalePrice(inv.sale_price_toman ?? null);
+        setSaleFxRate(fxRate);
+        setSalePrice(priceToman);
         setSaleStock(Math.max(0, (inv.quantity_available ?? 0) - (inv.quantity_reserved ?? 0)));
       })
-      .catch(() => {
+      .catch((err) => {
         if (cancelled) return;
         setSalePrice(null);
+        setSaleFxRate(null);
         setSaleStock(null);
+        setError(err instanceof Error ? err.message : String(err));
       });
     return () => {
       cancelled = true;
@@ -422,15 +435,19 @@ export default function NewHomePage() {
     if (!token || !customerId) return setError("ابتدا مشاوره را ثبت کنید.");
     if (!saleProductId.trim()) return setError("محصول را انتخاب کنید.");
     if (saleQty < 1) return setError("تعداد نامعتبر است.");
-    if (salePrice == null) return setError("قیمت فروش این محصول از موجودی دریافت نشد.");
+    if (salePrice == null) return setError("قیمت فروش این محصول در دسترس نیست.");
     if (saleStock != null && saleQty > saleStock) return setError(`موجودی قابل فروش: ${saleStock}`);
     setSaleBusy(true);
     try {
+      const fx = await getCurrentFx();
+      if (fx.fx_rate_usd_to_irr == null) throw new Error("نرخ عملیاتی ارز در دسترس نیست؛ فروش متوقف شد.");
+      const currentFxRate = fx.fx_rate_usd_to_irr;
+      setSaleFxRate(currentFxRate);
       const sale = await createSale(
         {
           customer_id: customerId,
           items: [{ product_id: saleProductId.trim(), quantity: saleQty, ...(selectedRecommendationId ? { recommendation_id: selectedRecommendationId } : {}) }],
-          fx_rate_usd_to_irr: saleFxRate,
+          fx_rate_usd_to_irr: currentFxRate,
         },
         token
       );
