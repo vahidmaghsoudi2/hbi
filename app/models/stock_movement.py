@@ -24,7 +24,7 @@ class StockMovement(Base):
 
     __table_args__ = (
         CheckConstraint(
-            "movement_type IN ('STOCK_IN', 'PURCHASE', 'SALE', 'RETURN_IN', 'RETURN_OUT', 'ADJUSTMENT')",
+            "movement_type IN ('STOCK_IN', 'PURCHASE', 'SALE', 'RETURN_IN', 'RETURN_OUT', 'ADJUSTMENT', 'ADJUST_IN', 'ADJUST_OUT')",
             name="stock_movement_type",
         ),
     )
