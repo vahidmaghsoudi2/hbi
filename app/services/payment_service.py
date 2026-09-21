@@ -23,7 +23,12 @@ class PaymentService:
     def __init__(self, db: Session):
         self.db = db
 
-    def list_by_sale(self, sale_id: str) -> List[Payment]:
+    def list_by_sale(self, sale_id: str, *, customer_id: Optional[str] = None) -> List[Payment]:
+        sale = self.db.query(Sale).filter(Sale.sale_id == sale_id).first()
+        if not sale:
+            raise ValueError(f"Sale {sale_id} not found")
+        if customer_id is not None and sale.customer_id != customer_id:
+            raise PermissionError("Access denied")
         return (
             self.db.query(Payment)
             .filter(Payment.sale_id == sale_id)
@@ -31,17 +36,23 @@ class PaymentService:
             .all()
         )
 
-    def get_by_id(self, payment_id: str) -> Optional[Payment]:
-        return (
-            self.db.query(Payment)
-            .filter(Payment.payment_id == payment_id)
-            .first()
-        )
+    def get_by_id(self, payment_id: str, *, customer_id: Optional[str] = None) -> Optional[Payment]:
+        payment = self.db.query(Payment).filter(Payment.payment_id == payment_id).first()
+        if payment is None:
+            return None
+        if customer_id is not None:
+            sale = self.db.query(Sale).filter(Sale.sale_id == payment.sale_id).first()
+            if sale is None:
+                return None
+            if sale.customer_id != customer_id:
+                raise PermissionError("Access denied")
+        return payment
 
     def record_payment(
         self,
         *,
         sale_id: str,
+        customer_id: Optional[str] = None,
         method: str,
         amount_usd: float,
         fx_rate_usd_to_irr: float,
@@ -66,6 +77,8 @@ class PaymentService:
         sale = self.db.query(Sale).filter(Sale.sale_id == sale_id).first()
         if not sale:
             raise ValueError(f"Sale {sale_id} not found")
+        if customer_id is not None and sale.customer_id != customer_id:
+            raise PermissionError("Access denied")
 
         # Capture sale totals before payment (must remain unchanged)
         prior_usd = sale.total_amount_usd
