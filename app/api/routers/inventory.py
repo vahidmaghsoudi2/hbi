@@ -104,6 +104,29 @@ async def get_stock_movement(
     return _to_dict(row)
 
 
+class SalePriceSetRequest(BaseModel):
+    sale_price_usd: float = Field(..., ge=0)
+
+
+@router.put("/product/{product_id}/sale-price")
+async def set_sale_price(
+    product_id: str,
+    body: SalePriceSetRequest,
+    db: Session = Depends(get_db),
+    _authz: tuple = Depends(_require_inventory_admin),
+):
+    """Set the authoritative Inventory.sale_price_usd for sales."""
+    svc = InventoryService(db)
+    try:
+        inv = svc.set_sale_price_usd(product_id, body.sale_price_usd)
+        db.commit()
+        db.refresh(inv)
+        return _to_dict(inv)
+    except ValueError as e:
+        db.rollback()
+        raise HTTPException(status_code=422, detail=str(e))
+
+
 @router.get("/product/{product_id}")
 async def get_inventory_by_product(
     product_id: str,
