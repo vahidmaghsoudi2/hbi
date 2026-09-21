@@ -93,6 +93,12 @@ class InventoryService(BaseService[Inventory, InventoryRepository]):
         self.db.flush()
         return mov
 
+    def _sync_stock_status(self, inv: Inventory) -> None:
+        if inv.quantity_available <= 0:
+            inv.stock_status = "OUT_OF_STOCK"
+        elif inv.stock_status == "OUT_OF_STOCK":
+            inv.stock_status = "active"
+
     def increase_stock(
         self,
         product_id: str,
@@ -105,10 +111,8 @@ class InventoryService(BaseService[Inventory, InventoryRepository]):
             raise ValueError("quantity must be positive")
         self._require_product(product_id)
         inv = self._require_inventory(product_id)
-        before = inv.quantity_available
-        inv.quantity_available = before + quantity
-        if inv.quantity_available > 0 and inv.stock_status == "OUT_OF_STOCK":
-            inv.stock_status = "active"
+        inv.quantity_available = inv.quantity_available + quantity
+        self._sync_stock_status(inv)
         self._record_movement(
             product_id=product_id,
             inventory_id=inv.inventory_id,
@@ -138,8 +142,7 @@ class InventoryService(BaseService[Inventory, InventoryRepository]):
                 f"insufficient stock for product {product_id}: available={before}, requested={quantity}"
             )
         inv.quantity_available = before - quantity
-        if inv.quantity_available == 0:
-            inv.stock_status = "OUT_OF_STOCK"
+        self._sync_stock_status(inv)
         self._record_movement(
             product_id=product_id,
             inventory_id=inv.inventory_id,
