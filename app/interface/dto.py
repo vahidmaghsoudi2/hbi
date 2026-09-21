@@ -54,6 +54,7 @@ class InventoryDTO:
     quantity_reserved: int
     stock_status: str
     sale_price_toman: Optional[int] = None
+    sale_price_usd: Optional[float] = None
 
 @dataclass
 class SaleItemDTO:
