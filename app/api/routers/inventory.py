@@ -170,7 +170,7 @@ async def stock_in(
 async def adjust_stock(
     body: StockAdjustRequest,
     db: Session = Depends(get_db),
-    _auth: str = Depends(get_current_customer_id),
+    _authz: tuple = Depends(_require_inventory_admin),
 ):
     """Authorized inventory increase/decrease with StockMovement trace."""
     svc = InventoryService(db)
