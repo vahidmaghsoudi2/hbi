@@ -14,7 +14,7 @@ Slice 1 is intentionally limited to the contract/data-dictionary boundary:
 - promotion rules
 - explicit distinction between Current Need, Profile Fact, Preference, Constraint/Safety Signal, Product Interaction, Outcome, and Derived Insight
 
-This audit authorizes a minimal additive backend slice only after the dictionary/contract mismatch identified below is corrected. It does not authorize recommendation, scoring, evidence-gate, seed, or product-rule changes.
+This audit does not authorize any implementation. It first establishes whether a minimal additive slice is actually required after consumer and architecture analysis. It does not authorize recommendation, scoring, evidence-gate, seed, or product-rule changes.
 
 ## 2. Sources audited in master
 
@@ -130,32 +130,76 @@ The existing Customer model has a binary `consent_to_store_data` flag. Approved 
 
 Required action: Slice 1 may define the vocabulary/contract for consent, but must not silently reinterpret the existing binary flag as the complete future consent model. Consent schema expansion belongs to a separately audited minimal implementation slice.
 
-## 5. What Slice 1 should implement
+## 5. Consumer Audit
 
-The smallest safe executable boundary is an additive structured-record foundation, not a Customer-table rewrite.
+Architecture is not selected from the vocabulary alone. Each candidate domain was traced through:
 
-Minimum target concepts for the next implementation slice:
-1. `ProfileFact`
-2. `Preference`
-3. `ConstraintSafetySignal`
+`Consumer → real use case → required data → required behavior → current capability → exact gap → minimum solution`
 
-Each record must support, at minimum:
-- stable identifier
-- customer identifier
-- canonical attribute/key
-- value or structured payload
-- value state where applicable
-- approved provenance
-- approved lifecycle/status
-- recorded timestamp
-- optional effective/review metadata where required by freshness semantics
-- audit-compatible actor/context fields
+### 5.1 Current Need
 
-Current Need remains visit/case scoped and should continue to be carried by Case/consultation context rather than copied into a permanent Customer Fact.
+- Consumer: Case / Recommendation
+- Use case: current consultation need drives the current recommendation request.
+- Required data: today's concerns / case context.
+- Current capability: covered by Case plus the explicit consultation payload.
+- Gap: none proven.
+- Result: **CLOSED / remain Case-scoped**.
 
-Product Interaction and Outcome are intentionally outside this first backend slice unless a separate Slice 1A audit demonstrates they can be added without widening the boundary.
+### 5.2 Profile Context
 
-## 6. Explicit non-goals
+- Consumers: Customer profile retrieval/update and Recommendation profile construction.
+- Use case: seller reuses customer context and may update the persistent profile.
+- Current capability: Customer fields, customer search, profile retrieval, intake update, and read-only recommendation projection exist.
+- Required missing behavior: provenance, lifecycle/freshness semantics, explicit confirmation, expiry/review, and conflict resolution.
+- Gap: **CAPABILITY GAP confirmed**.
+- Architectural conclusion: **model choice remains unproven**. Customer + Case still satisfies today's recommendation path.
+
+### 5.3 Preference
+
+- Current independent consumer: none proven.
+- Purchase is linked to Customer and optionally Recommendation, but purchase is not evidence of a durable preference.
+- Gap: **NO PROVEN GAP**.
+- Result: do not introduce a Preference entity on current evidence.
+
+### 5.4 Product Interaction / Outcome / Follow-up
+
+- Consumer: previous-customer workflow and case-scoped Feedback.
+- Purchase history is already represented by Sale → SaleItem → Product, with optional Recommendation linkage.
+- Feedback already records outcome/comment/rating/follow_up_at against Case and optional Recommendation.
+- Current capability: **PROVEN** for purchase history and case feedback.
+- Missing consumer: no proven customer-wide follow-up queue, scheduler, or downstream decision that changes because of follow_up_at.
+- Result: **no new Interaction, Outcome, or Follow-up entity is justified by current consumer evidence**.
+
+### 5.5 Safety
+
+- Product-side consumer: RecommendationService / ReasoningEngine consume QA-controlled Evidence and ProductKnowledge, including contraindications, existing conflicts, and medical-context handling.
+- Customer-side Safety Signal consumer: none proven.
+- Existing Customer observations/answers/operator_notes are generic and are not evidence of an independent safety domain.
+- Gap: **business need exists; consumer behavior for a persistent customer Safety Signal is unproven**.
+- Result: no new Safety entity and no new Recommendation safety gate.
+
+### 5.6 Smart Summary
+
+- Consumer: UI display.
+- Source: existing customer/case/recommendation data.
+- Required behavior: derived presentation.
+- Gap: none proven.
+- Result: **DERIVED / no persistence model**.
+
+## 6. Architecture decision status
+
+The Consumer Audit does **not** select A/B/C/D.
+
+Current evidence yields:
+- A — three independent tables: **not justified yet**
+- B — one shared Record: **not justified yet**
+- C — hybrid: **not justified yet**
+- D — existing Customer/Case: **currently sufficient for proven recommendation and visit needs**
+
+The unresolved Profile capability gap may require additional structure later, but the minimum structure must be proven by a subsequent architecture comparison. Preference, independent Outcome, and customer Safety Signal are not currently consumer-proven.
+
+
+## 7. Explicit non-goals
 
 This audit does not authorize:
 - redesigning Customer
@@ -171,30 +215,44 @@ This audit does not authorize:
 - automatic promotion from purchase/recommendation to Preference
 - automatic promotion from consultation input to Profile Fact
 
-## 7. Required tests for the minimal backend slice
+## 8. Required evidence before architecture selection
 
-At minimum, the implementation PR must prove:
-- records are linked to the correct Customer
-- allowed value states are accepted and invalid states are rejected
-- only approved provenance values are accepted
-- lifecycle/status values follow Contract v1.1
-- Current Need is not auto-promoted to permanent Profile Fact
-- purchase/recommendation does not auto-create Preference
-- conflicting facts preserve both provenance/context rather than silently overwrite
-- existing Customer → Case → recommendation integration remains green and unchanged
+No model-specific implementation tests are authorized yet.
 
-## 8. Gate result
+Before Architecture Selection, the next audit must compare the proven Profile capability gap against:
+- existing Customer/Case only
+- a shared record approach
+- separate concepts
+- a hybrid only where separation is behaviorally required
 
-**REALITY AUDIT FOR SLICE 1 = PASS WITH REQUIRED CONTRACT ALIGNMENT**
+The comparison must explicitly measure:
+- real consumer coverage
+- duplication with Customer/Case
+- provenance/lifecycle/freshness handling
+- promotion/conflict risks
+- migration and maintenance cost
+- Recommendation dependency
 
-The repository is structurally ready for a small additive backend foundation, but the older Data Dictionary contains vocabulary and freshness semantics that conflict with the approved Contract v1.1.
+## 9. Gate result
 
-Therefore the next action is:
+**CONSUMER AUDIT = IN PROGRESS / ARCHITECTURE BLOCKED**
 
-**Contract/Data Dictionary alignment → minimal additive backend models → focused tests → CI → runtime verification**
+Current disposition:
+- Current Need → **CLOSED / Case**
+- Preference → **NO PROVEN GAP**
+- Smart Summary → **DERIVED / no persistence**
+- Profile Context → **CAPABILITY GAP / architecture unknown**
+- Product Interaction → **existing purchase-history capability; experience gap not consumer-proven**
+- Outcome → **case-scoped Feedback exists; broader Outcome architecture not consumer-proven**
+- Safety → **business need / persistent consumer unproven**
 
-No recommendation/scoring/evidence-gate work is in this slice.
+Therefore:
+- **Architecture Selection = BLOCKED**
+- **Schema Contract = BLOCKED**
+- **Migration = BLOCKED**
+- **Code = BLOCKED**
+- **Recommendation / Scoring / Evidence Gates = FROZEN**
 
-## 9. Acceptance evidence
+## 10. Acceptance evidence
 
-The audit branch contains documentation only. No application schema, UI, or recommendation code has been changed by this audit.
+The audit branch remains documentation-only. No application schema, model, migration, UI rewrite, or recommendation/scoring/evidence-gate code has been changed.
