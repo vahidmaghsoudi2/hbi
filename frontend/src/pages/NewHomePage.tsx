@@ -1,1 +1,1 @@
-@file:///tmp/nhp_final.tsx
+LOADING_FROM_ARTIFACT_SEE_NEXT
