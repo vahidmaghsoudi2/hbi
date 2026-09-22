@@ -88,6 +88,8 @@ def _seed(session):
                 stock_status="active",
                 sale_price_usd=10.0,
                 sale_price_toman=1_000_000,
+                purchase_price_usd=8.0,
+                purchase_price_irr=8_000_000.0,
                 purchase_price_toman=800_000,
             )
         )
@@ -126,9 +128,9 @@ def test_sales_and_financial(session):
     session.commit()
     fin = ReportService(session).financial_summary(start=start, end=end)
     assert fin["returns_usd"] == pytest.approx(10.0)
-    assert fin["cogs"]["status"] == "UNSUPPORTED"
-    assert fin["discounts"]["status"] == "UNSUPPORTED"
-    assert fin["gross_profit"]["status"] == "UNSUPPORTED"
+    assert fin["cogs"]["status"] == "DEFERRED BY PO"
+    assert fin["discounts"]["status"] == "DEFERRED BY PO"
+    assert fin["gross_profit"]["status"] == "DEFERRED BY PO"
     # historical sale fx still intact
     assert session.get(Sale, sale.sale_id).fx_rate_usd_to_irr == 1_000_000.0
 
@@ -155,6 +157,17 @@ def test_inventory_reports(session):
     low = ReportService(session).inventory_low_stock(threshold=3)
     assert any(r["product_id"] == "P-HAIR" for r in low)
     assert not any(r["product_id"] == "P-BOOST" for r in low)
+
+
+def test_inventory_value_uses_latest_purchase_price(session):
+    _seed(session)
+    rows = ReportService(session).inventory_all()
+    boost = next(row for row in rows if row["product_id"] == "P-BOOST")
+
+    assert boost["inventory_value_basis"] == "LATEST_PURCHASE_PRICE"
+    assert boost["inventory_value_usd"] == pytest.approx(80.0)
+    assert boost["inventory_value_irr"] == pytest.approx(80_000_000.0)
+    assert boost["inventory_value_toman"] == 8_000_000
 
 
 def test_invalid_category(session):

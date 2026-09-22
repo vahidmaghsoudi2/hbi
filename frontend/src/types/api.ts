@@ -160,3 +160,69 @@ export interface ProductUpdateRequest {
   country_of_origin?: string | null;
   packaging_version?: string | null;
 }
+
+
+/** Admin reporting contracts used by AccountingHomePage. */
+export interface SalesReportDTO {
+  start: string;
+  end: string;
+  sale_count: number;
+  revenue_usd: number;
+  revenue_irr: number;
+  revenue_toman: number;
+  sales?: Array<Record<string, unknown>>;
+}
+
+export interface InventoryReportRow {
+  inventory_id: string;
+  product_id: string;
+  category_id?: string | null;
+  quantity_available: number;
+  quantity_reserved: number;
+  stock_status: string;
+  purchase_price_usd?: number | null;
+  sale_price_usd?: number | null;
+  purchase_price_toman?: number | null;
+  sale_price_toman?: number | null;
+  price_fx_rate_usd_to_irr?: number | null;
+  inventory_value_usd?: number | null;
+  inventory_value_irr?: number | null;
+  inventory_value_toman?: number | null;
+  inventory_value_basis?: string;
+}
+
+export interface FinancialSummaryDTO {
+  start: string;
+  end: string;
+  revenue_usd: number;
+  revenue_irr: number;
+  revenue_toman: number;
+  returns_usd: number;
+  returns_irr: number;
+  returns_toman: number;
+  net_revenue_usd: number;
+  net_revenue_irr: number;
+  net_revenue_toman: number;
+  return_count: number;
+  sale_count: number;
+  discounts?: { status: string; reason?: string };
+  cogs?: { status: string; reason?: string };
+  gross_profit?: { status: string; reason?: string };
+}
+
+export interface StockMovementDTO {
+  movement_id: string;
+  product_id: string;
+  inventory_id?: string | null;
+  movement_type: string;
+  quantity_delta: number;
+  quantity_after: number;
+  amount_usd?: number | null;
+  amount_irr?: number | null;
+  amount_toman?: number | null;
+  fx_rate_usd_to_irr?: number | null;
+  reference_type?: string | null;
+  reference_id?: string | null;
+  note?: string | null;
+  created_at?: string | null;
+}
