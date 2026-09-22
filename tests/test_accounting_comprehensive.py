@@ -212,9 +212,9 @@ def test_integrated_stock_in_sale_payment_return_fx_reports(session):
         start=now - timedelta(days=1), end=now + timedelta(days=1)
     )
     assert fin["sale_count"] >= 1
-    assert fin["cogs"]["status"] == "UNSUPPORTED"
-    assert fin["discounts"]["status"] == "UNSUPPORTED"
-    assert fin["gross_profit"]["status"] == "UNSUPPORTED"
+    assert fin["cogs"]["status"] == "DEFERRED BY PO"
+    assert fin["discounts"]["status"] == "DEFERRED BY PO"
+    assert fin["gross_profit"]["status"] == "DEFERRED BY PO"
     inv_before = session.get(Inventory, "INV-P1").quantity_available
     ReportService(session).inventory_all()
     ReportService(session).inventory_by_category("BOOST")
