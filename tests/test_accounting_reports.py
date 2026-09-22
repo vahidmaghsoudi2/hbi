@@ -128,9 +128,9 @@ def test_sales_and_financial(session):
     session.commit()
     fin = ReportService(session).financial_summary(start=start, end=end)
     assert fin["returns_usd"] == pytest.approx(10.0)
-    assert fin["cogs"]["status"] == "UNSUPPORTED"
-    assert fin["discounts"]["status"] == "UNSUPPORTED"
-    assert fin["gross_profit"]["status"] == "UNSUPPORTED"
+    assert fin["cogs"]["status"] == "DEFERRED BY PO"
+    assert fin["discounts"]["status"] == "DEFERRED BY PO"
+    assert fin["gross_profit"]["status"] == "DEFERRED BY PO"
     # historical sale fx still intact
     assert session.get(Sale, sale.sale_id).fx_rate_usd_to_irr == 1_000_000.0
 
