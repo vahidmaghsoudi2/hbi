@@ -23,6 +23,7 @@ def _seed_product_inventory(db_session, product_id: str = "PRICE-TEST"):
             status="ACTIVE",
         )
     )
+    db_session.flush()
     db_session.add(
         Inventory(
             inventory_id=f"INV-{product_id}",
