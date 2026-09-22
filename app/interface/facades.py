@@ -103,7 +103,8 @@ def _to_inventory_dto(i) -> InventoryDTO:
         quantity_available=i.quantity_available,
         quantity_reserved=i.quantity_reserved,
         stock_status=i.stock_status,
-        sale_price_toman=i.sale_price_toman
+        sale_price_toman=i.sale_price_toman,
+        sale_price_usd=i.sale_price_usd
     )
 
 class ProductFacade:

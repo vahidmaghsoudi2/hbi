@@ -90,11 +90,11 @@ class InventoryService(BaseService[Inventory, InventoryRepository]):
             reference_id=reference_id,
         )
         self.db.add(mov)
+        self.db.flush()
         return mov
 
     def _sync_stock_status(self, inv: Inventory) -> None:
         if inv.quantity_available <= 0:
-            inv.quantity_available = 0
             inv.stock_status = "OUT_OF_STOCK"
         elif inv.stock_status == "OUT_OF_STOCK":
             inv.stock_status = "active"
@@ -108,30 +108,21 @@ class InventoryService(BaseService[Inventory, InventoryRepository]):
         movement_type: str = "STOCK_IN",
     ) -> Inventory:
         if quantity <= 0:
-            raise ValueError("increase quantity must be positive")
-        if movement_type not in ("STOCK_IN", "PURCHASE", "RETURN_IN", "ADJUSTMENT"):
-            raise ValueError(f"invalid movement_type for increase: {movement_type}")
-
+            raise ValueError("quantity must be positive")
         self._require_product(product_id)
         inv = self._require_inventory(product_id)
-        before = inv.quantity_available
-
-        try:
-            inv.quantity_available = before + quantity
-            self._sync_stock_status(inv)
-            self._record_movement(
-                product_id=product_id,
-                inventory_id=inv.inventory_id,
-                movement_type=movement_type,
-                quantity_delta=quantity,
-                quantity_after=inv.quantity_available,
-                note=note,
-            )
-            self.db.flush()
-            return inv
-        except Exception:
-            self.db.rollback()
-            raise
+        inv.quantity_available = inv.quantity_available + quantity
+        self._sync_stock_status(inv)
+        self._record_movement(
+            product_id=product_id,
+            inventory_id=inv.inventory_id,
+            movement_type=movement_type,
+            quantity_delta=quantity,
+            quantity_after=inv.quantity_available,
+            note=note,
+        )
+        self.db.flush()
+        return inv
 
     def decrease_stock(
         self,
@@ -142,35 +133,26 @@ class InventoryService(BaseService[Inventory, InventoryRepository]):
         movement_type: str = "ADJUSTMENT",
     ) -> Inventory:
         if quantity <= 0:
-            raise ValueError("decrease quantity must be positive")
-        if movement_type not in ("SALE", "RETURN_OUT", "ADJUSTMENT"):
-            raise ValueError(f"invalid movement_type for decrease: {movement_type}")
-
+            raise ValueError("quantity must be positive")
         self._require_product(product_id)
         inv = self._require_inventory(product_id)
         before = inv.quantity_available
-
         if before < quantity:
             raise ValueError(
-                f"insufficient stock for {product_id}: available={before}, requested={quantity}"
+                f"insufficient stock for product {product_id}: available={before}, requested={quantity}"
             )
-
-        try:
-            inv.quantity_available = before - quantity
-            self._sync_stock_status(inv)
-            self._record_movement(
-                product_id=product_id,
-                inventory_id=inv.inventory_id,
-                movement_type=movement_type,
-                quantity_delta=-quantity,
-                quantity_after=inv.quantity_available,
-                note=note,
-            )
-            self.db.flush()
-            return inv
-        except Exception:
-            self.db.rollback()
-            raise
+        inv.quantity_available = before - quantity
+        self._sync_stock_status(inv)
+        self._record_movement(
+            product_id=product_id,
+            inventory_id=inv.inventory_id,
+            movement_type=movement_type,
+            quantity_delta=-quantity,
+            quantity_after=inv.quantity_available,
+            note=note,
+        )
+        self.db.flush()
+        return inv
 
     def reserve_stock(self, product_id: str, quantity: int) -> bool:
         inventory = self.find_by_product(product_id)
@@ -211,3 +193,36 @@ class InventoryService(BaseService[Inventory, InventoryRepository]):
             return True
         except ValueError:
             return False
+
+    def set_sale_price_usd(
+        self,
+        product_id: str,
+        sale_price_usd: float,
+        *,
+        fx_rate_usd_to_irr: float | None = None,
+    ) -> Inventory:
+        """Official sale price source (PO #181): Inventory.sale_price_usd.
+
+        Optionally refresh derived/legacy sale_price_toman when FX is supplied
+        (C-01: toman = usd * R / 10). FX is never invented here.
+        """
+        from datetime import datetime, timezone
+        from app.services.currency_fx import irr_to_toman, usd_to_irr, validate_fx_rate
+
+        if sale_price_usd is None or float(sale_price_usd) < 0:
+            raise ValueError("sale_price_usd must be >= 0")
+        sale_price_usd = float(sale_price_usd)
+        self._require_product(product_id)
+        inv = self._require_inventory(product_id)
+
+        inv.sale_price_usd = sale_price_usd
+        inv.price_updated_at = datetime.now(timezone.utc)
+
+        if fx_rate_usd_to_irr is not None:
+            rate = validate_fx_rate(fx_rate_usd_to_irr)
+            unit_irr = usd_to_irr(sale_price_usd, rate)
+            inv.price_fx_rate_usd_to_irr = rate
+            inv.sale_price_irr = unit_irr
+            inv.sale_price_toman = int(round(irr_to_toman(unit_irr)))
+        self.db.flush()
+        return inv

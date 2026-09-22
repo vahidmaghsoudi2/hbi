@@ -76,7 +76,7 @@ def test_successful_sale(session):
     svc = SaleService(session)
     sale = svc.create_sale(
         "CUST-1",
-        [{"product_id": "P-SALE-1", "quantity": 2, "unit_price_usd": 20.0}],
+        [{"product_id": "P-SALE-1", "quantity": 2}],
         fx_rate_usd_to_irr=1_000_000.0,
     )
     session.commit()
@@ -101,7 +101,7 @@ def test_insufficient_stock_rejected(session):
     with pytest.raises(ValueError, match="insufficient"):
         SaleService(session).create_sale(
             "CUST-1",
-            [{"product_id": "P-SALE-1", "quantity": 5, "unit_price_usd": 10.0}],
+            [{"product_id": "P-SALE-1", "quantity": 5}],
             fx_rate_usd_to_irr=1_000_000.0,
         )
     session.rollback()
@@ -115,7 +115,7 @@ def test_inactive_product_rejected(session):
     with pytest.raises(ValueError, match="not ACTIVE"):
         SaleService(session).create_sale(
             "CUST-1",
-            [{"product_id": "P-SALE-1", "quantity": 1, "unit_price_usd": 10.0}],
+            [{"product_id": "P-SALE-1", "quantity": 1}],
             fx_rate_usd_to_irr=1_000_000.0,
         )
 
@@ -126,7 +126,7 @@ def test_missing_product_rejected(session):
     with pytest.raises(ValueError, match="Product .* not found"):
         SaleService(session).create_sale(
             "CUST-1",
-            [{"product_id": "NOPE", "quantity": 1, "unit_price_usd": 1.0}],
+            [{"product_id": "NOPE", "quantity": 1}],
             fx_rate_usd_to_irr=1_000_000.0,
         )
 
@@ -147,7 +147,7 @@ def test_missing_inventory_rejected(session):
     with pytest.raises(ValueError, match="Inventory .* not found"):
         SaleService(session).create_sale(
             "CUST-1",
-            [{"product_id": "P-ONLY", "quantity": 1, "unit_price_usd": 1.0}],
+            [{"product_id": "P-ONLY", "quantity": 1}],
             fx_rate_usd_to_irr=1_000_000.0,
         )
 
@@ -156,7 +156,7 @@ def test_missing_customer_rejected(session):
     with pytest.raises(ValueError, match="Customer .* not found"):
         SaleService(session).create_sale(
             "NO-CUST",
-            [{"product_id": "P", "quantity": 1, "unit_price_usd": 1.0}],
+            [{"product_id": "P", "quantity": 1}],
             fx_rate_usd_to_irr=1_000_000.0,
         )
 
@@ -166,7 +166,7 @@ def test_quantity_validation(session):
     with pytest.raises(ValueError, match="quantity must be positive"):
         SaleService(session).create_sale(
             "CUST-1",
-            [{"product_id": "P-SALE-1", "quantity": 0, "unit_price_usd": 1.0}],
+            [{"product_id": "P-SALE-1", "quantity": 0}],
             fx_rate_usd_to_irr=1_000_000.0,
         )
 
@@ -176,7 +176,7 @@ def test_fx_required(session):
     with pytest.raises(ValueError, match="fx_rate_usd_to_irr"):
         SaleService(session).create_sale(
             "CUST-1",
-            [{"product_id": "P-SALE-1", "quantity": 1, "unit_price_usd": 1.0}],
+            [{"product_id": "P-SALE-1", "quantity": 1}],
             fx_rate_usd_to_irr=0,
         )
 
@@ -185,15 +185,15 @@ def test_currency_and_fx_snapshot(session):
     _seed(session)
     sale = SaleService(session).create_sale(
         "CUST-1",
-        [{"product_id": "P-SALE-1", "quantity": 1, "unit_price_usd": 15.0}],
+        [{"product_id": "P-SALE-1", "quantity": 1}],
         fx_rate_usd_to_irr=1_000_000.0,
     )
     session.commit()
-    assert sale.total_amount_usd == pytest.approx(15.0)
-    assert sale.total_amount_irr == pytest.approx(15_000_000.0)
-    assert sale.total_amount_toman == 1_500_000
+    assert sale.total_amount_usd == pytest.approx(20.0)
+    assert sale.total_amount_irr == pytest.approx(20_000_000.0)
+    assert sale.total_amount_toman == 2_000_000
     item = SaleService(session).get_sale_items(sale.sale_id)[0]
-    assert item.unit_price_usd == pytest.approx(15.0)
+    assert item.unit_price_usd == pytest.approx(20.0)
     assert item.fx_rate_usd_to_irr == 1_000_000.0
     mov = session.query(StockMovement).filter_by(reference_id=sale.sale_id).one()
     assert mov.fx_rate_usd_to_irr == 1_000_000.0
@@ -203,12 +203,25 @@ def test_purchase_toman_preserved(session):
     _seed(session)
     SaleService(session).create_sale(
         "CUST-1",
-        [{"product_id": "P-SALE-1", "quantity": 1, "unit_price_usd": 20.0}],
+        [{"product_id": "P-SALE-1", "quantity": 1}],
         fx_rate_usd_to_irr=1_000_000.0,
     )
     session.commit()
     inv = session.get(Inventory, "INV-P-SALE-1")
     assert inv.purchase_price_toman == 1_500_000
+
+
+def test_client_price_cannot_override_inventory_sale_price(session):
+    _seed(session)
+    sale = SaleService(session).create_sale(
+        "CUST-1",
+        [{"product_id": "P-SALE-1", "quantity": 1, "unit_price_usd": 1.0}],
+        fx_rate_usd_to_irr=1_000_000.0,
+    )
+    session.commit()
+    assert sale.total_amount_usd == pytest.approx(20.0)
+    item = SaleService(session).get_sale_items(sale.sale_id)[0]
+    assert item.unit_price_usd == pytest.approx(20.0)
 
 
 def test_total_sales_is_customer_scoped(session):

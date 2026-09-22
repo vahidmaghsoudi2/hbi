@@ -167,6 +167,11 @@ export function getTotalSales(token: string): Promise<{ total_sales: number }> {
   return request<{ total_sales: number }>("/sales/total", {}, token);
 }
 
+/** GET /api/v1/fx/current — official operational USD/IRR rate; null means unavailable. */
+export function getCurrentFx(): Promise<{ fx_rate_usd_to_irr: number | null; source?: unknown }> {
+  return request<{ fx_rate_usd_to_irr: number | null; source?: unknown }>("/fx/current");
+}
+
 /** GET /api/v1/sales/customer/{customerId} — own purchase history only (AuthZ on path). */
 export function listSalesByCustomer(
   customerId: string,
@@ -201,7 +206,7 @@ export function getProduct(productId: string): Promise<ProductDTO> {
 export function getInventoryByProduct(
   productId: string,
   token: string
-): Promise<{ product_id: string; quantity_available: number; quantity_reserved: number; stock_status: string; sale_price_toman?: number | null }> {
+): Promise<{ product_id: string; quantity_available: number; quantity_reserved: number; stock_status: string; sale_price_toman?: number | null; sale_price_usd?: number | null }> {
   return request(
     `/inventory/product/${encodeURIComponent(productId)}`,
     {},

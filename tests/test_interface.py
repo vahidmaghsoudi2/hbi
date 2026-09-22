@@ -95,7 +95,8 @@ def sample_inventory(db, sample_product):
         product_id=sample_product.product_id,
         quantity_available=10,
         quantity_reserved=0,
-        stock_status="AVAILABLE"
+        stock_status="AVAILABLE",
+        sale_price_usd=0.5
     )
 
 def test_product_facade_get_by_id(db, sample_product):
