@@ -17,6 +17,10 @@ import type {
   SaleDTO,
   ProductCreateRequest,
   ProductUpdateRequest,
+  SalesReportDTO,
+  InventoryReportRow,
+  FinancialSummaryDTO,
+  StockMovementDTO,
 } from "../types/api";
 
 const BASE = import.meta.env?.VITE_API_BASE ?? "/api/v1";
@@ -285,5 +289,70 @@ export function listFeedbackByCase(
     `/specialist/feedback/case/${encodeURIComponent(caseId)}`,
     {},
     token
+  );
+}
+
+
+/** Admin-only reporting APIs used by the Accounting console. */
+export function getSalesPeriod(
+  kind: "today" | "week" | "month",
+  adminToken: string
+): Promise<SalesReportDTO> {
+  return request<SalesReportDTO>(`/reports/sales/period/${kind}`, {}, adminToken);
+}
+
+export function getSalesRange(
+  start: string,
+  end: string,
+  adminToken: string
+): Promise<SalesReportDTO> {
+  return request<SalesReportDTO>(
+    `/reports/sales/range?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
+    {},
+    adminToken
+  );
+}
+
+export function getFinancialSummary(
+  start: string,
+  end: string,
+  adminToken: string
+): Promise<FinancialSummaryDTO> {
+  return request<FinancialSummaryDTO>(
+    `/reports/financial?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
+    {},
+    adminToken
+  );
+}
+
+export function getInventoryReport(adminToken: string): Promise<InventoryReportRow[]> {
+  return request<InventoryReportRow[]>("/reports/inventory", {}, adminToken);
+}
+
+export function getLowStockReport(
+  threshold: number,
+  adminToken: string
+): Promise<InventoryReportRow[]> {
+  return request<InventoryReportRow[]>(
+    `/reports/inventory/low-stock?threshold=${threshold}`,
+    {},
+    adminToken
+  );
+}
+
+export function getStockMovements(
+  adminToken: string,
+  options: { productId?: string; movementType?: string; limit?: number; offset?: number } = {}
+): Promise<StockMovementDTO[]> {
+  const params = new URLSearchParams();
+  if (options.productId) params.set("product_id", options.productId);
+  if (options.movementType) params.set("movement_type", options.movementType);
+  params.set("limit", String(options.limit ?? 100));
+  params.set("offset", String(options.offset ?? 0));
+  const suffix = params.toString();
+  return request<StockMovementDTO[]>(
+    `/inventory/movements${suffix ? `?${suffix}` : ""}`,
+    {},
+    adminToken
   );
 }
