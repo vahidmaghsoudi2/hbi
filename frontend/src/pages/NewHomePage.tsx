@@ -497,6 +497,9 @@ export default function NewHomePage() {
                 {label}
               </button>
             ))}
+            <Link to="/purchase" className="pro-nav-btn">
+              خرید
+            </Link>
             <Link to="/accounting" className="pro-nav-btn">
               حسابداری
             </Link>

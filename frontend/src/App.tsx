@@ -4,6 +4,7 @@ import CatalogPage from "./pages/CatalogPage";
 import PilotPage from "./pages/PilotPage";
 import RecommendationPage from "./pages/RecommendationPage";
 import AccountingHomePage from "./pages/AccountingHomePage";
+import PurchasePage from "./pages/PurchasePage";
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
       <Route path="/pilot" element={<PilotPage />} />
       <Route path="/recommendation" element={<RecommendationPage />} />
       <Route path="/accounting" element={<AccountingHomePage />} />
+      <Route path="/purchase" element={<PurchasePage />} />
     </Routes>
   );
 }
