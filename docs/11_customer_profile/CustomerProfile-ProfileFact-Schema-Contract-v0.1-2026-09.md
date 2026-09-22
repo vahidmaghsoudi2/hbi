@@ -140,6 +140,47 @@ Optional grouping for competing values. Conflict must be visible and resolvable;
 ### 4.13 created_at / updated_at
 Technical record timestamps. Material changes require audit information; these fields alone are not the audit trail.
 
+## 4.14 Field necessity classification
+
+To prevent the Schema Contract from becoming a disguised schema-design exercise, fields are classified by necessity:
+
+**Domain minimum**
+- fact_id
+- customer_id
+- attribute_key
+- value / value_state
+- source
+- recorded_at
+- status
+
+These fields directly express the proven consumer behavior.
+
+**Conditional domain metadata**
+- source_description — only for OTHER.
+- review_due_at — only where an attribute policy requires an explicit review point.
+- origin_case_id — only when the fact originates from a Case.
+- supersedes_fact_id — only when a fact explicitly replaces another fact.
+- conflict_group_id — only when competing facts require unresolved conflict grouping.
+
+These fields must not be populated merely because a column exists.
+
+**Technical metadata**
+- created_at
+- updated_at
+
+These support record maintenance but are not customer-profile semantics.
+
+A later implementation may challenge any conditional field and remove it if the concrete persistence design can satisfy the same contract without it. The contract therefore fixes behavior first and implementation shape second.
+
+## 4.15 Deliberate edge-case rules
+
+- A fact with value_state=UNKNOWN, PREFER_NOT_TO_SAY, or NOT_APPLICABLE is still an explicit recorded state; it is not equivalent to an absent record.
+- source=SYSTEM does not authorize medical inference or automatic promotion. A SYSTEM-sourced fact requires an explicitly permitted deterministic system operation under the approved contract.
+- source=SELLER identifies provenance only; the authenticated actor and authorization scope remain governed by existing RBAC.
+- status=CONFLICTED prevents selection as an unqualified current reusable value until authorized resolution.
+- status=REVOKED prevents ordinary reuse while preserving historical traceability subject to retention policy.
+- review_due_at is a review control, not a deletion trigger.
+
 ## 5. Write rules
 
 ### Allowed creation
