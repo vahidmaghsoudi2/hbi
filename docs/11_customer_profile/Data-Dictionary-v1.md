@@ -33,8 +33,8 @@ Applicable law/regulation and organizational privacy/consent policy govern sensi
 | visit_purpose | هدف امروز |
 | primary_concern | نگرانی اصلی |
 | attribute_key / value | پاسخ پویا |
-value_state | KNOWN / UNKNOWN / PREFER_NOT_TO_SAY / NOT_APPLICABLE
-source | CUSTOMER / SELLER / SYSTEM / IMPORTED / OTHER
+| value_state | KNOWN / UNKNOWN / PREFER_NOT_TO_SAY / NOT_APPLICABLE |
+| source | CUSTOMER / SELLER / SYSTEM / IMPORTED / OTHER |
 | recorded_at | زمان |
 
 ## Profile Fact (canonical)
