@@ -178,6 +178,10 @@ class InventoryService(BaseService[Inventory, InventoryRepository]):
         """Decrease stock as ADJUSTMENT with structured OUTFLOW reference — never SALE.
 
         No amount_usd / FX is set (no invented price). Sales reports use Sale table only.
+
+        Actor (subject_id): StockMovement has no dedicated actor column in the locked
+        schema. Actor is recorded in `note` as `actor={subject_id}` together with
+        `reason=...`. Trace keys remain reference_type / reference_id / created_at.
         """
         reason_key = (reason or "").strip().upper()
         if reason_key not in self.OUTFLOW_REASONS:
