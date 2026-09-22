@@ -1,6 +1,6 @@
 /**
  * INVENTORY-OUTFLOW-001 — مخارج و ضایعات (non-customer stock exit).
- * Not Sale. Not Purchase. Admin token required.
+ * Not Sale. Not Purchase. Admin-only (matches POST /inventory/outflow AuthZ).
  */
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -13,13 +13,9 @@ const REASONS: { value: "DAMAGE_WASTE" | "INTERNAL_USE" | "SHORTAGE_LOSS" | "OTH
   { value: "OTHER", label: "سایر" },
 ];
 
-function adminToken(): string {
-  return (
-    sessionStorage.getItem("hbi_operator_access_token") ||
-    sessionStorage.getItem("hbi_admin_access_token") ||
-    localStorage.getItem("hbi_operator_access_token") ||
-    ""
-  );
+/** Backend requires ROLE_ADMIN only — never Operator/Editor token. */
+function adminAccessToken(): string | null {
+  return sessionStorage.getItem("hbi_admin_access_token");
 }
 
 export default function OutflowPage() {
@@ -30,13 +26,14 @@ export default function OutflowPage() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const hasAdmin = Boolean(adminAccessToken());
 
   async function submit() {
     setErr(null);
     setMsg(null);
-    const token = adminToken();
+    const token = adminAccessToken();
     if (!token) {
-      setErr("نشست Admin/Operator یافت نشد. ابتدا وارد شوید.");
+      setErr("برای ثبت خروج غیرمشتری نشست Admin لازم است (نه Operator).");
       return;
     }
     if (!productId.trim()) {
@@ -73,7 +70,7 @@ export default function OutflowPage() {
       <header className="pro-header">
         <h1>مخارج و ضایعات</h1>
         <p className="pro-lead">
-          خروج کالا از موجودی گالری بدون فروش به مشتری. این مسیر آمار فروش را افزایش نمی‌دهد.
+          خروج کالا از موجودی گالری بدون فروش به مشتری. این مسیر آمار فروش را افزایش نمی‌دهد. فقط Admin.
         </p>
         <nav className="pro-nav">
           <Link to="/" className="pro-nav-btn">
@@ -88,11 +85,22 @@ export default function OutflowPage() {
         </nav>
       </header>
 
+      <p className="pro-status-bar">
+        <span className={hasAdmin ? "dot on" : "dot"} />
+        <span>{hasAdmin ? "Admin فعال" : "Admin لازم است"}</span>
+      </p>
+
+      {!hasAdmin && (
+        <p className="pro-error">
+          نشست Admin در این مرورگر وجود ندارد. ابتدا نشست مدیریتی را ایجاد کنید، سپس این صفحه را نوسازی کنید.
+        </p>
+      )}
+
       <section className="pro-card">
         <h2>ثبت خروج غیرمشتری</h2>
         <label>
           شناسه محصول
-          <input value={productId} onChange={(e) => setProductId(e.target.value)} placeholder="PRODUCT-ID" />
+          <input value={productId} onChange={(e) => setProductId(e.target.value)} placeholder="PRODUCT-ID" disabled={!hasAdmin} />
         </label>
         <label>
           تعداد
@@ -100,12 +108,13 @@ export default function OutflowPage() {
             type="number"
             min={1}
             value={quantity}
+            disabled={!hasAdmin}
             onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
           />
         </label>
         <label>
           علت خروج
-          <select value={reason} onChange={(e) => setReason(e.target.value as typeof reason)}>
+          <select value={reason} disabled={!hasAdmin} onChange={(e) => setReason(e.target.value as typeof reason)}>
             {REASONS.map((r) => (
               <option key={r.value} value={r.value}>
                 {r.label}
@@ -115,9 +124,9 @@ export default function OutflowPage() {
         </label>
         <label>
           یادداشت (اختیاری)
-          <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="توضیح کوتاه" />
+          <input value={note} disabled={!hasAdmin} onChange={(e) => setNote(e.target.value)} placeholder="توضیح کوتاه" />
         </label>
-        <button type="button" className="pro-btn-primary" disabled={busy} onClick={() => void submit()}>
+        <button type="button" className="pro-btn-primary" disabled={busy || !hasAdmin} onClick={() => void submit()}>
           {busy ? "در حال ثبت…" : "ثبت خروج"}
         </button>
         {msg && <p className="pro-ok">{msg}</p>}
