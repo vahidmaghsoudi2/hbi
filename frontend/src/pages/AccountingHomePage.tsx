@@ -215,8 +215,8 @@ export default function AccountingHomePage() {
                 <button
                   key={item.id}
                   type="button"
-                  className={`acc-menu-item ${activeSection === item.id ? "selected" : ""}`}
-                  onClick={() => setActiveSection(item.id as Section)}
+                  className={`acc-menu-item ${activeSection === (item.id === "sales-report" ? "sales" : item.id) ? "selected" : ""}`}
+                  onClick={() => setActiveSection((item.id === "sales-report" ? "sales" : item.id) as Section)}
                 >
                   <span className="acc-menu-label">{item.label}</span>
                 </button>
