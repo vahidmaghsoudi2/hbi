@@ -198,4 +198,26 @@ class ReportService:
             "purchase_price_toman": inv.purchase_price_toman,
             "sale_price_toman": inv.sale_price_toman,
             "price_fx_rate_usd_to_irr": inv.price_fx_rate_usd_to_irr,
+            # PO-approved Inventory Value basis: current on-hand quantity × latest
+            # purchase price recorded on the Inventory row by Stock-In.
+            "inventory_value_usd": (
+                float(inv.quantity_available) * float(inv.purchase_price_usd)
+                if inv.purchase_price_usd is not None
+                else None
+            ),
+            "inventory_value_irr": (
+                float(inv.quantity_available) * float(inv.purchase_price_irr)
+                if inv.purchase_price_irr is not None
+                else None
+            ),
+            "inventory_value_toman": (
+                int(inv.quantity_available) * int(inv.purchase_price_toman)
+                if inv.purchase_price_toman is not None
+                else None
+            ),
+            "inventory_value_basis": (
+                "LATEST_PURCHASE_PRICE"
+                if inv.purchase_price_usd is not None
+                else "UNAVAILABLE"
+            ),
         }
