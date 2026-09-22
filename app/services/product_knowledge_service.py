@@ -22,7 +22,15 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
             )
         return knowledge
 
+    # QA statuses that may contribute to ProductKnowledge (PO HBI-CATALOG-INTAKE-FIX-001).
+    # Aligns with recommendation evidence scoring surface: APPROVED / VERIFIED only.
+    _QA_APPROVED = frozenset({"APPROVED", "VERIFIED"})
+
     def update_from_evidence(self, product_id: str) -> ProductKnowledge:
+        """Rebuild ProductKnowledge from Evidence that has valid QA approval only.
+
+        PENDING / REJECTED / NEEDS_REVIEW claims must not remain in the summary.
+        """
         knowledge = self.get_or_create(product_id)
         evidences = self.evidence_repo.find_by_product(product_id)
 
@@ -32,7 +40,12 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
         contraindications = set()
         evidence_refs = []
 
+        approved: List[Evidence] = []
         for ev in evidences:
+            qa = (getattr(ev, "qa_status", None) or "").strip().upper()
+            if qa not in self._QA_APPROVED:
+                continue
+            approved.append(ev)
             claim = ev.claim or ""
             if ev.field == "ingredients" and claim:
                 ingredients.update([i.strip() for i in claim.split(",")])
@@ -53,7 +66,7 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
             "evidence_refs": ", ".join(evidence_refs) if evidence_refs else None,
         }
 
-        confidence = self._calculate_confidence_from_evidences(evidences)
+        confidence = self._calculate_confidence_from_evidences(approved)
         update_data["knowledge_confidence"] = confidence
 
         updated = self.repository.update_knowledge(product_id, **update_data)
