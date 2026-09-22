@@ -130,128 +130,163 @@ The existing Customer model has a binary `consent_to_store_data` flag. Approved 
 
 Required action: Slice 1 may define the vocabulary/contract for consent, but must not silently reinterpret the existing binary flag as the complete future consent model. Consent schema expansion belongs to a separately audited minimal implementation slice.
 
-## 5. Consumer Audit
+## 5. Consumer Audit — CLOSED
 
-Architecture is not selected from the vocabulary alone. Each candidate domain was traced through:
+Each candidate domain was traced through:
 
 `Consumer → real use case → required data → required behavior → current capability → exact gap → minimum solution`
 
 ### 5.1 Current Need
 
-- Consumer: Case / Recommendation
-- Use case: current consultation need drives the current recommendation request.
-- Required data: today's concerns / case context.
-- Current capability: covered by Case plus the explicit consultation payload.
+- Consumer: Case / Recommendation.
+- Use case: today's consultation need drives the current recommendation request.
+- Required data: today's concerns and case context.
+- Current capability: Case plus explicit consultation payload.
 - Gap: none proven.
-- Result: **CLOSED / remain Case-scoped**.
+- Decision: **remain Case-scoped**.
 
-### 5.2 Profile Context
+### 5.2 Profile Fact / reusable profile context
 
-- Consumers: Customer profile retrieval/update and Recommendation profile construction.
-- Use case: seller reuses customer context and may update the persistent profile.
-- Current capability: Customer fields, customer search, profile retrieval, intake update, and read-only recommendation projection exist.
-- Required missing behavior: provenance, lifecycle/freshness semantics, explicit confirmation, expiry/review, and conflict resolution.
-- Gap: **CAPABILITY GAP confirmed**.
-- Architectural conclusion: **model choice remains unproven**. Customer + Case still satisfies today's recommendation path.
+- Consumers: customer retrieval/update and Recommendation profile construction.
+- Use case: reuse a customer attribute across visits and update it without confusing it with today's need.
+- Current capability: Customer fields, search, retrieval, intake update, and read-only recommendation projection.
+- Proven missing behavior: provenance, lifecycle/freshness semantics, explicit confirmation/promotion, expiry/review, and conflict handling.
+- Gap: **confirmed capability gap**.
+- Architectural implication: this is the only candidate domain for which a new structured capability is presently justified.
 
 ### 5.3 Preference
 
-- Current independent consumer: none proven.
-- Purchase is linked to Customer and optionally Recommendation, but purchase is not evidence of a durable preference.
-- Gap: **NO PROVEN GAP**.
-- Result: do not introduce a Preference entity on current evidence.
+- Consumer: no independent executable consumer proven.
+- Purchase history exists through Sale → SaleItem → Product and may reference a Recommendation.
+- Purchase is not durable preference evidence.
+- Gap: **not proven**.
+- Decision: **no Preference entity**.
 
 ### 5.4 Product Interaction / Outcome / Follow-up
 
-- Consumer: previous-customer workflow and case-scoped Feedback.
-- Purchase history is already represented by Sale → SaleItem → Product, with optional Recommendation linkage.
-- Feedback already records outcome/comment/rating/follow_up_at against Case and optional Recommendation.
-- Current capability: **PROVEN** for purchase history and case feedback.
-- Missing consumer: no proven customer-wide follow-up queue, scheduler, or downstream decision that changes because of follow_up_at.
-- Result: **no new Interaction, Outcome, or Follow-up entity is justified by current consumer evidence**.
+- Purchase interaction is already represented by Sale → SaleItem → Product.
+- Case-scoped Feedback already records source, outcome, rating, comment and follow_up_at, with optional Recommendation linkage.
+- Feedback is owner-bound through the Case.
+- No proven customer-wide follow-up queue, scheduler, or downstream decision was found.
+- Gap: experience/outcome aggregation across customer history is a possible future capability, but its consumer is not proven.
+- Decision: **reuse current Sale/SaleItem/Feedback; no new Interaction/Outcome/Follow-up entity in this slice**.
 
 ### 5.5 Safety
 
-- Product-side consumer: RecommendationService / ReasoningEngine consume QA-controlled Evidence and ProductKnowledge, including contraindications, existing conflicts, and medical-context handling.
-- Customer-side Safety Signal consumer: none proven.
-- Existing Customer observations/answers/operator_notes are generic and are not evidence of an independent safety domain.
-- Gap: **business need exists; consumer behavior for a persistent customer Safety Signal is unproven**.
-- Result: no new Safety entity and no new Recommendation safety gate.
+- Product-side safety behavior is already consumed through QA-controlled Evidence/ProductKnowledge and the existing Reasoning/Recommendation path.
+- Customer-side persistent Safety Signal has no proven executable consumer in the current repository.
+- Customer observations/answers/operator_notes are generic fields and do not establish a separate safety contract.
+- Decision: **no new Safety entity and no Recommendation safety-gate change**.
 
 ### 5.6 Smart Summary
 
-- Consumer: UI display.
-- Source: existing customer/case/recommendation data.
-- Required behavior: derived presentation.
-- Gap: none proven.
-- Result: **DERIVED / no persistence model**.
+- Consumer: presentation.
+- Source: existing Customer/Case/Recommendation data.
+- Behavior: derived projection.
+- Decision: **no persistence model**.
 
-## 6. Architecture decision status
+## 6. Architecture Comparison
 
-The Consumer Audit does **not** select A/B/C/D.
+The evidence changes the question from "which three new models should be built?" to "what is the smallest structure required for the one proven capability gap?"
 
-Current evidence yields:
-- A — three independent tables: **not justified yet**
-- B — one shared Record: **not justified yet**
-- C — hybrid: **not justified yet**
-- D — existing Customer/Case: **currently sufficient for proven recommendation and visit needs**
+| Option | Real consumer coverage | Duplication risk | Provenance/lifecycle/freshness | Migration/maintenance | Decision |
+|---|---|---|---|---|---|
+| A — three independent tables | Low: only Profile Fact has a proven consumer | High | Good in theory, unnecessary for unproven domains | High | **Reject as overbuilt** |
+| B — one shared Record | Medium in abstract; requires semantics for Preference/Safety that are not consumer-proven | Medium/High | Can support metadata, but risks semantic overload | Medium | **Reject for now** |
+| C — hybrid | Medium; separation is not behaviorally required yet | Medium | Potentially good | Medium/High | **Reject for now** |
+| D — existing Customer/Case only | High for current recommendation/visit behavior | Low | Insufficient for the proven Profile Fact capability gap | Low | **Insufficient alone** |
 
-The unresolved Profile capability gap may require additional structure later, but the minimum structure must be proven by a subsequent architecture comparison. Preference, independent Outcome, and customer Safety Signal are not currently consumer-proven.
+### 6.1 Architecture Selection
 
+**Selected boundary: D-plus, narrowly scoped to the proven Profile Fact capability gap.**
 
-## 7. Explicit non-goals
+Meaning:
+- retain existing Customer as the customer identity/root;
+- retain Case as the visit/current-need boundary;
+- retain Sale/SaleItem for purchase interaction;
+- retain Feedback for case-scoped outcome/follow-up recording;
+- add structured Profile Fact capability only if the next Schema Contract proves that the required provenance/lifecycle/freshness behavior cannot be represented safely in existing Customer without semantic overload.
 
-This audit does not authorize:
-- redesigning Customer
-- replacing existing Customer fields
-- schema-wide normalization
-- new UI
-- five-box implementation
-- Smart Summary persistence
-- recommendation scoring changes
-- recommendation eligibility changes
-- evidence-gate changes
-- seed/product changes
-- automatic promotion from purchase/recommendation to Preference
-- automatic promotion from consultation input to Profile Fact
+This is deliberately **not** authorization to create a generic Record, Preference, Safety, Outcome, or Follow-up model.
 
-## 8. Required evidence before architecture selection
+### 6.2 Why D-plus is the minimum justified architecture
 
-No model-specific implementation tests are authorized yet.
+The repository already has executable consumers for Customer and Case. The missing behavior is not "more profile fields"; it is the ability to distinguish a reusable profile fact from:
+- today's Current Need,
+- an observation,
+- a purchase,
+- a recommendation,
+- or an unconfirmed statement,
 
-Before Architecture Selection, the next audit must compare the proven Profile capability gap against:
-- existing Customer/Case only
-- a shared record approach
-- separate concepts
-- a hybrid only where separation is behaviorally required
+while retaining controlled provenance and lifecycle/freshness semantics.
 
-The comparison must explicitly measure:
-- real consumer coverage
-- duplication with Customer/Case
-- provenance/lifecycle/freshness handling
-- promotion/conflict risks
-- migration and maintenance cost
-- Recommendation dependency
+A separate Profile Fact structure is therefore a hypothesis justified by the proven behavior gap; its exact schema remains a separate gate.
 
-## 9. Gate result
+## 7. Risk Review
 
-**CONSUMER AUDIT = IN PROGRESS / ARCHITECTURE BLOCKED**
+### R1 — Semantic overload
+Adding more meanings to Customer string fields would preserve today's simplicity but increase ambiguity between persistent facts, current needs, observations, and unconfirmed inputs.
 
-Current disposition:
-- Current Need → **CLOSED / Case**
-- Preference → **NO PROVEN GAP**
-- Smart Summary → **DERIVED / no persistence**
-- Profile Context → **CAPABILITY GAP / architecture unknown**
-- Product Interaction → **existing purchase-history capability; experience gap not consumer-proven**
-- Outcome → **case-scoped Feedback exists; broader Outcome architecture not consumer-proven**
-- Safety → **business need / persistent consumer unproven**
+**Disposition:** resolve through the next schema contract, not through ad-hoc fields.
 
-Therefore:
-- **Architecture Selection = BLOCKED**
-- **Schema Contract = BLOCKED**
-- **Migration = BLOCKED**
-- **Code = BLOCKED**
-- **Recommendation / Scoring / Evidence Gates = FROZEN**
+### R2 — False promotion
+Purchase, recommendation, or consultation input could be mistaken for durable preference/profile fact.
+
+**Disposition:** preserve Contract v1.1 promotion rules.
+
+### R3 — Freshness errors
+Universal TTLs could incorrectly expire durable facts or retain volatile ones too long.
+
+**Disposition:** attribute-specific freshness policy; no universal TTL.
+
+### R4 — Consent overreach
+The binary Customer consent flag cannot be treated as a complete purpose-aware future consent model.
+
+**Disposition:** keep current field as current reality; separately contract any future expansion.
+
+### R5 — Recommendation contamination
+Profile architecture changes could accidentally alter recommendation scoring or eligibility.
+
+**Disposition:** Recommendation/Scoring/Evidence Gates remain frozen; any adapter is read-only and separately tested.
+
+### R6 — Unproven domain expansion
+Building Preference/Safety/Outcome/Follow-up entities before an executable consumer exists creates schema without demonstrated operational value.
+
+**Disposition:** defer.
+
+## 8. Consumer Audit Gate
+
+**CONSUMER AUDIT = COMPLETE**
+
+Confirmed:
+- Current Need → **Case**
+- Profile Fact → **proven capability gap**
+- Preference → **no proven gap**
+- Product Interaction → **existing Sale/SaleItem capability**
+- Outcome/Follow-up → **existing case-scoped Feedback capability**
+- Safety Signal → **business need, consumer unproven**
+- Smart Summary → **derived projection**
+
+Architecture:
+- A → **rejected as overbuilt**
+- B → **rejected for now**
+- C → **rejected for now**
+- D → **insufficient alone**
+- **D-plus / Profile Fact-only boundary → selected for next contract gate**
+
+## 9. Next Gate — Schema Contract
+
+The next artifact must define only the minimum Profile Fact contract and prove:
+1. required fields for value, value_state, provenance, lifecycle/status, freshness/review metadata, timestamps and ownership;
+2. confirmation/promotion semantics;
+3. conflict and supersession semantics;
+4. edit/delete/revoke behavior and audit requirements;
+5. relationship to Customer and Case;
+6. read-only mapping into Recommendation profile;
+7. migration/backfill policy, including what happens to legacy Customer fields;
+8. focused tests for persistence, update, stale/conflict handling, promotion rules, and recommendation non-regression.
+
+No schema, migration, model, UI, or recommendation implementation is authorized by this document.
 
 ## 10. Acceptance evidence
 
