@@ -365,6 +365,24 @@ export function getLowStockReport(
   );
 }
 
+/** POST /api/v1/inventory/outflow — Admin non-customer exit (INVENTORY-OUTFLOW-001). */
+export function recordInventoryOutflow(
+  body: {
+    product_id: string;
+    quantity: number;
+    reason: "DAMAGE_WASTE" | "INTERNAL_USE" | "SHORTAGE_LOSS" | "OTHER";
+    note?: string;
+  },
+  adminToken: string
+): Promise<{
+  outflow_id: string;
+  reason: string;
+  inventory: { product_id: string; quantity_available: number };
+  movement: StockMovementDTO | null;
+}> {
+  return request(`/inventory/outflow`, { method: "POST", body: JSON.stringify(body) }, adminToken);
+}
+
 export function getStockMovements(
   adminToken: string,
   options: { productId?: string; movementType?: string; limit?: number; offset?: number } = {}
