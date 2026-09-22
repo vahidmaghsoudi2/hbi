@@ -199,3 +199,139 @@
     align-items: flex-start;
   }
 }
+
+
+.acc-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.acc-auth-badge {
+  border: 1px solid var(--border, #2d3a4f);
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.78rem;
+}
+
+.acc-auth-badge.ok {
+  color: var(--ok, #8bd49b);
+}
+
+.acc-auth-badge.warn {
+  color: var(--warn, #e6c07b);
+}
+
+.acc-auth-panel {
+  border-color: var(--warn, #e6c07b);
+}
+
+.acc-auth-panel p {
+  color: var(--muted, #9aa8bc);
+}
+
+.acc-auth-panel code {
+  display: inline-block;
+  margin-top: 0.4rem;
+  direction: ltr;
+}
+
+.acc-error {
+  border-color: var(--danger, #e06c75);
+}
+
+.acc-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.acc-refresh-btn {
+  border: 1px solid var(--border, #2d3a4f);
+  background: var(--surface-2, #243044);
+  color: var(--text, #e8eef7);
+  border-radius: 8px;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+}
+
+.acc-refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.acc-deferred {
+  font-size: 0.95rem;
+}
+
+.acc-kpi-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  color: var(--muted, #9aa8bc);
+}
+
+.acc-kpi-row strong {
+  color: var(--text, #e8eef7);
+}
+
+.acc-menu-item.selected {
+  border-color: var(--accent, #3d9cf0);
+  box-shadow: 0 0 0 1px rgba(61, 156, 240, 0.18);
+}
+
+.acc-table-wrap {
+  overflow-x: auto;
+}
+
+.acc-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 650px;
+}
+
+.acc-table th,
+.acc-table td {
+  text-align: right;
+  padding: 0.65rem 0.7rem;
+  border-bottom: 1px solid var(--border, #2d3a4f);
+}
+
+.acc-table th {
+  color: var(--muted, #9aa8bc);
+  font-weight: 600;
+}
+
+.acc-table code {
+  direction: ltr;
+}
+
+.acc-empty {
+  color: var(--muted, #9aa8bc);
+  padding: 1rem 0;
+}
+
+.acc-deferred-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.acc-deferred-grid > div {
+  border: 1px solid var(--border, #2d3a4f);
+  background: var(--surface-2, #243044);
+  border-radius: 9px;
+  padding: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.acc-deferred-grid span {
+  color: var(--muted, #9aa8bc);
+  font-size: 0.8rem;
+}
