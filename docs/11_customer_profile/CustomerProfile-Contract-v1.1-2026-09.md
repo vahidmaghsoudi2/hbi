@@ -155,7 +155,7 @@ Proposed source vocabulary:
 - SELLER
 - SYSTEM
 - IMPORTED
-- OTHER
+- OTHER — reserved for a temporary, explicitly documented source that does not fit the controlled sources; it requires a source description and must be reviewed/normalized before it is treated as a durable provenance category.
 
 SYSTEM may generate a derived value, but a derived value must not be presented as customer-confirmed fact without an explicit confirmation event.
 
@@ -185,6 +185,8 @@ observation -> source/time/context -> optional confirmed fact
 This prevents temporary consultation language from becoming permanent customer truth.
 
 ## 7. Customer and seller permissions
+
+These are target capabilities for the customer-profile feature. They do not create new roles, bypass existing authorization, or override the application's current authentication/RBAC model.
 
 ### Customer
 Subject to authentication/capability, customer may:
@@ -221,6 +223,8 @@ Deletion follows the system retention/privacy policy; logical withdrawal/superse
 
 ## 8. Consent rules
 
+Consent handling is jurisdiction- and policy-dependent. This Contract does not assume a particular country's law or prescribe a universal legal consent threshold. The implementation must follow applicable law, regulation, and the organization's privacy/consent policy; where those require consent, the system must support recording it.
+
 Consent must be purpose-specific where data is sensitive.
 
 Ordinary operational profile data can be collected when necessary for the requested retail/consultation service, subject to the application's applicable privacy policy.
@@ -234,8 +238,8 @@ Sensitive categories include:
 
 Rules:
 1. Collect only when necessary for a legitimate service/safety purpose.
-2. Obtain required explicit consent before storing sensitive information.
-3. Record consent purpose and time.
+2. Where applicable law or policy requires consent, obtain the required consent before storing sensitive information.
+3. Record consent purpose and time when consent is collected.
 4. Allow withdrawal where applicable.
 5. Withdrawal stops future use according to policy while preserving legally/operationally required audit records.
 6. Sensitive data must not be inferred merely because another field suggests it.
@@ -258,12 +262,12 @@ Core now:
 - Consent semantics
 
 Pilot-ready but deliberately narrow:
-- Outcome
+- Outcome — record information only; it has no effect on scoring, recommendation eligibility, evidence gates, or automatic Promotion.
 
 Derived only:
 - Smart Summary / Derived Insight
 
-No scoring or recommendation eligibility rule changes are part of v1.1.
+No scoring, recommendation eligibility, evidence-gate, or automatic Promotion rule changes are part of v1.1. Pilot Outcome records are informational only.
 
 ## 10. Five-box projection
 
