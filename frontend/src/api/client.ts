@@ -171,6 +171,31 @@ export function getTotalSales(token: string): Promise<{ total_sales: number }> {
   return request<{ total_sales: number }>("/sales/total", {}, token);
 }
 
+
+/** POST /api/v1/inventory/stock-in — Admin-only purchase/stock intake. */
+export function stockInInventory(
+  body: {
+    product_id: string;
+    quantity: number;
+    purchase_price_usd: number;
+    fx_rate_usd_to_irr: number;
+    note?: string;
+    reference_type?: string;
+    reference_id?: string;
+  },
+  adminToken: string
+): Promise<{
+  inventory: Record<string, unknown>;
+  movement: Record<string, unknown>;
+  before_quantity: number;
+}> {
+  return request(
+    "/inventory/stock-in",
+    { method: "POST", body: JSON.stringify(body) },
+    adminToken
+  );
+}
+
 /** GET /api/v1/fx/current — official operational USD/IRR rate; null means unavailable. */
 export function getCurrentFx(): Promise<{ fx_rate_usd_to_irr: number | null; source?: unknown }> {
   return request<{ fx_rate_usd_to_irr: number | null; source?: unknown }>("/fx/current");
