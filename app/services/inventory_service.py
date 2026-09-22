@@ -105,7 +105,7 @@ class InventoryService(BaseService[Inventory, InventoryRepository]):
         quantity: int,
         *,
         note: Optional[str] = None,
-        movement_type: str = "ADJUST_IN",
+        movement_type: str = "STOCK_IN",
     ) -> Inventory:
         if quantity <= 0:
             raise ValueError("quantity must be positive")
@@ -130,7 +130,7 @@ class InventoryService(BaseService[Inventory, InventoryRepository]):
         quantity: int,
         *,
         note: Optional[str] = None,
-        movement_type: str = "ADJUST_OUT",
+        movement_type: str = "ADJUSTMENT",
     ) -> Inventory:
         if quantity <= 0:
             raise ValueError("quantity must be positive")
