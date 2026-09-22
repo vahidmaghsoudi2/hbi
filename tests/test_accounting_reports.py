@@ -88,6 +88,8 @@ def _seed(session):
                 stock_status="active",
                 sale_price_usd=10.0,
                 sale_price_toman=1_000_000,
+                purchase_price_usd=8.0,
+                purchase_price_irr=8_000_000.0,
                 purchase_price_toman=800_000,
             )
         )
@@ -155,6 +157,17 @@ def test_inventory_reports(session):
     low = ReportService(session).inventory_low_stock(threshold=3)
     assert any(r["product_id"] == "P-HAIR" for r in low)
     assert not any(r["product_id"] == "P-BOOST" for r in low)
+
+
+def test_inventory_value_uses_latest_purchase_price(session):
+    _seed(session)
+    rows = ReportService(session).inventory_all()
+    boost = next(row for row in rows if row["product_id"] == "P-BOOST")
+
+    assert boost["inventory_value_basis"] == "LATEST_PURCHASE_PRICE"
+    assert boost["inventory_value_usd"] == pytest.approx(80.0)
+    assert boost["inventory_value_irr"] == pytest.approx(80_000_000.0)
+    assert boost["inventory_value_toman"] == 8_000_000
 
 
 def test_invalid_category(session):
