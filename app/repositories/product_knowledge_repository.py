@@ -14,11 +14,12 @@ class ProductKnowledgeRepository(BaseRepository[ProductKnowledge]):
         ).first()
 
     def update_knowledge(self, product_id: str, **fields) -> Optional[ProductKnowledge]:
+        """Apply fields including explicit None (clear) for PK rebuild after QA revoke."""
         knowledge = self.find_by_product(product_id)
         if not knowledge:
             return None
         for key, value in fields.items():
-            if hasattr(knowledge, key) and value is not None:
+            if hasattr(knowledge, key):
                 setattr(knowledge, key, value)
         self.db.flush()
         return knowledge

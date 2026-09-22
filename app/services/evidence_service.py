@@ -262,10 +262,15 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
                 f"Evidence {evidence_id} not found"
             )
 
-        return self.repository.update(
+        updated = self.repository.update(
             evidence_id,
             qa_status=verdict
         )
+        # PO HBI-CATALOG-INTAKE-FIX-001: QA change must rebuild ProductKnowledge.
+        if updated is not None:
+            from app.services.product_knowledge_service import ProductKnowledgeService
+            ProductKnowledgeService(self.db).update_from_evidence(updated.product_id)
+        return updated
 
     def detect_conflicts(
         self,
