@@ -4,12 +4,17 @@ Methods allowed by schema: CASH, CARD, TRANSFER, OTHER.
 No payment-status state machine (schema has no status field).
 Does not modify Sale monetary totals (historical sale values preserved).
 C-01: amount_irr = amount_usd * R; amount_toman = amount_irr / 10.
+
+Accounting baseline v0.2:
+- Payment ceiling: sum(valid payments) <= sale total (USD source of truth)
+- Optional idempotency_key for durable retry deduplication
 """
 from __future__ import annotations
 
 import uuid
 from typing import List, Optional
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.payment import Payment
@@ -17,6 +22,7 @@ from app.models.sale import Sale
 from app.services.stock_in_service import irr_to_toman, usd_to_irr
 
 VALID_METHODS = frozenset({"CASH", "CARD", "TRANSFER", "OTHER"})
+_USD_EPS = 1e-9
 
 
 class PaymentService:
@@ -48,6 +54,14 @@ class PaymentService:
                 raise PermissionError("Access denied")
         return payment
 
+    def _paid_usd_sum(self, sale_id: str) -> float:
+        total = (
+            self.db.query(func.coalesce(func.sum(Payment.amount_usd), 0.0))
+            .filter(Payment.sale_id == sale_id)
+            .scalar()
+        )
+        return float(total or 0.0)
+
     def record_payment(
         self,
         *,
@@ -57,6 +71,7 @@ class PaymentService:
         amount_usd: float,
         fx_rate_usd_to_irr: float,
         note: Optional[str] = None,
+        idempotency_key: Optional[str] = None,
     ) -> Payment:
         if not sale_id:
             raise ValueError("sale_id is required")
@@ -74,13 +89,36 @@ class PaymentService:
             )
         fx_rate = float(fx_rate_usd_to_irr)
 
+        key = (idempotency_key or "").strip() or None
+        if key is not None:
+            existing = (
+                self.db.query(Payment)
+                .filter(Payment.idempotency_key == key)
+                .first()
+            )
+            if existing is not None:
+                if existing.sale_id != sale_id:
+                    raise ValueError("idempotency_key already used for a different sale")
+                if customer_id is not None:
+                    sale_chk = self.db.query(Sale).filter(Sale.sale_id == existing.sale_id).first()
+                    if sale_chk is None or sale_chk.customer_id != customer_id:
+                        raise PermissionError("Access denied")
+                return existing
+
         sale = self.db.query(Sale).filter(Sale.sale_id == sale_id).first()
         if not sale:
             raise ValueError(f"Sale {sale_id} not found")
         if customer_id is not None and sale.customer_id != customer_id:
             raise PermissionError("Access denied")
 
-        # Capture sale totals before payment (must remain unchanged)
+        sale_total_usd = float(sale.total_amount_usd or 0.0)
+        already_paid = self._paid_usd_sum(sale_id)
+        if already_paid + amount_usd > sale_total_usd + _USD_EPS:
+            raise ValueError(
+                f"payment exceeds sale total: paid={already_paid}, "
+                f"new={amount_usd}, sale_total_usd={sale_total_usd}"
+            )
+
         prior_usd = sale.total_amount_usd
         prior_irr = sale.total_amount_irr
         prior_toman = sale.total_amount_toman
@@ -99,11 +137,11 @@ class PaymentService:
                 amount_irr=amount_irr,
                 amount_toman=int(round(amount_toman)),
                 note=note,
+                idempotency_key=key,
             )
             self.db.add(payment)
             self.db.flush()
 
-            # Ensure sale historical values not mutated
             self.db.refresh(sale)
             if sale.total_amount_usd != prior_usd:
                 raise RuntimeError("sale total_amount_usd corrupted by payment")
