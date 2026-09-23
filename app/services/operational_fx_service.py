@@ -6,6 +6,7 @@ StockMovement / SaleReturn / SaleItem money snapshots.
 """
 from __future__ import annotations
 
+from datetime import datetime, timezone
 import uuid
 from typing import Optional
 
@@ -42,9 +43,12 @@ class OperationalFxService:
     ) -> OperationalFxRate:
         rate = validate_fx_rate(fx_rate_usd_to_irr)
         try:
+            now = datetime.now(timezone.utc)
             row = OperationalFxRate(
                 rate_id=str(uuid.uuid4()),
                 fx_rate_usd_to_irr=rate,
+                effective_at=now,
+                created_at=now,
                 note=note,
             )
             self.db.add(row)
