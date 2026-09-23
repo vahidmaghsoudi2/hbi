@@ -20,7 +20,7 @@ function adminAccessToken(): string | null {
 
 export default function OutflowPage() {
   const [productId, setProductId] = useState("");
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState("");
   const [reason, setReason] = useState<(typeof REASONS)[number]["value"]>("DAMAGE_WASTE");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
