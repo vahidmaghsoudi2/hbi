@@ -452,9 +452,9 @@ export default function NewHomePage() {
     setError(null);
     if (!token || !customerId) return setError("ابتدا مشاوره را ثبت کنید.");
     if (!saleProductId.trim()) return setError("محصول را انتخاب کنید.");
-    if (saleQty < 1) return setError("تعداد نامعتبر است.");
+    const saleQuantity = Number(saleQty);\n    if (!Number.isInteger(saleQuantity) || saleQuantity < 1) return setError("تعداد نامعتبر است.");
     if (salePrice == null) return setError("قیمت فروش این محصول در دسترس نیست.");
-    if (saleStock != null && saleQty > saleStock) return setError(`موجودی قابل فروش: ${saleStock}`);
+    if (saleStock != null && saleQuantity > saleStock) return setError(`موجودی قابل فروش: ${saleStock}`);
     setSaleBusy(true);
     try {
       const fx = await getCurrentFx();
@@ -464,7 +464,7 @@ export default function NewHomePage() {
       const sale = await createSale(
         {
           customer_id: customerId,
-          items: [{ product_id: saleProductId.trim(), quantity: saleQty, ...(selectedRecommendationId ? { recommendation_id: selectedRecommendationId } : {}) }],
+          items: [{ product_id: saleProductId.trim(), quantity: saleQuantity, ...(selectedRecommendationId ? { recommendation_id: selectedRecommendationId } : {}) }],
           fx_rate_usd_to_irr: currentFxRate,
         },
         token
@@ -850,7 +850,7 @@ export default function NewHomePage() {
                       <label className="pro-label" htmlFor="sale-qty">
                         تعداد
                       </label>
-                      <input id="sale-qty" className="pro-input" type="number" min={1} value={saleQty} onChange={(e) => setSaleQty(Number(e.target.value) || 1)} />
+                      <input id="sale-qty" className="pro-input" type="text" inputMode="numeric" pattern="[0-9]*" minLength={1} value={saleQty} onChange={(e) => setSaleQty(e.target.value.replace(/[^0-9]/g, ""))} />
                     </div>
                     <div>
                       <span className="pro-label">قیمت واحد (تومان)</span>
