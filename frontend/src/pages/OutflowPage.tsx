@@ -40,7 +40,8 @@ export default function OutflowPage() {
       setErr("شناسه محصول الزامی است.");
       return;
     }
-    const quantityValue = Number(quantity);\n    if (!Number.isInteger(quantityValue) || quantityValue < 1) {
+    const quantityValue = Number(quantity);
+    if (!Number.isInteger(quantityValue) || quantityValue < 1) {
       setErr("تعداد باید حداقل ۱ باشد.");
       return;
     }
