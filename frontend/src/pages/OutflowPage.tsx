@@ -105,8 +105,9 @@ export default function OutflowPage() {
         <label>
           تعداد
           <input
-            type="number"
-            min={1}
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             value={quantity}
             disabled={!hasAdmin}
             onChange={(e) => setQuantity(e.target.value.replace(/[^0-9]/g, ""))}
