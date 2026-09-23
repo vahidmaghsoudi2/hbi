@@ -200,18 +200,23 @@ def test_payment_authorization_service_owner_and_foreign_create(session):
 
 
 def test_payment_authorization_http_contract(client, db_session):
+    """V1: POST payment is ADMIN-only; GET remains customer-scoped to sale owner."""
     from app.core.auth import create_access_token
+    from app.models.user_role import UserRole, ROLE_ADMIN
     db_session.add_all([
         Customer(customer_id="HTTP-C1", name="Owner", consent_to_store_data=1),
         Customer(customer_id="HTTP-C2", name="Foreign", consent_to_store_data=1),
+        UserRole(user_role_id="UR-ADMIN-HTTP", subject_id="USR_ADMIN", role=ROLE_ADMIN),
     ])
     db_session.flush()
     db_session.add(Sale(sale_id="HTTP-SALE-1", customer_id="HTTP-C1", total_amount_toman=1_000_000, total_amount_usd=10.0, total_amount_irr=10_000_000.0, fx_rate_usd_to_irr=1_000_000.0))
     db_session.commit()
+    admin_h = {"Authorization": f"Bearer {create_access_token({'sub': 'USR_ADMIN'})}"}
     owner_h = {"Authorization": f"Bearer {create_access_token({'sub': 'HTTP-C1'})}"}
     foreign_h = {"Authorization": f"Bearer {create_access_token({'sub': 'HTTP-C2'})}"}
     payload = {"sale_id":"HTTP-SALE-1","method":"CASH","amount_usd":1.0,"fx_rate_usd_to_irr":1_000_000.0}
-    assert client.post("/api/v1/payments/", json=payload, headers=owner_h).status_code == 200
+    assert client.post("/api/v1/payments/", json=payload, headers=owner_h).status_code == 403
+    assert client.post("/api/v1/payments/", json=payload, headers=admin_h).status_code == 200
     count = db_session.query(Payment).count()
     assert client.post("/api/v1/payments/", json=payload, headers=foreign_h).status_code == 403
     assert db_session.query(Payment).count() == count
