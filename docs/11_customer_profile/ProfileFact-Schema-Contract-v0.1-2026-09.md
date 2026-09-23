@@ -9,245 +9,230 @@
 
 Consumer Audit is closed.
 
-Only one persistent capability gap is currently proven:
+The only currently proven persistent capability gap is a reusable customer-owned fact that can carry controlled provenance and lifecycle semantics across visits without overwriting or confusing it with the current Case.
 
-> A reusable customer profile fact needs provenance, lifecycle/status, freshness/review semantics, explicit confirmation/promotion, conflict handling, and auditable change behavior that cannot be represented safely by today's undifferentiated Customer string fields.
+This contract therefore evaluates **ProfileFact only**.
 
-This contract therefore evaluates **Profile Fact only**.
-
-It does **not** authorize:
+It does not authorize:
 - Preference / PreferenceSignal
-- ConstraintSafetySignal / persistent customer Safety entity
+- ConstraintSafetySignal / persistent Safety entity
 - Outcome / Follow-up entity
 - Customer rewrite
-- Recommendation or scoring changes
+- Recommendation/scoring changes
 - Evidence-gate changes
 - UI rewrite
-- Migration or backfill
+- migration/backfill
+- model creation
 
-The existing Customer remains the identity/root and Case remains the visit/current-need boundary.
+Customer remains the identity/root. Case remains the visit/current-need boundary.
 
-## 2. Contract test
+## 2. Repository reality gate
 
-A Profile Fact structure is justified only if all of the following are required by an executable consumer:
+The current repository was inspected before defining this revision.
+
+### Confirmed facts
+
+1. CustomerService.build_recommendation_profile() currently projects Customer fields (concerns, skin_profile, hair_profile, scalp_profile, age_range) into Recommendation context.
+2. The Recommendation router merges saved Customer context with the current request and enforces Case ownership.
+3. RecommendationService performs the existing need normalization, scoring, eligibility, inventory, conflict, medical-context, and evidence behavior. There is currently no ProfileFact consumer/adapter.
+4. The existing audit implementation is ProductMutationLog + MutationLogService, and is currently Product-oriented rather than a generic ProfileFact audit subsystem.
+5. Existing Customer fields are undifferentiated strings and do not provide the required fact-level provenance/lifecycle/version semantics.
+
+Therefore this schema must be a **domain model**, not an audit log embedded inside each fact row.
+
+## 3. Contract test
+
+A ProfileFact is justified only if the implementation can demonstrate all of these behaviors:
 
 1. reusable across visits;
-2. distinguishable from today's Case-scoped Current Need;
+2. distinct from Case Current Need;
 3. attributable to a controlled source;
-4. able to become stale without being silently deleted;
+4. able to become stale without deletion;
 5. able to be superseded or conflicted without silent overwrite;
-6. explicitly promotable/confirmable;
-7. auditable when edited, revoked, or deleted;
-8. safely projectable into Recommendation without changing Recommendation rules.
+6. explicitly confirmable/promotable;
+7. auditable for material changes;
+8. projectable into Recommendation without changing Recommendation rules.
 
-If a proposed field does not serve one of these behaviors, it is not part of this schema.
+Fields that do not support these behaviors require separate evidence.
 
-## 3. Minimum entity
+## 4. Minimum domain entity
 
-Proposed logical entity name: ProfileFact
+Logical entity: ProfileFact
 
 Ownership:
 
-ProfileFact.customer_id → Customer.customer_id
+ProfileFact.customer_id -> Customer.customer_id
 
-A ProfileFact is **customer-owned reusable context**. It is not a visit, recommendation, purchase, feedback record, or derived summary.
+### 4.1 Proposed minimum fields
 
-### 3.1 Field-by-field contract
+| Field | Type / allowed values | Required | Purpose |
+|---|---|---:|---|
+| profile_fact_id | string PK | yes | Stable identity of one fact/version |
+| customer_id | FK Customer | yes | Customer ownership |
+| attribute_key | controlled identifier | yes | Identifies the fact attribute |
+| value | attribute-defined value; initial implementation may use text-compatible representation | conditional | Actual fact value |
+| value_state | KNOWN / UNKNOWN / PREFER_NOT_TO_SAY / NOT_APPLICABLE | yes | Explicit knowledge/response state |
+| provenance | CUSTOMER / SELLER / SYSTEM / IMPORTED | yes | Assertion source |
+| status | ACTIVE / STALE / SUPERSEDED / REVOKED / CONFLICTED | yes | Lifecycle state |
+| source_case_id | nullable FK Case | no | Originating consultation when applicable |
+| observed_at | datetime nullable | no | When the underlying fact was observed/declared |
+| reviewed_at | datetime nullable | no | Last explicit freshness/review check |
+| review_due_at | datetime nullable | no | Attribute-specific review boundary when applicable |
+| supersedes_fact_id | nullable FK ProfileFact | no | Explicit replacement lineage |
+| conflict_group_id | nullable identifier | no, pending proof | Groups incompatible assertions if a real conflict consumer requires it |
+| created_at | datetime | yes | Fact creation/recording time |
+| updated_at | datetime | yes | System-managed last metadata/state update |
 
-| Field | Type / allowed values | Required | Why it exists | Writer | Consumer | Lifecycle rules |
-|---|---|---:|---|---|---|---|
-| profile_fact_id | string PK | yes | Stable identity for one fact/version | system | profile operations, audit | immutable |
-| customer_id | FK → Customer | yes | Ownership/root relation | system | customer profile retrieval | immutable |
-| attribute_key | controlled string | yes | Identifies the profile attribute | customer/seller flow under contract | profile retrieval, recommendation adapter | immutable for a fact |
-| value | typed/serialized value; initial slice may use text-compatible values | yes when value_state=KNOWN | Actual reusable fact value | customer or authorized seller | profile/recommendation projection | never silently overwritten |
-| value_state | KNOWN / UNKNOWN / PREFER_NOT_TO_SAY / NOT_APPLICABLE | yes | Separates explicit state from absence | customer/seller/system according to source | profile consumers | state changes are auditable |
-| provenance | CUSTOMER / SELLER / SYSTEM / IMPORTED / OTHER | yes | Identifies assertion source | system from controlled operation | trust/promotion/review logic | OTHER requires documented normalization/review |
-| status | ACTIVE / STALE / SUPERSEDED / REVOKED / CONFLICTED / UNKNOWN | yes | Lifecycle without a second state vocabulary | system/authorized operation | profile retrieval and review | transitions explicit and auditable |
-| source_case_id | nullable FK → Case | no | Links an observation/promotion to originating consultation when one exists | system | audit/provenance | nullable; never makes fact Case-scoped |
-| observed_at | datetime nullable | no | When underlying fact was observed/declared | system/operator flow | freshness policy | historical; not silently changed |
-| recorded_at | datetime | yes | When HBI recorded the fact | system | audit | immutable |
-| reviewed_at | datetime nullable | no | Last explicit freshness/review check | authorized operation | freshness/review flow | updated only by review |
-| review_due_at | datetime nullable | no | Policy-derived review boundary | system/policy layer | review queue | never a universal TTL |
-| freshness_policy_key | controlled policy identifier, nullable initially | no | Records governing attribute-specific policy | system | audit/review | policy semantics live outside entity |
-| confirmed_at | datetime nullable | no | Explicit confirmation without a new lifecycle state | customer/authorized seller | promotion/audit | only set by explicit confirmation |
-| confirmed_by_type | CUSTOMER / SELLER / null | no | Confirmation actor category | system | audit | paired with confirmation metadata |
-| confirmed_by_id | string nullable | no | Identifies actor where permitted | system | audit | immutable once recorded |
-| supersedes_fact_id | nullable FK → ProfileFact | no | Makes replacement explicit | system | history/audit | immutable link |
-| conflict_group_id | nullable string | no | Groups mutually inconsistent facts | system/authorized conflict operation | review UI/service | set when conflict established |
-| revoked_at | datetime nullable | no | Records explicit revocation | authorized operation | audit | required when status=REVOKED |
-| revoked_by_type | CUSTOMER / SELLER / null | no | Records revoking actor category | system | audit | paired with revoked_at |
-| created_at | datetime | yes | System creation time | system | audit | immutable |
-| updated_at | datetime | yes | Last metadata/state update | system | audit | system-managed |
-| mutation_reason | string | required for material state/value mutation | Explains why the mutation occurred | authorized operation | audit/review | immutable per mutation |
+### 4.2 Intentionally removed from the entity
 
-### 3.2 Fields deliberately excluded
+The following are **not ProfileFact columns** in this revision:
 
-The entity must not contain:
+- recorded_at — redundant with created_at;
+- mutation_reason — belongs to the audit event, not the current fact row;
+- confirmed_at, confirmed_by_type, confirmed_by_id — confirmation is an auditable event; confirmation does not require a second copy of actor metadata in the fact row;
+- revoked_by_type — revocation actor belongs to the audit event;
+- revoked_at — remains representable through the lifecycle/audit implementation; a dedicated column requires implementation-level proof;
+- freshness_policy_key — no repository policy registry/consumer is currently proven;
+- provenance=OTHER — removed because a controlled source vocabulary must not have an unbounded catch-all.
 
-- today's Current Need as a replacement for Case;
-- recommendation score, ranking, eligibility, or evidence;
-- product purchase history;
-- generic operator notes as a fact substitute;
-- derived Smart Summary text;
-- medical diagnosis;
-- a universal TTL;
-- CANDIDATE or CONFIRMED as lifecycle/status values;
-- automatic Preference creation;
-- automatic Safety Signal creation.
+## 5. State semantics
 
-## 4. Value semantics
+value_state answers **what is known or declared**.
 
-### KNOWN
-A concrete value is available and usable subject to status, freshness, provenance, and applicable safety rules.
+status answers **where the fact is in its lifecycle**.
 
-### UNKNOWN
-The attribute is explicitly not known. This is not equivalent to null/absence.
+They are intentionally separate.
 
-### PREFER_NOT_TO_SAY
-The customer explicitly declines to provide the value. It must not be inferred or replaced silently.
+### Value state
 
-### NOT_APPLICABLE
-The attribute does not apply to this customer/context.
+- KNOWN — a concrete value is available.
+- UNKNOWN — explicitly not known.
+- PREFER_NOT_TO_SAY — customer explicitly declines.
+- NOT_APPLICABLE — attribute does not apply.
 
-The contract preserves:
+empty != FALSE != UNKNOWN.
 
-> empty ≠ FALSE ≠ UNKNOWN.
+### Lifecycle status
 
-## 5. Confirmation and promotion
+- ACTIVE — reusable current fact.
+- STALE — retained historical fact requiring review before current use when policy requires it.
+- SUPERSEDED — replaced by a newer fact.
+- REVOKED — explicitly withdrawn and not usable as active context.
+- CONFLICTED — incompatible assertions exist; no silent latest-wins behavior.
 
-Promotion from consultation information to reusable ProfileFact is **not automatic**.
+There is deliberately **no status=UNKNOWN** because value_state=UNKNOWN already represents unknown content. An unresolved lifecycle condition must be represented by an explicit lifecycle state or implementation-level error, not by duplicating the value-state vocabulary.
 
-Permitted promotion requires one of:
+## 6. Attribute control
 
+attribute_key is not a free-form user string.
+
+Before model implementation, the implementation gate must define the canonical attribute set and validation location.
+
+The schema must not invent an attribute registry solely to make this document appear complete.
+
+Initial attributes may be limited to those for which a real Recommendation/profile consumer and promotion rule are demonstrated.
+
+## 7. Provenance and promotion
+
+Allowed provenance values are controlled:
+
+- CUSTOMER
+- SELLER
+- SYSTEM
+- IMPORTED
+
+SYSTEM does not mean “AI guessed it”. A system-created fact must have an explicit rule or source.
+
+Promotion from consultation information to reusable ProfileFact is not automatic.
+
+Allowed promotion requires:
 1. explicit customer confirmation; or
-2. authorized seller/operator action allowed by policy, recorded with provenance and audit.
+2. authorized seller/operator action permitted by policy, with provenance and an auditable mutation event.
 
-The following do **not** automatically promote to ProfileFact:
-
+The following do not automatically become ProfileFacts:
 - Case Current Need;
-- purchase;
-- recommendation;
+- purchase history;
+- recommendation output;
 - Smart Summary;
 - unconfirmed observation.
 
-confirmed_at and confirmation actor metadata express confirmation. They do not create a parallel lifecycle vocabulary.
+## 8. Lifecycle and versioning
 
-## 6. Lifecycle and conflict rules
-
-### ACTIVE
-Current reusable fact.
-
-### STALE
-Fact remains historical but requires review before being treated as current reusable context when governing freshness policy requires review.
-
-### SUPERSEDED
-Replaced by a newer explicit fact. The previous fact remains historical.
-
-### REVOKED
-Explicitly withdrawn. It must not be projected as active context.
-
-### CONFLICTED
-Two or more assertions cannot safely be treated as one current value. Conflict must be visible; the system must not silently choose the latest value.
-
-### UNKNOWN
-Fact state is explicitly unresolved/unknown.
-
-### Required invariants
-
-- No silent overwrite of a previous fact.
-- Supersession is explicit through supersedes_fact_id.
-- Conflict is explicit through conflict_group_id.
-- Revocation is explicit and auditable.
-- Historical facts remain queryable.
-- Status transitions require actor, reason, and timestamp in the audit trail.
-
-## 7. Freshness contract
-
-Freshness is **attribute-specific**.
-
-The entity stores review metadata; it does not encode a universal expiration rule.
-
-Examples:
-
-- Current Need → Case-scoped; not a ProfileFact.
-- Identity/contact → reviewed when changed.
-- Skin/hair/scalp attributes → review driven by policy and meaningful change.
-- Preferences → remain until changed/rejected; no invented fixed TTL.
-- Safety-related customer context → reviewed when relevant information changes; this contract does not create a Safety entity.
-- Historical interaction/outcome → does not expire merely because time passed.
-- Derived summaries → regenerated; not persisted as ProfileFact.
-
-No fixed values such as "6 months for skin" or "12 months for texture/scent" are schema rules.
-
-## 8. Edit / delete / revoke
-
-A ProfileFact is not updated in place in a way that destroys history.
+Material value changes must preserve history.
 
 ### Edit
-A materially different fact creates a new version/fact and explicitly supersedes the previous one.
+
+A materially different fact creates a new ProfileFact version and explicitly supersedes the previous fact.
+
+### Supersession
+
+supersedes_fact_id identifies the previous fact.
+
+### Conflict
+
+If two assertions cannot safely be treated as one current value, the system records a conflict rather than selecting a winner silently.
+
+conflict_group_id remains **conditional** until a concrete repository consumer and conflict-resolution workflow are demonstrated.
 
 ### Revoke
-Sets the old fact to REVOKED with actor, timestamp, and reason. Revocation does not erase audit history.
 
-### Delete
-Physical deletion is not the default behavior for a fact with operational/audit significance. Any legally required deletion must follow organizational retention/privacy policy and preserve only what is legally permitted.
+A fact may be withdrawn through an explicit lifecycle operation. The operation must be auditable and must prevent the revoked fact from being projected as active context.
 
-### Audit minimum
+Physical deletion is not the default operational behavior.
 
-Every material mutation must be attributable by:
+## 9. Freshness
+
+Freshness is attribute-specific.
+
+The schema does not define a universal TTL.
+
+reviewed_at and review_due_at are retained only where an actual review/freshness workflow requires them. The implementation gate must demonstrate at least one real consumer before turning these into mandatory operational behavior.
+
+No fixed rule such as “skin expires after six months” is part of the schema.
+
+## 10. Audit contract
+
+Auditability is a **separate event concern**, not duplicated state inside ProfileFact.
+
+Every material ProfileFact mutation must produce an auditable event containing, as applicable:
 
 - actor type;
 - actor identifier where permitted;
 - action;
+- target entity/id;
 - old state/value reference;
 - new state/value reference;
 - reason;
 - timestamp;
-- mutation_reason for every material state/value mutation.
+- correlation/reference identifier where required.
 
-This contract does not assume a new audit table until the repository's existing audit capability is inspected and a separate implementation slice is approved.
+The current repository's ProductMutationLog is Product-oriented. Therefore this contract does **not** claim that the existing log can already audit ProfileFact safely.
 
-## 9. Customer and Case relationship
+The implementation gate must choose and test the smallest safe audit extension before ProfileFact writes are authorized.
 
-### Customer
-Customer remains the identity/root record.
+## 11. Recommendation boundary
 
-ProfileFact adds reusable, structured context without turning Customer into a generic event store.
+Recommendation may consume ProfileFact only through a read-only projection/adapter.
 
-### Case
-Case remains the current consultation/need boundary.
+The adapter may expose only facts that satisfy:
 
-A ProfileFact may optionally reference source_case_id for provenance, but that reference does not make the fact Case-scoped.
-
-Therefore:
-
-Current Need → Case
-
-Reusable Profile Fact → ProfileFact → Customer
-
-## 10. Recommendation boundary
-
-The Recommendation system may consume ProfileFact only through a **read-only projection/adapter**.
-
-The adapter may select only facts satisfying the existing contract:
-
-- customer ownership matches;
-- status is usable under freshness policy;
-- value_state is KNOWN;
-- provenance/confirmation requirements are satisfied where applicable.
+- correct Customer ownership;
+- status usable under the applicable freshness rule;
+- value_state=KNOWN;
+- provenance/promotion requirements satisfied.
 
 The adapter must not:
 
-- alter recommendation scoring;
+- alter scoring formulas;
 - alter product eligibility;
 - alter Evidence Gates;
 - infer new safety rules;
 - write ProfileFact;
-- promote consultation input automatically.
+- automatically promote consultation input.
 
-Recommendation/Scoring/Evidence Gates remain frozen.
+Current Recommendation behavior remains frozen.
 
-## 11. Legacy Customer mapping
+## 12. Legacy Customer mapping
 
 Current Customer fields include:
 
@@ -258,51 +243,52 @@ Current Customer fields include:
 - concerns
 - observations
 - answers
+- case_history
 - operator_notes
 
-No automatic backfill is authorized by this contract.
+No automatic backfill is authorized.
 
-Before migration, each legacy field must receive a field-level disposition:
+Each legacy field requires a separate disposition before migration:
 
-| Legacy field | Initial disposition |
+| Legacy field | Disposition |
 |---|---|
 | skin_profile | candidate source only after provenance/value semantics are established |
 | hair_profile | candidate source only after provenance/value semantics are established |
 | scalp_profile | candidate source only after provenance/value semantics are established |
 | age_range | candidate source; explicit freshness/promotion rules required |
-| concerns | ambiguous between persistent profile and current need; no blind backfill |
+| concerns | ambiguous persistent profile vs current need; no blind backfill |
 | observations | not automatically promoted |
 | answers | not automatically promoted |
+| case_history | remains historical Customer data unless a separate proven consumer requires transformation |
 | operator_notes | not automatically promoted |
 
-Migration/backfill requires a separate approved gate.
+## 13. Acceptance tests before implementation
 
-## 12. Acceptance tests for this contract
+The contract cannot advance until the following are demonstrably testable:
 
-The schema cannot advance to implementation until the following are testable:
-
-1. create a ProfileFact owned by Customer;
+1. create a ProfileFact owned by a Customer;
 2. reject cross-customer ownership;
 3. represent all four value states;
 4. enforce canonical provenance;
-5. enforce canonical lifecycle/status;
-6. confirm a fact without introducing a new lifecycle value;
-7. supersede a fact without destroying its history;
-8. represent a conflict without silent winner selection;
-9. revoke a fact with auditable actor/time/reason;
-10. require a mutation reason for material state/value changes;
-11. represent freshness review metadata without a universal TTL;
-12. project only eligible ProfileFacts into Recommendation context;
+5. enforce canonical lifecycle status;
+6. confirm/promote a fact through an auditable operation without creating a new lifecycle vocabulary;
+7. supersede a fact without destroying history;
+8. represent a conflict without silent winner selection, if conflict is retained;
+9. revoke a fact and prevent active projection;
+10. produce an audit event containing actor/time/reason and old/new state/value references;
+11. apply freshness/review metadata only where a real policy consumer exists;
+12. project eligible ProfileFacts into Recommendation context;
 13. prove Recommendation/Scoring/Evidence behavior is unchanged;
-14. prove legacy Customer fields remain behaviorally compatible until an explicit migration decision.
+14. prove legacy Customer behavior remains compatible until an explicit migration decision.
 
-## 13. Gate status
+## 14. Gate status
 
-```
 Consumer Audit                 = COMPLETE
-Architecture Boundary          = D-plus / ProfileFact-only
-ProfileFact Schema Contract    = DRAFT — THIS DOCUMENT
-Schema Implementation          = BLOCKED
+Repository Reality Review      = COMPLETE
+Schema Contract                = REVIEW ROUND 2
+Auditability gap               = RESOLVED AT CONTRACT LEVEL
+Minimum domain model           = REVISED / PENDING APPROVAL
+Model implementation           = BLOCKED
 Migration / Backfill           = BLOCKED
 UI                             = BLOCKED
 Recommendation / Scoring       = FROZEN
@@ -310,8 +296,7 @@ Evidence Gates                 = FROZEN
 Preference                     = NOT JUSTIFIED
 Constraint/Safety Signal       = NOT JUSTIFIED
 Outcome / Follow-up Entity     = NOT JUSTIFIED
-```
 
-**Next gate:** independent review of this field-by-field contract.
+**Next gate:** approve the reduced domain contract only after the canonical attribute set and the smallest safe ProfileFact audit mechanism are proven.
 
-Only after acceptance may a minimal implementation proposal be written. No model, migration, or UI code is authorized by this document.
+No model, migration, or UI code is authorized by this document.
