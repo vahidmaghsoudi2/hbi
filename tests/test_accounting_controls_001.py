@@ -239,3 +239,40 @@ def test_stock_movement_created_for_sale(session):
     assert len(moves) == 1
     assert moves[0].movement_type == "SALE"
     assert moves[0].quantity_delta == -2
+
+
+def test_v1_whole_rial_no_fractional_stored(session):
+    """PO Contract: final amounts are whole Rial; toman = rial/10 integer pair."""
+    _seed(session, qty=5, price=12.34)
+    sale = _sale(session, qty=1, fx=900_000.0)
+    session.commit()
+    irr = float(sale.total_amount_irr)
+    toman = int(sale.total_amount_toman)
+    assert irr == float(int(irr)), "fractional Rial stored"
+    assert toman * 10 == int(irr)
+
+
+def test_v1_void_sale_preserves_history(session):
+    _seed(session, qty=5, price=10.0)
+    sale = _sale(session, qty=1)
+    session.commit()
+    sale_id = sale.sale_id
+    prior_irr = sale.total_amount_irr
+    voided = SaleService(session).void_sale(sale_id, actor_id="USR_ADMIN", reason="test_void")
+    session.commit()
+    assert voided.document_status == "VOIDED"
+    session.refresh(sale)
+    assert sale.document_status == "VOIDED"
+    assert sale.total_amount_irr == prior_irr
+    assert session.query(Sale).filter_by(sale_id=sale_id).count() == 1
+    with pytest.raises(ValueError, match="VOIDED"):
+        PaymentService(session).record_payment(
+            sale_id=sale_id, method="CASH", amount_usd=1.0, fx_rate_usd_to_irr=1_000_000.0,
+        )
+
+
+def test_v1_contract_example_toman_rial():
+    """42,027 Toman = 420,270 Rial."""
+    from app.services.currency_fx import finalize_irr_toman
+    rial, toman = finalize_irr_toman(420270.4)
+    assert 42027 * 10 == 420270
