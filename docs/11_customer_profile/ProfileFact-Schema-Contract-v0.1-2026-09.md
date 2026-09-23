@@ -76,10 +76,10 @@ ProfileFact.customer_id -> Customer.customer_id
 | status | ACTIVE / STALE / SUPERSEDED / REVOKED / CONFLICTED | yes | Lifecycle state |
 | source_case_id | nullable FK Case | no | Originating consultation when applicable |
 | observed_at | datetime nullable | no | When the underlying fact was observed/declared |
-| reviewed_at | datetime nullable | no | Last explicit freshness/review check |
-| review_due_at | datetime nullable | no | Attribute-specific review boundary when applicable |
+| reviewed_at | datetime nullable | no | Last explicit freshness/review check; retain only if the implementation proves a real review workflow |
+| review_due_at | datetime nullable | no | Attribute-specific review boundary; retain only if the implementation proves a real review workflow |
 | supersedes_fact_id | nullable FK ProfileFact | no | Explicit replacement lineage |
-| conflict_group_id | nullable identifier | no, pending proof | Groups incompatible assertions if a real conflict consumer requires it |
+| conflict_group_id | nullable identifier | no, pending proof | Not authorized unless implementation proves a concrete conflict consumer/workflow |
 | created_at | datetime | yes | Fact creation/recording time |
 | updated_at | datetime | yes | System-managed last metadata/state update |
 
@@ -126,11 +126,21 @@ There is deliberately **no status=UNKNOWN** because value_state=UNKNOWN already 
 
 attribute_key is not a free-form user string.
 
-Before model implementation, the implementation gate must define the canonical attribute set and validation location.
+**Round-3 repository proof:** the current Recommendation projection consumes exactly these persisted Customer fields:
 
-The schema must not invent an attribute registry solely to make this document appear complete.
+- `skin_profile`
+- `hair_profile`
+- `scalp_profile`
+- `age_range`
+- `concerns`
 
-Initial attributes may be limited to those for which a real Recommendation/profile consumer and promotion rule are demonstrated.
+Therefore the initial canonical ProfileFact attribute set is limited to these five keys. No additional key is authorized by this contract.
+
+`concerns` has a strict boundary: a ProfileFact under this key means a reusable customer concern; the current Case/request concern remains Case-scoped and is not silently promoted into ProfileFact.
+
+The implementation must validate `attribute_key` against this fixed initial set at the ProfileFact write boundary. A separate attribute-registry table is not justified for this first slice.
+
+Each key must have an explicit value representation/validation rule before model implementation; the initial repository stores the legacy values as strings, so the first implementation may preserve text-compatible values without inventing a generic JSON attribute system.
 
 ## 7. Provenance and promotion
 
@@ -206,9 +216,9 @@ Every material ProfileFact mutation must produce an auditable event containing, 
 - timestamp;
 - correlation/reference identifier where required.
 
-The current repository's ProductMutationLog is Product-oriented. Therefore this contract does **not** claim that the existing log can already audit ProfileFact safely.
+The current repository's `ProductMutationLog` storage already contains `target_entity` and `target_id`, while `MutationLogService.append()` already accepts an explicit `target_entity` parameter. This proves that the smallest operational audit extension is **reuse of the existing append-only log path with `target_entity="ProfileFact"`**, rather than introducing a second audit table.
 
-The implementation gate must choose and test the smallest safe audit extension before ProfileFact writes are authorized.
+The existing model/service names remain Product-oriented, so implementation must add ProfileFact-specific tests for target isolation, actor/time/reason, old/new references, and append-only behavior before writes are authorized. A table rename or new audit subsystem is not part of this gate.
 
 ## 11. Recommendation boundary
 
@@ -285,9 +295,10 @@ The contract cannot advance until the following are demonstrably testable:
 
 Consumer Audit                 = COMPLETE
 Repository Reality Review      = COMPLETE
-Schema Contract                = REVIEW ROUND 2
-Auditability gap               = RESOLVED AT CONTRACT LEVEL
-Minimum domain model           = REVISED / PENDING APPROVAL
+Canonical Attribute Set        = PROVEN (5 legacy Recommendation-consumed keys)
+Audit Mechanism                 = PROVEN AS REUSABLE EXISTING APPEND-ONLY PATH
+Schema Contract                = REVIEW ROUND 3
+Minimum domain model           = REDUCED / PENDING FINAL GATE
 Model implementation           = BLOCKED
 Migration / Backfill           = BLOCKED
 UI                             = BLOCKED
@@ -297,6 +308,6 @@ Preference                     = NOT JUSTIFIED
 Constraint/Safety Signal       = NOT JUSTIFIED
 Outcome / Follow-up Entity     = NOT JUSTIFIED
 
-**Next gate:** approve the reduced domain contract only after the canonical attribute set and the smallest safe ProfileFact audit mechanism are proven.
+**Next gate:** final schema review must resolve whether `reviewed_at`, `review_due_at`, `conflict_group_id`, `source_case_id`, and `observed_at` each earn a persisted column from an actual workflow/consumer. The five canonical attribute keys and reuse of the existing append-only audit path are now repository-proven.
 
 No model, migration, or UI code is authorized by this document.
