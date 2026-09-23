@@ -469,6 +469,34 @@ export default function NewHomePage() {
     }
   }
 
+  function formatRecommendationStatus(value: string | null | undefined) {
+    const normalized = (value ?? "").trim().toUpperCase();
+    if (normalized === "ELIGIBLE") return "مناسب برای ادامه بررسی";
+    if (normalized === "INELIGIBLE") return "برای این نیاز مناسب نیست";
+    if (normalized === "READY") return "پیشنهاد آماده است";
+    return value ?? "وضعیت مشخص نیست";
+  }
+
+  function formatRecommendationAvailability(value: string | null | undefined) {
+    const normalized = (value ?? "").trim().toUpperCase();
+    if (normalized === "AVAILABLE") return "موجود";
+    if (normalized === "UNAVAILABLE") return "ناموجود";
+    return value ?? "وضعیت موجودی مشخص نیست";
+  }
+
+  function formatMatchLevel(score: number | null | undefined) {
+    if (score == null) return "ثبت نشده";
+    if (score >= 0.8) return "بالا";
+    if (score >= 0.5) return "متوسط";
+    return "پایین";
+  }
+
+  function formatConfidenceLevel(score: number | null | undefined) {
+    if (score == null) return "ثبت نشده";
+    if (score >= 0.8) return "بالا";
+    if (score >= 0.5) return "متوسط";
+    return "محدود";
+  }
   const nav: [Panel, string][] = [
     ["consult", "مشاوره"],
     ["previous", "مشتری قبلی / جست‌وجو"],
@@ -764,19 +792,38 @@ export default function NewHomePage() {
               </div>
             )}
             <div className="pro-rec-list">
-              {recs.map((r, i) => (
-                <article key={r.recommendation_id || `${r.product_id}-${i}`} className="pro-rec-card">
-                  <div className="pro-rec-rank">#{i + 1}</div>
-                  <div>
-                    <h3>{r.product_id}</h3>
-                    <p className="pro-muted">
-                      {r.eligibility_status ?? r.eligibility ?? "—"}
-                      {r.final_score != null || r.ranking_score != null ? ` · ${r.final_score ?? r.ranking_score}` : ""}
-                    </p>
-                    {(r.reasoning || r.ranking_reasons) && <p className="pro-reason">{r.reasoning || r.ranking_reasons}</p>}<button type="button" className="pro-btn-primary" onClick={() => selectRecommendationForSale(r)}>انتخاب این پیشنهاد برای فروش</button>
-                  </div>
-                </article>
-              ))}
+              {recs.map((r, i) => {
+                const product = sellableProducts.find((p) => p.product_id === r.product_id);
+                return (
+                  <article key={r.recommendation_id || `${r.product_id}-${i}`} className="pro-rec-card">
+                    <div className="pro-rec-rank">#{i + 1}</div>
+                    <div>
+                      <h3>{product?.product_name ?? r.product_id}</h3>
+                      {product?.brand ? <p className="pro-muted">{product.brand}</p> : null}
+                      <p className="pro-lead">این محصول با نیاز ثبت‌شده شما برای ادامه بررسی مطابقت دارد.</p>
+                      <div className="pro-tags">
+                        <span className="pro-tag">تطابق با نیاز: {formatMatchLevel(r.need_match_score)}</span>
+                        <span className="pro-tag">وضعیت پیشنهاد: {formatRecommendationStatus(r.eligibility_status ?? r.eligibility)}</span>
+                        <span className="pro-tag">موجودی: {formatRecommendationAvailability(r.availability)}</span>
+                      </div>
+                      <p className="pro-muted">اطمینان سیستم: {formatConfidenceLevel(r.confidence)}</p>
+                      <details className="pro-technical-details">
+                        <summary>جزئیات فنی</summary>
+                        <dl className="pro-dl">
+                          <div><dt>شناسه محصول</dt><dd>{r.product_id}</dd></div>
+                          <div><dt>شناسه پیشنهاد</dt><dd>{r.recommendation_id}</dd></div>
+                          {r.need_match_score != null ? <div><dt>Need Match</dt><dd>{r.need_match_score.toFixed(2)}</dd></div> : null}
+                          {r.evidence_score != null ? <div><dt>Evidence</dt><dd>{r.evidence_score.toFixed(2)}</dd></div> : null}
+                          {r.ranking_score != null ? <div><dt>Ranking</dt><dd>{r.ranking_score.toFixed(2)}</dd></div> : null}
+                          {r.final_score != null ? <div><dt>Final</dt><dd>{r.final_score.toFixed(2)}</dd></div> : null}
+                          {r.reasoning ? <div><dt>ReasoningEngine</dt><dd>{r.reasoning}</dd></div> : null}
+                        </dl>
+                      </details>
+                      <button type="button" className="pro-btn-primary" onClick={() => selectRecommendationForSale(r)}>انتخاب این پیشنهاد برای فروش</button>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </section>
         )}
