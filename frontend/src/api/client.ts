@@ -65,6 +65,13 @@ export function pilotOperatorToken(): Promise<TokenPair> {
   });
 }
 
+/** Dev/Pilot only — single Admin session for the local HBI pilot. */
+export function pilotAdminToken(): Promise<TokenPair> {
+  return request<TokenPair>("/auth/pilot-admin-token", {
+    method: "POST",
+  });
+}
+
 /** Requires auth; body must use case_type, NOT concerns */
 export function createCase(
   body: CaseCreateRequest,
