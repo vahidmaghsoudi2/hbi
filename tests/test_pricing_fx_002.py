@@ -53,7 +53,6 @@ def test_current_sale_price_uses_current_fx(client, db_session):
     assert first.json()["current_fx_rate_usd_to_irr"] == 1_000_000.0
     assert first.json()["current_sale_price_irr"] == 25_000_000.0
     assert first.json()["current_sale_price_toman"] == 2_500_000
-    assert first.json()["purchase_price_usd"] == 9.0
 
     fx.set_rate(1_100_000.0, note="fx-2")
     db_session.commit()
@@ -63,7 +62,7 @@ def test_current_sale_price_uses_current_fx(client, db_session):
     assert second.json()["sale_price_usd"] == 25.0
     assert second.json()["current_fx_rate_usd_to_irr"] == 1_100_000.0
     assert second.json()["current_sale_price_toman"] == 2_750_000
-    assert second.json()["purchase_price_usd"] == 9.0
+    assert db_session.query(Inventory).filter_by(inventory_id="INV-FX-PRICE-TEST").one().purchase_price_usd == 9.0
 
 
 def test_current_sale_price_stays_unavailable_without_fx(client, db_session):
