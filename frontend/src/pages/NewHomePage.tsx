@@ -452,7 +452,8 @@ export default function NewHomePage() {
     setError(null);
     if (!token || !customerId) return setError("ابتدا مشاوره را ثبت کنید.");
     if (!saleProductId.trim()) return setError("محصول را انتخاب کنید.");
-    const saleQuantity = Number(saleQty);\n    if (!Number.isInteger(saleQuantity) || saleQuantity < 1) return setError("تعداد نامعتبر است.");
+    const saleQuantity = Number(saleQty);
+    if (!Number.isInteger(saleQuantity) || saleQuantity < 1) return setError("تعداد نامعتبر است.");
     if (salePrice == null) return setError("قیمت فروش این محصول در دسترس نیست.");
     if (saleStock != null && saleQuantity > saleStock) return setError(`موجودی قابل فروش: ${saleStock}`);
     setSaleBusy(true);
@@ -863,7 +864,7 @@ export default function NewHomePage() {
                     موجودی قابل فروش: {saleStock == null ? "در حال دریافت…" : saleStock.toLocaleString("fa-IR")}
                   </p>
                   <p className="pro-summary">
-                    مبلغ: <strong>{salePrice == null ? "—" : (saleQty * salePrice).toLocaleString("fa-IR")}</strong> تومان
+                    مبلغ: <strong>{salePrice == null ? "—" : (Number(saleQty) * salePrice).toLocaleString("fa-IR")}</strong> تومان
                   </p>
                 </fieldset>
                 <div className="pro-actions">
