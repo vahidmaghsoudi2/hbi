@@ -1,4 +1,4 @@
-"""ProfileFact implementation contract tests."""
+"""ProfileFact implementation contract tests for the v0.1 schema gate."""
 import pytest
 
 from app.database import SessionLocal, init_db
