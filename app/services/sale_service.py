@@ -48,12 +48,21 @@ class SaleService(BaseService[Sale, SaleRepository]):
         items: list,
         *,
         fx_rate_usd_to_irr: float,
+        idempotency_key: Optional[str] = None,
     ) -> Sale:
         if not items:
             raise ValueError("Sale must have at least one item")
         if fx_rate_usd_to_irr is None or float(fx_rate_usd_to_irr) <= 0:
             raise ValueError("fx_rate_usd_to_irr must be > 0 (caller-supplied; never invented)")
         fx_rate = float(fx_rate_usd_to_irr)
+
+        key = (idempotency_key or "").strip() or None
+        if key is not None:
+            existing = self.db.query(Sale).filter(Sale.idempotency_key == key).first()
+            if existing is not None:
+                if existing.customer_id != customer_id:
+                    raise ValueError("idempotency_key already used for a different customer")
+                return existing
 
         customer = self.db.query(Customer).filter(Customer.customer_id == customer_id).first()
         if not customer:
@@ -90,7 +99,12 @@ class SaleService(BaseService[Sale, SaleRepository]):
             if getattr(product, "status", None) != "ACTIVE":
                 raise ValueError(f"Product {product_id} is not ACTIVE")
 
-            inv = self.db.query(Inventory).filter(Inventory.product_id == product_id).first()
+            inv = (
+                self.db.query(Inventory)
+                .filter(Inventory.product_id == product_id)
+                .with_for_update()
+                .first()
+            )
             if not inv:
                 raise ValueError(f"Inventory for product {product_id} not found")
             sellable = inv.quantity_available - (inv.quantity_reserved or 0)
@@ -136,6 +150,7 @@ class SaleService(BaseService[Sale, SaleRepository]):
                 total_amount_usd=0.0,
                 fx_rate_usd_to_irr=fx_rate,
                 total_amount_irr=0.0,
+                idempotency_key=key,
             )
             self.db.add(sale)
             self.db.flush()
@@ -194,6 +209,21 @@ class SaleService(BaseService[Sale, SaleRepository]):
             sale.total_amount_toman = int(round(total_toman))
             sale.fx_rate_usd_to_irr = fx_rate
             self.db.flush()
+
+            items_db = (
+                self.db.query(SaleItem)
+                .filter(SaleItem.sale_id == sale_id)
+                .all()
+            )
+            recomputed = sum(
+                float(it.unit_price_usd or 0.0) * int(it.quantity)
+                for it in items_db
+            )
+            if abs(recomputed - float(sale.total_amount_usd or 0.0)) > 1e-9:
+                raise RuntimeError(
+                    f"sale total invariant violated: header={sale.total_amount_usd} "
+                    f"sum_items={recomputed}"
+                )
             return sale
         except Exception:
             self.db.rollback()
