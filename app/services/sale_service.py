@@ -23,6 +23,8 @@ from app.repositories.sale_item_repository import SaleItemRepository
 from app.repositories.sale_repository import SaleRepository
 from app.services.base import BaseService
 from app.services.stock_in_service import irr_to_toman, usd_to_irr
+from app.services.currency_fx import finalize_irr_toman
+from app.services.mutation_log_service import MutationLogService
 
 
 class SaleService(BaseService[Sale, SaleRepository]):
@@ -48,12 +50,21 @@ class SaleService(BaseService[Sale, SaleRepository]):
         items: list,
         *,
         fx_rate_usd_to_irr: float,
+        idempotency_key: Optional[str] = None,
     ) -> Sale:
         if not items:
             raise ValueError("Sale must have at least one item")
         if fx_rate_usd_to_irr is None or float(fx_rate_usd_to_irr) <= 0:
             raise ValueError("fx_rate_usd_to_irr must be > 0 (caller-supplied; never invented)")
         fx_rate = float(fx_rate_usd_to_irr)
+
+        key = (idempotency_key or "").strip() or None
+        if key is not None:
+            existing = self.db.query(Sale).filter(Sale.idempotency_key == key).first()
+            if existing is not None:
+                if existing.customer_id != customer_id:
+                    raise ValueError("idempotency_key already used for a different customer")
+                return existing
 
         customer = self.db.query(Customer).filter(Customer.customer_id == customer_id).first()
         if not customer:
@@ -90,7 +101,12 @@ class SaleService(BaseService[Sale, SaleRepository]):
             if getattr(product, "status", None) != "ACTIVE":
                 raise ValueError(f"Product {product_id} is not ACTIVE")
 
-            inv = self.db.query(Inventory).filter(Inventory.product_id == product_id).first()
+            inv = (
+                self.db.query(Inventory)
+                .filter(Inventory.product_id == product_id)
+                .with_for_update()
+                .first()
+            )
             if not inv:
                 raise ValueError(f"Inventory for product {product_id} not found")
             sellable = inv.quantity_available - (inv.quantity_reserved or 0)
@@ -136,6 +152,7 @@ class SaleService(BaseService[Sale, SaleRepository]):
                 total_amount_usd=0.0,
                 fx_rate_usd_to_irr=fx_rate,
                 total_amount_irr=0.0,
+                idempotency_key=key,
             )
             self.db.add(sale)
             self.db.flush()
@@ -153,20 +170,21 @@ class SaleService(BaseService[Sale, SaleRepository]):
                     inv.stock_status = "OUT_OF_STOCK"
 
                 line_usd = line["unit_usd"] * qty
-                line_irr = usd_to_irr(line_usd, fx_rate)
-                line_toman = irr_to_toman(line_irr)
+                line_irr_raw = usd_to_irr(line_usd, fx_rate)
+                line_irr, line_toman = finalize_irr_toman(line_irr_raw)
                 total_usd += line_usd
 
+                unit_irr_i, unit_toman_i = finalize_irr_toman(line["unit_irr"])
                 item = SaleItem(
                     sale_item_id=str(uuid.uuid4()),
                     sale_id=sale_id,
                     product_id=line["product_id"],
                     recommendation_id=line["recommendation_id"],
                     quantity=qty,
-                    unit_price_toman=int(round(line["unit_toman"])),
+                    unit_price_toman=unit_toman_i,
                     unit_price_usd=line["unit_usd"],
                     fx_rate_usd_to_irr=fx_rate,
-                    unit_price_irr=line["unit_irr"],
+                    unit_price_irr=float(unit_irr_i),
                 )
                 self.db.add(item)
 
@@ -179,22 +197,76 @@ class SaleService(BaseService[Sale, SaleRepository]):
                     quantity_after=after,
                     amount_usd=line_usd,
                     fx_rate_usd_to_irr=fx_rate,
-                    amount_irr=line_irr,
-                    amount_toman=line_toman,
+                    amount_irr=float(line_irr),
+                    amount_toman=float(line_toman),
                     reference_type="SALE",
                     reference_id=sale_id,
                     note="phase08_sale",
                 )
                 self.db.add(movement)
 
-            total_irr = usd_to_irr(total_usd, fx_rate)
-            total_toman = irr_to_toman(total_irr)
+            total_irr_raw = usd_to_irr(total_usd, fx_rate)
+            total_irr, total_toman = finalize_irr_toman(total_irr_raw)
             sale.total_amount_usd = total_usd
-            sale.total_amount_irr = total_irr
-            sale.total_amount_toman = int(round(total_toman))
+            sale.total_amount_irr = float(total_irr)  # whole Rial as numeric
+            sale.total_amount_toman = total_toman
             sale.fx_rate_usd_to_irr = fx_rate
+            sale.document_status = "ACTIVE"
             self.db.flush()
+
+            items_db = (
+                self.db.query(SaleItem)
+                .filter(SaleItem.sale_id == sale_id)
+                .all()
+            )
+            recomputed = sum(
+                float(it.unit_price_usd or 0.0) * int(it.quantity)
+                for it in items_db
+            )
+            if abs(recomputed - float(sale.total_amount_usd or 0.0)) > 1e-9:
+                raise RuntimeError(
+                    f"sale total invariant violated: header={sale.total_amount_usd} "
+                    f"sum_items={recomputed}"
+                )
             return sale
         except Exception:
             self.db.rollback()
             raise
+
+    def void_sale(
+        self,
+        sale_id: str,
+        *,
+        actor_id: str,
+        reason: str | None = None,
+    ) -> Sale:
+        """V1: cancel invalid sale without physical delete (document_status=VOIDED)."""
+        sale = self.db.query(Sale).filter(Sale.sale_id == sale_id).first()
+        if not sale:
+            raise ValueError(f"Sale {sale_id} not found")
+        status = getattr(sale, "document_status", None) or "ACTIVE"
+        if status == "VOIDED":
+            return sale
+        if status != "ACTIVE":
+            raise ValueError(f"Sale {sale_id} cannot be voided from status={status}")
+
+        before = {
+            "sale_id": sale.sale_id,
+            "document_status": status,
+            "total_amount_irr": sale.total_amount_irr,
+            "total_amount_toman": sale.total_amount_toman,
+        }
+        sale.document_status = "VOIDED"
+        self.db.flush()
+        MutationLogService(self.db).append(
+            actor_id=actor_id,
+            actor_role="ADMIN",
+            action="VOID",
+            target_entity="Sale",
+            target_id=sale.sale_id,
+            before=before,
+            after={"document_status": "VOIDED"},
+            reason=reason or "sale_voided",
+            resulting_state="VOIDED",
+        )
+        return sale

@@ -206,10 +206,11 @@ class SaleFacade:
     def __init__(self, db: Session):
         self.service = SaleService(db)
 
-    def create_sale(self, customer_id: str, items: List[Dict], *, fx_rate_usd_to_irr: float) -> SaleDTO:
+    def create_sale(self, customer_id: str, items: List[Dict], *, fx_rate_usd_to_irr: float, idempotency_key: Optional[str] = None) -> SaleDTO:
         try:
             sale = self.service.create_sale(
-                customer_id, items, fx_rate_usd_to_irr=fx_rate_usd_to_irr
+                customer_id, items, fx_rate_usd_to_irr=fx_rate_usd_to_irr,
+                idempotency_key=idempotency_key,
             )
             sale_items = self.service.get_sale_items(sale.sale_id)
             item_dtos = [

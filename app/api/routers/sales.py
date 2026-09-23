@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_customer_id
+from app.core.authorization import require_any_role
+from app.models.user_role import ROLE_ADMIN
 from app.interface.facades import SaleFacade
 from app.interface.errors import BusinessRuleError
 
@@ -17,6 +19,7 @@ class SaleCreateRequest(BaseModel):
     customer_id: str
     items: List[Dict[str, Any]]
     fx_rate_usd_to_irr: float = Field(..., gt=0, description="IRR per 1 USD; required, never invented")
+    idempotency_key: Optional[str] = Field(None, description="Optional durable sale idempotency key")
 
 
 def _to_dict(obj):
@@ -35,20 +38,16 @@ def _to_dict(obj):
 async def create_sale(
     data: SaleCreateRequest,
     db: Session = Depends(get_db),
-    customer_id: str = Depends(get_current_customer_id),
+    admin=Depends(require_any_role(ROLE_ADMIN)),
 ):
-    if data.customer_id != customer_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied",
-        )
-
+    # V1 PO Contract: ADMIN owns financial mutations; body.customer_id is the buyer.
     facade = SaleFacade(db)
     try:
         sale = facade.create_sale(
-            customer_id=customer_id,
+            customer_id=data.customer_id,
             items=data.items,
             fx_rate_usd_to_irr=data.fx_rate_usd_to_irr,
+            idempotency_key=data.idempotency_key,
         )
         db.commit()
         return _to_dict(sale)

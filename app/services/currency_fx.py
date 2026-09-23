@@ -47,3 +47,22 @@ def usd_to_toman(amount_usd: float, fx_rate_usd_to_irr: float) -> float:
 
 def toman_to_usd(amount_toman: float, fx_rate_usd_to_irr: float) -> float:
     return irr_to_usd(toman_to_irr(amount_toman), fx_rate_usd_to_irr)
+
+
+def whole_rial(amount_irr: float) -> int:
+    """V1 PO Contract: final monetary amounts are whole Rial (no fractional Rial)."""
+    return int(round(float(amount_irr)))
+
+
+def whole_toman_from_rial(amount_irr: int) -> int:
+    """Explicit Toman from whole Rial: Rial / 10, integer (V1: 420270 Rial = 42027 Toman)."""
+    return int(amount_irr) // 10
+
+
+def finalize_irr_toman(amount_irr: float) -> tuple[int, int]:
+    """Round to whole Rial, derive whole Toman so the pair is consistent."""
+    rial = whole_rial(amount_irr)
+    # Ensure rial is compatible with integer toman representation (rial = toman * 10)
+    toman = int(round(rial / 10.0))
+    rial = toman * 10
+    return rial, toman
