@@ -283,3 +283,40 @@ def test_list_active_excludes_revoked(db):
     )
     listed = svc.list_active(c.customer_id, c.customer_id)
     assert [x.profile_fact_id for x in listed] == [active.profile_fact_id]
+
+
+def test_supersede_requires_consent(db):
+    c = customer(db)
+    svc = ProfileFactService(db)
+    fact = svc.create(
+        customer_id=c.customer_id,
+        authorized_customer_id=c.customer_id,
+        attribute_key="skin_profile",
+        value="خشک",
+        actor_id=c.customer_id,
+    )
+    c.consent_to_store_data = 0
+    with pytest.raises(ValueError, match="consent"):
+        svc.supersede(
+            fact_id=fact.profile_fact_id,
+            authorized_customer_id=c.customer_id,
+            value="مختلط",
+            value_state="KNOWN",
+            provenance="CUSTOMER",
+            actor_id=c.customer_id,
+        )
+
+
+def test_list_active_requires_consent(db):
+    c = customer(db)
+    svc = ProfileFactService(db)
+    svc.create(
+        customer_id=c.customer_id,
+        authorized_customer_id=c.customer_id,
+        attribute_key="skin_profile",
+        value="خشک",
+        actor_id=c.customer_id,
+    )
+    c.consent_to_store_data = 0
+    with pytest.raises(ValueError, match="consent"):
+        svc.list_active(c.customer_id, c.customer_id)
