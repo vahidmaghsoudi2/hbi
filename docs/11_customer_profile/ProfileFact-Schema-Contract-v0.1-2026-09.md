@@ -74,12 +74,7 @@ ProfileFact.customer_id -> Customer.customer_id
 | value_state | KNOWN / UNKNOWN / PREFER_NOT_TO_SAY / NOT_APPLICABLE | yes | Explicit knowledge/response state |
 | provenance | CUSTOMER / SELLER / SYSTEM / IMPORTED | yes | Assertion source |
 | status | ACTIVE / STALE / SUPERSEDED / REVOKED / CONFLICTED | yes | Lifecycle state |
-| source_case_id | nullable FK Case | no | Originating consultation when applicable |
-| observed_at | datetime nullable | no | When the underlying fact was observed/declared |
-| reviewed_at | datetime nullable | no | Last explicit freshness/review check; retain only if the implementation proves a real review workflow |
-| review_due_at | datetime nullable | no | Attribute-specific review boundary; retain only if the implementation proves a real review workflow |
 | supersedes_fact_id | nullable FK ProfileFact | no | Explicit replacement lineage |
-| conflict_group_id | nullable identifier | no, pending proof | Not authorized unless implementation proves a concrete conflict consumer/workflow |
 | created_at | datetime | yes | Fact creation/recording time |
 | updated_at | datetime | yes | System-managed last metadata/state update |
 
@@ -182,7 +177,7 @@ supersedes_fact_id identifies the previous fact.
 
 If two assertions cannot safely be treated as one current value, the system records a conflict rather than selecting a winner silently.
 
-conflict_group_id remains **conditional** until a concrete repository consumer and conflict-resolution workflow are demonstrated.
+Conflict grouping is **not part of this first schema**. The current repository does not prove a concrete conflict consumer/workflow. If conflict handling later becomes necessary, it requires a separate schema gate rather than an implicit nullable column.
 
 ### Revoke
 
@@ -192,11 +187,9 @@ Physical deletion is not the default operational behavior.
 
 ## 9. Freshness
 
-Freshness is attribute-specific.
+Freshness is attribute-specific, but the current repository proves no persisted ProfileFact freshness/review consumer or policy registry. Therefore this first slice stores **no reviewed_at, review_due_at, or universal TTL fields**.
 
-The schema does not define a universal TTL.
-
-reviewed_at and review_due_at are retained only where an actual review/freshness workflow requires them. The implementation gate must demonstrate at least one real consumer before turning these into mandatory operational behavior.
+A later freshness workflow may be added only through a new evidence gate tied to a concrete consumer and policy.
 
 No fixed rule such as “skin expires after six months” is part of the schema.
 
@@ -297,8 +290,8 @@ Consumer Audit                 = COMPLETE
 Repository Reality Review      = COMPLETE
 Canonical Attribute Set        = PROVEN (5 legacy Recommendation-consumed keys)
 Audit Mechanism                 = PROVEN AS REUSABLE EXISTING APPEND-ONLY PATH
-Schema Contract                = REVIEW ROUND 3
-Minimum domain model           = REDUCED / PENDING FINAL GATE
+Schema Contract                = REVIEW ROUND 4
+Minimum domain model           = MINIMIZED / PENDING FINAL GATE
 Model implementation           = BLOCKED
 Migration / Backfill           = BLOCKED
 UI                             = BLOCKED
@@ -308,6 +301,6 @@ Preference                     = NOT JUSTIFIED
 Constraint/Safety Signal       = NOT JUSTIFIED
 Outcome / Follow-up Entity     = NOT JUSTIFIED
 
-**Next gate:** final schema review must resolve whether `reviewed_at`, `review_due_at`, `conflict_group_id`, `source_case_id`, and `observed_at` each earn a persisted column from an actual workflow/consumer. The five canonical attribute keys and reuse of the existing append-only audit path are now repository-proven.
+**Next gate:** final schema review is now limited to implementation safety: ownership, value/provenance/status constraints, supersession lineage, consent behavior, and reuse of the existing append-only audit path. No unproven freshness, conflict, or source-tracking columns enter the first model.
 
 No model, migration, or UI code is authorized by this document.
