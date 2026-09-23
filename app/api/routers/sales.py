@@ -17,6 +17,7 @@ class SaleCreateRequest(BaseModel):
     customer_id: str
     items: List[Dict[str, Any]]
     fx_rate_usd_to_irr: float = Field(..., gt=0, description="IRR per 1 USD; required, never invented")
+    idempotency_key: Optional[str] = Field(None, description="Optional durable sale idempotency key")
 
 
 def _to_dict(obj):
@@ -49,6 +50,7 @@ async def create_sale(
             customer_id=customer_id,
             items=data.items,
             fx_rate_usd_to_irr=data.fx_rate_usd_to_irr,
+            idempotency_key=data.idempotency_key,
         )
         db.commit()
         return _to_dict(sale)
