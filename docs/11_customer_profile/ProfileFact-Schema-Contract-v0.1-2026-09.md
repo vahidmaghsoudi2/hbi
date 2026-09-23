@@ -78,6 +78,7 @@ A ProfileFact is **customer-owned reusable context**. It is not a visit, recomme
 | revoked_by_type | CUSTOMER / SELLER / null | no | Records revoking actor category | system | audit | paired with revoked_at |
 | created_at | datetime | yes | System creation time | system | audit | immutable |
 | updated_at | datetime | yes | Last metadata/state update | system | audit | system-managed |
+| mutation_reason | string | required for material state/value mutation | Explains why the mutation occurred | authorized operation | audit/review | immutable per mutation |
 
 ### 3.2 Fields deliberately excluded
 
@@ -201,7 +202,8 @@ Every material mutation must be attributable by:
 - old state/value reference;
 - new state/value reference;
 - reason;
-- timestamp.
+- timestamp;
+- mutation_reason for every material state/value mutation.
 
 This contract does not assume a new audit table until the repository's existing audit capability is inspected and a separate implementation slice is approved.
 
@@ -288,10 +290,11 @@ The schema cannot advance to implementation until the following are testable:
 7. supersede a fact without destroying its history;
 8. represent a conflict without silent winner selection;
 9. revoke a fact with auditable actor/time/reason;
-10. represent freshness review metadata without a universal TTL;
-11. project only eligible ProfileFacts into Recommendation context;
-12. prove Recommendation/Scoring/Evidence behavior is unchanged;
-13. prove legacy Customer fields remain behaviorally compatible until an explicit migration decision.
+10. require a mutation reason for material state/value changes;
+11. represent freshness review metadata without a universal TTL;
+12. project only eligible ProfileFacts into Recommendation context;
+13. prove Recommendation/Scoring/Evidence behavior is unchanged;
+14. prove legacy Customer fields remain behaviorally compatible until an explicit migration decision.
 
 ## 13. Gate status
 
