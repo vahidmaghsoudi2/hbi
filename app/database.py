@@ -46,7 +46,7 @@ def _ensure_recommendation_trace_columns():
             conn.execute(text('ALTER TABLE "SaleItem" ADD COLUMN recommendation_id TEXT'))
 
 def init_db():
-    from app.models import product, product_knowledge, evidence, customer, case, recommendation, inventory, sale, sale_item, category, stock_movement, payment, sale_return, operational_fx_rate, product_mutation_log, user_role, profile_fact
+    from app.models import product, product_knowledge, evidence, customer, case, recommendation, inventory, sale, sale_item, category, stock_movement, payment, sale_return, operational_fx_rate, product_mutation_log, user_role, profile_fact, admin_credential
     Base.metadata.create_all(bind=engine)
     _ensure_recommendation_trace_columns()
     with engine.connect() as conn:

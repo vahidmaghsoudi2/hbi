@@ -6,7 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core.rate_limit import RateLimitMiddleware
-from app.database import init_db
+from app.database import init_db, SessionLocal
+from app.services.admin_auth_service import ensure_admin_account
 
 from app.api.routers import (
     auth_router, products_router, customers_router, cases_router,
@@ -38,9 +39,12 @@ except ImportError:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Ensure SQLite schema exists for local/dev runtime (create_all is idempotent).
-    # Without this, first request hits "no such table: Product" / Customer → HTTP 500.
     init_db()
+    db = SessionLocal()
+    try:
+        ensure_admin_account(db)
+    finally:
+        db.close()
     yield
 
 

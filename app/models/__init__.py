@@ -18,10 +18,12 @@ from app.models.product_mutation_log import ProductMutationLog
 from app.models.user_role import UserRole
 from app.models.specialist_override import SpecialistOverride
 from app.models.feedback import Feedback
+from app.models.admin_credential import AdminCredential
 
 __all__ = [
     "Base", "Product", "ProductKnowledge", "Evidence", "Customer", "Case",
     "Recommendation", "Inventory", "Sale", "SaleItem", "Category", "ProfileFact",
     "StockMovement", "Payment", "SaleReturn", "OperationalFxRate",
     "ProductMutationLog", "UserRole", "SpecialistOverride", "Feedback",
+    "AdminCredential",
 ]
