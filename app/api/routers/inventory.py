@@ -13,6 +13,8 @@ from app.interface.errors import NotFoundError
 from app.services.inventory_service import InventoryService
 from app.services.stock_movement_service import StockMovementService
 from app.services.stock_in_service import StockInService
+from app.services.operational_fx_service import OperationalFxService
+from app.services.currency_fx import usd_to_irr, irr_to_toman
 
 router = APIRouter()
 
@@ -142,7 +144,17 @@ async def get_inventory_by_product(
     facade = InventoryFacade(db)
     try:
         inv = facade.get_by_product(product_id)
-        return _to_dict(inv)
+        data = _to_dict(inv)
+        fx = OperationalFxService(db).get_current_rate()
+        usd = inv.sale_price_usd
+        data["current_fx_rate_usd_to_irr"] = fx
+        data["current_sale_price_irr"] = usd_to_irr(usd, fx) if usd is not None and fx is not None else None
+        data["current_sale_price_toman"] = (
+            int(round(irr_to_toman(data["current_sale_price_irr"])))
+            if data["current_sale_price_irr"] is not None
+            else None
+        )
+        return data
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
