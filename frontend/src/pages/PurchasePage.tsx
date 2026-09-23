@@ -15,7 +15,7 @@ export default function PurchasePage() {
   );
   const [products, setProducts] = useState<ProductDTO[]>([]);
   const [productId, setProductId] = useState("");
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState("1");
   const [purchasePriceUsd, setPurchasePriceUsd] = useState("");
   const [fxRate, setFxRate] = useState<number | null>(null);
   const [note, setNote] = useState("");
@@ -101,7 +101,7 @@ export default function PurchasePage() {
       );
       setResult(response);
       setStatus("خرید/ورود کالا با موفقیت ثبت شد.");
-      setQuantity(1);
+      setQuantity("1");
       setPurchasePriceUsd("");
       setNote("");
       setReferenceId("");
@@ -184,11 +184,11 @@ export default function PurchasePage() {
                   <input
                     id="purchase-quantity"
                     className="pro-input"
-                    type="number"
-                    min="1"
-                    step="1"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     value={quantity}
-                    onChange={(e) => setQuantity(Number(e.target.value))}
+                    onChange={(e) => setQuantity(e.target.value.replace(/[^0-9]/g, ""))}
                     disabled={!adminToken || loading}
                   />
                 </div>

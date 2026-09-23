@@ -131,6 +131,8 @@ class InventoryService(BaseService[Inventory, InventoryRepository]):
         *,
         note: Optional[str] = None,
         movement_type: str = "ADJUSTMENT",
+        reference_type: Optional[str] = None,
+        reference_id: Optional[str] = None,
     ) -> Inventory:
         if quantity <= 0:
             raise ValueError("quantity must be positive")
@@ -150,9 +152,70 @@ class InventoryService(BaseService[Inventory, InventoryRepository]):
             quantity_delta=-quantity,
             quantity_after=inv.quantity_available,
             note=note,
+            reference_type=reference_type,
+            reference_id=reference_id,
         )
         self.db.flush()
         return inv
+
+    # Non-customer outflow reasons (INVENTORY-OUTFLOW-001). Not SALE.
+    OUTFLOW_REASONS = frozenset({
+        "DAMAGE_WASTE",
+        "INTERNAL_USE",
+        "SHORTAGE_LOSS",
+        "OTHER",
+    })
+
+    def record_non_customer_outflow(
+        self,
+        product_id: str,
+        quantity: int,
+        *,
+        reason: str,
+        note: Optional[str] = None,
+        actor_id: Optional[str] = None,
+    ) -> dict:
+        """Decrease stock as ADJUSTMENT with structured OUTFLOW reference — never SALE.
+
+        No amount_usd / FX is set (no invented price). Sales reports use Sale table only.
+
+        Actor (subject_id): StockMovement has no dedicated actor column in the locked
+        schema. Actor is recorded in `note` as `actor={subject_id}` together with
+        `reason=...`. Trace keys remain reference_type / reference_id / created_at.
+        """
+        reason_key = (reason or "").strip().upper()
+        if reason_key not in self.OUTFLOW_REASONS:
+            raise ValueError(
+                f"invalid outflow reason: {reason}; allowed={sorted(self.OUTFLOW_REASONS)}"
+            )
+        ref_id = f"OUTFLOW-{uuid.uuid4().hex[:12]}"
+        ref_type = f"OUTFLOW_{reason_key}"
+        note_parts = [f"reason={reason_key}"]
+        if actor_id:
+            note_parts.append(f"actor={actor_id}")
+        if note:
+            note_parts.append(note.strip())
+        combined_note = " | ".join(note_parts)
+
+        inv = self.decrease_stock(
+            product_id,
+            quantity,
+            note=combined_note,
+            movement_type="ADJUSTMENT",
+            reference_type=ref_type,
+            reference_id=ref_id,
+        )
+        mov = (
+            self.db.query(StockMovement)
+            .filter(StockMovement.reference_id == ref_id)
+            .first()
+        )
+        return {
+            "inventory": inv,
+            "movement": mov,
+            "outflow_id": ref_id,
+            "reason": reason_key,
+        }
 
     def reserve_stock(self, product_id: str, quantity: int) -> bool:
         inventory = self.find_by_product(product_id)

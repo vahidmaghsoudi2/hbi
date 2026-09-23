@@ -5,6 +5,7 @@ import {
   listManageableProducts,
   pilotToken,
   pilotOperatorToken,
+  pilotAdminToken,
   customerIntake,
   createGuest,
   generateRecommendations,
@@ -64,7 +65,7 @@ export default function NewHomePage() {
   const [recDone, setRecDone] = useState(false);
   const [saleProductId, setSaleProductId] = useState("");
   const [selectedRecommendationId, setSelectedRecommendationId] = useState<string | null>(null);
-  const [saleQty, setSaleQty] = useState(1);
+  const [saleQty, setSaleQty] = useState("1");
   const [salePrice, setSalePrice] = useState<number | null>(null);
   const [saleStock, setSaleStock] = useState<number | null>(null);
   const [saleFxRate, setSaleFxRate] = useState<number | null>(null);
@@ -97,6 +98,10 @@ export default function NewHomePage() {
   useEffect(() => {
     void loadProducts();
   }, [loadProducts]);
+
+  useEffect(() => {
+    void ensureAdminSession();
+  }, []);
 
   const loadSellableProducts = useCallback(async () => {
     try {
@@ -197,6 +202,19 @@ export default function NewHomePage() {
   function go(panel: Panel) {
     setActive(panel);
     setError(null);
+  }
+
+  async function ensureAdminSession(): Promise<string | null> {
+    const cached = sessionStorage.getItem("hbi_admin_access_token");
+    if (cached) return cached;
+    try {
+      const pair = await pilotAdminToken();
+      sessionStorage.setItem("hbi_admin_access_token", pair.access_token);
+      sessionStorage.setItem("hbi_admin_refresh_token", pair.refresh_token);
+      return pair.access_token;
+    } catch {
+      return null;
+    }
   }
 
   async function ensureSession(displayName: string, concernsForGuest: string) {
@@ -434,9 +452,10 @@ export default function NewHomePage() {
     setError(null);
     if (!token || !customerId) return setError("ابتدا مشاوره را ثبت کنید.");
     if (!saleProductId.trim()) return setError("محصول را انتخاب کنید.");
-    if (saleQty < 1) return setError("تعداد نامعتبر است.");
+    const saleQuantity = Number(saleQty);
+    if (!Number.isInteger(saleQuantity) || saleQuantity < 1) return setError("تعداد نامعتبر است.");
     if (salePrice == null) return setError("قیمت فروش این محصول در دسترس نیست.");
-    if (saleStock != null && saleQty > saleStock) return setError(`موجودی قابل فروش: ${saleStock}`);
+    if (saleStock != null && saleQuantity > saleStock) return setError(`موجودی قابل فروش: ${saleStock}`);
     setSaleBusy(true);
     try {
       const fx = await getCurrentFx();
@@ -446,7 +465,7 @@ export default function NewHomePage() {
       const sale = await createSale(
         {
           customer_id: customerId,
-          items: [{ product_id: saleProductId.trim(), quantity: saleQty, ...(selectedRecommendationId ? { recommendation_id: selectedRecommendationId } : {}) }],
+          items: [{ product_id: saleProductId.trim(), quantity: saleQuantity, ...(selectedRecommendationId ? { recommendation_id: selectedRecommendationId } : {}) }],
           fx_rate_usd_to_irr: currentFxRate,
         },
         token
@@ -499,6 +518,9 @@ export default function NewHomePage() {
             ))}
             <Link to="/purchase" className="pro-nav-btn">
               خرید
+            </Link>
+            <Link to="/outflow" className="pro-nav-btn">
+              مخارج و ضایعات
             </Link>
             <Link to="/accounting" className="pro-nav-btn">
               حسابداری
@@ -829,7 +851,7 @@ export default function NewHomePage() {
                       <label className="pro-label" htmlFor="sale-qty">
                         تعداد
                       </label>
-                      <input id="sale-qty" className="pro-input" type="number" min={1} value={saleQty} onChange={(e) => setSaleQty(Number(e.target.value) || 1)} />
+                      <input id="sale-qty" className="pro-input" type="text" inputMode="numeric" pattern="[0-9]*" minLength={1} value={saleQty} onChange={(e) => setSaleQty(e.target.value.replace(/[^0-9]/g, ""))} />
                     </div>
                     <div>
                       <span className="pro-label">قیمت واحد (تومان)</span>
@@ -842,7 +864,7 @@ export default function NewHomePage() {
                     موجودی قابل فروش: {saleStock == null ? "در حال دریافت…" : saleStock.toLocaleString("fa-IR")}
                   </p>
                   <p className="pro-summary">
-                    مبلغ: <strong>{salePrice == null ? "—" : (saleQty * salePrice).toLocaleString("fa-IR")}</strong> تومان
+                    مبلغ: <strong>{salePrice == null ? "—" : (Number(saleQty) * salePrice).toLocaleString("fa-IR")}</strong> تومان
                   </p>
                 </fieldset>
                 <div className="pro-actions">

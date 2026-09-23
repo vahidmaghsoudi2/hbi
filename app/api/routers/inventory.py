@@ -40,6 +40,17 @@ class StockAdjustRequest(BaseModel):
     note: Optional[str] = None
 
 
+class StockOutflowRequest(BaseModel):
+    """Non-customer stock outflow (INVENTORY-OUTFLOW-001). Never creates a Sale."""
+    product_id: str
+    quantity: int = Field(..., gt=0)
+    reason: str = Field(
+        ...,
+        description="DAMAGE_WASTE | INTERNAL_USE | SHORTAGE_LOSS | OTHER",
+    )
+    note: Optional[str] = None
+
+
 class StockInRequest(BaseModel):
     product_id: str
     quantity: int = Field(..., gt=0)
@@ -216,6 +227,44 @@ async def adjust_stock(
         db.commit()
         db.refresh(inv)
         return _to_dict(inv)
+    except ValueError as e:
+        db.rollback()
+        raise HTTPException(status_code=422, detail=str(e))
+
+
+@router.post("/outflow")
+async def record_non_customer_outflow(
+    body: StockOutflowRequest,
+    db: Session = Depends(get_db),
+    authz: tuple = Depends(_require_inventory_admin),
+):
+    """INVENTORY-OUTFLOW-001: non-customer exit (damage/waste, internal, shortage, other).
+
+    Creates ADJUSTMENT StockMovement with OUTFLOW_* reference — never a Sale row.
+    Does not set amount_usd / FX (no invented valuation). Admin only.
+    """
+    subject_id, _roles = authz
+    svc = InventoryService(db)
+    try:
+        result = svc.record_non_customer_outflow(
+            body.product_id,
+            body.quantity,
+            reason=body.reason,
+            note=body.note,
+            actor_id=subject_id,
+        )
+        db.commit()
+        inv = result["inventory"]
+        mov = result["movement"]
+        db.refresh(inv)
+        if mov is not None:
+            db.refresh(mov)
+        return {
+            "outflow_id": result["outflow_id"],
+            "reason": result["reason"],
+            "inventory": _to_dict(inv),
+            "movement": _to_dict(mov) if mov is not None else None,
+        }
     except ValueError as e:
         db.rollback()
         raise HTTPException(status_code=422, detail=str(e))

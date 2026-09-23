@@ -119,3 +119,37 @@ def test_duplicate_product_id_returns_conflict(api_env):
     )
     assert second.status_code == 409, second.text
     assert "already exists" in second.json()["detail"]
+
+
+def test_pilot_admin_token_grants_admin_role(api_env):
+    client, db = api_env
+
+    response = client.post("/api/v1/auth/pilot-admin-token")
+    assert response.status_code == 200, response.text
+    token = response.json()["access_token"]
+
+    role = (
+        db.query(UserRole)
+        .filter(
+            UserRole.subject_id == "USR_PILOT_ADMIN",
+            UserRole.role == "Admin",
+        )
+        .first()
+    )
+    assert role is not None
+
+    protected = client.get(
+        "/api/v1/inventory/",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert protected.status_code == 200, protected.text
+
+
+def test_pilot_admin_token_disabled_in_production(api_env, monkeypatch):
+    client, _ = api_env
+    monkeypatch.setenv("HBI_ENV", "production")
+
+    response = client.post("/api/v1/auth/pilot-admin-token")
+
+    assert response.status_code == 403
+    assert "disabled in production" in response.json()["detail"]

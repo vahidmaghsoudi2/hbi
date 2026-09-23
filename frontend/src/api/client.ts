@@ -65,6 +65,13 @@ export function pilotOperatorToken(): Promise<TokenPair> {
   });
 }
 
+/** Dev/Pilot only — single Admin session for the local HBI pilot. */
+export function pilotAdminToken(): Promise<TokenPair> {
+  return request<TokenPair>("/auth/pilot-admin-token", {
+    method: "POST",
+  });
+}
+
 /** Requires auth; body must use case_type, NOT concerns */
 export function createCase(
   body: CaseCreateRequest,
@@ -363,6 +370,24 @@ export function getLowStockReport(
     {},
     adminToken
   );
+}
+
+/** POST /api/v1/inventory/outflow — Admin non-customer exit (INVENTORY-OUTFLOW-001). */
+export function recordInventoryOutflow(
+  body: {
+    product_id: string;
+    quantity: number;
+    reason: "DAMAGE_WASTE" | "INTERNAL_USE" | "SHORTAGE_LOSS" | "OTHER";
+    note?: string;
+  },
+  adminToken: string
+): Promise<{
+  outflow_id: string;
+  reason: string;
+  inventory: { product_id: string; quantity_available: number };
+  movement: StockMovementDTO | null;
+}> {
+  return request(`/inventory/outflow`, { method: "POST", body: JSON.stringify(body) }, adminToken);
 }
 
 export function getStockMovements(
