@@ -40,7 +40,7 @@ export default function OutflowPage() {
       setErr("شناسه محصول الزامی است.");
       return;
     }
-    if (quantity < 1) {
+    const quantityValue = Number(quantity);\n    if (!Number.isInteger(quantityValue) || quantityValue < 1) {
       setErr("تعداد باید حداقل ۱ باشد.");
       return;
     }
@@ -49,7 +49,7 @@ export default function OutflowPage() {
       const result = await recordInventoryOutflow(
         {
           product_id: productId.trim(),
-          quantity,
+          quantity: quantityValue,
           reason,
           note: note.trim() || undefined,
         },
@@ -109,7 +109,7 @@ export default function OutflowPage() {
             min={1}
             value={quantity}
             disabled={!hasAdmin}
-            onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
+            onChange={(e) => setQuantity(e.target.value.replace(/[^0-9]/g, ""))}
           />
         </label>
         <label>
