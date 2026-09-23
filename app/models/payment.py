@@ -1,5 +1,5 @@
 """Accounting V1 — Payment (data model)."""
-from sqlalchemy import CheckConstraint, Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import CheckConstraint, Column, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.models.base import Base
@@ -17,6 +17,8 @@ class Payment(Base):
     amount_toman = Column(Integer, nullable=True)
     paid_at = Column(DateTime, server_default=func.current_timestamp())
     note = Column(String, nullable=True)
+    # Optional client-supplied key for durable payment idempotency (Accounting baseline §5).
+    idempotency_key = Column(String, nullable=True, index=True)
     created_at = Column(DateTime, server_default=func.current_timestamp())
 
     __table_args__ = (
@@ -24,6 +26,7 @@ class Payment(Base):
             "method IN ('CASH', 'CARD', 'TRANSFER', 'OTHER')",
             name="payment_method",
         ),
+        UniqueConstraint("idempotency_key", name="uq_payment_idempotency_key"),
     )
 
     sale = relationship("Sale", back_populates="payments")

@@ -18,6 +18,7 @@ from app.models.sale_item import SaleItem
 from app.models.sale_return import SaleReturn
 from app.models.stock_movement import StockMovement
 from app.services.stock_in_service import irr_to_toman, usd_to_irr
+from app.services.currency_fx import finalize_irr_toman
 
 
 class ReturnService:
@@ -122,8 +123,8 @@ class ReturnService:
             )
 
         line_usd = unit_usd * quantity
-        line_irr = usd_to_irr(line_usd, fx_rate)
-        line_toman = irr_to_toman(line_irr)
+        line_irr_raw = usd_to_irr(line_usd, fx_rate)
+        line_irr, line_toman = finalize_irr_toman(line_irr_raw)
 
         try:
             before = inv.quantity_available
@@ -139,8 +140,8 @@ class ReturnService:
                 quantity=quantity,
                 amount_usd=line_usd,
                 fx_rate_usd_to_irr=fx_rate,
-                amount_irr=line_irr,
-                amount_toman=int(round(line_toman)),
+                amount_irr=float(line_irr),
+                amount_toman=line_toman,
                 reason=reason,
             )
             self.db.add(ret)
@@ -154,8 +155,8 @@ class ReturnService:
                 quantity_after=after,
                 amount_usd=line_usd,
                 fx_rate_usd_to_irr=fx_rate,
-                amount_irr=line_irr,
-                amount_toman=line_toman,
+                amount_irr=float(line_irr),
+                amount_toman=float(line_toman),
                 reference_type="SALE_RETURN",
                 reference_id=ret.return_id,
                 note=f"return of sale {sale_id}",

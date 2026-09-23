@@ -13,7 +13,9 @@ from app.core.auth import (
 )
 from app.core.deps import get_db
 from app.models.customer import Customer
-from app.models.user_role import UserRole, ROLE_EDITOR
+from app.models.user_role import UserRole, ROLE_EDITOR, ROLE_ADMIN
+from app.models.admin_credential import AdminCredential
+from app.services.admin_auth_service import verify_admin_password
 from app.core.audit import audit_event
 from app.core.brute_force import clear_failures, is_locked, make_key, record_failure
 
@@ -24,11 +26,97 @@ class PilotTokenRequest(BaseModel):
     customer_id: str
 
 
+class AdminLoginRequest(BaseModel):
+    username: str
+    password: str
+
+
 @router.post("/login", response_model=TokenPair)
-async def login():
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Auth pending PO decision (POD-001: OTP/Magic Link). Schema v1.1 has no password field.",
+async def login(
+    request: AdminLoginRequest,
+    http_request: Request,
+    db: Session = Depends(get_db),
+):
+    forwarded = http_request.headers.get("x-forwarded-for")
+    client_ip = (
+        forwarded.split(",")[0].strip()
+        if forwarded
+        else (http_request.client.host if http_request.client else "unknown")
+    )
+    bf_key = make_key(client_ip, request.username.strip().lower())
+
+    remaining = is_locked(bf_key)
+    if remaining is not None:
+        audit_event(
+            "admin_login",
+            customer_id=request.username,
+            path="/api/v1/auth/login",
+            outcome="denied",
+            detail="brute_force_lockout",
+            extra={"retry_after": remaining, "client_ip": client_ip},
+        )
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Too many failed attempts. Retry after {remaining}s.",
+            headers={"Retry-After": str(remaining)},
+        )
+
+    credential = db.query(AdminCredential).filter(
+        AdminCredential.username == request.username.strip()
+    ).first()
+    if credential is None or not verify_admin_password(credential, request.password):
+        lockout = record_failure(bf_key)
+        audit_event(
+            "admin_login",
+            customer_id=request.username,
+            path="/api/v1/auth/login",
+            outcome="denied",
+            detail="invalid_credentials",
+            extra={"client_ip": client_ip, "lockout": lockout},
+        )
+        if lockout is not None:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Too many failed attempts. Retry after {lockout}s.",
+                headers={"Retry-After": str(lockout)},
+            )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    role = db.query(UserRole).filter(
+        UserRole.subject_id == credential.subject_id,
+        UserRole.role == ROLE_ADMIN,
+    ).first()
+    if role is None:
+        audit_event(
+            "admin_login",
+            customer_id=credential.subject_id,
+            path="/api/v1/auth/login",
+            outcome="denied",
+            detail="admin_role_missing",
+            extra={"client_ip": client_ip},
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin role is not assigned",
+        )
+
+    clear_failures(bf_key)
+    payload = {"sub": credential.subject_id}
+    audit_event(
+        "admin_login",
+        customer_id=credential.subject_id,
+        path="/api/v1/auth/login",
+        outcome="ok",
+        extra={"client_ip": client_ip, "role": ROLE_ADMIN},
+    )
+    return TokenPair(
+        access_token=create_access_token(payload),
+        refresh_token=create_refresh_token(payload),
+        token_type="bearer",
     )
 
 

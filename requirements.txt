@@ -10,4 +10,5 @@ polars==1.43.0
 opencv-python==4.10.0.84
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
+bcrypt==4.3.0
 python-multipart==0.0.20

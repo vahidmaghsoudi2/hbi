@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_customer_id
+from app.core.authorization import require_any_role
+from app.models.user_role import ROLE_ADMIN
 from app.services.payment_service import PaymentService
 
 router = APIRouter()
@@ -29,23 +31,27 @@ class PaymentCreateRequest(BaseModel):
     amount_usd: float = Field(..., gt=0)
     fx_rate_usd_to_irr: float = Field(..., gt=0)
     note: Optional[str] = None
+    idempotency_key: Optional[str] = Field(None, description="Optional durable payment idempotency key")
 
 
 @router.post("/")
 async def record_payment(
     body: PaymentCreateRequest,
     db: Session = Depends(get_db),
-    customer_id: str = Depends(get_current_customer_id),
+    admin=Depends(require_any_role(ROLE_ADMIN)),
 ):
+    # V1: ADMIN owns payment recording (buyer ownership checked only if customer_id passed).
+    subject_id, _roles = admin
     svc = PaymentService(db)
     try:
         payment = svc.record_payment(
             sale_id=body.sale_id,
-            customer_id=customer_id,
+            customer_id=None,
             method=body.method,
             amount_usd=body.amount_usd,
             fx_rate_usd_to_irr=body.fx_rate_usd_to_irr,
-            note=body.note,
+            note=(body.note or "") + f" | actor={subject_id}",
+            idempotency_key=body.idempotency_key,
         )
         db.commit()
         db.refresh(payment)

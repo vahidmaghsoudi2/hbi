@@ -20,9 +20,12 @@ class TestHealthCheck:
 
 
 class TestAuthEndpoints:
-    def test_login_returns_501(self, client):
-        response = client.post("/api/v1/auth/login", data={"username": "test", "password": "test"})
-        assert response.status_code == 501
+    def test_login_rejects_unknown_admin_credentials(self, client):
+        response = client.post("/api/v1/auth/login", json={
+            "username": "unknown-admin",
+            "password": "wrong-password",
+        })
+        assert response.status_code == 401
 
     def test_refresh_with_invalid_token(self, client):
         response = client.post("/api/v1/auth/refresh", json={"refresh_token": "invalid"})
