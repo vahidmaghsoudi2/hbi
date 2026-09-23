@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import NewHomePage from "./pages/NewHomePage";
 import CatalogPage from "./pages/CatalogPage";
@@ -7,7 +8,7 @@ import AccountingHomePage from "./pages/AccountingHomePage";
 import PurchasePage from "./pages/PurchasePage";
 import AdminLoginPage from "./pages/AdminLoginPage";
 
-function AdminGate({ children }: { children: JSX.Element }) {
+function AdminGate({ children }: { children: ReactNode }) {
   const token = sessionStorage.getItem("hbi_admin_access_token");
   return token ? children : <Navigate to="/login" replace />;
 }
