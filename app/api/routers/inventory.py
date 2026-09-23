@@ -19,6 +19,7 @@ from app.services.currency_fx import usd_to_irr, irr_to_toman
 router = APIRouter()
 
 _require_inventory_admin = require_any_role(ROLE_ADMIN)
+# Home Sales actor: Operator (Editor) or Admin — never bare customer JWT.
 _require_inventory_sell_read = require_any_role(ROLE_ADMIN, ROLE_EDITOR)
 
 
@@ -78,9 +79,15 @@ async def list_stock_movements(
     limit: int = Query(100, ge=1, le=500),
     offset: int = Query(0, ge=0),
 ):
+    """Phase 06 — Stock movement ledger list with optional filters."""
     svc = StockMovementService(db)
     try:
-        rows = svc.list_ledger(product_id=product_id, movement_type=movement_type, limit=limit, offset=offset)
+        rows = svc.list_ledger(
+            product_id=product_id,
+            movement_type=movement_type,
+            limit=limit,
+            offset=offset,
+        )
         return [_to_dict(r) for r in rows]
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
@@ -110,6 +117,7 @@ async def set_sale_price(
     db: Session = Depends(get_db),
     _authz: tuple = Depends(_require_inventory_admin),
 ):
+    """Set the authoritative Inventory.sale_price_usd for sales."""
     svc = InventoryService(db)
     try:
         inv = svc.set_sale_price_usd(product_id, body.sale_price_usd)
@@ -127,6 +135,12 @@ async def get_inventory_by_product(
     db: Session = Depends(get_db),
     _authz: tuple = Depends(_require_inventory_sell_read),
 ):
+    """Read-only sell support for Home Sales.
+
+    Operational model: Operator/Admin acts on behalf of a selected customer.
+    Bare customer JWT is denied (403). List/ledger/mutations stay Admin-only.
+    Not public: Bearer + role required.
+    """
     facade = InventoryFacade(db)
     try:
         inv = facade.get_by_product(product_id)
@@ -137,7 +151,8 @@ async def get_inventory_by_product(
         data["current_sale_price_irr"] = usd_to_irr(usd, fx) if usd is not None and fx is not None else None
         data["current_sale_price_toman"] = (
             int(round(irr_to_toman(data["current_sale_price_irr"])))
-            if data["current_sale_price_irr"] is not None else None
+            if data["current_sale_price_irr"] is not None
+            else None
         )
         return data
     except NotFoundError as e:
@@ -153,8 +168,12 @@ async def get_availability(
     svc = InventoryService(db)
     sellable = svc.sellable_quantity(product_id)
     available = svc.is_available(product_id, 1)
-    return {"product_id": product_id, "available": available, "sellable_quantity": sellable,
-            "status": "AVAILABLE" if available else "OUT_OF_STOCK"}
+    return {
+        "product_id": product_id,
+        "available": available,
+        "sellable_quantity": sellable,
+        "status": "AVAILABLE" if available else "OUT_OF_STOCK",
+    }
 
 
 @router.post("/stock-in")
@@ -163,18 +182,28 @@ async def stock_in(
     db: Session = Depends(get_db),
     _authz: tuple = Depends(_require_inventory_admin),
 ):
+    """Phase 07 — Stock-In with USD price + FX snapshot + STOCK_IN movement."""
     svc = StockInService(db)
     try:
-        result = svc.stock_in(product_id=body.product_id, quantity=body.quantity,
-                              purchase_price_usd=body.purchase_price_usd,
-                              fx_rate_usd_to_irr=body.fx_rate_usd_to_irr, note=body.note,
-                              reference_type=body.reference_type, reference_id=body.reference_id)
+        result = svc.stock_in(
+            product_id=body.product_id,
+            quantity=body.quantity,
+            purchase_price_usd=body.purchase_price_usd,
+            fx_rate_usd_to_irr=body.fx_rate_usd_to_irr,
+            note=body.note,
+            reference_type=body.reference_type,
+            reference_id=body.reference_id,
+        )
         db.commit()
         inv = result["inventory"]
         mov = result["movement"]
         db.refresh(inv)
         db.refresh(mov)
-        return {"inventory": _to_dict(inv), "movement": _to_dict(mov), "before_quantity": result["before_quantity"]}
+        return {
+            "inventory": _to_dict(inv),
+            "movement": _to_dict(mov),
+            "before_quantity": result["before_quantity"],
+        }
     except ValueError as e:
         db.rollback()
         raise HTTPException(status_code=422, detail=str(e))
@@ -186,6 +215,7 @@ async def adjust_stock(
     db: Session = Depends(get_db),
     _authz: tuple = Depends(_require_inventory_admin),
 ):
+    """Authorized inventory increase/decrease with StockMovement trace."""
     svc = InventoryService(db)
     direction = body.direction.strip().lower()
     try:
