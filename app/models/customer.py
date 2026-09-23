@@ -26,4 +26,5 @@ class Customer(Base):
     __table_args__ = (CheckConstraint("consent_to_store_data IN (0, 1)", name="ck_customer_consent_to_store_data"),)
 
     cases = relationship("Case", back_populates="customer")
+    profile_facts = relationship("ProfileFact", back_populates="customer")
     sales = relationship("Sale", back_populates="customer")
