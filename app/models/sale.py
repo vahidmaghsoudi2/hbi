@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.models.base import Base
@@ -11,8 +11,12 @@ class Sale(Base):
     total_amount_usd = Column(Float, nullable=True)
     fx_rate_usd_to_irr = Column(Float, nullable=True)  # IRR per 1 USD snapshot
     total_amount_irr = Column(Float, nullable=True)
+    # Optional client-supplied key for durable sale idempotency (Accounting baseline §5).
+    idempotency_key = Column(String, nullable=True, index=True)
     created_at = Column(DateTime, server_default=func.current_timestamp())
-    __table_args__ = ()
+    __table_args__ = (
+        UniqueConstraint("idempotency_key", name="uq_sale_idempotency_key"),
+    )
     customer = relationship("Customer", back_populates="sales")
     sale_items = relationship("SaleItem", back_populates="sale", cascade="all, delete-orphan")
     payments = relationship("Payment", back_populates="sale")
