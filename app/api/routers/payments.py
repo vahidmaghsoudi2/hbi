@@ -29,6 +29,7 @@ class PaymentCreateRequest(BaseModel):
     amount_usd: float = Field(..., gt=0)
     fx_rate_usd_to_irr: float = Field(..., gt=0)
     note: Optional[str] = None
+    idempotency_key: Optional[str] = Field(None, description="Optional durable payment idempotency key")
 
 
 @router.post("/")
@@ -46,6 +47,7 @@ async def record_payment(
             amount_usd=body.amount_usd,
             fx_rate_usd_to_irr=body.fx_rate_usd_to_irr,
             note=body.note,
+            idempotency_key=body.idempotency_key,
         )
         db.commit()
         db.refresh(payment)
