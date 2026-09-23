@@ -5,6 +5,7 @@ import {
   listManageableProducts,
   pilotToken,
   pilotOperatorToken,
+  pilotAdminToken,
   customerIntake,
   createGuest,
   generateRecommendations,
@@ -97,6 +98,10 @@ export default function NewHomePage() {
   useEffect(() => {
     void loadProducts();
   }, [loadProducts]);
+
+  useEffect(() => {
+    void ensureAdminSession();
+  }, []);
 
   const loadSellableProducts = useCallback(async () => {
     try {
@@ -197,6 +202,19 @@ export default function NewHomePage() {
   function go(panel: Panel) {
     setActive(panel);
     setError(null);
+  }
+
+  async function ensureAdminSession(): Promise<string | null> {
+    const cached = sessionStorage.getItem("hbi_admin_access_token");
+    if (cached) return cached;
+    try {
+      const pair = await pilotAdminToken();
+      sessionStorage.setItem("hbi_admin_access_token", pair.access_token);
+      sessionStorage.setItem("hbi_admin_refresh_token", pair.refresh_token);
+      return pair.access_token;
+    } catch {
+      return null;
+    }
   }
 
   async function ensureSession(displayName: string, concernsForGuest: string) {
