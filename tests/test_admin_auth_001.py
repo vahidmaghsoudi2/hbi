@@ -3,7 +3,7 @@ import os
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.database import SessionLocal
+from app.database import SessionLocal, init_db
 from app.models.admin_credential import AdminCredential
 from app.models.user_role import UserRole, ROLE_ADMIN
 from app.services.admin_auth_service import (
@@ -15,6 +15,7 @@ from app.core.brute_force import clear_failures
 
 
 def provision_test_admin(username: str, subject: str, password: str = "correct-password"):
+    init_db()
     db = SessionLocal()
     try:
         credential = db.query(AdminCredential).filter(
@@ -97,6 +98,7 @@ def test_admin_login_brute_force_lockout():
 
 
 def test_admin_login_requires_admin_role():
+    init_db()
     os.environ["HBI_ENV"] = "test"
     username = "roleless-admin"
     subject = "USR_ROLELESS_ADMIN"
@@ -125,6 +127,7 @@ def test_admin_login_requires_admin_role():
 
 
 def test_admin_bootstrap_stores_hash_and_assigns_role(monkeypatch):
+    init_db()
     monkeypatch.setenv("HBI_ADMIN_USERNAME", "bootstrap-admin")
     monkeypatch.setenv("HBI_ADMIN_PASSWORD", "bootstrap-secret")
     monkeypatch.setenv("HBI_ADMIN_SUBJECT", "USR_BOOTSTRAP_ADMIN")
