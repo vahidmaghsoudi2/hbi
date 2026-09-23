@@ -59,14 +59,27 @@ def test_customer_jwt_cannot_read_product_inventory(client, db_session):
     assert r.status_code == 403, r.text
 
 
-def test_operator_editor_reads_inventory_then_customer_sale(client, db_session):
-    """Operator (Editor) reads price/stock; sale still under selected customer token."""
+def test_operator_editor_reads_inventory_then_admin_sale(client, db_session):
+    """Operator (Editor) reads price/stock; V1 PO Contract: ADMIN owns sale write."""
     _seed(db_session)
     _grant(db_session, "OP-EDITOR", ROLE_EDITOR)
+    _grant(db_session, "USR_ADMIN", ROLE_ADMIN)
     inv = client.get("/api/v1/inventory/product/P-SALE", headers=_auth("OP-EDITOR"))
     assert inv.status_code == 200, inv.text
     assert inv.json()["sale_price_toman"] == 1_200_000
     assert inv.json()["quantity_available"] == 3
+
+    # Customer token must not create sale (ADMIN-only financial mutation).
+    denied = client.post(
+        "/api/v1/sales/",
+        json={
+            "customer_id": "C-SALE",
+            "items": [{"product_id": "P-SALE", "quantity": 1}],
+            "fx_rate_usd_to_irr": 1_000_000.0,
+        },
+        headers=_auth("C-SALE"),
+    )
+    assert denied.status_code == 403, denied.text
 
     sale = client.post(
         "/api/v1/sales/",
@@ -75,7 +88,7 @@ def test_operator_editor_reads_inventory_then_customer_sale(client, db_session):
             "items": [{"product_id": "P-SALE", "quantity": 1}],
             "fx_rate_usd_to_irr": 1_000_000.0,
         },
-        headers=_auth("C-SALE"),
+        headers=_auth("USR_ADMIN"),
     )
     assert sale.status_code == 201, sale.text
     inv2 = client.get("/api/v1/inventory/product/P-SALE", headers=_auth("OP-EDITOR"))
