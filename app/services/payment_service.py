@@ -20,6 +20,7 @@ from sqlalchemy.orm import Session
 from app.models.payment import Payment
 from app.models.sale import Sale
 from app.services.stock_in_service import irr_to_toman, usd_to_irr
+from app.services.currency_fx import finalize_irr_toman
 
 VALID_METHODS = frozenset({"CASH", "CARD", "TRANSFER", "OTHER"})
 _USD_EPS = 1e-9
@@ -110,6 +111,8 @@ class PaymentService:
             raise ValueError(f"Sale {sale_id} not found")
         if customer_id is not None and sale.customer_id != customer_id:
             raise PermissionError("Access denied")
+        if getattr(sale, "document_status", "ACTIVE") == "VOIDED":
+            raise ValueError(f"Sale {sale_id} is VOIDED; payment not allowed")
 
         sale_total_usd = float(sale.total_amount_usd or 0.0)
         already_paid = self._paid_usd_sum(sale_id)
@@ -124,8 +127,8 @@ class PaymentService:
         prior_toman = sale.total_amount_toman
         prior_fx = sale.fx_rate_usd_to_irr
 
-        amount_irr = usd_to_irr(amount_usd, fx_rate)
-        amount_toman = irr_to_toman(amount_irr)
+        amount_irr_raw = usd_to_irr(amount_usd, fx_rate)
+        amount_irr, amount_toman = finalize_irr_toman(amount_irr_raw)
 
         try:
             payment = Payment(
@@ -134,8 +137,8 @@ class PaymentService:
                 method=method_u,
                 amount_usd=amount_usd,
                 fx_rate_usd_to_irr=fx_rate,
-                amount_irr=amount_irr,
-                amount_toman=int(round(amount_toman)),
+                amount_irr=float(amount_irr),
+                amount_toman=amount_toman,
                 note=note,
                 idempotency_key=key,
             )

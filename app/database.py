@@ -59,6 +59,8 @@ def _ensure_accounting_control_columns():
             cols = {c["name"] for c in inspector.get_columns("Sale")}
             if "idempotency_key" not in cols:
                 conn.execute(text('ALTER TABLE "Sale" ADD COLUMN idempotency_key TEXT'))
+            if "document_status" not in cols:
+                conn.execute(text('ALTER TABLE "Sale" ADD COLUMN document_status TEXT DEFAULT \'ACTIVE\''))
 
 
 def init_db():
