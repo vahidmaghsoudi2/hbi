@@ -15,7 +15,7 @@ export default function PurchasePage() {
   );
   const [products, setProducts] = useState<ProductDTO[]>([]);
   const [productId, setProductId] = useState("");
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState("1");
   const [purchasePriceUsd, setPurchasePriceUsd] = useState("");
   const [fxRate, setFxRate] = useState<number | null>(null);
   const [note, setNote] = useState("");
