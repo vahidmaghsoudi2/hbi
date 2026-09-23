@@ -101,7 +101,7 @@ export default function PurchasePage() {
       );
       setResult(response);
       setStatus("خرید/ورود کالا با موفقیت ثبت شد.");
-      setQuantity(1);
+      setQuantity("1");
       setPurchasePriceUsd("");
       setNote("");
       setReferenceId("");
@@ -188,7 +188,7 @@ export default function PurchasePage() {
                     min="1"
                     step="1"
                     value={quantity}
-                    onChange={(e) => setQuantity(Number(e.target.value))}
+                    onChange={(e) => setQuantity(e.target.value.replace(/[^0-9]/g, ""))}
                     disabled={!adminToken || loading}
                   />
                 </div>
