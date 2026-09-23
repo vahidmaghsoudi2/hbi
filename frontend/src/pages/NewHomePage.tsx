@@ -65,7 +65,7 @@ export default function NewHomePage() {
   const [recDone, setRecDone] = useState(false);
   const [saleProductId, setSaleProductId] = useState("");
   const [selectedRecommendationId, setSelectedRecommendationId] = useState<string | null>(null);
-  const [saleQty, setSaleQty] = useState(1);
+  const [saleQty, setSaleQty] = useState("1");
   const [salePrice, setSalePrice] = useState<number | null>(null);
   const [saleStock, setSaleStock] = useState<number | null>(null);
   const [saleFxRate, setSaleFxRate] = useState<number | null>(null);
