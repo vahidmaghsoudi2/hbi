@@ -13,6 +13,7 @@ from app.interface.facades import CustomerFacade
 from app.services.customer_service import CustomerService
 from app.services.case_service import CaseService
 from app.services.feedback_service import FeedbackService
+from app.models.case import Case
 
 
 router = APIRouter()
