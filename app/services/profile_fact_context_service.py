@@ -61,6 +61,9 @@ class ProfileFactContextService:
 
         legacy = {
             "skin_profile": getattr(customer, "skin_profile", None),
+            "hair_profile": getattr(customer, "hair_profile", None),
+            "scalp_profile": getattr(customer, "scalp_profile", None),
+            "age_range": getattr(customer, "age_range", None),
             "concerns": getattr(customer, "concerns", None),
         }
 
@@ -152,9 +155,38 @@ class ProfileFactContextService:
                     value=legacy[key],
                 )
 
+        for key, value in legacy.items():
+            if key not in CONTEXT_KEYS and self._present(value):
+                profile[key] = value
+
         for key, value in current.items():
             if key not in CONTEXT_KEYS and self._present(value):
                 profile[key] = value
+
+        # Preserve the existing recommendation input surface: skin/hair/scalp
+        # profile dimensions are surfaced through concerns without changing
+        # the frozen scoring/eligibility implementation.
+        recommendation_parts = [profile.get("concerns")]
+        for key, prefix in (("skin_profile", "پوست"), ("skin_type", "پوست")):
+            if self._present(profile.get(key)):
+                values = profile[key] if isinstance(profile[key], list) else str(profile[key]).split(",")
+                recommendation_parts.append(", ".join(
+                    f"{prefix} {str(item).strip()}" for item in values if str(item).strip()
+                ))
+        for key in ("hair_profile", "scalp_profile"):
+            if self._present(profile.get(key)):
+                recommendation_parts.append(str(profile[key]))
+        parts = []
+        seen = set()
+        for value in recommendation_parts:
+            if value is None:
+                continue
+            for item in (value if isinstance(value, list) else str(value).split(",")):
+                item = str(item).strip()
+                if item and item not in seen:
+                    seen.add(item)
+                    parts.append(item)
+        profile["concerns"] = ", ".join(parts)
 
         profile["customer_id"] = case.customer_id
         profile["_profile_fact_context"] = trace
