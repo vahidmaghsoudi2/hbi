@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from app.core.auth import create_access_token
 from app.models.product_mutation_log import ProductMutationLog
+from app.models.profile_fact import ProfileFact
 from app.services.customer_service import CustomerService
 
 
@@ -139,7 +140,7 @@ def test_profile_fact_supersede_versions_and_audits(client, db_session):
     assert replacement_body["supersedes_fact_id"] == first_id
 
     db_session.expire_all()
-    first_row = db_session.get(__import__("app.models.profile_fact", fromlist=["ProfileFact"]).ProfileFact, first_id)
+    first_row = db_session.get(ProfileFact, first_id)
     assert first_row.status == "SUPERSEDED"
     logs = (
         db_session.query(ProductMutationLog)
