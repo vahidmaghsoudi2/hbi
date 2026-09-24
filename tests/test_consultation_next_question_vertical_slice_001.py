@@ -156,6 +156,13 @@ def test_answer_is_captured_in_case_and_not_profilefact(client, db_session):
         attribute_key=FACTOR_KEY,
     ).count() == 0
 
+    follow_up = client.get(
+        f"/api/v1/recommendations/next-question/{case.case_id}",
+        headers=headers,
+    )
+    assert follow_up.status_code == 200
+    assert follow_up.json()["status"] == "NO_QUESTION"
+
 
 def test_answer_a_and_b_rerun_existing_recommendation_with_observable_effect(client, db_session):
     customer, case = _setup_skin_case(db_session)
