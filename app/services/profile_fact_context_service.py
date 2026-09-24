@@ -64,15 +64,22 @@ class ProfileFactContextService:
             "concerns": getattr(customer, "concerns", None),
         }
 
-        facts = (
-            self.db.query(ProfileFact)
-            .filter(
-                ProfileFact.customer_id == case.customer_id,
-                ProfileFact.attribute_key.in_(CONTEXT_KEYS),
+        facts = []
+        if customer.consent_to_store_data == 1:
+            facts = (
+                self.db.query(ProfileFact)
+                .filter(
+                    ProfileFact.customer_id == case.customer_id,
+                    ProfileFact.attribute_key.in_(CONTEXT_KEYS),
+                )
+                .order_by(ProfileFact.created_at.asc(), ProfileFact.profile_fact_id.asc())
+                .all()
             )
-            .order_by(ProfileFact.created_at.asc(), ProfileFact.profile_fact_id.asc())
-            .all()
-        )
+        else:
+            trace["excluded"].append({
+                "customer_id": case.customer_id,
+                "reason": "customer_consent_not_active",
+            })
         active_by_key: Dict[str, list[ProfileFact]] = {key: [] for key in CONTEXT_KEYS}
         for fact in facts:
             if fact.status != TRUSTED_STATUS:
