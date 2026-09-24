@@ -259,8 +259,9 @@ async def revoke_profile_fact(
             actor_id=customer_id,
             reason=data.reason,
         )
+        result = _profile_fact_public(fact)
         db.commit()
-        return _to_dict(fact)
+        return result
     except ValueError as e:
         message = str(e)
         if message == "ProfileFact not found":
