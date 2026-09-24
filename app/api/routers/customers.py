@@ -8,9 +8,11 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_customer_id
+from app.core.audit import audit_event
 from app.interface.facades import CustomerFacade
 from app.services.customer_service import CustomerService
 from app.services.case_service import CaseService
+from app.services.feedback_service import FeedbackService
 
 
 router = APIRouter()
@@ -461,3 +463,90 @@ async def find_customer_by_mobile(
         return _customer_public(raw)
 
     return _to_dict(customer)
+
+
+class CustomerFeedbackRequest(BaseModel):
+    case_id: str
+    recommendation_id: str
+    outcome: Optional[str] = None
+    rating: Optional[str] = None
+    comment: Optional[str] = None
+
+
+def _feedback_public(feedback) -> Dict[str, Any]:
+    return {
+        "feedback_id": feedback.feedback_id,
+        "case_id": feedback.case_id,
+        "recommendation_id": feedback.recommendation_id,
+        "source": feedback.source,
+        "outcome": feedback.outcome,
+        "rating": feedback.rating,
+        "comment": feedback.comment,
+        "follow_up_at": feedback.follow_up_at.isoformat() if feedback.follow_up_at else None,
+        "created_at": feedback.created_at.isoformat() if feedback.created_at else None,
+    }
+
+
+@router.post("/feedback", status_code=status.HTTP_201_CREATED)
+async def create_customer_feedback(
+    data: CustomerFeedbackRequest,
+    db: Session = Depends(get_db),
+    customer_id: str = Depends(get_current_customer_id),
+):
+    """Record an authenticated customer's response to an existing Recommendation."""
+    case = db.get(Case, data.case_id)
+    if case is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Case not found")
+    if case.customer_id != customer_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+
+    svc = FeedbackService(db)
+    try:
+        feedback = svc.create_feedback(
+            case_id=data.case_id,
+            source="CUSTOMER",
+            outcome=data.outcome,
+            rating=data.rating,
+            comment=data.comment,
+            recommendation_id=data.recommendation_id,
+        )
+        db.commit()
+    except ValueError as exc:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+
+    audit_event(
+        "customer_feedback_created",
+        customer_id=customer_id,
+        path="/api/v1/customers/feedback",
+        outcome="ok",
+        detail=feedback.feedback_id,
+        extra={
+            "target": {
+                "case_id": feedback.case_id,
+                "recommendation_id": feedback.recommendation_id,
+            },
+            "new_state": {
+                "source": feedback.source,
+                "outcome": feedback.outcome,
+            },
+        },
+    )
+    return _feedback_public(feedback)
+
+
+@router.get("/feedback/case/{case_id}")
+async def list_customer_feedback(
+    case_id: str,
+    db: Session = Depends(get_db),
+    customer_id: str = Depends(get_current_customer_id),
+) -> List[Dict[str, Any]]:
+    """Retrieve customer responses only for a Case owned by the authenticated customer."""
+    case = db.get(Case, case_id)
+    if case is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Case not found")
+    if case.customer_id != customer_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+
+    feedbacks = FeedbackService(db).list_by_case(case_id)
+    return [_feedback_public(feedback) for feedback in feedbacks if feedback.source == "CUSTOMER"]
