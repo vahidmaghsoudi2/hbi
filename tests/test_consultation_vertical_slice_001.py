@@ -492,3 +492,34 @@ def test_current_consultation_trace_does_not_claim_profile_fact_usage(client, db
     )
     assert response.status_code == 200
     assert response.json() == []
+
+
+def test_profile_fact_read_respects_withdrawn_consent(client, db_session):
+    from app.models.customer import Customer
+    from app.models.profile_fact import ProfileFact
+    from app.services.profile_fact_context_service import ProfileFactContextService
+
+    customer = db_session.get(Customer, "CUST-CVS-1")
+    db_session.add(
+        ProfileFact(
+            profile_fact_id="PF-VS002-CONSENT-WITHDRAWN",
+            customer_id=customer.customer_id,
+            attribute_key="concerns",
+            value="ضدآفتاب",
+            value_state="KNOWN",
+            provenance="CUSTOMER",
+            status="ACTIVE",
+        )
+    )
+    customer.consent_to_store_data = 0
+    case = __import__("app.models.case", fromlist=["Case"]).Case(
+        case_id="CASE-VS002-CONSENT-WITHDRAWN",
+        customer_id=customer.customer_id,
+        case_type="OPEN",
+    )
+    db_session.add(case)
+    db_session.commit()
+
+    profile = ProfileFactContextService(db_session).build(case, {})
+    assert "concerns" not in profile
+    assert profile["_profile_fact_context"]["excluded"][-1]["reason"] == "customer_consent_not_active"
