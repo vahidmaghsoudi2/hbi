@@ -1,6 +1,9 @@
 """API Vertical Slice 001 for the explicit ProfileFact durable write boundary."""
 from __future__ import annotations
 
+import pytest
+from sqlalchemy import text
+
 from app.core.auth import create_access_token
 from app.models.product_mutation_log import ProductMutationLog
 from app.models.profile_fact import ProfileFact
@@ -9,6 +12,13 @@ from app.services.customer_service import CustomerService
 
 def _auth(customer_id: str) -> dict:
     return {"Authorization": f"Bearer {create_access_token({'sub': customer_id})}"}
+
+
+@pytest.fixture(autouse=True)
+def _disable_sqlite_fk_before_shared_teardown(db_session):
+    """The shared SQLite fixture drops self-referential ProfileFact after each test."""
+    yield
+    db_session.execute(text("PRAGMA foreign_keys=OFF"))
 
 
 def _customer(db_session, *, consent: int = 1, name: str = "ProfileFact API") :
