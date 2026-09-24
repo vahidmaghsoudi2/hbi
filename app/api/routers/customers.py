@@ -77,6 +77,21 @@ def _to_dict(obj):
     return obj
 
 
+def _profile_fact_public(fact) -> Dict[str, Any]:
+    return {
+        "profile_fact_id": fact.profile_fact_id,
+        "customer_id": fact.customer_id,
+        "attribute_key": fact.attribute_key,
+        "value": fact.value,
+        "value_state": fact.value_state,
+        "provenance": fact.provenance,
+        "status": fact.status,
+        "supersedes_fact_id": fact.supersedes_fact_id,
+        "created_at": fact.created_at,
+        "updated_at": fact.updated_at,
+    }
+
+
 def _customer_public(c) -> Dict[str, Any]:
     return {
         "customer_id": c.customer_id,
@@ -187,8 +202,9 @@ async def create_profile_fact(
             actor_id=customer_id,
             reason=data.reason,
         )
+        result = _profile_fact_public(fact)
         db.commit()
-        return _to_dict(fact)
+        return result
     except ValueError as e:
         message = str(e)
         if message in {"Customer not found", "ProfileFact not found"}:
@@ -215,8 +231,9 @@ async def supersede_profile_fact(
             actor_id=customer_id,
             reason=data.reason,
         )
+        result = _profile_fact_public(fact)
         db.commit()
-        return _to_dict(fact)
+        return result
     except ValueError as e:
         message = str(e)
         if message == "ProfileFact not found":
