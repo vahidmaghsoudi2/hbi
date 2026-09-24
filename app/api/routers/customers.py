@@ -33,6 +33,25 @@ class GuestCreateRequest(BaseModel):
     concerns: Optional[str] = None
 
 
+class ProfileFactCreateRequest(BaseModel):
+    attribute_key: str
+    value: Optional[str] = None
+    value_state: str = "KNOWN"
+    provenance: str = "CUSTOMER"
+    reason: Optional[str] = None
+
+
+class ProfileFactSupersedeRequest(BaseModel):
+    value: Optional[str] = None
+    value_state: str = "KNOWN"
+    provenance: str = "CUSTOMER"
+    reason: Optional[str] = None
+
+
+class ProfileFactRevokeRequest(BaseModel):
+    reason: Optional[str] = None
+
+
 class IntakeRequest(BaseModel):
     """ثبت سریع مراجعه گالری — نام، نگرانی امروز، موبایل اختیاری."""
     name: str
@@ -147,6 +166,110 @@ async def register_guest(
         return _customer_public(customer)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
+
+
+@router.post("/profile-facts", status_code=status.HTTP_201_CREATED)
+async def create_profile_fact(
+    data: ProfileFactCreateRequest,
+    db: Session = Depends(get_db),
+    customer_id: str = Depends(get_current_customer_id),
+):
+    from app.services.profile_fact_service import ProfileFactService
+
+    try:
+        fact = ProfileFactService(db).create(
+            customer_id=customer_id,
+            authorized_customer_id=customer_id,
+            attribute_key=data.attribute_key,
+            value=data.value,
+            value_state=data.value_state,
+            provenance=data.provenance,
+            actor_id=customer_id,
+            reason=data.reason,
+        )
+        db.commit()
+        return _to_dict(fact)
+    except ValueError as e:
+        message = str(e)
+        if message in {"Customer not found", "ProfileFact not found"}:
+            raise HTTPException(status_code=404, detail=message)
+        raise HTTPException(status_code=422, detail=message)
+
+
+@router.post("/profile-facts/{fact_id}/supersede", status_code=status.HTTP_200_OK)
+async def supersede_profile_fact(
+    fact_id: str,
+    data: ProfileFactSupersedeRequest,
+    db: Session = Depends(get_db),
+    customer_id: str = Depends(get_current_customer_id),
+):
+    from app.services.profile_fact_service import ProfileFactService
+
+    try:
+        fact = ProfileFactService(db).supersede(
+            fact_id=fact_id,
+            authorized_customer_id=customer_id,
+            value=data.value,
+            value_state=data.value_state,
+            provenance=data.provenance,
+            actor_id=customer_id,
+            reason=data.reason,
+        )
+        db.commit()
+        return _to_dict(fact)
+    except ValueError as e:
+        message = str(e)
+        if message == "ProfileFact not found":
+            raise HTTPException(status_code=404, detail=message)
+        if message == "Customer ownership mismatch":
+            raise HTTPException(status_code=403, detail="Access denied")
+        raise HTTPException(status_code=422, detail=message)
+
+
+@router.post("/profile-facts/{fact_id}/revoke", status_code=status.HTTP_200_OK)
+async def revoke_profile_fact(
+    fact_id: str,
+    data: ProfileFactRevokeRequest,
+    db: Session = Depends(get_db),
+    customer_id: str = Depends(get_current_customer_id),
+):
+    from app.services.profile_fact_service import ProfileFactService
+
+    try:
+        fact = ProfileFactService(db).revoke(
+            fact_id=fact_id,
+            authorized_customer_id=customer_id,
+            actor_id=customer_id,
+            reason=data.reason,
+        )
+        db.commit()
+        return _to_dict(fact)
+    except ValueError as e:
+        message = str(e)
+        if message == "ProfileFact not found":
+            raise HTTPException(status_code=404, detail=message)
+        if message == "Customer ownership mismatch":
+            raise HTTPException(status_code=403, detail="Access denied")
+        raise HTTPException(status_code=422, detail=message)
+
+
+@router.get("/profile-facts")
+async def list_profile_facts(
+    db: Session = Depends(get_db),
+    customer_id: str = Depends(get_current_customer_id),
+):
+    from app.services.profile_fact_service import ProfileFactService
+
+    try:
+        facts = ProfileFactService(db).list_active(customer_id, customer_id)
+        return [_to_dict(fact) for fact in facts]
+    except ValueError as e:
+        message = str(e)
+        if message == "Customer not found":
+            raise HTTPException(status_code=404, detail=message)
+        if message == "Customer ownership mismatch":
+            raise HTTPException(status_code=403, detail="Access denied")
+        raise HTTPException(status_code=422, detail=message)
 
 
 @router.post("/intake", status_code=status.HTTP_201_CREATED)
