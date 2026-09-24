@@ -186,7 +186,10 @@ class ProfileFactContextService:
                 if item and item not in seen:
                     seen.add(item)
                     parts.append(item)
-        profile["concerns"] = ", ".join(parts)
+        if parts:
+            profile["concerns"] = ", ".join(parts)
+        else:
+            profile.pop("concerns", None)
 
         profile["customer_id"] = case.customer_id
         profile["_profile_fact_context"] = trace
