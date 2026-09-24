@@ -39,6 +39,15 @@ class OverrideRequest(BaseModel):
     notes: Optional[str] = None
 
 
+class CustomerResponseRequest(BaseModel):
+    case_id: str
+    recommendation_id: str
+    outcome: Optional[str] = None
+    rating: Optional[str] = None
+    comment: Optional[str] = None
+    follow_up_at: Optional[datetime] = None
+
+
 class FeedbackRequest(BaseModel):
     case_id: str
     source: str = Field(..., description="CUSTOMER | SPECIALIST | SYSTEM")
@@ -217,6 +226,71 @@ async def create_feedback(
             extra={
                 "operator": customer_id,
                 "target": {"case_id": body.case_id},
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            },
+        )
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
+    return _feedback_to_dict(fb)
+
+
+@router.post("/feedback/customer-response")
+async def create_customer_response(
+    body: CustomerResponseRequest,
+    db: Session = Depends(get_db),
+    customer_id: str = Depends(get_current_customer_id),
+) -> dict:
+    _assert_case_owned(db, body.case_id, customer_id)
+    svc = FeedbackService(db)
+    try:
+        fb = svc.create_feedback(
+            case_id=body.case_id,
+            source="CUSTOMER",
+            outcome=body.outcome,
+            rating=body.rating,
+            comment=body.comment,
+            recommendation_id=body.recommendation_id,
+            follow_up_at=body.follow_up_at,
+        )
+        db.commit()
+        audit_event(
+            "customer_response_created",
+            customer_id=customer_id,
+            path="/api/v1/specialist/feedback/customer-response",
+            outcome="ok",
+            detail=fb.feedback_id,
+            extra={
+                "target": {
+                    "case_id": body.case_id,
+                    "recommendation_id": body.recommendation_id,
+                },
+                "new_state": {
+                    "feedback_id": fb.feedback_id,
+                    "source": fb.source,
+                    "outcome": fb.outcome,
+                    "follow_up_at": (
+                        fb.follow_up_at.isoformat() if fb.follow_up_at else None
+                    ),
+                },
+                "reason": fb.comment,
+                "timestamp": (
+                    fb.created_at.isoformat()
+                    if fb.created_at
+                    else datetime.now(timezone.utc).isoformat()
+                ),
+            },
+        )
+    except ValueError as e:
+        audit_event(
+            "customer_response_rejected",
+            customer_id=customer_id,
+            path="/api/v1/specialist/feedback/customer-response",
+            outcome="error",
+            detail=str(e),
+            extra={
+                "target": {
+                    "case_id": body.case_id,
+                    "recommendation_id": body.recommendation_id,
+                },
                 "timestamp": datetime.now(timezone.utc).isoformat(),
             },
         )
