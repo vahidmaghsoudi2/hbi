@@ -256,3 +256,287 @@ def test_create_case_for_other_customer_returns_403(client):
         json={"customer_id": "CUST-CVS-2", "case_type": "OPEN"},
     )
     assert r.status_code == 403
+
+
+def _runtime_session():
+    import app.database as database
+    from sqlalchemy.orm import sessionmaker
+    return sessionmaker(bind=database.engine)()
+
+
+def _create_owned_case(client, customer_id: str):
+    token = _token(client, customer_id)
+    headers = {"Authorization": f"Bearer {token}"}
+    created = client.post(
+        "/api/v1/cases/",
+        headers=headers,
+        json={"customer_id": customer_id, "case_type": "OPEN"},
+    )
+    assert created.status_code == 201, created.text
+    return headers, created.json()["case_id"]
+
+
+def test_profile_fact_concerns_supplies_recommendation_and_trace(client):
+    from app.models.profile_fact import ProfileFact
+
+    headers, case_id = _create_owned_case(client, "CUST-CVS-1")
+    db = _runtime_session()
+    try:
+        db.add(ProfileFact(
+            profile_fact_id="PF-VS002-CONCERNS",
+            customer_id="CUST-CVS-1",
+            attribute_key="concerns",
+            value="ضدآفتاب",
+            value_state="KNOWN",
+            provenance="CUSTOMER",
+            status="ACTIVE",
+        ))
+        db.commit()
+    finally:
+        db.close()
+
+    response = client.post(
+        "/api/v1/recommendations/generate",
+        headers=headers,
+        json={"case_id": case_id, "customer_profile": {}},
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert len(body) >= 1
+    reasons = body[0]["ranking_reasons"]
+    assert "PF-VS002-CONCERNS" in reasons
+    assert "PROFILE_FACT" in reasons
+
+
+def test_current_consultation_overrides_profile_fact(client):
+    from app.models.profile_fact import ProfileFact
+
+    headers, case_id = _create_owned_case(client, "CUST-CVS-1")
+    db = _runtime_session()
+    try:
+        db.add(ProfileFact(
+            profile_fact_id="PF-VS002-CURRENT-OVERRIDE",
+            customer_id="CUST-CVS-1",
+            attribute_key="concerns",
+            value="ضدآفتاب",
+            value_state="KNOWN",
+            provenance="CUSTOMER",
+            status="ACTIVE",
+        ))
+        db.commit()
+    finally:
+        db.close()
+
+    response = client.post(
+        "/api/v1/recommendations/generate",
+        headers=headers,
+        json={
+            "case_id": case_id,
+            "customer_profile": {"concerns": "xyz-noncanonical-current"},
+        },
+    )
+    assert response.status_code == 200, response.text
+    assert response.json() == []
+
+
+def test_profile_fact_overrides_legacy_customer_field(client):
+    from app.models.customer import Customer
+    from app.models.profile_fact import ProfileFact
+
+    db = _runtime_session()
+    try:
+        customer = db.get(Customer, "CUST-CVS-1")
+        customer.concerns = "xyz-noncanonical-legacy"
+        db.add(ProfileFact(
+            profile_fact_id="PF-VS002-LEGACY-OVERRIDE",
+            customer_id=customer.customer_id,
+            attribute_key="concerns",
+            value="ضدآفتاب",
+            value_state="KNOWN",
+            provenance="CUSTOMER",
+            status="ACTIVE",
+        ))
+        db.commit()
+    finally:
+        db.close()
+
+    headers, case_id = _create_owned_case(client, "CUST-CVS-1")
+    response = client.post(
+        "/api/v1/recommendations/generate",
+        headers=headers,
+        json={"case_id": case_id, "customer_profile": {}},
+    )
+    assert response.status_code == 200, response.text
+    assert len(response.json()) >= 1
+
+
+def test_profile_fact_non_trusted_lifecycle_states_are_excluded(client):
+    from app.models.profile_fact import ProfileFact
+    from app.services.profile_fact_context_service import ProfileFactContextService
+
+    headers, case_id = _create_owned_case(client, "CUST-CVS-1")
+    db = _runtime_session()
+    try:
+        for index, state in enumerate(["REVOKED", "SUPERSEDED", "STALE", "CONFLICTED"]):
+            db.add(ProfileFact(
+                profile_fact_id=f"PF-VS002-EXCLUDED-{index}",
+                customer_id="CUST-CVS-1",
+                attribute_key="concerns",
+                value=f"excluded-{index}",
+                value_state="KNOWN",
+                provenance="CUSTOMER",
+                status=state,
+            ))
+        db.commit()
+        case = db.get(__import__("app.models.case", fromlist=["Case"]).Case, case_id)
+        profile = ProfileFactContextService(db).build(case, {})
+        assert "concerns" not in profile
+        excluded_ids = {
+            item["profile_fact_id"]
+            for item in profile["_profile_fact_context"]["excluded"]
+        }
+        assert excluded_ids == {
+            "PF-VS002-EXCLUDED-0",
+            "PF-VS002-EXCLUDED-1",
+            "PF-VS002-EXCLUDED-2",
+            "PF-VS002-EXCLUDED-3",
+        }
+    finally:
+        db.close()
+
+
+@pytest.mark.parametrize("value_state", ["UNKNOWN", "PREFER_NOT_TO_SAY", "NOT_APPLICABLE"])
+def test_profile_fact_unknown_family_is_preserved_without_legacy_fallback(client, value_state):
+    from app.models.case import Case
+    from app.models.customer import Customer
+    from app.models.profile_fact import ProfileFact
+    from app.services.profile_fact_context_service import ProfileFactContextService
+
+    headers, case_id = _create_owned_case(client, "CUST-CVS-1")
+    db = _runtime_session()
+    try:
+        customer = db.get(Customer, "CUST-CVS-1")
+        customer.concerns = "legacy-value-must-not-be-used"
+        fact_id = f"PF-VS002-{value_state}"
+        db.add(ProfileFact(
+            profile_fact_id=fact_id,
+            customer_id=customer.customer_id,
+            attribute_key="concerns",
+            value=None,
+            value_state=value_state,
+            provenance="CUSTOMER",
+            status="ACTIVE",
+        ))
+        db.commit()
+        case = db.get(Case, case_id)
+        profile = ProfileFactContextService(db).build(case, {})
+        assert profile.get("concerns") is None
+        source = profile["_profile_fact_context"]["sources"]["concerns"]
+        assert source["profile_fact_id"] == fact_id
+        assert source["value_state"] == value_state
+        assert profile["_profile_fact_context"]["unknowns"][0]["profile_fact_id"] == fact_id
+    finally:
+        db.close()
+
+
+def test_duplicate_active_profile_facts_are_visible_conflict_and_unresolved(client):
+    from app.models.case import Case
+    from app.models.customer import Customer
+    from app.models.profile_fact import ProfileFact
+    from app.services.profile_fact_context_service import ProfileFactContextService
+
+    headers, case_id = _create_owned_case(client, "CUST-CVS-1")
+    db = _runtime_session()
+    try:
+        customer = db.get(Customer, "CUST-CVS-1")
+        customer.concerns = "legacy-must-not-win"
+        db.add_all([
+            ProfileFact(
+                profile_fact_id="PF-VS002-DUP-1",
+                customer_id=customer.customer_id,
+                attribute_key="concerns",
+                value="ضدآفتاب",
+                value_state="KNOWN",
+                provenance="CUSTOMER",
+                status="ACTIVE",
+            ),
+            ProfileFact(
+                profile_fact_id="PF-VS002-DUP-2",
+                customer_id=customer.customer_id,
+                attribute_key="concerns",
+                value="xyz-conflict",
+                value_state="KNOWN",
+                provenance="IMPORTED",
+                status="ACTIVE",
+            ),
+        ])
+        db.commit()
+        case = db.get(Case, case_id)
+        profile = ProfileFactContextService(db).build(case, {})
+        assert "concerns" not in profile
+        conflicts = profile["_profile_fact_context"]["conflicts"]
+        assert len(conflicts) == 1
+        assert conflicts[0]["state"] == "CONFLICTED"
+        assert set(conflicts[0]["profile_fact_ids"]) == {
+            "PF-VS002-DUP-1",
+            "PF-VS002-DUP-2",
+        }
+    finally:
+        db.close()
+
+
+def test_current_consultation_trace_does_not_claim_profile_fact_usage(client):
+    from app.models.profile_fact import ProfileFact
+
+    headers, case_id = _create_owned_case(client, "CUST-CVS-1")
+    db = _runtime_session()
+    try:
+        db.add(ProfileFact(
+            profile_fact_id="PF-VS002-OVERRIDDEN-TRACE",
+            customer_id="CUST-CVS-1",
+            attribute_key="concerns",
+            value="ضدآفتاب",
+            value_state="KNOWN",
+            provenance="CUSTOMER",
+            status="ACTIVE",
+        ))
+        db.commit()
+    finally:
+        db.close()
+
+    response = client.post(
+        "/api/v1/recommendations/generate",
+        headers=headers,
+        json={"case_id": case_id, "customer_profile": {"concerns": "xyz-current"}},
+    )
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_profile_fact_read_respects_withdrawn_consent(client):
+    from app.models.case import Case
+    from app.models.customer import Customer
+    from app.models.profile_fact import ProfileFact
+    from app.services.profile_fact_context_service import ProfileFactContextService
+
+    headers, case_id = _create_owned_case(client, "CUST-CVS-1")
+    db = _runtime_session()
+    try:
+        customer = db.get(Customer, "CUST-CVS-1")
+        db.add(ProfileFact(
+            profile_fact_id="PF-VS002-CONSENT-WITHDRAWN",
+            customer_id=customer.customer_id,
+            attribute_key="concerns",
+            value="ضدآفتاب",
+            value_state="KNOWN",
+            provenance="CUSTOMER",
+            status="ACTIVE",
+        ))
+        customer.consent_to_store_data = 0
+        db.commit()
+        case = db.get(Case, case_id)
+        profile = ProfileFactContextService(db).build(case, {})
+        assert "concerns" not in profile
+        assert profile["_profile_fact_context"]["excluded"][-1]["reason"] == "customer_consent_not_active"
+    finally:
+        db.close()

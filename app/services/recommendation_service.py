@@ -97,7 +97,18 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             raw_concerns = [str(c).strip() for c in concerns_raw if c and str(c).strip()]
         else:
             raw_concerns = [c.strip() for c in str(concerns_raw).split(",") if c.strip()]
-        factors = [{"name": "concern", "value": c, "source": "customer_input", "validity": "DECLARED"} for c in raw_concerns]
+        profile_fact_context = customer_profile.get("_profile_fact_context") or {}
+        source_map = profile_fact_context.get("sources") or {}
+        concern_source = (source_map.get("concerns") or {}).get("source", "CURRENT_CONSULTATION")
+        concern_fact_id = (source_map.get("concerns") or {}).get("profile_fact_id")
+        factor_source = "profile_fact" if concern_source == "PROFILE_FACT" else "customer_input"
+        factors = [{
+            "name": "concern",
+            "value": c,
+            "source": factor_source,
+            "validity": "DECLARED",
+            **({"profile_fact_id": concern_fact_id} if concern_fact_id else {}),
+        } for c in raw_concerns]
         medical_active, medical_notes = self._detect_medical_context(customer_profile, factors)
         return {
             "case_id": case_id,
@@ -106,8 +117,9 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             "evidence_refs": [],
             "evidence_gaps": [],
             "unknowns": [],
-            "conflicts": [],
+            "conflicts": list(profile_fact_context.get("conflicts") or []),
             "factors": factors,
+            "profile_fact_context": profile_fact_context,
             "inferences": [],
             "medical_context_active": medical_active,
             "medical_context_notes": medical_notes,
@@ -310,6 +322,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             trace_warnings = list(engine_result.get("warnings", []))
             if eligibility != "ELIGIBLE" and not trace_warnings:
                 trace_warnings.append(f"Recommendation gated: {eligibility}")
+            profile_fact_context = decision_state.get("profile_fact_context") or {}
             ranking_reasons = (
                 f"{rationale} | needs={needs} | need_match={need_match:.2f} | "
                 f"medical_context={decision_state['medical_context_active']} | "
@@ -317,7 +330,8 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 f"product_unknowns={len(product_unknowns)} | product_conflicts={len(product_conflicts)} | "
                 f"inferences={len(inferences)} | need_mappings={len(decision_state.get('need_mappings') or [])} | "
                 f"unmapped_need_factors={len(decision_state.get('unmapped_need_factors') or [])} | "
-                f"ambiguous_need_factors={len(decision_state.get('ambiguous_need_factors') or [])}"
+                f"ambiguous_need_factors={len(decision_state.get('ambiguous_need_factors') or [])} | "
+                f"profile_fact_trace={json.dumps(profile_fact_context, ensure_ascii=False, sort_keys=True)}"
             )
             if eligibility != "ELIGIBLE":
                 continue
