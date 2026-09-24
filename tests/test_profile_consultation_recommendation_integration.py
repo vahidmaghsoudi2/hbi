@@ -59,7 +59,9 @@ def test_persistent_profile_plus_current_consultation_reaches_recommendation(db_
     dto = result[0]
     assert dto["product_id"] == product.product_id
     assert dto["eligibility_status"] == "ELIGIBLE"
-    assert dto["need_match_score"] == 0.5
+    # Current consultation values take precedence over the legacy Customer
+    # fields for the same keys; the frozen scoring formula is unchanged.
+    assert dto["need_match_score"] == 1.0
     assert dto["evidence_score"] == 1.0
     # availability is a status string from inventory gate, not raw quantity
     assert dto["availability"] == "AVAILABLE"
@@ -73,3 +75,4 @@ def test_persistent_profile_plus_current_consultation_reaches_recommendation(db_
     ).one()
     assert persisted_recommendation.eligibility_status == "ELIGIBLE"
     assert "Evidence items considered: 1" in persisted_recommendation.ranking_reasons
+    assert '"source": "CURRENT_CONSULTATION"' in persisted_recommendation.ranking_reasons
