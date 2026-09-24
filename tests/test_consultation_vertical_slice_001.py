@@ -209,6 +209,7 @@ def test_owned_case_consultation_generate_persist_retrieve_and_feedback(client):
 
 
 def test_no_eligible_product_returns_empty_list(client):
+    """non-matching concern → 200 → [] → no persisted recommendation for the case."""
     token = _token(client, "CUST-CVS-1")
     headers = {"Authorization": f"Bearer {token}"}
 
@@ -232,14 +233,19 @@ def test_no_eligible_product_returns_empty_list(client):
     assert gen.status_code == 200, gen.text
     body = gen.json()
     assert isinstance(body, list)
-    # Empty is valid; no fabricated Evidence Gap payload required.
-    assert body == [] or all(
-        (item.get("eligibility_status") == "ELIGIBLE") for item in body
+    # Strict: no eligible product must yield an empty generate payload.
+    # Do not allow a non-empty ELIGIBLE list to satisfy this test.
+    assert body == [], (
+        "expected no recommendations for non-matching concern; "
+        f"got {len(body)} item(s): {body!r}"
     )
-    if body == []:
-        listed = client.get(f"/api/v1/recommendations/case/{case_id}", headers=headers)
-        assert listed.status_code == 200
-        assert listed.json() == []
+
+    listed = client.get(f"/api/v1/recommendations/case/{case_id}", headers=headers)
+    assert listed.status_code == 200, listed.text
+    assert listed.json() == [], (
+        "expected no persisted recommendations for case after empty generate; "
+        f"got {listed.json()!r}"
+    )
 
 
 def test_create_case_for_other_customer_returns_403(client):
