@@ -64,7 +64,9 @@ class SkinNextQuestionService:
         self.db.flush()
 
     def _context(self, case: Case, current_input: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        return self.context_service.build(case, current_input or {})
+        case_input = self.current_input_from_case(case)
+        case_input.update(current_input or {})
+        return self.context_service.build(case, case_input)
 
     @staticmethod
     def _has_concern(profile: Dict[str, Any]) -> bool:
