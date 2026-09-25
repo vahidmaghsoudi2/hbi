@@ -226,6 +226,15 @@ class DuplicateCheckRequest(BaseModel):
     packaging_version: Optional[str] = None
 
 
+class DuplicateCheckOperatorDecision(BaseModel):
+    """Persist the Operator's final resolution for a duplicate/naming review."""
+    decision: str
+    selected_product_id: Optional[str] = None
+    final_product_name: Optional[str] = None
+    reason: Optional[str] = None
+    model_config = ConfigDict(extra="forbid")
+
+
 class ProductTransitionRequest(BaseModel):
     reason: Optional[str] = None
 
