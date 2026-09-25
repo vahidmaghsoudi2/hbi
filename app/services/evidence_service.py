@@ -9,383 +9,210 @@ from app.models.evidence import Evidence
 from app.repositories.evidence_repository import EvidenceRepository
 from app.services.base import BaseService
 from app.core.exceptions import ValidationError, ConflictError, NotFoundError
+from app.services.evidence_mutation_log_service import EvidenceMutationLogService
 
 logger = logging.getLogger(__name__)
 
 
 class EvidenceService(BaseService[Evidence, EvidenceRepository]):
-    """
-    Evidence Service — Framework 3, 4, 5 compliant.
-
-    Framework 3:
-    - Generates semantic claim_id values using:
-      EV-[PRODUCT_ID]-[SEQ]
-
-    Framework 4:
-    - Enforces claim-boundary rules.
-    - Prevents MANUFACTURER_CLAIM/UNKNOWN source promotion to FACT.
-
-    Framework 5:
-    - Handles UNKNOWN evidence through the Unknown Register.
-    - Detects and logs conflicts through the Conflict Register.
-    - Never silently selects a conflicting value.
-    - A resolved conflict is represented by conflict_status="NONE";
-      resolution details remain preserved in notes.
-    """
+    """Evidence lifecycle with claim boundaries, conflict handling and G4 audit."""
 
     def __init__(self, db: Session):
         super().__init__(EvidenceRepository(db), db)
+        self.audit = EvidenceMutationLogService(db)
 
-    # ─── Framework 4: Claim Boundary Rules ───────────────────
-
-    def _validate_claim_boundary(
-        self,
-        claim_type: str,
-        source_type: str
-    ) -> None:
-        """
-        Framework 4 RULE 2: Promotion Forbidden.
-
-        Forbidden:
-        - INFERENCE → FACT
-        - MANUFACTURER_CLAIM → FACT
-        - UNKNOWN → FACT
-
-        Manufacturer claims may only become FACT after independent
-        verification, which is represented through the verification flow.
-        """
+    def _validate_claim_boundary(self, claim_type: str, source_type: str) -> None:
         if claim_type == "FACT":
-            allowed_sources = {
-                "PEER_REVIEWED",
-                "CLINICAL_TRIAL",
-                "REGULATORY",
-            }
-
+            allowed_sources = {"PEER_REVIEWED", "CLINICAL_TRIAL", "REGULATORY"}
             if source_type not in allowed_sources:
                 raise ValidationError(
-                    "FACT claims require independent verification "
-                    "from PEER_REVIEWED, CLINICAL_TRIAL, or REGULATORY sources."
+                    "FACT claims require independent verification from "
+                    "PEER_REVIEWED, CLINICAL_TRIAL, or REGULATORY sources."
                 )
 
-    # ─── ID Generators ───────────────────────────────────────
-
     def _generate_claim_id(self, product_id: str) -> str:
-        """
-        Framework 3:
-        Generate claim identifier in the format:
-
-        EV-[PRODUCT_ID]-[SEQ]
-        """
         seq = self.repository.get_next_claim_seq(product_id)
         return f"EV-{product_id}-{seq:03d}"
 
     def _generate_evidence_id(self, product_id: str) -> str:
-        """
-        Generate the internal Evidence primary key.
-
-        This is separate from claim_id because evidence_id is the
-        database primary key while claim_id is the Framework 3
-        semantic identifier.
-        """
         return f"EV-{product_id}-{uuid.uuid4().hex[:8]}"
 
-    # ─── Framework 5: Unknown/Conflict Registers ─────────────
-
-    def _log_unknown(
-        self,
-        product_id: str,
-        field: str,
-        value: str
-    ) -> None:
-        """
-        Framework 5:
-        Record UNKNOWN evidence in the Unknown Register.
-        Status is explicitly UNVERIFIED.
-        """
+    def _log_unknown(self, product_id: str, field: str, value: str) -> None:
         logger.info(
             "UNKNOWN evidence registered: product_id=%s, field=%s, value=%s, status=UNVERIFIED",
-            product_id,
-            field,
-            value
+            product_id, field, value
         )
 
-    def _log_conflict(
-        self,
-        product_id: str,
-        field: str,
-        values: List[str]
-    ) -> None:
-        """
-        Framework 5:
-        Record an unresolved conflict in the Conflict Register.
-
-        Conflicts are never silently resolved.
-        """
+    def _log_conflict(self, product_id: str, field: str, values: List[str]) -> None:
         logger.warning(
             "CONFLICT detected: product_id=%s, field=%s, values=%s, severity=HIGH, status=UNRESOLVED",
-            product_id,
-            field,
-            values
+            product_id, field, values
         )
 
-    # ─── CRUD Operations ─────────────────────────────────────
-
-    def add_evidence(self, evidence_data: dict) -> Evidence:
-        """
-        Add an Evidence record with Framework 3, 4 and 5 enforcement.
-        """
-        required = [
-            "product_id",
-            "source_type",
-            "source_reference",
-            "claim",
-        ]
-
+    def add_evidence(
+        self,
+        evidence_data: dict,
+        *,
+        actor_id: str = "system",
+        actor_role: Optional[str] = None,
+        action: str = "CREATE",
+        reason: Optional[str] = None,
+        correlation_id: Optional[str] = None,
+    ) -> Evidence:
+        required = ["product_id", "source_type", "source_reference", "claim"]
         for field in required:
             if field not in evidence_data or not evidence_data[field]:
-                raise ValidationError(
-                    f"Missing required field: {field}"
-                )
+                raise ValidationError(f"Missing required field: {field}")
 
-        product_id = evidence_data["product_id"]
-        claim_type = evidence_data.get("claim_type") or "UNKNOWN"
-        source_type = evidence_data.get("source_type") or "UNKNOWN"
+        data = dict(evidence_data)
+        product_id = data["product_id"]
+        claim_type = (data.get("claim_type") or "UNKNOWN").upper()
+        source_type = data.get("source_type") or "UNKNOWN"
+        self._validate_claim_boundary(claim_type, source_type)
 
-        # Framework 4: Claim Boundary Rules
-        self._validate_claim_boundary(
-            claim_type,
-            source_type
-        )
-
-        # Framework 5: UNKNOWN handling
         if claim_type == "UNKNOWN":
-            self._log_unknown(
-                product_id,
-                evidence_data.get("field"),
-                evidence_data.get("claim")
-            )
+            self._log_unknown(product_id, data.get("field"), data.get("claim"))
 
-        # Generate IDs
-        evidence_data.setdefault(
-            "evidence_id",
-            self._generate_evidence_id(product_id)
-        )
+        data.setdefault("evidence_id", self._generate_evidence_id(product_id))
+        data.setdefault("claim_id", self._generate_claim_id(product_id))
+        data["claim_type"] = claim_type
+        data["source_type"] = source_type
+        data.setdefault("evidence_status", "UNKNOWN")
+        data.setdefault("conflict_status", "NONE")
+        data.setdefault("qa_status", "PENDING")
+        data.setdefault("evidence_date", datetime.now(timezone.utc))
 
-        evidence_data.setdefault(
-            "claim_id",
-            self._generate_claim_id(product_id)
-        )
-
-        evidence_data["claim_type"] = claim_type
-        evidence_data["source_type"] = source_type
-
-        # Defaults
-        evidence_data.setdefault(
-            "evidence_status",
-            "UNKNOWN"
-        )
-
-        evidence_data.setdefault(
-            "conflict_status",
-            "NONE"
-        )
-
-        evidence_data.setdefault(
-            "qa_status",
-            "PENDING"
-        )
-
-        # Fixed: datetime.utcnow() deprecated → timezone-aware UTC
-        evidence_data.setdefault(
-            "evidence_date",
-            datetime.now(timezone.utc)
-        )
-
-        evidence = self.repository.create(
-            **evidence_data
-        )
-
-        # Framework 5: Conflict detection
+        evidence = self.repository.create(**data)
         conflicts = self.detect_conflicts(product_id)
-
         if conflicts:
             for conf in conflicts:
-                self._log_conflict(
-                    product_id,
-                    conf["field"],
-                    conf["values"]
-                )
+                self._log_conflict(product_id, conf["field"], conf["values"])
+            if any(conf["new_evidence_id"] == evidence.evidence_id for conf in conflicts):
+                self.repository.update(evidence.evidence_id, conflict_status="CONFLICT")
+                evidence = self.repository.get_by_id(evidence.evidence_id)
 
-            if any(
-                conf["new_evidence_id"] == evidence.evidence_id
-                for conf in conflicts
-            ):
-                self.repository.update(
-                    evidence.evidence_id,
-                    conflict_status="CONFLICT"
-                )
-
-                evidence = self.repository.get_by_id(
-                    evidence.evidence_id
-                )
-
+        self.audit.append(
+            actor_id=actor_id,
+            actor_role=actor_role,
+            action=action,
+            target_id=evidence.evidence_id,
+            product_id=product_id,
+            before=None,
+            after=self.audit.snapshot(evidence),
+            reason=reason,
+            resulting_state=evidence.qa_status,
+            correlation_id=correlation_id or f"EVID-{uuid.uuid4().hex}",
+        )
         return evidence
 
     def verify_evidence(
         self,
         evidence_id: str,
-        verdict: str
+        verdict: str,
+        *,
+        actor_id: str = "system",
+        actor_role: Optional[str] = None,
+        reason: Optional[str] = None,
+        correlation_id: Optional[str] = None,
     ) -> Optional[Evidence]:
-        """
-        Verify an Evidence record.
-
-        Allowed QA verdicts:
-        - VERIFIED
-        - REJECTED
-        - NEEDS_REVIEW
-        """
-        valid_verdicts = [
-            "VERIFIED",
-            "REJECTED",
-            "NEEDS_REVIEW",
-        ]
-
+        valid_verdicts = ["VERIFIED", "REJECTED", "NEEDS_REVIEW"]
         if verdict not in valid_verdicts:
-            raise ValidationError(
-                f"Invalid verdict. Allowed: {valid_verdicts}"
-            )
+            raise ValidationError(f"Invalid verdict. Allowed: {valid_verdicts}")
 
         evidence = self.get_by_id(evidence_id)
-
         if not evidence:
-            raise NotFoundError(
-                f"Evidence {evidence_id} not found"
-            )
+            raise NotFoundError(f"Evidence {evidence_id} not found")
 
-        updated = self.repository.update(
-            evidence_id,
-            qa_status=verdict
-        )
-        # PO HBI-CATALOG-INTAKE-FIX-001: QA change must rebuild ProductKnowledge.
+        before = self.audit.snapshot(evidence)
+        updated = self.repository.update(evidence_id, qa_status=verdict)
         if updated is not None:
             from app.services.product_knowledge_service import ProductKnowledgeService
             ProductKnowledgeService(self.db).update_from_evidence(updated.product_id)
+            self.audit.append(
+                actor_id=actor_id,
+                actor_role=actor_role,
+                action="VERIFY",
+                target_id=updated.evidence_id,
+                product_id=updated.product_id,
+                before=before,
+                after=self.audit.snapshot(updated),
+                diff={"qa_status": {"old": before.get("qa_status"), "new": verdict}},
+                reason=reason,
+                resulting_state=updated.qa_status,
+                correlation_id=correlation_id or f"EVID-{uuid.uuid4().hex}",
+            )
         return updated
 
-    def detect_conflicts(
-        self,
-        product_id: str
-    ) -> List[Dict]:
-        """
-        Framework 5:
-        Detect conflicting claims for the same product field.
-
-        Cross-product contamination is prevented because only evidence
-        belonging to the requested product_id is evaluated.
-
-        No conflicting value is silently selected.
-        """
-        evidences = self.repository.find_by_product(
-            product_id
-        )
-
+    def detect_conflicts(self, product_id: str) -> List[Dict]:
+        evidences = self.repository.find_by_product(product_id)
         if not evidences:
             return []
 
         field_map = {}
-
         for ev in evidences:
             field = ev.field or "general"
-
-            if field not in field_map:
-                field_map[field] = []
-
-            field_map[field].append(
-                {
-                    "evidence_id": ev.evidence_id,
-                    "value": ev.claim,
-                    "claim_type": ev.claim_type,
-                    "source_type": ev.source_type,
-                    "date": ev.source_date,
-                }
-            )
+            field_map.setdefault(field, []).append({
+                "evidence_id": ev.evidence_id,
+                "value": ev.claim,
+                "claim_type": ev.claim_type,
+                "source_type": ev.source_type,
+                "date": ev.source_date,
+            })
 
         conflicts = []
-
         for field, entries in field_map.items():
             if len(entries) > 1:
-                unique_values = set(
-                    entry["value"]
-                    for entry in entries
-                )
-
+                unique_values = {entry["value"] for entry in entries}
                 if len(unique_values) > 1:
-                    conflicts.append(
-                        {
-                            "field": field,
-                            "values": [
-                                entry["value"]
-                                for entry in entries
-                            ],
-                            "evidence_ids": [
-                                entry["evidence_id"]
-                                for entry in entries
-                            ],
-                            "new_evidence_id": entries[-1][
-                                "evidence_id"
-                            ],
-                        }
-                    )
-
+                    conflicts.append({
+                        "field": field,
+                        "values": [entry["value"] for entry in entries],
+                        "evidence_ids": [entry["evidence_id"] for entry in entries],
+                        "new_evidence_id": entries[-1]["evidence_id"],
+                    })
         return conflicts
 
     def resolve_conflict(
         self,
         evidence_id: str,
-        resolution: str
+        resolution: str,
+        *,
+        actor_id: str = "system",
+        actor_role: Optional[str] = None,
+        correlation_id: Optional[str] = None,
     ) -> Optional[Evidence]:
-        """
-        Framework 5:
-        Resolve a conflict only through an explicit resolution record.
+        if not resolution or not resolution.strip():
+            raise ValidationError("Conflict resolution reason is required")
 
-        IMPORTANT:
-        Schema v1.2 permits conflict_status values:
-            NONE
-            CONFLICT
-
-        Therefore a resolved conflict MUST NOT use "RESOLVED" as the
-        database status because that value violates the locked CHECK
-        constraint.
-
-        The conflict status is changed to NONE and the resolution
-        decision is preserved in notes with a [RESOLVED] marker.
-
-        This does NOT silently choose a value; the explicit resolution
-        remains auditable in the notes field.
-        """
         evidence = self.get_by_id(evidence_id)
-
         if not evidence:
-            raise NotFoundError(
-                f"Evidence {evidence_id} not found"
-            )
-
+            raise NotFoundError(f"Evidence {evidence_id} not found")
         if evidence.conflict_status != "CONFLICT":
-            raise ValidationError(
-                "This evidence is not in conflict status."
-            )
+            raise ValidationError("This evidence is not in conflict status.")
 
+        before = self.audit.snapshot(evidence)
         current_notes = evidence.notes or ""
-
-        # Fixed: datetime.utcnow() deprecated → timezone-aware UTC
         new_notes = (
             f"{current_notes}\n"
-            f"[RESOLVED] {resolution} "
-            f"at {datetime.now(timezone.utc).isoformat()}"
+            f"[RESOLVED] {resolution} at {datetime.now(timezone.utc).isoformat()}"
         )
-
-        return self.repository.update(
-            evidence_id,
-            conflict_status="NONE",
-            notes=new_notes
+        updated = self.repository.update(
+            evidence_id, conflict_status="NONE", notes=new_notes
         )
+        if updated is not None:
+            from app.services.product_knowledge_service import ProductKnowledgeService
+            ProductKnowledgeService(self.db).update_from_evidence(updated.product_id)
+            self.audit.append(
+                actor_id=actor_id,
+                actor_role=actor_role,
+                action="RESOLVE_CONFLICT",
+                target_id=updated.evidence_id,
+                product_id=updated.product_id,
+                before=before,
+                after=self.audit.snapshot(updated),
+                diff={"conflict_status": {"old": "CONFLICT", "new": "NONE"}},
+                reason=resolution,
+                resulting_state=updated.conflict_status,
+                correlation_id=correlation_id or f"EVID-{uuid.uuid4().hex}",
+            )
+        return updated
