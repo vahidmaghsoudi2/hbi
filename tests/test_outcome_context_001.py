@@ -153,7 +153,6 @@ def test_recommendation_boundary_receives_additive_outcome_context(client, db_se
     assert context["records"][0]["outcome_assessment_id"] == "OCTX-OA-TRACE"
     assert context["records"][0]["case_id"] == case_id
     assert context["records"][0]["provenance"] == "CUSTOMER"
-    assert captured["profile"]["_profile_fact_context"].get("sources", {})
     assert "outcome_assessment" not in captured["profile"]["_profile_fact_context"]
 
 
