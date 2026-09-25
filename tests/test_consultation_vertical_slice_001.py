@@ -266,12 +266,12 @@ def _runtime_session():
 
 def _customer_auth_headers(customer_id: str):
     from app.core.auth import create_access_token
-    return {"Authorization": f"Bearer {create_access_token({"sub": customer_id})}"}
+    token = create_access_token({"sub": customer_id})
+    return {"Authorization": f"Bearer {token}"}
 
 
 def _create_owned_case(client, customer_id: str):
-    token = _token(client, customer_id)
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = _customer_auth_headers(customer_id)
     created = client.post(
         "/api/v1/cases/",
         headers=headers,
