@@ -72,7 +72,7 @@ export function completeFromIntro(raw: string): Draft {
   else if (/نوتروژنا|neutrogena/i.test(text)) d.brand = "Neutrogena";
   else {
     const latin = text.match(/\b([A-Z][A-Za-z0-9\-']{1,28}(?:\s+[A-Z][A-Za-z0-9\-']{1,28}){0,3})\b/);
-    d.brand = latin ? latin[1].trim() : "Gallery";
+    d.brand = latin ? latin[1].trim() : "";
   }
 
   if (/ضد\s*آفتاب|ضدآفتاب|sunscreen|spf/i.test(text)) {
@@ -152,7 +152,7 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
     if (editing) completed.product_id = draft.product_id;
     setDraft(completed);
     setErr(null);
-    setMsg("اطلاعات تکمیل شد. هر باکس را بررسی/ویرایش کنید، سپس تأیید و ذخیره.");
+    setMsg("اطلاعات پیشنهادی تکمیل شد. هر باکس را بررسی/ویرایش کنید؛ سپس محصول به‌صورت Draft ثبت می‌شود.");
   }
 
   async function save() {
@@ -199,7 +199,7 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
           knowledge_evidence_source_reference: "PRODUCT_INTAKE",
         };
         const created = await createProduct(body, activeToken);
-        setMsg(`ذخیره شد: ${created.product_id}`);
+        setMsg(`ثبت اولیه انجام شد: ${created.product_id} — وضعیت محصول: Draft`);
         setIntro("");
         onRegistered?.(created.product_id);
       }
@@ -212,14 +212,14 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
 
   return (
     <section className="pro-panel">
-      <h1>{editing ? "ویرایش محصول" : "ورود محصول (تکمیل هوشمند + تأیید مدیر)"}</h1>
+      <h1>{editing ? "ویرایش محصول" : "ورود محصول (تکمیل هوشمند + ثبت اولیه)"}</h1>
       <p className="pro-lead">
-        خلاصه را بنویسید → تکمیل خودکار فیلدهای اطلاعاتی → بررسی شما → ذخیره به‌صورت Draft. وضعیت هویتی، QA و چرخه انتشار توسط سرور و نقش‌های مربوط کنترل می‌شود.
+        خلاصه را بنویسید → تکمیل خودکار فیلدهای اطلاعاتی → بررسی شما → ثبت اولیه به‌صورت Draft. وضعیت هویتی، QA و چرخه انتشار توسط سرور و نقش‌های مربوط کنترل می‌شود.
       </p>
       {err && <div className="pro-alert">{err}</div>}
       {msg && (
         <div className="pro-status-msg" role="status" aria-live="polite">
-          <strong>✓ عملیات با موفقیت انجام شد</strong>
+          <strong>✓ ثبت اولیه با موفقیت انجام شد</strong>
           <div style={{ marginTop: "0.25rem" }}>{msg}</div>
         </div>
       )}
@@ -305,7 +305,7 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
 
       <div className="pro-actions" style={{ marginTop: "1rem" }}>
         <button type="button" className="pro-btn-primary" disabled={busy} onClick={() => void save()}>
-          {busy ? "در حال ذخیره…" : editing ? "تأیید و به‌روزرسانی" : "تأیید نهایی و ذخیره"}
+          {busy ? "در حال ثبت…" : editing ? "تأیید و به‌روزرسانی" : "ثبت محصول به‌صورت Draft"}
         </button>
         {editing && (
           <button
