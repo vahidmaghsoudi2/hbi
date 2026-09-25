@@ -264,6 +264,11 @@ def _runtime_session():
     return sessionmaker(bind=database.engine)()
 
 
+def _customer_auth_headers(customer_id: str):
+    from app.core.auth import create_access_token
+    return {"Authorization": f"Bearer {create_access_token({"sub": customer_id})}"}
+
+
 def _create_owned_case(client, customer_id: str):
     token = _token(client, customer_id)
     headers = {"Authorization": f"Bearer {token}"}
@@ -555,8 +560,7 @@ def test_customer_response_requires_authentication(client):
 
 
 def test_customer_response_rejects_foreign_case(client):
-    token = _token(client, "CUST-CVS-1")
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = _customer_auth_headers("CUST-CVS-1")
     r = client.post(
         "/api/v1/specialist/feedback/customer-response",
         headers=headers,
