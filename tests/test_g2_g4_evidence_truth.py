@@ -1,12 +1,16 @@
 import pytest
 from app.core.auth import create_access_token
 from app.models.product import Product
+from app.models.customer import Customer
+from app.models.case import Case
+from app.models.inventory import Inventory
 from app.models.user_role import UserRole, ROLE_REVIEWER_QA
 from app.models.evidence import Evidence
 from app.models.evidence_mutation_log import EvidenceMutationLog
 from app.services.research_draft_service import ResearchDraftService
 from app.services.evidence_service import EvidenceService
 from app.services.product_knowledge_service import ProductKnowledgeService
+from app.services.recommendation_service import RecommendationService
 
 
 def _auth(db_session, subject="evidence_operator"):
@@ -28,8 +32,19 @@ def _product(db_session, product_id="G2-G4-001"):
         product_name="Evidence Truth Test",
         identity_status="VERIFIED",
         qa_verdict="VALID",
+        status="ACTIVE",
     )
     db_session.add(product)
+    db_session.add(
+        Inventory(
+            inventory_id=f"INV-{product_id}",
+            product_id=product_id,
+            quantity_available=10,
+            quantity_reserved=0,
+            quantity_damaged=0,
+            stock_status="active",
+        )
+    )
     db_session.commit()
     return product
 
@@ -111,6 +126,83 @@ def test_evidence_mutations_create_actor_bound_audit_rows(db_session):
     assert logs[1].before_state is not None
     assert logs[1].after_state is not None
     assert logs[1].reason == "Reviewed source"
+
+
+def test_conflict_resolution_closes_pair_and_propagates_to_knowledge_and_recommendation(db_session):
+    product_id = "G2-G4-CONFLICT"
+    _product(db_session, product_id)
+    db_session.add(Customer(customer_id="C-G2-G4", name="Conflict Test"))
+    db_session.add(Case(case_id="CASE-G2-G4", customer_id="C-G2-G4", case_type="SKIN"))
+    db_session.commit()
+
+    service = EvidenceService(db_session)
+    winner = service.add_evidence(
+        {
+            "product_id": product_id,
+            "source_type": "MANUFACTURER",
+            "source_reference": "source:winner",
+            "claim": "hydration",
+            "claim_type": "MANUFACTURER_CLAIM",
+            "field": "known_use_cases",
+            "evidence_strength": "STRONG",
+        },
+        actor_id="qa-1",
+        actor_role=ROLE_REVIEWER_QA,
+    )
+    loser = service.add_evidence(
+        {
+            "product_id": product_id,
+            "source_type": "MANUFACTURER",
+            "source_reference": "source:loser",
+            "claim": "dry_skin_only",
+            "claim_type": "MANUFACTURER_CLAIM",
+            "field": "known_use_cases",
+            "evidence_strength": "WEAK",
+        },
+        actor_id="qa-1",
+        actor_role=ROLE_REVIEWER_QA,
+    )
+
+    assert winner.conflict_status == "CONFLICT"
+    assert loser.conflict_status == "CONFLICT"
+
+    service.verify_evidence(winner.evidence_id, "VERIFIED", actor_id="qa-1", actor_role=ROLE_REVIEWER_QA, reason="Winner reviewed")
+    service.verify_evidence(loser.evidence_id, "VERIFIED", actor_id="qa-1", actor_role=ROLE_REVIEWER_QA, reason="Loser reviewed")
+
+    blocked_knowledge = ProductKnowledgeService(db_session).get_or_create(product_id)
+    assert blocked_knowledge.known_use_cases is None
+
+    # Conflict remains a hard recommendation gate before resolution.
+    before = RecommendationService(db_session).generate_recommendations(
+        "CASE-G2-G4",
+        {"customer_id": "C-G2-G4", "concerns": "hydration"},
+    )
+    assert before == []
+
+    resolved = service.resolve_conflict(
+        winner.evidence_id,
+        "Selected after source review",
+        actor_id="qa-1",
+        actor_role=ROLE_REVIEWER_QA,
+    )
+    assert resolved.conflict_status == "NONE"
+
+    db_session.refresh(loser)
+    assert loser.conflict_status == "NONE"
+    assert loser.qa_status == "REJECTED"
+
+    knowledge = ProductKnowledgeService(db_session).get_or_create(product_id)
+    assert knowledge.known_use_cases == "hydration"
+    assert knowledge.evidence_refs == winner.claim_id
+
+    after = RecommendationService(db_session).generate_recommendations(
+        "CASE-G2-G4",
+        {"customer_id": "C-G2-G4", "concerns": "hydration"},
+    )
+    assert len(after) == 1
+    assert after[0].product_id == product_id
+    assert after[0].eligibility_status == "ELIGIBLE"
+    assert after[0].evidence_refs
 
 
 def test_evidence_api_requires_role_for_mutation_and_exposes_audit(client, db_session):
