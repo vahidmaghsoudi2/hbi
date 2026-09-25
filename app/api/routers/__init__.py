@@ -1,5 +1,6 @@
 from app.api.routers.auth import router as auth_router
 from app.api.routers.products import router as products_router
+from app.api.routers.duplicate_checks import router as duplicate_checks_router
 from app.api.routers.customers import router as customers_router
 from app.api.routers.cases import router as cases_router
 from app.api.routers.recommendations import router as recommendations_router
@@ -15,7 +16,7 @@ from app.api.routers.followups import router as followups_router
 from app.api.routers.outcome_assessments import router as outcome_assessments_router
 
 __all__ = [
-    "auth_router", "products_router", "customers_router", "cases_router",
+    "auth_router", "products_router", "duplicate_checks_router", "customers_router", "cases_router",
     "recommendations_router", "inventory_router", "sales_router", "evidence_router",
     "payments_router", "returns_router", "fx_router", "reports_router",
     "specialist_router", "followups_router", "outcome_assessments_router",
