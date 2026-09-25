@@ -1,4 +1,6 @@
 """Product duplicate/naming review API."""
+
+import json
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -57,9 +59,9 @@ async def list_duplicate_audits(
             "actor_role": row.actor_role,
             "result": row.result,
             "product_id": row.product_id,
-            "input_snapshot": row.input_snapshot,
-            "candidates": row.candidates,
-            "operator_decision": row.operator_decision,
+            "input_snapshot": json.loads(row.input_snapshot) if row.input_snapshot else None,
+            "candidates": json.loads(row.candidates) if row.candidates else [],
+            "operator_decision": json.loads(row.operator_decision) if row.operator_decision else None,
         }
         for row in rows
     ]
