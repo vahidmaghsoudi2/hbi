@@ -1,222 +1,168 @@
-# HBI Consultation Follow-up Lifecycle Reality Gate v0.1
+# HBI Consultation Follow-up Lifecycle — Reality Gate v0.2
 
 | Field | Value |
 |---|---|
-| Baseline | `3289d8c16ebf9a05a2e3c1ded2d1d3db345736bb` |
-| Gate | HBI-CONSULTATION-FOLLOWUP-LIFECYCLE-REALITY-GATE-003 |
-| Scope | Customer Response / Outcome → Follow-up Lifecycle |
-| Implementation | **NOT AUTHORIZED BY THIS GATE** |
-| Verdict | **READY FOR NEXT VERTICAL SLICE** |
+| Issue | #247 |
+| Audit baseline | `1175b6ad49794704b1cacf89b25ce8c7469cc57a` |
+| Implementation | PR #246 |
+| Implementation HEAD | `fe3d7d432cd4cb3c363b75ee16d72919ce4fb219` |
+| Verdict | **ACCEPTED — READY FOR NEXT VERTICAL SLICE** |
 
-## 1. Baseline
+## 1. Executive Verdict
 
-This gate is anchored to the actual Master after PR #238, which completed the explicit Customer Response Outcome Contract.
+The first-class Follow-up implementation is present on current Master and materially conforms to the accepted Lifecycle Contract v0.1.
 
-Current Master reality therefore includes:
-- explicit Customer Response;
-- server-controlled `source=CUSTOMER`;
-- Recommendation-to-Case validation;
-- four-value Customer Response outcome vocabulary;
-- durable Feedback retrieval;
-- optional `Feedback.follow_up_at`.
+No critical contract violation was identified within the audited boundary.
 
-## 2. Files / Code Paths
-
-Primary evidence inspected:
-- `app/models/feedback.py`
-- `app/services/feedback_service.py`
-- `app/api/routers/specialist.py`
-- `tests/test_consultation_vertical_slice_001.py`
-- `docs/architecture/HBI_CONSULTATION_FOLLOWUP_OUTCOME_REALITY_GATE_v0.1.md`
-
-Required evidence statuses:
-**CONFIRMED IN CODE / CONFIRMED IN TEST / CONFIRMED IN DOC / NOT FOUND / CONFLICT / UNKNOWN**
-
-## 3. Follow-up Data Reality
-
-### Field
-**CONFIRMED IN CODE**
-
-`Feedback.follow_up_at` is a nullable DateTime column.
-
-It is accepted by generic Feedback creation and by the explicit Customer Response action, and is returned by Case-scoped Feedback retrieval.
-
-### Persistence
-**CONFIRMED IN CODE**
-
-The value is persisted directly on the Feedback row. No separate Follow-up record is created.
-
-### Retrieval
-**CONFIRMED IN CODE**
-
-Current retrieval is through:
-
-`GET /api/v1/specialist/feedback/case/{case_id}`
-
-The serialized Feedback DTO includes `follow_up_at`.
-
-### Audit
-**CONFIRMED IN CODE**
-
-Feedback creation audit records include `follow_up_at`. Explicit Customer Response audit also records the value.
-
-## 4. Follow-up Lifecycle Reality
-
-### Dedicated Follow-up entity
-**NOT FOUND**
-
-No dedicated Follow-up model/table was verified.
-
-### Dedicated service
-**NOT FOUND**
-
-No Follow-up lifecycle service was verified.
-
-### Scheduling / reminders
-**NOT FOUND**
-
-No scheduler, reminder worker, notification lifecycle or due-follow-up processor was verified in the inspected runtime.
-
-### Completion
-**NOT FOUND**
-
-No durable follow-up completion state or completion endpoint was verified.
-
-### Cancellation
-**NOT FOUND**
-
-No cancellation state or cancellation endpoint was verified.
-
-### Rescheduling
-**NOT FOUND**
-
-No rescheduling operation or lifecycle state transition was verified.
-
-### Active-follow-up invariant
-**NOT FOUND**
-
-Because `follow_up_at` belongs to individual Feedback rows, multiple Feedback rows can carry different dates. No single-active-follow-up invariant exists in the verified contract.
-
-## 5. Ownership / Authorization
+## 2. Durable Object
 
 **CONFIRMED IN CODE**
 
-Feedback creation and Case retrieval pass through authenticated customer identity and Case ownership validation.
+Current Master contains a dedicated `FollowUp` model with:
 
-The explicit Customer Response action also requires the authenticated customer to own the Case.
+- `follow_up_id`
+- `case_id`
+- nullable `recommendation_id`
+- nullable `feedback_id`
+- `scheduled_at`
+- `status`
+- creation/update actor and timestamps
+- completion/cancellation timestamps
 
-There is currently no separate Follow-up endpoint whose authorization boundary must be audited.
+This establishes Follow-up as a durable object rather than Feedback metadata.
 
-## 6. Recommendation / Case Traceability
+## 3. Lifecycle
+
+**CONFIRMED IN CODE / TEST**
+
+The implemented state machine is:
+
+`SCHEDULED → COMPLETED`  
+`SCHEDULED → CANCELLED`
+
+Reschedule updates `scheduled_at` while preserving `SCHEDULED`.
+
+Terminal states reject further lifecycle mutation with a conflict response.
+
+## 4. Authorization
+
+**CONFIRMED IN CODE / TEST**
+
+Follow-up operations establish authenticated customer ownership of the target Case.
+
+Observed acceptance coverage includes:
+
+- unauthenticated access → 401;
+- non-owner Case → 403;
+- missing Case → 404;
+- cross-Case Follow-up mutation → 403.
+
+The authorization boundary remains Case-centered.
+
+## 5. Traceability
+
+**CONFIRMED IN CODE / TEST**
+
+When supplied, Recommendation and Feedback references are validated before Follow-up creation.
+
+Both must belong to the same Case as the Follow-up.
+
+Therefore the durable trace is:
+
+`Customer → Case → FollowUp`
+
+with optional:
+
+`Case → Recommendation / Feedback → FollowUp`
+
+## 6. API Surface
+
+**CONFIRMED IN CODE / TEST**
+
+The implementation provides dedicated operations for:
+
+1. Create
+2. Case-scoped Retrieve
+3. Reschedule
+4. Complete
+5. Cancel
+
+The lifecycle is therefore explicit rather than encoded through arbitrary Feedback mutations.
+
+## 7. Audit
 
 **CONFIRMED IN CODE**
 
-Current durable relation:
+Dedicated lifecycle audit events are emitted for:
 
-`Customer → owned Case → Recommendation → Feedback → follow_up_at`
-
-When a Recommendation is supplied:
-- it must exist;
-- it must belong to the supplied Case;
-- the Feedback row stores its Recommendation ID.
-
-Follow-up metadata therefore remains attached to the Feedback event, not to an independent Follow-up object.
-
-## 7. Outcome Boundary
-
-**CONFIRMED IN CODE**
-
-PR #238 now enforces the explicit Customer Response vocabulary:
-
-- `ACCEPTED`
-- `REJECTED`
-- `PARTIAL`
-- `FOLLOW_UP_NEEDED`
-
-`FOLLOW_UP_NEEDED` is an outcome label. It does not itself create a Follow-up record, reminder, task or lifecycle state.
-
-This distinction is important:
-
-**reported outcome ≠ scheduled follow-up lifecycle**
-
-## 8. Existing Tests
-
-**CONFIRMED IN TEST**
-
-The consultation vertical-slice tests verify Customer Response authentication, Case ownership, Recommendation linkage, persistence and retrieval.
-
-The current inspected test suite does not establish a dedicated Follow-up lifecycle contract. That matches the runtime evidence: there is no such subsystem to test.
-
-## 9. Documentation Consistency
-
-**CONFIRMED IN DOC / CONFLICT WITH HISTORICAL BASELINE**
-
-Older consultation documentation correctly described `follow_up_at` as Feedback metadata and deferred richer Follow-up lifecycle behavior.
-
-Some historical documents were written before PR #238 and therefore describe Outcome as open runtime vocabulary. Current Master has since closed that vocabulary specifically for the explicit Customer Response action.
-
-For Follow-up, however, the historical statement remains accurate:
-
-**Feedback date metadata exists; a Follow-up lifecycle subsystem does not.**
-
-## 10. Confirmed Gaps
-
-1. No dedicated Follow-up entity.
-2. No Follow-up lifecycle service.
-3. No scheduler/reminder subsystem.
-4. No completion state.
-5. No cancellation state.
-6. No rescheduling state.
-7. No single-active-follow-up invariant.
-8. No dedicated Follow-up retrieval/action API.
-9. No dedicated Follow-up audit lifecycle.
-10. No UI/runtime contract proving a Follow-up task lifecycle.
-
-## 11. Smallest Next Vertical Slice
-
-The evidence supports one narrow next boundary:
-
-`Feedback.follow_up_at → Explicit Follow-up Record / Lifecycle`
-
-However, this should **not** be implemented merely by adding another field or endpoint to Feedback.
-
-The minimum coherent lifecycle requires a defined contract for:
-- Follow-up identity;
-- Case ownership;
-- optional Recommendation/Feedback linkage;
-- scheduled time;
-- lifecycle state;
-- completion;
-- cancellation;
+- creation;
 - rescheduling;
-- audit;
-- retrieval.
+- completion;
+- cancellation.
 
-Until that contract is explicitly accepted, the current safe runtime remains:
+Events contain target and actor information sufficient for the V1 lifecycle boundary.
 
-**Feedback + optional follow_up_at metadata**
+## 8. Feedback Compatibility
 
-## 12. Implementation Constraints
+**CONFIRMED IN CODE**
 
-If a Follow-up implementation is authorized later:
-- begin with a dedicated contract/reality gate for lifecycle states;
-- preserve existing Feedback semantics;
-- do not reinterpret `FOLLOW_UP_NEEDED` as an automatic scheduled task;
-- preserve Case ownership;
-- preserve Recommendation/Feedback traceability;
-- define audit for every lifecycle mutation;
-- avoid automatic scheduling until a lifecycle state machine is explicitly defined;
-- no changes to Recommendation scoring/ranking/eligibility/evidence;
-- no ProfileFact writes;
-- no Usage or CustomerChoice implementation hidden inside Follow-up;
-- no schema change without an explicit implementation contract.
+`Feedback.follow_up_at` remains available.
 
-## 13. Final Gate Verdict
+The implementation does not silently rewrite or backfill existing Feedback metadata.
 
-**READY FOR NEXT VERTICAL SLICE**
+This preserves backward compatibility while allowing new Follow-up records to carry their own lifecycle.
 
-Reason: the repository has reliable follow-up **metadata**, but no Follow-up **lifecycle**. The next implementation boundary, if authorized, is therefore a dedicated Follow-up lifecycle contract rather than incremental mutation of Feedback.
+## 9. Explicit Exclusions
 
-**This gate authorizes no implementation by itself.**
+The audited implementation does not introduce, as part of this Slice:
 
-*End of HBI Consultation Follow-up Lifecycle Reality Gate v0.1.*
+- scheduler;
+- notification worker;
+- background jobs;
+- automatic Follow-up creation;
+- Usage;
+- Outcome Assessment;
+- Learning integration;
+- Recommendation scoring/ranking/eligibility changes;
+- ProfileFact changes;
+- UI redesign.
+
+These remain separate boundaries.
+
+## 10. CI / Merge Evidence
+
+- PR #246 exact HEAD: `fe3d7d432cd4cb3c363b75ee16d72919ce4fb219`
+- HBI CI #841 / run `36112215809`: `test` SUCCESS; `governance-tests` SUCCESS.
+- Independent verification was recorded before merge.
+- Post-merge Master: `1175b6ad49794704b1cacf89b25ce8c7469cc57a`
+- FollowUp model/API presence was verified on Master.
+
+## 11. Contract-vs-Reality Result
+
+| Contract requirement | Reality |
+|---|---|
+| Dedicated identity | CONFIRMED |
+| Durable persistence | CONFIRMED |
+| Case ownership | CONFIRMED |
+| Same-Case Recommendation trace | CONFIRMED |
+| Same-Case Feedback trace | CONFIRMED |
+| SCHEDULED state | CONFIRMED |
+| COMPLETED transition | CONFIRMED |
+| CANCELLED transition | CONFIRMED |
+| Reschedule without state change | CONFIRMED |
+| Terminal mutation guard | CONFIRMED |
+| Create/Retrieve/Reschedule/Complete/Cancel | CONFIRMED |
+| Lifecycle audit | CONFIRMED |
+| Feedback.follow_up_at compatibility | CONFIRMED |
+| Scheduler/Notification V1 exclusion | CONFIRMED |
+| Recommendation/ProfileFact/Learning isolation | CONFIRMED |
+
+## 12. Gate Decision
+
+**ACCEPTED — READY FOR NEXT VERTICAL SLICE**
+
+The Follow-up lifecycle boundary is now sufficiently represented in code, persistence, authorization, tests, and audit to move forward.
+
+Any next capability must receive its own explicit boundary and reality verification rather than being appended informally to Follow-up.
+
+*End of HBI Consultation Follow-up Lifecycle Reality Gate v0.2.*
