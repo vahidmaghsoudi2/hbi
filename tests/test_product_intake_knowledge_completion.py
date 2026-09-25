@@ -78,7 +78,7 @@ def test_approved_evidence_populates_completion_fields(db):
     knowledge = ProductKnowledgeService(db).update_from_evidence("P-KC-001")
 
     assert set(knowledge.ingredient_roles.split(", ")) == {"humectant", "emollient"}
-    assert knowledge.usage_instructions == "apply twice daily, use after cleansing"
+    assert set(knowledge.usage_instructions.split(", ")) == {"apply twice daily", "use after cleansing"}
     assert set(knowledge.manufacturer_claims.split(", ")) == {"fragrance-free", "dermatologist tested"}
 
 
