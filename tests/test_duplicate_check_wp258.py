@@ -46,8 +46,8 @@ def test_different_size_is_not_existing(client, db_session):
         "variant": "clear", "size_value": 100, "size_unit": "ml"
     })
     assert r.status_code == 200
-    assert r.json()["result"] == "POSSIBLE_MATCH"
-    assert "size_value" in r.json()["candidates"][0]["conflicting_fields"]
+    assert r.json()["result"] == "NEW"
+    assert r.json()["candidates"] == []
 
 
 def test_different_variant_is_not_existing(client, db_session):
@@ -58,8 +58,8 @@ def test_different_variant_is_not_existing(client, db_session):
         "variant": "tinted", "size_value": 50, "size_unit": "ml"
     })
     assert r.status_code == 200
-    assert r.json()["result"] == "POSSIBLE_MATCH"
-    assert "variant" in r.json()["candidates"][0]["conflicting_fields"]
+    assert r.json()["result"] == "NEW"
+    assert r.json()["candidates"] == []
 
 
 def test_packaging_change_keeps_same_business_product_as_review_candidate(client, db_session):
