@@ -35,6 +35,8 @@ def _product(db_session, product_id="G2-G4-001"):
         status="ACTIVE",
     )
     db_session.add(product)
+    db_session.commit()
+
     db_session.add(
         Inventory(
             inventory_id=f"INV-{product_id}",
@@ -172,7 +174,6 @@ def test_conflict_resolution_closes_pair_and_propagates_to_knowledge_and_recomme
     blocked_knowledge = ProductKnowledgeService(db_session).get_or_create(product_id)
     assert blocked_knowledge.known_use_cases is None
 
-    # Conflict remains a hard recommendation gate before resolution.
     before = RecommendationService(db_session).generate_recommendations(
         "CASE-G2-G4",
         {"customer_id": "C-G2-G4", "concerns": "hydration"},
