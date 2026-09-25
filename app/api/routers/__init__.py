@@ -12,10 +12,11 @@ from app.api.routers.fx import router as fx_router
 from app.api.routers.reports import router as reports_router
 from app.api.routers.specialist import router as specialist_router
 from app.api.routers.followups import router as followups_router
+from app.api.routers.outcome_assessments import router as outcome_assessments_router
 
 __all__ = [
     "auth_router", "products_router", "customers_router", "cases_router",
     "recommendations_router", "inventory_router", "sales_router", "evidence_router",
     "payments_router", "returns_router", "fx_router", "reports_router",
-    "specialist_router", "followups_router",
+    "specialist_router", "followups_router", "outcome_assessments_router",
 ]
