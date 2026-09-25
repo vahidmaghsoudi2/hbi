@@ -64,7 +64,7 @@ def _ensure_accounting_control_columns():
 
 
 def init_db():
-    from app.models import product, product_knowledge, evidence, customer, case, recommendation, inventory, sale, sale_item, category, stock_movement, payment, sale_return, operational_fx_rate, product_mutation_log, user_role, profile_fact, admin_credential, feedback, follow_up, outcome_assessment
+    from app.models import product, product_knowledge, evidence, customer, case, recommendation, inventory, sale, sale_item, category, stock_movement, payment, sale_return, operational_fx_rate, product_mutation_log, duplicate_check_audit, user_role, profile_fact, admin_credential, feedback, follow_up, outcome_assessment
     Base.metadata.create_all(bind=engine)
     _ensure_recommendation_trace_columns()
     _ensure_accounting_control_columns()
