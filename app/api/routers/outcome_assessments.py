@@ -117,3 +117,18 @@ async def list_outcome_assessments(
 ) -> List[dict]:
     _assert_case_owned(db, case_id, customer_id)
     return [_to_dict(item) for item in OutcomeAssessmentService(db).list_by_case(case_id, recommendation_id)]
+
+
+@router.get("/profile-history")
+async def list_profile_outcome_assessment_history(
+    db: Session = Depends(get_db),
+    customer_id: str = Depends(get_current_customer_id),
+) -> List[dict]:
+    """Customer Profile longitudinal projection of Outcome Assessments.
+
+    Case remains authoritative source of truth. This endpoint aggregates
+    Case-owned assessments for the authenticated customer without creating
+    ProfileFact records or becoming a second source of truth.
+    """
+    items = OutcomeAssessmentService(db).list_by_customer(customer_id)
+    return [_to_dict(item) for item in items]
