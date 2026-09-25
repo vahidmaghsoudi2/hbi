@@ -117,3 +117,14 @@ class OutcomeAssessmentService:
         if recommendation_id:
             query = query.filter(OutcomeAssessment.recommendation_id == recommendation_id)
         return query.order_by(OutcomeAssessment.observed_at.desc(), OutcomeAssessment.created_at.desc()).all()
+
+    def list_by_customer(self, customer_id: str):
+        """Profile projection: longitudinal assessments for all Cases owned by customer.
+        Case remains source of truth; this is a read-only aggregation."""
+        return (
+            self.db.query(OutcomeAssessment)
+            .join(Case, Case.case_id == OutcomeAssessment.case_id)
+            .filter(Case.customer_id == customer_id)
+            .order_by(OutcomeAssessment.observed_at.desc(), OutcomeAssessment.created_at.desc())
+            .all()
+        )
