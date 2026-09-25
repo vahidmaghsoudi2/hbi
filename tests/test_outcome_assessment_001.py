@@ -173,3 +173,51 @@ def test_outcome_assessment_rejects_product_without_case_trace(client, db_sessio
         json={"case_id": case_id, "product_id": "OA-PROD-UNTRACED", "result_state": "NO_BENEFIT"},
     )
     assert response.status_code == 422
+
+
+def test_outcome_assessment_profile_history_projection(client, db_session):
+    """Profile projection aggregates Case-owned assessments; Case remains SoT."""
+    case_id, foreign_case_id = _seed_case(db_session)
+    rec_id, product_id = _seed_recommendation(db_session, case_id)
+    _seed_recommendation(db_session, foreign_case_id, "OA-REC-2", "OA-PROD-2")
+    own = client.post(
+        "/api/v1/outcome-assessments",
+        headers=_headers("OA-CUST-1"),
+        json={
+            "case_id": case_id,
+            "recommendation_id": rec_id,
+            "product_id": product_id,
+            "result_state": "POSITIVE",
+        },
+    )
+    assert own.status_code == 201, own.text
+    foreign = client.post(
+        "/api/v1/outcome-assessments",
+        headers=_headers("OA-CUST-2"),
+        json={
+            "case_id": foreign_case_id,
+            "recommendation_id": "OA-REC-2",
+            "product_id": "OA-PROD-2",
+            "result_state": "NO_BENEFIT",
+        },
+    )
+    assert foreign.status_code == 201, foreign.text
+
+    hist = client.get(
+        "/api/v1/outcome-assessments/profile-history",
+        headers=_headers("OA-CUST-1"),
+    )
+    assert hist.status_code == 200
+    rows = hist.json()
+    assert len(rows) == 1
+    assert rows[0]["case_id"] == case_id
+    assert rows[0]["result_state"] == "POSITIVE"
+
+    facts = client.get("/api/v1/customers/profile-facts", headers=_headers("OA-CUST-1"))
+    assert facts.status_code == 200
+    assert facts.json() == [] or isinstance(facts.json(), list)
+
+
+def test_outcome_assessment_profile_history_unauthenticated(client, db_session):
+    unauth = client.get("/api/v1/outcome-assessments/profile-history")
+    assert unauth.status_code == 401
