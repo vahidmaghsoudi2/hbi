@@ -124,3 +124,171 @@ def test_operator_decision_is_persisted_and_visible(client, db_session):
     row = next(x for x in audit.json() if x["check_id"] == check_id)
     assert row["operator_decision"] is not None
     assert row["operator_decision"]["final_product_name"] == "Hydra Cream New"
+
+
+def test_exact_product_id_is_existing(client, db_session):
+    _role(db_session)
+    _product(db_session, "P258-ID")
+    r = client.post("/api/v1/products/duplicate-check/", headers=_headers(), json={
+        "product_id": "P258-ID", "brand": "HBI", "product_name": "Hydra Cream",
+    })
+    assert r.status_code == 200, r.text
+    assert r.json()["result"] == "EXISTING"
+    assert r.json()["reason"] == "EXACT_PRODUCT_ID"
+
+
+def test_duplicate_check_without_token_is_401(client, db_session):
+    _product(db_session, "P258-AUTH")
+    r = client.post("/api/v1/products/duplicate-check/", json={
+        "product_id": "P258-AUTH",
+    })
+    assert r.status_code == 401
+
+
+def test_duplicate_check_with_unauthorized_role_is_403(client, db_session):
+    subject = "wp258-unauthorized"
+    db_session.add(UserRole(
+        user_role_id=f"UR-{subject}",
+        subject_id=subject,
+        role="CUSTOMER",
+    ))
+    db_session.flush()
+    r = client.post("/api/v1/products/duplicate-check/",
+                    headers=_headers(subject),
+                    json={"product_id": "P258-AUTH"})
+    assert r.status_code == 403
+
+
+def test_p4_governance_fields_are_preserved_through_check_and_decision(client, db_session):
+    _role(db_session)
+    product = _product(db_session, "P258-P4")
+    before = (product.status, product.identity_status, product.qa_verdict)
+
+    r = client.post("/api/v1/products/duplicate-check/", headers=_headers(), json={
+        "product_id": "P258-P4",
+        "brand": "HBI",
+        "product_name": "Hydra Cream",
+    })
+    assert r.status_code == 200, r.text
+
+    d = client.post(
+        f"/api/v1/products/duplicate-check/audit/{r.json()['check_id']}/decision",
+        headers=_headers(),
+        json={"decision": "EXISTING", "selected_product_id": "P258-P4",
+              "reason": "Exact Product ID"},
+    )
+    assert d.status_code == 200, d.text
+    db_session.refresh(product)
+    after = (product.status, product.identity_status, product.qa_verdict)
+    assert after == before
+
+
+def test_audit_completeness_has_required_fields_and_decision(client, db_session):
+    _role(db_session)
+    _product(db_session, "P258-AUDIT")
+    r = client.post("/api/v1/products/duplicate-check/", headers=_headers(), json={
+        "product_id": "NEW-ID", "brand": "HBI", "product_name": "Other Entry",
+    })
+    assert r.status_code == 200, r.text
+    check_id = r.json()["check_id"]
+
+    d = client.post(
+        f"/api/v1/products/duplicate-check/audit/{check_id}/decision",
+        headers=_headers(),
+        json={"decision": "RENAME", "final_product_name": "Other Entry New",
+              "reason": "Audit evidence"},
+    )
+    assert d.status_code == 200, d.text
+
+    audit = client.get("/api/v1/products/duplicate-check/audit", headers=_headers())
+    assert audit.status_code == 200, audit.text
+    row = next(x for x in audit.json() if x["check_id"] == check_id)
+    for key in ("check_id", "timestamp", "actor_id", "actor_role", "result",
+                "product_id", "input_snapshot", "candidates", "operator_decision"):
+        assert row[key] is not None
+    assert row["check_id"] == check_id
+    assert row["actor_id"] == "wp258-editor"
+    assert row["actor_role"] == ROLE_EDITOR
+    assert row["result"] == "NEW"
+    assert row["product_id"] == "NEW-ID"
+    assert row["input_snapshot"]["product_name"] == "Other Entry"
+    assert isinstance(row["candidates"], list)
+    assert row["operator_decision"]["decision"] == "RENAME"
+    assert row["operator_decision"]["final_product_name"] == "Other Entry New"
+
+
+def test_operator_existing_without_selected_product_id_is_rejected(client, db_session):
+    _role(db_session)
+    _product(db_session, "P258-EXISTING")
+    r = client.post("/api/v1/products/duplicate-check/", headers=_headers(), json={
+        "product_id": "P258-EXISTING",
+    })
+    assert r.status_code == 200
+    d = client.post(
+        f"/api/v1/products/duplicate-check/audit/{r.json()['check_id']}/decision",
+        headers=_headers(),
+        json={"decision": "EXISTING"},
+    )
+    assert d.status_code == 422
+
+
+def test_operator_existing_with_selected_product_id_is_accepted(client, db_session):
+    _role(db_session)
+    _product(db_session, "P258-EXISTING-OK")
+    r = client.post("/api/v1/products/duplicate-check/", headers=_headers(), json={
+        "product_id": "P258-EXISTING-OK",
+    })
+    assert r.status_code == 200
+    d = client.post(
+        f"/api/v1/products/duplicate-check/audit/{r.json()['check_id']}/decision",
+        headers=_headers(),
+        json={"decision": "EXISTING", "selected_product_id": "P258-EXISTING-OK"},
+    )
+    assert d.status_code == 200
+    assert d.json()["operator_decision"]["decision"] == "EXISTING"
+
+
+def test_operator_rename_without_final_product_name_is_rejected(client, db_session):
+    _role(db_session)
+    _product(db_session, "P258-RENAME")
+    r = client.post("/api/v1/products/duplicate-check/", headers=_headers(), json={
+        "product_id": "P258-RENAME",
+    })
+    assert r.status_code == 200
+    d = client.post(
+        f"/api/v1/products/duplicate-check/audit/{r.json()['check_id']}/decision",
+        headers=_headers(),
+        json={"decision": "RENAME"},
+    )
+    assert d.status_code == 422
+
+
+def test_operator_rename_with_final_product_name_is_accepted(client, db_session):
+    _role(db_session)
+    _product(db_session, "P258-RENAME-OK")
+    r = client.post("/api/v1/products/duplicate-check/", headers=_headers(), json={
+        "product_id": "P258-RENAME-OK",
+    })
+    assert r.status_code == 200
+    d = client.post(
+        f"/api/v1/products/duplicate-check/audit/{r.json()['check_id']}/decision",
+        headers=_headers(),
+        json={"decision": "RENAME", "final_product_name": "Hydra Cream Renamed"},
+    )
+    assert d.status_code == 200
+    assert d.json()["operator_decision"]["decision"] == "RENAME"
+
+
+def test_invalid_operator_decision_is_rejected(client, db_session):
+    _role(db_session)
+    _product(db_session, "P258-INVALID")
+    r = client.post("/api/v1/products/duplicate-check/", headers=_headers(), json={
+        "product_id": "P258-INVALID",
+    })
+    assert r.status_code == 200
+    d = client.post(
+        f"/api/v1/products/duplicate-check/audit/{r.json()['check_id']}/decision",
+        headers=_headers(),
+        json={"decision": "INVALID"},
+    )
+    assert d.status_code == 422
