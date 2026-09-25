@@ -96,7 +96,7 @@ if ConsentError:
     async def consent_handler(request, exc):
         return JSONResponse(
             status_code=403,
-            content={"error": {"code": "CONSENT_REQUIRED", "message": str(exc)},
+            content={"error": {"code": "CONSENT_REQUIRED", "message": str(exc)}},
         )
 
 if ValidationError:
@@ -104,7 +104,7 @@ if ValidationError:
     async def validation_handler(request, exc):
         return JSONResponse(
             status_code=422,
-            content={"error": {"code": "VALIDATION_ERROR", "message": str(exc)},
+            content={"error": {"code": "VALIDATION_ERROR", "message": str(exc)}},
         )
 
 app.include_router(auth_router, prefix="/api/v1/auth", tags=["Authentication"])
