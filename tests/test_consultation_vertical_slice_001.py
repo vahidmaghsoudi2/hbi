@@ -618,6 +618,93 @@ def test_customer_response_rejects_recommendation_from_other_case(client):
     assert "does not belong to the given case" in r.text
 
 
+@pytest.mark.parametrize("outcome", ["ACCEPTED", "REJECTED", "PARTIAL", "FOLLOW_UP_NEEDED"])
+def test_customer_response_accepts_documented_outcome_values(client, outcome):
+    headers, case_id = _create_owned_case(client, "CUST-CVS-1")
+    db = _runtime_session()
+    try:
+        from app.models.recommendation import Recommendation
+        db.add(Recommendation(
+            recommendation_id=f"REC-CUSTOMER-OUTCOME-{outcome}",
+            case_id=case_id,
+            product_id="ISDIN-FOTOUTRA100-50ML",
+            eligibility_status="ELIGIBLE",
+            ranking_score=1.0,
+        ))
+        db.commit()
+    finally:
+        db.close()
+
+    response = client.post(
+        "/api/v1/specialist/feedback/customer-response",
+        headers=headers,
+        json={
+            "case_id": case_id,
+            "recommendation_id": f"REC-CUSTOMER-OUTCOME-{outcome}",
+            "outcome": outcome.lower(),
+        },
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["outcome"] == outcome
+
+
+def test_customer_response_allows_omitted_outcome(client):
+    headers, case_id = _create_owned_case(client, "CUST-CVS-1")
+    db = _runtime_session()
+    try:
+        from app.models.recommendation import Recommendation
+        db.add(Recommendation(
+            recommendation_id="REC-CUSTOMER-OUTCOME-OMITTED",
+            case_id=case_id,
+            product_id="ISDIN-FOTOUTRA100-50ML",
+            eligibility_status="ELIGIBLE",
+            ranking_score=1.0,
+        ))
+        db.commit()
+    finally:
+        db.close()
+
+    response = client.post(
+        "/api/v1/specialist/feedback/customer-response",
+        headers=headers,
+        json={
+            "case_id": case_id,
+            "recommendation_id": "REC-CUSTOMER-OUTCOME-OMITTED",
+        },
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["outcome"] is None
+
+
+def test_customer_response_rejects_invalid_outcome(client):
+    headers, case_id = _create_owned_case(client, "CUST-CVS-1")
+    db = _runtime_session()
+    try:
+        from app.models.recommendation import Recommendation
+        db.add(Recommendation(
+            recommendation_id="REC-CUSTOMER-OUTCOME-INVALID",
+            case_id=case_id,
+            product_id="ISDIN-FOTOUTRA100-50ML",
+            eligibility_status="ELIGIBLE",
+            ranking_score=1.0,
+        ))
+        db.commit()
+    finally:
+        db.close()
+
+    response = client.post(
+        "/api/v1/specialist/feedback/customer-response",
+        headers=headers,
+        json={
+            "case_id": case_id,
+            "recommendation_id": "REC-CUSTOMER-OUTCOME-INVALID",
+            "outcome": "PURCHASED",
+        },
+    )
+    assert response.status_code == 422, response.text
+    assert "Expected one of" in response.text
+
+
 def test_customer_response_persists_customer_source_and_is_retrievable(client):
     headers, case_id = _create_owned_case(client, "CUST-CVS-1")
     db = _runtime_session()
