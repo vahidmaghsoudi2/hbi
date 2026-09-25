@@ -91,9 +91,13 @@ class DuplicateCheckService:
             ]
             for product in exact_name_candidates:
                 conflicts = self._conflicts(product, data)
+                # PO decision: a size or variant/type/color difference identifies
+                # a distinct Product. It is not a duplicate candidate.
+                if "size_value" in conflicts or "size_unit" in conflicts or "variant" in conflicts:
+                    continue
                 tier = "EXACT_NAME_OPERATOR_REVIEW"
                 candidates.append(self._candidate(product, "POSSIBLE_MATCH", tier, conflicts))
-            if exact_name_candidates:
+            if candidates:
                 result = "POSSIBLE_MATCH"
                 reason = "EXACT_NAME_REQUIRES_OPERATOR_REVIEW"
 
