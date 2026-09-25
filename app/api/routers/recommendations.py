@@ -8,6 +8,7 @@ from app.core.deps import get_db, get_current_customer_id
 from app.interface.facades import RecommendationFacade
 from app.models.case import Case
 from app.services.profile_fact_context_service import ProfileFactContextService
+from app.services.outcome_assessment_context_service import OutcomeAssessmentContextService
 from app.services.skin_next_question_service import SkinNextQuestionService
 from app.interface.errors import NotFoundError, BusinessRuleError
 
@@ -55,6 +56,9 @@ async def generate_recommendations(
         consultation_profile = ProfileFactContextService(db).build(
             case,
             case_input,
+        )
+        consultation_profile["_outcome_assessment_context"] = (
+            OutcomeAssessmentContextService(db).build_for_case(case)
         )
         facade = RecommendationFacade(db)
         dtos = facade.generate(request.case_id, consultation_profile)
