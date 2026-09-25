@@ -2,165 +2,289 @@
 
 | Field | Value |
 |---|---|
-| Baseline | `265e29c430631c428cd2e0abb47bb677fb8dc84f` |
+| Baseline | `f31df40db18e7365eed096fc804a5aebc0fa6924` |
 | Gate | HBI-CONSULTATION-OUTCOME-FOLLOWUP-REALITY-GATE-002 |
 | Scope | Customer Response → Outcome / Follow-up |
 | Implementation | **NOT AUTHORIZED BY THIS GATE** |
 | Verdict | **READY FOR NEXT VERTICAL SLICE** |
 
 ## 1. Baseline
-Current Master is `265e29c430631c428cd2e0abb47bb677fb8dc84f`. The Customer Response slice is already present in Master through `POST /api/v1/customers/feedback`.
+
+This audit is anchored to the actual current Master after PR #233:
+
+`f31df40db18e7365eed096fc804a5aebc0fa6924`
+
+PR #233 is merged. Issue #232 is completed. The explicit Customer Response action is therefore current repository reality, not a proposed feature.
+
+The previous v0.1 gate used an earlier baseline and is historical evidence only.
 
 ## 2. Files / Code Paths
-Evidence inspected:
+
+Directly inspected at the current Master baseline:
+
 - `app/models/feedback.py`
 - `app/services/feedback_service.py`
-- `app/api/routers/customers.py`
 - `app/api/routers/specialist.py`
-- `tests/test_consultation_response_vertical_slice_001.py`
+- `app/api/routers/recommendations.py` and related consultation paths as required by the existing slice
 - `tests/test_consultation_vertical_slice_001.py`
+- `app/core/audit.py`
 - `docs/architecture/HBI_CONSULTATION_FOLLOWUP_OUTCOME_REALITY_GATE_v0.1.md`
-- `docs/architecture/HBI_CONSULTATION_MINIMAL_CONTRACT_v0.1.md`
 
-Evidence statuses: **CONFIRMED IN CODE / CONFIRMED IN TEST / CONFIRMED IN DOC / NOT FOUND / CONFLICT / UNKNOWN**.
+Relevant current API paths:
+
+- `POST /api/v1/specialist/feedback`
+- `POST /api/v1/specialist/feedback/customer-response`
+- `GET /api/v1/specialist/feedback/case/{case_id}`
+
+Evidence status vocabulary:
+
+**CONFIRMED IN CODE / CONFIRMED IN TEST / CONFIRMED IN DOC / NOT FOUND / CONFLICT / UNKNOWN**
 
 ## 3. Customer Response Reality
+
 **CONFIRMED IN CODE / CONFIRMED IN TEST**
 
-The explicit customer-response path already provides authenticated Case ownership, required Recommendation linkage, same-Case validation, server-controlled `source=CUSTOMER`, durable Feedback, Case-scoped retrieval and response-specific audit evidence.
+The current Master contains the explicit Customer Response vertical slice introduced by PR #233.
 
-Issue #232 proposed the same slice after it had already been merged. It is therefore superseded by repository reality.
+Runtime contract:
+
+`Authenticated Customer → Owned Case → Existing Recommendation → Customer Response → Feedback(source=CUSTOMER) → Case-scoped Retrieval → Audit`
+
+The endpoint:
+
+`POST /api/v1/specialist/feedback/customer-response`
+
+- requires authentication;
+- verifies the authenticated customer owns the Case;
+- requires `recommendation_id`;
+- reuses `FeedbackService.create_feedback()`;
+- forces `source="CUSTOMER"` server-side;
+- validates that the Recommendation exists;
+- validates that the Recommendation belongs to the supplied Case;
+- persists Feedback;
+- records a response-specific `customer_response_created` audit event;
+- records `customer_response_rejected` for rejected service validation.
+
+The current focused tests cover authentication, foreign Case, missing Recommendation, Recommendation from another Case, durable persistence, CUSTOMER source and Case-scoped retrieval.
 
 ## 4. Outcome Runtime Contract
 
 ### Carrier
+
 **CONFIRMED IN CODE**
 
-Outcome is nullable `Feedback.outcome`. No dedicated Outcome model/service exists.
+There is no dedicated Outcome entity or service.
 
-### Vocabulary
-**CONFIRMED IN DOC / PARTIAL IN CODE**
+The V1 carrier is nullable:
 
-Documented labels:
+`Feedback.outcome`
+
+### Values
+
+**CONFIRMED IN CODE / CONFIRMED IN DOC**
+
+The documented vocabulary is:
+
 - `ACCEPTED`
 - `REJECTED`
 - `PARTIAL`
 - `FOLLOW_UP_NEEDED`
 
-Runtime normalizes supplied text to uppercase but does not enforce this four-value vocabulary. Therefore the labels are documented vocabulary, not a proven closed runtime state machine.
+Runtime behavior is broader than that documentation:
 
-### Persistence / retrieval
-**CONFIRMED IN CODE / CONFIRMED IN TEST**
+- supplied outcome text is normalized to uppercase;
+- no database enum is enforced;
+- `FeedbackService` does not reject values outside the four documented labels.
 
-Outcome is persisted on Feedback and returned by retrieval. Existing tests exercise values including `ACCEPTED` and `PARTIAL`.
+Therefore the four labels are **documented vocabulary, not a closed runtime state machine**.
 
 ### Semantic boundary
+
 **CONFIRMED IN CODE / CONFIRMED IN DOC**
 
-A Feedback outcome is not proof of independent Customer Choice, purchase, product usage, observed outcome, or outcome assessment.
+A Feedback outcome is a reported customer response value. It is not, by itself, proof of:
+
+- Customer Choice as an independent domain event;
+- purchase;
+- product usage;
+- observed outcome;
+- outcome assessment.
+
+Purchase remains represented separately through the existing Recommendation → SaleItem trace.
 
 ## 5. Customer Choice Reality
+
 **NOT FOUND**
 
-No independent CustomerChoice model, service, or persistence field was verified. Specialist override actions are operator actions. Purchase remains transaction evidence and is distinct from customer response.
+No independent `CustomerChoice` model, service, persistence field, or API was verified.
+
+The current Customer Response action is explicit and Recommendation-linked, but its durable representation remains Feedback.
+
+Specialist Override actions are operator actions and are not Customer Choice.
 
 ## 6. Follow-up Runtime Reality
 
 ### Field
+
 **CONFIRMED IN CODE**
 
-`Feedback.follow_up_at` is nullable datetime, accepted by generic specialist Feedback creation and returned by retrieval.
+`Feedback.follow_up_at` is nullable `DateTime`.
 
-### Explicit customer-response action
-**CONFLICT / GAP**
+Generic Feedback creation accepts it and Case-scoped Feedback retrieval returns it.
 
-The customer-response request currently carries case, recommendation, outcome, rating and comment. It does not expose `follow_up_at`. This is compatible with the narrow response slice because follow-up metadata remains optional and outside that action.
+### Explicit Customer Response
+
+**CONFIRMED IN CODE**
+
+The explicit Customer Response request currently carries:
+
+- `case_id`
+- `recommendation_id`
+- `outcome`
+- `rating`
+- `comment`
+- `follow_up_at`
+
+The field is therefore available as optional metadata in the explicit response path. Its presence does not create a Follow-up lifecycle.
 
 ### Lifecycle
+
 **NOT FOUND**
 
-No Follow-up entity, scheduler, reminder, completion, cancellation or rescheduling contract was verified.
+No dedicated Follow-up entity, scheduler, reminder mechanism, completion state, cancellation state, rescheduling state, or active-follow-up invariant was verified.
 
-### Cardinality
-**CONFIRMED IN CODE**
+Current reality is therefore:
 
-Each Feedback row can carry its own `follow_up_at`; no single-active-follow-up invariant was verified.
+**follow-up date metadata on Feedback, not a Follow-up subsystem.**
 
 ### Audit
+
 **CONFIRMED IN CODE**
 
-Generic specialist Feedback audit records outcome and follow-up metadata. Customer-response audit records the response target and outcome.
+Generic Feedback creation records Feedback audit events. The explicit Customer Response path records a response-specific audit event containing the Case and Recommendation target and the persisted response state.
 
 ## 7. Usage / Observed Outcome Reality
 
-| Concept | Reality |
+| Concept | Status |
 |---|---|
 | Product Usage entity/service | **NOT FOUND** |
 | Customer usage confirmation | **NOT FOUND** |
 | Observed Outcome entity/service | **NOT FOUND** |
 | Outcome Assessment entity/service | **NOT FOUND** |
-| Learning / automatic recommendation update | **NOT FOUND / OUT OF SCOPE** |
+| Automatic recommendation learning/update | **NOT FOUND / OUT OF SCOPE** |
+
+The existing `Feedback.outcome` must remain interpreted as reported response data, not verified product-use or observed-result data.
 
 ## 8. Traceability
+
 **CONFIRMED IN CODE / CONFIRMED IN TEST**
 
-Current durable path:
+Current durable consultation response path:
 
 `Customer → owned Case → Recommendation → Feedback(source=CUSTOMER) → outcome`
 
-Purchase remains separate:
+The Feedback row carries both `case_id` and `recommendation_id`, and creation verifies that the Recommendation belongs to the Case.
+
+Current purchase trace is separate:
 
 `Recommendation → SaleItem → Sale`
 
-No evidence supports collapsing purchase, reported outcome and product usage into one lifecycle.
+This is transaction evidence. It is not independent Customer Choice evidence.
+
+Current retrieval boundary is:
+
+`GET /api/v1/specialist/feedback/case/{case_id}`
+
+No dedicated Recommendation-scoped Feedback retrieval endpoint was verified.
 
 ## 9. Documentation Consistency
-**CONFIRMED IN DOC**
 
-The existing v0.1 gate and Minimal Consultation Contract defer richer Outcome, Usage and Follow-up domains. Framework wording is broader than current runtime, so the distinction must remain explicit.
+**CONFIRMED IN DOC / PARTIAL CONSISTENCY**
+
+The v0.1 gate correctly deferred richer Outcome, Usage and Follow-up domains.
+
+The current repository now contains the explicit Customer Response slice, so any older document that describes that slice as merely proposed is historical and must not be treated as current Master reality.
+
+The safe current vocabulary is:
+
+- Customer Response: implemented as explicit CUSTOMER-sourced Feedback;
+- Outcome: nullable Feedback field, documented four-label vocabulary but open runtime values;
+- Customer Choice: not an independent persisted construct;
+- Purchase: Recommendation → SaleItem transaction trace;
+- Usage / Observed Outcome / Outcome Assessment: not implemented;
+- Follow-up: optional Feedback date metadata, no lifecycle subsystem.
 
 ## 10. Confirmed Gaps
-1. Outcome vocabulary is documented but not runtime-closed.
-2. Customer Choice persistence is absent.
+
+1. `Feedback.outcome` is documented but not runtime-closed.
+2. Customer Choice has no independent persistence model.
 3. Product Usage is absent.
 4. Observed Outcome / Outcome Assessment are absent.
 5. Follow-up has metadata but no lifecycle subsystem.
-6. Customer-response API does not expose optional `follow_up_at`.
-7. No Recommendation-scoped Feedback retrieval endpoint.
-8. No automatic learning from Feedback.
+6. No Recommendation-scoped Feedback retrieval endpoint was verified.
+7. No presentation event is durably recorded as a separate construct.
+8. Feedback does not automatically update recommendation learning or scoring.
+9. The Feedback routes remain under the specialist router even though Customer ownership is enforced for the explicit customer action; this is a route-organization issue, not evidence of an authorization bypass.
 
 ## 11. Smallest Next Vertical Slice
 
-The smallest evidence-bound next slice is:
+The smallest evidence-bound next boundary is:
 
-`Customer Response → Explicit Outcome Contract → Durable Feedback → Existing Recommendation/Case Trace`
+`Customer Response → Explicit Outcome Contract → Durable Feedback → Existing Case/Recommendation Trace`
 
-Boundary:
-- keep Feedback as the carrier;
-- keep `Feedback.outcome`;
-- enforce the documented four-value vocabulary **only for the explicit Customer Response action**, if implementation acceptance confirms this contract;
-- preserve generic specialist Feedback compatibility;
-- preserve ownership, Recommendation linkage, audit and retrieval;
+The repository already has the Customer Response action. The remaining narrow contract gap is the difference between **documented outcome vocabulary** and **runtime acceptance**.
+
+The candidate implementation boundary is therefore:
+
+- keep `Feedback.outcome` as the carrier;
+- define the accepted outcome vocabulary for the explicit Customer Response action;
+- reject invalid Customer Response outcome values at that action boundary;
+- preserve generic Feedback compatibility unless a separate contract authorizes changing it;
+- preserve Case ownership, Recommendation linkage, audit and retrieval;
 - introduce no Outcome entity;
+- introduce no CustomerChoice entity;
 - introduce no Usage entity;
 - introduce no Follow-up engine.
 
+This is the smallest boundary identified by the current evidence. It requires separate implementation authorization.
+
 ## 12. Implementation Constraints
-- Branch from current Master.
-- Change only the explicit Customer Response outcome boundary.
-- No Recommendation scoring/ranking/eligibility/evidence changes.
-- No ProfileFact writes.
-- No Sale/Usage/CustomerChoice/Follow-up entity or engine.
-- No schema migration.
-- Focused tests for accepted/rejected customer-response outcomes.
-- Full regression and governance checks on exact PR HEAD.
-- Independent verification before merge.
-- Exact post-merge Master verification.
+
+If separately authorized:
+
+- branch from the then-current Master;
+- change only the explicit Customer Response outcome contract;
+- preserve server-controlled `source=CUSTOMER`;
+- preserve Case ownership and Recommendation-to-Case validation;
+- preserve Feedback persistence and retrieval;
+- preserve audit behavior;
+- add focused valid/invalid outcome tests;
+- run full regression and governance checks on the exact PR HEAD;
+- independently verify the diff;
+- merge only with exact-head verification;
+- verify the resulting Master SHA and observable post-merge evidence.
+
+Explicitly excluded:
+
+- CustomerChoice entity;
+- Outcome entity;
+- Follow-up entity/engine;
+- Product Usage;
+- Observed Outcome;
+- Sale changes;
+- Recommendation scoring/ranking/eligibility/evidence changes;
+- ProfileFact writes;
+- Home/UI redesign;
+- questionnaire;
+- AI/image architecture;
+- schema/migration.
 
 ## 13. Final Gate Verdict
 
 **READY FOR NEXT VERTICAL SLICE**
 
-Reason: Customer Response already exists durably. The next narrow repository-backed boundary is explicit outcome vocabulary enforcement on the Customer Response action, while broader Outcome/Usage/Follow-up systems remain deferred.
+Reason: the current Master has a durable, authenticated, Recommendation-linked Customer Response path. The next smallest repository-backed boundary is the explicit Outcome contract, while richer Customer Choice, Outcome, Usage and Follow-up lifecycle domains remain outside current runtime reality.
+
+**This gate authorizes no implementation by itself. Separate PO implementation authorization is required.**
 
 *End of HBI Consultation Outcome / Follow-up Reality Gate v0.2.*
