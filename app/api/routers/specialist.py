@@ -20,6 +20,13 @@ from app.services.feedback_service import FeedbackService
 
 router = APIRouter()
 
+CUSTOMER_RESPONSE_OUTCOMES = {
+    "ACCEPTED",
+    "REJECTED",
+    "PARTIAL",
+    "FOLLOW_UP_NEEDED",
+}
+
 
 def _assert_case_owned(db: Session, case_id: str, customer_id: str) -> Case:
     case = db.get(Case, case_id)
@@ -240,12 +247,36 @@ async def create_customer_response(
     customer_id: str = Depends(get_current_customer_id),
 ) -> dict:
     _assert_case_owned(db, body.case_id, customer_id)
+    normalized_outcome = (body.outcome or "").strip().upper() or None
+    if normalized_outcome is not None and normalized_outcome not in CUSTOMER_RESPONSE_OUTCOMES:
+        audit_event(
+            "customer_response_rejected",
+            customer_id=customer_id,
+            path="/api/v1/specialist/feedback/customer-response",
+            outcome="error",
+            detail=f"Invalid customer response outcome: {normalized_outcome}",
+            extra={
+                "target": {
+                    "case_id": body.case_id,
+                    "recommendation_id": body.recommendation_id,
+                },
+                "reason": "outcome_not_in_customer_response_vocabulary",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            },
+        )
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=(
+                "Invalid customer response outcome. Expected one of: "
+                "ACCEPTED, REJECTED, PARTIAL, FOLLOW_UP_NEEDED"
+            ),
+        )
     svc = FeedbackService(db)
     try:
         fb = svc.create_feedback(
             case_id=body.case_id,
             source="CUSTOMER",
-            outcome=body.outcome,
+            outcome=normalized_outcome,
             rating=body.rating,
             comment=body.comment,
             recommendation_id=body.recommendation_id,
