@@ -84,12 +84,14 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
 
         evidence = self.repository.create(**data)
         conflicts = self.detect_conflicts(product_id)
-        if conflicts:
-            for conf in conflicts:
-                self._log_conflict(product_id, conf["field"], conf["values"])
-            if any(conf["new_evidence_id"] == evidence.evidence_id for conf in conflicts):
-                self.repository.update(evidence.evidence_id, conflict_status="CONFLICT")
-                evidence = self.repository.get_by_id(evidence.evidence_id)
+        for conf in conflicts:
+            self._log_conflict(product_id, conf["field"], conf["values"])
+            # A detected conflict is a pair/group state, not merely a flag on
+            # the newest row. Every member must be blocked until explicit
+            # resolution selects one claim.
+            for conflicting_id in conf["evidence_ids"]:
+                self.repository.update(conflicting_id, conflict_status="CONFLICT")
+        evidence = self.repository.get_by_id(evidence.evidence_id)
 
         self.audit.append(
             actor_id=actor_id,
@@ -184,21 +186,47 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
         if not resolution or not resolution.strip():
             raise ValidationError("Conflict resolution reason is required")
 
-        evidence = self.get_by_id(evidence_id)
-        if not evidence:
+        selected = self.get_by_id(evidence_id)
+        if not selected:
             raise NotFoundError(f"Evidence {evidence_id} not found")
-        if evidence.conflict_status != "CONFLICT":
+        if selected.conflict_status != "CONFLICT":
             raise ValidationError("This evidence is not in conflict status.")
 
-        before = self.audit.snapshot(evidence)
-        current_notes = evidence.notes or ""
+        # The evidence_id is the explicit winning claim. Resolution is a
+        # governance decision, so every competing claim in the same field
+        # must be excluded from Knowledge/Recommendation.
+        field = selected.field or "general"
+        related = [
+            ev for ev in self.repository.find_by_product(selected.product_id)
+            if (ev.field or "general") == field
+            and ev.evidence_id != selected.evidence_id
+            and (ev.conflict_status or "").upper() == "CONFLICT"
+        ]
+
+        before = self.audit.snapshot(selected)
+        current_notes = selected.notes or ""
         new_notes = (
             f"{current_notes}\n"
             f"[RESOLVED] {resolution} at {datetime.now(timezone.utc).isoformat()}"
         )
         updated = self.repository.update(
-            evidence_id, conflict_status="NONE", notes=new_notes
+            selected.evidence_id, conflict_status="NONE", notes=new_notes
         )
+
+        for competing in related:
+            competing_notes = competing.notes or ""
+            rejected_notes = (
+                f"{competing_notes}\n"
+                f"[REJECTED_BY_CONFLICT_RESOLUTION winner={selected.evidence_id}] "
+                f"{resolution} at {datetime.now(timezone.utc).isoformat()}"
+            )
+            self.repository.update(
+                competing.evidence_id,
+                conflict_status="NONE",
+                qa_status="REJECTED",
+                notes=rejected_notes,
+            )
+
         if updated is not None:
             from app.services.product_knowledge_service import ProductKnowledgeService
             ProductKnowledgeService(self.db).update_from_evidence(updated.product_id)
@@ -210,7 +238,11 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
                 product_id=updated.product_id,
                 before=before,
                 after=self.audit.snapshot(updated),
-                diff={"conflict_status": {"old": "CONFLICT", "new": "NONE"}},
+                diff={
+                    "conflict_status": {"old": "CONFLICT", "new": "NONE"},
+                    "competing_evidence_ids": [ev.evidence_id for ev in related],
+                    "competing_resolution_state": "REJECTED",
+                },
                 reason=resolution,
                 resulting_state=updated.conflict_status,
                 correlation_id=correlation_id or f"EVID-{uuid.uuid4().hex}",
