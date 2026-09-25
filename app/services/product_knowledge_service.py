@@ -30,9 +30,12 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
         evidences = self.evidence_repo.find_by_product(product_id)
 
         ingredients = set()
+        ingredient_roles = set()
         benefits = set()
         use_cases = set()
         contraindications = set()
+        usage_instructions = set()
+        manufacturer_claims = set()
         evidence_refs = []
 
         approved: List[Evidence] = []
@@ -44,21 +47,30 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
             approved.append(ev)
             claim = ev.claim or ""
             if ev.field == "ingredients" and claim:
-                ingredients.update([i.strip() for i in claim.split(",")])
+                ingredients.update([i.strip() for i in claim.split(",") if i.strip()])
+            elif ev.field in ("ingredient_roles", "ingredient_role") and claim:
+                ingredient_roles.update([r.strip() for r in claim.split(",") if r.strip()])
             elif ev.field in ("claimed_benefits", "benefit") and claim:
-                benefits.update([b.strip() for b in claim.split(",")])
+                benefits.update([b.strip() for b in claim.split(",") if b.strip()])
             elif ev.field in ("known_use_cases", "use_case") and claim:
-                use_cases.update([u.strip() for u in claim.split(",")])
+                use_cases.update([u.strip() for u in claim.split(",") if u.strip()])
             elif ev.field == "contraindications" and claim:
-                contraindications.update([c.strip() for c in claim.split(",")])
+                contraindications.update([c.strip() for c in claim.split(",") if c.strip()])
+            elif ev.field in ("usage_instructions", "usage_instruction", "usage") and claim:
+                usage_instructions.update([u.strip() for u in claim.split(",") if u.strip()])
+            elif ev.field in ("manufacturer_claims", "manufacturer_claim", "claim") and claim:
+                manufacturer_claims.update([m.strip() for m in claim.split(",") if m.strip()])
             if ev.claim_id:
                 evidence_refs.append(ev.claim_id)
 
         update_data = {
             "ingredients": ", ".join(ingredients) if ingredients else None,
+            "ingredient_roles": ", ".join(ingredient_roles) if ingredient_roles else None,
             "claimed_benefits": ", ".join(benefits) if benefits else None,
             "known_use_cases": ", ".join(use_cases) if use_cases else None,
             "contraindications": ", ".join(contraindications) if contraindications else None,
+            "usage_instructions": ", ".join(usage_instructions) if usage_instructions else None,
+            "manufacturer_claims": ", ".join(manufacturer_claims) if manufacturer_claims else None,
             "evidence_refs": ", ".join(evidence_refs) if evidence_refs else None,
             "knowledge_confidence": self._calculate_confidence_from_evidences(approved),
         }
