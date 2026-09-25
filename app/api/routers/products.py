@@ -8,12 +8,13 @@ from app.core.governance import can_view_mutation_log
 from app.interface.facades import ProductFacade
 from app.interface.schemas import (
     ProductCreate, ProductUpdate, ProductTransitionRequest, ProductRejectRequest,
-    ProductQARequest, ProductIdentityVerifyRequest,
+    ProductQARequest, ProductIdentityVerifyRequest, ResearchDraftRequest,
 )
 from app.services.product_service import ProductService
 from app.services.product_transition_service import ProductTransitionService
 from app.services.mutation_log_service import MutationLogService
 from app.models.user_role import ROLE_EDITOR, ROLE_PO, ROLE_REVIEWER_QA, ROLE_ADMIN
+from app.services.research_draft_service import ResearchDraftService
 
 router = APIRouter()
 
@@ -47,6 +48,29 @@ async def list_manageable_products(
     auth=Depends(require_any_role(ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
 ):
     return [_to_dict(p) for p in ProductFacade(db).list_all()]
+
+
+@router.post("/{product_id}/research-draft")
+async def create_research_draft(
+    product_id: str,
+    payload: ResearchDraftRequest,
+    db: Session = Depends(get_db),
+    auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
+):
+    subject_id, roles = auth
+    try:
+        evidences = ResearchDraftService(db).create_draft(
+            product_id,
+            [item.model_dump(exclude_unset=True) for item in payload.assertions],
+            actor_id=subject_id,
+            actor_role=next(iter(roles), None),
+        )
+        return [
+            {k: v for k, v in vars(evidence).items() if not k.startswith("_")}
+            for evidence in evidences
+        ]
+    except Exception as e:
+        _http_from_domain(e)
 
 
 @router.get("/{product_id}")
