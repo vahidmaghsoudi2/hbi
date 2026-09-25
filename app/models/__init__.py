@@ -15,6 +15,7 @@ from app.models.payment import Payment
 from app.models.sale_return import SaleReturn
 from app.models.operational_fx_rate import OperationalFxRate
 from app.models.product_mutation_log import ProductMutationLog
+from app.models.duplicate_check_audit import DuplicateCheckAudit
 from app.models.user_role import UserRole
 from app.models.specialist_override import SpecialistOverride
 from app.models.feedback import Feedback
@@ -26,6 +27,6 @@ __all__ = [
     "Base", "Product", "ProductKnowledge", "Evidence", "Customer", "Case",
     "Recommendation", "Inventory", "Sale", "SaleItem", "Category", "ProfileFact",
     "StockMovement", "Payment", "SaleReturn", "OperationalFxRate",
-    "ProductMutationLog", "UserRole", "SpecialistOverride", "Feedback", "FollowUp",
-    "AdminCredential", "OutcomeAssessment",
+    "ProductMutationLog", "DuplicateCheckAudit", "UserRole", "SpecialistOverride",
+    "Feedback", "FollowUp", "AdminCredential", "OutcomeAssessment",
 ]
