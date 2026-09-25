@@ -13,7 +13,7 @@ from app.api.routers import (
     auth_router, products_router, customers_router, cases_router,
     recommendations_router, inventory_router, sales_router, evidence_router,
     payments_router, returns_router, fx_router, reports_router,
-    specialist_router,
+    specialist_router, followups_router,
 )
 
 try:
@@ -96,7 +96,7 @@ if ConsentError:
     async def consent_handler(request, exc):
         return JSONResponse(
             status_code=403,
-            content={"error": {"code": "CONSENT_REQUIRED", "message": str(exc)}},
+            content={"error": {"code": "CONSENT_REQUIRED", "message": str(exc)},
         )
 
 if ValidationError:
@@ -121,6 +121,7 @@ app.include_router(fx_router, prefix="/api/v1/fx", tags=["FX"])
 app.include_router(reports_router, prefix="/api/v1/reports", tags=["Reports"])
 app.include_router(evidence_router, prefix="/api/v1/evidence", tags=["Evidence"])
 app.include_router(specialist_router, prefix="/api/v1/specialist", tags=["Specialist Override & Feedback"])
+app.include_router(followups_router, prefix="/api/v1/followups", tags=["Follow-ups"])
 
 
 @app.get("/health", tags=["System"])
