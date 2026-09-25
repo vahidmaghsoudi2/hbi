@@ -48,7 +48,7 @@ def _product(db, product_id="P-KC-001"):
     db.commit()
 
 
-def _evidence(db, *, product_id, evidence_id, field, claim, qa_status="VERIFIED", conflict_status="NONE"):
+def _evidence(db, *, product_id, evidence_id, field, claim, qa_status="VERIFIED", conflict_status="NONE", claim_type="MANUFACTURER_CLAIM"):
     db.add(
         Evidence(
             evidence_id=evidence_id,
@@ -58,7 +58,7 @@ def _evidence(db, *, product_id, evidence_id, field, claim, qa_status="VERIFIED"
             source_reference=f"ref:{evidence_id}",
             claim=claim,
             field=field,
-            claim_type="MANUFACTURER_CLAIM",
+            claim_type=claim_type,
             evidence_strength="STRONG",
             evidence_status="SUPPORTED",
             qa_status=qa_status,
@@ -133,3 +133,45 @@ def test_rebuild_clears_completion_field_when_eligible_evidence_is_removed_by_qa
 
     second = service.update_from_evidence("P-KC-001")
     assert second.ingredient_roles is None
+
+
+@pytest.mark.parametrize(
+    "claim_type,expect_populated",
+    [
+        ("MANUFACTURER_CLAIM", True),
+        ("FACT", False),
+        ("EVIDENCE", False),
+    ],
+)
+def test_bound_claim_alias_requires_manufacturer_claim_type(db, claim_type, expect_populated):
+    """BOUND-CLAIM-ALIAS-001: field=claim maps to manufacturer_claims only with MANUFACTURER_CLAIM."""
+    _product(db)
+    _evidence(
+        db,
+        product_id="P-KC-001",
+        evidence_id=f"E-CLAIM-{claim_type}",
+        field="claim",
+        claim="dermatologist tested",
+        claim_type=claim_type,
+    )
+    knowledge = ProductKnowledgeService(db).update_from_evidence("P-KC-001")
+    if expect_populated:
+        assert knowledge.manufacturer_claims is not None
+        assert "dermatologist tested" in knowledge.manufacturer_claims
+    else:
+        assert knowledge.manufacturer_claims is None
+
+
+def test_manufacturer_claim_field_still_maps_without_claim_type_gate(db):
+    _product(db)
+    _evidence(
+        db,
+        product_id="P-KC-001",
+        evidence_id="E-MFG-ALIAS",
+        field="manufacturer_claim",
+        claim="fragrance-free",
+        claim_type="FACT",
+    )
+    knowledge = ProductKnowledgeService(db).update_from_evidence("P-KC-001")
+    assert knowledge.manufacturer_claims is not None
+    assert "fragrance-free" in knowledge.manufacturer_claims
