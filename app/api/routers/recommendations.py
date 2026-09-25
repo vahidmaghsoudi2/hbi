@@ -11,6 +11,7 @@ from app.services.profile_fact_context_service import ProfileFactContextService
 from app.services.outcome_assessment_context_service import OutcomeAssessmentContextService
 from app.services.skin_next_question_service import SkinNextQuestionService
 from app.interface.errors import NotFoundError, BusinessRuleError
+from app.services.recommendation_trust_trace_service import RecommendationTrustTraceService, TrustTraceIntegrityError
 
 
 router = APIRouter()
@@ -73,6 +74,26 @@ async def generate_recommendations(
 
     return [_to_dict(d) for d in dtos]
 
+
+@router.get("/{recommendation_id}/trust-trace")
+async def get_recommendation_trust_trace(
+    recommendation_id: str,
+    db: Session = Depends(get_db),
+    customer_id: str = Depends(get_current_customer_id),
+) -> dict:
+    try:
+        return RecommendationTrustTraceService(db).get_for_recommendation(
+            recommendation_id, customer_id
+        )
+    except LookupError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    except TrustTraceIntegrityError as e:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"code": "TRACE_INTEGRITY_FAILURE", "message": str(e)},
+        )
 
 @router.get("/case/{case_id}")
 async def get_recommendations_by_case(
