@@ -152,6 +152,10 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
 
         field_map = {}
         for ev in evidences:
+            # REJECTED rows are governance-excluded (e.g. conflict losers).
+            # They must not re-open conflicts when a new claim is added on the same field.
+            if (getattr(ev, "qa_status", None) or "").strip().upper() == "REJECTED":
+                continue
             field = ev.field or "general"
             field_map.setdefault(field, []).append({
                 "evidence_id": ev.evidence_id,
