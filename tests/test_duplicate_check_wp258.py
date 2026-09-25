@@ -100,3 +100,27 @@ def test_no_fuzzy_match_and_no_candidate_is_new(client, db_session):
     assert r.status_code == 200
     assert r.json()["result"] == "NEW"
     assert r.json()["provenance"]["fuzzy_matching"] is False
+
+
+def test_operator_decision_is_persisted_and_visible(client, db_session):
+    _role(db_session)
+    _product(db_session, "P258-OP", name="Hydra Cream")
+    r = client.post("/api/v1/products/duplicate-check/", headers=_headers(), json={
+        "product_id": "NEW-ID", "brand": "HBI", "product_name": "Hydra Cream",
+        "variant": "clear", "size_value": 50, "size_unit": "ml"
+    })
+    assert r.status_code == 200
+    check_id = r.json()["check_id"]
+
+    d = client.post(f"/api/v1/products/duplicate-check/audit/{check_id}/decision",
+                     headers=_headers(),
+                     json={"decision": "RENAME", "final_product_name": "Hydra Cream New",
+                           "reason": "Accounting naming convention"})
+    assert d.status_code == 200, d.text
+    assert d.json()["operator_decision"]["decision"] == "RENAME"
+
+    audit = client.get("/api/v1/products/duplicate-check/audit", headers=_headers())
+    assert audit.status_code == 200
+    row = next(x for x in audit.json() if x["check_id"] == check_id)
+    assert row["operator_decision"] is not None
+    assert row["operator_decision"]["final_product_name"] == "Hydra Cream New"
