@@ -96,7 +96,7 @@ if ConsentError:
     async def consent_handler(request, exc):
         return JSONResponse(
             status_code=403,
-            content={"error": {"code": "CONSENT_REQUIRED", "message": str(exc)},
+            content={"error": {"code": "CONSENT_REQUIRED", "message": str(exc)}},
         )
 
 if ValidationError:
