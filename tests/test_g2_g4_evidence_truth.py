@@ -225,3 +225,66 @@ def test_evidence_api_requires_role_for_mutation_and_exposes_audit(client, db_se
     assert audit.status_code == 200
     assert len(audit.json()) == 1
     assert audit.json()[0]["actor_id"] == "evidence_operator"
+
+
+def test_resolved_rejected_loser_does_not_reopen_conflict_on_new_evidence(db_session):
+    """Team1 finding: after resolve, REJECTED loser must not re-trigger detect_conflicts."""
+    product_id = "G2-G4-CONFLICT-REGRESS"
+    _product(db_session, product_id=product_id)
+    service = EvidenceService(db_session)
+
+    first = service.add_evidence({
+        "product_id": product_id,
+        "claim": "old claim A",
+        "source_type": "MANUFACTURER",
+        "source_reference": "ref-a",
+        "claim_type": "MANUFACTURER_CLAIM",
+        "field": "known_use_cases",
+    }, actor_id="op", actor_role="ROLE_REVIEWER_QA")
+    second = service.add_evidence({
+        "product_id": product_id,
+        "claim": "old claim B",
+        "source_type": "MANUFACTURER",
+        "source_reference": "ref-b",
+        "claim_type": "MANUFACTURER_CLAIM",
+        "field": "known_use_cases",
+    }, actor_id="op", actor_role="ROLE_REVIEWER_QA")
+
+    # Force conflict status as add path may mark them
+    conflicts = service.detect_conflicts(product_id)
+    assert conflicts, "setup requires two competing claims"
+    for ev in (first, second):
+        db_session.refresh(ev)
+        if (ev.conflict_status or "").upper() != "CONFLICT":
+            service.repository.update(ev.evidence_id, conflict_status="CONFLICT")
+            db_session.refresh(ev)
+
+    resolved = service.resolve_conflict(
+        second.evidence_id,
+        "Keep B as winner",
+        actor_id="op",
+        actor_role="ROLE_REVIEWER_QA",
+    )
+    assert resolved is not None
+    assert resolved.conflict_status == "NONE"
+    db_session.refresh(first)
+    assert first.qa_status == "REJECTED"
+
+    # New evidence on same field with a third claim must not conflict with REJECTED loser
+    third = service.add_evidence({
+        "product_id": product_id,
+        "claim": "new post-resolution claim C",
+        "source_type": "PEER_REVIEWED",
+        "source_reference": "ref-c",
+        "claim_type": "FACT",
+        "field": "known_use_cases",
+    }, actor_id="op", actor_role="ROLE_REVIEWER_QA")
+
+    remaining = service.detect_conflicts(product_id)
+    for c in remaining:
+        assert first.evidence_id not in c.get("evidence_ids", []), (
+            f"REJECTED loser re-entered conflict set: {c}"
+        )
+    assert first.evidence_id not in {
+        eid for c in remaining for eid in c.get("evidence_ids", [])
+    }
