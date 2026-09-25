@@ -10,7 +10,7 @@ from app.database import init_db, SessionLocal
 from app.services.admin_auth_service import ensure_admin_account
 
 from app.api.routers import (
-    auth_router, products_router, customers_router, cases_router,
+    auth_router, products_router, duplicate_checks_router, customers_router, cases_router,
     recommendations_router, inventory_router, sales_router, evidence_router,
     payments_router, returns_router, fx_router, reports_router,
     specialist_router, followups_router, outcome_assessments_router,
@@ -78,37 +78,26 @@ app.add_middleware(RateLimitMiddleware)
 if NotFoundError:
     @app.exception_handler(NotFoundError)
     async def not_found_handler(request, exc):
-        return JSONResponse(
-            status_code=404,
-            content={"error": {"code": "NOT_FOUND", "message": str(exc)}},
-        )
+        return JSONResponse(status_code=404, content={"error": {"code": "NOT_FOUND", "message": str(exc)}})
 
 if ConflictError:
     @app.exception_handler(ConflictError)
     async def conflict_handler(request, exc):
-        return JSONResponse(
-            status_code=409,
-            content={"error": {"code": "CONFLICT", "message": str(exc)}},
-        )
+        return JSONResponse(status_code=409, content={"error": {"code": "CONFLICT", "message": str(exc)}})
 
 if ConsentError:
     @app.exception_handler(ConsentError)
     async def consent_handler(request, exc):
-        return JSONResponse(
-            status_code=403,
-            content={"error": {"code": "CONSENT_REQUIRED", "message": str(exc)}},
-        )
+        return JSONResponse(status_code=403, content={"error": {"code": "CONSENT_REQUIRED", "message": str(exc)}})
 
 if ValidationError:
     @app.exception_handler(ValidationError)
     async def validation_handler(request, exc):
-        return JSONResponse(
-            status_code=422,
-            content={"error": {"code": "VALIDATION_ERROR", "message": str(exc)}},
-        )
+        return JSONResponse(status_code=422, content={"error": {"code": "VALIDATION_ERROR", "message": str(exc)}})
 
 app.include_router(auth_router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(products_router, prefix="/api/v1/products", tags=["Products"])
+app.include_router(duplicate_checks_router, prefix="/api/v1/products/duplicate-check", tags=["Product Duplicate Check"])
 app.include_router(customers_router, prefix="/api/v1/customers", tags=["Customers"])
 app.include_router(cases_router, prefix="/api/v1/cases", tags=["Cases"])
 app.include_router(recommendations_router, prefix="/api/v1/recommendations", tags=["Recommendations"])
