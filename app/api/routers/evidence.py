@@ -12,6 +12,7 @@ from app.interface.schemas import (
 )
 from app.interface.facades import EvidenceFacade, ProductKnowledgeFacade
 from app.models.user_role import ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN
+from app.services.evidence_mutation_log_service import EvidenceMutationLogService
 
 router = APIRouter()
 
@@ -24,7 +25,11 @@ async def create_evidence(
 ):
     facade = EvidenceFacade(db)
     try:
-        evidence_dto = facade.add_evidence(data.model_dump())
+        subject_id, roles = auth
+        evidence_dto = facade.service.add_evidence(
+            data.model_dump(), actor_id=subject_id, actor_role=next(iter(roles), None)
+        )
+        evidence_dto = facade._to_evidence_dto(evidence_dto)
         return EvidenceResponse.model_validate(evidence_dto.__dict__)
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=str(e))
@@ -104,7 +109,14 @@ async def verify_evidence(
 ):
     facade = EvidenceFacade(db)
     try:
-        dto = facade.verify_evidence(evidence_id, request.verdict)
+        subject_id, roles = auth
+        dto = facade.service.verify_evidence(
+            evidence_id,
+            request.verdict,
+            actor_id=subject_id,
+            actor_role=next(iter(roles), None),
+            reason=request.reason,
+        )
         return EvidenceResponse.model_validate(dto.__dict__)
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -121,9 +133,41 @@ async def resolve_conflict(
 ):
     facade = EvidenceFacade(db)
     try:
-        dto = facade.resolve_conflict(evidence_id, request.resolution)
+        subject_id, roles = auth
+        dto = facade.service.resolve_conflict(
+            evidence_id,
+            request.resolution,
+            actor_id=subject_id,
+            actor_role=next(iter(roles), None),
+        )
         return EvidenceResponse.model_validate(dto.__dict__)
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=str(e))
+
+
+@router.get("/{evidence_id}/audit")
+async def get_evidence_audit(
+    evidence_id: str,
+    db: Session = Depends(get_db),
+    auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
+):
+    rows = EvidenceMutationLogService(db).list_for_evidence(evidence_id)
+    return [
+        {k: v for k, v in vars(row).items() if not k.startswith("_")}
+        for row in rows
+    ]
+
+
+@router.get("/audit/product/{product_id}")
+async def get_product_evidence_audit(
+    product_id: str,
+    db: Session = Depends(get_db),
+    auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
+):
+    rows = EvidenceMutationLogService(db).list_for_product(product_id)
+    return [
+        {k: v for k, v in vars(row).items() if not k.startswith("_")}
+        for row in rows
+    ]

@@ -146,10 +146,27 @@ class EvidenceResponse(BaseModel):
 
 class VerifyRequest(BaseModel):
     verdict: str
+    reason: Optional[str] = None
 
 
 class ResolveConflictRequest(BaseModel):
     resolution: str
+
+
+class ResearchAssertion(BaseModel):
+    claim: str
+    source_type: str
+    source_reference: str
+    claim_type: Optional[str] = "UNKNOWN"
+    field: Optional[str] = None
+    source_date: Optional[str] = None
+    evidence_strength: Optional[str] = None
+    market_region: Optional[str] = None
+    notes: Optional[str] = None
+
+
+class ResearchDraftRequest(BaseModel):
+    assertions: List[ResearchAssertion]
 
 
 class ProductKnowledgeResponse(BaseModel):
