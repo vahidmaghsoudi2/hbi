@@ -13,7 +13,7 @@ from app.api.routers import (
     auth_router, products_router, customers_router, cases_router,
     recommendations_router, inventory_router, sales_router, evidence_router,
     payments_router, returns_router, fx_router, reports_router,
-    specialist_router, followups_router,
+    specialist_router, followups_router, outcome_assessments_router,
 )
 
 try:
@@ -107,7 +107,6 @@ if ValidationError:
             content={"error": {"code": "VALIDATION_ERROR", "message": str(exc)}},
         )
 
-
 app.include_router(auth_router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(products_router, prefix="/api/v1/products", tags=["Products"])
 app.include_router(customers_router, prefix="/api/v1/customers", tags=["Customers"])
@@ -122,6 +121,7 @@ app.include_router(reports_router, prefix="/api/v1/reports", tags=["Reports"])
 app.include_router(evidence_router, prefix="/api/v1/evidence", tags=["Evidence"])
 app.include_router(specialist_router, prefix="/api/v1/specialist", tags=["Specialist Override & Feedback"])
 app.include_router(followups_router, prefix="/api/v1/followups", tags=["Follow-ups"])
+app.include_router(outcome_assessments_router, prefix="/api/v1/outcome-assessments", tags=["Outcome Assessments"])
 
 
 @app.get("/health", tags=["System"])

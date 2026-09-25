@@ -19,6 +19,7 @@ from app.models.user_role import UserRole
 from app.models.specialist_override import SpecialistOverride
 from app.models.feedback import Feedback
 from app.models.follow_up import FollowUp
+from app.models.outcome_assessment import OutcomeAssessment
 from app.models.admin_credential import AdminCredential
 
 __all__ = [
@@ -26,5 +27,5 @@ __all__ = [
     "Recommendation", "Inventory", "Sale", "SaleItem", "Category", "ProfileFact",
     "StockMovement", "Payment", "SaleReturn", "OperationalFxRate",
     "ProductMutationLog", "UserRole", "SpecialistOverride", "Feedback", "FollowUp",
-    "AdminCredential",
+    "AdminCredential", "OutcomeAssessment",
 ]
