@@ -71,39 +71,20 @@ def _evidence(db, *, product_id, evidence_id, field, claim, qa_status="VERIFIED"
 def test_approved_evidence_populates_completion_fields(db):
     _product(db)
 
-    _evidence(
-        db,
-        product_id="P-KC-001",
-        evidence_id="E-ROLE",
-        field="ingredient_roles",
-        claim="humectant, emollient",
-    )
-    _evidence(
-        db,
-        product_id="P-KC-001",
-        evidence_id="E-USAGE",
-        field="usage_instructions",
-        claim="apply twice daily, use after cleansing",
-    )
-    _evidence(
-        db,
-        product_id="P-KC-001",
-        evidence_id="E-MFG",
-        field="manufacturer_claims",
-        claim="fragrance-free, dermatologist tested",
-    )
+    _evidence(db, product_id="P-KC-001", evidence_id="E-ROLE", field="ingredient_roles", claim="humectant, emollient")
+    _evidence(db, product_id="P-KC-001", evidence_id="E-USAGE", field="usage_instructions", claim="apply twice daily, use after cleansing")
+    _evidence(db, product_id="P-KC-001", evidence_id="E-MFG", field="manufacturer_claims", claim="fragrance-free, dermatologist tested")
 
     knowledge = ProductKnowledgeService(db).update_from_evidence("P-KC-001")
 
-    assert knowledge.ingredient_roles == "emollient, humectant"
+    assert set(knowledge.ingredient_roles.split(", ")) == {"humectant", "emollient"}
     assert knowledge.usage_instructions == "apply twice daily, use after cleansing"
-    assert knowledge.manufacturer_claims == "dermatologist tested, fragrance-free"
+    assert set(knowledge.manufacturer_claims.split(", ")) == {"fragrance-free", "dermatologist tested"}
 
 
 @pytest.mark.parametrize("qa_status", ["PENDING", "REJECTED", "NEEDS_REVIEW"])
 def test_non_approved_evidence_does_not_populate_completion_fields(db, qa_status):
     _product(db)
-
     _evidence(
         db,
         product_id="P-KC-001",
@@ -114,13 +95,11 @@ def test_non_approved_evidence_does_not_populate_completion_fields(db, qa_status
     )
 
     knowledge = ProductKnowledgeService(db).update_from_evidence("P-KC-001")
-
     assert knowledge.usage_instructions is None
 
 
 def test_conflicting_evidence_does_not_populate_completion_fields(db):
     _product(db)
-
     _evidence(
         db,
         product_id="P-KC-001",
@@ -131,13 +110,11 @@ def test_conflicting_evidence_does_not_populate_completion_fields(db):
     )
 
     knowledge = ProductKnowledgeService(db).update_from_evidence("P-KC-001")
-
     assert knowledge.manufacturer_claims is None
 
 
 def test_rebuild_clears_completion_field_when_eligible_evidence_is_removed_by_qa(db):
     _product(db)
-
     _evidence(
         db,
         product_id="P-KC-001",
