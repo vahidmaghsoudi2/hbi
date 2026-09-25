@@ -127,6 +127,47 @@ class DuplicateCheckService:
             },
         }
 
+    def record_operator_decision(
+        self,
+        *,
+        check_id: str,
+        decision: str,
+        selected_product_id: Optional[str],
+        final_product_name: Optional[str],
+        reason: Optional[str],
+        actor_id: str,
+        roles: Set[str],
+    ) -> Dict[str, Any]:
+        audit = self.db.query(DuplicateCheckAudit).filter(
+            DuplicateCheckAudit.check_id == check_id
+        ).first()
+        if not audit:
+            raise NotFoundError("Duplicate check audit not found")
+        if not actor_id:
+            raise ValidationError("Actor is required for operator decision")
+        decision = str(decision).strip().upper()
+        if decision not in {"NEW", "EXISTING", "RENAME"}:
+            raise ValidationError("Decision must be NEW, EXISTING, or RENAME")
+        if decision == "EXISTING" and not selected_product_id:
+            raise ValidationError("selected_product_id is required for EXISTING decision")
+        if decision == "RENAME" and not final_product_name:
+            raise ValidationError("final_product_name is required for RENAME decision")
+
+        audit.operator_decision = _json({
+            "decision": decision,
+            "selected_product_id": selected_product_id,
+            "final_product_name": final_product_name,
+            "reason": reason,
+            "actor_id": actor_id,
+            "actor_role": next((r for r in _ROLE_ORDER if r in roles), None),
+        })
+        self.db.flush()
+        return {
+            "check_id": audit.check_id,
+            "result": audit.result,
+            "operator_decision": json.loads(audit.operator_decision),
+        }
+
     def list_audits(self, *, product_id: Optional[str] = None, limit: int = 100) -> List[DuplicateCheckAudit]:
         query = self.db.query(DuplicateCheckAudit)
         if product_id:
