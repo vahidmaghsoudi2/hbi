@@ -264,9 +264,14 @@ def _runtime_session():
     return sessionmaker(bind=database.engine)()
 
 
+def _customer_auth_headers(customer_id: str):
+    from app.core.auth import create_access_token
+    token = create_access_token({"sub": customer_id})
+    return {"Authorization": f"Bearer {token}"}
+
+
 def _create_owned_case(client, customer_id: str):
-    token = _token(client, customer_id)
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = _customer_auth_headers(customer_id)
     created = client.post(
         "/api/v1/cases/",
         headers=headers,
@@ -540,3 +545,120 @@ def test_profile_fact_read_respects_withdrawn_consent(client):
         assert profile["_profile_fact_context"]["excluded"][-1]["reason"] == "customer_consent_not_active"
     finally:
         db.close()
+
+
+def test_customer_response_requires_authentication(client):
+    r = client.post(
+        "/api/v1/specialist/feedback/customer-response",
+        json={
+            "case_id": "CASE-ANY",
+            "recommendation_id": "REC-ANY",
+            "outcome": "ACCEPTED",
+        },
+    )
+    assert r.status_code == 401
+
+
+def test_customer_response_rejects_foreign_case(client):
+    headers = _customer_auth_headers("CUST-CVS-1")
+    r = client.post(
+        "/api/v1/specialist/feedback/customer-response",
+        headers=headers,
+        json={
+            "case_id": "CASE-CVS-FOREIGN",
+            "recommendation_id": "REC-ANY",
+            "outcome": "ACCEPTED",
+        },
+    )
+    assert r.status_code == 403
+
+
+def test_customer_response_requires_existing_recommendation(client):
+    headers, case_id = _create_owned_case(client, "CUST-CVS-1")
+    r = client.post(
+        "/api/v1/specialist/feedback/customer-response",
+        headers=headers,
+        json={
+            "case_id": case_id,
+            "recommendation_id": "REC-DOES-NOT-EXIST",
+            "outcome": "ACCEPTED",
+        },
+    )
+    assert r.status_code == 422
+    assert "Recommendation not found" in r.text
+
+
+def test_customer_response_rejects_recommendation_from_other_case(client):
+    headers, case_id = _create_owned_case(client, "CUST-CVS-1")
+    _, other_case_id = _create_owned_case(client, "CUST-CVS-1")
+    db = _runtime_session()
+    try:
+        from app.models.recommendation import Recommendation
+        db.add(Recommendation(
+            recommendation_id="REC-CUSTOMER-RESPONSE-FOREIGN",
+            case_id=other_case_id,
+            product_id="ISDIN-FOTOUTRA100-50ML",
+            eligibility_status="ELIGIBLE",
+            ranking_score=1.0,
+        ))
+        db.commit()
+    finally:
+        db.close()
+
+    r = client.post(
+        "/api/v1/specialist/feedback/customer-response",
+        headers=headers,
+        json={
+            "case_id": case_id,
+            "recommendation_id": "REC-CUSTOMER-RESPONSE-FOREIGN",
+            "outcome": "REJECTED",
+        },
+    )
+    assert r.status_code == 422
+    assert "does not belong to the given case" in r.text
+
+
+def test_customer_response_persists_customer_source_and_is_retrievable(client):
+    headers, case_id = _create_owned_case(client, "CUST-CVS-1")
+    db = _runtime_session()
+    try:
+        from app.models.recommendation import Recommendation
+        db.add(Recommendation(
+            recommendation_id="REC-CUSTOMER-RESPONSE-001",
+            case_id=case_id,
+            product_id="ISDIN-FOTOUTRA100-50ML",
+            eligibility_status="ELIGIBLE",
+            ranking_score=1.0,
+        ))
+        db.commit()
+    finally:
+        db.close()
+
+    response = client.post(
+        "/api/v1/specialist/feedback/customer-response",
+        headers=headers,
+        json={
+            "case_id": case_id,
+            "recommendation_id": "REC-CUSTOMER-RESPONSE-001",
+            "outcome": "ACCEPTED",
+            "comment": "customer-response-001",
+        },
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["source"] == "CUSTOMER"
+    assert body["case_id"] == case_id
+    assert body["recommendation_id"] == "REC-CUSTOMER-RESPONSE-001"
+    assert body["outcome"] == "ACCEPTED"
+
+    listed = client.get(
+        f"/api/v1/specialist/feedback/case/{case_id}",
+        headers=headers,
+    )
+    assert listed.status_code == 200, listed.text
+    assert any(
+        item["feedback_id"] == body["feedback_id"]
+        and item["source"] == "CUSTOMER"
+        and item["recommendation_id"] == "REC-CUSTOMER-RESPONSE-001"
+        for item in listed.json()
+    )
