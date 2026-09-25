@@ -213,6 +213,19 @@ class ProductUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class DuplicateCheckRequest(BaseModel):
+    """Input for deterministic Product duplicate/naming review."""
+    product_id: Optional[str] = None
+    barcode_gtin: Optional[str] = None
+    brand: Optional[str] = None
+    product_name: Optional[str] = None
+    variant: Optional[str] = None
+    size_value: Optional[float] = None
+    size_unit: Optional[str] = None
+    market_region: Optional[str] = None
+    packaging_version: Optional[str] = None
+
+
 class ProductTransitionRequest(BaseModel):
     reason: Optional[str] = None
 
