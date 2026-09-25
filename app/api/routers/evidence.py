@@ -26,8 +26,10 @@ async def create_evidence(
     facade = EvidenceFacade(db)
     try:
         subject_id, roles = auth
-evidence_dto = facade.service.add_evidence(data.model_dump(), actor_id=subject_id, actor_role=next(iter(roles), None))
-evidence_dto = facade._to_evidence_dto(evidence_dto)
+        evidence_dto = facade.service.add_evidence(
+            data.model_dump(), actor_id=subject_id, actor_role=next(iter(roles), None)
+        )
+        evidence_dto = facade._to_evidence_dto(evidence_dto)
         return EvidenceResponse.model_validate(evidence_dto.__dict__)
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=str(e))
@@ -108,7 +110,13 @@ async def verify_evidence(
     facade = EvidenceFacade(db)
     try:
         subject_id, roles = auth
-dto = facade.service.verify_evidence(evidence_id, request.verdict, actor_id=subject_id, actor_role=next(iter(roles), None), reason=request.reason)
+        dto = facade.service.verify_evidence(
+            evidence_id,
+            request.verdict,
+            actor_id=subject_id,
+            actor_role=next(iter(roles), None),
+            reason=request.reason,
+        )
         return EvidenceResponse.model_validate(dto.__dict__)
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -126,7 +134,12 @@ async def resolve_conflict(
     facade = EvidenceFacade(db)
     try:
         subject_id, roles = auth
-dto = facade.service.resolve_conflict(evidence_id, request.resolution, actor_id=subject_id, actor_role=next(iter(roles), None))
+        dto = facade.service.resolve_conflict(
+            evidence_id,
+            request.resolution,
+            actor_id=subject_id,
+            actor_role=next(iter(roles), None),
+        )
         return EvidenceResponse.model_validate(dto.__dict__)
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
