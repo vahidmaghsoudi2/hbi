@@ -1,4 +1,7 @@
+import pytest
+
 from app.core.auth import create_access_token
+from app.core.exceptions import ValidationError
 from app.models.product import Product
 from app.models.user_role import UserRole, ROLE_EDITOR
 
@@ -224,12 +227,12 @@ def test_operator_existing_without_selected_product_id_is_rejected(client, db_se
         "product_id": "P258-EXISTING",
     })
     assert r.status_code == 200
-    d = client.post(
-        f"/api/v1/products/duplicate-check/audit/{r.json()['check_id']}/decision",
-        headers=_headers(),
-        json={"decision": "EXISTING"},
-    )
-    assert d.status_code == 422
+    with pytest.raises(ValidationError, match="selected_product_id is required"):
+        client.post(
+            f"/api/v1/products/duplicate-check/audit/{r.json()['check_id']}/decision",
+            headers=_headers(),
+            json={"decision": "EXISTING"},
+        )
 
 
 def test_operator_existing_with_selected_product_id_is_accepted(client, db_session):
@@ -255,12 +258,12 @@ def test_operator_rename_without_final_product_name_is_rejected(client, db_sessi
         "product_id": "P258-RENAME",
     })
     assert r.status_code == 200
-    d = client.post(
-        f"/api/v1/products/duplicate-check/audit/{r.json()['check_id']}/decision",
-        headers=_headers(),
-        json={"decision": "RENAME"},
-    )
-    assert d.status_code == 422
+    with pytest.raises(ValidationError, match="final_product_name is required"):
+        client.post(
+            f"/api/v1/products/duplicate-check/audit/{r.json()['check_id']}/decision",
+            headers=_headers(),
+            json={"decision": "RENAME"},
+        )
 
 
 def test_operator_rename_with_final_product_name_is_accepted(client, db_session):
@@ -286,9 +289,9 @@ def test_invalid_operator_decision_is_rejected(client, db_session):
         "product_id": "P258-INVALID",
     })
     assert r.status_code == 200
-    d = client.post(
-        f"/api/v1/products/duplicate-check/audit/{r.json()['check_id']}/decision",
-        headers=_headers(),
-        json={"decision": "INVALID"},
-    )
-    assert d.status_code == 422
+    with pytest.raises(ValidationError, match="Decision must be NEW, EXISTING, or RENAME"):
+        client.post(
+            f"/api/v1/products/duplicate-check/audit/{r.json()['check_id']}/decision",
+            headers=_headers(),
+            json={"decision": "INVALID"},
+        )
