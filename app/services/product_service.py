@@ -1,4 +1,5 @@
 from typing import Optional, List, Set
+import json
 import uuid
 from sqlalchemy.orm import Session
 from app.models.product import Product
@@ -13,6 +14,8 @@ from app.core.exceptions import ValidationError, NotFoundError, ConflictError
 from app.services.mutation_log_service import MutationLogService
 from app.services.evidence_service import EvidenceService
 from app.services.product_knowledge_service import ProductKnowledgeService
+from app.services.duplicate_check_service import DuplicateCheckService
+from app.models.duplicate_check_audit import DuplicateCheckAudit
 from app.models.user_role import ROLE_ADMIN, ROLE_EDITOR, ROLE_PO, ROLE_REVIEWER_QA
 
 
@@ -61,9 +64,17 @@ class ProductService(BaseService[Product, ProductRepository]):
         knowledge_use_cases = data.pop("knowledge_use_cases", None)
         knowledge_evidence_claim = data.pop("knowledge_evidence_claim", None)
         knowledge_evidence_source_reference = data.pop("knowledge_evidence_source_reference", None)
+        # Intake-only resolution token (not a Product column). Allows create after
+        # POSSIBLE_MATCH when operator recorded decision=NEW on that check_id.
+        duplicate_check_id = data.pop("duplicate_check_id", None)
         product_id = data.get("product_id")
         if product_id and self.get_by_id(product_id):
             raise ConflictError(f"Product {product_id} already exists")
+
+        # WP-01: enforce existing DuplicateCheck on real create path (no new algorithm).
+        self._enforce_duplicate_check_on_create(
+            data, actor_id=actor_id, roles=roles, duplicate_check_id=duplicate_check_id
+        )
         for k in list(PRODUCT_GOVERNANCE_KEYS):
             data.pop(k, None)
         data["status"] = "DRAFT"
@@ -108,6 +119,56 @@ class ProductService(BaseService[Product, ProductRepository]):
             knowledge.update_from_evidence(product.product_id)
 
         return product
+
+    def _enforce_duplicate_check_on_create(
+        self,
+        data: dict,
+        *,
+        actor_id: str,
+        roles: Set[str],
+        duplicate_check_id: Optional[str],
+    ) -> None:
+        """Enforce DuplicateCheck on intake create without changing match rules.
+
+        - NEW → allow create
+        - EXISTING → ConflictError (exact product_id or barcode)
+        - POSSIBLE_MATCH → require prior operator decision=NEW on duplicate_check_id
+        """
+        dup = DuplicateCheckService(self.db).check(dict(data), actor_id=actor_id, roles=roles)
+        result = dup.get("result")
+        check_id = dup.get("check_id")
+        reason = dup.get("reason")
+        if result == "NEW":
+            return
+        if result == "EXISTING":
+            raise ConflictError(
+                f"DuplicateCheck EXISTING ({reason}); check_id={check_id}. "
+                "Create is blocked for exact product_id or barcode match."
+            )
+        if result == "POSSIBLE_MATCH":
+            if not duplicate_check_id:
+                raise ValidationError(
+                    f"DuplicateCheck POSSIBLE_MATCH requires operator review "
+                    f"(check_id={check_id}; operator_decision_required=true). "
+                    "Record decision=NEW via duplicate-check audit, then retry create "
+                    "with duplicate_check_id."
+                )
+            audit = (
+                self.db.query(DuplicateCheckAudit)
+                .filter(DuplicateCheckAudit.check_id == duplicate_check_id)
+                .first()
+            )
+            if audit is None:
+                raise ValidationError(
+                    f"duplicate_check_id={duplicate_check_id} not found for POSSIBLE_MATCH resolution"
+                )
+            decision = json.loads(audit.operator_decision) if audit.operator_decision else None
+            if not decision or str(decision.get("decision", "")).upper() != "NEW":
+                raise ValidationError(
+                    f"POSSIBLE_MATCH check_id={duplicate_check_id} has no operator decision=NEW"
+                )
+            return
+        raise ValidationError(f"Unexpected DuplicateCheck result={result} check_id={check_id}")
 
     def edit_informational(self, product_id: str, updates: dict, actor_id: str, roles: Set[str]) -> Product:
         if not can_edit_informational(roles):
