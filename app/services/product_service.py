@@ -14,7 +14,7 @@ from app.core.exceptions import ValidationError, NotFoundError, ConflictError
 from app.services.mutation_log_service import MutationLogService
 from app.services.evidence_service import EvidenceService
 from app.services.product_knowledge_service import ProductKnowledgeService
-from app.services.duplicate_check_service import DuplicateCheckService
+from app.services.duplicate_check_service import DuplicateCheckService, _norm
 from app.models.duplicate_check_audit import DuplicateCheckAudit
 from app.models.user_role import ROLE_ADMIN, ROLE_EDITOR, ROLE_PO, ROLE_REVIEWER_QA
 
@@ -133,6 +133,7 @@ class ProductService(BaseService[Product, ProductRepository]):
         - NEW → allow create
         - EXISTING → ConflictError (exact product_id or barcode)
         - POSSIBLE_MATCH → require prior operator decision=NEW on duplicate_check_id
+          bound to the same identity as create payload (input_snapshot match)
         """
         dup = DuplicateCheckService(self.db).check(dict(data), actor_id=actor_id, roles=roles)
         result = dup.get("result")
@@ -167,8 +168,46 @@ class ProductService(BaseService[Product, ProductRepository]):
                 raise ValidationError(
                     f"POSSIBLE_MATCH check_id={duplicate_check_id} has no operator decision=NEW"
                 )
+            # Bind decision to the same product identity as this create payload.
+            snapshot = json.loads(audit.input_snapshot) if audit.input_snapshot else None
+            if not isinstance(snapshot, dict):
+                raise ValidationError(
+                    f"duplicate_check_id={duplicate_check_id} has invalid input_snapshot"
+                )
+            if not self._duplicate_snapshot_matches_create(snapshot, data):
+                raise ValidationError(
+                    f"duplicate_check_id={duplicate_check_id} input_snapshot does not match "
+                    "current create payload; operator NEW decision is not transferable"
+                )
             return
         raise ValidationError(f"Unexpected DuplicateCheck result={result} check_id={check_id}")
+
+    @staticmethod
+    def _duplicate_snapshot_matches_create(snapshot: dict, data: dict) -> bool:
+        """True when audit input_snapshot identity fields match create payload."""
+        keys = (
+            "product_id",
+            "barcode_gtin",
+            "brand",
+            "product_name",
+            "variant",
+            "size_unit",
+            "market_region",
+            "packaging_version",
+        )
+        for key in keys:
+            if _norm(snapshot.get(key)) != _norm(data.get(key)):
+                return False
+        # size_value: compare numerically when both present
+        sv_a, sv_b = snapshot.get("size_value"), data.get("size_value")
+        if sv_a is None and sv_b is None:
+            return True
+        if sv_a is None or sv_b is None:
+            return False
+        try:
+            return float(sv_a) == float(sv_b)
+        except (TypeError, ValueError):
+            return _norm(sv_a) == _norm(sv_b)
 
     def edit_informational(self, product_id: str, updates: dict, actor_id: str, roles: Set[str]) -> Product:
         if not can_edit_informational(roles):
