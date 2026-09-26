@@ -192,19 +192,24 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
     )
     assert created["status"] == "DRAFT"
 
-    # DUPLICATE CHECK (new id → NEW)
+    # DUPLICATE CHECK (same product_id → EXISTING / EXACT_PRODUCT_ID)
     dup = client.post(
         "/api/v1/products/duplicate-check/",
         headers=po,
         json={
-            "product_id": "SLICE-E2E-OTHER",
+            "product_id": pid,
             "brand": "OtherBrand",
             "product_name": "Unrelated Product",
-            "barcode_gtin": "9999999999999",
         },
     )
     assert dup.status_code == 200, dup.text
-    assert dup.json()["result"] == "NEW"
+    dup_body = dup.json()
+    assert dup_body["result"] == "EXISTING"
+    assert dup_body["reason"] == "EXACT_PRODUCT_ID"
+    assert any(
+        candidate.get("product_id") == pid
+        for candidate in dup_body.get("candidates", [])
+    )
 
     # RESEARCH DRAFT (PENDING evidence)
     draft = client.post(
