@@ -12,6 +12,7 @@ from app.core.governance import (
 from app.models.product import Product
 from app.models.user_role import ROLE_PO, ROLE_REVIEWER_QA
 from app.services.evidence_readiness_service import EvidenceReadinessService
+from app.services.skin_safety_minimum_service import SkinSafetyMinimumService
 from app.services.d3_conditional_evidence_policy import D3ConditionalEvidencePolicy
 from app.services.mutation_log_service import MutationLogService
 
@@ -21,6 +22,7 @@ class ProductTransitionService:
         self.db = db
         self.log = MutationLogService(db)
         self.readiness = EvidenceReadinessService(db)
+        self.skin_safety = SkinSafetyMinimumService(db)
         self.d3_policy = D3ConditionalEvidencePolicy(db)
 
     def _get_product(self, product_id: str) -> Product:
@@ -81,6 +83,9 @@ class ProductTransitionService:
             raise ValidationError(d3.summary)
         if product.identity_status != "VERIFIED":
             raise ValidationError("APPROVE requires identity_status=VERIFIED")
+        safety = self.skin_safety.evaluate(product_id)
+        if not safety.satisfied:
+            raise ValidationError(f"Skin safety minimum FAIL: {safety.summary}")
         return self._transition(product_id, ACTION_APPROVE, actor_id, roles)
 
     def reject(self, product_id, actor_id, roles, reason):
@@ -98,6 +103,9 @@ class ProductTransitionService:
             raise ValidationError("ACTIVATE requires qa_verdict=VALID")
         if product.identity_status != "VERIFIED":
             raise ValidationError("ACTIVATE requires identity_status=VERIFIED")
+        safety = self.skin_safety.evaluate(product_id)
+        if not safety.satisfied:
+            raise ValidationError(f"Skin safety minimum FAIL: {safety.summary}")
         readiness = self.readiness.evaluate(product_id)
         if not readiness.ready:
             raise ValidationError(f"Evidence Readiness FAIL: {readiness.summary}")
