@@ -210,6 +210,8 @@ class ProductCreate(BaseModel):
     knowledge_use_cases: Optional[str] = None
     knowledge_evidence_claim: Optional[str] = None
     knowledge_evidence_source_reference: Optional[str] = None
+    # WP-01: resolution token after POSSIBLE_MATCH operator decision=NEW (not a Product column)
+    duplicate_check_id: Optional[str] = None
 
 
 class ProductUpdate(BaseModel):
