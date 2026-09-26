@@ -239,13 +239,13 @@ def test_possible_match_rejects_mismatched_snapshot(client, db_session):
         json={"decision": "NEW", "reason": "ok for BIND-B only"},
     )
     assert dec.status_code == 200, dec.text
-    # Different product_id / name than snapshot → must reject
+    # Same name dimensions (still POSSIBLE_MATCH) but product_id differs from snapshot
     r = _create(
         client,
         h,
         product_id="WP01-BIND-C",
         brand="BindCo",
-        product_name="Other Serum Entirely",
+        product_name="Bound Serum",
         size_value=30,
         size_unit="ml",
         variant="clear",
