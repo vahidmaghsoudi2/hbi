@@ -200,3 +200,56 @@ def test_size_or_variant_difference_allows_create(client, db_session):
         variant="tinted",
     )
     assert r.status_code == 201, r.text
+
+
+def test_possible_match_rejects_mismatched_snapshot(client, db_session):
+    """NEW decision on check_id must not authorize a different create payload."""
+    h = _auth(db_session)
+    assert (
+        _create(
+            client,
+            h,
+            product_id="WP01-BIND-A",
+            brand="BindCo",
+            product_name="Bound Serum",
+            size_value=30,
+            size_unit="ml",
+            variant="clear",
+        ).status_code
+        == 201
+    )
+    chk = client.post(
+        "/api/v1/products/duplicate-check/",
+        headers=h,
+        json={
+            "product_id": "WP01-BIND-B",
+            "brand": "BindCo",
+            "product_name": "Bound Serum",
+            "size_value": 30,
+            "size_unit": "ml",
+            "variant": "clear",
+        },
+    )
+    assert chk.status_code == 200, chk.text
+    assert chk.json()["result"] == "POSSIBLE_MATCH"
+    check_id = chk.json()["check_id"]
+    dec = client.post(
+        f"/api/v1/products/duplicate-check/audit/{check_id}/decision",
+        headers=h,
+        json={"decision": "NEW", "reason": "ok for BIND-B only"},
+    )
+    assert dec.status_code == 200, dec.text
+    # Different product_id / name than snapshot → must reject
+    r = _create(
+        client,
+        h,
+        product_id="WP01-BIND-C",
+        brand="BindCo",
+        product_name="Other Serum Entirely",
+        size_value=30,
+        size_unit="ml",
+        variant="clear",
+        duplicate_check_id=check_id,
+    )
+    assert r.status_code == 422, r.text
+    assert "input_snapshot" in r.text or "does not match" in r.text
