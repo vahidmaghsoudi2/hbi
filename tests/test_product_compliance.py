@@ -135,6 +135,10 @@ def test_readiness_pass_and_approve(db_session):
     db_session.add(Evidence(
         evidence_id="E_CMP_1", product_id="P_CMP_RDY2", source_type="PEER_REVIEWED",
         source_reference="s1", claim="c1", qa_status="VERIFIED", conflict_status="NONE"))
+    db_session.add(Evidence(
+        evidence_id="E_CMP_1_SAFE", product_id="P_CMP_RDY2", source_type="MANUFACTURER",
+        source_reference="s-safe", claim="none known", field="contraindications",
+        claim_type="MANUFACTURER_CLAIM", qa_status="VERIFIED", conflict_status="NONE"))
     db_session.flush()
     assert EvidenceReadinessService(db_session).evaluate("P_CMP_RDY2").ready is True
     assert ProductTransitionService(db_session).approve(
@@ -214,6 +218,10 @@ def test_readiness_approved_evidence_passes(db_session):
     db_session.add(Evidence(
         evidence_id="E_AP_1", product_id="P_CMP_RDY_AP", source_type="PEER_REVIEWED",
         source_reference="s1", claim="c1", qa_status="APPROVED", conflict_status="NONE"))
+    db_session.add(Evidence(
+        evidence_id="E_AP_1_SAFE", product_id="P_CMP_RDY_AP", source_type="MANUFACTURER",
+        source_reference="s-safe", claim="none known", field="contraindications",
+        claim_type="MANUFACTURER_CLAIM", qa_status="VERIFIED", conflict_status="NONE"))
     db_session.flush()
     result = EvidenceReadinessService(db_session).evaluate("P_CMP_RDY_AP")
     assert result.ready is True
@@ -308,6 +316,11 @@ def _seed_ready_evidence(db, product_id, eid="E_WP04"):
     db.add(Evidence(
         evidence_id=eid, product_id=product_id, source_type="PEER_REVIEWED",
         source_reference="s1", claim="c1", qa_status="VERIFIED", conflict_status="NONE"))
+    # WP-02: APPROVE/ACTIVATE require verified contraindications (or explicit UNKNOWN).
+    db.add(Evidence(
+        evidence_id=f"{eid}_SAFE", product_id=product_id, source_type="MANUFACTURER",
+        source_reference="s-safe", claim="none known", field="contraindications",
+        claim_type="MANUFACTURER_CLAIM", qa_status="VERIFIED", conflict_status="NONE"))
     db.flush()
 
 
