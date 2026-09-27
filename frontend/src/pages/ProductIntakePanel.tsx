@@ -10,10 +10,21 @@ type Props = {
   onCancelEdit?: () => void;
 };
 
+/** Product Line V1 — operator classification only; never inferred from text/category/AI. */
+const PRODUCT_LINE_OPTIONS = [
+  { value: "SKIN", label: "پوست (SKIN)" },
+  { value: "HAIR", label: "مو (HAIR)" },
+  { value: "BEAUTY", label: "زیبایی (BEAUTY)" },
+  { value: "TOOLS", label: "ابزار (TOOLS)" },
+  { value: "PERFUME", label: "ادکلن (PERFUME)" },
+  { value: "OTHER", label: "متفرقه (OTHER)" },
+] as const;
+
 type Draft = {
   product_id: string;
   brand: string;
   product_name: string;
+  product_line: string;
   variant: string;
   size_value: number;
   size_unit: string;
@@ -31,6 +42,7 @@ const EMPTY: Draft = {
   product_id: "",
   brand: "",
   product_name: "",
+  product_line: "",
   variant: "clear",
   size_value: 50,
   size_unit: "ml",
@@ -100,14 +112,18 @@ export function completeFromIntro(raw: string): Draft {
   d.qa_verdict = "PENDING";
   d.status = "DRAFT";
   d.market_region = "IR";
+  // product_line intentionally left empty — operator must select explicitly
+  d.product_line = "";
   return d;
 }
 
 function fromProduct(p: ProductDTO): Draft {
+  const lineRaw = (p as { product_line?: string | null }).product_line;
   return {
     product_id: p.product_id,
     brand: p.brand || "",
     product_name: p.product_name || "",
+    product_line: typeof lineRaw === "string" ? lineRaw : "",
     variant: String(p.variant ?? "clear"),
     size_value: Number(p.size_value ?? 50),
     size_unit: String(p.size_unit ?? "ml"),
@@ -150,6 +166,8 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
     }
     const completed = completeFromIntro(intro);
     if (editing) completed.product_id = draft.product_id;
+    // Preserve operator product_line selection; never infer from intro text
+    completed.product_line = draft.product_line;
     setDraft(completed);
     setErr(null);
     setMsg("اطلاعات پیشنهادی تکمیل شد. هر باکس را بررسی/ویرایش کنید؛ سپس محصول به‌صورت Draft ثبت می‌شود.");
@@ -160,6 +178,10 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
     setMsg(null);
     if (!draft.product_id.trim() || !draft.brand.trim() || !draft.product_name.trim()) {
       setErr("شناسه، برند و نام محصول الزامی است.");
+      return;
+    }
+    if (!editing && !draft.product_line.trim()) {
+      setErr("انتخاب لاین محصول (پوست / مو / زیبایی / ابزار / ادکلن / متفرقه) الزامی است.");
       return;
     }
     setBusy(true);
@@ -180,6 +202,10 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
           market_region: draft.market_region || null,
           packaging_version: draft.packaging_version || null,
         };
+        // Product Line change only when operator has an explicit value selected
+        if (draft.product_line.trim()) {
+          body.product_line = draft.product_line.trim().toUpperCase();
+        }
         const updated = await updateProduct(draft.product_id.trim(), body, activeToken);
         setMsg(`به‌روزرسانی شد: ${updated.product_id}`);
         onRegistered?.(updated.product_id);
@@ -188,6 +214,7 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
           product_id: draft.product_id.trim(),
           brand: draft.brand.trim(),
           product_name: draft.product_name.trim(),
+          product_line: draft.product_line.trim().toUpperCase(),
           variant: draft.variant || null,
           size_value: draft.size_value,
           size_unit: draft.size_unit || "ml",
@@ -259,6 +286,28 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
           <div style={{ gridColumn: "1 / -1" }}>
             <label className="pro-label">نام محصول</label>
             <input className="pro-input" value={draft.product_name} onChange={(e) => setField("product_name", e.target.value)} />
+          </div>
+          <div style={{ gridColumn: "1 / -1" }}>
+            <label className="pro-label" htmlFor="product-line-select">
+              لاین محصول (اجباری) *
+            </label>
+            <select
+              id="product-line-select"
+              className="pro-input"
+              value={draft.product_line}
+              onChange={(e) => setField("product_line", e.target.value)}
+              required={!editing}
+            >
+              <option value="">— انتخاب لاین —</option>
+              {PRODUCT_LINE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            <p className="pro-lead" style={{ marginTop: "0.25rem", fontSize: "0.85rem" }}>
+              انتخاب صریح اپراتور؛ از متن، برند، دسته یا پیشنهاد هوشمند استخراج نمی‌شود.
+            </p>
           </div>
           <div>
             <label className="pro-label">variant</label>
