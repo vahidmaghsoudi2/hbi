@@ -77,6 +77,23 @@ def test_create_rejects_invalid_product_line(client, db_session):
     assert db_session.get(Product, "PL-BAD") is None
 
 
+def test_create_rejects_perfume_product_line(client, db_session):
+    """Product Line V1 allowlist is five values only; PERFUME is not a product_line."""
+    h = _auth(db_session)
+    r = client.post(
+        "/api/v1/products/",
+        headers=h,
+        json=_base(product_id="PL-PERFUME", product_line="PERFUME"),
+    )
+    assert r.status_code in (400, 422), r.text
+    assert db_session.get(Product, "PL-PERFUME") is None
+
+
+def test_product_line_allowlist_is_exactly_five():
+    assert PRODUCT_LINE_VALUES == frozenset({"SKIN", "HAIR", "BEAUTY", "TOOLS", "OTHER"})
+    assert "PERFUME" not in PRODUCT_LINE_VALUES
+
+
 def test_create_does_not_infer_line_from_category_id(client, db_session):
     h = _auth(db_session)
     # category_id is not on ProductCreate; even if smuggled, must not satisfy line
