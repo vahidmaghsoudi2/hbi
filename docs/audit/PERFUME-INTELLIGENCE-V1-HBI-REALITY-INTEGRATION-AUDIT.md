@@ -506,3 +506,66 @@ Scope: Independent verification only; no code/schema/contract/architecture/runti
 ```
 
 **End Independent Verification.**
+
+
+---
+
+# Next Evidence Gate — Post Independent Verification
+
+**Status:** OPEN  
+**Purpose:** Convert the remaining PARTIAL verification state into a bounded evidence-collection task without authorizing implementation.
+
+## Evidence required
+
+| Gate | Required evidence | Owner | Acceptance condition |
+|---|---|---|---|
+| E-01 | Exact-SHA CI evidence for the audited repository state | Grok | Run/result ID tied to the inspected SHA, with outcome visible |
+| E-02 | Runtime environment identity | Grok | Backend/frontend/runtime versions and exact code SHA recorded |
+| E-03 | Runtime PERFUME catalog evidence | Grok | At least one real, identity-verified PERFUME product is demonstrated; simulated products are explicitly marked |
+| E-04 | Runtime identity/availability evidence | Grok | Brand/product/variant/concentration/volume/market and stock state are shown from runtime data where those fields exist; missing fields remain UNKNOWN |
+| E-05 | Manual consultation evidence | Grok | A bounded manual case records customer wording, preference, avoidance, context, candidate handling and explicit unknowns without automatic fragrance intelligence |
+| E-06 | Decision trace evidence | Grok | If a recommendation/candidate outcome is exercised, its evidence references, eligibility state, unknown/conflict state and operator action are captured |
+| E-07 | Independent re-check | ChatGPT | Re-check E-01 through E-06 against the supplied repository/runtime evidence; no acceptance based on narrative report alone |
+
+## Hard boundaries
+
+This gate does **not** authorize:
+
+- new Perfume schema or Product Master redesign;
+- new fragrance-specific Evidence engine;
+- fragrance scoring/ranking;
+- automatic recommendation;
+- automatic learning;
+- production implementation;
+- migration of generic HBI fields into a fragrance-specific model.
+
+## Required handling of unknowns
+
+- UNKNOWN remains UNKNOWN.
+- CONFLICT remains visible until resolved by evidence and operator action.
+- Missing concentration, performance, preference or avoidance data must not be inferred.
+- A generic PERFUME category entry is not evidence that Perfume Intelligence capability exists.
+- Simulated data must never be represented as runtime product truth.
+
+## Exit conditions
+
+The evidence gate may move to **READY FOR PO REVIEW** only when E-01 through E-06 have explicit evidence artifacts and E-07 has independently re-checked them.
+
+Until then:
+
+```text
+RESEARCH BASELINE: ACCEPTED AS RESEARCH
+REALITY AUDIT: PARTIAL
+INDEPENDENT VERIFICATION: PARTIAL
+EVIDENCE GATE: OPEN
+IMPLEMENTATION AUTHORIZATION: NOT GRANTED
+```
+
+## Provenance
+
+```text
+Added by: ChatGPT / GPT-5.6 Luna
+Reason: operationalize the remaining gaps identified by independent verification
+Scope: documentation/evidence governance only
+No code/schema/contract/architecture/runtime mutation
+```
