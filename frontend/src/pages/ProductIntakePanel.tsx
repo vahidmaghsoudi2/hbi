@@ -56,6 +56,27 @@ const EMPTY: Draft = {
   status: "DRAFT",
 };
 
+/** Normalize for compare / API (trim + upper). Empty stays empty. */
+export function normalizeProductLine(value: string | null | undefined): string {
+  return (value ?? "").trim().toUpperCase();
+}
+
+/**
+ * Option-2 semantic: include product_line in PATCH only when the operator
+ * actually changed it relative to the value loaded at Edit start.
+ * Unchanged (including same value still shown in the form) → omit from body.
+ */
+export function productLineForPatch(
+  initialLine: string | null | undefined,
+  currentLine: string | null | undefined,
+): string | undefined {
+  const initial = normalizeProductLine(initialLine);
+  const current = normalizeProductLine(currentLine);
+  if (current === initial) return undefined;
+  if (!current) return undefined;
+  return current;
+}
+
 /** Complete protocol fields from intro text — extract only, no invented medical claims. */
 export function completeFromIntro(raw: string): Draft {
   const text = raw.trim();
@@ -141,6 +162,8 @@ function fromProduct(p: ProductDTO): Draft {
 export default function ProductIntakePanel({ token, onEnsureSession, onRegistered, editProduct, onCancelEdit }: Props) {
   const [intro, setIntro] = useState("");
   const [draft, setDraft] = useState<Draft>(EMPTY);
+  /** Baseline product_line at Edit entry — used so unchanged line is omitted from PATCH. */
+  const [initialProductLine, setInitialProductLine] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -148,7 +171,9 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
 
   useEffect(() => {
     if (editProduct?.product_id) {
-      setDraft(fromProduct(editProduct));
+      const next = fromProduct(editProduct);
+      setDraft(next);
+      setInitialProductLine(normalizeProductLine(next.product_line));
       setIntro("");
       setMsg(`ویرایش محصول: ${editProduct.product_id}`);
       setErr(null);
@@ -202,9 +227,10 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
           market_region: draft.market_region || null,
           packaging_version: draft.packaging_version || null,
         };
-        // Product Line change only when operator has an explicit value selected
-        if (draft.product_line.trim()) {
-          body.product_line = draft.product_line.trim().toUpperCase();
+        // Option 2: only send product_line when operator actually changed it
+        const lineDelta = productLineForPatch(initialProductLine, draft.product_line);
+        if (lineDelta !== undefined) {
+          body.product_line = lineDelta;
         }
         const updated = await updateProduct(draft.product_id.trim(), body, activeToken);
         setMsg(`به‌روزرسانی شد: ${updated.product_id}`);
@@ -307,6 +333,7 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
             </select>
             <p className="pro-lead" style={{ marginTop: "0.25rem", fontSize: "0.85rem" }}>
               انتخاب صریح اپراتور؛ از متن، برند، دسته یا پیشنهاد هوشمند استخراج نمی‌شود.
+              در ویرایش، فقط در صورت تغییر واقعی لاین به سرور ارسال می‌شود.
             </p>
           </div>
           <div>
@@ -363,6 +390,7 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
             onClick={() => {
               onCancelEdit?.();
               setDraft(EMPTY);
+              setInitialProductLine("");
               setMsg(null);
             }}
           >

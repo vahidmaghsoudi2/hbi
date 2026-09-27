@@ -143,6 +143,36 @@ def test_patch_product_line_operator_controlled(client, db_session):
     assert row.product_line == "HAIR"
 
 
+def test_patch_without_product_line_leaves_line_unchanged(client, db_session):
+    """Option-2: Edit payload that omits product_line must not rewrite the line.
+
+    Mirrors Intake UI: when operator does not change Product Line, the field
+    is omitted from PATCH; brand-only update must keep the stored line.
+    """
+    h = _auth(db_session)
+    assert (
+        client.post(
+            "/api/v1/products/",
+            headers=h,
+            json=_base(product_id="PL-PATCH-OMIT", product_line="BEAUTY"),
+        ).status_code
+        == 201
+    )
+    r = client.patch(
+        "/api/v1/products/PL-PATCH-OMIT",
+        headers=h,
+        json={"brand": "BrandOnlyUpdate"},
+    )
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["brand"] == "BrandOnlyUpdate"
+    assert body["product_line"] == "BEAUTY"
+    row = db_session.get(Product, "PL-PATCH-OMIT")
+    assert row is not None
+    assert row.product_line == "BEAUTY"
+    assert row.brand == "BrandOnlyUpdate"
+
+
 def test_patch_rejects_invalid_product_line(client, db_session):
     h = _auth(db_session)
     assert (
