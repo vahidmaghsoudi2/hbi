@@ -5,6 +5,7 @@ import {
   listManageableProducts,
   pilotToken,
   pilotOperatorToken,
+  pilotPoToken,
   customerIntake,
   createGuest,
   generateRecommendations,
@@ -225,6 +226,14 @@ export default function NewHomePage() {
     if (cached) return cached;
     const pair = await pilotOperatorToken();
     sessionStorage.setItem("hbi_operator_access_token", pair.access_token);
+    return pair.access_token;
+  }
+
+  async function ensureReviewSession(): Promise<string | null> {
+    const cached = sessionStorage.getItem("hbi_po_access_token");
+    if (cached) return cached;
+    const pair = await pilotPoToken();
+    sessionStorage.setItem("hbi_po_access_token", pair.access_token);
     return pair.access_token;
   }
 
@@ -782,9 +791,9 @@ export default function NewHomePage() {
 
         {active === "review" && (
           <ProductReviewPanel
-            token={sessionStorage.getItem("hbi_operator_access_token")}
+            token={sessionStorage.getItem("hbi_po_access_token")}
             productId={sessionStorage.getItem("hbi_review_product_id")}
-            onEnsureSession={ensureProductSession}
+            onEnsureSession={ensureReviewSession}
             onProductChanged={() => void loadProducts()}
           />
         )}

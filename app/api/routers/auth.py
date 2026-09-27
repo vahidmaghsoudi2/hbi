@@ -13,7 +13,7 @@ from app.core.auth import (
 )
 from app.core.deps import get_db
 from app.models.customer import Customer
-from app.models.user_role import UserRole, ROLE_EDITOR, ROLE_ADMIN
+from app.models.user_role import UserRole, ROLE_EDITOR, ROLE_PO, ROLE_ADMIN
 from app.models.admin_credential import AdminCredential
 from app.services.admin_auth_service import verify_admin_password
 from app.core.audit import audit_event

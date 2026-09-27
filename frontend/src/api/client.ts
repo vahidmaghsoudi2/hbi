@@ -67,6 +67,13 @@ export function pilotOperatorToken(): Promise<TokenPair> {
   });
 }
 
+/** Dev/Pilot only — governed PO session for Product Review transitions. */
+export function pilotPoToken(): Promise<TokenPair> {
+  return request<TokenPair>("/auth/pilot-po-token", {
+    method: "POST",
+  });
+}
+
 /** Requires auth; body must use case_type, NOT concerns */
 export function createCase(
   body: CaseCreateRequest,
