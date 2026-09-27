@@ -35,6 +35,7 @@ def _create_product(client, headers, product_id, **extra):
         "product_id": product_id,
         "brand": extra.pop("brand", "SliceBrand"),
         "product_name": extra.pop("product_name", "Slice Serum"),
+        "product_line": extra.pop("product_line", "SKIN"),
         **extra,
     }
     r = client.post("/api/v1/products/", headers=headers, json=body)
