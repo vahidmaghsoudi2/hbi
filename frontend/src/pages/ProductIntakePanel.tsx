@@ -16,7 +16,6 @@ const PRODUCT_LINE_OPTIONS = [
   { value: "HAIR", label: "مو (HAIR)" },
   { value: "BEAUTY", label: "زیبایی (BEAUTY)" },
   { value: "TOOLS", label: "ابزار (TOOLS)" },
-  { value: "PERFUME", label: "ادکلن (PERFUME)" },
   { value: "OTHER", label: "متفرقه (OTHER)" },
 ] as const;
 
@@ -206,7 +205,7 @@ export default function ProductIntakePanel({ token, onEnsureSession, onRegistere
       return;
     }
     if (!editing && !draft.product_line.trim()) {
-      setErr("انتخاب لاین محصول (پوست / مو / زیبایی / ابزار / ادکلن / متفرقه) الزامی است.");
+      setErr("انتخاب لاین محصول (پوست / مو / زیبایی / ابزار / متفرقه) الزامی است.");
       return;
     }
     setBusy(true);
