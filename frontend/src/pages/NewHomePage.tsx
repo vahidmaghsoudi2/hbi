@@ -5,6 +5,7 @@ import {
   listManageableProducts,
   pilotToken,
   pilotOperatorToken,
+  pilotPoToken,
   customerIntake,
   createGuest,
   generateRecommendations,
@@ -18,6 +19,7 @@ import {
   listSalesByCustomer,
 } from "../api/client";
 import ProductIntakePanel from "./ProductIntakePanel";
+import ProductReviewPanel from "./ProductReviewPanel";
 import type {
   ProductDTO,
   RecommendationDTO,
@@ -41,7 +43,7 @@ const CONCERN_OPTIONS = [
 
 const SKIN_OPTIONS = ["خشک", "چرب", "مختلط", "معمولی", "حساس"] as const;
 
-type Panel = "consult" | "previous" | "profile" | "catalog" | "intake" | "results" | "sales" | "about";
+type Panel = "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about";
 
 export default function NewHomePage() {
   const [active, setActive] = useState<Panel>("consult");
@@ -224,6 +226,14 @@ export default function NewHomePage() {
     if (cached) return cached;
     const pair = await pilotOperatorToken();
     sessionStorage.setItem("hbi_operator_access_token", pair.access_token);
+    return pair.access_token;
+  }
+
+  async function ensureReviewSession(): Promise<string | null> {
+    const cached = sessionStorage.getItem("hbi_po_access_token");
+    if (cached) return cached;
+    const pair = await pilotPoToken();
+    sessionStorage.setItem("hbi_po_access_token", pair.access_token);
     return pair.access_token;
   }
 
@@ -502,6 +512,7 @@ export default function NewHomePage() {
     ["previous", "مشتری قبلی / جست‌وجو"],
     ["profile", "پروفایل"],
     ["catalog", "محصولات"],
+    ["review", "بررسی محصول"],
     ["intake", "ورود محصول"],
     ["results", "پیشنهادها"],
     ["sales", "فروش"],
@@ -761,11 +772,30 @@ export default function NewHomePage() {
                     >
                       ویرایش
                     </button>
+                    <button
+                      type="button"
+                      className="pro-btn-primary"
+                      onClick={() => {
+                        sessionStorage.setItem("hbi_review_product_id", p.product_id);
+                        go("review");
+                      }}
+                    >
+                      بررسی پرونده
+                    </button>
                   </div>
                 </article>
               ))}
             </div>
           </section>
+        )}
+
+        {active === "review" && (
+          <ProductReviewPanel
+            token={sessionStorage.getItem("hbi_po_access_token")}
+            productId={sessionStorage.getItem("hbi_review_product_id")}
+            onEnsureSession={ensureReviewSession}
+            onProductChanged={() => void loadProducts()}
+          />
         )}
 
         {active === "intake" && (

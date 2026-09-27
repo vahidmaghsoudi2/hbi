@@ -228,3 +228,32 @@ export interface StockMovementDTO {
   note?: string | null;
   created_at?: string | null;
 }
+
+
+export interface EvidenceDTO {
+  evidence_id: string;
+  product_id: string;
+  claim?: string | null;
+  field?: string | null;
+  claim_type?: string | null;
+  qa_status?: string | null;
+  conflict_status?: string | null;
+  source_type?: string | null;
+  source_reference?: string | null;
+  evidence_status?: string | null;
+  [key: string]: unknown;
+}
+
+export interface MutationLogDTO {
+  id?: string | number | null;
+  action?: string | null;
+  actor_id?: string | null;
+  actor_role?: string | null;
+  target_id?: string | null;
+  resulting_state?: string | null;
+  reason?: string | null;
+  before?: unknown;
+  after?: unknown;
+  created_at?: string | null;
+  [key: string]: unknown;
+}

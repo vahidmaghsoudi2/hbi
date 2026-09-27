@@ -21,6 +21,8 @@ import type {
   InventoryReportRow,
   FinancialSummaryDTO,
   StockMovementDTO,
+  EvidenceDTO,
+  MutationLogDTO,
 } from "../types/api";
 
 const BASE = import.meta.env?.VITE_API_BASE ?? "/api/v1";
@@ -61,6 +63,13 @@ export function pilotToken(body: PilotTokenRequest): Promise<TokenPair> {
 /** Dev/Pilot only — operator session for Product Intake governance actions. */
 export function pilotOperatorToken(): Promise<TokenPair> {
   return request<TokenPair>("/auth/pilot-operator-token", {
+    method: "POST",
+  });
+}
+
+/** Dev/Pilot only — governed PO session for Product Review transitions. */
+export function pilotPoToken(): Promise<TokenPair> {
+  return request<TokenPair>("/auth/pilot-po-token", {
     method: "POST",
   });
 }
@@ -150,8 +159,8 @@ export function createGuest(
 export function getProductEvidence(
   productId: string,
   token: string
-): Promise<unknown> {
-  return request<unknown>(`/evidence/?product_id=${productId}`, {}, token);
+): Promise<EvidenceDTO[]> {
+  return request<EvidenceDTO[]>(`/evidence/?product_id=${encodeURIComponent(productId)}`, {}, token);
 }
 
 /** POST /api/v1/sales/ — requires auth; customer_id must match token identity */
@@ -253,6 +262,63 @@ export function updateProduct(
     method: "PATCH",
     body: JSON.stringify(body),
   }, token);
+}
+
+/** Product governance transitions — backend is the authority. */
+export function submitProduct(productId: string, token: string): Promise<ProductDTO> {
+  return request<ProductDTO>(`/products/${encodeURIComponent(productId)}/submit`, { method: "POST" }, token);
+}
+
+export function enterProductQaReview(productId: string, token: string): Promise<ProductDTO> {
+  return request<ProductDTO>(`/products/${encodeURIComponent(productId)}/enter-qa-review`, { method: "POST" }, token);
+}
+
+export function approveProduct(productId: string, token: string): Promise<ProductDTO> {
+  return request<ProductDTO>(`/products/${encodeURIComponent(productId)}/approve`, { method: "POST" }, token);
+}
+
+export function activateProduct(productId: string, token: string): Promise<ProductDTO> {
+  return request<ProductDTO>(`/products/${encodeURIComponent(productId)}/activate`, { method: "POST" }, token);
+}
+
+export function rejectProduct(productId: string, reason: string, token: string): Promise<ProductDTO> {
+  return request<ProductDTO>(`/products/${encodeURIComponent(productId)}/reject`, {
+    method: "POST",
+    body: JSON.stringify({ reason }),
+  }, token);
+}
+
+export function setProductQa(
+  productId: string,
+  body: { verdict: string; notes?: string | null },
+  token: string
+): Promise<ProductDTO> {
+  return request<ProductDTO>(`/products/${encodeURIComponent(productId)}/qa`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  }, token);
+}
+
+export function verifyProductIdentity(
+  productId: string,
+  body: { identity_status: string; source_refs?: string | null; confidence?: number | null },
+  token: string
+): Promise<ProductDTO> {
+  return request<ProductDTO>(`/products/${encodeURIComponent(productId)}/verify-identity`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  }, token);
+}
+
+export function getProductMutationLog(
+  productId: string,
+  token: string
+): Promise<MutationLogDTO[]> {
+  return request<MutationLogDTO[]>(
+    `/products/${encodeURIComponent(productId)}/mutation-log`,
+    {},
+    token
+  );
 }
 
 /** Mission B — Specialist Override.

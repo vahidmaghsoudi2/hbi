@@ -13,7 +13,7 @@ from app.core.auth import (
 )
 from app.core.deps import get_db
 from app.models.customer import Customer
-from app.models.user_role import UserRole, ROLE_EDITOR, ROLE_ADMIN
+from app.models.user_role import UserRole, ROLE_EDITOR, ROLE_PO, ROLE_ADMIN
 from app.models.admin_credential import AdminCredential
 from app.services.admin_auth_service import verify_admin_password
 from app.core.audit import audit_event
@@ -240,6 +240,53 @@ async def pilot_operator_token(
         outcome="ok",
         extra={"client_ip": client_ip, "role": ROLE_EDITOR},
     )
+    return TokenPair(
+        access_token=create_access_token(payload),
+        refresh_token=create_refresh_token(payload),
+        token_type="bearer",
+    )
+
+
+@router.post("/pilot-po-token", response_model=TokenPair)
+async def pilot_po_token(
+    http_request: Request,
+    db: Session = Depends(get_db),
+):
+    """Dev/Pilot only: issue a scoped PO token for governed Product Review transitions."""
+    if os.getenv("HBI_ENV", "development").lower() == "production":
+        audit_event(
+            "pilot_po_token",
+            path="/api/v1/auth/pilot-po-token",
+            outcome="denied",
+            detail="disabled_in_production",
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="pilot-po-token disabled in production",
+        )
+
+    subject_id = os.getenv("HBI_PILOT_PO_SUBJECT", "USR_PILOT_PO")
+    role = db.query(UserRole).filter(
+        UserRole.subject_id == subject_id,
+        UserRole.role == ROLE_PO,
+    ).first()
+    if role is None:
+        db.add(UserRole(
+            user_role_id=f"UR-{subject_id}-{ROLE_PO}",
+            subject_id=subject_id,
+            role=ROLE_PO,
+        ))
+        db.commit()
+
+    client_ip = http_request.client.host if http_request.client else "unknown"
+    audit_event(
+        "pilot_po_token",
+        customer_id=subject_id,
+        path="/api/v1/auth/pilot-po-token",
+        outcome="ok",
+        extra={"client_ip": client_ip, "role": ROLE_PO},
+    )
+    payload = {"sub": subject_id}
     return TokenPair(
         access_token=create_access_token(payload),
         refresh_token=create_refresh_token(payload),
