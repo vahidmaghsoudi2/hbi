@@ -21,6 +21,10 @@ import type {
   InventoryReportRow,
   FinancialSummaryDTO,
   StockMovementDTO,
+  DuplicateCheckRequest,
+  DuplicateCheckResponse,
+  DuplicateCheckOperatorDecisionRequest,
+  DuplicateCheckOperatorDecisionResponse,
 } from "../types/api";
 
 const BASE = import.meta.env?.VITE_API_BASE ?? "/api/v1";
@@ -213,12 +217,37 @@ export function listSalesByCustomer(
   );
 }
 
-/** POST /api/v1/products/ — requires the active pilot/customer JWT */
+/** POST /api/v1/products/ — requires operator JWT; may include duplicate_check_id */
 export function createProduct(body: ProductCreateRequest, token: string): Promise<ProductDTO> {
   return request<ProductDTO>("/products/", {
     method: "POST",
     body: JSON.stringify(body),
   }, token);
+}
+
+/** POST /api/v1/products/duplicate-check/ — governed identity review before create. */
+export function checkDuplicate(
+  body: DuplicateCheckRequest,
+  token: string
+): Promise<DuplicateCheckResponse> {
+  return request<DuplicateCheckResponse>(
+    "/products/duplicate-check/",
+    { method: "POST", body: JSON.stringify(body) },
+    token
+  );
+}
+
+/** POST /api/v1/products/duplicate-check/audit/{check_id}/decision */
+export function recordDuplicateDecision(
+  checkId: string,
+  body: DuplicateCheckOperatorDecisionRequest,
+  token: string
+): Promise<DuplicateCheckOperatorDecisionResponse> {
+  return request<DuplicateCheckOperatorDecisionResponse>(
+    `/products/duplicate-check/audit/${encodeURIComponent(checkId)}/decision`,
+    { method: "POST", body: JSON.stringify(body) },
+    token
+  );
 }
 
 /** Operational catalog — includes DRAFT products; requires operator role. */
