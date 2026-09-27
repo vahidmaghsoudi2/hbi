@@ -57,8 +57,12 @@ TRANSITION_ROLES: Dict[str, FrozenSet[str]] = {
 
 
 def can_create_product(roles: Set[str]) -> bool:
-    return bool(roles.intersection({ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN}))
+    return bool(roles & {ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO}) or ROLE_ADMIN in roles
 
 
 def can_edit_informational(roles: Set[str]) -> bool:
-    return bool(roles.intersection({ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN}))
+    return bool(roles & {ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO}) or ROLE_ADMIN in roles
+
+
+def can_view_mutation_log(roles: Set[str]) -> bool:
+    return bool(roles & {ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN})
