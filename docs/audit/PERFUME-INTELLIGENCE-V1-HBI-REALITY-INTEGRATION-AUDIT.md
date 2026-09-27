@@ -393,3 +393,116 @@ Shared header for all IDs unless overridden:
 ---
 
 *End of Evidence Package and Audit document*
+
+
+---
+
+# Independent Verification — ChatGPT / GPT-5.6 Luna
+
+**Verification date:** 2026-09-27  
+**Verifier:** ChatGPT / GPT-5.6 Luna  
+**Role:** Independent Repository Verifier  
+**Audit Author:** Grok  
+**Independence:** Verifier is not the Audit Author.
+
+## Verification scope
+
+The verification was performed against the Audit Author's declared base SHA:
+
+`bbe1a4eed81937fae1c7ecb7be5bb28af551458b`
+
+The verifier inspected the repository artifacts cited by PI-V1-01 through PI-V1-10. No runtime database was available, and no CI workflow run was returned for the exact base SHA. Therefore this verification does not upgrade static evidence into runtime or CI evidence.
+
+## Claim classification used
+
+- REPOSITORY_FACT — directly confirmed in repository source at the inspected SHA.
+- TEST_SUPPORTED_FACT — supported by a named repository test inspected at the same SHA.
+- CI_NOT_VERIFIED — no exact-SHA workflow run was available from the repository workflow-run query.
+- RUNTIME_NOT_AVAILABLE — no authorized runtime/database evidence was available.
+- NOT_CONFIRMED — the audit claim could not be established from the inspected evidence.
+
+## Per-row independent results
+
+| Audit ID | Independent result | Evidence position |
+|---|---|---|
+| PI-V1-01 | CONFIRMED — static | Product model contains product_id, brand, product_name, variant, identity_status, qa_verdict and status; cited product/intake tests exist. Runtime not verified. |
+| PI-V1-02 | CONFIRMED — static | Product.variant and size_value/size_unit exist; DuplicateCheckService explicitly treats variant/size differences as distinct. No concentration column found in Product. Runtime not verified. |
+| PI-V1-03 | CONFIRMED — static | Inventory.quantity_available exists and ProductRepository filters ACTIVE + VALID + VERIFIED + quantity_available > 0. Runtime not verified. |
+| PI-V1-04 | CONFIRMED — static | ProductKnowledge is one row per product_id and ProductKnowledgeService rebuilds from approved/verified, non-conflicting Evidence. Fragrance-specific olfactory fields were not found in the inspected model. |
+| PI-V1-05 | CONFIRMED — static | Evidence stores source_type/source_reference/claim_type/qa_status/conflict_status; ResearchDraftService requires source_type and source_reference and initializes QA as PENDING. |
+| PI-V1-06 | CONFIRMED — static | UNKNOWN and CONFLICT are explicit claim/conflict states; EvidenceReadinessService blocks CONFLICT; ProfileFact separately models UNKNOWN. |
+| PI-V1-07 | CONFIRMED — static | ProfileFact exists with provenance/value_state, but the allowed attribute_key constraint contains skin_profile, hair_profile, scalp_profile, age_range and concerns only; no fragrance-specific preference/avoidance key was evidenced. |
+| PI-V1-08 | CONFIRMED — static | RecommendationService calls ProductRepository.find_by_identity_status_and_active("VERIFIED") and maps eligibility/unknown states. No fragrance-specific eligibility rule set was evidenced. |
+| PI-V1-09 | CONFIRMED — static / PARTIAL | Recommendation and mutation-log/override models exist, but the audit's statement that a complete human-readable decision explanation package was not fully line-traced remains NOT CONFIRMED as an exhaustive claim. |
+| PI-V1-10 | CONFIRMED — static | Governance/docs and CI workflow files exist; Category explicitly permits PERFUME. Exact-SHA CI result was not verified. |
+
+## Independent findings
+
+### IV-F-01 — Audit conclusion remains PARTIAL
+
+The Audit Author's final verdict **B. AUDIT PARTIAL — ADDITIONAL EVIDENCE REQUIRED** is supported.
+
+The inspected repository evidence confirms substantial portions of the static audit matrix, but it does not establish runtime behavior or a CI result for the exact inspected SHA.
+
+### IV-F-02 — CI must remain unverified
+
+A repository workflow-run query for commit `bbe1a4eed81937fae1c7ecb7be5bb28af551458b` returned no workflow runs.
+
+Therefore:
+
+`CI_NOT_VERIFIED`
+
+must remain the classification. This is not equivalent to CI_FAILED.
+
+### IV-F-03 — Runtime remains unavailable
+
+No authorized runtime/DB evidence was available to independently verify live PERFUME catalog contents, live stock, live operator flow, or production behavior.
+
+Therefore those claims remain:
+
+`RUNTIME_NOT_AVAILABLE`
+
+### IV-F-04 — Static repository evidence does not prove Perfume Intelligence exists
+
+The inspected code supports generic HBI capabilities and the PERFUME category taxonomy. It does not establish a dedicated fragrance-intelligence engine, fragrance-specific preference model, concentration field, or olfactory/performance intelligence module.
+
+### IV-F-05 — No architecture or implementation authorization follows
+
+This verification does not authorize Architecture, Contract, Schema, API, Implementation, scoring, ranking, automatic recommendation, learning, or a live Perfume pilot.
+
+## Verification verdict
+
+```text
+INDEPENDENT VERIFICATION VERDICT: PARTIALLY VERIFIED / AUDIT PARTIAL
+
+Static repository claims PI-V1-01 through PI-V1-08: substantially confirmed.
+PI-V1-09: partially confirmed; exhaustive explanation completeness not established.
+PI-V1-10: static governance claims confirmed; exact-SHA CI remains unverified.
+Runtime: NOT AVAILABLE.
+CI exact SHA: NOT VERIFIED.
+Additional evidence required before any transition beyond research/audit.
+```
+
+## Visible disagreement with Audit Author
+
+No material contradiction was found in the Audit Author's overall PARTIAL verdict.
+
+One limitation is made explicit: PI-V1-09's negative/exhaustiveness statement about the complete human-readable explanation package is **NOT CONFIRMED** by this independent inspection. The available evidence establishes persistence/auditability primitives, but not a complete end-to-end explanation package.
+
+## Agent provenance
+
+```text
+Agent: ChatGPT / GPT-5.6 Luna
+Execution surface: GitHub connector
+Input repository: vahidmaghsoudi2/hbi
+Audit base SHA inspected: bbe1a4eed81937fae1c7ecb7be5bb28af551458b
+Audit file prior blob SHA: e54fa1d61c77ca6f0d8182456f5ff73df3662c67
+Repository operations:
+- Fetch audit file at docs/perfume-v1-reality-integration-audit
+- Fetch AGENTS.md at bbe1a4eed81937fae1c7ecb7be5bb28af551458b
+- Fetch cited source/test files at bbe1a4eed81937fae1c7ecb7be5bb28af551458b
+- Query workflow runs for bbe1a4eed81937fae1c7ecb7be5bb28af551458b
+Scope: Independent verification only; no code/schema/contract/architecture/runtime changes
+```
+
+**End Independent Verification.**
