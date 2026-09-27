@@ -15,7 +15,7 @@ PRODUCT_INFORMATIONAL_KEYS: FrozenSet[str] = frozenset({
 })
 
 PRODUCT_LINE_VALUES: FrozenSet[str] = frozenset({
-    "SKIN", "HAIR", "BEAUTY", "TOOLS", "PERFUME", "OTHER",
+    "SKIN", "HAIR", "BEAUTY", "TOOLS", "OTHER",
 })
 
 ACTION_CREATE = "CREATE"
