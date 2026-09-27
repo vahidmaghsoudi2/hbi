@@ -49,7 +49,7 @@ class Product(Base):
         ),
         CheckConstraint(
             "product_line IS NULL OR product_line IN "
-            "('SKIN', 'HAIR', 'BEAUTY', 'TOOLS', 'PERFUME', 'OTHER')",
+            "('SKIN', 'HAIR', 'BEAUTY', 'TOOLS', 'OTHER')",
             name="ck_product_product_line",
         ),
     )
