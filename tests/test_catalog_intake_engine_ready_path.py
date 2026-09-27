@@ -8,6 +8,8 @@ from __future__ import annotations
 from app.models.case import Case
 from app.models.customer import Customer
 from app.models.evidence import Evidence
+from app.models.inventory import Inventory
+from app.models.product import Product
 from app.models.product_knowledge import ProductKnowledge
 from app.models.user_role import ROLE_PO
 from app.repositories.product_repository import ProductRepository
@@ -41,6 +43,13 @@ def test_governed_intake_reaches_engine_ready_and_recommendation(db_session):
     assert product.status == "DRAFT"
     assert product.qa_verdict == "PENDING"
     assert product.identity_status == "NEEDS_REVIEW"
+
+    # Product Master continuity: one canonical Product identity is the anchor.
+    products = db_session.query(Product).filter(Product.product_id == PID).all()
+    inventories = db_session.query(Inventory).filter(Inventory.product_id == PID).all()
+    assert len(products) == 1
+    assert len(inventories) == 1
+    assert inventories[0].product_id == PID
 
     assert transitions.submit(PID, "po_catalog", PO).status == "SUBMITTED"
     assert transitions.enter_qa_review(PID, "po_catalog", PO).status == "QA_REVIEW"
@@ -105,6 +114,13 @@ def test_governed_intake_reaches_engine_ready_and_recommendation(db_session):
     candidates = ProductRepository(db_session).find_by_identity_status_and_active("VERIFIED")
     candidate_ids = {p.product_id for p in candidates}
     assert PID in candidate_ids
+
+    # The same Product identity remains the anchor for Knowledge and Evidence.
+    pk = db_session.query(ProductKnowledge).filter(ProductKnowledge.product_id == PID).all()
+    ev_rows = db_session.query(Evidence).filter(Evidence.product_id == PID).all()
+    assert len(pk) == 1
+    assert ev_rows
+    assert all(ev.product_id == PID for ev in ev_rows)
 
     customer = Customer(
         customer_id="CUST_CATALOG_INTAKE_001",
