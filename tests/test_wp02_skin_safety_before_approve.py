@@ -151,6 +151,25 @@ def test_skin_conflicting_contraindication_does_not_satisfy(db_session):
     assert SkinSafetyMinimumService(db_session).evaluate(pid).satisfied is False
 
 
+def test_skin_claim_type_conflict_does_not_satisfy(db_session):
+    pid = "WP02-SKIN-CLAIMTYPE-CONFLICT"
+    _product(db_session, pid)
+    _ready(db_session, pid, "E-SKIN-CLAIMTYPE-CONFLICT-READY")
+    _ev(
+        db_session,
+        eid="E-SKIN-CLAIMTYPE-CONFLICT-SAFE",
+        pid=pid,
+        field="contraindications",
+        claim="conflicting statement",
+        claim_type="CONFLICT",
+        qa="VERIFIED",
+        conflict="NONE",
+    )
+    assert SkinSafetyMinimumService(db_session).evaluate(pid).satisfied is False
+    with pytest.raises(ValidationError, match="Skin safety minimum"):
+        ProductTransitionService(db_session).approve(pid, "po", {ROLE_PO})
+
+
 def test_skin_empty_contraindication_does_not_mean_safe(db_session):
     pid = "WP02-SKIN-EMPTY"
     _product(db_session, pid)

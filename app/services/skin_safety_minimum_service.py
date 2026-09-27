@@ -64,11 +64,11 @@ class SkinSafetyMinimumService:
             if qa != _QA_OK:
                 continue
 
+            claim_type = (getattr(ev, "claim_type", None) or "").strip().upper()
             conflict = (getattr(ev, "conflict_status", None) or "NONE").strip().upper()
-            if conflict == "CONFLICT":
+            if conflict == "CONFLICT" or claim_type == "CONFLICT":
                 continue
 
-            claim_type = (getattr(ev, "claim_type", None) or "").strip().upper()
             claim = (getattr(ev, "claim", None) or "").strip()
 
             # Explicit field-specific UNKNOWN.
