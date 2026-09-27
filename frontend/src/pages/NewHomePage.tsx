@@ -18,6 +18,7 @@ import {
   listSalesByCustomer,
 } from "../api/client";
 import ProductIntakePanel from "./ProductIntakePanel";
+import ProductReviewPanel from "./ProductReviewPanel";
 import type {
   ProductDTO,
   RecommendationDTO,
@@ -41,7 +42,7 @@ const CONCERN_OPTIONS = [
 
 const SKIN_OPTIONS = ["خشک", "چرب", "مختلط", "معمولی", "حساس"] as const;
 
-type Panel = "consult" | "previous" | "profile" | "catalog" | "intake" | "results" | "sales" | "about";
+type Panel = "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about";
 
 export default function NewHomePage() {
   const [active, setActive] = useState<Panel>("consult");
@@ -502,6 +503,7 @@ export default function NewHomePage() {
     ["previous", "مشتری قبلی / جست‌وجو"],
     ["profile", "پروفایل"],
     ["catalog", "محصولات"],
+    ["review", "بررسی محصول"],
     ["intake", "ورود محصول"],
     ["results", "پیشنهادها"],
     ["sales", "فروش"],
@@ -761,11 +763,30 @@ export default function NewHomePage() {
                     >
                       ویرایش
                     </button>
+                    <button
+                      type="button"
+                      className="pro-btn-primary"
+                      onClick={() => {
+                        sessionStorage.setItem("hbi_review_product_id", p.product_id);
+                        go("review");
+                      }}
+                    >
+                      بررسی پرونده
+                    </button>
                   </div>
                 </article>
               ))}
             </div>
           </section>
+        )}
+
+        {active === "review" && (
+          <ProductReviewPanel
+            token={sessionStorage.getItem("hbi_operator_access_token")}
+            productId={sessionStorage.getItem("hbi_review_product_id")}
+            onEnsureSession={ensureProductSession}
+            onProductChanged={() => void loadProducts()}
+          />
         )}
 
         {active === "intake" && (
