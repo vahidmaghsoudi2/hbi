@@ -8,7 +8,7 @@ from app.repositories.product_repository import ProductRepository
 from app.services.base import BaseService
 from app.core.governance import (
     ACTION_CREATE, ACTION_EDIT, PRODUCT_GOVERNANCE_KEYS, PRODUCT_INFORMATIONAL_KEYS,
-    can_create_product, can_edit_informational,
+    PRODUCT_LINE_VALUES, can_create_product, can_edit_informational,
 )
 from app.core.exceptions import ValidationError, NotFoundError, ConflictError
 from app.services.mutation_log_service import MutationLogService
@@ -75,6 +75,8 @@ class ProductService(BaseService[Product, ProductRepository]):
         self._enforce_duplicate_check_on_create(
             data, actor_id=actor_id, roles=roles, duplicate_check_id=duplicate_check_id
         )
+        # Product Line V1: required on create; operator value only (no inference).
+        self._enforce_product_line_on_write(data, required=True)
         for k in list(PRODUCT_GOVERNANCE_KEYS):
             data.pop(k, None)
         data["status"] = "DRAFT"
@@ -119,6 +121,24 @@ class ProductService(BaseService[Product, ProductRepository]):
             knowledge.update_from_evidence(product.product_id)
 
         return product
+
+    def _enforce_product_line_on_write(self, data: dict, *, required: bool) -> None:
+        """Validate product_line allowlist. required=True for create; False for PATCH."""
+        if "product_line" not in data:
+            if required:
+                raise ValidationError("product_line is required")
+            return
+        raw = data.get("product_line")
+        if raw is None or (isinstance(raw, str) and not str(raw).strip()):
+            if required:
+                raise ValidationError("product_line is required")
+            raise ValidationError("product_line cannot be empty")
+        line = str(raw).strip().upper()
+        if line not in PRODUCT_LINE_VALUES:
+            raise ValidationError(
+                f"Invalid product_line: {raw!r}; allowed: {sorted(PRODUCT_LINE_VALUES)}"
+            )
+        data["product_line"] = line
 
     def _enforce_duplicate_check_on_create(
         self,
@@ -216,6 +236,8 @@ class ProductService(BaseService[Product, ProductRepository]):
         if blocked:
             raise ValidationError(f"Governance fields forbidden on informational edit: {sorted(blocked)}")
         clean = {k: v for k, v in updates.items() if k in PRODUCT_INFORMATIONAL_KEYS}
+        if "product_line" in clean:
+            self._enforce_product_line_on_write(clean, required=False)
         product = self.get_by_id(product_id)
         if not product:
             raise NotFoundError(f"Product {product_id} not found")
