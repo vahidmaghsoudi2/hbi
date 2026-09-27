@@ -11,6 +11,11 @@ PRODUCT_GOVERNANCE_KEYS: FrozenSet[str] = frozenset({
 PRODUCT_INFORMATIONAL_KEYS: FrozenSet[str] = frozenset({
     "brand", "product_name", "variant", "size_value", "size_unit", "barcode_gtin",
     "market_region", "country_of_origin", "packaging_version", "category_id",
+    "product_line",
+})
+
+PRODUCT_LINE_VALUES: FrozenSet[str] = frozenset({
+    "SKIN", "HAIR", "BEAUTY", "TOOLS", "PERFUME", "OTHER",
 })
 
 ACTION_CREATE = "CREATE"
@@ -50,11 +55,10 @@ TRANSITION_ROLES: Dict[str, FrozenSet[str]] = {
     ACTION_ARCHIVE: frozenset({ROLE_PO}),
 }
 
+
 def can_create_product(roles: Set[str]) -> bool:
-    return bool(roles & {ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO}) or ROLE_ADMIN in roles
+    return bool(roles.intersection({ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN}))
+
 
 def can_edit_informational(roles: Set[str]) -> bool:
-    return bool(roles & {ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO}) or ROLE_ADMIN in roles
-
-def can_view_mutation_log(roles: Set[str]) -> bool:
-    return bool(roles & {ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN})
+    return bool(roles.intersection({ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN}))

@@ -25,6 +25,8 @@ class Product(Base):
     # P4 P0: new products always DRAFT; expanded lifecycle vocabulary
     status = Column(String, nullable=False, server_default="DRAFT")
     category_id = Column(String, ForeignKey("Category.category_id", ondelete="RESTRICT"), nullable=True, index=True)
+    # Product Line V1 — operator classification; nullable for legacy; required on app create
+    product_line = Column(String, nullable=True, index=True)
     created_at = Column(DateTime, server_default=func.current_timestamp())
     updated_at = Column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
 
@@ -44,6 +46,11 @@ class Product(Base):
         CheckConstraint(
             "qa_verdict IN ('PENDING', 'VALID', 'INVALID', 'CONFLICT', 'UNKNOWN', 'NEEDS_REVIEW')",
             name="ck_product_qa_verdict",
+        ),
+        CheckConstraint(
+            "product_line IS NULL OR product_line IN "
+            "('SKIN', 'HAIR', 'BEAUTY', 'TOOLS', 'PERFUME', 'OTHER')",
+            name="ck_product_product_line",
         ),
     )
 
