@@ -121,3 +121,54 @@ def test_duplicate_product_id_returns_conflict(api_env):
     )
     assert second.status_code == 409, second.text
     assert "already exists" in second.json()["detail"]
+
+
+def test_pilot_po_token_grants_po_role_and_supports_governed_approve_boundary(api_env, monkeypatch):
+    client, db = api_env
+
+    token_response = client.post("/api/v1/auth/pilot-po-token")
+    assert token_response.status_code == 200, token_response.text
+    token = token_response.json()["access_token"]
+
+    role = (
+        db.query(UserRole)
+        .filter(
+            UserRole.subject_id == "USR_PILOT_PO",
+            UserRole.role == "PO",
+        )
+        .first()
+    )
+    assert role is not None
+
+    created = client.post(
+        "/api/v1/products/",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "product_id": "PILOT-PO-001",
+            "brand": "HBI Test",
+            "product_name": "Pilot PO Product",
+            "product_line": "SKIN",
+            "variant": "clear",
+            "size_value": 50,
+            "size_unit": "ml",
+        },
+    )
+    assert created.status_code == 201, created.text
+
+    submit = client.post(
+        "/api/v1/products/PILOT-PO-001/submit",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert submit.status_code == 200, submit.text
+
+    approve = client.post(
+        "/api/v1/products/PILOT-PO-001/approve",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert approve.status_code == 422, approve.text
+    assert "qa_verdict=VALID" in approve.json()["detail"]
+
+    monkeypatch.setenv("HBI_ENV", "production")
+    denied = client.post("/api/v1/auth/pilot-po-token")
+    assert denied.status_code == 403, denied.text
+    assert "disabled in production" in denied.json()["detail"]
