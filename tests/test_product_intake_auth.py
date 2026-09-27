@@ -161,12 +161,18 @@ def test_pilot_po_token_grants_po_role_and_supports_governed_approve_boundary(ap
     )
     assert submit.status_code == 200, submit.text
 
+    enter_qa = client.post(
+        "/api/v1/products/PILOT-PO-001/enter-qa-review",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert enter_qa.status_code == 200, enter_qa.text
+
     approve = client.post(
         "/api/v1/products/PILOT-PO-001/approve",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert approve.status_code == 422, approve.text
-    assert "qa_verdict=VALID" in approve.json()["detail"]
+    assert approve.json()["detail"].startswith("Evidence Readiness FAIL")
 
     monkeypatch.setenv("HBI_ENV", "production")
     denied = client.post("/api/v1/auth/pilot-po-token")
