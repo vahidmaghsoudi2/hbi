@@ -136,6 +136,7 @@ export interface ProductCreateRequest {
   product_id: string;
   brand: string;
   product_name: string;
+  product_line: string;
   variant?: string | null;
   size_value?: number | null;
   size_unit?: string | null;
@@ -159,6 +160,7 @@ export interface ProductUpdateRequest {
   market_region?: string | null;
   country_of_origin?: string | null;
   packaging_version?: string | null;
+  product_line?: string | null;
 }
 
 

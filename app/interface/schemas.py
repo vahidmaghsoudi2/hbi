@@ -200,6 +200,7 @@ class ProductCreate(BaseModel):
     product_id: str
     brand: str
     product_name: str
+    product_line: str  # Product Line V1 — required operator classification
     variant: Optional[str] = None
     size_value: Optional[float] = None
     size_unit: Optional[str] = None
@@ -229,6 +230,7 @@ class ProductUpdate(BaseModel):
     country_of_origin: Optional[str] = None
     packaging_version: Optional[str] = None
     category_id: Optional[str] = None
+    product_line: Optional[str] = None  # Product Line V1 — operator-controlled change only
     model_config = ConfigDict(extra="forbid")
 
 

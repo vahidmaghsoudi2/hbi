@@ -51,5 +51,5 @@ class MutationLogService:
         keys = ["product_id", "brand", "product_name", "variant", "size_value", "size_unit",
                 "barcode_gtin", "market_region", "country_of_origin", "packaging_version",
                 "identity_status", "identity_confidence", "identity_source_refs",
-                "qa_verdict", "qa_reviewed_at", "qa_notes", "status", "category_id"]
+                "qa_verdict", "qa_reviewed_at", "qa_notes", "status", "category_id", "product_line"]
         return {k: getattr(product, k) for k in keys if hasattr(product, k)}

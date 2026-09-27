@@ -33,6 +33,7 @@ def test_governed_intake_reaches_engine_ready_and_recommendation(db_session):
             "product_id": PID,
             "brand": "Catalog Test",
             "product_name": "Hydration Intake Path Product",
+            "product_line": "SKIN",
         },
         actor_id="po_catalog",
         roles=PO,

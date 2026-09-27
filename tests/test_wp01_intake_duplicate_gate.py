@@ -25,6 +25,7 @@ def _auth(db_session, subject="wp01_op", *roles):
 
 
 def _create(client, headers, **body):
+    body.setdefault("product_line", "SKIN")
     return client.post("/api/v1/products/", headers=headers, json=body)
 
 

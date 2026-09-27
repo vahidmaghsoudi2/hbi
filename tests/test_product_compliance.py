@@ -38,6 +38,7 @@ def _make_product(db, pid="P_CMP_001", status="DRAFT", **kwargs):
 def test_product_create_forces_draft(db_session):
     p = ProductService(db_session).create_product_with_inventory(
         {"product_id": "P_CMP_CREATE", "brand": "B", "product_name": "N",
+         "product_line": "SKIN",
          "status": "ACTIVE", "qa_verdict": "VALID", "identity_status": "VERIFIED"},
         actor_id="u1", roles={ROLE_EDITOR})
     assert p.status == "DRAFT"
@@ -111,7 +112,8 @@ def test_reject_requires_reason(db_session):
 
 def test_mutation_log_persists(db_session):
     ProductService(db_session).create_product_with_inventory(
-        {"product_id": "P_CMP_LOG", "brand": "B", "product_name": "N"},
+        {"product_id": "P_CMP_LOG", "brand": "B", "product_name": "N",
+         "product_line": "SKIN"},
         actor_id="u1", roles={ROLE_EDITOR})
     logs = MutationLogService(db_session).list_for_product("P_CMP_LOG")
     assert any(l.action == "CREATE" and l.actor_id == "u1" for l in logs)
