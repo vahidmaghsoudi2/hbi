@@ -250,9 +250,25 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
     assert ev.status_code == 201, ev.text
     evidence_id = ev.json()["evidence_id"]
 
+    # WP-02: verified contraindications required for SKIN before APPROVE/ACTIVATE.
+    safe = client.post(
+        "/api/v1/evidence/",
+        headers=po,
+        json={
+            "product_id": pid,
+            "claim": "none known",
+            "source_type": "MANUFACTURER",
+            "source_reference": "test://slice-safety",
+            "claim_type": "MANUFACTURER_CLAIM",
+            "field": "contraindications",
+        },
+    )
+    assert safe.status_code == 201, safe.text
+    safe_id = safe.json()["evidence_id"]
+
     # EVIDENCE VERIFY — clear PENDING from research draft + approve new evidence
     # so EvidenceReadiness can pass (no PENDING/REJECTED left unresolved).
-    for eid, verdict in ((draft_eid, "VERIFIED"), (evidence_id, "VERIFIED")):
+    for eid, verdict in ((draft_eid, "VERIFIED"), (evidence_id, "VERIFIED"), (safe_id, "VERIFIED")):
         v = client.post(
             f"/api/v1/evidence/{eid}/verify",
             headers=po,

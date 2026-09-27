@@ -78,6 +78,22 @@ def test_governed_intake_reaches_engine_ready_and_recommendation(db_session):
     )
     db_session.flush()
 
+    # WP-02: Skin products require verified contraindications or explicit UNKNOWN.
+    db_session.add(
+        Evidence(
+            evidence_id=f"EV-{PID}-SAFE",
+            product_id=PID,
+            source_type="MANUFACTURER",
+            source_reference="test://mission-283-safety",
+            claim="none known",
+            field="contraindications",
+            claim_type="MANUFACTURER_CLAIM",
+            qa_status="VERIFIED",
+            conflict_status="NONE",
+        )
+    )
+    db_session.flush()
+
     transitions.set_product_qa(PID, "po_catalog", PO, "VALID", notes="Mission 144 readiness")
 
     readiness = EvidenceReadinessService(db_session).evaluate(PID)
