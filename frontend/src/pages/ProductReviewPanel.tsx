@@ -95,8 +95,13 @@ export default function ProductReviewPanel({
       setLogs(Array.isArray(log) ? log : []);
       setSelectedId(id);
       setIdentityStatus(upper(p.identity_status) || "NEEDS_REVIEW");
+      setIdentityRefs(text((p as { identity_source_refs?: unknown }).identity_source_refs));
+      const confidence = (p as { identity_confidence?: unknown }).identity_confidence;
+      setIdentityConfidence(
+        confidence == null || confidence === "" ? "" : String(confidence)
+      );
       setQaVerdict(upper(p.qa_verdict) || "PENDING");
-      setQaNotes("");
+      setQaNotes(text((p as { qa_notes?: unknown }).qa_notes));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
       setProduct(null);
