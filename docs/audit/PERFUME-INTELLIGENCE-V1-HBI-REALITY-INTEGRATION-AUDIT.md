@@ -4,7 +4,19 @@
 **Mission type:** AUTHORIZED FOR AUDIT ONLY  
 **Domain owner (mission):** Perplexity — Perfume Intelligence V1  
 **Auditor:** Grok — Repository Access / GitHub Execution  
-**Independent Verifier:** NOT ASSIGNED / NOT COMPLETED  
+
+**Independent Verification = NOT COMPLETED**  
+**Reason:** No independent verifier evidence submitted.
+
+**Status ladder (this document):**
+
+```text
+Audit Evidence Collection: COMPLETED / PARTIAL (static repo + tests; runtime/CI-run incomplete)
+Independent Verification: NOT COMPLETED
+Architecture: NOT DECIDED
+Contract: NOT AUTHORIZED
+Implementation: NOT AUTHORIZED
+```
 
 ---
 
@@ -13,16 +25,18 @@
 | Field | Value |
 |-------|--------|
 | Repository URL | https://github.com/vahidmaghsoudi2/hbi |
-| Inspected Branch | `master` (analysis); report registered on `docs/perfume-v1-reality-integration-audit` |
+| Inspected Branch | `master` (code analysis baseline) |
 | Inspected Commit SHA | `bbe1a4eed81937fae1c7ecb7be5bb28af551458b` |
+| Report Branch | `docs/perfume-v1-reality-integration-audit` |
 | Audit Start Date | 2026-09-27 |
+| Evidence Package update | 2026-09-27 |
 | Auditor | Grok |
-| Independent Verifier | INDEPENDENT VERIFICATION NOT COMPLETED |
+| Independent Verification | NOT COMPLETED — No independent verifier evidence submitted |
 | Runtime Access Status | **NOT AVAILABLE** — no authorized production/pilot DB session for this mission |
-| Report path chosen | `docs/audit/PERFUME-INTELLIGENCE-V1-HBI-REALITY-INTEGRATION-AUDIT.md` |
-| Path note | Requested `docs/11-meeting-room/fragrance/` **does not exist** on inspected tree. Closest existing governance/audit location: `docs/audit/` (already used for gate/recon evidence). No new documentation architecture invented beyond placing this single file under `docs/audit/`. |
+| Report path | `docs/audit/PERFUME-INTELLIGENCE-V1-HBI-REALITY-INTEGRATION-AUDIT.md` |
+| Path note | Requested `docs/11-meeting-room/fragrance/` does not exist. File under existing `docs/audit/`. |
 
-**Core rules applied**
+**Core rules**
 
 ```text
 Artifact Exists ≠ Capability Exists
@@ -36,20 +50,11 @@ No architecture design, contract, Reuse/Extend/New decision, or implementation r
 
 ## 2. Scope and Non-Scope
 
-### In scope (ten V1 audit areas only)
+### In scope
 
-- PI-V1-01 Canonical Product Identity  
-- PI-V1-02 Product Variant / Concentration / Volume  
-- PI-V1-03 Inventory Availability  
-- PI-V1-04 ProductKnowledge / product information  
-- PI-V1-05 Evidence / Provenance  
-- PI-V1-06 Unknown / Conflict handling  
-- PI-V1-07 Customer input (preference / avoidance / context)  
-- PI-V1-08 Eligibility / decision boundary  
-- PI-V1-09 Decision trace / auditability  
-- PI-V1-10 Documentation / QA / CI governance  
+PI-V1-01 … PI-V1-10 only (see Evidence Package).
 
-### Explicitly out of scope (deferred; not audited as V1 capabilities)
+### Out of scope
 
 Similarity; numeric scoring; automatic ranking/recommendation/learning; advanced customer event history; advanced fragrance performance model; derived olfactory profile engine; new product master / evidence / knowledge / lifecycle designs; cross-market equivalence; formula/reformulation intelligence.
 
@@ -57,15 +62,10 @@ Similarity; numeric scoring; automatic ranking/recommendation/learning; advanced
 
 ## 3. Source-of-Truth Statement
 
-Only the following were used as proof:
+Proof sources: repository files/symbols/tests/workflow paths at inspected SHA.  
+Not proof: memory alone, chat summaries alone, filename-only inference, unproven runtime.
 
-- GitHub repository `vahidmaghsoudi2/hbi`
-- Branch `master` at SHA `bbe1a4eed81937fae1c7ecb7be5bb28af551458b`
-- Files, symbols, schemas, tests, workflow file names under that tree
-
-Not used as proof: memory, prior chat summaries alone, file-name inference without reading symbols, or unproven runtime.
-
-**Fragrance-specific note:** Repository search for perfume/fragrance/olfactory/sillage/longevity product-intelligence modules did **not** show a dedicated perfume intelligence engine. Category id `PERFUME` appears as a **catalog category** constraint (see PI-V1-01/10), which is **not** the same as fragrance intelligence capability.
+**Fragrance note:** No dedicated olfactory/sillage/longevity intelligence module found under `app/`. Category id `PERFUME` is catalog taxonomy only (`app/models/category.py`), not perfume intelligence.
 
 ---
 
@@ -73,133 +73,89 @@ Not used as proof: memory, prior chat summaries alone, file-name inference witho
 
 | Resource | Status |
 |----------|--------|
-| Git clone / file read | AVAILABLE |
-| Test source files | AVAILABLE (static) |
-| CI workflow definitions | AVAILABLE under `.github/workflows/` |
-| CI outcome **for inspected SHA** `bbe1a4ee…` | **NOT VERIFIED in this audit** (no run-id bound to this SHA recorded here) |
-| Authorized runtime / production DB | **NOT AVAILABLE** |
-
-Where runtime would be material, **Runtime Status = NOT AVAILABLE**.
+| Git file read | AVAILABLE |
+| Test sources | AVAILABLE (static) |
+| CI workflow YAML | AVAILABLE `.github/workflows/` |
+| CI run bound to `bbe1a4ee…` | NOT VERIFIED in this audit |
+| Authorized runtime DB | NOT AVAILABLE |
 
 ---
 
 ## 5. Audit Method
 
-1. Record SHA and branch.  
-2. Inspect models, services, repositories, routers, tests for each PI-V1-0x area.  
-3. Separate static presence from tested behavior.  
-4. Mark UNKNOWN / NOT VERIFIED when evidence is incomplete.  
-5. No architecture or Reuse/Extend/New conclusions.  
-6. Independent verification step: **not completed** (no second auditor assigned).
+Static inspection of models/services/repos/tests at SHA above; separate presence from tested behavior; mark unknowns; no architecture decisions; independent verification not completed.
 
 ---
 
-## 6. Audit Matrix
+## 6. Audit Matrix (summary)
 
-Statuses used only as allowed by the mission brief.
-
-| ID | Foundation Requirement | Domain Meaning | Repository Artifact | Artifact SHA | Observed Behavior | Caller Evidence | Test Evidence | CI Evidence | Runtime Evidence | Runtime Status | Verification Status | Current Capability | Verified Gap | Architecture Impact | ADR Required | PO Decision Required | Auditor | Independent Verifier | Verification Date |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| PI-V1-01 | Canonical product identity | Stable product id shared across modules | `app/models/product.py` `Product.product_id` PK; FKs from Evidence, ProductKnowledge, Inventory, etc. | `bbe1a4eed81937fae1c7ecb7be5bb28af551458b` | String PK; brand/name required; lifecycle `status`; `identity_status`; `qa_verdict` | Services/repos use `product_id` | `tests/test_product_compliance.py`, `tests/test_product_intake_auth.py`, intake e2e | Workflow files exist; **outcome for this SHA NOT VERIFIED here** | NOT AVAILABLE | NOT AVAILABLE | PARTIALLY_VERIFIED | PARTIALLY_VERIFIED | NO GAP VERIFIED for generic identity; fragrance-specific identity semantics NOT PRESENT | NOT ASSESSED — GAP NOT YET VERIFIED | NOT ASSESSED | NOT ASSESSED | Grok | NOT_CONFIRMED | 2026-09-27 |
-| PI-V1-02 | Variant / concentration / volume | Represent sellable form differences | `Product.variant`, `size_value`, `size_unit`, `packaging_version`; `DuplicateCheckService` size/variant rules | same | Variant/size are nullable attributes; concentration **not** a dedicated field; volume only via size_value/unit if used that way | `duplicate_check_service.py`; product create paths | Duplicate/intake tests on master lineage | NOT VERIFIED for this SHA | NOT AVAILABLE | NOT AVAILABLE | PARTIALLY_VERIFIED | PARTIALLY_VERIFIED | GAP VERIFIED: no first-class concentration; fragrance volume/concentration semantics not evidenced | DEFERRED TO ARCHITECTURE REVIEW | POSSIBLY REQUIRED AFTER ARCHITECTURE REVIEW | POSSIBLY REQUIRED AFTER ARCHITECTURE REVIEW | Grok | NOT_CONFIRMED | 2026-09-27 |
-| PI-V1-03 | Inventory availability | Stock affects availability | `app/models/inventory.py`; `quantity_available`; create seeds inventory | same | Catalog join requires `quantity_available > 0` | `ProductRepository.find_by_identity_status_and_active`; `RecommendationService.generate_recommendations` | Intake/catalog-related tests; recommendation path uses inventory_score | NOT VERIFIED for this SHA | NOT AVAILABLE | NOT AVAILABLE | PARTIALLY_VERIFIED | PARTIALLY_VERIFIED | NO GAP VERIFIED for generic stock gate | NOT ASSESSED | NOT ASSESSED | NOT ASSESSED | Grok | NOT_CONFIRMED | 2026-09-27 |
-| PI-V1-04 | Product information / knowledge | Store product-facing knowledge | `app/models/product_knowledge.py` one row per `product_id`; text fields ingredients, roles, benefits, use_cases, contraindications, usage, manufacturer_claims, evidence_refs | same | Flat single-row projection; rebuild from approved evidence | `ProductKnowledgeService.update_from_evidence` | `test_product_knowledge_qa_sync.py`, `test_product_intake_knowledge_completion.py`, `test_g2_g4_evidence_truth.py` | NOT VERIFIED for this SHA | NOT AVAILABLE | NOT AVAILABLE | PARTIALLY_VERIFIED | PARTIALLY_VERIFIED | GAP VERIFIED: no olfactory/notes/accords/performance fragrance fields evidenced | DEFERRED TO ARCHITECTURE REVIEW | POSSIBLY REQUIRED AFTER ARCHITECTURE REVIEW | POSSIBLY REQUIRED AFTER ARCHITECTURE REVIEW | Grok | NOT_CONFIRMED | 2026-09-27 |
-| PI-V1-05 | Evidence / provenance | Source-traceable claims | `app/models/evidence.py`; `EvidenceService`; `ResearchDraftService` | same | Requires source_type/source_reference/claim; claim_type; qa_status; conflict_status; research draft → PENDING | `POST .../research-draft`; evidence routers | `test_g2_g4_evidence_truth.py`, `test_evidence.py` | NOT VERIFIED for this SHA | NOT AVAILABLE | NOT AVAILABLE | PARTIALLY_VERIFIED | PARTIALLY_VERIFIED | NO GAP VERIFIED for generic evidence; perfume-specific evidence types NOT PRESENT | NOT ASSESSED | NOT ASSESSED | NOT ASSESSED | Grok | NOT_CONFIRMED | 2026-09-27 |
-| PI-V1-06 | Unknown / conflict | Explicit unknown vs missing; conflict handling | Evidence `claim_type` includes UNKNOWN/CONFLICT; `conflict_status`; ProfileFact `value_state` | same | Research draft defaults evidence_status UNKNOWN; conflict resolution API path in EvidenceService; empty PK field ≠ explicit UNKNOWN | `EvidenceService.resolve_conflict`; readiness blocks CONFLICT | g2/g4 evidence tests; profile_fact value_state tests | NOT VERIFIED for this SHA | NOT AVAILABLE | NOT AVAILABLE | PARTIALLY_VERIFIED | PARTIALLY_VERIFIED | POSSIBLE GAP — INSUFFICIENT EVIDENCE that EMPTY vs UNKNOWN is enforced for all product fields | DEFERRED TO ARCHITECTURE REVIEW | POSSIBLY REQUIRED AFTER ARCHITECTURE REVIEW | POSSIBLY REQUIRED AFTER ARCHITECTURE REVIEW | Grok | NOT_CONFIRMED | 2026-09-27 |
-| PI-V1-07 | Customer preference / avoidance / context | Customer-side inputs | `ProfileFact` attribute_key limited to skin/hair/scalp/age_range/concerns; Case/consultation paths exist | same | No fragrance preference/avoidance keys in ProfileFact constraint; visit context via Case not fully mapped here | profile_fact services/APIs | `test_profile_fact.py`, consultation tests | NOT VERIFIED for this SHA | NOT AVAILABLE | NOT AVAILABLE | PARTIALLY_VERIFIED | PARTIALLY_VERIFIED | GAP VERIFIED: no evidenced fragrance taste/avoidance model | DEFERRED TO ARCHITECTURE REVIEW | POSSIBLY REQUIRED AFTER ARCHITECTURE REVIEW | POSSIBLY REQUIRED AFTER ARCHITECTURE REVIEW | Grok | NOT_CONFIRMED | 2026-09-27 |
-| PI-V1-08 | Eligibility / decision boundary | Gates before recommendation | Catalog filter ACTIVE+VERIFIED+VALID+stock; `_map_eligibility` | same | Unavailable stock excluded from catalog set; eligibility strings include INELIGIBLE paths; need_match used | `recommendation_service.py` | recommendation / f2 / medical gate tests (generic) | NOT VERIFIED for this SHA | NOT AVAILABLE | NOT AVAILABLE | PARTIALLY_VERIFIED | PARTIALLY_VERIFIED | NO GAP VERIFIED for generic gates; fragrance-specific eligibility NOT PRESENT | NOT ASSESSED | NOT ASSESSED | NOT ASSESSED | Grok | NOT_CONFIRMED | 2026-09-27 |
-| PI-V1-09 | Decision trace / auditability | Trace inputs to output | `Recommendation` model; mutation logs product/evidence; specialist_override; outcome assessment | same | Recommendations persisted; product mutation log; evidence mutation log; override model present — **full explanation package NOT fully verified line-by-line in this pass** | recommendation generate; mutation log routes | various recommendation/outcome tests | NOT VERIFIED for this SHA | NOT AVAILABLE | NOT AVAILABLE | PARTIALLY_VERIFIED | PARTIALLY_VERIFIED | POSSIBLE GAP — INSUFFICIENT EVIDENCE for complete perfume decision explanation | DEFERRED TO ARCHITECTURE REVIEW | POSSIBLY REQUIRED AFTER ARCHITECTURE REVIEW | NOT ASSESSED | Grok | NOT_CONFIRMED | 2026-09-27 |
-| PI-V1-10 | Docs / QA / CI governance | Governance artifacts | `docs/` contracts/audit; `.github/workflows/test.yml`, `hbi_auto.yml`, etc.; category includes PERFUME | same | P4/intake contracts, audit folder, workflow YAML present; category enum includes PERFUME for reporting/catalog | N/A | governance-tests job name used historically | **CI success for bbe1a4ee NOT VERIFIED in this audit** | NOT REQUIRED for static governance presence | NOT AVAILABLE | PARTIALLY_VERIFIED | PARTIALLY_VERIFIED | NO GAP VERIFIED for existence of CI/docs; perfume intelligence docs NOT PRESENT | NOT ASSESSED | NOT ASSESSED | NOT ASSESSED | Grok | NOT_CONFIRMED | 2026-09-27 |
+Full per-ID detail is in **Evidence Package** below. Summary: all ten areas **PARTIALLY_VERIFIED** at static/test level; none fully VERIFIED with runtime + CI-run + independent verification.
 
 ---
 
-## 7. Verified Current HBI Capabilities
+## 7. Verified Current HBI Capabilities (generic platform only)
 
-(Generic platform capabilities evidenced at inspected SHA; **not** claimed as perfume intelligence.)
-
-1. **Product identity:** `Product.product_id` as primary key with shared FKs.  
-2. **Lifecycle vocabulary on Product:** DRAFT → … → ACTIVE (and reject/archive) via constraints + `ProductTransitionService`.  
-3. **Inventory quantity and catalog stock filter:** `quantity_available > 0` in `find_by_identity_status_and_active`.  
-4. **Evidence model with source fields, claim_type, qa_status, conflict_status.**  
-5. **Research Draft → PENDING Evidence path.**  
-6. **ProductKnowledge flat projection from approved/verified non-conflict evidence.**  
-7. **Duplicate check service** (identity/barcode/size/variant behavior) on create path post–WP-01 lineage.  
-8. **ProfileFact** with explicit value_state including UNKNOWN (customer attributes constrained to listed keys).  
-9. **Recommendation generation** that loads ACTIVE∩VERIFIED∩VALID∩stock products and maps eligibility.  
-10. **Category id `PERFUME`** allowed in category constraint (catalog taxonomy, not olfactory engine).
+1. `Product.product_id` PK with cross-module FKs  
+2. Product lifecycle statuses + `ProductTransitionService`  
+3. Inventory `quantity_available` + catalog stock filter  
+4. Evidence model + Research Draft → PENDING  
+5. ProductKnowledge flat projection from approved evidence  
+6. DuplicateCheck (identity/barcode/size/variant)  
+7. ProfileFact with value_state including UNKNOWN (constrained keys)  
+8. Recommendation catalog load + `_map_eligibility`  
+9. Category `PERFUME` in category constraint  
 
 ---
 
 ## 8. Partially Verified Capabilities
 
-- End-to-end **runtime** operator flows (UI → production DB): NOT AVAILABLE.  
-- CI **green on exact inspected SHA**: workflow files seen; run result for `bbe1a4ee…` not recorded in this audit.  
-- Completeness of recommendation **explanation/trace** payload for all engine inputs.  
-- Whether every product text field distinguishes EMPTY vs explicit UNKNOWN at approval gates (skin contract may differ; not re-validated here for perfume).
+Runtime operator flows; CI green on exact SHA; full recommendation explanation payload; product-field EMPTY vs UNKNOWN enforcement everywhere.
 
 ---
 
 ## 9. Unknown / Not Verified Areas
 
-- Production catalog contents for category PERFUME.  
-- Any hidden fragrance modules outside searched paths.  
-- Live CI status of `bbe1a4eed81937fae1c7ecb7be5bb28af551458b`.  
-- Independent verification of every matrix cell.
+Production PERFUME catalog contents; modules outside searched paths; live CI for exact SHA; independent verification of all rows.
 
 ---
 
-## 10. Verified Gaps (evidence of absence for fragrance V1 needs)
+## 10. Verified Gaps (observed absence)
 
-| Gap | Evidence of absence / limitation |
-|-----|----------------------------------|
-| Dedicated concentration field | No `concentration` column on Product; only generic variant/size |
-| Olfactory structured knowledge | No notes/accords/family/sillage/longevity fields on ProductKnowledge |
-| Fragrance preference/avoidance profile keys | ProfileFact `attribute_key` check constraint lists skin/hair/scalp/age_range/concerns only |
-| Perfume-specific intelligence services | No matching modules in app search for olfactory/sillage/longevity engines |
-
-These are **observed absences**, not architecture decisions.
+| Gap | Evidence |
+|-----|----------|
+| No concentration column | `app/models/product.py` fields listed; no `concentration` |
+| No olfactory PK fields | `app/models/product_knowledge.py` column list |
+| No fragrance preference keys | `ProfileFact` attribute_key CheckConstraint |
+| No perfume intelligence services | app search: no olfactory/sillage/longevity engine modules |
 
 ---
 
 ## 11. Contradictions
 
-| Topic | Notes |
-|-------|--------|
-| Category `PERFUME` vs Perfume Intelligence | Category exists for classification/reporting; does **not** contradict absence of fragrance intelligence engine — different concepts |
-| File existence vs capability | Satisfied methodologically; no contradiction found that a name alone was treated as full capability |
+Category `PERFUME` ≠ Perfume Intelligence engine — not a logical contradiction; different concepts.
 
 ---
 
 ## 12. Independent Verification Result
 
 ```text
-INDEPENDENT VERIFICATION NOT COMPLETED
+Independent Verification = NOT COMPLETED
+Reason: No independent verifier evidence submitted.
 ```
 
-No second auditor confirmed matrix rows. All Independent Verifier cells: **NOT_CONFIRMED**.
-
-This audit must **not** be treated as fully verified.
+Do not treat this audit as fully verified.
 
 ---
 
 ## 13. Deferred Items
 
-(As required by mission non-scope — listed only, not designed.)
-
-Similarity; numeric scoring; automatic ranking/recommendation/learning; advanced customer event history; advanced performance model; derived olfactory profile; new masters/engines; cross-market equivalence; formula intelligence.
+Similarity; numeric scoring; automatic ranking/learning; advanced customer events; advanced performance model; derived olfactory profile; new masters/engines; cross-market equivalence; formula intelligence.
 
 ---
 
 ## 14. Explicit Non-Decisions
 
-This audit does **not**:
-
-- Choose Reuse / Extend / New  
-- Define a Contract  
-- Recommend implementation  
-- Propose Product Master, Evidence engine, or ProductKnowledge redesign  
-- Propose scoring or similarity  
-- Authorize code, schema, migration, API, Issue, or PR (beyond this single documentation file on a docs branch)
+No Reuse/Extend/New; no Contract; no implementation recommendation; no Product Master / Evidence / Knowledge redesign; no scoring/similarity; no code/schema/API/Issue/PR beyond this documentation file on the docs branch.
 
 ---
 
@@ -207,15 +163,233 @@ This audit does **not**:
 
 **B. AUDIT PARTIAL — ADDITIONAL EVIDENCE REQUIRED**
 
-**Reasons (evidence-based):**
-
-1. Static repository reality for the ten V1 areas was inspected at SHA `bbe1a4eed81937fae1c7ecb7be5bb28af551458b`.  
-2. Runtime evidence was **NOT AVAILABLE**.  
-3. CI outcome for the exact inspected SHA was **NOT VERIFIED** in this pass.  
-4. **Independent verification was NOT COMPLETED.**  
-
-Therefore the audit establishes a **partial, auditor-only** reality baseline suitable for Domain Owner review, not a fully verified closure.
+Reasons: static evidence collected; runtime NOT AVAILABLE; CI outcome for exact SHA NOT VERIFIED; Independent Verification NOT COMPLETED.
 
 ---
 
-*End of PERFUME-INTELLIGENCE-V1-HBI-REALITY-INTEGRATION-AUDIT*
+## Evidence Package — PI-V1-01 to PI-V1-10
+
+Shared header for all IDs unless overridden:
+
+| Field | Value |
+|-------|--------|
+| Repository URL | https://github.com/vahidmaghsoudi2/hbi |
+| Inspected Branch | master |
+| Inspected Commit SHA | `bbe1a4eed81937fae1c7ecb7be5bb28af551458b` |
+| Independent Verification | NOT COMPLETED — No independent verifier evidence submitted |
+
+---
+
+### PI-V1-01 — Canonical Product Identity
+
+1. **Audit ID:** PI-V1-01  
+2. **Repository URL:** https://github.com/vahidmaghsoudi2/hbi  
+3. **Inspected Branch:** master  
+4. **Inspected Commit SHA:** `bbe1a4eed81937fae1c7ecb7be5bb28af551458b`  
+5. **Repository Path:** `app/models/product.py`  
+6. **Artifact Type:** SQLAlchemy model  
+7. **Exact Symbol:** `class Product` — `product_id` Column PK; `brand`; `product_name`; `status`; `identity_status`; `qa_verdict`  
+8. **Observed Behavior:** String primary key; brand and product_name required (nullable=False); lifecycle and identity constrained by CheckConstraints  
+9. **Caller Evidence:** `ProductService.create_product_with_inventory` (`app/services/product_service.py`); FKs from Evidence, ProductKnowledge, Inventory models  
+10. **Test Evidence:** `tests/test_product_compliance.py` — `test_product_create_forces_draft`, lifecycle tests; `tests/test_intake_e2e_api_slice_001.py` — `test_intake_api_vertical_slice_reaches_active`  
+11. **CI Evidence:** Workflow definitions `.github/workflows/test.yml`, `hbi_auto.yml` present; **run result for inspected SHA NOT VERIFIED**  
+12. **Runtime Evidence:** None collected  
+13. **Runtime Status:** NOT AVAILABLE  
+14. **Verification Status:** PARTIALLY_VERIFIED  
+15. **Current Capability:** PARTIALLY_VERIFIED (generic identity)  
+16. **Explicit Unknowns:** Whether production data always uses stable external product_id conventions; fragrance-specific identity rules  
+17. **Contradictions:** None  
+18. **Audit Limitation:** No runtime; no independent verification; fragrance semantics not present in model  
+
+---
+
+### PI-V1-02 — Variant / Concentration / Volume
+
+1. **Audit ID:** PI-V1-02  
+2–4. Same repo/branch/SHA  
+5. **Repository Path:** `app/models/product.py`; `app/services/duplicate_check_service.py`  
+6. **Artifact Type:** Model columns + service  
+7. **Exact Symbol:** `Product.variant`, `Product.size_value`, `Product.size_unit`, `Product.packaging_version`; `DuplicateCheckService.check`  
+8. **Observed Behavior:** variant/size nullable attributes; size/variant differences treated as distinct in duplicate path; **no `concentration` column**; volume only if encoded in size_value/unit  
+9. **Caller Evidence:** Create/duplicate intake paths; `ProductService.create_product_with_inventory`  
+10. **Test Evidence:** `tests/test_intake_e2e_api_slice_001.py` — `test_duplicate_different_variant_or_size_is_distinct_not_possible_match`, `test_duplicate_exact_name_same_size_returns_possible_match`  
+11. **CI Evidence:** Workflow files present; SHA-specific outcome NOT VERIFIED  
+12. **Runtime Evidence:** None  
+13. **Runtime Status:** NOT AVAILABLE  
+14. **Verification Status:** PARTIALLY_VERIFIED  
+15. **Current Capability:** PARTIALLY_VERIFIED  
+16. **Explicit Unknowns:** Operator convention for encoding EDP/EDT in variant text  
+17. **Contradictions:** None  
+18. **Audit Limitation:** Concentration absence is structural; not a perfume engine  
+
+---
+
+### PI-V1-03 — Inventory Availability
+
+1. **Audit ID:** PI-V1-03  
+2–4. Same  
+5. **Repository Path:** `app/models/inventory.py`; `app/repositories/product_repository.py`  
+6. **Artifact Type:** Model + repository query  
+7. **Exact Symbol:** `Inventory.quantity_available`; `ProductRepository.find_by_identity_status_and_active`  
+8. **Observed Behavior:** Catalog query requires `Product.status == ACTIVE`, `identity_status` match, `qa_verdict == VALID`, `Inventory.quantity_available > 0`  
+9. **Caller Evidence:** `RecommendationService.generate_recommendations` uses `find_by_identity_status_and_active("VERIFIED")`  
+10. **Test Evidence:** Intake/compliance paths that create inventory; recommendation tests that depend on stock (generic)  
+11. **CI Evidence:** Workflow files present; SHA-specific outcome NOT VERIFIED  
+12. **Runtime Evidence:** None  
+13. **Runtime Status:** NOT AVAILABLE  
+14. **Verification Status:** PARTIALLY_VERIFIED  
+15. **Current Capability:** PARTIALLY_VERIFIED  
+16. **Explicit Unknowns:** Default seed quantity operational policy in production  
+17. **Contradictions:** None  
+18. **Audit Limitation:** Runtime stock behavior not observed  
+
+---
+
+### PI-V1-04 — ProductKnowledge / Product Information
+
+1. **Audit ID:** PI-V1-04  
+2–4. Same  
+5. **Repository Path:** `app/models/product_knowledge.py`; `app/services/product_knowledge_service.py`  
+6. **Artifact Type:** Model + service  
+7. **Exact Symbol:** `class ProductKnowledge`; `ProductKnowledgeService.update_from_evidence`  
+8. **Observed Behavior:** One row per product_id; text columns (ingredients, ingredient_roles, claimed_benefits, known_use_cases, contraindications, usage_instructions, manufacturer_claims, evidence_refs); rebuild from APPROVED/VERIFIED non-CONFLICT evidence; PENDING excluded  
+9. **Caller Evidence:** Research draft path calls update_from_evidence after create; evidence verify flows  
+10. **Test Evidence:** `tests/test_product_knowledge_qa_sync.py` — `test_pending_evidence_not_in_product_knowledge`, `test_verify_then_reject_then_reverify_rebuilds_knowledge`; `tests/test_g2_g4_evidence_truth.py`  
+11. **CI Evidence:** Workflow files present; SHA-specific outcome NOT VERIFIED  
+12. **Runtime Evidence:** None  
+13. **Runtime Status:** NOT AVAILABLE  
+14. **Verification Status:** PARTIALLY_VERIFIED  
+15. **Current Capability:** PARTIALLY_VERIFIED  
+16. **Explicit Unknowns:** Whether free-text is used ad hoc for fragrance notes in production data  
+17. **Contradictions:** None  
+18. **Audit Limitation:** No olfactory schema columns evidenced  
+
+---
+
+### PI-V1-05 — Evidence / Provenance
+
+1. **Audit ID:** PI-V1-05  
+2–4. Same  
+5. **Repository Path:** `app/models/evidence.py`; `app/services/evidence_service.py`; `app/services/research_draft_service.py`; `app/api/routers/products.py`  
+6. **Artifact Type:** Model + services + API route  
+7. **Exact Symbol:** `class Evidence`; `ResearchDraftService.create_draft`; `POST /{product_id}/research-draft`  
+8. **Observed Behavior:** Evidence stores source_type, source_reference, claim, field, claim_type, qa_status, conflict_status, dates; research draft requires claim + sources; sets qa_status PENDING  
+9. **Caller Evidence:** Products router research-draft; evidence routers  
+10. **Test Evidence:** `tests/test_g2_g4_evidence_truth.py`; `tests/test_evidence.py`  
+11. **CI Evidence:** Workflow files present; SHA-specific outcome NOT VERIFIED  
+12. **Runtime Evidence:** None  
+13. **Runtime Status:** NOT AVAILABLE  
+14. **Verification Status:** PARTIALLY_VERIFIED  
+15. **Current Capability:** PARTIALLY_VERIFIED  
+16. **Explicit Unknowns:** Perfume-specific claim vocabularies in live data  
+17. **Contradictions:** None  
+18. **Audit Limitation:** Provenance capability is generic, not fragrance-typed  
+
+---
+
+### PI-V1-06 — Unknown / Conflict Handling
+
+1. **Audit ID:** PI-V1-06  
+2–4. Same  
+5. **Repository Path:** `app/services/research_draft_service.py`; `app/services/evidence_service.py`; `app/services/evidence_readiness_service.py`; `app/models/profile_fact.py`  
+6. **Artifact Type:** Services + model constraints  
+7. **Exact Symbol:** `_ALLOWED_CLAIM_TYPES` includes UNKNOWN, CONFLICT; `EvidenceService.resolve_conflict`; `EvidenceReadinessService.evaluate`; `ProfileFact.value_state`  
+8. **Observed Behavior:** Explicit claim_type UNKNOWN/CONFLICT; conflict_status on evidence; readiness fails on CONFLICT / pending QA; ProfileFact distinguishes KNOWN vs UNKNOWN value_state; empty ProductKnowledge string is not the same mechanism as claim_type UNKNOWN  
+9. **Caller Evidence:** Transition approve uses readiness; profile fact services  
+10. **Test Evidence:** `test_readiness_conflict_blocks_approve` in `test_product_compliance.py`; `test_all_value_states_are_supported` in `test_profile_fact.py`; g2/g4 evidence tests  
+11. **CI Evidence:** Workflow files present; SHA-specific outcome NOT VERIFIED  
+12. **Runtime Evidence:** None  
+13. **Runtime Status:** NOT AVAILABLE  
+14. **Verification Status:** PARTIALLY_VERIFIED  
+15. **Current Capability:** PARTIALLY_VERIFIED  
+16. **Explicit Unknowns:** Uniform EMPTY vs UNKNOWN enforcement for every product text field at all gates  
+17. **Contradictions:** None recorded  
+18. **Audit Limitation:** Product-field EMPTY≠UNKNOWN policy not fully proven across all gates in this package  
+
+---
+
+### PI-V1-07 — Customer Input (Preference / Avoidance / Context)
+
+1. **Audit ID:** PI-V1-07  
+2–4. Same  
+5. **Repository Path:** `app/models/profile_fact.py`; related profile services/tests  
+6. **Artifact Type:** Model + tests  
+7. **Exact Symbol:** `class ProfileFact`; CheckConstraint `attribute_key IN ('skin_profile', 'hair_profile', 'scalp_profile', 'age_range', 'concerns')`  
+8. **Observed Behavior:** Customer facts versioned with provenance and value_state; **no fragrance preference/avoidance keys** in constraint; Case/consultation exist elsewhere but fragrance visit-context mapping not evidenced here  
+9. **Caller Evidence:** Profile fact API/services (as covered by profile tests)  
+10. **Test Evidence:** `tests/test_profile_fact.py` (create, supersession, value_states, consent)  
+11. **CI Evidence:** Workflow files present; SHA-specific outcome NOT VERIFIED  
+12. **Runtime Evidence:** None  
+13. **Runtime Status:** NOT AVAILABLE  
+14. **Verification Status:** PARTIALLY_VERIFIED  
+15. **Current Capability:** PARTIALLY_VERIFIED for generic profile facts; **NOT PRESENT** for fragrance preference/avoidance model  
+16. **Explicit Unknowns:** Whether concerns free-text is ever used for scent in production  
+17. **Contradictions:** None  
+18. **Audit Limitation:** Avoidance-as-first-class not evidenced  
+
+---
+
+### PI-V1-08 — Eligibility / Decision Boundary
+
+1. **Audit ID:** PI-V1-08  
+2–4. Same  
+5. **Repository Path:** `app/repositories/product_repository.py`; `app/services/recommendation_service.py`  
+6. **Artifact Type:** Repository + service  
+7. **Exact Symbol:** `find_by_identity_status_and_active`; `RecommendationService._map_eligibility`; `generate_recommendations`  
+8. **Observed Behavior:** Catalog excludes non-ACTIVE / non-VALID / non-VERIFIED / zero stock; eligibility mapping uses engine_result, decision_state, need_match, unknowns  
+9. **Caller Evidence:** `generate_recommendations`  
+10. **Test Evidence:** Recommendation-related tests under `tests/` (e.g. pipeline/medical gate suites present in repo); exact perfume eligibility tests **not** identified  
+11. **CI Evidence:** Workflow files present; SHA-specific outcome NOT VERIFIED  
+12. **Runtime Evidence:** None  
+13. **Runtime Status:** NOT AVAILABLE  
+14. **Verification Status:** PARTIALLY_VERIFIED  
+15. **Current Capability:** PARTIALLY_VERIFIED (generic)  
+16. **Explicit Unknowns:** Full set of eligibility string outcomes in production  
+17. **Contradictions:** None  
+18. **Audit Limitation:** Fragrance-specific eligibility rules NOT PRESENT  
+
+---
+
+### PI-V1-09 — Decision Trace / Auditability
+
+1. **Audit ID:** PI-V1-09  
+2–4. Same  
+5. **Repository Path:** `app/models/recommendation.py`; `app/models/product_mutation_log.py`; `app/models/evidence_mutation_log.py`; `app/models/specialist_override.py`; outcome assessment modules  
+6. **Artifact Type:** Models + related services  
+7. **Exact Symbol:** `class Recommendation`; mutation log models; specialist override model  
+8. **Observed Behavior:** Recommendation rows persisted on generate path; product/evidence mutation logs exist; override model exists; **complete human-readable decision explanation package not fully line-traced in this audit**  
+9. **Caller Evidence:** `generate_recommendations`; mutation-log routes on products  
+10. **Test Evidence:** `test_product_compliance.py` — `test_mutation_log_persists`; outcome assessment tests present in repo  
+11. **CI Evidence:** Workflow files present; SHA-specific outcome NOT VERIFIED  
+12. **Runtime Evidence:** None  
+13. **Runtime Status:** NOT AVAILABLE  
+14. **Verification Status:** PARTIALLY_VERIFIED  
+15. **Current Capability:** PARTIALLY_VERIFIED  
+16. **Explicit Unknowns:** Whether every recommendation stores full constraint/evidence snapshot  
+17. **Contradictions:** None  
+18. **Audit Limitation:** Trace completeness not exhaustively verified  
+
+---
+
+### PI-V1-10 — Documentation / QA / CI Governance
+
+1. **Audit ID:** PI-V1-10  
+2–4. Same  
+5. **Repository Path:** `docs/`; `docs/audit/`; `docs/P4_PRODUCT_INTAKE_GOVERNANCE_CONTRACT_V1.md`; `.github/workflows/test.yml`; `.github/workflows/hbi_auto.yml`; `app/models/category.py`  
+6. **Artifact Type:** Docs + workflows + category model  
+7. **Exact Symbol:** workflow file names; `Category` CheckConstraint includes `'PERFUME'`  
+8. **Observed Behavior:** Governance/docs tree and CI workflow YAML exist; category taxonomy includes PERFUME for catalog/reporting; **no perfume intelligence contract/audit doc prior to this file**  
+9. **Caller Evidence:** N/A (governance artifacts)  
+10. **Test Evidence:** governance-tests referenced in project history; not bound to run-id here  
+11. **CI Evidence:** YAML present; **outcome for `bbe1a4ee…` NOT VERIFIED**  
+12. **Runtime Evidence:** NOT REQUIRED for static presence of docs/workflows  
+13. **Runtime Status:** NOT REQUIRED (for static governance inventory)  
+14. **Verification Status:** PARTIALLY_VERIFIED  
+15. **Current Capability:** PARTIALLY_VERIFIED  
+16. **Explicit Unknowns:** CI conclusion on exact inspected SHA  
+17. **Contradictions:** None  
+18. **Audit Limitation:** Without run-id, CI cannot be claimed green for baseline SHA  
+
+---
+
+*End of Evidence Package and Audit document*
