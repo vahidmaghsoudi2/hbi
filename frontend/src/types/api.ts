@@ -99,35 +99,24 @@ export interface CustomerIntakeRequest {
   open_case?: boolean;
 }
 
-/** Guest create request (POST /api/v1/customers/guest) */
+/** Guest create */
 export interface GuestCreateRequest {
-  name: string;
-  consent: number;
-  concerns?: string;
+  name?: string;
+  mobile?: string;
+  [key: string]: unknown;
 }
 
-/** POST /api/v1/sales/ body */
-export interface SaleItemInput {
-  product_id: string;
-  quantity: number;
-  recommendation_id?: string;
-  /** Optional: backend derives the authoritative sale price from inventory when omitted. */
-  unit_price_toman?: number;
-  unit_price_usd?: number;
-}
-
+/** Sale create */
 export interface SaleCreateRequest {
   customer_id: string;
-  items: SaleItemInput[];
-  fx_rate_usd_to_irr: number;
+  items?: Array<{ product_id?: string; quantity?: number; recommendation_id?: string | null }>;
+  [key: string]: unknown;
 }
 
-/** Sale response (backend may return ORM-shaped dict) */
+/** Sale DTO */
 export interface SaleDTO {
-  sale_id?: string;
+  sale_id: string;
   customer_id?: string;
-  total_amount_toman?: number;
-  items?: Array<{ product_id?: string; quantity?: number; recommendation_id?: string | null }>;
   [key: string]: unknown;
 }
 
@@ -147,6 +136,8 @@ export interface ProductCreateRequest {
   knowledge_use_cases?: string | null;
   knowledge_evidence_claim?: string | null;
   knowledge_evidence_source_reference?: string | null;
+  /** WP-01: after POSSIBLE_MATCH + operator decision=NEW */
+  duplicate_check_id?: string | null;
 }
 
 /** PATCH /api/v1/products/{id} — matches backend ProductUpdate */
@@ -163,6 +154,57 @@ export interface ProductUpdateRequest {
   product_line?: string | null;
 }
 
+/** POST /api/v1/products/duplicate-check/ — identity payload */
+export interface DuplicateCheckRequest {
+  product_id?: string | null;
+  barcode_gtin?: string | null;
+  brand?: string | null;
+  product_name?: string | null;
+  variant?: string | null;
+  size_value?: number | null;
+  size_unit?: string | null;
+  market_region?: string | null;
+  packaging_version?: string | null;
+}
+
+export interface DuplicateCheckCandidate {
+  product_id: string;
+  brand?: string | null;
+  product_name?: string | null;
+  variant?: string | null;
+  size_value?: number | null;
+  size_unit?: string | null;
+  packaging_version?: string | null;
+  result?: string;
+  match_tier?: string;
+  conflicting_fields?: string[];
+}
+
+/** Response of POST /api/v1/products/duplicate-check/ */
+export interface DuplicateCheckResponse {
+  check_id: string;
+  result: "NEW" | "POSSIBLE_MATCH" | "EXISTING" | string;
+  reason?: string;
+  candidates?: DuplicateCheckCandidate[];
+  naming_reference?: Array<Record<string, unknown>>;
+  operator_decision_required?: boolean;
+  provenance?: Record<string, unknown>;
+}
+
+/** POST /api/v1/products/duplicate-check/audit/{check_id}/decision */
+export interface DuplicateCheckOperatorDecisionRequest {
+  decision: "NEW" | "EXISTING" | "RENAME" | string;
+  selected_product_id?: string | null;
+  final_product_name?: string | null;
+  reason?: string | null;
+}
+
+export interface DuplicateCheckOperatorDecisionResponse {
+  check_id: string;
+  result?: string;
+  operator_decision?: Record<string, unknown> | null;
+  [key: string]: unknown;
+}
 
 /** Admin reporting contracts used by AccountingHomePage. */
 export interface SalesReportDTO {
@@ -228,7 +270,6 @@ export interface StockMovementDTO {
   note?: string | null;
   created_at?: string | null;
 }
-
 
 export interface EvidenceDTO {
   evidence_id: string;
