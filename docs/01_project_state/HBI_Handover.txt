@@ -1,39 +1,646 @@
-HBI Project Handover Document
-Date: 2026-08-23 (SUPERSEDES 2026-08-11 text)
-From: Grok1 — Knowledge / Data / QA
-To: Maqsoudi Gallery Team / All AI agents
+# HBI MASTER HANDOVER — CURRENT CONTEXT & DECISION BASELINE
 
-═══════════════════════════════════════════════════════════
-STATUS
-═══════════════════════════════════════════════════════════
+**Status:** MASTER HANDOVER / current-context reference  
+**Repository:** `vahidmaghsoudi2/hbi`  
+**Product Owner:** وحید مقصودی  
+**Current Product-Intake review master:** `e110d2c46dfa966009118a0aee6d040ee932ea28`  
+**Latest review reference:** Issue #260, comment #comment-5831730208
 
-This file previously described Phase-1 state as of 2026-08-11.
-That content is OBSOLETE for operational decisions.
+> این فایل جایگزین محتوای قدیمی HBI_Handover.txt است. تاریخچه Git حفظ می‌شود، اما
+> هیچ سند تاریخی در صورت تعارض بر Current Master / Code Reality / Current Contract
+> مقدم نیست.
 
-Current Source of Truth for readiness:
-  docs/09_gate_reports/HBI_PILOT_READINESS_QA_PACKAGE.md
-  docs/01_project_state/HBI_PROJECT_STATE.md
-  08-Meeting-Room/WORK-REGISTRY.md
-  08-Meeting-Room/HBI_GROK_EXECUTIVE_WORK_ORDER.md
+---
 
-═══════════════════════════════════════════════════════════
-OPERATIONAL LOCKS
-═══════════════════════════════════════════════════════════
+## 1. روش کار اجباری
 
-- Products A–D records + data/seed_products.json = FROZEN
-- No invented clinical evidence
-- EVIDENCE_MISSING hard-gate = ACTIVE (Grok2 line)
-- Grok2 = Recommendation / Backend / Integration
-- Grok1 = Knowledge / Data / QA / Registry
+### Reality First → Business Contract → Verification → Authorization → Implementation
 
-═══════════════════════════════════════════════════════════
-DO NOT USE (from old handover)
-═══════════════════════════════════════════════════════════
+قاعده اصلی:
+**KEEP → COMPLETE → CHANGE → BUILD**
 
-- GATE 6-1 as NOT APPROVED
-- Products C & D as UNIDENTIFIED (records + seed exist; freeze applies)
-- Absolute MISSING of Evidence path without checking current master
+گزارش Agent فقط **CLAIM** است، نه Reality.
 
-═══════════════════════════════════════════════════════════
-END
-═══════════════════════════════════════════════════════════
+تا حد امکان هر ادعا با این زنجیره بررسی شود:
+
+`Repository File → Symbol → Exact SHA → Test Case → CI Run → Runtime`
+
+وضعیت‌ها:
+- **PROVEN** — با شواهد کافی تأیید شده
+- **PARTIAL** — بخشی موجود/تأیید شده
+- **UNPROVEN** — ادعا شده ولی اثبات نشده
+- **OPEN** — تصمیم/طراحی هنوز باز
+- **BLOCKED** — ادامه به دلیل وابستگی/تعارض متوقف
+- **CONFLICT** — شواهد معتبر متعارض
+
+**UNPROVEN ≠ FALSE، اما UNPROVEN = NOT AUTHORIZED.**
+
+No Guess / No Assumption / No Fake Explainability.  
+دقت بر سرعت Agent مقدم است.
+
+---
+
+## 2. مرجعیت اسناد
+
+Product Intake Contract:
+`docs/01_project_control/product_intake/PRODUCT_INTAKE_CONTRACT_v1.md`
+
+این Contract در زمان پذیرش خود Baseline تاریخی `42cc77ec` داشته است.
+این SHA **Current Master نیست** و نباید به‌عنوان وضعیت فعلی معرفی شود.
+
+P4 تنها ماشین V1 برای Product governance/lifecycle است.
+
+هر گزارش/roadmap/handover قدیمی که با Current Master یا Contract تعارض دارد:
+**Historical فقط برای archaeology است، نه operational truth.**
+
+---
+
+## 3. دامنه HBI
+
+HBI در Accounting فعلی یک Full Accounting GL نیست.
+
+دامنه فعلی Operational Commerce/Finance:
+- Product
+- Inventory / Stock Movement
+- Sale
+- Payment
+- Return
+- Operational FX snapshots
+- Operational reports
+
+Double-entry / Journal / Ledger / Trial Balance / Financial Statements و
+COGS/Gross Profit تا تعریف و تأیید جداگانه، نباید به‌عنوان قابلیت فعلی ادعا شوند.
+
+**Product Intake و Recommendation یک Product Master مشترک دارند.**
+
+> ONE PRODUCT MASTER / ONE `product_id`
+
+ساخت Product Master موازی یا Product Schema موازی ممنوع مگر PO صریحاً معماری را باز کند.
+
+---
+
+## 4. Product Lifecycle / Governance
+
+مسیر فعلی:
+
+`DRAFT → SUBMITTED → QA_REVIEW → APPROVED → ACTIVE`
+
+با مسیرهای REJECT / ARCHIVE.
+
+Create:
+- DRAFT
+- identity اولیه NEEDS_REVIEW
+- QA اولیه PENDING
+- Client نباید governance fields را inject کند
+
+Governance fields:
+- `status`
+- `identity_status`
+- `qa_verdict`
+
+Generic PATCH نباید این‌ها را تغییر دهد.
+
+P4 تنها ماشین V1 برای:
+Submit / QA / Identity Verify / Approve / Reject / Activate / Archive
+
+**Save/Create Row ≠ Product Master Approval**
+
+هیچ Intake-specific approval machine یا lifecycle موازی ساخته نشود.
+
+---
+
+## 5. Product Intelligence — مرز داده‌ها
+
+حوزه‌های مورد نیاز:
+1. Identity
+2. Composition / Ingredients / INCI
+3. Functional information / claimed benefits / known use cases
+4. Suitability
+5. Safety / contraindications
+6. Usage instructions
+7. Claims
+8. Evidence / provenance / QA / conflicts
+9. Price / commercial information
+10. Availability / Inventory
+11. Sales / popularity به‌عنوان اطلاعات پشتیبان
+12. Customer Needs / Priorities / Preferences فقط در صورت ثبت صریح
+
+تفکیک اجباری:
+
+**User Input ≠ Research Draft ≠ Evidence ≠ ProductKnowledge ≠ Approval**
+
+هیچ helper/default/inference بدون طبقه‌بندی نباید FACT یا Evidence تلقی شود.
+
+---
+
+## 6. Product Intake — Reality فعلی
+
+قابلیت‌های موجود/اثبات‌شده:
+- Product creation
+- Product lifecycle API
+- Evidence / EvidenceReadiness
+- D3 conditional evidence policy
+- ProductKnowledge rebuild از Evidence
+- Need mapping / GAP-05
+- Inventory availability gate
+- Product mutation log / PATCH governance freeze
+- identity / evidence / UNKNOWN / conflict structures
+- synthetic Product Intake → Recommendation path
+
+Gapهای اصلی:
+- **G1:** Actual Duplicate Detector
+- **G2:** Governed Research Draft workflow بین Introduction و Evidence
+- Real-product pilot
+- CSV / Excel intake
+- Supplier API
+- Website extraction
+- OCR / image extraction
+- PDF extraction
+- LLM / embedding intake pipeline
+
+وجود UI با عنوان «تکمیل هوشمند» به‌تنهایی به معنی وجود AI intake pipeline نیست.
+
+---
+
+## 7. Current UI Intake — طبقه‌بندی بسیار مهم
+
+`frontend/src/pages/ProductIntakePanel.tsx` دارای `completeFromIntro()` است.
+
+هر مقدار باید یکی از این طبقات باشد:
+- **EXTRACTED** — صریحاً از متن supplied استخراج شده
+- **USER_SUPPLIED** — صریحاً توسط Operator وارد/انتخاب شده
+- **HELPER_DEFAULT** — توسط UI/helper/default ساخته شده
+- **UNKNOWN** — معلوم نیست
+
+نمونه‌های فعلی helper/default:
+- variant = `clear`
+- size = 50
+- size_unit = `ml`
+- market_region = `IR`
+- category ممکن است helper-derived باشد
+- product_id ممکن است generated باشد
+- identity_status = NEEDS_REVIEW
+- qa_verdict = PENDING
+- status = DRAFT
+
+**Helper/default هرگز Evidence محصول نیست.**
+
+همچنین category-like data که helper در create به knowledge-related fields می‌فرستد،
+نباید بدون Evidence/QA به‌عنوان Product Knowledge verified تلقی شود.
+
+---
+
+## 8. Duplicate Rule
+
+Contract states:
+- **NEW** — no credible match
+- **POSSIBLE_MATCH** — human review required
+- **EXISTING** — همان business product؛ reuse existing `product_id`
+
+وجود این stateها به معنی وجود Detector نیست.
+
+Exact detector algorithm / weights / matching rules هنوز **OPEN** است و تا
+Technical Design + PO Authorization نباید implementation شود.
+
+Product / Variant / SKU technical model نیز **OPEN** است.
+
+---
+
+## 9. AI Research Boundary
+
+AI می‌تواند:
+- research
+- collect
+- compare
+- structure
+- UNKNOWN / CONFLICT را flag کند
+- update پیشنهاد کند
+- reasoning/method را توضیح دهد
+
+AI نمی‌تواند:
+- Product را approve/activate کند
+- P4 governance را تغییر دهد
+- fact بسازد
+- INFERENCE را FACT کند
+- conflict را silently resolve کند
+- بدون Operator approval authoritative data را overwrite کند
+
+چرخه مطلوب:
+
+`Operator Note/Question → Unique ID → Selected AI Agent → Research/Answer
+→ Same ID → Operator Review → Approve → System Update`
+
+چرخه می‌تواند چندباره باشد:
+
+`Operator → AI → Operator → AI → … → Approve`
+
+رد شدن پاسخ AI یک issue قابل پیگیری است؛ نباید silently discard شود.
+
+V1 نام این سازوکار:
+**Operator-Controlled Update & Research Queue**
+و فعلاً «Self-Learning System» نامیده نشود.
+
+---
+
+## 10. Update / Research Queue
+
+در کنار موجودیت‌های مهم سیستم در آینده یک **Update** ساده می‌تواند قرار گیرد.
+
+Note به target واقعی متصل شود، مانند:
+Product / Ingredient / Evidence / Price / Inventory / Customer Profile /
+Recommendation / ...
+
+V1:
+- free-text note ساده
+- Central Queue
+- Operator/Admin عملاً all-capable
+- انتخاب Agent توسط Operator
+- reminder period توسط Operator
+- نمایش تعداد/متن updateهای باز
+- Apply نهایی فقط با Operator approval
+- حفظ history
+
+Note-to-Note dependency graph برای V1 لازم نیست.
+
+برای تغییرات مهم، در صورت امکان حفظ شود:
+old value / new value / why / source-evidence / agent-process / timestamp /
+operator approval
+
+---
+
+## 11. Recommendation — نقش
+
+**Recommendation ≠ Decision**
+
+System recommends؛ Operator decides.
+
+V1:
+- Operator/Admin final authority
+- Operator می‌تواند محصول lower-ranked را انتخاب کند
+- selection + time + context ثبت شود
+- note اختیاری
+
+برای هر محصول:
+**Why? / چرا پیشنهاد شد؟**
+
+برای محصول نمایش‌داده‌نشده:
+**Why Not Shown? / چرا نمایش داده نشد؟**
+
+**Excluded ≠ Ranked Lower**
+
+Hidden removal بدون rule/gate قابل ردیابی ممنوع است.
+
+---
+
+## 12. Eligibility / Filtering / Ranking / Explanation
+
+این چهار لایه جدا هستند:
+
+1. **Eligibility** — آیا محصول اصلاً وارد domain توصیه می‌شود؟
+2. **Filtering** — محدودیت‌های انتخاب‌شده توسط Operator
+3. **Ranking** — ترتیب محصولات باقی‌مانده
+4. **Explanation** — علت inclusion/exclusion/rank
+
+Inventory/Gallery:
+- «موجود در گالری» و «موجود در انبار» در HBI یک مفهوم عملیاتی هستند.
+- هر محصول وارد Gallery شود، در HBI inventory/accounting ثبت است.
+- unavailable product وارد recommendation review structure نمی‌شود.
+- Inventory پس از gate، ranking signal نیست.
+- V1 نباید Gallery inventory model جدا و پیچیده بسازد.
+
+---
+
+## 13. FILTER DECISIONS 33–40 — LOCKED
+
+**33 — فیلترهای مختلف:** AND  
+مثال: Dry Skin + Price 500–1500 + Available → همه باید برقرار باشند.
+
+**34 — چند مقدار در یک فیلتر:** OR  
+مثال: Moisturizer + Serum + Cream → هرکدام از مقادیر انتخاب‌شده می‌تواند match شود.
+
+**35 — Multiple Needs:**  
+محصولی که Needs بیشتری را پوشش دهد رتبه بالاتری می‌گیرد؛ محصولی که فقط یک Need را
+پوشش می‌دهد، اگر eligible باشد حذف نمی‌شود.
+
+**36 — خاموش کردن فیلتر:**  
+Result Set بلافاصله با فیلترهای باقی‌مانده دوباره محاسبه می‌شود.
+
+**37 — Reset Filters:**  
+همه فیلترها پاک می‌شوند.
+
+**38 — No Filter:**  
+Backend = تمام eligible products؛ Backend نباید Top 5 را truncate کند.  
+UI در ابتدا حداکثر 5 محصول نشان می‌دهد؛ More Results بقیه را نشان می‌دهد.
+
+**39 — Price:**  
+Min / Max / Range
+- Min only: `Price >= min`
+- Max only: `Price <= max`
+- Both: `min <= Price <= max`
+Invalid range = acceptance failure.
+Price numeric و بر حسب Toman است.
+
+**40 — Why Not Shown:**  
+Operator باید علت exclusion ناشی از filter را ببیند؛ با تغییر filter محصول می‌تواند
+دوباره ظاهر شود.
+
+---
+
+## 14. Price / Foreign-Domestic
+
+Price **filter** است، نه quality/superiority signal.
+
+Cheaper ≠ better  
+More expensive ≠ better
+
+Foreign/domestic ذاتاً priority ندارد و factor پنهان ranking نیست.
+در صورت نیاز Operator filter انتخاب می‌کند؛ preference ثبت‌نشده حدس زده نمی‌شود.
+
+برای foreign product:
+- Toman price
+- exchange rate
+- date/time
+- dollar equivalent at entry
+
+FX change می‌تواند foreign pricing را تغییر دهد؛ domestic product صرفاً به‌علت FX
+نباید خودکار تغییر کند.
+
+Null price = data/system issue، نه normal business state.
+
+---
+
+## 15. Ranking Business Direction — Decisions 41–48
+
+جهت مورد تأیید:
+- coverage of customer Needs
+- relevant ingredient relationships
+- Evidence strength/quality
+
+**41 — پوشش چند Need:** اگر سایر شرایط مرتبط مشابه باشند، محصولی که تعداد بیشتری از
+Needهای ثبت‌شده را پوشش می‌دهد بالاتر رتبه می‌گیرد؛ اما تعداد Need به‌تنهایی معیار
+کافی نیست و اعتبار رابطه‌ها نیز اهمیت دارد.
+
+**42 — رابطه Ingredient ↔ Need:** فقط رابطه معتبر و قابل‌ردیابیِ پشتیبانی‌شده با
+Evidence می‌تواند در ranking اثر بگذارد. صرف وجود نام یک Ingredient امتیاز ایجاد نمی‌کند.
+
+**43 — اطلاعات ناقص:** اگر محصول از نظر Eligibility معتبر باشد، ناقص بودن اطلاعات
+Ingredient/Evidence به‌تنهایی موجب حذف نمی‌شود. عدم کفایت اطلاعات باید در توضیح نمایش
+داده شود و فقط در صورت وجود یک gate صریح می‌تواند مانع ورود شود.
+
+**44 — قدرت Evidence:** در صورت شباهت پوشش Needها، قدرت/کیفیت Evidence می‌تواند بر ترتیب
+اثر بگذارد؛ اثر آن باید قابل توضیح باشد، نه یک عدد مبهم و غیرقابل ردیابی.
+
+**45 — رتبه پایین‌تر:** Ranking فقط ترتیب را تغییر می‌دهد؛ محصول eligible و منطبق با
+فیلترها را به‌علت رتبه پایین حذف نمی‌کند. حذف فقط در لایه Eligibility یا Filtering مجاز است.
+
+**46 — تساوی یا امتیازهای نزدیک:** tie-breaking خودکار/پنهان هنوز **OPEN** است.
+تا تصمیم صریح PO وجود نداشته باشد، هیچ معیار پنهانی برای تعیین برنده اضافه نشود.
+
+**47 — مقایسه رتبه‌ها:** Operator باید بتواند علت بالاتر بودن رتبه یک محصول نسبت به
+محصول دیگر را ببیند، اما فقط عواملی که واقعاً در محاسبه دخالت داشته‌اند می‌توانند به‌عنوان
+علت گزارش شوند.
+
+**48 — انتخاب Operator:** Operator می‌تواند محصول پایین‌تر در فهرست را انتخاب کند.
+انتخاب، زمان و context آن ثبت شود؛ یادداشت اختیاری است.
+
+سایر قواعد:
+- چند محصول می‌توانند برای یک Need معتبر بمانند.
+- Sales/popularity فعلاً فقط supporting information است؛ ranking signal نیست.
+- Routine قابلیت supplementary است و نباید normal Recommendation را suppress کند.
+- Customer Profile فقط از Needs / priorities / preferences صریحاً ثبت‌شده و
+  contract-linked استفاده کند.
+- Foreign/domestic preference filter است، نه hidden score.
+
+این‌ها **Business Decisions** هستند؛ اثبات نمی‌کنند که کد فعلی همه آن‌ها را اجرا می‌کند.
+
+---
+
+## 16. Current Recommendation Code Baseline
+
+Latest audited Recommendation baseline:
+`89bb72004f4d8740f24535a8f8a6de87f8b11eba`
+
+Relevant file SHAs:
+- reasoning_engine.py = `bf1ca17ff9fab726e074f4a589b489fe93a67fb6`
+- scoring.py = `a62b6d961553919a390652e862d783d5eff3bd4f`
+- product_repository.py = `3ba5abd7a3698a98b1d88f09f0a4a1675ee04332`
+- inventory.py = `f864ba2330989625aacd726830083e3bf48bec54`
+
+Observed scoring code:
+- Need 0.50
+- Evidence 0.30
+- Inventory 0.20
+
+Current repository candidate path requires:
+identity status + ACTIVE + QA VALID + Inventory quantity_available > 0.
+
+این‌ها **Code Reality** هستند، نه به معنی پیاده‌سازی همه Business Contractهای جدید.
+
+---
+
+## 17. Explainability — NO FAKE EXPLANATION
+
+اگر ingredient/Need/Evidence/preference واقعاً در تصمیم ranking دخیل نبوده،
+نباید به‌عنوان reason اعلام شود.
+
+Operator باید بتواند ببیند:
+- factors considered
+- method/logic
+- Evidence references
+- warnings
+- UNKNOWN / CONFLICT
+- filter exclusion در برابر lower ranking
+
+Explainability علاوه بر اعتماد، یک **learning/coordination layer** برای Operator است.
+
+---
+
+## 18. Ingredients / Evidence
+
+Current reality:
+- `ProductKnowledge.ingredients` text-like است.
+- Evidence از `field=ingredients` پشتیبانی می‌کند.
+- dedicated Ingredient entity را نباید فرض کرد.
+- claimed_benefits / known_use_cases / manufacturer_claims وجود دارند.
+- suitability vocabulary وجود دارد.
+- contraindications وجود دارند؛ safety research/validation workflow کامل نیست.
+
+زنجیره حاکم:
+
+`Product → Research Draft → Evidence → QA/Readiness → ProductKnowledge → Recommendation`
+
+AI نباید این زنجیره را bypass کند.
+
+---
+
+## 19. Acceptance / Failure Matrix
+
+حداقل تست‌ها:
+
+AT-01 No Filter  
+AT-02 One Concern  
+AT-03 Multiple Concerns  
+AT-04 Cross-group AND  
+AT-05 Price Min  
+AT-06 Price Max  
+AT-07 Price Range  
+AT-08 Invalid Range  
+AT-09 No Match  
+AT-10 Ineligible Product  
+AT-11 Evidence Failure  
+AT-12 Need-Match Conflict  
+AT-13 8 Results / UI 5  
+AT-14 Operator Selection  
+AT-15 Empty Result  
+AT-16 Null Price  
+AT-17 Ranking Does Not Remove  
+AT-18 Hidden Matching Detection
+
+به‌علاوه:
+multi-filter AND / same-filter OR / filter-off recalculation / Reset /
+Why Not Shown / backend-all-vs-UI-five
+
+هر test:
+1. Input
+2. Expected Backend Result
+3. Expected UI Result
+4. Forbidden Behavior
+
+---
+
+## 20. Execution Order
+
+Phase 0 — Scope & Freeze  
+Phase 1 — Reality Baseline  
+Phase 2 — Business Behavior Contract  
+Phase 3 — Eligibility / Matching Semantics  
+Phase 4 — Gap & Impact Matrix  
+Phase 5 — Acceptance & Failure Matrix  
+Phase 6 — Independent Verification  
+
+سپس:
+
+Implementation Authorization
+→ Technical Design
+→ Implementation
+→ Test
+→ CI
+→ Runtime Verification
+→ Merge Decision
+
+**Current priority: first real GAP, not speculative implementation.**
+
+---
+
+## 21. Team Separation
+
+Team 1:
+Outcome Assessment / Product Intake / Recommendation follow-up
+
+Team 2:
+PAY-AUTH only
+
+Shared boundary:
+Architecture / Traceability
+
+برای هماهنگی، Model/API مشترک جدید نسازیم.
+
+---
+
+## 22. Historical Corrections
+
+اسناد قدیمی زیر می‌توانند حاوی stateهای obsolete باشند:
+- old HBI_Handover
+- HBI_PHASE2_FINAL_HANDOVER
+- HBI_INFORMATION_FEEDING_ROADMAP
+- INFORMATION_FEEDING_FLOW
+- HBI_PRODUCT_INTAKE_FORENSIC_REPORT
+- سایر handover/reportهای قدیمی
+
+نمونه ادعاهای obsolete:
+- Evidence/Reasoning missing
+- ACTIVE default-era lifecycle as current
+- old SHA as current baseline
+
+آن‌ها برای archaeology باقی می‌مانند، اما Current Master/Contract/verified code
+بر آن‌ها مقدم است.
+
+---
+
+## 23. OPEN ITEMS — Do Not Silently Close
+
+- Duplicate Detector algorithm
+- tie-breaking algorithm
+- Product/Variant/SKU model
+- Research Draft storage model
+- source-tier taxonomy
+- AI model/tier/cost
+- safety research/validation workflow
+- re-validation trigger matrix
+- complex version history beyond mutation log
+- multi-user roles
+- Note-to-Note dependency graph
+- provisional/shadow product mechanism
+- advanced AI intake channels
+
+هیچ implementerی حق ندارد OPEN را بدون PO decision ببندد.
+
+---
+
+## 24. Immediate Next Work
+
+1. این Master Handover را مرجع انتقال قرار بده.
+2. وضعیت PR #291 و Current master را بررسی کن؛ تا Merge، تغییرات این PR را current master فرض نکن.
+3. به‌جای طرح سؤال‌های مشابه، تمام OPEN itemهای موجود را در یک فهرست واحد deduplicate کن.
+4. هر OPEN item را به تصمیم لازم، وابستگی، اثر بر رفتار سیستم و شواهد موردنیاز طبقه‌بندی کن.
+5. فقط سؤال‌هایی را از PO بپرس که پاسخشان در اسناد/تصمیم‌های قبلی موجود نیست و واقعاً مانع پیشرفت است؛ سؤال‌های مستقل را در یک batch بیاور.
+6. سپس Reality Baseline و Gap/Impact Matrix را با شواهد فعلی به‌روز کن.
+7. Acceptance/Failure Matrix و Independent Verification را تکمیل کن.
+8. بعد از آن فقط یک WP نام‌گذاری و برایش مجوز صریح گرفته شود.
+9. فقط همان WP پیاده‌سازی شود.
+
+**Decision batch 41–48 is resolved and recorded above. Do not ask these questions again.**
+
+این سند به‌خودی‌خود Implementation Authorization نیست.
+
+---
+
+## 25. MASTER UPDATE PROTOCOL — برای جلوگیری از مشکل قبلی
+
+هر بار که این سند به‌روزرسانی می‌شود:
+
+**LOCATE → CLASSIFY → REPLACE/SUPERSEDE → RECHECK INTERNAL CONSISTENCY**
+
+الزامی است:
+- ابتدا نسخه فعلی خوانده شود.
+- عبارت قدیمیِ متناقض پیدا شود.
+- مشخص شود چه چیزی superseded شده.
+- متن قدیمی اصلاح/جایگزین شود، نه اینکه فقط پاراگراف جدید به آن اضافه شود.
+- Current Master SHA و Evidence مربوط ثبت/به‌روز شود.
+- Business Decision از Code Reality جدا بماند.
+- Code Reality از Test/CI/Runtime Reality جدا بماند.
+- هیچ دو «current statement» متناقضی در سند باقی نماند.
+
+---
+
+## 26. NEW CHAT START PROTOCOL
+
+هر چت جدید HBI:
+
+1. این Master Handover خوانده شود.
+2. Current Product Intake Contract و Decision Log مرتبط خوانده شود.
+3. Current master SHA بررسی شود.
+4. این فایل به‌عنوان CONTEXT استفاده شود، نه proof of implementation.
+5. ادعاهای فنی مورد نیاز مرحله بعد مستقل verify شوند.
+6. کار از اولین OPEN decision ادامه پیدا کند، نه از ابتدای تاریخچه.
+
+## 27. DECISION DEDUPLICATION RULE
+
+پیش از هر سؤال جدید به PO:
+- Handover، Contract، Decision Log و پاسخ‌های ثبت‌شده قبلی بررسی شوند.
+- سؤال تکراری یا سؤال با پاسخ قابل استنباط از تصمیم ثبت‌شده دوباره مطرح نشود.
+- اگر یک تصمیم قبلاً گرفته شده، آن را به‌عنوان LOCKED ثبت/استفاده کن؛ برای بازکردن مجدد آن دلیل و اثر مشخص لازم است.
+- OPENها یک‌جا فهرست و اولویت‌بندی شوند؛ از پرسش‌های پراکنده و چرخه‌ای پرهیز شود.
+- هر سؤال جدید باید شناسه، تصمیم موردنیاز، علت باز بودن و پیامد عدم تصمیم داشته باشد.
+
+**END OF HBI MASTER HANDOVER**
