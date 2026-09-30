@@ -369,29 +369,49 @@ Null price = data/system issue، نه normal business state.
 
 ---
 
-## 15. Ranking Business Direction
+## 15. Ranking Business Direction — Decisions 41–48
 
 جهت مورد تأیید:
 - coverage of customer Needs
 - relevant ingredient relationships
 - Evidence strength/quality
 
-More Need coverage → higher rank.
+**41 — پوشش چند Need:** اگر سایر شرایط مرتبط مشابه باشند، محصولی که تعداد بیشتری از
+Needهای ثبت‌شده را پوشش می‌دهد بالاتر رتبه می‌گیرد؛ اما تعداد Need به‌تنهایی معیار
+کافی نیست و اعتبار رابطه‌ها نیز اهمیت دارد.
 
-Valid ingredient ↔ Need relationship می‌تواند rank/recommendation را بهبود دهد.
+**42 — رابطه Ingredient ↔ Need:** فقط رابطه معتبر و قابل‌ردیابیِ پشتیبانی‌شده با
+Evidence می‌تواند در ranking اثر بگذارد. صرف وجود نام یک Ingredient امتیاز ایجاد نمی‌کند.
 
-چند محصول می‌توانند برای یک Need معتبر بمانند.
+**43 — اطلاعات ناقص:** اگر محصول از نظر Eligibility معتبر باشد، ناقص بودن اطلاعات
+Ingredient/Evidence به‌تنهایی موجب حذف نمی‌شود. عدم کفایت اطلاعات باید در توضیح نمایش
+داده شود و فقط در صورت وجود یک gate صریح می‌تواند مانع ورود شود.
 
-Sales/popularity فعلاً فقط supporting information است؛ ranking signal نیست.
+**44 — قدرت Evidence:** در صورت شباهت پوشش Needها، قدرت/کیفیت Evidence می‌تواند بر ترتیب
+اثر بگذارد؛ اثر آن باید قابل توضیح باشد، نه یک عدد مبهم و غیرقابل ردیابی.
 
-Routine قابلیت supplementary است و نباید normal Recommendation را suppress کند.
+**45 — رتبه پایین‌تر:** Ranking فقط ترتیب را تغییر می‌دهد؛ محصول eligible و منطبق با
+فیلترها را به‌علت رتبه پایین حذف نمی‌کند. حذف فقط در لایه Eligibility یا Filtering مجاز است.
 
-Customer Profile فقط از Needs / priorities / preferences صریحاً ثبت‌شده و
-contract-linked استفاده کند.
+**46 — تساوی یا امتیازهای نزدیک:** tie-breaking خودکار/پنهان هنوز **OPEN** است.
+تا تصمیم صریح PO وجود نداشته باشد، هیچ معیار پنهانی برای تعیین برنده اضافه نشود.
 
-Foreign/domestic preference filter است، نه hidden score.
+**47 — مقایسه رتبه‌ها:** Operator باید بتواند علت بالاتر بودن رتبه یک محصول نسبت به
+محصول دیگر را ببیند، اما فقط عواملی که واقعاً در محاسبه دخالت داشته‌اند می‌توانند به‌عنوان
+علت گزارش شوند.
 
-Exact tie-breaking algorithm هنوز **OPEN** است.
+**48 — انتخاب Operator:** Operator می‌تواند محصول پایین‌تر در فهرست را انتخاب کند.
+انتخاب، زمان و context آن ثبت شود؛ یادداشت اختیاری است.
+
+سایر قواعد:
+- چند محصول می‌توانند برای یک Need معتبر بمانند.
+- Sales/popularity فعلاً فقط supporting information است؛ ranking signal نیست.
+- Routine قابلیت supplementary است و نباید normal Recommendation را suppress کند.
+- Customer Profile فقط از Needs / priorities / preferences صریحاً ثبت‌شده و
+  contract-linked استفاده کند.
+- Foreign/domestic preference filter است، نه hidden score.
+
+این‌ها **Business Decisions** هستند؛ اثبات نمی‌کنند که کد فعلی همه آن‌ها را اجرا می‌کند.
 
 ---
 
@@ -570,15 +590,16 @@ Architecture / Traceability
 ## 24. Immediate Next Work
 
 1. این Master Handover را مرجع انتقال قرار بده.
-2. Current master/code را برای ادعاهای فنی مهم دوباره verify کن.
-3. Business Contract باقی‌مانده را کامل کن.
-4. Gap/Impact Matrix را کامل کن.
-5. Acceptance/Failure Matrix را کامل کن.
-6. Independent Verification.
-7. سپس فقط یک WP نام‌گذاری و authorize شود.
-8. فقط همان WP پیاده‌سازی شود.
+2. وضعیت PR #291 و Current master را بررسی کن؛ تا Merge، تغییرات این PR را current master فرض نکن.
+3. به‌جای طرح سؤال‌های مشابه، تمام OPEN itemهای موجود را در یک فهرست واحد deduplicate کن.
+4. هر OPEN item را به تصمیم لازم، وابستگی، اثر بر رفتار سیستم و شواهد موردنیاز طبقه‌بندی کن.
+5. فقط سؤال‌هایی را از PO بپرس که پاسخشان در اسناد/تصمیم‌های قبلی موجود نیست و واقعاً مانع پیشرفت است؛ سؤال‌های مستقل را در یک batch بیاور.
+6. سپس Reality Baseline و Gap/Impact Matrix را با شواهد فعلی به‌روز کن.
+7. Acceptance/Failure Matrix و Independent Verification را تکمیل کن.
+8. بعد از آن فقط یک WP نام‌گذاری و برایش مجوز صریح گرفته شود.
+9. فقط همان WP پیاده‌سازی شود.
 
-**Next business-question batch: 41–48 — scoring / ranking / tie behavior / detailed explainability.**
+**Decision batch 41–48 is resolved and recorded above. Do not ask these questions again.**
 
 این سند به‌خودی‌خود Implementation Authorization نیست.
 
@@ -612,5 +633,14 @@ Architecture / Traceability
 4. این فایل به‌عنوان CONTEXT استفاده شود، نه proof of implementation.
 5. ادعاهای فنی مورد نیاز مرحله بعد مستقل verify شوند.
 6. کار از اولین OPEN decision ادامه پیدا کند، نه از ابتدای تاریخچه.
+
+## 27. DECISION DEDUPLICATION RULE
+
+پیش از هر سؤال جدید به PO:
+- Handover، Contract، Decision Log و پاسخ‌های ثبت‌شده قبلی بررسی شوند.
+- سؤال تکراری یا سؤال با پاسخ قابل استنباط از تصمیم ثبت‌شده دوباره مطرح نشود.
+- اگر یک تصمیم قبلاً گرفته شده، آن را به‌عنوان LOCKED ثبت/استفاده کن؛ برای بازکردن مجدد آن دلیل و اثر مشخص لازم است.
+- OPENها یک‌جا فهرست و اولویت‌بندی شوند؛ از پرسش‌های پراکنده و چرخه‌ای پرهیز شود.
+- هر سؤال جدید باید شناسه، تصمیم موردنیاز، علت باز بودن و پیامد عدم تصمیم داشته باشد.
 
 **END OF HBI MASTER HANDOVER**
