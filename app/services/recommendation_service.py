@@ -181,7 +181,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             inferences.append({"statement": "Medical context present — professional review may be required", "confidence": 0.7, "based_on_evidence_refs": [], "based_on_factors": [f.get("value") for f in decision_state.get("factors", [])], "source": "medical_context_trigger", "product_id": product_id})
         return inferences
 
-    def _map_eligibility(self, engine_result: Dict[str, Any], decision_state: Dict[str, Any], need_match: float, product_unknowns: Optional[List[Dict[str, Any]]] = None) -> str:
+    def _map_eligibility(self, engine_result: Dict[str, Any], decision_state: Dict[str, Any], need_match: float, evidence_score: float, product_unknowns: Optional[List[Dict[str, Any]]] = None) -> str:
         product_unknowns = product_unknowns or []
         for u in product_unknowns:
             if u.get("unknown_priority") == "CRITICAL_UNKNOWN":
@@ -317,7 +317,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 product_unknowns.append({"field": u.get("field"), "unknown_priority": self._map_unknown_priority(u.get("severity", "LOW")), "action": u.get("action"), "notes": u.get("notes"), "product_id": product.product_id})
             product_conflicts = list(engine_result.get("conflicts", []))
             inferences = self._build_inferences(engine_result, decision_state, product.product_id)
-            eligibility = self._map_eligibility(engine_result, decision_state, need_match, product_unknowns=product_unknowns)
+            eligibility = self._map_eligibility(engine_result, decision_state, need_match, evidence_score, product_unknowns=product_unknowns)
             final_score = engine_result.get("final_score", 0.0)
             rationale = engine_result.get("rationale", "")
             trace_evidence_refs = list(engine_result.get("evidence_refs", []))
