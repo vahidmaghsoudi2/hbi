@@ -31,7 +31,7 @@ def test_oos_product_eliminated_before_reasoning_and_no_recommendation():
         _product("PROD_IN_STOCK"),
     ]
     svc.pk_repo.find_by_product.return_value = MagicMock(known_use_cases="dry skin")
-    svc.evidence_repo.find_by_product.return_value = []
+    svc.evidence_repo.find_by_product.return_value = [MagicMock(qa_status="APPROVED", conflict_status="NONE", source_type="PEER_REVIEWED")]
 
     def inv_side_effect(product_id):
         inv = MagicMock()
