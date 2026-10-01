@@ -206,7 +206,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         # for automatic recommendation.
         if not decision_state.get("needs"):
             return "INELIGIBLE_PENDING_REVIEW"
-        if (engine_result.get("evidence_score") if engine_result.get("evidence_score") is not None else 0.0) <= 0.0:
+        if evidence_score <= 0.0:
             return "INELIGIBLE_PENDING_REVIEW"
         return "ELIGIBLE"
 
