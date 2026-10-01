@@ -22,6 +22,10 @@ from app.reasoning.conflict_analyzer import ConflictSeverity
 
 logger = logging.getLogger(__name__)
 
+# Legacy compatibility constant retained for existing callers/tests.
+# V1 eligibility no longer uses this threshold; Need Match is ranking-only.
+NEED_MATCH_SUFFICIENT = 0.40
+
 _EVIDENCE_WEIGHTS = {
     "PEER_REVIEWED": 1.0,
     "CLINICAL_TRIAL": 1.0,
