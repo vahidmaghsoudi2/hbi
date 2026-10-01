@@ -68,7 +68,7 @@ def test_second_generate_updates_same_row_count_remains_one(db_session):
     inv.quantity_available = 2
     svc.inventory_repo.find_by_product.return_value = inv
     svc.pk_repo.find_by_product.return_value = MagicMock(known_use_cases="dry skin")
-    svc.evidence_repo.find_by_product.return_value = []
+    svc.evidence_repo.find_by_product.return_value = [MagicMock(qa_status="APPROVED", conflict_status="NONE", source_type="PEER_REVIEWED")]
     svc.reasoning_engine.run.return_value = {
         "unknowns": [], "conflicts": [], "claim_boundary_violations": [],
         "eligibility": "ELIGIBLE", "final_score": 0.5, "rationale": "first",
