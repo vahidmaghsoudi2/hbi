@@ -280,9 +280,11 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             known_use_cases = pk.known_use_cases if pk else None
             evidences = self.evidence_repo.find_by_product(product.product_id)
             inv = self.inventory_repo.find_by_product(product.product_id)
-            # ProductRepository has already applied the four V1 entry gates,
-            # including quantity_available > 0. Inventory quantity is therefore
-            # availability-only and must not influence ranking.
+            # Inventory is a V1 entry gate. Keep the service-level check as a
+            # defense-in-depth invariant for alternate/test candidate providers.
+            if not inv or not inv.quantity_available or inv.quantity_available <= 0:
+                continue
+            # Inventory quantity is availability-only and must not influence ranking.
             inventory_score = 1.0
             need_match = self._calculate_need_match(needs, known_use_cases)
             evidence_score = self._compute_evidence_score(evidences)
