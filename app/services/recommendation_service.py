@@ -201,14 +201,14 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         ]
         if high_or_critical:
             return "INELIGIBLE_PENDING_REVIEW"
-        if need_match < NEED_MATCH_SUFFICIENT or not decision_state.get("needs"):
+        # Business Contract V1: Need Match and Final Score are ranking signals,
+        # not eligibility gates. Approved/verified Evidence remains a prerequisite
+        # for automatic recommendation.
+        if not decision_state.get("needs"):
             return "INELIGIBLE_PENDING_REVIEW"
-        eng_elig = engine_result.get("eligibility") or "INELIGIBLE"
-        if eng_elig == "NEEDS_REVIEW":
+        if not engine_result.get("evidence_ready", False):
             return "INELIGIBLE_PENDING_REVIEW"
-        if eng_elig == "ELIGIBLE":
-            return "ELIGIBLE"
-        return "INELIGIBLE_PENDING_REVIEW"
+        return "ELIGIBLE"
 
     def _stable_recommendation_id(self, case_id: str, product_id: str) -> str:
         return f"rec_{case_id}_{product_id}"
@@ -280,9 +280,10 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             known_use_cases = pk.known_use_cases if pk else None
             evidences = self.evidence_repo.find_by_product(product.product_id)
             inv = self.inventory_repo.find_by_product(product.product_id)
-            inventory_score = 1.0 if (inv and inv.quantity_available and inv.quantity_available > 0) else 0.0
-            if inventory_score <= 0.0:
-                continue
+            # ProductRepository has already applied the four V1 entry gates,
+            # including quantity_available > 0. Inventory quantity is therefore
+            # availability-only and must not influence ranking.
+            inventory_score = 1.0
             need_match = self._calculate_need_match(needs, known_use_cases)
             evidence_score = self._compute_evidence_score(evidences)
             evidence_list = [{
@@ -310,6 +311,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 evidence_score=evidence_score,
                 inventory_score=inventory_score,
             )
+            engine_result["evidence_ready"] = evidence_score > 0.0
             product_unknowns = []
             for u in engine_result.get("unknowns", []):
                 product_unknowns.append({"field": u.get("field"), "unknown_priority": self._map_unknown_priority(u.get("severity", "LOW")), "action": u.get("action"), "notes": u.get("notes"), "product_id": product.product_id})
