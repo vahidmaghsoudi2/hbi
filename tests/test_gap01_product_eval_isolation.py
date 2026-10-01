@@ -38,7 +38,7 @@ def test_product_unknowns_do_not_mutate_case_decision_state():
     svc.repository.find_by_case_and_product.return_value = None
     svc.repository.create.side_effect = lambda **kwargs: MagicMock(**kwargs)
     svc.pk_repo.find_by_product.return_value = MagicMock(known_use_cases="dry skin", claimed_benefits="", contraindications="", ingredients="")
-    svc.evidence_repo.find_by_product.return_value = []
+    svc.evidence_repo.find_by_product.return_value = [MagicMock(qa_status="APPROVED", conflict_status="NONE", source_type="PEER_REVIEWED")]
     inv = MagicMock()
     inv.quantity_available = 5
     svc.inventory_repo.find_by_product.return_value = inv
