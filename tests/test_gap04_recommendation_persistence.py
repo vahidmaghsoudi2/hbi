@@ -98,7 +98,7 @@ def test_two_products_yield_two_recommendations(db_session):
     inv.quantity_available = 1
     svc.inventory_repo.find_by_product.return_value = inv
     svc.pk_repo.find_by_product.return_value = MagicMock(known_use_cases="dry skin")
-    svc.evidence_repo.find_by_product.return_value = []
+    svc.evidence_repo.find_by_product.return_value = [MagicMock(qa_status="APPROVED", conflict_status="NONE", source_type="PEER_REVIEWED")]
     svc.reasoning_engine.run.return_value = {
         "unknowns": [], "conflicts": [], "claim_boundary_violations": [],
         "eligibility": "ELIGIBLE", "final_score": 0.7, "rationale": "ok",
@@ -137,3 +137,4 @@ def test_gap03_oos_still_creates_no_recommendation(db_session):
     assert recs == []
     assert db_session.query(Recommendation).count() == 0
     assert svc.reasoning_engine.run.call_count == 0
+}
