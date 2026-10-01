@@ -14,6 +14,7 @@ export default function RecommendationPage() {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
   async function onGenerate(e: FormEvent) {
     e.preventDefault();
@@ -35,6 +36,7 @@ export default function RecommendationPage() {
         token
       );
       setItems(result);
+      setShowAll(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -129,7 +131,7 @@ export default function RecommendationPage() {
       {info && <div className="alert">{info}</div>}
       {items.length > 0 && (
         <div className="results">
-          {items.map((r) => (
+          {items.slice(0, showAll ? items.length : 5).map((r) => (
             <article key={String(r.recommendation_id)} className="rec-item">
               <div>
                 <strong>{r.product_id}</strong>
@@ -157,6 +159,17 @@ export default function RecommendationPage() {
               </div>
             </article>
           ))}
+          {items.length > 5 && (
+            <button type="button" onClick={() => setShowAll((value) => !value)}>
+              {showAll ? "نمایش کمتر" : `نمایش ${items.length - 5} محصول دیگر`}
+            </button>
+          )}
+        </div>
+      )}
+      {!busy && !error && items.length === 0 && (
+        <div className="alert">
+          سیستم در این مرحله پیشنهاد قابل‌اعتماد تولید نکرد. اپراتور پاسخ مشتری را بر عهده می‌گیرد؛
+          کمبود اطلاعات یا Evidence باید در به‌روزرسانی بعدی برطرف شود.
         </div>
       )}
     </section>
