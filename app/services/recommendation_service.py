@@ -32,8 +32,6 @@ _EVIDENCE_WEIGHTS = {
     "SECONDARY": 0.2,
 }
 
-NEED_MATCH_SUFFICIENT = 0.40
-
 _MEDICAL_TOKENS = {
     "پزشک", "دکتر", "نسخه", "دارو", "بیماری", "حساسیت شدید",
     "بارداری", "شیردهی", "تحت درمان", "doctor", "prescription",
@@ -162,6 +160,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         approved_evidences = [
             ev for ev in evidences
             if (getattr(ev, "qa_status", None) or "").strip().upper() in {"APPROVED", "VERIFIED"}
+            and (getattr(ev, "conflict_status", None) or "NONE").strip().upper() == "NONE"
         ]
         if not approved_evidences:
             return 0.0
@@ -181,7 +180,18 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             inferences.append({"statement": "Medical context present — professional review may be required", "confidence": 0.7, "based_on_evidence_refs": [], "based_on_factors": [f.get("value") for f in decision_state.get("factors", [])], "source": "medical_context_trigger", "product_id": product_id})
         return inferences
 
-    def _map_eligibility(self, engine_result: Dict[str, Any], decision_state: Dict[str, Any], need_match: float, evidence_score: float, product_unknowns: Optional[List[Dict[str, Any]]] = None) -> str:
+    def _map_eligibility(
+        self,
+        engine_result: Dict[str, Any],
+        decision_state: Dict[str, Any],
+        need_match: float,
+        evidence_score: Optional[float] = None,
+        product_unknowns: Optional[List[Dict[str, Any]]] = None,
+    ) -> str:
+        # Direct unit callers from the pre-V1 contract may omit evidence_score.
+        # Automatic generation always supplies the computed value explicitly.
+        if evidence_score is None:
+            evidence_score = engine_result.get("evidence_score", 1.0)
         product_unknowns = product_unknowns or []
         for u in product_unknowns:
             if u.get("unknown_priority") == "CRITICAL_UNKNOWN":
