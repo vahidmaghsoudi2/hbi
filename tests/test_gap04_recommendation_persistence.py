@@ -137,4 +137,3 @@ def test_gap03_oos_still_creates_no_recommendation(db_session):
     assert recs == []
     assert db_session.query(Recommendation).count() == 0
     assert svc.reasoning_engine.run.call_count == 0
-}
