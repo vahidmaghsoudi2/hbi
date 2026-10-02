@@ -192,10 +192,12 @@ def test_answer_a_and_b_rerun_existing_recommendation_with_observable_effect(cli
         assert generated.status_code == 200, generated.text
         body = generated.json()
         assert body
-        assert [item["product_id"] for item in body] == [expected_product]
-        assert body[0]["eligibility_status"] == "ELIGIBLE"
-        assert body[0]["need_match_score"] == 1.0
-        observed.append(body[0]["product_id"])
+        product_ids = [item["product_id"] for item in body]
+        assert expected_product in product_ids
+        assert all(item["eligibility_status"] == "ELIGIBLE" for item in body)
+        selected = next(item for item in body if item["product_id"] == expected_product)
+        assert selected["need_match_score"] == 1.0
+        observed.append(expected_product)
 
     # The same Case was re-evaluated by the existing recommendation path with
     # a different current answer; the observable decision changed.

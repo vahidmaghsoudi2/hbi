@@ -42,6 +42,7 @@ const CONCERN_OPTIONS = [
 ] as const;
 
 const SKIN_OPTIONS = ["خشک", "چرب", "مختلط", "معمولی", "حساس"] as const;
+const INITIAL_RECOMMENDATION_LIMIT = 5;
 
 type Panel = "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about";
 
@@ -64,6 +65,7 @@ export default function NewHomePage() {
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [recs, setRecs] = useState<RecommendationDTO[]>([]);
   const [recDone, setRecDone] = useState(false);
+  const [showAllRecommendations, setShowAllRecommendations] = useState(false);
   const [saleProductId, setSaleProductId] = useState("");
   const [selectedRecommendationId, setSelectedRecommendationId] = useState<string | null>(null);
   const [saleQty, setSaleQty] = useState(1);
@@ -181,6 +183,7 @@ export default function NewHomePage() {
       setNote("");
       setRecs([]);
       setRecDone(false);
+      setShowAllRecommendations(false);
       setSelectedRecommendationId(null);
       setSaleProductId("");
       setLastSale(null);
@@ -351,6 +354,7 @@ export default function NewHomePage() {
     setStatusMsg(null);
     setRecDone(false);
     setRecs([]);
+    setShowAllRecommendations(false);
     if (!name.trim()) return setError("نام الزامی است.");
     if (!mobile.trim()) return setError("شماره موبایل الزامی است.");
     if (!concernsText) return setError("حداقل یک موضوع یا نوع پوست را انتخاب کنید.");
@@ -384,6 +388,7 @@ export default function NewHomePage() {
         currentToken
       );
       setRecs(Array.isArray(list) ? list : []);
+      setShowAllRecommendations(false);
       setRecDone(true);
       setStatusMsg(list?.length ? `${list.length} پیشنهاد آماده است.` : "پیشنهادی با شواهد کافی یافت نشد.");
       setActive("results");
@@ -822,7 +827,7 @@ export default function NewHomePage() {
               </div>
             )}
             <div className="pro-rec-list">
-              {recs.map((r, i) => {
+              {recs.slice(0, showAllRecommendations ? recs.length : INITIAL_RECOMMENDATION_LIMIT).map((r, i) => {
                 const product = sellableProducts.find((p) => p.product_id === r.product_id);
                 return (
                   <article key={r.recommendation_id || `${r.product_id}-${i}`} className="pro-rec-card">
@@ -855,6 +860,13 @@ export default function NewHomePage() {
                 );
               })}
             </div>
+            {recs.length > INITIAL_RECOMMENDATION_LIMIT && !showAllRecommendations ? (
+              <div className="pro-actions">
+                <button type="button" className="pro-btn-secondary" onClick={() => setShowAllRecommendations(true)}>
+                  نمایش همه پیشنهادها ({recs.length})
+                </button>
+              </div>
+            ) : null}
           </section>
         )}
 

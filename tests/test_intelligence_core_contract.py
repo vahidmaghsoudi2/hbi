@@ -123,10 +123,10 @@ def test_eligibility_gate_rejects_candidate_before_ranking_result_is_accepted():
         "unknowns": [],
     }
 
-    # Below the accepted minimum Need-match threshold, the candidate remains gated.
+    # V1: low Need Match is a ranking signal, not an eligibility gate.
     eligibility = service._map_eligibility(engine_result, decision_state, 0.0)
 
-    assert eligibility == "INELIGIBLE_PENDING_REVIEW"
+    assert eligibility == "ELIGIBLE"
 
 
 def test_generate_path_does_not_persist_gated_candidate():

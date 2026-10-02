@@ -22,6 +22,10 @@ from app.reasoning.conflict_analyzer import ConflictSeverity
 
 logger = logging.getLogger(__name__)
 
+# Legacy compatibility constant retained for existing callers/tests.
+# V1 eligibility no longer uses this threshold; Need Match is ranking-only.
+NEED_MATCH_SUFFICIENT = 0.40
+
 _EVIDENCE_WEIGHTS = {
     "PEER_REVIEWED": 1.0,
     "CLINICAL_TRIAL": 1.0,
@@ -31,8 +35,6 @@ _EVIDENCE_WEIGHTS = {
     "REPUTABLE_RETAILER": 0.4,
     "SECONDARY": 0.2,
 }
-
-NEED_MATCH_SUFFICIENT = 0.40
 
 _MEDICAL_TOKENS = {
     "پزشک", "دکتر", "نسخه", "دارو", "بیماری", "حساسیت شدید",
@@ -162,6 +164,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         approved_evidences = [
             ev for ev in evidences
             if (getattr(ev, "qa_status", None) or "").strip().upper() in {"APPROVED", "VERIFIED"}
+            and (getattr(ev, "conflict_status", None) or "NONE").strip().upper() == "NONE"
         ]
         if not approved_evidences:
             return 0.0
@@ -181,7 +184,18 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             inferences.append({"statement": "Medical context present — professional review may be required", "confidence": 0.7, "based_on_evidence_refs": [], "based_on_factors": [f.get("value") for f in decision_state.get("factors", [])], "source": "medical_context_trigger", "product_id": product_id})
         return inferences
 
-    def _map_eligibility(self, engine_result: Dict[str, Any], decision_state: Dict[str, Any], need_match: float, product_unknowns: Optional[List[Dict[str, Any]]] = None) -> str:
+    def _map_eligibility(
+        self,
+        engine_result: Dict[str, Any],
+        decision_state: Dict[str, Any],
+        need_match: float,
+        evidence_score: Optional[float] = None,
+        product_unknowns: Optional[List[Dict[str, Any]]] = None,
+    ) -> str:
+        # Direct unit callers from the pre-V1 contract may omit evidence_score.
+        # Automatic generation always supplies the computed value explicitly.
+        if evidence_score is None:
+            evidence_score = engine_result.get("evidence_score", 1.0)
         product_unknowns = product_unknowns or []
         for u in product_unknowns:
             if u.get("unknown_priority") == "CRITICAL_UNKNOWN":
@@ -201,14 +215,14 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         ]
         if high_or_critical:
             return "INELIGIBLE_PENDING_REVIEW"
-        if need_match < NEED_MATCH_SUFFICIENT or not decision_state.get("needs"):
+        # Business Contract V1: Need Match and Final Score are ranking signals,
+        # not eligibility gates. Approved/verified Evidence remains a prerequisite
+        # for automatic recommendation.
+        if not decision_state.get("needs"):
             return "INELIGIBLE_PENDING_REVIEW"
-        eng_elig = engine_result.get("eligibility") or "INELIGIBLE"
-        if eng_elig == "NEEDS_REVIEW":
+        if evidence_score <= 0.0:
             return "INELIGIBLE_PENDING_REVIEW"
-        if eng_elig == "ELIGIBLE":
-            return "ELIGIBLE"
-        return "INELIGIBLE_PENDING_REVIEW"
+        return "ELIGIBLE"
 
     def _stable_recommendation_id(self, case_id: str, product_id: str) -> str:
         return f"rec_{case_id}_{product_id}"
@@ -280,9 +294,12 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             known_use_cases = pk.known_use_cases if pk else None
             evidences = self.evidence_repo.find_by_product(product.product_id)
             inv = self.inventory_repo.find_by_product(product.product_id)
-            inventory_score = 1.0 if (inv and inv.quantity_available and inv.quantity_available > 0) else 0.0
-            if inventory_score <= 0.0:
+            # Inventory is a V1 entry gate. Keep the service-level check as a
+            # defense-in-depth invariant for alternate/test candidate providers.
+            if not inv or not inv.quantity_available or inv.quantity_available <= 0:
                 continue
+            # Inventory quantity is availability-only and must not influence ranking.
+            inventory_score = 1.0
             need_match = self._calculate_need_match(needs, known_use_cases)
             evidence_score = self._compute_evidence_score(evidences)
             evidence_list = [{
@@ -310,12 +327,13 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 evidence_score=evidence_score,
                 inventory_score=inventory_score,
             )
+            engine_result["evidence_ready"] = evidence_score > 0.0
             product_unknowns = []
             for u in engine_result.get("unknowns", []):
                 product_unknowns.append({"field": u.get("field"), "unknown_priority": self._map_unknown_priority(u.get("severity", "LOW")), "action": u.get("action"), "notes": u.get("notes"), "product_id": product.product_id})
             product_conflicts = list(engine_result.get("conflicts", []))
             inferences = self._build_inferences(engine_result, decision_state, product.product_id)
-            eligibility = self._map_eligibility(engine_result, decision_state, need_match, product_unknowns=product_unknowns)
+            eligibility = self._map_eligibility(engine_result, decision_state, need_match, evidence_score, product_unknowns=product_unknowns)
             final_score = engine_result.get("final_score", 0.0)
             rationale = engine_result.get("rationale", "")
             trace_evidence_refs = list(engine_result.get("evidence_refs", []))
