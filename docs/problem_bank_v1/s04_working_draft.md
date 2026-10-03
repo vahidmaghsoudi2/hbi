@@ -56,7 +56,8 @@ Medical evidence does not by itself prove HBI relevance, canonical Problem admis
   - **Basis:** An altered-color presentation is directly within the governing consultation question: HBI must be able to recognize what the customer is presenting before deciding whether clarification, ordinary consultation, or clinical evaluation/referral is appropriate.
   - **Important boundary:** This relevance statement is an HBI Contract claim, not an inference from prevalence or medical treatment literature.
 - **HBI Role:** PROBLEM / PRESENTATION
-- **Canonical Status:** CANONICAL_PROBLEM_SUPPORTED as a working presenting-problem category; this does not make every underlying cause canonical.
+- **Canonical Status:** CANONICAL_PROBLEM_NOT_PROVEN
+  - **Reason:** HBI Relevance is directly supported, but no independent Problem-Bank Contract criterion has been established in this execution that distinguishes P17 from the other umbrella pigmentary presentations and authorizes canonical admission. Therefore HBI Relevance does not imply Canonical Problem admission.
 - **Boundary:** Hyperpigmentation / dark spots ≠ Melasma ≠ Post-inflammatory hyperpigmentation ≠ Sun-related pigmentation. The visible color change does not identify its cause.
 - **Related / Overlap:** P18, P19, P22; P13 from S03 may overlap when acne is the antecedent cause.
 - **Coverage / Capability Gap:** G-S04-01 Cause-vs-Presentation Separation; G-S04-02 Pigmentation Differential/Boundary; G-S04-03 Need for context/history before classification.
@@ -226,7 +227,7 @@ No Gap above is converted into a feature, schema, API, UI, rule engine, or imple
 
 | Map Entry | Working Classification | HBI Relevance | Canonical Status | Disposition |
 |---|---|---|---|---|
-| P17 | Problem / Presentation | DIRECTLY_SUPPORTED | CANONICAL_PROBLEM_SUPPORTED | KEEP |
+| P17 | Problem / Presentation | DIRECTLY_SUPPORTED | CANONICAL_PROBLEM_NOT_PROVEN | KEEP |
 | P18 | Clinical Condition / Clinical Anchor | DIRECTLY_SUPPORTED | CANONICAL_PROBLEM_NOT_PROVEN | KEEP |
 | P19 | Sequela / Presentation | DIRECTLY_SUPPORTED | WORKING_CLASSIFICATION_ONLY | RECLASSIFY / KEEP AS WORKING CONCEPT |
 | P20 | Problem / Presentation | DIRECTLY_SUPPORTED | CANONICAL_PROBLEM_NOT_PROVEN | KEEP |
@@ -257,7 +258,7 @@ No Gap above is converted into a feature, schema, API, UI, rule engine, or imple
 ## Self-Critique
 
 ### Highest Overclaim Risk
-P17 HBI relevance and P21 HBI relevance are the strongest HBI claims. They are grounded in the governing consultation question, not in medical evidence. They should therefore remain explicitly labeled as HBI Contract claims and not be presented as medical evidence.
+P17 HBI relevance and P21 HBI relevance are the strongest HBI claims. P17 previously carried an unsupported jump from HBI relevance to canonical admission; that claim is corrected here to CANONICAL_PROBLEM_NOT_PROVEN. They are grounded in the governing consultation question, not in medical evidence. They should therefore remain explicitly labeled as HBI Contract claims and not be presented as medical evidence.
 
 ### Greatest Classification Ambiguity
 P17 is the largest classification ambiguity because dark spots/hyperpigmentation is an umbrella presentation with many causes. P20 has a parallel issue for pale/hypopigmented areas.
@@ -272,7 +273,7 @@ P17 vs P18/P19/P22 and P20 vs P21 require further consultation-boundary work. P2
 The artifact keeps these separate. Medical identity is recorded under Evidence/Provenance; HBI relevance is separately justified under the consultation question.
 
 ### KEEP vs Canonical Check
-KEEP is not treated as canonical admission. P18, P20 and P21 remain CANONICAL_PROBLEM_NOT_PROVEN; P19 and P22 are working classifications; P23 is parked.
+KEEP is not treated as canonical admission. P17, P18, P20 and P21 remain CANONICAL_PROBLEM_NOT_PROVEN; P19 and P22 are working classifications; P23 is parked.
 
 ### Related/Overlap vs Parent/Child Check
 No new parent-child hierarchy is asserted. Cross-shelf relationships are recorded as related/overlapping/contextual only.
@@ -323,3 +324,22 @@ No new feature or operational requirement is declared from a Gap. Gaps remain ca
 8. DermNet — Skin ageing: https://dermnetnz.org/topics/ageing-skin
 9. DermNet — Poikiloderma of Civatte: https://dermnetnz.org/topics/poikiloderma-of-civatte
 10. AAD — How to fade dark spots in darker skin tones: https://www.aad.org/public/everyday-care/skin-care-secrets/routine/fade-dark-spots
+
+
+## Correction Record — P17 Canonical Status
+
+- **Correction Trigger:** Independent review identified an unsupported inference from DIRECTLY_SUPPORTED HBI Relevance to CANONICAL_PROBLEM_SUPPORTED.
+- **Correction:** P17 Canonical Status changed to **CANONICAL_PROBLEM_NOT_PROVEN**.
+- **HBI Relevance:** remains **DIRECTLY_SUPPORTED**.
+- **Disposition:** remains **KEEP**.
+- **Reason:** no independent Problem-Bank Contract criterion was established in this execution that authorizes canonical admission for P17 or distinguishes it from the other umbrella pigmentary presentations.
+- **Boundary preserved:** HBI Relevance ≠ Canonical Problem Admission.
+- **Scope impact:** P17 only. P18–P23, Map V0.1, S03, and all downstream scopes remain unchanged.
+- **Status:** Correction applied; independent verification required. S04 remains WORKING DRAFT / NOT BASELINE.
+
+## Correction Self-Critique — P17
+
+- The original classification overreached by treating strong HBI relevance as sufficient for canonical admission.
+- Medical evidence supports P17 identity as a pigmentary presentation, but does not itself establish HBI canonical admission.
+- No new evidence was invented to justify the correction.
+- The corrected state is intentionally conservative and leaves canonical admission OPEN for a later gate.
