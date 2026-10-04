@@ -48,7 +48,7 @@ The frozen Map is the structural authority for primary shelf placement. Cross-sh
 | P13 | S03 | S03↔S04 | PROVEN | Working sequela; decomposition remains OPEN |
 | P14 | S03 | — | PROVEN | HBI relevance NOT_PROVEN preserved |
 | P15 | S03 | — | PROVEN | HBI relevance INDIRECTLY_SUPPORTED preserved |
-| P16 | S02 | S02↔S07 | PROVEN | HBI relevance NOT_PROVEN preserved |
+| P16 | S03 | — | CORRECTED / PROVEN | HBI relevance NOT_PROVEN preserved |
 | P17 | S04 | — | PROVEN | Presentation retained; canonical admission not proven |
 | P18 | S04 | P17 | PROVEN | Clinical condition ≠ Need |
 | P19 | S04 | P17; S03 overlap possible | PROVEN | Working sequela retained |
@@ -105,7 +105,7 @@ No unauthorized new P-ID was found in the inspected S03–S10 artifacts.
 
 S01/S02 execution is recorded as accepted at the governance level, but their original working-draft repository artifacts were not directly retrievable through the currently available PR references during this audit. Therefore the S01/S02 portion is **PARTIAL at artifact-inspection level**, not a content failure.
 
-**Disposition:** retain current structure; do not repair from this audit.
+**Disposition:** P16 primary-shelf error identified; correction required. No Map or accepted-shelf artifact repair authorized.
 
 ## 3. Cross-Shelf Relationship Register
 
@@ -119,7 +119,7 @@ S01/S02 execution is recorded as accepted at the governance level, but their ori
 | P47 ↔ S08 | S07 primary + S08 relation | PROVEN | Preserve |
 | P52 ↔ S08 | S09 primary + S08 relation | PROVEN | Preserve |
 | P61 ↔ S10 | S09 primary + S10 relation | PROVEN | Preserve; no duplicate |
-| P16 ↔ S07 | S02 primary + S07 relation | PROVEN | Preserve |
+| P16 | S03 primary; no cross-shelf relation | CORRECTED | Preserve |
 | P06 ↔ S05 | S01 primary + S05 relation | PROVEN | Preserve |
 
 **Critical scope check:** P48 is **S08**, not S07. No P48 absorption into S07 was found.
@@ -348,6 +348,15 @@ S05 retains P24–P33 only. The scope-corrected PR #306 contains the S05 artifac
 
 ## 12. Findings Register
 
+### F16 — P16 Primary-Shelf Consistency Error
+
+**Status: CORRECTED IN AUDIT ARTIFACT**
+
+The previous audit incorrectly assigned P16 to S02 and recorded an S02↔S07 relation. Correct state is P16 primary S03 with no cross-shelf relation. S03 = P08–P16; S07 = P43–P47. The frozen Map and accepted shelf artifacts are unchanged.
+
+**Prior Red-Team gate:** invalid as final gate because this material discrepancy was missed.
+
+
 | Finding | Status | Severity | Disposition |
 |---|---|---|---|
 | F01 P01–P61 coverage | PROVEN | None | Preserve |
@@ -365,6 +374,7 @@ S05 retains P24–P33 only. The scope-corrected PR #306 contains the S05 artifac
 | F13 P08 canonical-status strength | OPEN | Medium | Independent gate review; no edit |
 | F14 HBI relevance criterion consistency | OPEN | Medium | Independent gate review; no normalization |
 | F15 S01/S02 artifact direct inspection | PARTIAL | Medium | Do not infer; carry as evidence gap |
+| F16 P16 primary-shelf assignment | CORRECTED | High | Fresh independent recheck required |
 
 ## 13. Coverage / Capability Gaps
 
@@ -381,19 +391,21 @@ These are audit limitations or pre-existing governance gaps, not evidence to inv
 
 ## 14. Mandatory Self-Critique
 
-1. The frozen Map is the structural source, so a clean P01–P61 table cannot by itself prove that every working-draft claim is correct.
-2. S01/S02 could not be independently inspected at artifact level through current PR references; treating them as fully verified would overclaim.
-3. The audit relies on management-accepted execution records for the S01/S02 existence/acceptance state, while direct repository content evidence is stronger for S03–S10.
-4. A concept-level HBI relevance claim marked DIRECTLY_SUPPORTED is not automatically equivalent to canonical Problem admission.
-5. P08's explicit CANONICAL_PROBLEM_SUPPORTED status deserves independent contract-level review because the general governance rule intentionally separates working disposition from canonical admission.
-6. Cross-shelf relation preservation does not prove real-world completeness of the Problem Space.
-7. Medical source citations in the shelf artifacts prove clinical identity/description only within their cited scope; they do not prove Customer Reality, Need, Product, or Recommendation readiness.
+1. The first audit made a factual P16 primary-shelf assignment error; this correction explicitly closes that audit error.
+2. Numeric P01–P61 coverage is insufficient; primary-shelf consistency is a separate gate.
+3. S01/S02 could not be independently inspected at artifact level through current PR references; treating them as fully verified would overclaim.
+4. The correction changes only the audit artifact, not the frozen Map or accepted shelf artifacts.
+5. The prior Red-Team cannot serve as the final gate because it missed this material discrepancy.
+6. A fresh independent Repository Reality Check, Red-Team, and Grok-1 gate are required.
+7. P08's explicit CANONICAL_PROBLEM_SUPPORTED status remains an independent contract-level review item.
+8. Cross-shelf relation preservation does not prove real-world completeness of the Problem Space.
+9. Medical source citations prove clinical identity/description only within their cited scope; they do not prove Customer Reality, Need, Product, or Recommendation readiness.
 
 ## 15. Governance Footer
 
-**Cross-Shelf Audit Execution:** COMPLETED  
+**Correction Execution:** COMPLETED  
 **Independent Repository Reality Check:** PENDING  
-**Grok-2 Red-Team:** PENDING  
+**Red-Team Recheck:** PENDING  
 **Grok-1 Independent Gate:** PENDING  
 **Accepted Execution Pass:** PENDING  
 **Management Baseline:** PENDING  
