@@ -17,6 +17,7 @@ from app.services.evidence_readiness_service import EvidenceReadinessService
 from app.services.product_service import ProductService
 from app.services.product_transition_service import ProductTransitionService
 from app.services.recommendation_service import RecommendationService
+from app.services.skin_next_question_service import SkinNextQuestionService
 
 
 PO = {ROLE_PO}
@@ -132,6 +133,9 @@ def test_governed_intake_reaches_engine_ready_and_recommendation(db_session):
     case = Case(case_id="CASE_CATALOG_INTAKE_001", customer_id=customer.customer_id, case_type="OPEN")
     db_session.add_all([customer, case])
     db_session.flush()
+    SkinNextQuestionService(db_session).capture_answer(
+        case, "skin.primary_need.v1", "hydration"
+    )
 
     recs = RecommendationService(db_session).generate_recommendations(
         case.case_id,
