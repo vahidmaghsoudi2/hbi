@@ -10,6 +10,7 @@ from app.services.recommendation_service import RecommendationService
 def _service():
     db = MagicMock()
     service = RecommendationService(db)
+    service._has_minimum_consultation_evidence = MagicMock(return_value=True)
     return service
 
 
@@ -104,6 +105,7 @@ def test_medical_context_maps_to_pending_review_eligibility():
         "needs": ["dry skin"],
         "medical_context_active": True,
         "unknowns": [],
+        "consultation_evidence_ready": True,
     }
 
     eligibility = service._map_eligibility(engine_result, decision_state, 1.0)
@@ -121,6 +123,7 @@ def test_eligibility_gate_rejects_candidate_before_ranking_result_is_accepted():
         "needs": ["dry skin"],
         "medical_context_active": False,
         "unknowns": [],
+        "consultation_evidence_ready": True,
     }
 
     # V1: low Need Match is a ranking signal, not an eligibility gate.
