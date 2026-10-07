@@ -32,6 +32,7 @@ def _svc_with_real_db(db):
     svc.pk_repo = MagicMock()
     svc.evidence_repo = MagicMock()
     svc.reasoning_engine = MagicMock()
+    svc._has_minimum_consultation_evidence = MagicMock(return_value=True)
     return svc
 
 
