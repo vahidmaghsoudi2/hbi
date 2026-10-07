@@ -319,11 +319,10 @@ def _create_owned_case(client, customer_id: str):
     return headers, created.json()["case_id"]
 
 
-def test_profile_fact_concerns_supplies_recommendation_and_trace(client):
+def test_profile_fact_concerns_alone_does_not_supply_consultation_evidence(client):
     from app.models.profile_fact import ProfileFact
 
     headers, case_id = _create_owned_case(client, "CUST-CVS-1")
-    _capture_skin_consultation_answer(client, headers, case_id)
     db = _runtime_session()
     try:
         db.add(ProfileFact(
@@ -346,10 +345,7 @@ def test_profile_fact_concerns_supplies_recommendation_and_trace(client):
     )
     assert response.status_code == 200, response.text
     body = response.json()
-    assert len(body) >= 1
-    reasons = body[0]["ranking_reasons"]
-    assert "PF-VS002-CONCERNS" in reasons
-    assert "PROFILE_FACT" in reasons
+    assert body == []
 
 
 def test_current_consultation_overrides_profile_fact(client):
