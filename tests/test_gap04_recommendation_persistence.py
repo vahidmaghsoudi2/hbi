@@ -7,12 +7,18 @@ from app.models.case import Case
 from app.models.product import Product
 from app.models.recommendation import Recommendation
 from app.services.recommendation_service import RecommendationService
+from app.services.skin_next_question_service import SkinNextQuestionService
 
 
 def _seed_case_and_products(db, product_ids):
     db.add(Customer(customer_id="CUST1", name="Test", consent_to_store_data=1))
     db.flush()
-    db.add(Case(case_id="CASE1", customer_id="CUST1", case_type="OPEN"))
+    case = Case(case_id="CASE1", customer_id="CUST1", case_type="OPEN")
+    db.add(case)
+    db.flush()
+    SkinNextQuestionService(db).capture_answer(
+        case, "skin.primary_need.v1", "hydration"
+    )
     for pid in product_ids:
         db.add(
             Product(
