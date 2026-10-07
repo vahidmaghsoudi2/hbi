@@ -60,6 +60,7 @@ def test_recommendation_hard_gates_block_claim_violation_and_high_conflict():
         "medical_context_active": False,
         "needs": ["آبرسان و مرطوب‌کننده"],
         "unknowns": [],
+        "consultation_evidence_ready": True,
     }
     eligible_engine = {"eligibility": "ELIGIBLE", "claim_boundary_violations": [], "conflicts": []}
     assert service._map_eligibility(eligible_engine, base_state, 1.0) == "ELIGIBLE"
