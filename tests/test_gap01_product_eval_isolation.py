@@ -103,6 +103,7 @@ def test_map_eligibility_uses_product_unknowns_not_shared_accumulation():
         "needs": ["dry skin"],
         "medical_context_active": False,
         "decision_status": "READY",
+        "consultation_evidence_ready": True,
     }
     engine_ok = {"eligibility": "ELIGIBLE"}
     product_critical = [{"unknown_priority": "CRITICAL_UNKNOWN", "field": "x"}]
