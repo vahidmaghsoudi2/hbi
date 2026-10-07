@@ -267,10 +267,12 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         # for automatic recommendation.
         if not decision_state.get("needs"):
             return "INELIGIBLE_PENDING_REVIEW"
-        # D1: a Need cannot become ELIGIBLE without traceable, known
-        # Case-owned consultation evidence for the current Skin slice.
-        if not decision_state.get("consultation_evidence_ready"):
-            return "INELIGIBLE_PENDING_REVIEW"
+        # D1 is a Skin-line rule. The Case scope is the authority: non-Skin
+        # consultation paths must not inherit the Skin-only evidence gate.
+        case = self.db.get(Case, decision_state.get("case_id"))
+        if case is not None and (case.case_type or "").strip().upper() == "SKIN":
+            if not decision_state.get("consultation_evidence_ready"):
+                return "INELIGIBLE_PENDING_REVIEW"
         if evidence_score <= 0.0:
             return "INELIGIBLE_PENDING_REVIEW"
         return "ELIGIBLE"
