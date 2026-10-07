@@ -116,7 +116,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         return {
             "case_id": case_id,
             "customer_id": customer_profile.get("customer_id"),
-            "consultation_evidence_ready": self._has_minimum_consultation_evidence(case_id),
+            "consultation_evidence_ready": False,
             "raw_concerns": raw_concerns,
             "evidence_refs": [],
             "evidence_gaps": [],
@@ -134,10 +134,10 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             "generated_at": datetime.now(timezone.utc).isoformat(),
         }
 
-    def _has_minimum_consultation_evidence(self, case_id: str) -> bool:
-        """Return True only for the proven Skin consultation evidence record.
+    def _has_minimum_consultation_evidence(self, case_id: str, generated_needs: List[str]) -> bool:
+        """Require a Case-owned consultation answer relevant to the generated Need.
 
-        D1 uses the existing Case-owned consultation answer written by
+        D1 uses only the existing Skin consultation answer written by
         SkinNextQuestionService. No new evidence source or schema is introduced.
         """
         case = self.db.get(Case, case_id)
@@ -150,6 +150,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         if not isinstance(state, dict):
             return False
 
+        evidence_factors = []
         for answer in state.get("answers", []):
             if not isinstance(answer, dict):
                 continue
@@ -160,8 +161,20 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 and answer.get("value_state") == "KNOWN"
                 and str(answer.get("value") or "").strip()
             ):
-                return True
-        return False
+                evidence_factors.append(
+                    {
+                        "name": "concern",
+                        "value": str(answer["value"]).strip(),
+                        "source": "customer_input",
+                        "validity": "DECLARED",
+                    }
+                )
+
+        if not evidence_factors or not generated_needs:
+            return False
+
+        evidence_needs, _, _, _ = normalize_needs_from_factors(evidence_factors)
+        return bool(set(evidence_needs) & set(generated_needs))
 
     def _generate_needs_from_decision_state(self, decision_state: Dict[str, Any]) -> List[str]:
         """Need ONLY from Decision State (F2 + GAP-05 L1). No silent guessing."""
@@ -173,6 +186,9 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         decision_state["ambiguous_need_factors"] = ambiguous
         if not needs and (unmapped or ambiguous):
             decision_state["decision_status"] = "INSUFFICIENT"
+        decision_state["consultation_evidence_ready"] = self._has_minimum_consultation_evidence(
+            decision_state.get("case_id"), needs
+        )
         return needs
 
     def _calculate_need_match(self, generated_needs: List[str], known_use_cases: Optional[str]) -> float:
