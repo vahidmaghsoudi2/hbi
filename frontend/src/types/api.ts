@@ -96,6 +96,7 @@ export interface CustomerIntakeRequest {
   consent: number;
   skin_profile?: unknown;
   guest?: boolean;
+  case_type?: string;
   open_case?: boolean;
 }
 
