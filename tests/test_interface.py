@@ -171,7 +171,7 @@ def test_recommendation_facade_generate(db, sample_product, sample_customer, sam
     )
     db.commit()
     rec_facade = RecommendationFacade(db)
-    recs = rec_facade.generate(case.case_id, {"concerns": "oily skin"})
+    recs = rec_facade.generate(case.case_id, {"concerns": "hydration"})
     assert len(recs) >= 1
     assert recs[0].case_id == case.case_id
 
