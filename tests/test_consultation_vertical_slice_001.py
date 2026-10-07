@@ -156,6 +156,43 @@ def test_missing_case_generate_returns_404(client):
     assert r.status_code == 404
 
 
+def _capture_skin_consultation_answer(client, headers, case_id, answer="sun_protection"):
+    response = client.post(
+        f"/api/v1/recommendations/next-question/{case_id}/answer",
+        headers=headers,
+        json={
+            "question_id": "skin.primary_need.v1",
+            "answer": answer,
+        },
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["source"] == "CURRENT_CASE_CONSULTATION"
+    assert response.json()["value_state"] == "KNOWN"
+
+
+def test_consultation_evidence_is_required_before_eligibility(client):
+    headers, case_id = _create_owned_case(client, "CUST-CVS-1")
+
+    blocked = client.post(
+        "/api/v1/recommendations/generate",
+        headers=headers,
+        json={"case_id": case_id, "customer_profile": {"concerns": "ضدآفتاب"}},
+    )
+    assert blocked.status_code == 200, blocked.text
+    assert blocked.json() == []
+
+    _capture_skin_consultation_answer(client, headers, case_id)
+
+    allowed = client.post(
+        "/api/v1/recommendations/generate",
+        headers=headers,
+        json={"case_id": case_id, "customer_profile": {"concerns": "ضدآفتاب"}},
+    )
+    assert allowed.status_code == 200, allowed.text
+    assert allowed.json()
+    assert all(item["eligibility_status"] == "ELIGIBLE" for item in allowed.json())
+
+
 def test_owned_case_consultation_generate_persist_retrieve_and_feedback(client):
     token = _token(client, "CUST-CVS-1")
     headers = {"Authorization": f"Bearer {token}"}
@@ -168,6 +205,7 @@ def test_owned_case_consultation_generate_persist_retrieve_and_feedback(client):
     assert created.status_code == 201, created.text
     case_id = created.json()["case_id"]
     assert created.json()["customer_id"] == "CUST-CVS-1"
+    _capture_skin_consultation_answer(client, headers, case_id)
 
     gen = client.post(
         "/api/v1/recommendations/generate",
@@ -285,6 +323,7 @@ def test_profile_fact_concerns_supplies_recommendation_and_trace(client):
     from app.models.profile_fact import ProfileFact
 
     headers, case_id = _create_owned_case(client, "CUST-CVS-1")
+    _capture_skin_consultation_answer(client, headers, case_id)
     db = _runtime_session()
     try:
         db.add(ProfileFact(
@@ -366,6 +405,7 @@ def test_profile_fact_overrides_legacy_customer_field(client):
         db.close()
 
     headers, case_id = _create_owned_case(client, "CUST-CVS-1")
+    _capture_skin_consultation_answer(client, headers, case_id)
     response = client.post(
         "/api/v1/recommendations/generate",
         headers=headers,
