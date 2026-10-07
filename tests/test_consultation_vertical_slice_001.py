@@ -213,7 +213,7 @@ def test_owned_case_consultation_generate_persist_retrieve_and_feedback(client):
     created = client.post(
         "/api/v1/cases/",
         headers=headers,
-        json={"customer_id": "CUST-CVS-1", "case_type": "OPEN"},
+        json={"customer_id": "CUST-CVS-1", "case_type": "SKIN"},
     )
     assert created.status_code == 201, created.text
     case_id = created.json()["case_id"]
@@ -267,7 +267,7 @@ def test_no_eligible_product_returns_empty_list(client):
     created = client.post(
         "/api/v1/cases/",
         headers=headers,
-        json={"customer_id": "CUST-CVS-1", "case_type": "OPEN"},
+        json={"customer_id": "CUST-CVS-1", "case_type": "SKIN"},
     )
     assert created.status_code == 201, created.text
     case_id = created.json()["case_id"]
@@ -330,6 +330,26 @@ def _create_owned_case(client, customer_id: str):
     )
     assert created.status_code == 201, created.text
     return headers, created.json()["case_id"]
+
+
+def test_non_skin_case_does_not_inherit_skin_consultation_gate(client):
+    headers = _customer_auth_headers("CUST-CVS-1")
+    created = client.post(
+        "/api/v1/cases/",
+        headers=headers,
+        json={"customer_id": "CUST-CVS-1", "case_type": "OPEN"},
+    )
+    assert created.status_code == 201, created.text
+    case_id = created.json()["case_id"]
+
+    response = client.post(
+        "/api/v1/recommendations/generate",
+        headers=headers,
+        json={"case_id": case_id, "customer_profile": {"concerns": "ضدآفتاب"}},
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()
+    assert all(item["eligibility_status"] == "ELIGIBLE" for item in response.json())
 
 
 def test_profile_fact_concerns_alone_does_not_supply_consultation_evidence(client):
