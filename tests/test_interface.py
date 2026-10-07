@@ -163,9 +163,11 @@ def test_recommendation_facade_generate(db, sample_product, sample_customer, sam
 
     case_facade = CaseFacade(db)
     case = case_facade.create(customer_id=sample_customer.customer_id)
+    from app.models.case import Case
     from app.services.skin_next_question_service import SkinNextQuestionService
+    case_model = db.get(Case, case.case_id)
     SkinNextQuestionService(db).capture_answer(
-        case, "skin.primary_need.v1", "hydration"
+        case_model, "skin.primary_need.v1", "hydration"
     )
     db.commit()
     rec_facade = RecommendationFacade(db)
