@@ -170,6 +170,19 @@ def _capture_skin_consultation_answer(client, headers, case_id, answer="sun_prot
     assert response.json()["value_state"] == "KNOWN"
 
 
+def test_irrelevant_consultation_evidence_cannot_authorize_different_need(client):
+    headers, case_id = _create_owned_case(client, "CUST-CVS-1")
+    _capture_skin_consultation_answer(client, headers, case_id, answer="hydration")
+
+    response = client.post(
+        "/api/v1/recommendations/generate",
+        headers=headers,
+        json={"case_id": case_id, "customer_profile": {"concerns": "ضدآفتاب"}},
+    )
+    assert response.status_code == 200, response.text
+    assert response.json() == []
+
+
 def test_consultation_evidence_is_required_before_eligibility(client):
     headers, case_id = _create_owned_case(client, "CUST-CVS-1")
 
