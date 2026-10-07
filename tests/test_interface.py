@@ -163,6 +163,11 @@ def test_recommendation_facade_generate(db, sample_product, sample_customer, sam
 
     case_facade = CaseFacade(db)
     case = case_facade.create(customer_id=sample_customer.customer_id)
+    from app.services.skin_next_question_service import SkinNextQuestionService
+    SkinNextQuestionService(db).capture_answer(
+        case, "skin.primary_need.v1", "hydration"
+    )
+    db.commit()
     rec_facade = RecommendationFacade(db)
     recs = rec_facade.generate(case.case_id, {"concerns": "oily skin"})
     assert len(recs) >= 1
