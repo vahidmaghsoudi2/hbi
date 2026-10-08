@@ -270,7 +270,8 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             return "INELIGIBLE_PENDING_REVIEW"
         # D1 is a Skin-line rule. The Case scope is the authority: non-Skin
         # consultation paths must not inherit the Skin-only evidence gate.
-        case = self.db.get(Case, decision_state.get("case_id"))
+        db = getattr(self, "db", None)
+        case = db.get(Case, decision_state.get("case_id")) if db is not None else None
         if case is not None and (case.case_type or "").strip().upper() == "SKIN":
             if not decision_state.get("consultation_evidence_ready"):
                 return "INELIGIBLE_PENDING_REVIEW"
