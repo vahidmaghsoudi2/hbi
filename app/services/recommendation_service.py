@@ -49,6 +49,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
 
     def __init__(self, db: Session):
         super().__init__(RecommendationRepository(db), db)
+        self.db = db
         self.product_repo = ProductRepository(db)
         self.inventory_repo = InventoryRepository(db)
         self.pk_repo = ProductKnowledgeRepository(db)
