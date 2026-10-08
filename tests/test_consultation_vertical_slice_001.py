@@ -326,7 +326,7 @@ def _create_owned_case(client, customer_id: str):
     created = client.post(
         "/api/v1/cases/",
         headers=headers,
-        json={"customer_id": customer_id, "case_type": "OPEN"},
+        json={"customer_id": customer_id, "case_type": "SKIN"},
     )
     assert created.status_code == 201, created.text
     return headers, created.json()["case_id"]
