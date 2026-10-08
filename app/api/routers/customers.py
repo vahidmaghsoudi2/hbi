@@ -66,6 +66,10 @@ class IntakeRequest(BaseModel):
     consent: int = 0
     skin_profile: Optional[str] = None
     guest: bool = False
+    case_type: str = Field(
+        default="OPEN",
+        description="Consultation scope / Case type. Home Skin consultation sends SKIN.",
+    )
     open_case: bool = Field(
         default=True,
         description="اگر true باشد یک Case OPEN برای همین مشتری ساخته می‌شود",
@@ -363,7 +367,7 @@ async def quick_intake(
         if data.open_case:
             case = CaseService(db).create_case(
                 customer_id=customer.customer_id,
-                case_type="OPEN",
+                case_type=(data.case_type or "OPEN").strip().upper(),
             )
             case_payload = {
                 "case_id": case.case_id,

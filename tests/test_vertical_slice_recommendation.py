@@ -61,6 +61,12 @@ def db_session(monkeypatch):
     if session.get(Case, "CASE-VS-002") is None:
         session.add(Case(case_id="CASE-VS-002", customer_id="CUST-VS-001"))
     session.commit()
+    from app.services.skin_next_question_service import SkinNextQuestionService
+    case = session.get(Case, "CASE-VS-002")
+    SkinNextQuestionService(session).capture_answer(
+        case, "skin.primary_need.v1", "sun_protection"
+    )
+    session.commit()
     yield session
     session.close()
     try:

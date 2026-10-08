@@ -1,5 +1,7 @@
 """Acceptance tests for the approved Recommendation V1 business contract."""
 
+import json
+
 from app.models.case import Case
 from app.models.customer import Customer
 from app.models.evidence import Evidence
@@ -56,11 +58,42 @@ def _seed_product(db_session, *, product_id, known_use_cases, quantity):
     db_session.commit()
 
 
+def _record_skin_consultation_answer(db_session, case, value="sun_protection"):
+    case.evidence_gaps = json.dumps(
+        {
+            "version": "1",
+            "gaps": [
+                {
+                    "gap_id": f"{case.case_id}:skin.primary_need.v1",
+                    "factor": "concerns",
+                    "status": "RESOLVED",
+                    "resolution": "CURRENT_CASE_ANSWER",
+                    "question_id": "skin.primary_need.v1",
+                }
+            ],
+            "answers": [
+                {
+                    "question_id": "skin.primary_need.v1",
+                    "factor": "concerns",
+                    "value": value,
+                    "source": "CURRENT_CASE_CONSULTATION",
+                    "value_state": "KNOWN",
+                }
+            ],
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+    )
+    db_session.add(case)
+    db_session.commit()
+
+
 def test_low_need_match_does_not_exclude_an_eligible_product(db_session):
     customer = Customer(customer_id="CUST-RV1-001", name="Contract Customer")
     case = Case(case_id="CASE-RV1-001", customer_id=customer.customer_id)
     db_session.add_all([customer, case])
     db_session.commit()
+    _record_skin_consultation_answer(db_session, case)
 
     # Product passes the four entry gates and has approved Evidence, but its
     # known use case does not match the customer's declared Need.
@@ -86,6 +119,7 @@ def test_inventory_quantity_does_not_change_ranking_score(db_session):
     case = Case(case_id="CASE-RV1-002", customer_id=customer.customer_id)
     db_session.add_all([customer, case])
     db_session.commit()
+    _record_skin_consultation_answer(db_session, case)
 
     for product_id, quantity in (
         ("PROD-RV1-STOCK-1", 1),
@@ -142,6 +176,7 @@ def test_missing_approved_evidence_blocks_automatic_recommendation(db_session):
     )
     db_session.add_all([customer, case, product, knowledge])
     db_session.commit()
+    _record_skin_consultation_answer(db_session, case)
     db_session.add(inventory)
     db_session.commit()
 

@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
 from app.models.recommendation import Recommendation
+from app.models.case import Case
 from app.models.product import Product
 from app.models.product_knowledge import ProductKnowledge
 from app.models.evidence import Evidence
@@ -48,6 +49,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
 
     def __init__(self, db: Session):
         super().__init__(RecommendationRepository(db), db)
+        self.db = db
         self.product_repo = ProductRepository(db)
         self.inventory_repo = InventoryRepository(db)
         self.pk_repo = ProductKnowledgeRepository(db)
@@ -115,6 +117,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         return {
             "case_id": case_id,
             "customer_id": customer_profile.get("customer_id"),
+            "consultation_evidence_ready": False,
             "raw_concerns": raw_concerns,
             "evidence_refs": [],
             "evidence_gaps": [],
@@ -132,6 +135,48 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             "generated_at": datetime.now(timezone.utc).isoformat(),
         }
 
+    def _has_minimum_consultation_evidence(self, case_id: str, generated_needs: List[str]) -> bool:
+        """Require a Case-owned consultation answer relevant to the generated Need.
+
+        D1 uses only the existing Skin consultation answer written by
+        SkinNextQuestionService. No new evidence source or schema is introduced.
+        """
+        case = self.db.get(Case, case_id)
+        if case is None or not case.evidence_gaps:
+            return False
+        try:
+            state = json.loads(case.evidence_gaps)
+        except (TypeError, ValueError):
+            return False
+        if not isinstance(state, dict):
+            return False
+
+        evidence_factors = []
+        for answer in state.get("answers", []):
+            if not isinstance(answer, dict):
+                continue
+            if (
+                answer.get("question_id") == "skin.primary_need.v1"
+                and answer.get("factor") == "concerns"
+                and answer.get("source") == "CURRENT_CASE_CONSULTATION"
+                and answer.get("value_state") == "KNOWN"
+                and str(answer.get("value") or "").strip()
+            ):
+                evidence_factors.append(
+                    {
+                        "name": "concern",
+                        "value": str(answer["value"]).strip(),
+                        "source": "customer_input",
+                        "validity": "DECLARED",
+                    }
+                )
+
+        if not evidence_factors or not generated_needs:
+            return False
+
+        evidence_needs, _, _, _ = normalize_needs_from_factors(evidence_factors)
+        return bool(set(evidence_needs) & set(generated_needs))
+
     def _generate_needs_from_decision_state(self, decision_state: Dict[str, Any]) -> List[str]:
         """Need ONLY from Decision State (F2 + GAP-05 L1). No silent guessing."""
         needs, mappings, unmapped, ambiguous = normalize_needs_from_factors(
@@ -142,6 +187,9 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         decision_state["ambiguous_need_factors"] = ambiguous
         if not needs and (unmapped or ambiguous):
             decision_state["decision_status"] = "INSUFFICIENT"
+        decision_state["consultation_evidence_ready"] = self._has_minimum_consultation_evidence(
+            decision_state.get("case_id"), needs
+        )
         return needs
 
     def _calculate_need_match(self, generated_needs: List[str], known_use_cases: Optional[str]) -> float:
@@ -220,6 +268,13 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         # for automatic recommendation.
         if not decision_state.get("needs"):
             return "INELIGIBLE_PENDING_REVIEW"
+        # D1 is a Skin-line rule. The Case scope is the authority: non-Skin
+        # consultation paths must not inherit the Skin-only evidence gate.
+        db = getattr(self, "db", None)
+        case = db.get(Case, decision_state.get("case_id")) if db is not None else None
+        if case is not None and (case.case_type or "").strip().upper() == "SKIN":
+            if not decision_state.get("consultation_evidence_ready"):
+                return "INELIGIBLE_PENDING_REVIEW"
         if evidence_score <= 0.0:
             return "INELIGIBLE_PENDING_REVIEW"
         return "ELIGIBLE"

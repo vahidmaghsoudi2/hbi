@@ -18,6 +18,7 @@ def _make_svc():
     svc.pk_repo = MagicMock()
     svc.evidence_repo = MagicMock()
     svc.reasoning_engine = MagicMock()
+    svc._has_minimum_consultation_evidence = MagicMock(return_value=True)
     return svc
 
 
@@ -102,6 +103,7 @@ def test_map_eligibility_uses_product_unknowns_not_shared_accumulation():
         "needs": ["dry skin"],
         "medical_context_active": False,
         "decision_status": "READY",
+        "consultation_evidence_ready": True,
     }
     engine_ok = {"eligibility": "ELIGIBLE"}
     product_critical = [{"unknown_priority": "CRITICAL_UNKNOWN", "field": "x"}]

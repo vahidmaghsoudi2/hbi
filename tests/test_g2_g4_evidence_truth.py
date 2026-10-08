@@ -11,6 +11,7 @@ from app.services.research_draft_service import ResearchDraftService
 from app.services.evidence_service import EvidenceService
 from app.services.product_knowledge_service import ProductKnowledgeService
 from app.services.recommendation_service import RecommendationService
+from app.services.skin_next_question_service import SkinNextQuestionService
 
 
 def _auth(db_session, subject="evidence_operator"):
@@ -134,8 +135,12 @@ def test_conflict_resolution_closes_pair_and_propagates_to_knowledge_and_recomme
     product_id = "G2-G4-CONFLICT"
     _product(db_session, product_id)
     db_session.add(Customer(customer_id="C-G2-G4", name="Conflict Test"))
-    db_session.add(Case(case_id="CASE-G2-G4", customer_id="C-G2-G4", case_type="SKIN"))
+    case = Case(case_id="CASE-G2-G4", customer_id="C-G2-G4", case_type="SKIN")
+    db_session.add(case)
     db_session.commit()
+    SkinNextQuestionService(db_session).capture_answer(
+        case, "skin.primary_need.v1", "hydration"
+    )
 
     service = EvidenceService(db_session)
     winner = service.add_evidence(

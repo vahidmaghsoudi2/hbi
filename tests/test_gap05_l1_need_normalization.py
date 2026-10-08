@@ -103,6 +103,7 @@ def test_traceability_factor_to_need():
 
 def test_decision_state_path_sets_audit_fields():
     svc = RecommendationService.__new__(RecommendationService)
+    svc._has_minimum_consultation_evidence = lambda case_id, generated_needs: True
     ds = {
         "factors": [
             {"value": "hydration", "source": "customer_input", "validity": "DECLARED"},
@@ -122,6 +123,7 @@ def test_decision_state_path_sets_audit_fields():
 
 def test_only_unmapped_or_ambiguous_marks_insufficient():
     svc = RecommendationService.__new__(RecommendationService)
+    svc._has_minimum_consultation_evidence = lambda case_id, generated_needs: True
     ds = {
         "factors": [{"value": "totally_unknown_phrase_qqq", "source": "customer_input", "validity": "DECLARED"}],
         "decision_status": "READY",

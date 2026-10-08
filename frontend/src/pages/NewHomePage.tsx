@@ -42,6 +42,7 @@ const CONCERN_OPTIONS = [
 ] as const;
 
 const SKIN_OPTIONS = ["خشک", "چرب", "مختلط", "معمولی", "حساس"] as const;
+const CONSULTATION_LINES = [{ id: "SKIN", label: "پوست" }] as const;
 const INITIAL_RECOMMENDATION_LIMIT = 5;
 
 type Panel = "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about";
@@ -53,6 +54,7 @@ export default function NewHomePage() {
   const [caseId, setCaseId] = useState<string | null>(() => sessionStorage.getItem("hbi_case_id"));
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
+  const [consultationLine, setConsultationLine] = useState<string>("SKIN");
   const [concerns, setConcerns] = useState<string[]>([]);
   const [skin, setSkin] = useState<string[]>([]);
   const [note, setNote] = useState("");
@@ -328,6 +330,7 @@ export default function NewHomePage() {
     setCaseId(null);
     setName("");
     setMobile("");
+    setConsultationLine("SKIN");
     setConcerns([]);
     setSkin([]);
     setNote("");
@@ -357,6 +360,7 @@ export default function NewHomePage() {
     setShowAllRecommendations(false);
     if (!name.trim()) return setError("نام الزامی است.");
     if (!mobile.trim()) return setError("شماره موبایل الزامی است.");
+    if (!consultationLine) return setError("ابتدا لاین مشاوره را انتخاب کنید.");
     if (!concernsText) return setError("حداقل یک موضوع یا نوع پوست را انتخاب کنید.");
     setBusy(true);
     try {
@@ -369,6 +373,7 @@ export default function NewHomePage() {
           concerns: concernsText,
           consent: 0,
           skin_profile: skin.length ? skin.join(",") : undefined,
+          case_type: consultationLine,
           guest: false,
           open_case: true,
         } as CustomerIntakeRequest,
@@ -661,7 +666,23 @@ export default function NewHomePage() {
                 </div>
                 </fieldset>
               <fieldset className="pro-fieldset">
-                <legend>۲) موضوع مشاوره</legend>
+                <legend>۲) لاین مشاوره</legend>
+                <div className="pro-checks pro-checks-inline">
+                  {CONSULTATION_LINES.map((line) => (
+                    <label key={line.id} className="pro-check-card sm">
+                      <input
+                        type="checkbox"
+                        checked={consultationLine === line.id}
+                        onChange={() => setConsultationLine(consultationLine === line.id ? "" : line.id)}
+                      />
+                      <span>{line.label}</span>
+                    </label>
+                  ))}
+                </div>
+                <p className="pro-muted">این انتخاب محدوده همین مشاوره را مشخص می‌کند.</p>
+              </fieldset>
+              <fieldset className="pro-fieldset">
+                <legend>۳) موضوع مشاوره</legend>
                 <div className="pro-checks">
                   {CONCERN_OPTIONS.map((c) => (
                     <label key={c.id} className="pro-check-card">
@@ -672,7 +693,7 @@ export default function NewHomePage() {
                 </div>
               </fieldset>
               <fieldset className="pro-fieldset">
-                <legend>۳) نوع پوست</legend>
+                <legend>۴) نوع پوست</legend>
                 <div className="pro-checks pro-checks-inline">
                   {SKIN_OPTIONS.map((s) => (
                     <label key={s} className="pro-check-card sm">
@@ -683,7 +704,7 @@ export default function NewHomePage() {
                 </div>
               </fieldset>
               <fieldset className="pro-fieldset">
-                <legend>۴) توضیح</legend>
+                <legend>۵) توضیح</legend>
                 <textarea className="pro-input pro-textarea" value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder="نکته اختیاری…" />
                 {concernsText ? (
                   <p className="pro-summary">

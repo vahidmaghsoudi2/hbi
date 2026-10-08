@@ -23,6 +23,7 @@ from app.models.stock_movement import StockMovement  # noqa: F401
 from app.models.payment import Payment  # noqa: F401
 from app.models.sale_return import SaleReturn  # noqa: F401
 from app.models.category import Category  # noqa: F401
+from app.services.skin_next_question_service import SkinNextQuestionService
 
 
 @pytest.fixture()
@@ -60,6 +61,10 @@ def api_env():
     db.add(customer)
     case = Case(case_id="test_case", customer_id="test_customer")
     db.add(case)
+    db.commit()
+    SkinNextQuestionService(db).capture_answer(
+        case, "skin.primary_need.v1", "sun_protection"
+    )
     db.commit()
 
     yield client, db, case

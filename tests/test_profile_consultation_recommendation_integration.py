@@ -10,6 +10,7 @@ from app.models.inventory import Inventory
 from app.models.product import Product
 from app.models.product_knowledge import ProductKnowledge
 from app.models.recommendation import Recommendation
+from app.services.skin_next_question_service import SkinNextQuestionService
 
 
 def test_persistent_profile_plus_current_consultation_reaches_recommendation(db_session):
@@ -45,6 +46,9 @@ def test_persistent_profile_plus_current_consultation_reaches_recommendation(db_
     db_session.commit()
     db_session.add(inventory)
     db_session.commit()
+    SkinNextQuestionService(db_session).capture_answer(
+        case, "skin.primary_need.v1", "hydration"
+    )
 
     result = asyncio.run(generate_recommendations(
         RecommendationRequest(

@@ -60,6 +60,12 @@ def client(monkeypatch):
     session.add(Customer(customer_id="CUST-PILOT-1", name="Pilot User"))
     session.add(Case(case_id="CASE-PILOT-1", customer_id="CUST-PILOT-1"))
     session.commit()
+    from app.services.skin_next_question_service import SkinNextQuestionService
+    case = session.get(Case, "CASE-PILOT-1")
+    SkinNextQuestionService(session).capture_answer(
+        case, "skin.primary_need.v1", "sun_protection"
+    )
+    session.commit()
 
     def _override_db():
         s = Session()

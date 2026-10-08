@@ -16,6 +16,7 @@ def _service():
     service.pk_repo = MagicMock()
     service.evidence_repo = MagicMock()
     service.reasoning_engine = MagicMock()
+    service._has_minimum_consultation_evidence = MagicMock(return_value=True)
     return service, db
 
 

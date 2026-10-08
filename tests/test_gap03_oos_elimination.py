@@ -15,6 +15,7 @@ def _make_svc():
     svc.pk_repo = MagicMock()
     svc.evidence_repo = MagicMock()
     svc.reasoning_engine = MagicMock()
+    svc._has_minimum_consultation_evidence = MagicMock(return_value=True)
     return svc
 
 
