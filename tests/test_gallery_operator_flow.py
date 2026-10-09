@@ -126,6 +126,20 @@ def test_customer_token_issuance_is_disabled(client, db_session):
 
 
 
+def test_pilot_internal_role_tokens_are_disabled_by_default(client, db_session, monkeypatch):
+    monkeypatch.setenv("HBI_ENV", "development")
+    monkeypatch.delenv("HBI_ENABLE_PILOT_TOKENS", raising=False)
+
+    editor_response = client.post("/api/v1/auth/pilot-operator-token")
+    po_response = client.post("/api/v1/auth/pilot-po-token")
+
+    assert editor_response.status_code == 403, editor_response.text
+    assert po_response.status_code == 403, po_response.text
+    assert db_session.query(UserRole).filter(
+        UserRole.subject_id.in_(["USR_PILOT_EDITOR", "USR_PILOT_PO"])
+    ).count() == 0
+
+
 def test_customer_refresh_token_cannot_restore_system_access(client, db_session):
     db_session.add(Customer(customer_id="CUST-REFRESH-DENIED", name="مشتری بدون دسترسی"))
     db_session.commit()
