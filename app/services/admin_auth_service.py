@@ -33,6 +33,12 @@ def ensure_admin_account(db: Session) -> AdminCredential | None:
     credential = db.query(AdminCredential).filter(AdminCredential.username == username).first()
     if credential is not None and credential.subject_id != subject_id:
         raise ValueError("Admin username is already assigned to a different subject.")
+    existing_gallery_role = db.query(UserRole).filter(
+        UserRole.subject_id == subject_id,
+        UserRole.role == ROLE_GALLERY_OPERATOR,
+    ).first()
+    if existing_gallery_role is not None:
+        raise ValueError("Admin subject must not also be a GalleryOperator subject.")
     if credential is None:
         credential = AdminCredential(
             credential_id=f"ADMIN-CRED-{uuid.uuid4().hex[:12]}",
