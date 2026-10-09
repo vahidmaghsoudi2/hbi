@@ -92,6 +92,7 @@ def _to_recommendation_dto(r, db: Session) -> RecommendationDTO:
         evidence_score=getattr(r, 'evidence_score', None),
         evidence_refs=_decode_json_list(getattr(r, 'evidence_refs', None)),
         warnings=_decode_json_list(getattr(r, 'warnings', None)),
+        exclusion_reasons=_decode_json_list(getattr(r, 'exclusion_reasons', None)),
         availability=_get_availability(db, r.product_id),
         price=_get_price(db, r.product_id),
     )
