@@ -208,6 +208,35 @@ def test_admin_and_gallery_operator_login_roles_are_not_interchangeable(client, 
     assert gallery_on_admin_route.status_code == 403, gallery_on_admin_route.text
 
 
+def test_dual_role_identity_cannot_login_as_admin_or_gallery_operator(client, db_session, monkeypatch):
+    db_session.add(AdminCredential(
+        credential_id="CRED-DUAL-ROLE-LOGIN",
+        subject_id="USR_DUAL_ROLE_LOGIN",
+        username="dual-role-login",
+        password_hash="test-hash",
+    ))
+    _assign_role(db_session, "USR_DUAL_ROLE_LOGIN", ROLE_ADMIN)
+    _assign_role(db_session, "USR_DUAL_ROLE_LOGIN", ROLE_GALLERY_OPERATOR)
+    monkeypatch.setattr(
+        "app.api.routers.auth.verify_admin_password",
+        lambda credential, password: password == "valid",
+    )
+
+    admin_login = client.post(
+        "/api/v1/auth/login",
+        json={"username": "dual-role-login", "password": "valid"},
+    )
+    operator_login = client.post(
+        "/api/v1/auth/operator-login",
+        json={"username": "dual-role-login", "password": "valid"},
+    )
+
+    assert admin_login.status_code == 403, admin_login.text
+    assert operator_login.status_code == 403, operator_login.text
+    assert "identity conflict" in admin_login.json()["detail"].lower()
+    assert "identity conflict" in operator_login.json()["detail"].lower()
+
+
 def test_gallery_operator_provisioning_refuses_to_take_over_existing_non_admin_username(
     db_session, monkeypatch
 ):
