@@ -1,5 +1,11 @@
 # ورود محصولات پوستی
 
+> **REFERENCE STATUS — STRATEGIC INTENT ONLY / NOT CURRENT IMPLEMENTATION EVIDENCE**  
+> This document preserves the approved strategic direction and boundaries. Its recorded baseline SHA is historical; it does not describe current code, test, CI, or runtime status. For implementation reality, current gaps, and execution reconciliation, use [Issue #278](https://github.com/vahidmaghsoudi2/hbi/issues/278). For the approved operational contract, use `docs/architecture/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md`. Do not infer implementation authorization from this document; only separately authorized bounded WPs permit changes.
+>
+> ---
+>
+
 **English secondary title (repo path only):** Skin Product Intake  
 **Document ID:** HBI-SKIN-PRODUCT-INTAKE-STRATEGIC-BASELINE-v0.1  
 **Status:** STRATEGIC DESIGN BASELINE / PRE-IMPLEMENTATION  
