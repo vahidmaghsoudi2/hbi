@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.auth import (
     TokenPair,
     RefreshRequest,
+    decode_token,
     refresh_access_token,
     create_access_token,
     create_refresh_token,
@@ -315,7 +316,24 @@ async def pilot_po_token(
 
 
 @router.post("/refresh", response_model=TokenPair)
-async def refresh(request: RefreshRequest):
+async def refresh(request: RefreshRequest, db: Session = Depends(get_db)):
+    payload = decode_token(request.refresh_token)
+    subject_id = payload.get("sub") if payload else None
+    if not subject_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token",
+        )
+    assigned_roles = {
+        row.role
+        for row in db.query(UserRole).filter(UserRole.subject_id == subject_id).all()
+        if row.role in {ROLE_EDITOR, ROLE_PO, ROLE_ADMIN, ROLE_GALLERY_OPERATOR}
+    }
+    if not assigned_roles:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Customer identities cannot refresh system access tokens",
+        )
     new_access = refresh_access_token(request.refresh_token)
     if not new_access:
         raise HTTPException(
