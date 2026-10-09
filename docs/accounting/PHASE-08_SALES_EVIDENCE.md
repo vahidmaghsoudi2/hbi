@@ -1,3 +1,6 @@
+> **HISTORICAL / NOT AUTHORITATIVE FOR CURRENT IMPLEMENTATION (audit 2026-10-09)**  
+> The CLOSED/PASS label below is historical and is **not current implementation or runtime proof**. In current code, `POST /api/v1/sales/` is Admin-only, and `SaleService` takes the authoritative unit sale price from `Inventory.sale_price_usd`; caller-supplied `unit_price_usd` is intentionally ignored. Verify against [`app/api/routers/sales.py`](../../app/api/routers/sales.py), [`app/services/sale_service.py`](../../app/services/sale_service.py), and current tests. Preserve this document as historical evidence; do not use it alone to claim the current end-to-end Home sale flow is verified. This notice does not claim a fresh runtime pass.  
+>
 # PHASE 08 — Sales Workflow Evidence
 
 **Status:** **CLOSED / PASS**  
