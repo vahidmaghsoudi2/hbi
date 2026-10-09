@@ -167,7 +167,7 @@ export function getProductEvidence(
   return request<EvidenceDTO[]>(`/evidence/?product_id=${encodeURIComponent(productId)}`, {}, token);
 }
 
-/** POST /api/v1/sales/ — requires auth; customer_id must match token identity */
+/** POST /api/v1/sales/ — Admin-only financial mutation. Callers must pass an Admin JWT; a customer JWT is not authorized. */
 export function createSale(
   body: SaleCreateRequest,
   token: string
