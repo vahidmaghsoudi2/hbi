@@ -6,6 +6,7 @@ on:
       - master
       - feature/staff-auth-consultation-sale
       - fix/staff-auth-consultation-sale-identity
+      - fix/staff-session-role-isolation
   pull_request:
     branches:
       - master
@@ -54,10 +55,6 @@ jobs:
             htmlcov/
             coverage.xml
 
-  # WP-06 / Issue #20: dedicated governance gate for P4 Contract §16–§18
-  # Justification: stable named status check for future branch protection;
-  # faster targeted feedback without re-running accounting/inventory suites.
-  # Scope files are the P4 compliance + API auth matrix suites on master.
   governance-tests:
     name: governance-tests
     runs-on: ubuntu-latest
