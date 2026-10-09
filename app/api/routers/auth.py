@@ -13,7 +13,7 @@ from app.core.auth import (
 )
 from app.core.deps import get_db
 from app.models.customer import Customer
-from app.models.user_role import UserRole, ROLE_EDITOR, ROLE_PO, ROLE_ADMIN
+from app.models.user_role import UserRole, ROLE_EDITOR, ROLE_PO, ROLE_ADMIN, ROLE_GALLERY_OPERATOR
 from app.models.admin_credential import AdminCredential
 from app.services.admin_auth_service import verify_admin_password
 from app.core.audit import audit_event
@@ -112,6 +112,79 @@ async def login(
         path="/api/v1/auth/login",
         outcome="ok",
         extra={"client_ip": client_ip, "role": ROLE_ADMIN},
+    )
+    return TokenPair(
+        access_token=create_access_token(payload),
+        refresh_token=create_refresh_token(payload),
+        token_type="bearer",
+    )
+
+
+
+@router.post("/operator-login", response_model=TokenPair)
+async def operator_login(
+    request: AdminLoginRequest,
+    http_request: Request,
+    db: Session = Depends(get_db),
+):
+    """Production gallery-operator login using separately provisioned credentials."""
+    forwarded = http_request.headers.get("x-forwarded-for")
+    client_ip = forwarded.split(",")[0].strip() if forwarded else (
+        http_request.client.host if http_request.client else "unknown"
+    )
+    username = request.username.strip()
+    bf_key = make_key(client_ip, username.lower())
+    remaining = is_locked(bf_key)
+    if remaining is not None:
+        audit_event(
+            "gallery_operator_login", customer_id=username,
+            path="/api/v1/auth/operator-login", outcome="denied",
+            detail="brute_force_lockout",
+            extra={"retry_after": remaining, "client_ip": client_ip},
+        )
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Too many failed attempts. Retry after {remaining}s.",
+            headers={"Retry-After": str(remaining)},
+        )
+    credential = db.query(AdminCredential).filter(AdminCredential.username == username).first()
+    if credential is None or not verify_admin_password(credential, request.password):
+        lockout = record_failure(bf_key)
+        audit_event(
+            "gallery_operator_login", customer_id=username,
+            path="/api/v1/auth/operator-login", outcome="denied",
+            detail="invalid_credentials",
+            extra={"client_ip": client_ip, "lockout": lockout},
+        )
+        if lockout is not None:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Too many failed attempts. Retry after {lockout}s.",
+                headers={"Retry-After": str(lockout)},
+            )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    role = db.query(UserRole).filter(
+        UserRole.subject_id == credential.subject_id,
+        UserRole.role == ROLE_GALLERY_OPERATOR,
+    ).first()
+    if role is None:
+        audit_event(
+            "gallery_operator_login", customer_id=credential.subject_id,
+            path="/api/v1/auth/operator-login", outcome="denied",
+            detail="gallery_operator_role_missing",
+            extra={"client_ip": client_ip},
+        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Gallery operator role is not assigned")
+    clear_failures(bf_key)
+    payload = {"sub": credential.subject_id}
+    audit_event(
+        "gallery_operator_login", customer_id=credential.subject_id,
+        path="/api/v1/auth/operator-login", outcome="ok",
+        extra={"client_ip": client_ip, "role": ROLE_GALLERY_OPERATOR},
     )
     return TokenPair(
         access_token=create_access_token(payload),

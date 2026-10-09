@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 
 from app.core.rate_limit import RateLimitMiddleware
 from app.database import init_db, SessionLocal
-from app.services.admin_auth_service import ensure_admin_account
+from app.services.admin_auth_service import ensure_admin_account, ensure_gallery_operator_account
 
 from app.api.routers import (
     auth_router, products_router, duplicate_checks_router, customers_router, cases_router,
@@ -43,6 +43,7 @@ async def lifespan(app: FastAPI):
     db = SessionLocal()
     try:
         ensure_admin_account(db)
+        ensure_gallery_operator_account(db)
     finally:
         db.close()
     yield

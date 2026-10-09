@@ -4,7 +4,7 @@ from typing import Set
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.deps import get_current_customer_id, get_db
-from app.models.user_role import VALID_ROLES, UserRole
+from app.models.user_role import VALID_ROLES, UserRole, ROLE_GALLERY_OPERATOR, ROLE_ADMIN
 
 def get_roles_for_subject(db: Session, subject_id: str) -> Set[str]:
     rows = db.query(UserRole).filter(UserRole.subject_id == subject_id).all()
@@ -30,3 +30,8 @@ def require_any_role(*allowed: str):
             )
         return subject_id, roles
     return _checker
+
+
+def is_gallery_operator_or_admin(roles: Set[str]) -> bool:
+    """True only for server-resolved operational roles, never client-supplied claims."""
+    return bool(roles.intersection({ROLE_GALLERY_OPERATOR, ROLE_ADMIN}))

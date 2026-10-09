@@ -5,7 +5,7 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from app.models.admin_credential import AdminCredential
-from app.models.user_role import UserRole, ROLE_ADMIN
+from app.models.user_role import UserRole, ROLE_ADMIN, ROLE_GALLERY_OPERATOR
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -52,3 +52,44 @@ def ensure_admin_account(db: Session) -> AdminCredential | None:
 
 def verify_admin_password(credential: AdminCredential, password: str) -> bool:
     return pwd_context.verify(password, credential.password_hash)
+
+
+def ensure_gallery_operator_account(db: Session) -> AdminCredential | None:
+    """Provision a separate gallery-operator login only when explicit credentials are configured."""
+    username = os.getenv("HBI_GALLERY_OPERATOR_USERNAME")
+    password = os.getenv("HBI_GALLERY_OPERATOR_PASSWORD")
+    if not username or not password:
+        return None
+    username = username.strip()
+    subject_id = os.getenv("HBI_GALLERY_OPERATOR_SUBJECT", "USR_GALLERY_OPERATOR")
+    credential = db.query(AdminCredential).filter(AdminCredential.username == username).first()
+    if credential is not None:
+        admin_role = db.query(UserRole).filter(
+            UserRole.subject_id == credential.subject_id, UserRole.role == ROLE_ADMIN
+        ).first()
+        if admin_role is not None:
+            raise ValueError("Gallery operator username must be different from the Admin username.")
+        credential.subject_id = subject_id
+        credential.password_hash = pwd_context.hash(password)
+    else:
+        credential = AdminCredential(
+            credential_id=f"GALLERY-CRED-{uuid.uuid4().hex[:12]}",
+            subject_id=subject_id,
+            username=username,
+            password_hash=pwd_context.hash(password),
+        )
+        db.add(credential)
+    if db.query(UserRole).filter(
+        UserRole.subject_id == subject_id, UserRole.role == ROLE_ADMIN
+    ).first() is not None:
+        raise ValueError("Gallery operator subject must not also be an Admin subject.")
+    role = db.query(UserRole).filter(
+        UserRole.subject_id == subject_id, UserRole.role == ROLE_GALLERY_OPERATOR
+    ).first()
+    if role is None:
+        db.add(UserRole(
+            user_role_id=f"UR-{subject_id}-{ROLE_GALLERY_OPERATOR}",
+            subject_id=subject_id, role=ROLE_GALLERY_OPERATOR,
+        ))
+    db.commit()
+    return credential
