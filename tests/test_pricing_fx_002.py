@@ -104,3 +104,28 @@ def test_current_sale_price_stays_unavailable_without_fx(client, db_session):
     assert response.json()["current_fx_rate_usd_to_irr"] is None
     assert response.json()["current_sale_price_irr"] is None
     assert response.json()["current_sale_price_toman"] is None
+
+
+
+def test_operational_fx_prefers_latest_rate_when_written_in_same_second(db_session, monkeypatch):
+    from datetime import datetime as RealDateTime
+
+    timestamps = iter([
+        RealDateTime(2026, 10, 9, 12, 0, 0, 100_000),
+        RealDateTime(2026, 10, 9, 12, 0, 0, 900_000),
+    ])
+
+    class FixedDateTime:
+        @staticmethod
+        def utcnow():
+            return next(timestamps)
+
+    monkeypatch.setattr("app.services.operational_fx_service.datetime", FixedDateTime)
+    fx = OperationalFxService(db_session)
+
+    fx.set_rate(1_000_000.0, note="same-second-first")
+    db_session.commit()
+    fx.set_rate(1_100_000.0, note="same-second-second")
+    db_session.commit()
+
+    assert fx.get_current_rate() == 1_100_000.0
