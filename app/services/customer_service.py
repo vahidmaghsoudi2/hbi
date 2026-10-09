@@ -12,6 +12,18 @@ def _new_customer_id(prefix: str = "CUST") -> str:
     return f"{prefix}_{datetime.now().strftime('%Y%m%d%H%M%S%f')}_{uuid.uuid4().hex[:6]}"
 
 
+
+def normalize_customer_name(name: str) -> str:
+    """Normalize display name for identity comparison.
+
+    Schema limitation: Customer has a single `name` column (no separate
+    family_name/surname). Product rule requires mobile + family-name match;
+    without a structured surname field we compare the full normalized name
+    and refuse silent rebind on any difference.
+    """
+    return " ".join((name or "").strip().split()).casefold()
+
+
 class CustomerService(BaseService[Customer, CustomerRepository]):
     def __init__(self, db: Session):
         super().__init__(CustomerRepository(db), db)
@@ -92,6 +104,11 @@ class CustomerService(BaseService[Customer, CustomerRepository]):
 
         existing = self.find_by_mobile(mobile)
         if existing:
+            if normalize_customer_name(existing.name) != normalize_customer_name(name):
+                raise ValueError(
+                    "Customer identity conflict: mobile matches an existing record "
+                    "but the name differs; silent rebind is not allowed"
+                )
             return self.repository.update(existing.customer_id, **fields) or existing
 
         return self.register_customer(name=name, mobile=mobile, **fields)
