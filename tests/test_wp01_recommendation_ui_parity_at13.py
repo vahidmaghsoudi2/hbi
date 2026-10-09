@@ -16,12 +16,12 @@ def _source() -> str:
 def test_at13_initial_recommendation_limit_is_five():
     source = _source()
     assert "const INITIAL_RECOMMENDATION_LIMIT = 5;" in source
-    assert "recs.slice(0, showAllRecommendations ? recs.length : INITIAL_RECOMMENDATION_LIMIT)" in source
+    assert "eligibleRecs.slice(0, showAllRecommendations ? eligibleRecs.length : INITIAL_RECOMMENDATION_LIMIT)" in source
 
 
 def test_at13_show_more_exists_only_when_more_than_five_results():
     source = _source()
-    assert "recs.length > INITIAL_RECOMMENDATION_LIMIT && !showAllRecommendations" in source
+    assert "eligibleRecs.length > INITIAL_RECOMMENDATION_LIMIT && !showAllRecommendations" in source
     assert "setShowAllRecommendations(true)" in source
 
 

@@ -279,6 +279,43 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             return "INELIGIBLE_PENDING_REVIEW"
         return "ELIGIBLE"
 
+    def _primary_exclusion_reason(
+        self,
+        engine_result: Dict[str, Any],
+        decision_state: Dict[str, Any],
+        evidence_score: float,
+        product_unknowns: Optional[List[Dict[str, Any]]] = None,
+    ) -> str:
+        """Return the first existing eligibility gate that rejected this product.
+
+        Gate order intentionally mirrors _map_eligibility; this records the reason
+        without changing eligibility, scoring, ranking, or gate behavior.
+        """
+        product_unknowns = product_unknowns or []
+        if any(u.get("unknown_priority") == "CRITICAL_UNKNOWN" for u in product_unknowns):
+            return "CRITICAL_PRODUCT_UNKNOWN"
+        if any(u.get("unknown_priority") == "CRITICAL_UNKNOWN" for u in decision_state.get("unknowns", [])):
+            return "CRITICAL_CASE_UNKNOWN"
+        if decision_state.get("medical_context_active"):
+            return "MEDICAL_CONTEXT_REVIEW_REQUIRED"
+        if engine_result.get("claim_boundary_violations"):
+            return "CLAIM_BOUNDARY_VIOLATION"
+        if any(
+            c.get("severity") in (ConflictSeverity.HIGH.value, ConflictSeverity.CRITICAL.value)
+            for c in (engine_result.get("conflicts") or [])
+        ):
+            return "HIGH_CRITICAL_CONFLICT"
+        if not decision_state.get("needs"):
+            return "NO_CANONICAL_NEED"
+        db = getattr(self, "db", None)
+        case = db.get(Case, decision_state.get("case_id")) if db is not None else None
+        if case is not None and (case.case_type or "").strip().upper() == "SKIN":
+            if not decision_state.get("consultation_evidence_ready"):
+                return "SKIN_CONSULTATION_EVIDENCE_MISSING"
+        if evidence_score <= 0.0:
+            return "NO_APPROVED_EVIDENCE"
+        return "INELIGIBLE_REASON_UNRESOLVED"
+
     def _stable_recommendation_id(self, case_id: str, product_id: str) -> str:
         return f"rec_{case_id}_{product_id}"
 
@@ -406,12 +443,27 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 f"ambiguous_need_factors={len(decision_state.get('ambiguous_need_factors') or [])} | "
                 f"profile_fact_trace={json.dumps(profile_fact_context, ensure_ascii=False, sort_keys=True)}"
             )
+            exclusion_reasons = ""
             if eligibility != "ELIGIBLE":
+                primary_reason = self._primary_exclusion_reason(
+                    engine_result, decision_state, evidence_score,
+                    product_unknowns=product_unknowns,
+                )
+                exclusion_reasons = json.dumps([primary_reason], ensure_ascii=False)
+                # Keep a stable internal record for this evaluated candidate. It is
+                # deliberately not added to the returned final recommendation list.
+                self._upsert_current_recommendation(
+                    case_id=case_id, product_id=product.product_id, need_match=need_match,
+                    evidence_score=evidence_score, eligibility=eligibility, ranking_score=final_score,
+                    ranking_reasons=ranking_reasons, exclusion_reasons=exclusion_reasons,
+                    evidence_refs=trace_evidence_refs, warnings=trace_warnings,
+                )
+                kept_product_ids.add(product.product_id)
                 continue
             rec = self._upsert_current_recommendation(
                 case_id=case_id, product_id=product.product_id, need_match=need_match,
                 evidence_score=evidence_score, eligibility=eligibility, ranking_score=final_score,
-                ranking_reasons=ranking_reasons, exclusion_reasons="",
+                ranking_reasons=ranking_reasons, exclusion_reasons=exclusion_reasons,
                 evidence_refs=trace_evidence_refs, warnings=trace_warnings,
             )
             kept_product_ids.add(product.product_id)

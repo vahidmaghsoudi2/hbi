@@ -132,8 +132,8 @@ def test_eligibility_gate_rejects_candidate_before_ranking_result_is_accepted():
     assert eligibility == "ELIGIBLE"
 
 
-def test_generate_path_does_not_persist_gated_candidate():
-    """Non-ELIGIBLE candidates must not be returned or persisted from generate."""
+def test_generate_path_persists_gated_candidate_but_does_not_return_it():
+    """Non-ELIGIBLE candidates are retained internally but not returned as recommendations."""
     service = _service()
 
     # RecommendationService wires real repository classes; replace collaborators
@@ -174,5 +174,8 @@ def test_generate_path_does_not_persist_gated_candidate():
     )
 
     assert result == []
-    service.repository.create.assert_not_called()
-    service.repository.find_by_case_and_product.assert_not_called()
+    service.repository.create.assert_called_once()
+    kwargs = service.repository.create.call_args.kwargs
+    assert kwargs["eligibility_status"] == "INELIGIBLE_PENDING_REVIEW"
+    assert kwargs["exclusion_reasons"] == '["NO_CANONICAL_NEED"]'
+    service.repository.find_by_case_and_product.assert_called_once_with("CASE-GATE", "P-1")

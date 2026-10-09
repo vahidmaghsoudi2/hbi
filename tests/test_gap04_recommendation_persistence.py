@@ -144,3 +144,66 @@ def test_gap03_oos_still_creates_no_recommendation(db_session):
     assert recs == []
     assert db_session.query(Recommendation).count() == 0
     assert svc.reasoning_engine.run.call_count == 0
+
+
+def test_evaluated_ineligible_candidate_is_persisted_with_reason_and_survives_regeneration(db_session):
+    import json
+
+    _seed_case_and_products(db_session, ["PROD_REJECTED"])
+    svc = _svc_with_real_db(db_session)
+    p = MagicMock()
+    p.product_id = "PROD_REJECTED"
+    svc.product_repo.find_by_identity_status_and_active.return_value = [p]
+    inv = MagicMock()
+    inv.quantity_available = 2
+    svc.inventory_repo.find_by_product.return_value = inv
+    svc.pk_repo.find_by_product.return_value = MagicMock(known_use_cases="dry skin")
+    svc.evidence_repo.find_by_product.return_value = [
+        MagicMock(qa_status="PENDING", conflict_status="NONE", source_type="SECONDARY", evidence_id="EV-PENDING")
+    ]
+    svc.reasoning_engine.run.return_value = {
+        "unknowns": [], "conflicts": [], "claim_boundary_violations": [],
+        "final_score": 0.0, "rationale": "evidence not approved",
+        "evidence_refs": ["EV-PENDING"], "warnings": ["Evidence requires QA"],
+    }
+
+    first = svc.generate_recommendations("CASE1", {"concerns": "dry skin"})
+    assert first == []
+    row = db_session.query(Recommendation).filter_by(case_id="CASE1", product_id="PROD_REJECTED").one()
+    first_id = row.recommendation_id
+    assert row.eligibility_status == "INELIGIBLE_PENDING_REVIEW"
+    assert json.loads(row.exclusion_reasons) == ["NO_APPROVED_EVIDENCE"]
+    assert json.loads(row.warnings) == ["Evidence requires QA"]
+    assert json.loads(row.evidence_refs) == ["EV-PENDING"]
+
+    second = svc.generate_recommendations("CASE1", {"concerns": "dry skin"})
+    assert second == []
+    rows = db_session.query(Recommendation).filter_by(case_id="CASE1", product_id="PROD_REJECTED").all()
+    assert len(rows) == 1
+    assert rows[0].recommendation_id == first_id
+    assert json.loads(rows[0].exclusion_reasons) == ["NO_APPROVED_EVIDENCE"]
+
+
+def test_evaluated_ineligible_candidate_records_first_gate_without_changing_status(db_session):
+    import json
+
+    _seed_case_and_products(db_session, ["PROD_MEDICAL"])
+    svc = _svc_with_real_db(db_session)
+    p = MagicMock()
+    p.product_id = "PROD_MEDICAL"
+    svc.product_repo.find_by_identity_status_and_active.return_value = [p]
+    inv = MagicMock()
+    inv.quantity_available = 1
+    svc.inventory_repo.find_by_product.return_value = inv
+    svc.pk_repo.find_by_product.return_value = MagicMock(known_use_cases="dry skin")
+    svc.evidence_repo.find_by_product.return_value = []
+    svc.reasoning_engine.run.return_value = {
+        "unknowns": [], "conflicts": [], "claim_boundary_violations": [],
+        "final_score": 0.0, "rationale": "medical context gate",
+    }
+
+    recs = svc.generate_recommendations("CASE1", {"concerns": "نیاز به پزشک"})
+    assert recs == []
+    row = db_session.query(Recommendation).filter_by(case_id="CASE1", product_id="PROD_MEDICAL").one()
+    assert row.eligibility_status == "INELIGIBLE_PENDING_REVIEW"
+    assert json.loads(row.exclusion_reasons) == ["MEDICAL_CONTEXT_REVIEW_REQUIRED"]

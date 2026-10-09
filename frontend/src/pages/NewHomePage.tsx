@@ -9,7 +9,7 @@ import {
   customerIntake,
   createGuest,
   generateRecommendations,
-  listRecommendationsByCase,
+  listInternalEvaluationsByCase,
   createSale,
   getTotalSales,
   getCustomerById,
@@ -276,17 +276,22 @@ export default function NewHomePage() {
       return;
     }
     let cancelled = false;
-    void listRecommendationsByCase(storedCaseId, token)
-      .then((list) => {
+    void (async () => {
+      try {
+        // The operator UI reads internal evaluation history through the
+        // role-protected endpoint; the ordinary customer endpoint stays eligible-only.
+        const operatorToken = await ensureProductSession();
+        if (!operatorToken) throw new Error("نشست اپراتور در دسترس نیست.");
+        const list = await listInternalEvaluationsByCase(storedCaseId, operatorToken);
         if (cancelled) return;
         setRecs(Array.isArray(list) ? list : []);
         setRecDone(true);
-      })
-      .catch(() => {
+      } catch {
         if (cancelled) return;
         setRecs([]);
         setRecDone(false);
-      });
+      }
+    })();
     return () => {
       cancelled = true;
     };
@@ -345,6 +350,10 @@ export default function NewHomePage() {
   }
 
   function selectRecommendationForSale(r: RecommendationDTO) {
+    if ((r.eligibility_status ?? r.eligibility ?? "").trim().toUpperCase() !== "ELIGIBLE") {
+      setError("این مورد واجد شرایط پیشنهاد نهایی نیست و قابل انتخاب برای فروش از بخش پیشنهادها نیست.");
+      return;
+    }
     setSaleProductId(r.product_id);
     setSelectedRecommendationId(r.recommendation_id);
     setStatusMsg(`پیشنهاد ${r.recommendation_id} برای فروش انتخاب شد.`);
@@ -392,10 +401,17 @@ export default function NewHomePage() {
         { case_id: newCaseId, customer_profile: { concerns: concernsText, skin_type: skin.join(",") || undefined } },
         currentToken
       );
-      setRecs(Array.isArray(list) ? list : []);
+      const operatorToken = await ensureProductSession();
+      const evaluations = operatorToken
+        ? await listInternalEvaluationsByCase(newCaseId, operatorToken)
+        : list;
+      const eligibleCount = (Array.isArray(evaluations) ? evaluations : []).filter(
+        (r) => (r.eligibility_status ?? r.eligibility ?? "").trim().toUpperCase() === "ELIGIBLE"
+      ).length;
+      setRecs(Array.isArray(evaluations) ? evaluations : []);
       setShowAllRecommendations(false);
       setRecDone(true);
-      setStatusMsg(list?.length ? `${list.length} پیشنهاد آماده است.` : "پیشنهادی با شواهد کافی یافت نشد.");
+      setStatusMsg(eligibleCount ? `${eligibleCount} پیشنهاد واجد شرایط آماده است.` : "پیشنهاد واجد شرایطی با شواهد کافی یافت نشد.");
       setActive("results");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -487,6 +503,22 @@ export default function NewHomePage() {
     } finally {
       setSaleBusy(false);
     }
+  }
+
+  function formatExclusionReason(value: string | null | undefined) {
+    const labels: Record<string, string> = {
+      CRITICAL_PRODUCT_UNKNOWN: "اطلاعات حیاتی محصول نامشخص است",
+      CRITICAL_CASE_UNKNOWN: "اطلاعات حیاتی پرونده نامشخص است",
+      MEDICAL_CONTEXT_REVIEW_REQUIRED: "وجود زمینه پزشکی؛ نیازمند بررسی تخصصی",
+      CLAIM_BOUNDARY_VIOLATION: "محدودیت ادعا نقض شده است",
+      HIGH_CRITICAL_CONFLICT: "تعارض مهم یا بحرانی در شواهد",
+      NO_CANONICAL_NEED: "نیاز استاندارد قابل تشخیص نیست",
+      SKIN_CONSULTATION_EVIDENCE_MISSING: "شواهد مشاوره پوست کامل نیست",
+      NO_APPROVED_EVIDENCE: "شواهد تأییدشده برای پیشنهاد وجود ندارد",
+      INELIGIBLE_REASON_UNRESOLVED: "علت دقیق ردشدن نیازمند بررسی است",
+    };
+    const code = (value ?? "").trim();
+    return (labels[code] ?? code) || "دلیل ثبت نشده";
   }
 
   function formatRecommendationStatus(value: string | null | undefined) {
@@ -839,16 +871,21 @@ export default function NewHomePage() {
 
         {active === "results" && (
           <section className="pro-panel">
-            <h1>پیشنهادها</h1>
+            <h1>پیشنهادهای نهایی برای اپراتور</h1>
+            {(() => {
+              const eligibleRecs = recs.filter((r) => (r.eligibility_status ?? r.eligibility ?? "").trim().toUpperCase() === "ELIGIBLE");
+              const rejectedRecs = recs.filter((r) => (r.eligibility_status ?? r.eligibility ?? "").trim().toUpperCase() !== "ELIGIBLE");
+              return (
+                <>
             {!recDone && <p className="pro-muted">هنوز پیشنهادی گرفته نشده — از مشاوره شروع کنید.</p>}
-            {recDone && recs.length === 0 && (
+            {recDone && eligibleRecs.length === 0 && (
               <div className="pro-empty">
-                <strong>مورد منطبقی یافت نشد.</strong>
-                <p>شواهد کافی نبود؛ سیستم حدس نمی‌زند.</p>
+                <strong>پیشنهاد واجد شرایطی یافت نشد.</strong>
+                <p>موارد ردشده، در صورت وجود، در بخش داخلی زیر برای بررسی ثبت شده‌اند.</p>
               </div>
             )}
             <div className="pro-rec-list">
-              {recs.slice(0, showAllRecommendations ? recs.length : INITIAL_RECOMMENDATION_LIMIT).map((r, i) => {
+              {eligibleRecs.slice(0, showAllRecommendations ? eligibleRecs.length : INITIAL_RECOMMENDATION_LIMIT).map((r, i) => {
                 const product = sellableProducts.find((p) => p.product_id === r.product_id);
                 return (
                   <article key={r.recommendation_id || `${r.product_id}-${i}`} className="pro-rec-card">
@@ -881,13 +918,35 @@ export default function NewHomePage() {
                 );
               })}
             </div>
-            {recs.length > INITIAL_RECOMMENDATION_LIMIT && !showAllRecommendations ? (
+            {eligibleRecs.length > INITIAL_RECOMMENDATION_LIMIT && !showAllRecommendations ? (
               <div className="pro-actions">
                 <button type="button" className="pro-btn-secondary" onClick={() => setShowAllRecommendations(true)}>
-                  نمایش همه پیشنهادها ({recs.length})
+                  نمایش همه پیشنهادها ({eligibleRecs.length})
                 </button>
               </div>
             ) : null}
+            {rejectedRecs.length > 0 ? (
+              <section className="pro-panel" style={{ marginTop: "1rem" }} aria-label="موارد ارزیابی‌شده و ردشده">
+                <h2>سوابق داخلی محصولات ردشده</h2>
+                <p className="pro-muted">این موارد برای بررسی تیم نگهداری می‌شوند و پیشنهاد نهایی نیستند؛ از این بخش امکان انتخاب برای فروش وجود ندارد.</p>
+                <div className="pro-rec-list">
+                  {rejectedRecs.map((r) => (
+                    <article key={r.recommendation_id} className="pro-rec-card">
+                      <div><h3>{sellableProducts.find((p) => p.product_id === r.product_id)?.product_name ?? r.product_id}</h3>
+                        <p className="pro-muted">شناسه محصول: {r.product_id}</p>
+                        <p><strong>دلیل اصلی:</strong> {formatExclusionReason(r.exclusion_reasons?.[0])}</p>
+                        <p className="pro-muted">وضعیت: {formatRecommendationStatus(r.eligibility_status ?? r.eligibility)}</p>
+                        {r.warnings?.length ? <p className="pro-muted">تذکرها: {r.warnings.map((w) => String(w)).join("؛ ")}</p> : null}
+                        <p className="pro-muted">تعداد ارجاعات شواهد: {r.evidence_refs?.length ?? 0}</p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+                </>
+              );
+            })()}
           </section>
         )}
 

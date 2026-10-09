@@ -5,6 +5,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_customer_id
+from app.core.authorization import require_any_role
+from app.models.user_role import ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN
 from app.interface.facades import RecommendationFacade
 from app.models.case import Case
 from app.services.profile_fact_context_service import ProfileFactContextService
@@ -72,7 +74,8 @@ async def generate_recommendations(
     except RuntimeError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    return [_to_dict(d) for d in dtos]
+    # Customer-facing generation contract never exposes internal rejection reasons.
+    return [{k: v for k, v in _to_dict(d).items() if k != "exclusion_reasons"} for d in dtos]
 
 
 @router.get("/{recommendation_id}/trust-trace")
@@ -102,6 +105,26 @@ async def get_recommendations_by_case(
     customer_id: str = Depends(get_current_customer_id),
 ) -> List[dict]:
     _assert_case_owned(db, case_id, customer_id)
+    facade = RecommendationFacade(db)
+    # Ordinary case reads expose only final eligible recommendations and never
+    # expose internal rejection reasons, even if rejected evaluation rows exist.
+    return [
+        {k: v for k, v in _to_dict(d).items() if k != "exclusion_reasons"}
+        for d in facade.find_by_case(case_id)
+        if (getattr(d, "eligibility_status", None) or getattr(d, "eligibility", None) or "").strip().upper() == "ELIGIBLE"
+    ]
+
+
+@router.get("/case/{case_id}/evaluations")
+async def get_internal_evaluations_by_case(
+    case_id: str,
+    db: Session = Depends(get_db),
+    auth=Depends(require_any_role(ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
+) -> List[dict]:
+    # This route is deliberately role-gated and is the only case-list API that
+    # exposes persisted rejected evaluation records and their exclusion reasons.
+    if db.get(Case, case_id) is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Case not found")
     facade = RecommendationFacade(db)
     return [_to_dict(d) for d in facade.find_by_case(case_id)]
 
