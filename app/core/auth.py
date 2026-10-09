@@ -113,10 +113,12 @@ def refresh_access_token(refresh_token: str) -> Optional[str]:
     if payload is None:
         return None
 
-    new_payload = {
-        k: v
-        for k, v in payload.items()
-        if k not in ("exp", "type")
-    }
+    # A refresh token is proof of continued authentication, not a source of
+    # authorization claims. Carry only the stable subject into the new access
+    # token; purpose, staff_session, role, and other claims must never be
+    # promoted across the refresh boundary.
+    subject = payload.get("sub")
+    if not isinstance(subject, str) or not subject:
+        return None
 
-    return create_access_token(new_payload)
+    return create_access_token({"sub": subject})
