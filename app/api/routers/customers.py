@@ -493,13 +493,23 @@ async def get_customer_by_id(
 async def find_customer_by_mobile(
     mobile: str,
     db: Session = Depends(get_db),
-    customer_id: str = Depends(get_current_customer_id),
+    subject_and_roles: tuple = Depends(get_current_subject_and_roles),
 ):
-    if _looks_like_mobile(customer_id) and mobile != customer_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied",
+    subject_id, roles = subject_and_roles
+    if not is_gallery_operator_or_admin(roles):
+        # Customer JWT subjects may be internal IDs (for example CUST_GUEST_*),
+        # so comparing only numeric/mobile-shaped subjects is not an ownership check.
+        svc = CustomerService(db)
+        own_customer = (
+            svc.get_by_id(subject_id)
+            if str(subject_id).startswith("CUST_")
+            else svc.find_by_mobile(subject_id)
         )
+        if own_customer is None or own_customer.mobile != mobile:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied",
+            )
 
     facade = CustomerFacade(db)
     try:
