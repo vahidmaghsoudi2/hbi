@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import LandingPage from "./pages/LandingPage";
 import NewHomePage from "./pages/NewHomePage";
 import CatalogPage from "./pages/CatalogPage";
 import PilotPage from "./pages/PilotPage";
@@ -16,13 +17,15 @@ function AdminGate({ children }: { children: ReactNode }) {
 export default function App() {
   return (
     <Routes>
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<AdminLoginPage />} />
-      <Route path="/" element={<AdminGate><NewHomePage /></AdminGate>} />
+      <Route path="/workspace" element={<AdminGate><NewHomePage /></AdminGate>} />
       <Route path="/catalog" element={<AdminGate><CatalogPage /></AdminGate>} />
       <Route path="/pilot" element={<AdminGate><PilotPage /></AdminGate>} />
       <Route path="/recommendation" element={<AdminGate><RecommendationPage /></AdminGate>} />
       <Route path="/accounting" element={<AdminGate><AccountingHomePage /></AdminGate>} />
       <Route path="/purchase" element={<AdminGate><PurchasePage /></AdminGate>} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
