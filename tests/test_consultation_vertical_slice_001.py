@@ -293,10 +293,21 @@ def test_no_eligible_product_returns_empty_list(client):
 
     listed = client.get(f"/api/v1/recommendations/case/{case_id}", headers=headers)
     assert listed.status_code == 200, listed.text
-    listed_body = listed.json()
-    assert listed_body, "evaluated rejected candidates should remain available for internal review"
-    assert all(item.get("eligibility_status") != "ELIGIBLE" for item in listed_body), listed_body
-    assert all(item.get("exclusion_reasons") for item in listed_body), listed_body
+    # Ordinary case reads must remain ELIGIBLE-only and must not leak internal reasons.
+    assert listed.json() == []
+
+    operator_pair = client.post("/api/v1/auth/pilot-operator-token")
+    assert operator_pair.status_code == 200, operator_pair.text
+    operator_token = operator_pair.json()["access_token"]
+    internal = client.get(
+        f"/api/v1/recommendations/case/{case_id}/evaluations",
+        headers={"Authorization": f"Bearer {operator_token}"},
+    )
+    assert internal.status_code == 200, internal.text
+    internal_body = internal.json()
+    assert internal_body, "evaluated rejected candidates should remain available for internal review"
+    assert all(item.get("eligibility_status") != "ELIGIBLE" for item in internal_body), internal_body
+    assert all(item.get("exclusion_reasons") for item in internal_body), internal_body
 
 
 def test_create_case_for_other_customer_returns_403(client):
