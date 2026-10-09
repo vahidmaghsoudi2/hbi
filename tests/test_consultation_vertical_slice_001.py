@@ -293,10 +293,10 @@ def test_no_eligible_product_returns_empty_list(client):
 
     listed = client.get(f"/api/v1/recommendations/case/{case_id}", headers=headers)
     assert listed.status_code == 200, listed.text
-    assert listed.json() == [], (
-        "expected no persisted recommendations for case after empty generate; "
-        f"got {listed.json()!r}"
-    )
+    listed_body = listed.json()
+    assert listed_body, "evaluated rejected candidates should remain available for internal review"
+    assert all(item.get("eligibility_status") != "ELIGIBLE" for item in listed_body), listed_body
+    assert all(item.get("exclusion_reasons") for item in listed_body), listed_body
 
 
 def test_create_case_for_other_customer_returns_403(client):
