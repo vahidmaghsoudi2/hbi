@@ -61,7 +61,10 @@ def test_medical_context_with_valid_need_is_hard_gated():
     result = service.generate_recommendations("CASE_MEDICAL", profile)
 
     assert result == [], "Medical Context must hard-gate even when Need is valid"
-    service.repository.create.assert_not_called()
+    service.repository.create.assert_called_once()
+    kwargs = service.repository.create.call_args.kwargs
+    assert kwargs["eligibility_status"] == "INELIGIBLE_PENDING_REVIEW"
+    assert kwargs["exclusion_reasons"] == '["MEDICAL_CONTEXT_REVIEW_REQUIRED"]'
     db.delete.assert_not_called()
 
 
