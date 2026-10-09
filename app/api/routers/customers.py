@@ -323,6 +323,19 @@ async def quick_intake(
     if data.consent not in (0, 1):
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="consent must be 0 or 1")
 
+    # Preserve the legacy mobile-subject guard for non-staff customer tokens.
+    if (
+        mobile
+        and not data.guest
+        and _looks_like_mobile(mobile)
+        and _looks_like_mobile(customer_id)
+        and mobile != customer_id
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Customer identity mismatch",
+        )
+
     try:
         authenticated = svc.get_by_id(customer_id)
         mobile_owner = svc.find_by_mobile(mobile) if mobile and not data.guest else None
