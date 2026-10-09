@@ -75,7 +75,10 @@ def test_medical_context_still_hard_gates_with_valid_need():
         {"concerns": "dry skin", "medical_notes": "تحت درمان پزشک"},
     )
     assert result == [], "Medical Context + valid Need must still hard-gate"
-    svc.repository.create.assert_not_called()
+    svc.repository.create.assert_called_once()
+    kwargs = svc.repository.create.call_args.kwargs
+    assert kwargs["eligibility_status"] == "INELIGIBLE_PENDING_REVIEW"
+    assert kwargs["exclusion_reasons"] == '["MEDICAL_CONTEXT_REVIEW_REQUIRED"]'
 
 
 def test_override_still_does_not_mutate_recommendation(db_session):
