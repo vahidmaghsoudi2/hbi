@@ -7,12 +7,13 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import get_db
 from app.core.authorization import require_any_role
-from app.models.user_role import ROLE_ADMIN
+from app.models.user_role import ROLE_ADMIN, ROLE_GALLERY_OPERATOR
 from app.services.operational_fx_service import OperationalFxService
 
 router = APIRouter()
 
 _require_fx_admin = require_any_role(ROLE_ADMIN)
+_require_fx_staff_read = require_any_role(ROLE_ADMIN, ROLE_GALLERY_OPERATOR)
 
 
 def _to_dict(obj):
@@ -33,7 +34,10 @@ class FxSetRequest(BaseModel):
 
 
 @router.get("/current")
-async def get_current_fx(db: Session = Depends(get_db)):
+async def get_current_fx(
+    db: Session = Depends(get_db),
+    _authz: tuple = Depends(_require_fx_staff_read),
+):
     svc = OperationalFxService(db)
     row = svc.get_current()
     if not row:
