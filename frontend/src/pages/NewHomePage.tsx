@@ -248,6 +248,7 @@ export default function NewHomePage() {
     if (cached) return cached;
     const pair = await pilotOperatorToken();
     sessionStorage.setItem("hbi_operator_access_token", pair.access_token);
+    sessionStorage.setItem("hbi_operator_refresh_token", pair.refresh_token);
     setProductToken(pair.access_token);
     return pair.access_token;
   }
@@ -289,6 +290,7 @@ export default function NewHomePage() {
     if (cached) return cached;
     const pair = await pilotPoToken();
     sessionStorage.setItem("hbi_po_access_token", pair.access_token);
+    sessionStorage.setItem("hbi_po_refresh_token", pair.refresh_token);
     return pair.access_token;
   }
 
