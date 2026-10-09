@@ -431,8 +431,8 @@ async def quick_intake(
             )
             case_payload = {
                 "case_id": case.case_id,
-                "case_type": case.case_type,
                 "customer_id": case.customer_id,
+                "case_type": case.case_type,
             }
 
         db.commit()
