@@ -130,8 +130,14 @@ export default function NewHomePage() {
   }, [loadProducts]);
 
   const loadSellableProducts = useCallback(async () => {
+    const staffToken = sessionStorage.getItem("hbi_gallery_access_token")
+      || sessionStorage.getItem("hbi_admin_access_token");
+    if (!staffToken) {
+      setSellableProducts([]);
+      return;
+    }
     try {
-      const data = await listProducts();
+      const data = await listProducts(staffToken);
       setSellableProducts(Array.isArray(data) ? data : []);
     } catch {
       setSellableProducts([]);
@@ -263,7 +269,7 @@ export default function NewHomePage() {
       setToken(pair.access_token);
       setOperatorPassword("");
       setStatusMsg("ورود اپراتور گالری موفق بود.");
-      await loadProducts();
+      await Promise.all([loadProducts(), loadSellableProducts()]);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
@@ -279,7 +285,7 @@ export default function NewHomePage() {
       setAdminToken(pair.access_token);
       setAdminPassword("");
       setStatusMsg("ورود مسئول مالی موفق بود. ثبت فروش با این نشست انجام می‌شود.");
-      await refreshSalesTotal();
+      await Promise.all([refreshSalesTotal(), loadSellableProducts()]);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
