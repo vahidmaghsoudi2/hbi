@@ -406,11 +406,13 @@ export default function NewHomePage() {
           open_case: true,
         } as CustomerIntakeRequest,
         currentToken
-      )) as { case?: { case_id?: string }; customer?: { customer_id?: string } };
+      )) as { case?: { case_id?: string }; customer?: { customer_id?: string; name?: string; mobile?: string | null } };
       if (intake?.customer?.customer_id) {
         sessionStorage.setItem("hbi_customer_id", intake.customer.customer_id);
         setCustomerId(intake.customer.customer_id);
       }
+      if (intake?.customer?.name) setName(intake.customer.name);
+      if (intake?.customer?.mobile) setMobile(intake.customer.mobile);
       const newCaseId = intake?.case?.case_id;
       if (!newCaseId) throw new Error("پرونده مشاوره ساخته نشد.");
       sessionStorage.setItem("hbi_case_id", newCaseId);
@@ -447,7 +449,7 @@ export default function NewHomePage() {
     // Inventory sell-read requires Operator/Admin — not the customer JWT.
     setSalePrice(null);
     setSaleFxRate(null);
-    void ensureProductSession()
+    void ensureOperatorSession()
       .then(async (operatorToken) => {
         if (cancelled || !operatorToken) throw new Error("operator session unavailable");
         const [inv, fx] = await Promise.all([

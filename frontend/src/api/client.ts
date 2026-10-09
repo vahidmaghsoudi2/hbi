@@ -175,7 +175,7 @@ export function getProductEvidence(
   return request<EvidenceDTO[]>(`/evidence/?product_id=${encodeURIComponent(productId)}`, {}, token);
 }
 
-/** POST /api/v1/sales/ — requires auth; customer_id must match token identity */
+/** POST /api/v1/sales/ — Admin-only; body customer_id identifies the buyer, not the Admin subject. */
 export function createSale(
   body: SaleCreateRequest,
   token: string
