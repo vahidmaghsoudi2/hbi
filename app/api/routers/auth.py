@@ -10,8 +10,11 @@ from app.core.auth import (
     refresh_access_token,
     create_access_token,
     create_refresh_token,
+    create_staff_customer_access_token,
+    STAFF_CUSTOMER_ACCESS_EXPIRE_MINUTES,
 )
 from app.core.deps import get_db
+from app.core.authorization import require_any_role
 from app.models.customer import Customer
 from app.models.user_role import UserRole, ROLE_EDITOR, ROLE_PO, ROLE_ADMIN
 from app.models.admin_credential import AdminCredential
@@ -29,6 +32,18 @@ class PilotTokenRequest(BaseModel):
 class AdminLoginRequest(BaseModel):
     username: str
     password: str
+
+
+class StaffCustomerSessionRequest(BaseModel):
+    customer_id: str
+
+
+class StaffCustomerSessionResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int
+    customer_id: str
+    purpose: str = "staff_customer_session"
 
 
 @router.post("/login", response_model=TokenPair)
@@ -306,4 +321,43 @@ async def refresh(request: RefreshRequest):
         access_token=new_access,
         refresh_token=request.refresh_token,
         token_type="bearer",
+    )
+
+
+
+@router.post("/staff-customer-session", response_model=StaffCustomerSessionResponse)
+async def staff_customer_session(
+    request: StaffCustomerSessionRequest,
+    db: Session = Depends(get_db),
+    admin=Depends(require_any_role(ROLE_ADMIN)),
+):
+    """Admin-only: issue a short-lived access token bound to one customer."""
+    admin_sub = admin[0] if isinstance(admin, tuple) and admin else "admin"
+    customer = db.query(Customer).filter(Customer.customer_id == request.customer_id).first()
+    if customer is None:
+        audit_event(
+            "staff_customer_session",
+            customer_id=request.customer_id,
+            path="/api/v1/auth/staff-customer-session",
+            outcome="denied",
+            detail="customer_not_found",
+            extra={"issued_by": admin_sub},
+        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
+
+    access = create_staff_customer_access_token(
+        customer_id=request.customer_id,
+        issued_by=str(admin_sub),
+    )
+    audit_event(
+        "staff_customer_session",
+        customer_id=request.customer_id,
+        path="/api/v1/auth/staff-customer-session",
+        outcome="ok",
+        extra={"issued_by": admin_sub, "ttl_minutes": STAFF_CUSTOMER_ACCESS_EXPIRE_MINUTES},
+    )
+    return StaffCustomerSessionResponse(
+        access_token=access,
+        expires_in=STAFF_CUSTOMER_ACCESS_EXPIRE_MINUTES * 60,
+        customer_id=request.customer_id,
     )

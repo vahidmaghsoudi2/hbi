@@ -26,6 +26,35 @@ REFRESH_TOKEN_EXPIRE_DAYS = int(
     os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7")
 )
 
+STAFF_CUSTOMER_SESSION_PURPOSE = "staff_customer_session"
+STAFF_CUSTOMER_ACCESS_EXPIRE_MINUTES = int(
+    os.getenv("STAFF_CUSTOMER_ACCESS_EXPIRE_MINUTES", "15")
+)
+
+
+def create_staff_customer_access_token(
+    *,
+    customer_id: str,
+    issued_by: str,
+) -> str:
+    """Short-lived access token for Admin-mediated customer ownership.
+
+    - sub is the target customer (preserves existing ownership checks)
+    - purpose and issued_by are explicit audit claims
+    - no refresh token is issued by the staff-customer-session endpoint
+    - TTL is shorter than ordinary access tokens by default (15m)
+    """
+    payload = {
+        "sub": customer_id,
+        "purpose": STAFF_CUSTOMER_SESSION_PURPOSE,
+        "issued_by": issued_by,
+        "staff_session": True,
+    }
+    return create_access_token(
+        payload,
+        expires_delta=timedelta(minutes=STAFF_CUSTOMER_ACCESS_EXPIRE_MINUTES),
+    )
+
 
 class TokenPair(BaseModel):
     access_token: str

@@ -47,29 +47,34 @@ def test_customer_create_and_persist_via_intake(client, db_session):
 
 
 def test_customer_update_concerns_same_mobile(client, db_session):
-    client.post(
+    first = client.post(
         "/api/v1/customers/intake",
         headers=_auth(),
         json={
             "name": "سارا CP01",
+            "family_name": "احمدی",
             "mobile": "09130000002",
             "concerns": "آبرسان",
             "consent": 1,
             "open_case": False,
         },
     )
+    assert first.status_code == 201, first.text
+    customer_id = first.json()["customer"]["customer_id"]
+
     r2 = client.post(
         "/api/v1/customers/intake",
-        headers=_auth(),
+        headers=_auth(customer_id),
         json={
             "name": "سارا CP01",
+            "family_name": "احمدی",
             "mobile": "09130000002",
             "concerns": "ضدآفتاب, لک",
             "consent": 1,
             "open_case": False,
         },
     )
-    assert r2.status_code == 201
+    assert r2.status_code == 201, r2.text
     c = r2.json()["customer"]
     assert c["concerns"] == "ضدآفتاب, لک"
     svc = CustomerService(db_session)

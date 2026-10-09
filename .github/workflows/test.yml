@@ -2,9 +2,15 @@ name: HBI CI
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+      - feature/staff-auth-consultation-sale
+      - fix/staff-auth-consultation-sale-identity
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
+      - feature/staff-auth-consultation-sale
+      - fix/staff-auth-consultation-sale-identity
 
 jobs:
   test:
@@ -13,6 +19,8 @@ jobs:
     steps:
       - name: Checkout exact commit
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -57,6 +65,8 @@ jobs:
     steps:
       - name: Checkout exact commit
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up Python
         uses: actions/setup-python@v5

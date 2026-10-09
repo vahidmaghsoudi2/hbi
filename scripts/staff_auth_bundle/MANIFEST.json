@@ -1,0 +1,32 @@
+[
+  {
+    "path": "app/api/routers/auth.py",
+    "blob": "app__api__routers__auth.py.zlib.b64",
+    "sha256": "53c9c25ba9f8a9a13ee0b2f2f73569d5ec68955f9115a5d9162fe863ea189803",
+    "bytes": 13327
+  },
+  {
+    "path": "app/api/routers/customers.py",
+    "blob": "app__api__routers__customers.py.zlib.b64",
+    "sha256": "6c33874cfaba73000b9e8cf910850d7bd8537a83ae474bff0e349d30c2ea0c15",
+    "bytes": 21134
+  },
+  {
+    "path": "frontend/src/api/client.ts",
+    "blob": "frontend__src__api__client.ts.zlib.b64",
+    "sha256": "458d97f1ed1da71e518c9660fe243f48ce5bd7107e3ce27c6bc55741cb1c4304",
+    "bytes": 14459
+  },
+  {
+    "path": "frontend/src/pages/NewHomePage.tsx",
+    "blob": "frontend__src__pages__NewHomePage.tsx.zlib.b64",
+    "sha256": "b4fc7ab92915a12778b7246c3d8589a2bb2528cb50837068b5451ad2e26051b5",
+    "bytes": 49247
+  },
+  {
+    "path": "tests/test_staff_auth_consultation_sale_path.py",
+    "blob": "tests__test_staff_auth_consultation_sale_path.py.zlib.b64",
+    "sha256": "1bf87bbe8416ad1820d251e79c2b4526297a36cb42db93c1fd18f8b4ad9fb34e",
+    "bytes": 12584
+  }
+]

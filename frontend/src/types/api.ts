@@ -11,6 +11,19 @@ export interface TokenPair {
   token_type: string;
 }
 
+export interface AdminLoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface StaffCustomerSessionResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  customer_id: string;
+  purpose: "staff_customer_session";
+}
+
 /** POST /api/v1/auth/pilot-token body */
 export interface PilotTokenRequest {
   customer_id: string;
@@ -83,6 +96,7 @@ export interface ProductDTO {
 export interface CustomerSearchResult {
   customer_id: string;
   name: string;
+  family_name?: string | null;
   mobile?: string | null;
   consent_to_store_data?: number;
   concerns?: string | null;
@@ -92,6 +106,7 @@ export interface CustomerSearchResult {
 /** POST /api/v1/customers/intake request */
 export interface CustomerIntakeRequest {
   name: string;
+  family_name?: string;
   mobile?: string;
   concerns?: string;
   consent: number;
