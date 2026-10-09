@@ -1,7 +1,7 @@
 """Integration checks for the separate gallery-operator identity and access boundary."""
 from __future__ import annotations
 
-from app.core.auth import create_access_token
+from app.core.auth import create_access_token, create_refresh_token
 from app.models.admin_credential import AdminCredential
 from app.models.customer import Customer
 from app.models.user_role import UserRole, ROLE_ADMIN, ROLE_GALLERY_OPERATOR
@@ -124,6 +124,16 @@ def test_customer_token_issuance_is_disabled(client, db_session):
     )
     assert response.status_code == 403, response.text
 
+
+
+def test_customer_refresh_token_cannot_restore_system_access(client, db_session):
+    db_session.add(Customer(customer_id="CUST-REFRESH-DENIED", name="مشتری بدون دسترسی"))
+    db_session.commit()
+    response = client.post(
+        "/api/v1/auth/refresh",
+        json={"refresh_token": create_refresh_token({"sub": "CUST-REFRESH-DENIED"})},
+    )
+    assert response.status_code == 403, response.text
 
 def test_unassigned_customer_identity_cannot_access_authenticated_api(client, db_session):
     db_session.add(Customer(customer_id="CUST-NO-ROLE", name="مشتری بدون نقش"))
