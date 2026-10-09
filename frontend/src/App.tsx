@@ -7,6 +7,7 @@ import RecommendationPage from "./pages/RecommendationPage";
 import AccountingHomePage from "./pages/AccountingHomePage";
 import PurchasePage from "./pages/PurchasePage";
 import AdminLoginPage from "./pages/AdminLoginPage";
+import PricingFxPage from "./pages/PricingFxPage";
 
 function AdminGate({ children }: { children: ReactNode }) {
   const token = sessionStorage.getItem("hbi_admin_access_token");
@@ -23,6 +24,7 @@ export default function App() {
       <Route path="/recommendation" element={<AdminGate><RecommendationPage /></AdminGate>} />
       <Route path="/accounting" element={<AdminGate><AccountingHomePage /></AdminGate>} />
       <Route path="/purchase" element={<AdminGate><PurchasePage /></AdminGate>} />
+      <Route path="/pricing-fx" element={<AdminGate><PricingFxPage /></AdminGate>} />
     </Routes>
   );
 }
