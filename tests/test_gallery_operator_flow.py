@@ -106,6 +106,16 @@ def test_gallery_operator_cannot_create_financial_sale(client, db_session):
     assert response.status_code == 403
 
 
+def test_customer_mobile_lookup_is_owner_scoped(client, db_session):
+    db_session.add_all([
+        Customer(customer_id="CUST-MOBILE-OWNER", name="مالک", mobile="09135550201"),
+        Customer(customer_id="CUST-MOBILE-OTHER", name="دیگری", mobile="09135550202"),
+    ])
+    db_session.commit()
+    response = client.get("/api/v1/customers/mobile/09135550202", headers=_headers("CUST-MOBILE-OWNER"))
+    assert response.status_code == 403, response.text
+
+
 def test_customer_search_requires_gallery_operator_role(client):
     response = client.get("/api/v1/customers/search?q=سارا", headers=_headers("CUST-UNPRIVILEGED"))
     assert response.status_code == 403
