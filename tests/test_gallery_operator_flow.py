@@ -167,6 +167,26 @@ def test_pilot_internal_role_tokens_stay_disabled_in_production_even_if_opted_in
     ).count() == 0
 
 
+def test_customer_and_anonymous_requests_cannot_read_product_catalog_or_fx(client):
+    for path in ("/api/v1/products/", "/api/v1/fx/current"):
+        anonymous = client.get(path)
+        assert anonymous.status_code == 401, f"{path}: {anonymous.text}"
+
+        customer = client.get(path, headers=_headers("CUST-DIRECT-ACCESS"))
+        assert customer.status_code == 403, f"{path}: {customer.text}"
+
+
+def test_gallery_operator_can_read_staff_product_catalog_and_fx(client, db_session):
+    _assign_role(db_session, "USR_STAFF_READ")
+    headers = _headers("USR_STAFF_READ")
+
+    products = client.get("/api/v1/products/", headers=headers)
+    fx = client.get("/api/v1/fx/current", headers=headers)
+
+    assert products.status_code == 200, products.text
+    assert fx.status_code == 200, fx.text
+
+
 def test_customer_refresh_token_cannot_restore_system_access(client, db_session):
     db_session.add(Customer(customer_id="CUST-REFRESH-DENIED", name="مشتری بدون دسترسی"))
     db_session.commit()
