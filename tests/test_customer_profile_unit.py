@@ -29,6 +29,7 @@ def test_intake_new_and_update_concerns(db):
     svc = CustomerService(db)
     c1 = svc.record_intake(
         name="سارا",
+        family_name="احمدی",
         mobile="09129990001",
         concerns="آبرسان",
         consent=1,
@@ -38,6 +39,7 @@ def test_intake_new_and_update_concerns(db):
 
     c2 = svc.record_intake(
         name="سارا",
+        family_name="احمدی",
         mobile="09129990001",
         concerns="ضدآفتاب, لک",
         consent=1,
