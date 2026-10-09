@@ -393,11 +393,11 @@ async def quick_intake(
                     try:
                         assert_mobile_identity_allows_bind(
                             existing=authenticated,
-                            incoming_family_name=(
-                                data.family_name
-                                if data.family_name is not None
-                                else getattr(authenticated, "family_name", None)
-                            ),
+                            # Require the incoming surname explicitly even when the
+                            # mobile already belongs to this customer. Falling back to
+                            # the stored surname would silently approve an omitted identity
+                            # field rather than confirming the caller's claim.
+                            incoming_family_name=data.family_name,
                         )
                     except ValueError as e:
                         raise HTTPException(
