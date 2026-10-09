@@ -140,6 +140,33 @@ def test_pilot_internal_role_tokens_are_disabled_by_default(client, db_session, 
     ).count() == 0
 
 
+def test_pilot_internal_role_tokens_require_explicit_nonproduction_opt_in(client, db_session, monkeypatch):
+    monkeypatch.setenv("HBI_ENV", "development")
+    monkeypatch.setenv("HBI_ENABLE_PILOT_TOKENS", "true")
+
+    editor_response = client.post("/api/v1/auth/pilot-operator-token")
+    po_response = client.post("/api/v1/auth/pilot-po-token")
+
+    assert editor_response.status_code == 200, editor_response.text
+    assert po_response.status_code == 200, po_response.text
+    assert editor_response.json()["access_token"]
+    assert po_response.json()["access_token"]
+
+
+def test_pilot_internal_role_tokens_stay_disabled_in_production_even_if_opted_in(client, db_session, monkeypatch):
+    monkeypatch.setenv("HBI_ENV", "production")
+    monkeypatch.setenv("HBI_ENABLE_PILOT_TOKENS", "true")
+
+    editor_response = client.post("/api/v1/auth/pilot-operator-token")
+    po_response = client.post("/api/v1/auth/pilot-po-token")
+
+    assert editor_response.status_code == 403, editor_response.text
+    assert po_response.status_code == 403, po_response.text
+    assert db_session.query(UserRole).filter(
+        UserRole.subject_id.in_(["USR_PILOT_EDITOR", "USR_PILOT_PO"])
+    ).count() == 0
+
+
 def test_customer_refresh_token_cannot_restore_system_access(client, db_session):
     db_session.add(Customer(customer_id="CUST-REFRESH-DENIED", name="مشتری بدون دسترسی"))
     db_session.commit()
