@@ -388,7 +388,11 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             inv = self.inventory_repo.find_by_product(product.product_id)
             # Inventory is a V1 entry gate. Keep the service-level check as a
             # defense-in-depth invariant for alternate/test candidate providers.
-            if not inv or not inv.quantity_available or inv.quantity_available <= 0:
+            if (
+                not inv
+                or (inv.stock_status or "").strip().upper() == "OUT_OF_STOCK"
+                or max(0, inv.quantity_available - (inv.quantity_reserved or 0)) <= 0
+            ):
                 continue
             # Inventory quantity is availability-only and must not influence ranking.
             inventory_score = 1.0
