@@ -174,7 +174,7 @@ async def staff_customer_session(
     request: StaffCustomerSessionRequest,
     http_request: Request,
     db: Session = Depends(get_db),
-    _admin=Depends(require_any_role([ROLE_ADMIN])),
+    _admin=Depends(require_any_role(ROLE_ADMIN)),
 ):
     """Admin-only: issue short-lived access token bound to a specific customer.
 
@@ -184,7 +184,12 @@ async def staff_customer_session(
     - No refresh token
     - Audited
     """
-    admin_sub = getattr(_admin, "sub", None) or getattr(_admin, "subject_id", None) or "admin"
+    # require_any_role returns (subject_id, roles); preserve the real issuer in the JWT and audit log.
+    admin_sub = (
+        _admin[0]
+        if isinstance(_admin, tuple) and _admin
+        else getattr(_admin, "sub", None) or getattr(_admin, "subject_id", None) or "admin"
+    )
     customer = db.query(Customer).filter(Customer.customer_id == request.customer_id).first()
     if customer is None:
         audit_event(
