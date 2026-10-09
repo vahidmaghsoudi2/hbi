@@ -5,6 +5,8 @@
 import type {
   CaseCreateRequest,
   CaseDTO,
+  AdminLoginRequest,
+  StaffCustomerSessionResponse,
   CustomerIntakeRequest,
   CustomerSearchResult,
   GuestCreateRequest,
@@ -54,6 +56,26 @@ async function request<T>(
 /** Public — no auth */
 export function listProducts(): Promise<ProductDTO[]> {
   return request<ProductDTO[]>("/products/");
+}
+
+/** Admin login for operational staff workflows. */
+export function adminLogin(body: AdminLoginRequest): Promise<TokenPair> {
+  return request<TokenPair>("/auth/login", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+/** Admin-only short-lived token bound to one customer for consultation actions. */
+export function staffCustomerSession(
+  customerId: string,
+  adminToken: string
+): Promise<StaffCustomerSessionResponse> {
+  return request<StaffCustomerSessionResponse>(
+    "/auth/staff-customer-session",
+    { method: "POST", body: JSON.stringify({ customer_id: customerId }) },
+    adminToken
+  );
 }
 
 /** Dev/Pilot only */
