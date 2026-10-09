@@ -136,7 +136,7 @@ class CustomerService(BaseService[Customer, CustomerRepository]):
         if existing:
             assert_mobile_identity_allows_bind(
                 existing=existing,
-                incoming_family_name=family_name if family_name is not None else existing.family_name,
+                incoming_family_name=family_name,
             )
             # Display name may update; identity was confirmed via mobile+family_name
             fields["name"] = name
