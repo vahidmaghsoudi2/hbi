@@ -123,17 +123,18 @@ export default function NewHomePage() {
   }, [loadSellableProducts]);
 
   const refreshSalesTotal = useCallback(async () => {
-    if (!token) {
+    const currentAdminToken = adminToken || sessionStorage.getItem("hbi_admin_access_token");
+    if (!currentAdminToken) {
       setTotalSales(null);
       return;
     }
     try {
-      const res = await getTotalSales(token);
+      const res = await getTotalSales(currentAdminToken);
       setTotalSales(res.total_sales ?? 0);
     } catch {
       setTotalSales(null);
     }
-  }, [token]);
+  }, [adminToken]);
 
   useEffect(() => {
     if (active === "sales") void refreshSalesTotal();
