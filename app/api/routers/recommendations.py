@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_customer_id
+from app.core.authorization import get_current_subject_and_roles, is_gallery_operator_or_admin
 from app.interface.facades import RecommendationFacade
 from app.models.case import Case
 from app.services.profile_fact_context_service import ProfileFactContextService
@@ -33,12 +34,12 @@ def _to_dict(obj) -> dict:
     return dict(obj) if obj else {}
 
 
-def _assert_case_owned(db: Session, case_id: str, customer_id: str) -> Case:
+def _assert_case_access(db: Session, case_id: str, subject_id: str, roles: set) -> Case:
     case = db.get(Case, case_id)
     if case is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Case not found")
-    if case.customer_id != customer_id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+        raise HTTPException(status_code=404, detail="Case not found")
+    if case.customer_id != subject_id and not is_gallery_operator_or_admin(roles):
+        raise HTTPException(status_code=403, detail="Access denied")
     return case
 
 
@@ -46,9 +47,10 @@ def _assert_case_owned(db: Session, case_id: str, customer_id: str) -> Case:
 async def generate_recommendations(
     request: RecommendationRequest,
     db: Session = Depends(get_db),
-    customer_id: str = Depends(get_current_customer_id),
+    subject_and_roles: tuple = Depends(get_current_subject_and_roles),
 ) -> List[dict]:
-    case = _assert_case_owned(db, request.case_id, customer_id)
+    subject_id, roles = subject_and_roles
+    case = _assert_case_access(db, request.case_id, subject_id, roles)
     try:
         # Case-captured answers are current consultation context. Explicit request
         # input remains the highest-precedence current consultation value.
@@ -99,9 +101,10 @@ async def get_recommendation_trust_trace(
 async def get_recommendations_by_case(
     case_id: str,
     db: Session = Depends(get_db),
-    customer_id: str = Depends(get_current_customer_id),
+    subject_and_roles: tuple = Depends(get_current_subject_and_roles),
 ) -> List[dict]:
-    _assert_case_owned(db, case_id, customer_id)
+    subject_id, roles = subject_and_roles
+    case = _assert_case_access(db, case_id, subject_id, roles)
     facade = RecommendationFacade(db)
     return [_to_dict(d) for d in facade.find_by_case(case_id)]
 
@@ -110,9 +113,10 @@ async def get_recommendations_by_case(
 async def get_next_skin_question(
     case_id: str,
     db: Session = Depends(get_db),
-    customer_id: str = Depends(get_current_customer_id),
+    subject_and_roles: tuple = Depends(get_current_subject_and_roles),
 ) -> dict:
-    case = _assert_case_owned(db, case_id, customer_id)
+    subject_id, roles = subject_and_roles
+    case = _assert_case_access(db, case_id, subject_id, roles)
     question = SkinNextQuestionService(db).get_question(case)
     if question is None:
         return {
@@ -132,9 +136,10 @@ async def answer_next_skin_question(
     case_id: str,
     request: SkinNextQuestionAnswerRequest,
     db: Session = Depends(get_db),
-    customer_id: str = Depends(get_current_customer_id),
+    subject_and_roles: tuple = Depends(get_current_subject_and_roles),
 ) -> dict:
-    case = _assert_case_owned(db, case_id, customer_id)
+    subject_id, roles = subject_and_roles
+    case = _assert_case_access(db, case_id, subject_id, roles)
     try:
         result = SkinNextQuestionService(db).capture_answer(
             case,

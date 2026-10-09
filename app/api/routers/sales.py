@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.deps import get_db, get_current_customer_id
 from app.core.authorization import require_any_role
 from app.models.user_role import ROLE_ADMIN
+from app.core.authorization import get_current_subject_and_roles, is_gallery_operator_or_admin
 from app.interface.facades import SaleFacade
 from app.interface.errors import BusinessRuleError
 
@@ -69,16 +70,13 @@ async def get_total_sales(
 async def list_customer_purchase_history(
     target_customer_id: str,
     db: Session = Depends(get_db),
-    customer_id: str = Depends(get_current_customer_id),
+    subject_and_roles: tuple = Depends(get_current_subject_and_roles),
 ):
-    """Return purchase history only for the authenticated customer (no cross-customer leak)."""
-    if target_customer_id != customer_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied",
-        )
-    facade = SaleFacade(db)
-    sales = facade.list_by_customer(customer_id)
+    """Return own history, or selected-customer history to an authorized gallery operator/admin."""
+    subject_id, roles = subject_and_roles
+    if target_customer_id != subject_id and not is_gallery_operator_or_admin(roles):
+        raise HTTPException(status_code=403, detail="Access denied")
+    sales = SaleFacade(db).list_by_customer(target_customer_id)
     return [
         {
             "sale_id": s.sale_id,

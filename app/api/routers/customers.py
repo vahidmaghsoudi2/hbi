@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_customer_id
+from app.core.authorization import get_current_subject_and_roles, is_gallery_operator_or_admin
 from app.core.audit import audit_event
 from app.interface.facades import CustomerFacade
 from app.services.customer_service import CustomerService
@@ -301,7 +302,7 @@ async def list_profile_facts(
 async def quick_intake(
     data: IntakeRequest,
     db: Session = Depends(get_db),
-    customer_id: str = Depends(get_current_customer_id),
+    subject_and_roles: tuple = Depends(get_current_subject_and_roles),
 ):
     """
     Intake سریع گالری.
@@ -314,7 +315,47 @@ async def quick_intake(
     token is A → generate returns 403 Access denied.
     """
     svc = CustomerService(db)
+    subject_id, roles = subject_and_roles
+    customer_id = subject_id
     mobile = data.mobile
+
+    if is_gallery_operator_or_admin(roles):
+        if data.guest or not mobile or not _looks_like_mobile(mobile):
+            raise HTTPException(status_code=422, detail="Gallery intake requires a valid mobile number.")
+        existing = svc.find_by_mobile(mobile)
+        normalized_tokens = lambda value: " ".join((value or "").split()).casefold().split()
+        surname = lambda value: normalized_tokens(value)[-1] if normalized_tokens(value) else ""
+        if existing and surname(existing.name) != surname(data.name):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Customer identity mismatch: mobile and surname do not match an existing record.")
+        try:
+            if existing:
+                fields: Dict[str, Any] = {}
+                if not data.open_case:
+                    if data.concerns is not None:
+                        fields["concerns"] = data.concerns
+                    if data.skin_profile is not None:
+                        fields["skin_profile"] = data.skin_profile
+                if data.consent == 1:
+                    fields["consent_to_store_data"] = 1
+                    fields["consent_date"] = datetime.now()
+                customer = svc.repository.update(existing.customer_id, **fields) if fields else existing
+                customer = customer or existing
+            else:
+                customer = svc.record_intake(name=data.name, mobile=mobile, concerns=data.concerns, consent=data.consent, skin_profile=data.skin_profile, guest=False)
+            profile = svc.build_recommendation_profile(customer, concerns=data.concerns)
+            case_payload = None
+            if data.open_case:
+                case = CaseService(db).create_case(customer_id=customer.customer_id, case_type=(data.case_type or "OPEN").strip().upper())
+                case_payload = {"case_id": case.case_id, "customer_id": case.customer_id, "case_type": case.case_type}
+            db.commit()
+            return {
+                "customer": _customer_public(customer), "case": case_payload,
+                "recommendation_profile": profile,
+                "generate_hint": {"path": "POST /api/v1/recommendations/generate", "body": {"case_id": case_payload["case_id"] if case_payload else "<case_id>", "customer_profile": profile}},
+            }
+        except ValueError as e:
+            db.rollback()
+            raise HTTPException(status_code=422, detail=str(e))
 
     if (
         mobile
@@ -417,9 +458,12 @@ async def get_recommendation_profile(
 async def search_customers_by_name_or_mobile(
     q: str = Query(..., min_length=1, description="بخشی از نام یا شماره موبایل مشتری"),
     db: Session = Depends(get_db),
-    _auth: str = Depends(get_current_customer_id),
+    subject_and_roles: tuple = Depends(get_current_subject_and_roles),
 ) -> List[Dict[str, Any]]:
-    """جست‌وجوی سریع مشتری قبلی با نام یا شماره موبایل برای فروشنده گالری."""
+    """جست‌وجوی مشتری برای نقش عملیاتی مجاز گالری."""
+    _, roles = subject_and_roles
+    if not is_gallery_operator_or_admin(roles):
+        raise HTTPException(status_code=403, detail="Gallery operator access required")
     svc = CustomerService(db)
     query = q.strip()
     if _looks_like_mobile(query):
@@ -433,8 +477,11 @@ async def search_customers_by_name_or_mobile(
 async def get_customer_by_id(
     target_customer_id: str,
     db: Session = Depends(get_db),
-    _auth: str = Depends(get_current_customer_id),
+    subject_and_roles: tuple = Depends(get_current_subject_and_roles),
 ):
+    _, roles = subject_and_roles
+    if not is_gallery_operator_or_admin(roles):
+        raise HTTPException(status_code=403, detail="Gallery operator access required")
     svc = CustomerService(db)
     customer = svc.get_by_id(target_customer_id)
     if not customer:
