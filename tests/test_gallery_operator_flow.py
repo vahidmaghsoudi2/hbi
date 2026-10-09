@@ -269,3 +269,64 @@ def test_gallery_operator_provisioning_refuses_subject_with_another_username(
     assert db_session.query(AdminCredential).filter_by(
         username="new-gallery-login"
     ).first() is None
+
+
+def test_admin_provisioning_refuses_to_promote_an_existing_non_admin_username(
+    db_session, monkeypatch
+):
+    from app.services.admin_auth_service import ensure_admin_account
+
+    existing = AdminCredential(
+        credential_id="CRED-EXISTING-PO",
+        subject_id="USR_EXISTING_PO",
+        username="existing-po-login",
+        password_hash="existing-po-hash",
+    )
+    db_session.add(existing)
+    _assign_role(db_session, "USR_EXISTING_PO", "PO")
+    db_session.commit()
+    monkeypatch.setenv("HBI_ADMIN_USERNAME", "existing-po-login")
+    monkeypatch.setenv("HBI_ADMIN_PASSWORD", "admin-secret")
+    monkeypatch.setenv("HBI_ADMIN_SUBJECT", "USR_ADMIN")
+
+    try:
+        ensure_admin_account(db_session)
+        assert False, "Expected conflicting admin username to be rejected"
+    except ValueError as exc:
+        assert "different subject" in str(exc)
+
+    db_session.refresh(existing)
+    assert existing.subject_id == "USR_EXISTING_PO"
+    assert existing.password_hash == "existing-po-hash"
+    assert db_session.query(UserRole).filter_by(
+        subject_id="USR_EXISTING_PO", role="PO"
+    ).one()
+
+
+def test_admin_provisioning_refuses_subject_with_another_username(db_session, monkeypatch):
+    from app.services.admin_auth_service import ensure_admin_account
+
+    existing = AdminCredential(
+        credential_id="CRED-EXISTING-ADMIN-SUBJECT",
+        subject_id="USR_ADMIN",
+        username="already-admin-login",
+        password_hash="existing-admin-hash",
+    )
+    db_session.add(existing)
+    db_session.commit()
+    monkeypatch.setenv("HBI_ADMIN_USERNAME", "new-admin-login")
+    monkeypatch.setenv("HBI_ADMIN_PASSWORD", "admin-secret")
+    monkeypatch.setenv("HBI_ADMIN_SUBJECT", "USR_ADMIN")
+
+    try:
+        ensure_admin_account(db_session)
+        assert False, "Expected conflicting admin subject to be rejected"
+    except ValueError as exc:
+        assert "different username" in str(exc)
+
+    assert db_session.query(AdminCredential).filter_by(
+        username="already-admin-login"
+    ).one().password_hash == "existing-admin-hash"
+    assert db_session.query(AdminCredential).filter_by(
+        username="new-admin-login"
+    ).first() is None
