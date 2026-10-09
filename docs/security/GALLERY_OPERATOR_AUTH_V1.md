@@ -24,6 +24,6 @@ The configured account is provisioned with the `GalleryOperator` role during app
 ## Legacy pilot role-token endpoints
 
 - `/auth/pilot-operator-token` and `/auth/pilot-po-token` are disabled by default, including in development.
-- They require the explicit server-side opt-in `HBI_ENABLE_PILOT_TOKENS=true` and are still denied whenever `HBI_ENV=production`.
+- They require both the explicit server-side opt-in `HBI_ENABLE_PILOT_TOKENS=true` and frontend opt-in `VITE_ENABLE_PILOT_TOKENS=true`; the backend still denies them whenever `HBI_ENV=production`.
 - This opt-in exists only for isolated local development/test environments while the legacy Product Editor/PO UI flow is being replaced. Never enable it on a shared or publicly reachable environment; these endpoints mint internal-role tokens without authenticating a person.
 - A successful HTTP response from these endpoints is not evidence that a real operator or Admin identity was authenticated.
