@@ -13,7 +13,7 @@ from app.interface.schemas import (
 from app.services.product_service import ProductService
 from app.services.product_transition_service import ProductTransitionService
 from app.services.mutation_log_service import MutationLogService
-from app.models.user_role import ROLE_EDITOR, ROLE_PO, ROLE_REVIEWER_QA, ROLE_ADMIN
+from app.models.user_role import ROLE_EDITOR, ROLE_PO, ROLE_REVIEWER_QA, ROLE_ADMIN, ROLE_GALLERY_OPERATOR
 from app.services.research_draft_service import ResearchDraftService
 
 router = APIRouter()
@@ -38,7 +38,10 @@ def _http_from_domain(exc):
 
 
 @router.get("/")
-async def list_products(db: Session = Depends(get_db)):
+async def list_products(
+    db: Session = Depends(get_db),
+    auth=Depends(require_any_role(ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN, ROLE_GALLERY_OPERATOR)),
+):
     return [_to_dict(p) for p in ProductFacade(db).get_verified_products()]
 
 
@@ -74,7 +77,11 @@ async def create_research_draft(
 
 
 @router.get("/{product_id}")
-async def get_product(product_id: str, db: Session = Depends(get_db)):
+async def get_product(
+    product_id: str,
+    db: Session = Depends(get_db),
+    auth=Depends(require_any_role(ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN, ROLE_GALLERY_OPERATOR)),
+):
     product = ProductFacade(db).get_by_id(product_id)
     if not product:
         raise HTTPException(status_code=404, detail=f"Product {product_id} not found")
@@ -82,7 +89,11 @@ async def get_product(product_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("/brand/{brand}")
-async def get_products_by_brand(brand: str, db: Session = Depends(get_db)):
+async def get_products_by_brand(
+    brand: str,
+    db: Session = Depends(get_db),
+    auth=Depends(require_any_role(ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN, ROLE_GALLERY_OPERATOR)),
+):
     return [_to_dict(p) for p in ProductFacade(db).find_by_brand(brand)]
 
 
