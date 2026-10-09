@@ -330,3 +330,31 @@ def test_admin_provisioning_refuses_subject_with_another_username(db_session, mo
     assert db_session.query(AdminCredential).filter_by(
         username="new-admin-login"
     ).first() is None
+
+
+def test_admin_provisioning_refuses_gallery_operator_subject(db_session, monkeypatch):
+    from app.services.admin_auth_service import ensure_admin_account
+
+    db_session.add(AdminCredential(
+        credential_id="CRED-GALLERY-AS-ADMIN",
+        subject_id="USR_SHARED_ROLE_BOUNDARY",
+        username="shared-role-login",
+        password_hash="existing-hash",
+    ))
+    _assign_role(db_session, "USR_SHARED_ROLE_BOUNDARY", ROLE_GALLERY_OPERATOR)
+    monkeypatch.setenv("HBI_ADMIN_USERNAME", "shared-role-login")
+    monkeypatch.setenv("HBI_ADMIN_PASSWORD", "admin-secret")
+    monkeypatch.setenv("HBI_ADMIN_SUBJECT", "USR_SHARED_ROLE_BOUNDARY")
+
+    try:
+        ensure_admin_account(db_session)
+        assert False, "Expected Admin/GalleryOperator identity conflict to be rejected"
+    except ValueError as exc:
+        assert "GalleryOperator" in str(exc)
+
+    assert db_session.query(UserRole).filter_by(
+        subject_id="USR_SHARED_ROLE_BOUNDARY", role=ROLE_GALLERY_OPERATOR
+    ).one()
+    assert db_session.query(UserRole).filter_by(
+        subject_id="USR_SHARED_ROLE_BOUNDARY", role=ROLE_ADMIN
+    ).first() is None
