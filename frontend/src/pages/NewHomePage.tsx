@@ -123,18 +123,20 @@ export default function NewHomePage() {
   }, [loadSellableProducts]);
 
   const refreshSalesTotal = useCallback(async () => {
-    const currentAdminToken = adminToken || sessionStorage.getItem("hbi_admin_access_token");
-    if (!currentAdminToken) {
+    // GET /sales/total is scoped to the authenticated customer subject.
+    // Keep this read on the staff-customer token; only POST /sales/ uses Admin.
+    const currentCustomerToken = token || sessionStorage.getItem("hbi_staff_customer_access_token");
+    if (!currentCustomerToken) {
       setTotalSales(null);
       return;
     }
     try {
-      const res = await getTotalSales(currentAdminToken);
+      const res = await getTotalSales(currentCustomerToken);
       setTotalSales(res.total_sales ?? 0);
     } catch {
       setTotalSales(null);
     }
-  }, [adminToken]);
+  }, [token]);
 
   useEffect(() => {
     if (active === "sales") void refreshSalesTotal();
