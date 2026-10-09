@@ -176,10 +176,20 @@ def test_first_name_does_not_override_family_name_identity_and_conflict_has_no_m
     assert db_session.query(Case).count() == 0
 
 
-def test_staff_customer_token_cannot_create_sale_without_admin_role(client, db_session):
+def test_staff_customer_token_cannot_create_sale_even_if_subject_has_admin_role(client, db_session):
     db_session.add(Customer(customer_id="CUST_SALE_A", name="مشتری"))
     db_session.commit()
     admin_token = _admin_token(db_session)
+    # Defensive collision case: the customer subject must not inherit this role
+    # through a staff-customer token, even if data is misconfigured.
+    db_session.add(
+        UserRole(
+            user_role_id="UR-CUST-SALE-A-ADMIN",
+            subject_id="CUST_SALE_A",
+            role=ROLE_ADMIN,
+        )
+    )
+    db_session.commit()
     staff_token = _staff_token(client, admin_token, "CUST_SALE_A")
 
     response = client.post(
