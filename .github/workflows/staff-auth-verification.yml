@@ -1,0 +1,31 @@
+name: Staff Auth Consultation-to-Sale Verification
+
+on:
+  push:
+    branches:
+      - fix/staff-auth-initial-mobile-binding
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact pushed commit
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov httpx
+      - name: Compile Python files
+        run: python -m compileall app tests
+      - name: Run full test suite with coverage
+        run: python -m pytest --cov=app --cov-report=term-missing --cov-report=xml -v
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
