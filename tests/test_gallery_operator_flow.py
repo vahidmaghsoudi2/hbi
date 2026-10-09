@@ -132,3 +132,45 @@ def test_gallery_operator_can_search_existing_customer(client, db_session):
     )
     assert response.status_code == 200, response.text
     assert any(item["customer_id"] == "CUST-SEARCH-1" for item in response.json())
+
+def test_customer_cannot_read_another_customers_sales_or_total(client, db_session):
+    db_session.add_all([
+        Customer(customer_id="CUST-SALES-SELF", name="مشتری خود"),
+        Customer(customer_id="CUST-SALES-OTHER", name="مشتری دیگر"),
+    ])
+    db_session.commit()
+    headers = _headers("CUST-SALES-SELF")
+
+    history = client.get(
+        "/api/v1/sales/customer/CUST-SALES-OTHER",
+        headers=headers,
+    )
+    assert history.status_code == 403, history.text
+
+    total = client.get(
+        "/api/v1/sales/total?target_customer_id=CUST-SALES-OTHER",
+        headers=headers,
+    )
+    assert total.status_code == 403, total.text
+
+
+def test_gallery_operator_can_read_selected_customers_sales_history_and_total(client, db_session):
+    _assign_role(db_session, "USR_GALLERY_SALES_READ")
+    db_session.add(Customer(customer_id="CUST-SALES-READ", name="مشتری منتخب"))
+    db_session.commit()
+    headers = _headers("USR_GALLERY_SALES_READ")
+
+    history = client.get(
+        "/api/v1/sales/customer/CUST-SALES-READ",
+        headers=headers,
+    )
+    assert history.status_code == 200, history.text
+    assert history.json() == []
+
+    total = client.get(
+        "/api/v1/sales/total?target_customer_id=CUST-SALES-READ",
+        headers=headers,
+    )
+    assert total.status_code == 200, total.text
+    assert "total_sales" in total.json()
+
