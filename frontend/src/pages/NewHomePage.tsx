@@ -253,16 +253,18 @@ export default function NewHomePage() {
   }
 
   async function ensureProductSession(): Promise<string | null> {
-    const cached = sessionStorage.getItem("hbi_operator_access_token");
-    if (cached) return cached;
     const adminToken = sessionStorage.getItem("hbi_admin_access_token");
     if (adminToken) {
       setProductToken(adminToken);
       return adminToken;
     }
     if (import.meta.env.VITE_ENABLE_PILOT_TOKENS !== "true") {
+      sessionStorage.removeItem("hbi_operator_access_token");
+      sessionStorage.removeItem("hbi_operator_refresh_token");
       throw new Error("برای مدیریت محصول، ورود ادمین لازم است؛ توکن‌های آزمایشی به‌طور پیش‌فرض خاموش‌اند.");
     }
+    const cached = sessionStorage.getItem("hbi_operator_access_token");
+    if (cached) return cached;
     const pair = await pilotOperatorToken();
     sessionStorage.setItem("hbi_operator_access_token", pair.access_token);
     sessionStorage.setItem("hbi_operator_refresh_token", pair.refresh_token);
@@ -303,11 +305,13 @@ export default function NewHomePage() {
   }
 
   async function ensureReviewSession(): Promise<string | null> {
-    const cached = sessionStorage.getItem("hbi_po_access_token");
-    if (cached) return cached;
     if (import.meta.env.VITE_ENABLE_PILOT_TOKENS !== "true") {
+      sessionStorage.removeItem("hbi_po_access_token");
+      sessionStorage.removeItem("hbi_po_refresh_token");
       throw new Error("نشست بررسی محصول در حالت عادی صادر نمی‌شود؛ توکن آزمایشی فقط برای توسعهٔ محلی و با فعال‌سازی صریح قابل استفاده است.");
     }
+    const cached = sessionStorage.getItem("hbi_po_access_token");
+    if (cached) return cached;
     const pair = await pilotPoToken();
     sessionStorage.setItem("hbi_po_access_token", pair.access_token);
     sessionStorage.setItem("hbi_po_refresh_token", pair.refresh_token);
