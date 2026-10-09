@@ -31,7 +31,7 @@ def _complete_pk(**overrides):
     return SimpleNamespace(**values)
 
 
-def test_hard_gated_candidate_is_not_persisted_or_ranked():
+def test_hard_gated_candidate_is_persisted_for_internal_review_but_not_ranked():
     service, db = _service()
     product = SimpleNamespace(product_id="P1")
     service.product_repo.find_by_identity_status_and_active.return_value = [product]
@@ -53,7 +53,10 @@ def test_hard_gated_candidate_is_not_persisted_or_ranked():
     result = service.generate_recommendations("CASE1", {"concerns": "dry skin"})
 
     assert result == []
-    service.repository.create.assert_not_called()
+    service.repository.create.assert_called_once()
+    kwargs = service.repository.create.call_args.kwargs
+    assert kwargs["eligibility_status"] == "INELIGIBLE_PENDING_REVIEW"
+    assert json.loads(kwargs["exclusion_reasons"]) == ["NO_APPROVED_EVIDENCE"]
     db.delete.assert_not_called()
 
 
@@ -98,6 +101,7 @@ def test_recommendation_dto_exposes_persisted_trace():
         ranking_score=0.85, ranking_reasons="eligible",
         evidence_refs=json.dumps([{"evidence_id": "E1"}]),
         warnings=json.dumps(["TRACE_WARNING"]),
+        exclusion_reasons=json.dumps(["NO_APPROVED_EVIDENCE"]),
     )
     with patch("app.interface.facades._get_availability", return_value="AVAILABLE"), patch("app.interface.facades._get_price", return_value=100):
         dto = _to_recommendation_dto(recommendation, MagicMock())
@@ -105,3 +109,4 @@ def test_recommendation_dto_exposes_persisted_trace():
     assert isinstance(dto, RecommendationDTO)
     assert dto.evidence_refs == [{"evidence_id": "E1"}]
     assert dto.warnings == ["TRACE_WARNING"]
+    assert dto.exclusion_reasons == ["NO_APPROVED_EVIDENCE"]
