@@ -479,9 +479,9 @@ async def get_customer_by_id(
     db: Session = Depends(get_db),
     subject_and_roles: tuple = Depends(get_current_subject_and_roles),
 ):
-    _, roles = subject_and_roles
-    if not is_gallery_operator_or_admin(roles):
-        raise HTTPException(status_code=403, detail="Gallery operator access required")
+    subject_id, roles = subject_and_roles
+    if target_customer_id != subject_id and not is_gallery_operator_or_admin(roles):
+        raise HTTPException(status_code=403, detail="Access denied")
     svc = CustomerService(db)
     customer = svc.get_by_id(target_customer_id)
     if not customer:

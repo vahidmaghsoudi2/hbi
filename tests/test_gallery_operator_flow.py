@@ -109,3 +109,14 @@ def test_gallery_operator_cannot_create_financial_sale(client, db_session):
 def test_customer_search_requires_gallery_operator_role(client):
     response = client.get("/api/v1/customers/search?q=سارا", headers=_headers("CUST-UNPRIVILEGED"))
     assert response.status_code == 403
+
+
+def test_customer_can_read_own_customer_record(client, db_session):
+    db_session.add(Customer(customer_id="CUST-SELF-1", name="خود مشتری"))
+    db_session.commit()
+    response = client.get(
+        "/api/v1/customers/id/CUST-SELF-1",
+        headers=_headers("CUST-SELF-1"),
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["customer_id"] == "CUST-SELF-1"
