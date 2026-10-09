@@ -1,5 +1,6 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from app.models.product import Product
 from app.models.inventory import Inventory
 from app.repositories.base import BaseRepository
@@ -44,5 +45,6 @@ class ProductRepository(BaseRepository[Product]):
             Product.identity_status == identity_status,
             Product.status == "ACTIVE",
             Product.qa_verdict == "VALID",
-            Inventory.quantity_available > 0
+            Inventory.stock_status != "OUT_OF_STOCK",
+            (Inventory.quantity_available - func.coalesce(Inventory.quantity_reserved, 0)) > 0
         ).all()
