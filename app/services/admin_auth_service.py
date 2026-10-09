@@ -64,12 +64,17 @@ def ensure_gallery_operator_account(db: Session) -> AdminCredential | None:
     subject_id = os.getenv("HBI_GALLERY_OPERATOR_SUBJECT", "USR_GALLERY_OPERATOR")
     credential = db.query(AdminCredential).filter(AdminCredential.username == username).first()
     if credential is not None:
+        # Never rebind an existing login to a different subject: doing so would
+        # overwrite another non-admin account's credential and identity.
+        if credential.subject_id != subject_id:
+            raise ValueError(
+                "Gallery operator username is already assigned to a different subject."
+            )
         admin_role = db.query(UserRole).filter(
             UserRole.subject_id == credential.subject_id, UserRole.role == ROLE_ADMIN
         ).first()
         if admin_role is not None:
             raise ValueError("Gallery operator username must be different from the Admin username.")
-        credential.subject_id = subject_id
         credential.password_hash = pwd_context.hash(password)
     else:
         credential = AdminCredential(
