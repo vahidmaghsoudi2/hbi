@@ -381,7 +381,11 @@ async def quick_intake(
                     fields["skin_profile"] = data.skin_profile
             if data.consent == 1:
                 fields["consent_date"] = datetime.now()
-            if mobile and not data.guest:
+            if (
+                mobile
+                and not data.guest
+                and (getattr(authenticated, "mobile", None) or "").strip()
+            ):
                 from app.services.customer_service import assert_mobile_identity_allows_bind
 
                 try:
