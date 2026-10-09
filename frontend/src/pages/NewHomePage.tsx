@@ -413,6 +413,13 @@ export default function NewHomePage() {
     if (!mobile.trim()) return setError("شماره موبایل الزامی است.");
     if (!consultationLine) return setError("ابتدا لاین مشاوره را انتخاب کنید.");
     if (!concernsText) return setError("حداقل یک موضوع یا نوع پوست را انتخاب کنید.");
+    // Prevent stale case/recommendation state from crossing consultation boundaries.
+    setSelectedRecommendationId(null);
+    setSaleProductId("");
+    setSaleQty(1);
+    setLastSale(null);
+    setCaseId(null);
+    sessionStorage.removeItem("hbi_case_id");
     setBusy(true);
     try {
       const currentToken = await ensureSession(name.trim(), concernsText);
