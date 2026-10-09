@@ -206,3 +206,66 @@ def test_admin_and_gallery_operator_login_roles_are_not_interchangeable(client, 
 
     assert admin_on_operator_route.status_code == 403, admin_on_operator_route.text
     assert gallery_on_admin_route.status_code == 403, gallery_on_admin_route.text
+
+
+def test_gallery_operator_provisioning_refuses_to_take_over_existing_non_admin_username(
+    db_session, monkeypatch
+):
+    from app.services.admin_auth_service import ensure_gallery_operator_account
+
+    existing = AdminCredential(
+        credential_id="CRED-EXISTING-EDITOR",
+        subject_id="USR_EXISTING_EDITOR",
+        username="existing-editor",
+        password_hash="existing-hash",
+    )
+    db_session.add(existing)
+    _assign_role(db_session, "USR_EXISTING_EDITOR", "Editor")
+    db_session.commit()
+    monkeypatch.setenv("HBI_GALLERY_OPERATOR_USERNAME", "existing-editor")
+    monkeypatch.setenv("HBI_GALLERY_OPERATOR_PASSWORD", "new-secret")
+    monkeypatch.setenv("HBI_GALLERY_OPERATOR_SUBJECT", "USR_GALLERY_OPERATOR")
+
+    try:
+        ensure_gallery_operator_account(db_session)
+        assert False, "Expected conflicting username to be rejected"
+    except ValueError as exc:
+        assert "different subject" in str(exc)
+
+    db_session.refresh(existing)
+    assert existing.subject_id == "USR_EXISTING_EDITOR"
+    assert existing.password_hash == "existing-hash"
+    assert db_session.query(UserRole).filter_by(
+        subject_id="USR_EXISTING_EDITOR", role="Editor"
+    ).one()
+
+
+def test_gallery_operator_provisioning_refuses_subject_with_another_username(
+    db_session, monkeypatch
+):
+    from app.services.admin_auth_service import ensure_gallery_operator_account
+
+    existing = AdminCredential(
+        credential_id="CRED-EXISTING-GALLERY-SUBJECT",
+        subject_id="USR_GALLERY_OPERATOR",
+        username="already-configured-login",
+        password_hash="existing-hash",
+    )
+    db_session.add(existing)
+    db_session.commit()
+    monkeypatch.setenv("HBI_GALLERY_OPERATOR_USERNAME", "new-gallery-login")
+    monkeypatch.setenv("HBI_GALLERY_OPERATOR_PASSWORD", "new-secret")
+    monkeypatch.setenv("HBI_GALLERY_OPERATOR_SUBJECT", "USR_GALLERY_OPERATOR")
+
+    try:
+        ensure_gallery_operator_account(db_session)
+        assert False, "Expected conflicting subject to be rejected"
+    except ValueError as exc:
+        assert "different username" in str(exc)
+
+    assert db_session.query(AdminCredential).filter_by(
+        username="already-configured-login"
+    ).one().password_hash == "existing-hash"
+    assert db_session.query(AdminCredential).filter_by(
+        username="new-gallery-login"
+    ).first() is None
