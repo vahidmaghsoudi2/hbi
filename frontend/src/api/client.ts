@@ -34,16 +34,49 @@ const BASE = import.meta.env?.VITE_API_BASE ?? "/api/v1";
 async function request<T>(
   path: string,
   options: RequestInit = {},
-  token?: string
+  token?: string,
+  allowRefresh = true
 ): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string> | undefined),
   };
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
+  if (token) headers.Authorization = `Bearer ${token}`;
   const res = await fetch(`${BASE}${path}`, { ...options, headers });
+
+  if (res.status === 401 && token && allowRefresh) {
+    const sessions = [
+      { kind: "gallery", accessKey: "hbi_gallery_access_token", refreshKey: "hbi_gallery_refresh_token" },
+      { kind: "admin", accessKey: "hbi_admin_access_token", refreshKey: "hbi_admin_refresh_token" },
+      { kind: "product", accessKey: "hbi_operator_access_token", refreshKey: "hbi_operator_refresh_token" },
+      { kind: "review", accessKey: "hbi_po_access_token", refreshKey: "hbi_po_refresh_token" },
+      { kind: "customer", accessKey: "hbi_access_token", refreshKey: "hbi_refresh_token" },
+    ];
+    const session = sessions.find((item) => sessionStorage.getItem(item.accessKey) === token);
+    if (session) {
+      const refreshToken = sessionStorage.getItem(session.refreshKey);
+      if (refreshToken) {
+        const refreshed = await fetch(`${BASE}/auth/refresh`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refresh_token: refreshToken }),
+        });
+        if (refreshed.ok) {
+          const pair = await refreshed.json() as TokenPair;
+          sessionStorage.setItem(session.accessKey, pair.access_token);
+          sessionStorage.setItem(session.refreshKey, pair.refresh_token);
+          window.dispatchEvent(new CustomEvent("hbi-auth-refreshed", {
+            detail: { kind: session.kind, accessToken: pair.access_token },
+          }));
+          return request<T>(path, options, pair.access_token, false);
+        }
+      }
+      sessionStorage.removeItem(session.accessKey);
+      sessionStorage.removeItem(session.refreshKey);
+      window.dispatchEvent(new CustomEvent("hbi-auth-expired", { detail: session.kind }));
+    }
+  }
+
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`HTTP ${res.status}: ${body}`);

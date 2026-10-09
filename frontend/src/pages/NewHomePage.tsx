@@ -88,6 +88,27 @@ export default function NewHomePage() {
   const [purchaseHistory, setPurchaseHistory] = useState<SaleDTO[]>([]);
   const [customerSearchBusy, setCustomerSearchBusy] = useState(false);
 
+  useEffect(() => {
+    const onRefreshed = (event: Event) => {
+      const detail = (event as CustomEvent<{ kind: string; accessToken: string }>).detail;
+      if (detail.kind === "gallery") setToken(detail.accessToken);
+      if (detail.kind === "admin") setAdminToken(detail.accessToken);
+      if (detail.kind === "product") setProductToken(detail.accessToken);
+    };
+    const onExpired = (event: Event) => {
+      const kind = (event as CustomEvent<string>).detail;
+      if (kind === "gallery") setToken(null);
+      if (kind === "admin") setAdminToken(null);
+      if (kind === "product") setProductToken(null);
+    };
+    window.addEventListener("hbi-auth-refreshed", onRefreshed);
+    window.addEventListener("hbi-auth-expired", onExpired);
+    return () => {
+      window.removeEventListener("hbi-auth-refreshed", onRefreshed);
+      window.removeEventListener("hbi-auth-expired", onExpired);
+    };
+  }, []);
+
   const loadProducts = useCallback(async () => {
     setCatalogLoading(true);
     setCatalogError(null);
