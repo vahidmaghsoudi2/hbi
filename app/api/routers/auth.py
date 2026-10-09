@@ -22,6 +22,13 @@ from app.core.brute_force import clear_failures, is_locked, make_key, record_fai
 
 router = APIRouter()
 
+def _pilot_tokens_enabled() -> bool:
+    """Require an explicit opt-in for unauthenticated development token minting."""
+    environment = os.getenv("HBI_ENV", "development").strip().lower()
+    enabled = os.getenv("HBI_ENABLE_PILOT_TOKENS", "false").strip().lower()
+    return environment != "production" and enabled in {"1", "true", "yes"}
+
+
 
 class PilotTokenRequest(BaseModel):
     customer_id: str
@@ -227,7 +234,7 @@ async def pilot_operator_token(
     db: Session = Depends(get_db),
 ):
     """Dev/Pilot only: issue a scoped Editor token for Product Intake operations."""
-    if os.getenv("HBI_ENV", "development").lower() == "production":
+    if not _pilot_tokens_enabled():
         audit_event(
             "pilot_operator_token",
             path="/api/v1/auth/pilot-operator-token",
@@ -236,7 +243,7 @@ async def pilot_operator_token(
         )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="pilot-operator-token disabled in production",
+            detail="pilot-operator-token disabled unless explicitly enabled in a non-production environment",
         )
 
     subject_id = os.getenv("HBI_PILOT_OPERATOR_SUBJECT", "USR_PILOT_EDITOR")
@@ -274,7 +281,7 @@ async def pilot_po_token(
     db: Session = Depends(get_db),
 ):
     """Dev/Pilot only: issue a scoped PO token for governed Product Review transitions."""
-    if os.getenv("HBI_ENV", "development").lower() == "production":
+    if not _pilot_tokens_enabled():
         audit_event(
             "pilot_po_token",
             path="/api/v1/auth/pilot-po-token",
@@ -283,7 +290,7 @@ async def pilot_po_token(
         )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="pilot-po-token disabled in production",
+            detail="pilot-po-token disabled unless explicitly enabled in a non-production environment",
         )
 
     subject_id = os.getenv("HBI_PILOT_PO_SUBJECT", "USR_PILOT_PO")
