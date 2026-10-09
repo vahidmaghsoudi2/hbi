@@ -57,6 +57,14 @@ export function listProducts(): Promise<ProductDTO[]> {
 }
 
 /** Dev/Pilot only */
+export function galleryOperatorLogin(body: { username: string; password: string }): Promise<TokenPair> {
+  return request<TokenPair>("/auth/operator-login", { method: "POST", body: JSON.stringify(body) });
+}
+
+export function adminLogin(body: { username: string; password: string }): Promise<TokenPair> {
+  return request<TokenPair>("/auth/login", { method: "POST", body: JSON.stringify(body) });
+}
+
 export function pilotToken(body: PilotTokenRequest): Promise<TokenPair> {
   return request<TokenPair>("/auth/pilot-token", {
     method: "POST",

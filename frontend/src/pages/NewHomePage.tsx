@@ -3,11 +3,10 @@ import { Link } from "react-router-dom";
 import {
   listProducts,
   listManageableProducts,
-  pilotToken,
-  pilotOperatorToken,
+  galleryOperatorLogin,
+  adminLogin,
   pilotPoToken,
   customerIntake,
-  createGuest,
   generateRecommendations,
   listRecommendationsByCase,
   createSale,
@@ -23,9 +22,7 @@ import ProductReviewPanel from "./ProductReviewPanel";
 import type {
   ProductDTO,
   RecommendationDTO,
-  PilotTokenRequest,
   CustomerIntakeRequest,
-  GuestCreateRequest,
   CustomerSearchResult,
   SaleDTO,
 } from "../types/api";
@@ -49,7 +46,12 @@ type Panel = "consult" | "previous" | "profile" | "catalog" | "review" | "intake
 
 export default function NewHomePage() {
   const [active, setActive] = useState<Panel>("consult");
-  const [token, setToken] = useState<string | null>(() => sessionStorage.getItem("hbi_access_token"));
+  const [token, setToken] = useState<string | null>(() => sessionStorage.getItem("hbi_operator_access_token"));
+  const [adminToken, setAdminToken] = useState<string | null>(() => sessionStorage.getItem("hbi_admin_access_token"));
+  const [operatorUsername, setOperatorUsername] = useState("");
+  const [operatorPassword, setOperatorPassword] = useState("");
+  const [adminUsername, setAdminUsername] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
   const [customerId, setCustomerId] = useState<string | null>(() => sessionStorage.getItem("hbi_customer_id"));
   const [caseId, setCaseId] = useState<string | null>(() => sessionStorage.getItem("hbi_case_id"));
   const [name, setName] = useState("");
@@ -118,17 +120,17 @@ export default function NewHomePage() {
   }, [loadSellableProducts]);
 
   const refreshSalesTotal = useCallback(async () => {
-    if (!token) {
+    if (!adminToken) {
       setTotalSales(null);
       return;
     }
     try {
-      const res = await getTotalSales(token);
+      const res = await getTotalSales(adminToken);
       setTotalSales(res.total_sales ?? 0);
     } catch {
       setTotalSales(null);
     }
-  }, [token]);
+  }, [adminToken]);
 
   useEffect(() => {
     if (active === "sales") void refreshSalesTotal();
@@ -170,12 +172,11 @@ export default function NewHomePage() {
     setStatusMsg(null);
     setBusy(true);
     try {
-      const pair = await pilotToken({ customer_id: customer.customer_id });
-      sessionStorage.setItem("hbi_access_token", pair.access_token);
-      sessionStorage.setItem("hbi_refresh_token", pair.refresh_token);
+      const operatorToken = await ensureProductSession();
+      if (!operatorToken) throw new Error("نشست اپراتور در دسترس نیست.");
       sessionStorage.setItem("hbi_customer_id", customer.customer_id);
       sessionStorage.removeItem("hbi_case_id");
-      setToken(pair.access_token);
+      setToken(operatorToken);
       setCustomerId(customer.customer_id);
       setCaseId(null);
       setName(customer.name ?? "");
@@ -189,7 +190,7 @@ export default function NewHomePage() {
       setSelectedRecommendationId(null);
       setSaleProductId("");
       setLastSale(null);
-      const history = await listSalesByCustomer(customer.customer_id, pair.access_token);
+      const history = await listSalesByCustomer(customer.customer_id, operatorToken);
       setPurchaseHistory(Array.isArray(history) ? history : []);
       setStatusMsg(`مشتری قبلی انتخاب شد. ${history.length} خرید قبلی بارگذاری شد؛ مشکل امروز را ثبت کنید.`);
       setCustomerSearchResults([]);
@@ -206,32 +207,49 @@ export default function NewHomePage() {
     setError(null);
   }
 
-  async function ensureSession(displayName: string, concernsForGuest: string) {
-    let currentToken = token;
-    if (!currentToken) {
-      const guest = (await createGuest({
-        name: displayName,
-        consent: 0,
-        concerns: concernsForGuest || undefined,
-      })) as { customer_id?: string };
-      if (!guest?.customer_id) throw new Error("ایجاد پروفایل مهمان ناموفق بود.");
-      sessionStorage.setItem("hbi_customer_id", guest.customer_id);
-      setCustomerId(guest.customer_id);
-      const pair = await pilotToken({ customer_id: guest.customer_id } as PilotTokenRequest);
-      sessionStorage.setItem("hbi_access_token", pair.access_token);
-      sessionStorage.setItem("hbi_refresh_token", pair.refresh_token);
-      currentToken = pair.access_token;
-      setToken(currentToken);
-    }
-    return currentToken as string;
+  async function ensureSession(_displayName: string, _concernsForGuest: string) {
+    const operatorToken = await ensureProductSession();
+    if (!operatorToken) throw new Error("ابتدا اپراتور گالری وارد شود.");
+    return operatorToken;
   }
 
   async function ensureProductSession(): Promise<string | null> {
     const cached = sessionStorage.getItem("hbi_operator_access_token");
     if (cached) return cached;
-    const pair = await pilotOperatorToken();
-    sessionStorage.setItem("hbi_operator_access_token", pair.access_token);
-    return pair.access_token;
+    if (token) return token;
+    throw new Error("ابتدا با حساب اپراتور گالری وارد شوید.");
+  }
+
+  async function loginGalleryOperator(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    try {
+      const pair = await galleryOperatorLogin({ username: operatorUsername, password: operatorPassword });
+      sessionStorage.setItem("hbi_operator_access_token", pair.access_token);
+      sessionStorage.setItem("hbi_operator_refresh_token", pair.refresh_token);
+      setToken(pair.access_token);
+      setOperatorPassword("");
+      setStatusMsg("ورود اپراتور گالری موفق بود.");
+      await loadProducts();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  }
+
+  async function loginAdmin(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    try {
+      const pair = await adminLogin({ username: adminUsername, password: adminPassword });
+      sessionStorage.setItem("hbi_admin_access_token", pair.access_token);
+      sessionStorage.setItem("hbi_admin_refresh_token", pair.refresh_token);
+      setAdminToken(pair.access_token);
+      setAdminPassword("");
+      setStatusMsg("ورود مسئول مالی موفق بود. ثبت فروش با این نشست انجام می‌شود.");
+      await refreshSalesTotal();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
   }
 
   async function ensureReviewSession(): Promise<string | null> {
@@ -324,8 +342,7 @@ export default function NewHomePage() {
   }
 
   function startNewCustomer() {
-    ["hbi_access_token", "hbi_refresh_token", "hbi_customer_id", "hbi_case_id", "hbi_concerns"].forEach((k) => sessionStorage.removeItem(k));
-    setToken(null);
+    ["hbi_customer_id", "hbi_case_id", "hbi_concerns"].forEach((k) => sessionStorage.removeItem(k));
     setCustomerId(null);
     setCaseId(null);
     setName("");
@@ -453,6 +470,7 @@ export default function NewHomePage() {
     e.preventDefault();
     setError(null);
     if (!token || !customerId) return setError("ابتدا مشاوره را ثبت کنید.");
+    if (!adminToken) return setError("برای ثبت مالی فروش، مسئول مالی باید با حساب Admin وارد شود.");
     if (!saleProductId.trim()) return setError("محصول را انتخاب کنید.");
     if (saleQty < 1) return setError("تعداد نامعتبر است.");
     if (salePrice == null) return setError("قیمت فروش این محصول در دسترس نیست.");
@@ -469,7 +487,7 @@ export default function NewHomePage() {
           items: [{ product_id: saleProductId.trim(), quantity: saleQty, ...(selectedRecommendationId ? { recommendation_id: selectedRecommendationId } : {}) }],
           fx_rate_usd_to_irr: currentFxRate,
         },
-        token
+        adminToken
       );
       setLastSale(sale);
       setSelectedRecommendationId(null);
@@ -576,6 +594,20 @@ export default function NewHomePage() {
           <div className="pro-alert" role="alert">
             {error}
           </div>
+        ) : null}
+
+        {!token ? (
+          <section className="pro-panel">
+            <h2>ورود اپراتور گالری</h2>
+            <p className="pro-lead">مشاوره و کار با پرونده مشتری فقط با حساب عملیاتی مجاز انجام می‌شود.</p>
+            <form className="pro-form" onSubmit={loginGalleryOperator}>
+              <div className="pro-grid-2">
+                <div><label className="pro-label" htmlFor="operator-username">نام کاربری اپراتور</label><input id="operator-username" className="pro-input" autoComplete="username" value={operatorUsername} onChange={(e) => setOperatorUsername(e.target.value)} required /></div>
+                <div><label className="pro-label" htmlFor="operator-password">رمز عبور</label><input id="operator-password" className="pro-input" type="password" autoComplete="current-password" value={operatorPassword} onChange={(e) => setOperatorPassword(e.target.value)} required /></div>
+              </div>
+              <button type="submit" className="pro-btn-primary">ورود اپراتور</button>
+            </form>
+          </section>
         ) : null}
 
         {active === "previous" && (
@@ -894,7 +926,17 @@ export default function NewHomePage() {
         {active === "sales" && (
           <section className="pro-panel" id="sales">
             <h1>ثبت فروش</h1>
-            <p className="pro-lead">API: POST /api/v1/sales/ و GET /api/v1/sales/total — نیاز به نشست فعال.</p>
+            <p className="pro-lead">ثبت فروش مالی فقط با نشست مستقل Admin مجاز است؛ توکن اپراتور به‌جای آن استفاده نمی‌شود.</p>
+            {!adminToken ? (
+              <form className="pro-form pro-fieldset" onSubmit={loginAdmin}>
+                <h2>ورود مسئول مالی</h2>
+                <div className="pro-grid-2">
+                  <div><label className="pro-label" htmlFor="admin-username">نام کاربری Admin</label><input id="admin-username" className="pro-input" autoComplete="username" value={adminUsername} onChange={(e) => setAdminUsername(e.target.value)} required /></div>
+                  <div><label className="pro-label" htmlFor="admin-password">رمز عبور Admin</label><input id="admin-password" className="pro-input" type="password" autoComplete="current-password" value={adminPassword} onChange={(e) => setAdminPassword(e.target.value)} required /></div>
+                </div>
+                <button type="submit" className="pro-btn-primary">ورود مسئول مالی</button>
+              </form>
+            ) : <p className="pro-muted">نشست مالی Admin فعال است.</p>}
             {!token || !customerId ? (
               <div className="pro-empty">
                 <strong>ابتدا مشاوره را ثبت کنید.</strong>
