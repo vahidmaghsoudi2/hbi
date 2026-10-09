@@ -9,7 +9,6 @@ import {
   customerIntake,
   createGuest,
   generateRecommendations,
-  listRecommendationsByCase,
   listInternalEvaluationsByCase,
   createSale,
   getTotalSales,
