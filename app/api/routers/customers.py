@@ -381,27 +381,24 @@ async def quick_intake(
                     fields["skin_profile"] = data.skin_profile
             if data.consent == 1:
                 fields["consent_date"] = datetime.now()
-            if (
-                mobile
-                and not data.guest
-                and (getattr(authenticated, "mobile", None) or "").strip()
-            ):
-                from app.services.customer_service import assert_mobile_identity_allows_bind
+            if mobile and not data.guest:
+                if (getattr(authenticated, "mobile", None) or "").strip():
+                    from app.services.customer_service import assert_mobile_identity_allows_bind
 
-                try:
-                    assert_mobile_identity_allows_bind(
-                        existing=authenticated,
-                        incoming_family_name=(
-                            data.family_name
-                            if data.family_name is not None
-                            else getattr(authenticated, "family_name", None)
-                        ),
-                    )
-                except ValueError as e:
-                    raise HTTPException(
-                        status_code=status.HTTP_409_CONFLICT,
-                        detail=str(e),
-                    )
+                    try:
+                        assert_mobile_identity_allows_bind(
+                            existing=authenticated,
+                            incoming_family_name=(
+                                data.family_name
+                                if data.family_name is not None
+                                else getattr(authenticated, "family_name", None)
+                            ),
+                        )
+                    except ValueError as e:
+                        raise HTTPException(
+                            status_code=status.HTTP_409_CONFLICT,
+                            detail=str(e),
+                        )
                 fields["mobile"] = mobile
             customer = (
                 svc.repository.update(authenticated.customer_id, **fields)
