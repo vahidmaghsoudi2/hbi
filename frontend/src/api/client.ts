@@ -137,6 +137,18 @@ export function listRecommendationsByCase(
   );
 }
 
+/** Internal operator view — includes eligible and rejected evaluation records. */
+export function listInternalEvaluationsByCase(
+  caseId: string,
+  operatorToken: string
+): Promise<RecommendationDTO[]> {
+  return request<RecommendationDTO[]>(
+    `/recommendations/case/${caseId}/evaluations`,
+    {},
+    operatorToken
+  );
+}
+
 /** Customer Intake — requires auth */
 export function customerIntake(
   body: CustomerIntakeRequest,
