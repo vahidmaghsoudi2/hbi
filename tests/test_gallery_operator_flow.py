@@ -106,6 +106,34 @@ def test_gallery_operator_cannot_create_financial_sale(client, db_session):
     assert response.status_code == 403
 
 
+
+def test_public_guest_registration_is_disabled(client):
+    response = client.post(
+        "/api/v1/customers/guest",
+        json={"name": "مشتری مهمان", "consent": 1, "concerns": "آبرسان"},
+    )
+    assert response.status_code == 403, response.text
+
+
+def test_customer_token_issuance_is_disabled(client, db_session):
+    db_session.add(Customer(customer_id="CUST-NO-TOKEN", name="مشتری بدون توکن"))
+    db_session.commit()
+    response = client.post(
+        "/api/v1/auth/pilot-token",
+        json={"customer_id": "CUST-NO-TOKEN"},
+    )
+    assert response.status_code == 403, response.text
+
+
+def test_unassigned_customer_identity_cannot_access_authenticated_api(client, db_session):
+    db_session.add(Customer(customer_id="CUST-NO-ROLE", name="مشتری بدون نقش"))
+    db_session.commit()
+    response = client.get(
+        "/api/v1/customers/id/CUST-NO-ROLE",
+        headers=_headers("CUST-NO-ROLE"),
+    )
+    assert response.status_code == 403, response.text
+
 def test_customer_mobile_lookup_is_owner_scoped(client, db_session):
     db_session.add_all([
         Customer(customer_id="CUST-MOBILE-OWNER", name="مالک", mobile="09135550201"),
@@ -121,15 +149,14 @@ def test_customer_search_requires_gallery_operator_role(client):
     assert response.status_code == 403
 
 
-def test_customer_can_read_own_customer_record(client, db_session):
+def test_customer_identity_cannot_access_customer_api_even_for_own_record(client, db_session):
     db_session.add(Customer(customer_id="CUST-SELF-1", name="خود مشتری"))
     db_session.commit()
     response = client.get(
         "/api/v1/customers/id/CUST-SELF-1",
         headers=_headers("CUST-SELF-1"),
     )
-    assert response.status_code == 200, response.text
-    assert response.json()["customer_id"] == "CUST-SELF-1"
+    assert response.status_code == 403, response.text
 
 
 def test_gallery_operator_can_search_existing_customer(client, db_session):
