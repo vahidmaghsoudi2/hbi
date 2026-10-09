@@ -188,8 +188,9 @@ export function createSale(
 }
 
 /** GET /api/v1/sales/total — requires auth */
-export function getTotalSales(token: string): Promise<{ total_sales: number }> {
-  return request<{ total_sales: number }>("/sales/total", {}, token);
+export function getTotalSales(token: string, customerId?: string): Promise<{ total_sales: number }> {
+  const query = customerId ? `?target_customer_id=${encodeURIComponent(customerId)}` : "";
+  return request<{ total_sales: number }>(`/sales/total${query}`, {}, token);
 }
 
 

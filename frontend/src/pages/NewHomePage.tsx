@@ -5,6 +5,7 @@ import {
   listManageableProducts,
   galleryOperatorLogin,
   adminLogin,
+  pilotOperatorToken,
   pilotPoToken,
   customerIntake,
   generateRecommendations,
@@ -46,8 +47,9 @@ type Panel = "consult" | "previous" | "profile" | "catalog" | "review" | "intake
 
 export default function NewHomePage() {
   const [active, setActive] = useState<Panel>("consult");
-  const [token, setToken] = useState<string | null>(() => sessionStorage.getItem("hbi_operator_access_token"));
+  const [token, setToken] = useState<string | null>(() => sessionStorage.getItem("hbi_gallery_access_token"));
   const [adminToken, setAdminToken] = useState<string | null>(() => sessionStorage.getItem("hbi_admin_access_token"));
+  const [productToken, setProductToken] = useState<string | null>(() => sessionStorage.getItem("hbi_operator_access_token"));
   const [operatorUsername, setOperatorUsername] = useState("");
   const [operatorPassword, setOperatorPassword] = useState("");
   const [adminUsername, setAdminUsername] = useState("");
@@ -120,17 +122,17 @@ export default function NewHomePage() {
   }, [loadSellableProducts]);
 
   const refreshSalesTotal = useCallback(async () => {
-    if (!adminToken) {
+    if (!token || !customerId) {
       setTotalSales(null);
       return;
     }
     try {
-      const res = await getTotalSales(adminToken);
+      const res = await getTotalSales(token, customerId);
       setTotalSales(res.total_sales ?? 0);
     } catch {
       setTotalSales(null);
     }
-  }, [adminToken]);
+  }, [token, customerId]);
 
   useEffect(() => {
     if (active === "sales") void refreshSalesTotal();
@@ -172,7 +174,7 @@ export default function NewHomePage() {
     setStatusMsg(null);
     setBusy(true);
     try {
-      const operatorToken = await ensureProductSession();
+      const operatorToken = await ensureOperatorSession();
       if (!operatorToken) throw new Error("نشست اپراتور در دسترس نیست.");
       sessionStorage.setItem("hbi_customer_id", customer.customer_id);
       sessionStorage.removeItem("hbi_case_id");
@@ -208,16 +210,25 @@ export default function NewHomePage() {
   }
 
   async function ensureSession(_displayName: string, _concernsForGuest: string) {
-    const operatorToken = await ensureProductSession();
+    const operatorToken = await ensureOperatorSession();
     if (!operatorToken) throw new Error("ابتدا اپراتور گالری وارد شود.");
     return operatorToken;
+  }
+
+  async function ensureOperatorSession(): Promise<string | null> {
+    const cached = sessionStorage.getItem("hbi_gallery_access_token");
+    if (cached) return cached;
+    if (token) return token;
+    throw new Error("ابتدا با حساب اپراتور گالری وارد شوید.");
   }
 
   async function ensureProductSession(): Promise<string | null> {
     const cached = sessionStorage.getItem("hbi_operator_access_token");
     if (cached) return cached;
-    if (token) return token;
-    throw new Error("ابتدا با حساب اپراتور گالری وارد شوید.");
+    const pair = await pilotOperatorToken();
+    sessionStorage.setItem("hbi_operator_access_token", pair.access_token);
+    setProductToken(pair.access_token);
+    return pair.access_token;
   }
 
   async function loginGalleryOperator(e: FormEvent) {
@@ -225,8 +236,8 @@ export default function NewHomePage() {
     setError(null);
     try {
       const pair = await galleryOperatorLogin({ username: operatorUsername, password: operatorPassword });
-      sessionStorage.setItem("hbi_operator_access_token", pair.access_token);
-      sessionStorage.setItem("hbi_operator_refresh_token", pair.refresh_token);
+      sessionStorage.setItem("hbi_gallery_access_token", pair.access_token);
+      sessionStorage.setItem("hbi_gallery_refresh_token", pair.refresh_token);
       setToken(pair.access_token);
       setOperatorPassword("");
       setStatusMsg("ورود اپراتور گالری موفق بود.");
@@ -858,7 +869,7 @@ export default function NewHomePage() {
 
         {active === "intake" && (
           <ProductIntakePanel
-            token={token}
+            token={productToken}
             onEnsureSession={ensureProductSession}
             editProduct={editProduct}
             onCancelEdit={() => setEditProduct(null)}

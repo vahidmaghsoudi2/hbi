@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import get_db
 from app.core.authorization import require_any_role
-from app.models.user_role import ROLE_ADMIN, ROLE_EDITOR
+from app.models.user_role import ROLE_ADMIN, ROLE_EDITOR, ROLE_GALLERY_OPERATOR
 from app.interface.facades import InventoryFacade
 from app.interface.errors import NotFoundError
 from app.services.inventory_service import InventoryService
@@ -18,7 +18,7 @@ router = APIRouter()
 
 _require_inventory_admin = require_any_role(ROLE_ADMIN)
 # Home Sales actor: Operator (Editor) or Admin — never bare customer JWT.
-_require_inventory_sell_read = require_any_role(ROLE_ADMIN, ROLE_EDITOR)
+_require_inventory_sell_read = require_any_role(ROLE_ADMIN, ROLE_EDITOR, ROLE_GALLERY_OPERATOR)
 
 
 def _to_dict(obj):

@@ -59,11 +59,16 @@ async def create_sale(
 
 @router.get("/total")
 async def get_total_sales(
+    target_customer_id: Optional[str] = None,
     db: Session = Depends(get_db),
-    customer_id: str = Depends(get_current_customer_id),
+    subject_and_roles: tuple = Depends(get_current_subject_and_roles),
 ):
+    subject_id, roles = subject_and_roles
+    target_id = target_customer_id or subject_id
+    if target_id != subject_id and not is_gallery_operator_or_admin(roles):
+        raise HTTPException(status_code=403, detail="Access denied")
     facade = SaleFacade(db)
-    return {"total_sales": facade.get_total_sales(customer_id)}
+    return {"total_sales": facade.get_total_sales(target_id)}
 
 
 @router.get("/customer/{target_customer_id}")
