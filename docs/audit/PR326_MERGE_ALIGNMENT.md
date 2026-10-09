@@ -1,9 +1,21 @@
-# PR #326 history alignment
+# PR #326 branch-sync evidence
 
-Local merge commit prepared:
-- Intended parents: `0b15c7fc64142c3e3fd8c1cf622ffaf5e65c82a9` + `6fd75fe4ccad971aef3d73fe3dbbfa02ee642a1b`
-- Conflict resolved on identity tests only (add/add; same four tests; UTF-8 kept).
-- Sale persistence, role isolation, and refresh tests preserved.
+## Actual remote history
+- PR #326 head before this documentation refresh: `2cdd975abb76cfed84c8a3405777082799608aa5`
+- Branch-sync merge commit: `2cdd975abb76cfed84c8a3405777082799608aa5`
+- First parent (updated PR #325 branch): `a6fbc0c70f09c141f802852c3df797add5279c33`
+- Second parent (previous PR #326 head): `b0c42bac9b383a7c66020779aed050e7eb4957af`
+- The sync preserves the identity router and identity-contract test from PR #325, plus the 11 PR #326 changed files.
+- No force update was used. `master` was not modified.
 
-Remote push of the two-parent merge commit requires a credentialed `git push` (no force-push).
-This note does not claim the merge commit is on origin until that push succeeds.
+## CI
+HBI CI run #1081 succeeded on exact code SHA `2cdd975abb76cfed84c8a3405777082799608aa5`:
+https://github.com/vahidmaghsoudi2/hbi/actions/runs/37991094438
+
+The documentation refresh creates a new head commit; verify CI on that resulting SHA separately.
+
+## Remaining gates
+- Target-runtime E2E: NOT VERIFIED.
+- Live target DB schema: NOT VERIFIED.
+- PO acceptance: NOT RECORDED.
+- PR #326 remains Draft and unmerged. This is branch synchronization, not approval or PR merge.
