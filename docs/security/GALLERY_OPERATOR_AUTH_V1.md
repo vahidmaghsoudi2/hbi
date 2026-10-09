@@ -16,7 +16,14 @@ The configured account is provisioned with the `GalleryOperator` role during app
 
 - GalleryOperator may search/select customers, perform intake using mobile + surname matching, and create/read consultation cases and recommendations for the selected customer.
 - A mobile number already attached to a different surname returns HTTP 409; it is not silently rebound to another identity.
-- Customer tokens remain owner-scoped for self-service routes.
+- Customers are records in the gallery workflow, not system users. Public customer registration and customer-token issuance/refresh are disabled; customer records do not receive direct API access.
 - Financial sale creation remains Admin-only. The frontend obtains a separate Admin session for the sale mutation; it must never pass an operator token as a substitute.
 - Do not expose either token to the customer or log credentials/tokens.
 - Deployment configuration is not performed by this code change. Production behavior must be verified after the environment variables are set.
+
+## Legacy pilot role-token endpoints
+
+- `/auth/pilot-operator-token` and `/auth/pilot-po-token` are disabled by default, including in development.
+- They require the explicit server-side opt-in `HBI_ENABLE_PILOT_TOKENS=true` and are still denied whenever `HBI_ENV=production`.
+- This opt-in exists only for isolated local development/test environments while the legacy Product Editor/PO UI flow is being replaced. Never enable it on a shared or publicly reachable environment; these endpoints mint internal-role tokens without authenticating a person.
+- A successful HTTP response from these endpoints is not evidence that a real operator or Admin identity was authenticated.
