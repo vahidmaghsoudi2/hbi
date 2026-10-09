@@ -3,7 +3,7 @@ from __future__ import annotations
 import base64
 import json
 
-from app.core.auth import create_access_token, create_refresh_token
+from app.core.auth import create_access_token, create_refresh_token, decode_token
 from app.models.case import Case
 from app.models.customer import Customer
 from app.models.sale import Sale
@@ -35,6 +35,30 @@ def test_staff_customer_session_cannot_refresh(client, db_session):
         json={"refresh_token": staff_token},
     )
     assert refresh_response.status_code == 401
+
+
+def test_valid_refresh_does_not_promote_authorization_claims(client):
+    refresh_token = create_refresh_token(
+        {
+            "sub": "CUST_REFRESH_CLAIMS",
+            "purpose": "staff_customer_session",
+            "staff_session": True,
+            "role": "Admin",
+        }
+    )
+
+    response = client.post(
+        "/api/v1/auth/refresh",
+        json={"refresh_token": refresh_token},
+    )
+    assert response.status_code == 200, response.text
+    access_claims = decode_token(response.json()["access_token"])
+    assert access_claims is not None
+    assert access_claims["sub"] == "CUST_REFRESH_CLAIMS"
+    assert access_claims["type"] == "access"
+    assert "purpose" not in access_claims
+    assert "staff_session" not in access_claims
+    assert "role" not in access_claims
 
 
 def test_tampered_refresh_claims_are_rejected(client):
