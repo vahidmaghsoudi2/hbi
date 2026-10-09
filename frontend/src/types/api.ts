@@ -61,6 +61,7 @@ export interface RecommendationDTO {
   evidence_score?: number | null;
   evidence_refs?: unknown[] | null;
   warnings?: unknown[] | null;
+  exclusion_reasons?: string[] | null;
   availability?: string | null;
   price?: number | null;
 }
