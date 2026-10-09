@@ -58,7 +58,10 @@ class ProfileFactRevokeRequest(BaseModel):
 class IntakeRequest(BaseModel):
     """ثبت سریع مراجعه گالری — نام، نام خانوادگی و اطلاعات همین مراجعه."""
     name: str
-    family_name: Optional[str] = None
+    family_name: Optional[str] = Field(
+        default=None,
+        description="نام خانوادگی برای تطبیق هویت؛ نام کوچک در تطبیق دخالت ندارد",
+    )
     mobile: Optional[str] = None
     concerns: Optional[str] = Field(
         default=None,
@@ -113,9 +116,17 @@ def _customer_public(c) -> Dict[str, Any]:
 
 
 def _looks_like_mobile(value: Optional[str]) -> bool:
+    """True only for mobile-shaped identifiers, not internal customer_ids.
+
+    Guest ids like CUST_GUEST_2026... contain long digit runs and must not
+    be treated as a mobile number for identity-mismatch checks.
+    """
     if not value:
         return False
-    digits = "".join(ch for ch in value if ch.isdigit())
+    cleaned = value.strip()
+    if cleaned.upper().startswith("CUST"):
+        return False
+    digits = "".join(ch for ch in cleaned if ch.isdigit())
     return len(digits) >= 10
 
 
@@ -176,7 +187,7 @@ async def register_guest(
     """Public guest bootstrap for Home Front Door (no JWT).
 
     Rate-limited by client IP (10 req / 60s). Enables:
-    createGuest → pilot-token → intake without auth chicken-and-egg.
+    createGuest → staff-customer-session (Admin) → intake (no pilot dependency).
     """
     _enforce_guest_rate_limit(request)
 
@@ -310,26 +321,27 @@ async def quick_intake(
     برمی‌گرداند: customer + recommendation_profile + (اختیاری) case
     آماده برای generate(case_id, recommendation_profile).
 
-    Home flow: createGuest → pilot-token → intake.
+    Home flow: createGuest → staff-customer-session (Admin) → intake.
     When the JWT already identifies a customer (e.g. CUST_GUEST_*), reuse that
     row instead of creating a second guest — otherwise Case belongs to B while
     token is A → generate returns 403 Access denied.
     """
     svc = CustomerService(db)
-    mobile = data.mobile.strip() if data.mobile else None
+    mobile = (data.mobile or "").strip() or None
 
-    # Validate before any mutation. The staff token is bound to one customer;
-    # a mobile already owned by another row must never silently rebind that token.
     if data.consent not in (0, 1):
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="consent must be 0 or 1")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="consent must be 0 or 1",
+        )
 
-    # Preserve the legacy mobile-subject guard for non-staff customer tokens.
+    # Legacy mobile-subject guard for pure mobile JWT subjects only.
+    # CUST_* staff-customer tokens must not be treated as mobile numbers.
     if (
         mobile
         and not data.guest
         and _looks_like_mobile(mobile)
         and _looks_like_mobile(customer_id)
-        and customer_id.strip().replace("+", "").replace("-", "").replace(" ", "").isdigit()
         and mobile != customer_id
     ):
         raise HTTPException(
@@ -339,26 +351,29 @@ async def quick_intake(
 
     try:
         authenticated = svc.get_by_id(customer_id)
-        mobile_owner = svc.find_by_mobile(mobile) if mobile and not data.guest else None
-        if mobile_owner is not None and (
-            authenticated is None or mobile_owner.customer_id != authenticated.customer_id
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Mobile already belongs to another customer; select the existing customer",
-            )
+
+        # Ownership check before any mutation: mobile owned by another row → 409.
+        if mobile and not data.guest:
+            mobile_owner = svc.find_by_mobile(mobile)
+            if mobile_owner is not None and (
+                authenticated is None
+                or mobile_owner.customer_id != authenticated.customer_id
+            ):
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=(
+                        "Mobile already belongs to another customer; "
+                        "select the existing customer"
+                    ),
+                )
 
         if authenticated is not None:
-            # Continue the same identity as the staff-authenticated customer.
             fields: Dict[str, Any] = {
                 "name": data.name,
                 "consent_to_store_data": data.consent,
             }
             if data.family_name is not None:
-                fields["family_name"] = data.family_name.strip() or None
-            # A consultation is case-scoped input. Do not overwrite the
-            # persistent customer profile here: Recommendation combines the
-            # saved profile with today's consultation payload.
+                fields["family_name"] = (data.family_name or "").strip() or None
             if not data.open_case:
                 if data.concerns is not None:
                     fields["concerns"] = data.concerns
@@ -367,8 +382,27 @@ async def quick_intake(
             if data.consent == 1:
                 fields["consent_date"] = datetime.now()
             if mobile and not data.guest:
+                from app.services.customer_service import assert_mobile_identity_allows_bind
+
+                try:
+                    assert_mobile_identity_allows_bind(
+                        existing=authenticated,
+                        incoming_family_name=(
+                            data.family_name
+                            if data.family_name is not None
+                            else getattr(authenticated, "family_name", None)
+                        ),
+                    )
+                except ValueError as e:
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail=str(e),
+                    )
                 fields["mobile"] = mobile
-            customer = svc.repository.update(authenticated.customer_id, **fields) or authenticated
+            customer = (
+                svc.repository.update(authenticated.customer_id, **fields)
+                or authenticated
+            )
         else:
             customer = svc.record_intake(
                 name=data.name,
@@ -410,7 +444,12 @@ async def quick_intake(
             },
         }
     except ValueError as e:
-        raise HTTPException(status_code=422, detail=str(e))
+        message = str(e)
+        if "identity conflict" in message.lower():
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail=message
+            )
+        raise HTTPException(status_code=422, detail=message)
 
 
 @router.get("/recommendation-profile")
