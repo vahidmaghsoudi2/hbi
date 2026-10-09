@@ -120,3 +120,15 @@ def test_customer_can_read_own_customer_record(client, db_session):
     )
     assert response.status_code == 200, response.text
     assert response.json()["customer_id"] == "CUST-SELF-1"
+
+
+def test_gallery_operator_can_search_existing_customer(client, db_session):
+    _assign_role(db_session, "USR_GALLERY_SEARCH")
+    db_session.add(Customer(customer_id="CUST-SEARCH-1", name="سارا احمدی", mobile="09135550103"))
+    db_session.commit()
+    response = client.get(
+        "/api/v1/customers/search?q=سارا",
+        headers=_headers("USR_GALLERY_SEARCH"),
+    )
+    assert response.status_code == 200, response.text
+    assert any(item["customer_id"] == "CUST-SEARCH-1" for item in response.json())
