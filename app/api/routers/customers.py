@@ -329,6 +329,7 @@ async def quick_intake(
         and not data.guest
         and _looks_like_mobile(mobile)
         and _looks_like_mobile(customer_id)
+        and customer_id.strip().replace("+", "").replace("-", "").replace(" ", "").isdigit()
         and mobile != customer_id
     ):
         raise HTTPException(
