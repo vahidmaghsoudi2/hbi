@@ -142,21 +142,166 @@ async def pilot_token(
     db: Session = Depends(get_db),
 ):
     """Dev/Pilot only: issue JWT for an existing customer_id. Disabled in production."""
-    if not os.getenv("HBI_ALLOW_PILOT_TOKEN", "").strip().lower() in ("1", "true", "yes"):
+    forwarded = http_request.headers.get("x-forwarded-for")
+    client_ip = (
+        forwarded.split(",")[0].strip()
+        if forwarded
+        else (http_request.client.host if http_request.client else "unknown")
+    )
+    bf_key = make_key(client_ip, request.customer_id)
+
+    remaining = is_locked(bf_key)
+    if remaining is not None:
+        audit_event(
+            "pilot_token",
+            customer_id=request.customer_id,
+            path="/api/v1/auth/pilot-token",
+            outcome="denied",
+            detail="brute_force_lockout",
+            extra={"retry_after": remaining, "client_ip": client_ip},
+        )
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Too many failed attempts. Retry after {remaining}s.",
+            headers={"Retry-After": str(remaining)},
+        )
+
+    if os.getenv("HBI_ENV", "development").lower() == "production":
+        audit_event(
+            "pilot_token",
+            customer_id=request.customer_id,
+            path="/api/v1/auth/pilot-token",
+            outcome="denied",
+            detail="disabled_in_production",
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Pilot token issuance is disabled",
+            detail="pilot-token disabled in production",
         )
-    customer = db.query(Customer).filter(Customer.customer_id == request.customer_id).first()
+    customer = db.get(Customer, request.customer_id)
     if customer is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
+        lockout = record_failure(bf_key)
+        audit_event(
+            "pilot_token",
+            customer_id=request.customer_id,
+            path="/api/v1/auth/pilot-token",
+            outcome="denied",
+            detail="customer_not_found",
+            extra={"client_ip": client_ip, "lockout": lockout},
+        )
+        if lockout is not None:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Too many failed attempts. Retry after {lockout}s.",
+                headers={"Retry-After": str(lockout)},
+            )
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Customer not found",
+        )
+    clear_failures(bf_key)
     payload = {"sub": request.customer_id}
     audit_event(
         "pilot_token",
         customer_id=request.customer_id,
         path="/api/v1/auth/pilot-token",
         outcome="ok",
+        extra={"client_ip": client_ip},
     )
+    return TokenPair(
+        access_token=create_access_token(payload),
+        refresh_token=create_refresh_token(payload),
+        token_type="bearer",
+    )
+
+
+@router.post("/pilot-operator-token", response_model=TokenPair)
+async def pilot_operator_token(
+    http_request: Request,
+    db: Session = Depends(get_db),
+):
+    """Dev/Pilot only: issue a scoped Editor token for Product Intake operations."""
+    if os.getenv("HBI_ENV", "development").lower() == "production":
+        audit_event(
+            "pilot_operator_token",
+            path="/api/v1/auth/pilot-operator-token",
+            outcome="denied",
+            detail="disabled_in_production",
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="pilot-operator-token disabled in production",
+        )
+
+    subject_id = os.getenv("HBI_PILOT_OPERATOR_SUBJECT", "USR_PILOT_EDITOR")
+    role = db.query(UserRole).filter(
+        UserRole.subject_id == subject_id,
+        UserRole.role == ROLE_EDITOR,
+    ).first()
+    if role is None:
+        db.add(UserRole(
+            user_role_id=f"UR-{subject_id}-{ROLE_EDITOR.replace('/', '-')}",
+            subject_id=subject_id,
+            role=ROLE_EDITOR,
+        ))
+        db.commit()
+
+    payload = {"sub": subject_id}
+    client_ip = http_request.client.host if http_request.client else "unknown"
+    audit_event(
+        "pilot_operator_token",
+        customer_id=subject_id,
+        path="/api/v1/auth/pilot-operator-token",
+        outcome="ok",
+        extra={"client_ip": client_ip, "role": ROLE_EDITOR},
+    )
+    return TokenPair(
+        access_token=create_access_token(payload),
+        refresh_token=create_refresh_token(payload),
+        token_type="bearer",
+    )
+
+
+@router.post("/pilot-po-token", response_model=TokenPair)
+async def pilot_po_token(
+    http_request: Request,
+    db: Session = Depends(get_db),
+):
+    """Dev/Pilot only: issue a scoped PO token for governed Product Review transitions."""
+    if os.getenv("HBI_ENV", "development").lower() == "production":
+        audit_event(
+            "pilot_po_token",
+            path="/api/v1/auth/pilot-po-token",
+            outcome="denied",
+            detail="disabled_in_production",
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="pilot-po-token disabled in production",
+        )
+
+    subject_id = os.getenv("HBI_PILOT_PO_SUBJECT", "USR_PILOT_PO")
+    role = db.query(UserRole).filter(
+        UserRole.subject_id == subject_id,
+        UserRole.role == ROLE_PO,
+    ).first()
+    if role is None:
+        db.add(UserRole(
+            user_role_id=f"UR-{subject_id}-{ROLE_PO}",
+            subject_id=subject_id,
+            role=ROLE_PO,
+        ))
+        db.commit()
+
+    client_ip = http_request.client.host if http_request.client else "unknown"
+    audit_event(
+        "pilot_po_token",
+        customer_id=subject_id,
+        path="/api/v1/auth/pilot-po-token",
+        outcome="ok",
+        extra={"client_ip": client_ip, "role": ROLE_PO},
+    )
+    payload = {"sub": subject_id}
     return TokenPair(
         access_token=create_access_token(payload),
         refresh_token=create_refresh_token(payload),
@@ -166,30 +311,28 @@ async def pilot_token(
 
 @router.post("/refresh", response_model=TokenPair)
 async def refresh(request: RefreshRequest):
-    return refresh_access_token(request.refresh_token)
+    new_access = refresh_access_token(request.refresh_token)
+    if not new_access:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token",
+        )
+    return TokenPair(
+        access_token=new_access,
+        refresh_token=request.refresh_token,
+        token_type="bearer",
+    )
+
 
 
 @router.post("/staff-customer-session", response_model=StaffCustomerSessionResponse)
 async def staff_customer_session(
     request: StaffCustomerSessionRequest,
-    http_request: Request,
     db: Session = Depends(get_db),
-    _admin=Depends(require_any_role(ROLE_ADMIN)),
+    admin=Depends(require_any_role(ROLE_ADMIN)),
 ):
-    """Admin-only: issue short-lived access token bound to a specific customer.
-
-    - Claims: sub=customer_id, purpose=staff_customer_session, issued_by=admin subject,
-      staff_session=True
-    - TTL: STAFF_CUSTOMER_ACCESS_EXPIRE_MINUTES (default 15)
-    - No refresh token
-    - Audited
-    """
-    # require_any_role returns (subject_id, roles); preserve the real issuer in the JWT and audit log.
-    admin_sub = (
-        _admin[0]
-        if isinstance(_admin, tuple) and _admin
-        else getattr(_admin, "sub", None) or getattr(_admin, "subject_id", None) or "admin"
-    )
+    """Admin-only: issue a short-lived access token bound to one customer."""
+    admin_sub = admin[0] if isinstance(admin, tuple) and admin else "admin"
     customer = db.query(Customer).filter(Customer.customer_id == request.customer_id).first()
     if customer is None:
         audit_event(
