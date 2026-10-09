@@ -178,8 +178,8 @@ export default function NewHomePage() {
     setError(null);
     setCustomerSearchBusy(true);
     try {
-      const operatorToken = await ensureProductSession();
-      if (!operatorToken) throw new Error("نشست جست‌وجوی مشتری در دسترس نیست.");
+      const operatorToken = await ensureOperatorSession();
+      if (!operatorToken) throw new Error("نشست اپراتور گالری برای جست‌وجوی مشتری در دسترس نیست.");
       const found = await searchCustomers(query, operatorToken);
       setCustomerSearchResults(Array.isArray(found) ? found : []);
     } catch (err) {
