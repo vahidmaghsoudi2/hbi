@@ -124,14 +124,67 @@ def test_family_name_flows_through_intake_and_mobile_conflict_precedes_mutation(
     assert db_session.query(Case).count() == 0
 
 
+def test_first_name_does_not_override_family_name_identity_and_conflict_has_no_mutation(client, db_session):
+    db_session.add(
+        Customer(
+            customer_id="CUST_IDENTITY_A",
+            name="نام قبلی",
+            family_name="احمدی",
+            mobile="09124445555",
+            consent_to_store_data=0,
+        )
+    )
+    db_session.commit()
+    admin_token = _admin_token(db_session)
+    staff_token = _staff_token(client, admin_token, "CUST_IDENTITY_A")
+
+    same_identity = client.post(
+        "/api/v1/customers/intake",
+        headers={"Authorization": f"Bearer {staff_token}"},
+        json={
+            "name": "نام کوچک متفاوت",
+            "family_name": "احمدی",
+            "mobile": "09124445555",
+            "consent": 0,
+            "guest": False,
+            "open_case": False,
+        },
+    )
+    assert same_identity.status_code == 201, same_identity.text
+    db_session.expire_all()
+    saved = db_session.get(Customer, "CUST_IDENTITY_A")
+    assert saved.name == "نام کوچک متفاوت"
+
+    conflict = client.post(
+        "/api/v1/customers/intake",
+        headers={"Authorization": f"Bearer {staff_token}"},
+        json={
+            "name": "نباید ذخیره شود",
+            "family_name": "رضایی",
+            "mobile": "09124445555",
+            "consent": 1,
+            "guest": False,
+            "open_case": True,
+        },
+    )
+    assert conflict.status_code == 409
+    db_session.expire_all()
+    saved = db_session.get(Customer, "CUST_IDENTITY_A")
+    assert saved.name == "نام کوچک متفاوت"
+    assert saved.family_name == "احمدی"
+    assert saved.consent_to_store_data == 0
+    assert db_session.query(Case).count() == 0
+
+
 def test_staff_customer_token_cannot_create_sale_without_admin_role(client, db_session):
     db_session.add(Customer(customer_id="CUST_SALE_A", name="مشتری"))
     db_session.commit()
-    customer_token = create_access_token({"sub": "CUST_SALE_A"})
+    admin_token = _admin_token(db_session)
+    staff_token = _staff_token(client, admin_token, "CUST_SALE_A")
 
     response = client.post(
         "/api/v1/sales/",
-        headers={"Authorization": f"Bearer {customer_token}"},
+        headers={"Authorization": f"Bearer {staff_token}"},
         json={
             "customer_id": "CUST_SALE_A",
             "items": [],
