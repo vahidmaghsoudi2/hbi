@@ -3,9 +3,10 @@ import { Link } from "react-router-dom";
 import {
   listProducts,
   listManageableProducts,
-  pilotToken,
   pilotOperatorToken,
   pilotPoToken,
+  adminLogin,
+  staffCustomerSession,
   customerIntake,
   createGuest,
   generateRecommendations,
@@ -23,7 +24,6 @@ import ProductReviewPanel from "./ProductReviewPanel";
 import type {
   ProductDTO,
   RecommendationDTO,
-  PilotTokenRequest,
   CustomerIntakeRequest,
   GuestCreateRequest,
   CustomerSearchResult,
@@ -49,11 +49,16 @@ type Panel = "consult" | "previous" | "profile" | "catalog" | "review" | "intake
 
 export default function NewHomePage() {
   const [active, setActive] = useState<Panel>("consult");
-  const [token, setToken] = useState<string | null>(() => sessionStorage.getItem("hbi_access_token"));
+  const [token, setToken] = useState<string | null>(() => sessionStorage.getItem("hbi_staff_customer_access_token"));
   const [customerId, setCustomerId] = useState<string | null>(() => sessionStorage.getItem("hbi_customer_id"));
   const [caseId, setCaseId] = useState<string | null>(() => sessionStorage.getItem("hbi_case_id"));
   const [name, setName] = useState("");
+  const [familyName, setFamilyName] = useState("");
   const [mobile, setMobile] = useState("");
+  const [adminToken, setAdminToken] = useState<string | null>(() => sessionStorage.getItem("hbi_admin_access_token"));
+  const [adminUsername, setAdminUsername] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminLoginBusy, setAdminLoginBusy] = useState(false);
   const [consultationLine, setConsultationLine] = useState<string>("SKIN");
   const [concerns, setConcerns] = useState<string[]>([]);
   const [skin, setSkin] = useState<string[]>([]);
@@ -153,9 +158,8 @@ export default function NewHomePage() {
     setError(null);
     setCustomerSearchBusy(true);
     try {
-      const operatorToken = await ensureProductSession();
-      if (!operatorToken) throw new Error("نشست جست‌وجوی مشتری در دسترس نیست.");
-      const found = await searchCustomers(query, operatorToken);
+      const currentAdminToken = await ensureAdminToken();
+      const found = await searchCustomers(query, currentAdminToken);
       setCustomerSearchResults(Array.isArray(found) ? found : []);
     } catch (err) {
       setCustomerSearchResults([]);
@@ -170,15 +174,17 @@ export default function NewHomePage() {
     setStatusMsg(null);
     setBusy(true);
     try {
-      const pair = await pilotToken({ customer_id: customer.customer_id });
-      sessionStorage.setItem("hbi_access_token", pair.access_token);
-      sessionStorage.setItem("hbi_refresh_token", pair.refresh_token);
+      const currentAdminToken = await ensureAdminToken();
+      const staffSession = await staffCustomerSession(customer.customer_id, currentAdminToken);
+      sessionStorage.setItem("hbi_staff_customer_access_token", staffSession.access_token);
+      sessionStorage.setItem("hbi_access_token", staffSession.access_token);
       sessionStorage.setItem("hbi_customer_id", customer.customer_id);
       sessionStorage.removeItem("hbi_case_id");
-      setToken(pair.access_token);
+      setToken(staffSession.access_token);
       setCustomerId(customer.customer_id);
       setCaseId(null);
       setName(customer.name ?? "");
+      setFamilyName(customer.family_name ?? "");
       setMobile(customer.mobile ?? "");
       setConcerns(customer.concerns ? customer.concerns.split(",").map((x) => x.trim()).filter(Boolean) : []);
       setSkin(customer.skin_profile ? customer.skin_profile.split(",").map((x) => x.trim()).filter(Boolean) : []);
@@ -189,7 +195,7 @@ export default function NewHomePage() {
       setSelectedRecommendationId(null);
       setSaleProductId("");
       setLastSale(null);
-      const history = await listSalesByCustomer(customer.customer_id, pair.access_token);
+      const history = await listSalesByCustomer(customer.customer_id, staffSession.access_token);
       setPurchaseHistory(Array.isArray(history) ? history : []);
       setStatusMsg(`مشتری قبلی انتخاب شد. ${history.length} خرید قبلی بارگذاری شد؛ مشکل امروز را ثبت کنید.`);
       setCustomerSearchResults([]);
@@ -206,24 +212,56 @@ export default function NewHomePage() {
     setError(null);
   }
 
+  async function ensureAdminToken(): Promise<string> {
+    const current = adminToken || sessionStorage.getItem("hbi_admin_access_token");
+    if (!current) throw new Error("برای ادامه مسیر مشاوره و فروش، ابتدا با حساب Admin وارد شوید.");
+    return current;
+  }
+
+  async function onAdminLoginSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    if (!adminUsername.trim() || !adminPassword) return setError("نام کاربری و رمز عبور Admin الزامی است.");
+    setAdminLoginBusy(true);
+    try {
+      const pair = await adminLogin({ username: adminUsername.trim(), password: adminPassword });
+      sessionStorage.setItem("hbi_admin_access_token", pair.access_token);
+      setAdminToken(pair.access_token);
+      setAdminPassword("");
+      setStatusMsg("ورود Admin موفق بود؛ مسیر مشاوره و فروش از نشست آزمایشی استفاده نمی‌کند.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setAdminLoginBusy(false);
+    }
+  }
+
+  function logoutAdmin() {
+    sessionStorage.removeItem("hbi_admin_access_token");
+    setAdminToken(null);
+    setStatusMsg("نشست Admin پاک شد.");
+  }
+
   async function ensureSession(displayName: string, concernsForGuest: string) {
-    let currentToken = token;
-    if (!currentToken) {
+    if (token && customerId) return token;
+    const currentAdminToken = await ensureAdminToken();
+    let targetCustomerId = customerId;
+    if (!targetCustomerId) {
       const guest = (await createGuest({
         name: displayName,
         consent: 0,
         concerns: concernsForGuest || undefined,
       })) as { customer_id?: string };
       if (!guest?.customer_id) throw new Error("ایجاد پروفایل مهمان ناموفق بود.");
-      sessionStorage.setItem("hbi_customer_id", guest.customer_id);
-      setCustomerId(guest.customer_id);
-      const pair = await pilotToken({ customer_id: guest.customer_id } as PilotTokenRequest);
-      sessionStorage.setItem("hbi_access_token", pair.access_token);
-      sessionStorage.setItem("hbi_refresh_token", pair.refresh_token);
-      currentToken = pair.access_token;
-      setToken(currentToken);
+      targetCustomerId = guest.customer_id;
+      sessionStorage.setItem("hbi_customer_id", targetCustomerId);
+      setCustomerId(targetCustomerId);
     }
-    return currentToken as string;
+    const staffSession = await staffCustomerSession(targetCustomerId, currentAdminToken);
+    sessionStorage.setItem("hbi_staff_customer_access_token", staffSession.access_token);
+    sessionStorage.setItem("hbi_access_token", staffSession.access_token);
+    setToken(staffSession.access_token);
+    return staffSession.access_token;
   }
 
   async function ensureProductSession(): Promise<string | null> {
@@ -245,8 +283,9 @@ export default function NewHomePage() {
   async function loadActiveCustomerProfile() {
     if (!token || !customerId) return;
     try {
-      const profile = (await getCustomerById(customerId, token)) as { name?: string; mobile?: string | null; concerns?: string | null; skin_profile?: string | null };
+      const profile = (await getCustomerById(customerId, token)) as { name?: string; family_name?: string | null; mobile?: string | null; concerns?: string | null; skin_profile?: string | null };
       if (profile.name) setName(profile.name);
+      if (profile.family_name) setFamilyName(profile.family_name);
       if (profile.mobile) {
         setMobile(profile.mobile);
       }
@@ -280,9 +319,8 @@ export default function NewHomePage() {
       try {
         // The operator UI reads internal evaluation history through the
         // role-protected endpoint; the ordinary customer endpoint stays eligible-only.
-        const operatorToken = await ensureProductSession();
-        if (!operatorToken) throw new Error("نشست اپراتور در دسترس نیست.");
-        const list = await listInternalEvaluationsByCase(storedCaseId, operatorToken);
+        const currentAdminToken = await ensureAdminToken();
+        const list = await listInternalEvaluationsByCase(storedCaseId, currentAdminToken);
         if (cancelled) return;
         setRecs(Array.isArray(list) ? list : []);
         setRecDone(true);
@@ -295,18 +333,20 @@ export default function NewHomePage() {
     return () => {
       cancelled = true;
     };
-  }, [active, token, caseId]);
+  }, [active, token, caseId, adminToken]);
 
   async function saveActiveProfile() {
     setError(null);
     setStatusMsg(null);
     if (!name.trim()) return setError("نام الزامی است.");
     if (!mobile.trim()) return setError("شماره موبایل الزامی است.");
+    if (!familyName.trim()) return setError("نام خانوادگی برای تطبیق هویت مشتری الزامی است.");
     setProfileSaving(true);
     try {
       const currentToken = await ensureSession(name.trim(), concernsText);
       const intake = (await customerIntake({
         name: name.trim(),
+        family_name: familyName.trim(),
         mobile: mobile.trim() || undefined,
         concerns: concernsText || undefined,
         consent: 0,
@@ -329,11 +369,12 @@ export default function NewHomePage() {
   }
 
   function startNewCustomer() {
-    ["hbi_access_token", "hbi_refresh_token", "hbi_customer_id", "hbi_case_id", "hbi_concerns"].forEach((k) => sessionStorage.removeItem(k));
+    ["hbi_access_token", "hbi_staff_customer_access_token", "hbi_refresh_token", "hbi_customer_id", "hbi_case_id", "hbi_concerns"].forEach((k) => sessionStorage.removeItem(k));
     setToken(null);
     setCustomerId(null);
     setCaseId(null);
     setName("");
+    setFamilyName("");
     setMobile("");
     setConsultationLine("SKIN");
     setConcerns([]);
@@ -369,6 +410,7 @@ export default function NewHomePage() {
     setShowAllRecommendations(false);
     if (!name.trim()) return setError("نام الزامی است.");
     if (!mobile.trim()) return setError("شماره موبایل الزامی است.");
+    if (!familyName.trim()) return setError("نام خانوادگی برای تطبیق هویت مشتری الزامی است.");
     if (!consultationLine) return setError("ابتدا لاین مشاوره را انتخاب کنید.");
     if (!concernsText) return setError("حداقل یک موضوع یا نوع پوست را انتخاب کنید.");
     setBusy(true);
@@ -378,6 +420,7 @@ export default function NewHomePage() {
       const intake = (await customerIntake(
         {
           name: name.trim(),
+          family_name: familyName.trim(),
           mobile: mobile.trim() || undefined,
           concerns: concernsText,
           consent: 0,
@@ -401,10 +444,8 @@ export default function NewHomePage() {
         { case_id: newCaseId, customer_profile: { concerns: concernsText, skin_type: skin.join(",") || undefined } },
         currentToken
       );
-      const operatorToken = await ensureProductSession();
-      const evaluations = operatorToken
-        ? await listInternalEvaluationsByCase(newCaseId, operatorToken)
-        : list;
+      const currentAdminToken = await ensureAdminToken();
+      const evaluations = await listInternalEvaluationsByCase(newCaseId, currentAdminToken);
       const eligibleCount = (Array.isArray(evaluations) ? evaluations : []).filter(
         (r) => (r.eligibility_status ?? r.eligibility ?? "").trim().toUpperCase() === "ELIGIBLE"
       ).length;
@@ -435,11 +476,12 @@ export default function NewHomePage() {
     // Inventory sell-read requires Operator/Admin — not the customer JWT.
     setSalePrice(null);
     setSaleFxRate(null);
-    void ensureProductSession()
-      .then(async (operatorToken) => {
-        if (cancelled || !operatorToken) throw new Error("operator session unavailable");
+    void Promise.resolve()
+      .then(async () => {
+        if (cancelled) throw new Error("request cancelled");
+        const currentAdminToken = await ensureAdminToken();
         const [inv, fx] = await Promise.all([
-          getInventoryByProduct(saleProductId, operatorToken),
+          getInventoryByProduct(saleProductId, currentAdminToken),
           getCurrentFx(),
         ]);
         if (fx.fx_rate_usd_to_irr == null) throw new Error("نرخ عملیاتی ارز در دسترس نیست؛ فروش متوقف شد.");
@@ -469,6 +511,8 @@ export default function NewHomePage() {
     e.preventDefault();
     setError(null);
     if (!token || !customerId) return setError("ابتدا مشاوره را ثبت کنید.");
+    const currentAdminToken = adminToken || sessionStorage.getItem("hbi_admin_access_token");
+    if (!currentAdminToken) return setError("برای ثبت فروش باید با حساب Admin وارد شوید.");
     if (!saleProductId.trim()) return setError("محصول را انتخاب کنید.");
     if (saleQty < 1) return setError("تعداد نامعتبر است.");
     if (salePrice == null) return setError("قیمت فروش این محصول در دسترس نیست.");
@@ -485,7 +529,7 @@ export default function NewHomePage() {
           items: [{ product_id: saleProductId.trim(), quantity: saleQty, ...(selectedRecommendationId ? { recommendation_id: selectedRecommendationId } : {}) }],
           fx_rate_usd_to_irr: currentFxRate,
         },
-        token
+        currentAdminToken
       );
       setLastSale(sale);
       setSelectedRecommendationId(null);
@@ -589,6 +633,33 @@ export default function NewHomePage() {
       </header>
 
       <main className="pro-main">
+        {!adminToken ? (
+          <section className="pro-panel" aria-label="ورود Admin">
+            <h2>ورود مدیر برای مشاوره و فروش</h2>
+            <p className="pro-muted">مسیر مشاوره از نشست staff-customer-session و ثبت فروش از توکن Admin استفاده می‌کند؛ توکن آزمایشی مشتری در این مسیر صادر نمی‌شود.</p>
+            <form className="pro-form" onSubmit={onAdminLoginSubmit}>
+              <div className="pro-grid-2">
+                <div>
+                  <label className="pro-label" htmlFor="admin-username">نام کاربری Admin</label>
+                  <input id="admin-username" className="pro-input" autoComplete="username" value={adminUsername} onChange={(e) => setAdminUsername(e.target.value)} required />
+                </div>
+                <div>
+                  <label className="pro-label" htmlFor="admin-password">رمز عبور Admin</label>
+                  <input id="admin-password" className="pro-input" type="password" autoComplete="current-password" value={adminPassword} onChange={(e) => setAdminPassword(e.target.value)} required />
+                </div>
+              </div>
+              <div className="pro-actions">
+                <button type="submit" className="pro-btn-primary" disabled={adminLoginBusy}>{adminLoginBusy ? "در حال ورود…" : "ورود Admin"}</button>
+              </div>
+            </form>
+          </section>
+        ) : (
+          <div className="pro-status-bar">
+            <span className="dot on" />
+            <span>نشست Admin فعال</span>
+            <button type="button" className="pro-btn-secondary" onClick={logoutAdmin}>خروج Admin</button>
+          </div>
+        )}
         <div className="pro-status-bar">
           <span className={token ? "dot on" : "dot"} />
           <span>{token ? "نشست فعال" : "نشست ندارد"}</span>
@@ -692,7 +763,11 @@ export default function NewHomePage() {
                     <input id="name" className="pro-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="نام مشتری" />
                   </div>
                   <div>
-                    <label className="pro-label" htmlFor="mobile">موبایل</label>
+                    <label className="pro-label" htmlFor="family-name">نام خانوادگی *</label>
+                    <input id="family-name" className="pro-input" value={familyName} onChange={(e) => setFamilyName(e.target.value)} placeholder="نام خانوادگی مشتری" />
+                  </div>
+                  <div>
+                    <label className="pro-label" htmlFor="mobile">موبایل *</label>
                     <input id="mobile" className="pro-input" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="09…" />
                   </div>
                 </div>
@@ -769,7 +844,8 @@ export default function NewHomePage() {
               <legend>اطلاعات مشتری فعال</legend>
               <div className="pro-grid-2">
                 <div><label className="pro-label" htmlFor="profile-name">نام *</label><input id="profile-name" className="pro-input" value={name} onChange={(e) => setName(e.target.value)} /></div>
-                <div><label className="pro-label" htmlFor="profile-mobile">موبایل</label><input id="profile-mobile" className="pro-input" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="09…" /></div>
+                <div><label className="pro-label" htmlFor="profile-family-name">نام خانوادگی *</label><input id="profile-family-name" className="pro-input" value={familyName} onChange={(e) => setFamilyName(e.target.value)} /></div>
+                <div><label className="pro-label" htmlFor="profile-mobile">موبایل *</label><input id="profile-mobile" className="pro-input" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="09…" /></div>
               </div>
             </fieldset>
             <dl className="pro-dl">
