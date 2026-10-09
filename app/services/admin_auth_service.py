@@ -62,6 +62,15 @@ def ensure_gallery_operator_account(db: Session) -> AdminCredential | None:
         return None
     username = username.strip()
     subject_id = os.getenv("HBI_GALLERY_OPERATOR_SUBJECT", "USR_GALLERY_OPERATOR")
+    # The credential table allows only one login per subject. Refuse a second
+    # username rather than letting startup fail with a database uniqueness error.
+    subject_credential = db.query(AdminCredential).filter(
+        AdminCredential.subject_id == subject_id
+    ).first()
+    if subject_credential is not None and subject_credential.username != username:
+        raise ValueError(
+            "Gallery operator subject is already assigned to a different username."
+        )
     credential = db.query(AdminCredential).filter(AdminCredential.username == username).first()
     if credential is not None:
         # Never rebind an existing login to a different subject: doing so would
