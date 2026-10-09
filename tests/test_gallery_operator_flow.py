@@ -4,7 +4,7 @@ from __future__ import annotations
 from app.core.auth import create_access_token
 from app.models.admin_credential import AdminCredential
 from app.models.customer import Customer
-from app.models.user_role import UserRole, ROLE_GALLERY_OPERATOR
+from app.models.user_role import UserRole, ROLE_ADMIN, ROLE_GALLERY_OPERATOR
 
 
 def _headers(subject_id: str) -> dict:
@@ -174,3 +174,35 @@ def test_gallery_operator_can_read_selected_customers_sales_history_and_total(cl
     assert total.status_code == 200, total.text
     assert "total_sales" in total.json()
 
+
+
+def test_admin_and_gallery_operator_login_roles_are_not_interchangeable(client, db_session, monkeypatch):
+    db_session.add_all([
+        AdminCredential(
+            credential_id="ADMIN-CRED-ROLE-BOUNDARY",
+            subject_id="USR_ROLE_BOUNDARY_ADMIN",
+            username="admin-boundary",
+            password_hash="test-hash",
+        ),
+        AdminCredential(
+            credential_id="GALLERY-CRED-ROLE-BOUNDARY",
+            subject_id="USR_ROLE_BOUNDARY_GALLERY",
+            username="gallery-boundary",
+            password_hash="test-hash",
+        ),
+    ])
+    _assign_role(db_session, "USR_ROLE_BOUNDARY_ADMIN", ROLE_ADMIN)
+    _assign_role(db_session, "USR_ROLE_BOUNDARY_GALLERY", ROLE_GALLERY_OPERATOR)
+    monkeypatch.setattr("app.api.routers.auth.verify_admin_password", lambda credential, password: password == "valid")
+
+    admin_on_operator_route = client.post(
+        "/api/v1/auth/operator-login",
+        json={"username": "admin-boundary", "password": "valid"},
+    )
+    gallery_on_admin_route = client.post(
+        "/api/v1/auth/login",
+        json={"username": "gallery-boundary", "password": "valid"},
+    )
+
+    assert admin_on_operator_route.status_code == 403, admin_on_operator_route.text
+    assert gallery_on_admin_route.status_code == 403, gallery_on_admin_route.text
