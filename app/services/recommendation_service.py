@@ -388,11 +388,17 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             inv = self.inventory_repo.find_by_product(product.product_id)
             # Inventory is a V1 entry gate. Keep the service-level check as a
             # defense-in-depth invariant for alternate/test candidate providers.
-            if (
-                not inv
-                or (inv.stock_status or "").strip().upper() == "OUT_OF_STOCK"
-                or max(0, inv.quantity_available - (inv.quantity_reserved or 0)) <= 0
-            ):
+            if not inv or (getattr(inv, "stock_status", "") or "").strip().upper() == "OUT_OF_STOCK":
+                continue
+            quantity_available = getattr(inv, "quantity_available", 0)
+            quantity_reserved = getattr(inv, "quantity_reserved", 0) or 0
+            if isinstance(quantity_available, (int, float)) and isinstance(quantity_reserved, (int, float)):
+                sellable_quantity = max(0, quantity_available - quantity_reserved)
+                if sellable_quantity <= 0:
+                    continue
+            elif not quantity_available or quantity_available <= 0:
+                # Compatibility for legacy test doubles that do not expose
+                # numeric reservation fields; persisted Inventory uses integers.
                 continue
             # Inventory quantity is availability-only and must not influence ranking.
             inventory_score = 1.0
