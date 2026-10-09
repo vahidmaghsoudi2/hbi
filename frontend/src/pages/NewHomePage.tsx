@@ -10,6 +10,7 @@ import {
   createGuest,
   generateRecommendations,
   listRecommendationsByCase,
+  listInternalEvaluationsByCase,
   createSale,
   getTotalSales,
   getCustomerById,
@@ -276,17 +277,22 @@ export default function NewHomePage() {
       return;
     }
     let cancelled = false;
-    void listRecommendationsByCase(storedCaseId, token)
-      .then((list) => {
+    void (async () => {
+      try {
+        // The operator UI reads internal evaluation history through the
+        // role-protected endpoint; the ordinary customer endpoint stays eligible-only.
+        const operatorToken = await ensureProductSession();
+        if (!operatorToken) throw new Error("نشست اپراتور در دسترس نیست.");
+        const list = await listInternalEvaluationsByCase(storedCaseId, operatorToken);
         if (cancelled) return;
         setRecs(Array.isArray(list) ? list : []);
         setRecDone(true);
-      })
-      .catch(() => {
+      } catch {
         if (cancelled) return;
         setRecs([]);
         setRecDone(false);
-      });
+      }
+    })();
     return () => {
       cancelled = true;
     };
@@ -396,10 +402,17 @@ export default function NewHomePage() {
         { case_id: newCaseId, customer_profile: { concerns: concernsText, skin_type: skin.join(",") || undefined } },
         currentToken
       );
-      setRecs(Array.isArray(list) ? list : []);
+      const operatorToken = await ensureProductSession();
+      const evaluations = operatorToken
+        ? await listInternalEvaluationsByCase(newCaseId, operatorToken)
+        : list;
+      const eligibleCount = (Array.isArray(evaluations) ? evaluations : []).filter(
+        (r) => (r.eligibility_status ?? r.eligibility ?? "").trim().toUpperCase() === "ELIGIBLE"
+      ).length;
+      setRecs(Array.isArray(evaluations) ? evaluations : []);
       setShowAllRecommendations(false);
       setRecDone(true);
-      setStatusMsg(list?.length ? `${list.length} پیشنهاد آماده است.` : "پیشنهادی با شواهد کافی یافت نشد.");
+      setStatusMsg(eligibleCount ? `${eligibleCount} پیشنهاد واجد شرایط آماده است.` : "پیشنهاد واجد شرایطی با شواهد کافی یافت نشد.");
       setActive("results");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
