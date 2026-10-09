@@ -382,17 +382,21 @@ async def quick_intake(
             if data.consent == 1:
                 fields["consent_date"] = datetime.now()
             if mobile and not data.guest:
-                if (getattr(authenticated, "mobile", None) or "").strip():
+                # Confirm family-name identity only when reusing the same
+                # mobile already attached to this customer. Assigning a new,
+                # currently unowned mobile to this customer is not a mobile
+                # match and must not be blocked by a legacy NULL family_name.
+                existing_mobile = (getattr(authenticated, "mobile", None) or "").strip()
+                if existing_mobile and existing_mobile == mobile:
                     from app.services.customer_service import assert_mobile_identity_allows_bind
 
                     try:
                         assert_mobile_identity_allows_bind(
                             existing=authenticated,
-                            incoming_family_name=(
-                                data.family_name
-                                if data.family_name is not None
-                                else getattr(authenticated, "family_name", None)
-                            ),
+                            # Same-mobile match requires an explicit surname from
+                            # the current request. Never fall back to the stored
+                            # family_name (that would silently approve omission).
+                            incoming_family_name=data.family_name,
                         )
                     except ValueError as e:
                         raise HTTPException(
