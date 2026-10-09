@@ -209,6 +209,9 @@ def test_inventory_zero_excluded(api_env):
         ]
 
     assert zero_inv.product_id not in product_ids
+    assert db.query(Recommendation).filter_by(
+        case_id=case.case_id, product_id=zero_inv.product_id
+    ).count() == 0, "pre-evaluation zero-stock exclusions must not create why-not records"
 
 
 def test_verified_evidence_is_decision_usable(api_env):
@@ -267,3 +270,94 @@ def test_verified_evidence_is_decision_usable(api_env):
     assert response.status_code == 200, response.text
     data = response.json()
     assert product.product_id in [item["product_id"] for item in data]
+
+
+
+def test_customer_case_read_hides_rejected_rows_and_internal_reasons(api_env):
+    client, db, case = api_env
+    eligible = Product(
+        product_id="api_eligible_001", brand="TestBrand",
+        product_name="Eligible", identity_status="VERIFIED", qa_verdict="VALID",
+        status="ACTIVE",
+    )
+    rejected = Product(
+        product_id="api_rejected_001", brand="TestBrand",
+        product_name="Rejected", identity_status="VERIFIED", qa_verdict="VALID",
+        status="ACTIVE",
+    )
+    db.add_all([eligible, rejected])
+    db.flush()
+    db.add_all([
+        Recommendation(
+            recommendation_id="rec_api_eligible_001", case_id=case.case_id,
+            product_id=eligible.product_id, eligibility_status="ELIGIBLE",
+            exclusion_reasons="",
+        ),
+        Recommendation(
+            recommendation_id="rec_api_rejected_001", case_id=case.case_id,
+            product_id=rejected.product_id, eligibility_status="INELIGIBLE_PENDING_REVIEW",
+            exclusion_reasons='["NO_APPROVED_EVIDENCE"]',
+        ),
+    ])
+    db.commit()
+
+    token = _token(client)
+    response = client.get(
+        f"/api/v1/recommendations/case/{case.case_id}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200, response.text
+    payload = response.json()
+    assert [row["product_id"] for row in payload] == [eligible.product_id]
+    assert all("exclusion_reasons" not in row for row in payload)
+
+
+def test_operator_case_evaluations_include_rejected_reason_and_require_role(api_env):
+    client, db, case = api_env
+    eligible = Product(
+        product_id="api_operator_eligible_001", brand="TestBrand",
+        product_name="Eligible", identity_status="VERIFIED", qa_verdict="VALID",
+        status="ACTIVE",
+    )
+    rejected = Product(
+        product_id="api_operator_rejected_001", brand="TestBrand",
+        product_name="Rejected", identity_status="VERIFIED", qa_verdict="VALID",
+        status="ACTIVE",
+    )
+    db.add_all([eligible, rejected])
+    db.flush()
+    db.add_all([
+        Recommendation(
+            recommendation_id="rec_api_operator_eligible_001", case_id=case.case_id,
+            product_id=eligible.product_id, eligibility_status="ELIGIBLE",
+            exclusion_reasons="",
+        ),
+        Recommendation(
+            recommendation_id="rec_api_operator_rejected_001", case_id=case.case_id,
+            product_id=rejected.product_id, eligibility_status="INELIGIBLE_PENDING_REVIEW",
+            exclusion_reasons='["NO_APPROVED_EVIDENCE"]',
+        ),
+    ])
+    db.commit()
+
+    customer_token = _token(client)
+    denied = client.get(
+        f"/api/v1/recommendations/case/{case.case_id}/evaluations",
+        headers={"Authorization": f"Bearer {customer_token}"},
+    )
+    assert denied.status_code == 403
+
+    operator_response = client.post("/api/v1/auth/pilot-operator-token")
+    assert operator_response.status_code == 200, operator_response.text
+    operator_token = operator_response.json()["access_token"]
+    response = client.get(
+        f"/api/v1/recommendations/case/{case.case_id}/evaluations",
+        headers={"Authorization": f"Bearer {operator_token}"},
+    )
+    assert response.status_code == 200, response.text
+    payload = response.json()
+    assert {row["product_id"] for row in payload} == {
+        eligible.product_id, rejected.product_id
+    }
+    rejected_row = next(row for row in payload if row["product_id"] == rejected.product_id)
+    assert rejected_row["exclusion_reasons"] == ["NO_APPROVED_EVIDENCE"]
