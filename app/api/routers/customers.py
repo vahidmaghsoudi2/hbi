@@ -382,22 +382,28 @@ async def quick_intake(
             if data.consent == 1:
                 fields["consent_date"] = datetime.now()
             if mobile and not data.guest:
-                from app.services.customer_service import assert_mobile_identity_allows_bind
+                # A record with no mobile has no existing mobile identity to
+                # re-bind. Allow its first mobile assignment; the ownership
+                # check above has already rejected numbers owned by another
+                # customer. If this record already has a mobile, require an
+                # explicit family-name match before changing/binding it.
+                if (getattr(authenticated, "mobile", None) or "").strip():
+                    from app.services.customer_service import assert_mobile_identity_allows_bind
 
-                try:
-                    assert_mobile_identity_allows_bind(
-                        existing=authenticated,
-                        incoming_family_name=(
-                            data.family_name
-                            if data.family_name is not None
-                            else getattr(authenticated, "family_name", None)
-                        ),
-                    )
-                except ValueError as e:
-                    raise HTTPException(
-                        status_code=status.HTTP_409_CONFLICT,
-                        detail=str(e),
-                    )
+                    try:
+                        assert_mobile_identity_allows_bind(
+                            existing=authenticated,
+                            incoming_family_name=(
+                                data.family_name
+                                if data.family_name is not None
+                                else getattr(authenticated, "family_name", None)
+                            ),
+                        )
+                    except ValueError as e:
+                        raise HTTPException(
+                            status_code=status.HTTP_409_CONFLICT,
+                            detail=str(e),
+                        )
                 fields["mobile"] = mobile
             customer = (
                 svc.repository.update(authenticated.customer_id, **fields)
