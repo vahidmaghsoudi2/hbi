@@ -85,8 +85,8 @@ async function request<T>(
 }
 
 /** Public — no auth */
-export function listProducts(): Promise<ProductDTO[]> {
-  return request<ProductDTO[]>("/products/");
+export function listProducts(token: string): Promise<ProductDTO[]> {
+  return request<ProductDTO[]>("/products/", {}, token);
 }
 
 /** Dev/Pilot only */
