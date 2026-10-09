@@ -90,18 +90,27 @@ async def login(
         UserRole.subject_id == credential.subject_id,
         UserRole.role == ROLE_ADMIN,
     ).first()
-    if role is None:
+    gallery_role = db.query(UserRole).filter(
+        UserRole.subject_id == credential.subject_id,
+        UserRole.role == ROLE_GALLERY_OPERATOR,
+    ).first()
+    if role is None or gallery_role is not None:
+        detail = (
+            "Admin/GalleryOperator identity conflict"
+            if gallery_role is not None
+            else "Admin role is not assigned"
+        )
         audit_event(
             "admin_login",
             customer_id=credential.subject_id,
             path="/api/v1/auth/login",
             outcome="denied",
-            detail="admin_role_missing",
+            detail="role_conflict" if gallery_role is not None else "admin_role_missing",
             extra={"client_ip": client_ip},
         )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin role is not assigned",
+            detail=detail,
         )
 
     clear_failures(bf_key)
@@ -171,14 +180,23 @@ async def operator_login(
         UserRole.subject_id == credential.subject_id,
         UserRole.role == ROLE_GALLERY_OPERATOR,
     ).first()
-    if role is None:
+    admin_role = db.query(UserRole).filter(
+        UserRole.subject_id == credential.subject_id,
+        UserRole.role == ROLE_ADMIN,
+    ).first()
+    if role is None or admin_role is not None:
+        conflict = admin_role is not None
         audit_event(
             "gallery_operator_login", customer_id=credential.subject_id,
             path="/api/v1/auth/operator-login", outcome="denied",
-            detail="gallery_operator_role_missing",
+            detail="role_conflict" if conflict else "gallery_operator_role_missing",
             extra={"client_ip": client_ip},
         )
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Gallery operator role is not assigned")
+        detail = (
+            "Admin/GalleryOperator identity conflict"
+            if conflict else "Gallery operator role is not assigned"
+        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=detail)
     clear_failures(bf_key)
     payload = {"sub": credential.subject_id}
     audit_event(
