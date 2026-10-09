@@ -4,7 +4,9 @@ import base64
 import json
 
 from app.core.auth import create_access_token, create_refresh_token
+from app.models.case import Case
 from app.models.customer import Customer
+from app.models.sale import Sale
 from app.models.user_role import ROLE_ADMIN, UserRole
 
 
@@ -83,6 +85,19 @@ def test_staff_customer_session_cannot_use_admin_role_even_if_customer_subject_h
     )
     assert denied.status_code == 403
 
+    sale_denied = client.post(
+        "/api/v1/sales/",
+        headers={"Authorization": f"Bearer {staff_token}"},
+        json={
+            "customer_id": customer_id,
+            "items": [],
+            "fx_rate_usd_to_irr": 1,
+        },
+    )
+    assert sale_denied.status_code == 403
+    db_session.expire_all()
+    assert db_session.query(Sale).count() == 0
+
 
 def test_admin_token_still_passes_role_gate_for_sale_endpoint(client, db_session):
     _add_role(db_session, "SALE_AUTH_ADMIN", ROLE_ADMIN, "UR-SALE-AUTH-ADMIN")
@@ -100,3 +115,96 @@ def test_admin_token_still_passes_role_gate_for_sale_endpoint(client, db_session
         },
     )
     assert response.status_code not in (401, 403)
+
+
+def _staff_session_for(client, db_session, customer_id: str) -> str:
+    admin_id = f"STAFF_IDENTITY_ADMIN_{customer_id}"
+    _add_role(
+        db_session,
+        admin_id,
+        ROLE_ADMIN,
+        f"UR-IDENTITY-ADMIN-{customer_id}",
+    )
+    admin_token = create_access_token({"sub": admin_id})
+    response = client.post(
+        "/api/v1/auth/staff-customer-session",
+        headers={"Authorization": f"Bearer {admin_token}"},
+        json={"customer_id": customer_id},
+    )
+    assert response.status_code == 200, response.text
+    return response.json()["access_token"]
+
+
+def test_same_mobile_requires_explicit_matching_surname_and_never_mutates_on_conflict(
+    client, db_session
+):
+    customer_id = "CUST_IDENTITY_SAME_MOBILE"
+    db_session.add(
+        Customer(
+            customer_id=customer_id,
+            name="مینا",
+            family_name="احمدی",
+            mobile="09123334444",
+        )
+    )
+    db_session.commit()
+    staff_token = _staff_session_for(client, db_session, customer_id)
+
+    # None/omitted, blank, a different surname, and first-name-as-surname
+    # must all fail without changing Customer or creating a Case.
+    for incoming in (None, "", "رضایی", "مینا"):
+        payload = {
+            "name": "نام نباید تغییر کند",
+            "mobile": "09123334444",
+            "consent": 1,
+            "guest": False,
+            "open_case": True,
+        }
+        if incoming is not None:
+            payload["family_name"] = incoming
+        response = client.post(
+            "/api/v1/customers/intake",
+            headers={"Authorization": f"Bearer {staff_token}"},
+            json=payload,
+        )
+        assert response.status_code == 409, (incoming, response.text)
+        db_session.expire_all()
+        saved = db_session.get(Customer, customer_id)
+        assert saved.name == "مینا"
+        assert saved.family_name == "احمدی"
+        assert saved.mobile == "09123334444"
+        assert db_session.query(Case).count() == 0
+
+
+def test_same_mobile_with_explicit_matching_surname_is_allowed(client, db_session):
+    customer_id = "CUST_IDENTITY_MATCHING_SURNAME"
+    db_session.add(
+        Customer(
+            customer_id=customer_id,
+            name="مینا",
+            family_name="احمدی",
+            mobile="09125556666",
+        )
+    )
+    db_session.commit()
+    staff_token = _staff_session_for(client, db_session, customer_id)
+
+    response = client.post(
+        "/api/v1/customers/intake",
+        headers={"Authorization": f"Bearer {staff_token}"},
+        json={
+            "name": "مینا جدید",
+            "family_name": "احمدی",
+            "mobile": "09125556666",
+            "consent": 0,
+            "guest": False,
+            "open_case": False,
+        },
+    )
+    assert response.status_code == 201, response.text
+    db_session.expire_all()
+    saved = db_session.get(Customer, customer_id)
+    assert saved.name == "مینا جدید"
+    assert saved.family_name == "احمدی"
+    assert saved.mobile == "09125556666"
+    assert db_session.query(Case).count() == 0
