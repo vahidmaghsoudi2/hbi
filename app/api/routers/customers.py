@@ -56,8 +56,9 @@ class ProfileFactRevokeRequest(BaseModel):
 
 
 class IntakeRequest(BaseModel):
-    """ثبت سریع مراجعه گالری — نام، نگرانی امروز، موبایل اختیاری."""
+    """ثبت سریع مراجعه گالری — نام، نام خانوادگی و اطلاعات همین مراجعه."""
     name: str
+    family_name: Optional[str] = None
     mobile: Optional[str] = None
     concerns: Optional[str] = Field(
         default=None,
@@ -103,6 +104,7 @@ def _customer_public(c) -> Dict[str, Any]:
     return {
         "customer_id": c.customer_id,
         "name": c.name,
+        "family_name": getattr(c, "family_name", None),
         "mobile": c.mobile,
         "consent_to_store_data": c.consent_to_store_data,
         "concerns": getattr(c, "concerns", None),
@@ -314,28 +316,32 @@ async def quick_intake(
     token is A → generate returns 403 Access denied.
     """
     svc = CustomerService(db)
-    mobile = data.mobile
+    mobile = data.mobile.strip() if data.mobile else None
 
-    if (
-        mobile
-        and not data.guest
-        and _looks_like_mobile(mobile)
-        and _looks_like_mobile(customer_id)
-        and mobile != customer_id
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Customer identity mismatch",
-        )
+    # Validate before any mutation. The staff token is bound to one customer;
+    # a mobile already owned by another row must never silently rebind that token.
+    if data.consent not in (0, 1):
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="consent must be 0 or 1")
 
     try:
         authenticated = svc.get_by_id(customer_id)
+        mobile_owner = svc.find_by_mobile(mobile) if mobile and not data.guest else None
+        if mobile_owner is not None and (
+            authenticated is None or mobile_owner.customer_id != authenticated.customer_id
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Mobile already belongs to another customer; select the existing customer",
+            )
+
         if authenticated is not None:
-            # Continue the same identity as the JWT (Home Front Door path).
+            # Continue the same identity as the staff-authenticated customer.
             fields: Dict[str, Any] = {
                 "name": data.name,
                 "consent_to_store_data": data.consent,
             }
+            if data.family_name is not None:
+                fields["family_name"] = data.family_name.strip() or None
             # A consultation is case-scoped input. Do not overwrite the
             # persistent customer profile here: Recommendation combines the
             # saved profile with today's consultation payload.
@@ -357,6 +363,7 @@ async def quick_intake(
                 consent=data.consent,
                 skin_profile=data.skin_profile,
                 guest=data.guest or not mobile,
+                family_name=data.family_name,
             )
 
         profile = svc.build_recommendation_profile(
