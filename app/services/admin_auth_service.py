@@ -25,7 +25,14 @@ def ensure_admin_account(db: Session) -> AdminCredential | None:
         return None
     username, password = configured
     subject_id = os.getenv("HBI_ADMIN_SUBJECT", "USR_ADMIN")
+    subject_credential = db.query(AdminCredential).filter(
+        AdminCredential.subject_id == subject_id
+    ).first()
+    if subject_credential is not None and subject_credential.username != username:
+        raise ValueError("Admin subject is already assigned to a different username.")
     credential = db.query(AdminCredential).filter(AdminCredential.username == username).first()
+    if credential is not None and credential.subject_id != subject_id:
+        raise ValueError("Admin username is already assigned to a different subject.")
     if credential is None:
         credential = AdminCredential(
             credential_id=f"ADMIN-CRED-{uuid.uuid4().hex[:12]}",
@@ -34,8 +41,6 @@ def ensure_admin_account(db: Session) -> AdminCredential | None:
             password_hash=pwd_context.hash(password),
         )
         db.add(credential)
-    else:
-        credential.subject_id = subject_id
     role = db.query(UserRole).filter(
         UserRole.subject_id == subject_id,
         UserRole.role == ROLE_ADMIN,
