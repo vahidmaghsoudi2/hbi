@@ -243,8 +243,8 @@ export default function NewHomePage() {
   }
 
   async function ensureSession(displayName: string, concernsForGuest: string) {
-    if (token && customerId) return token;
     const currentAdminToken = await ensureAdminToken();
+    if (token && customerId) return token;
     let targetCustomerId = customerId;
     if (!targetCustomerId) {
       const guest = (await createGuest({
