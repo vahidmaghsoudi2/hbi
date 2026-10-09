@@ -166,29 +166,13 @@ async def register_customer(
     )
 
 
-@router.post("/guest", status_code=status.HTTP_201_CREATED)
-async def register_guest(
-    data: GuestCreateRequest,
-    request: Request,
-    db: Session = Depends(get_db),
-):
-    """Public guest bootstrap for Home Front Door (no JWT).
-
-    Rate-limited by client IP (10 req / 60s). Enables:
-    createGuest → pilot-token → intake without auth chicken-and-egg.
-    """
-    _enforce_guest_rate_limit(request)
-
-    svc = CustomerService(db)
-    try:
-        kwargs: Dict[str, Any] = {"consent_to_store_data": data.consent}
-        if data.concerns is not None:
-            kwargs["concerns"] = data.concerns
-        customer = svc.register_guest(name=data.name, **kwargs)
-        db.commit()
-        return _customer_public(customer)
-    except ValueError as e:
-        raise HTTPException(status_code=422, detail=str(e))
+@router.post("/guest", status_code=status.HTTP_403_FORBIDDEN)
+async def register_guest():
+    """Public customer bootstrap is disabled: customers are not system users."""
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Public customer registration is disabled; gallery staff must register customers.",
+    )
 
 
 @router.post("/profile-facts", status_code=status.HTTP_201_CREATED)
