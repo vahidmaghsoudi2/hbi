@@ -73,7 +73,14 @@ class ReturnService:
         if quantity <= 0:
             raise ValueError("quantity must be positive")
 
-        sale = self.db.query(Sale).filter(Sale.sale_id == sale_id).first()
+        # Serialize return attempts for the same sale on databases that support
+        # row-level locks. SQLite serializes writers at database level instead.
+        sale = (
+            self.db.query(Sale)
+            .filter(Sale.sale_id == sale_id)
+            .with_for_update()
+            .first()
+        )
         if not sale:
             raise ValueError(f"Sale {sale_id} not found")
         if getattr(sale, "document_status", "ACTIVE") != "ACTIVE":
@@ -95,6 +102,26 @@ class ReturnService:
             raise ValueError(
                 f"SaleItem for sale {sale_id} product {product_id} not found"
             )
+
+        # SaleReturn currently stores product-level quantity, not the original
+        # SaleItem line ID. Do not silently value a return using the first line
+        # when matching lines carry different unit prices or relevant FX rates.
+        unit_prices = {None if item.unit_price_usd is None else float(item.unit_price_usd) for item in items}
+        if len(unit_prices) > 1:
+            raise ValueError(
+                "cannot return product with mixed original unit prices; "
+                "invoice line allocation is required"
+            )
+        if sale.fx_rate_usd_to_irr is None:
+            item_fx_rates = {
+                None if item.fx_rate_usd_to_irr is None else float(item.fx_rate_usd_to_irr)
+                for item in items
+            }
+            if len(item_fx_rates) > 1:
+                raise ValueError(
+                    "cannot return product with mixed original FX rates; "
+                    "invoice line allocation is required"
+                )
 
         sold = self._sold_qty(sale_id, product_id)
         already = self._already_returned_qty(sale_id, product_id)
