@@ -273,6 +273,18 @@ export interface StockMovementDTO {
   created_at?: string | null;
 }
 
+export interface ResearchDraftAssertion {
+  claim: string;
+  source_type: string;
+  source_reference: string;
+  claim_type?: string;
+  field?: string | null;
+  source_date?: string | null;
+  evidence_strength?: string | null;
+  market_region?: string | null;
+  notes?: string | null;
+}
+
 export interface EvidenceDTO {
   evidence_id: string;
   product_id: string;
