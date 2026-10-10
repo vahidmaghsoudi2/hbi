@@ -965,7 +965,7 @@ export default function NewHomePage() {
           <section className="pro-panel" id="sales">
             <h1>ثبت فروش</h1>
             <p className="pro-lead">ثبت فروش با نشست مدیر انجام می‌شود؛ نشست مشتری فقط برای پرونده و سابقه خرید استفاده می‌شود.</p>
-            {!token || !customerId ? (
+            {!customerId ? (
               <div className="pro-empty">
                 <strong>ابتدا مشاوره را ثبت کنید.</strong>
                 <button type="button" className="pro-btn-primary" onClick={() => go("consult")}>
