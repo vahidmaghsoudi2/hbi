@@ -20,7 +20,7 @@ from app.models.stock_movement import StockMovement
 from app.services.sale_service import SaleService
 from app.services.return_service import ReturnService
 from app.api.routers.sales import get_sale_detail
-from app.api.routers.returns import ReturnCreateRequest
+from app.api.routers.returns import ReturnCreateRequest, create_return as create_return_endpoint
 from pydantic import ValidationError
 
 
@@ -419,3 +419,12 @@ def test_mixed_toman_prices_for_duplicate_lines_are_rejected(session):
         ReturnService(session).create_return(
             sale_id=sale.sale_id, product_id="P1", quantity=1
         )
+
+
+def test_return_api_preserves_404_for_missing_sale(session):
+    from fastapi import HTTPException
+
+    body = ReturnCreateRequest(sale_id="MISSING-SALE", product_id="P1", quantity=1)
+    with pytest.raises(HTTPException) as exc:
+        asyncio.run(create_return_endpoint(body, session, admin=object()))
+    assert exc.value.status_code == 404
