@@ -12,6 +12,7 @@ from app.models.customer import Customer
 from app.models.product import Product
 from app.models.inventory import Inventory
 from app.models.sale import Sale
+from app.models.sale_item import SaleItem
 from app.models.sale_return import SaleReturn
 from app.models.stock_movement import StockMovement
 from app.services.sale_service import SaleService
@@ -235,6 +236,50 @@ def test_return_rejected_for_voided_sale(session):
     session.commit()
 
     with pytest.raises(ValueError, match="cannot return against sale"):
+        ReturnService(session).create_return(
+            sale_id=sale.sale_id, product_id="P1", quantity=1
+        )
+
+
+def test_mixed_price_duplicate_product_lines_rejected(session):
+    sale = _sold(session, qty_sold=2)
+    original = session.query(SaleItem).filter_by(sale_id=sale.sale_id, product_id="P1").one()
+    duplicate = SaleItem(
+        sale_item_id="DUPLICATE-LINE",
+        sale_id=sale.sale_id,
+        product_id="P1",
+        quantity=1,
+        unit_price_toman=original.unit_price_toman,
+        unit_price_usd=original.unit_price_usd + 5,
+        fx_rate_usd_to_irr=original.fx_rate_usd_to_irr,
+    )
+    session.add(duplicate)
+    session.commit()
+
+    with pytest.raises(ValueError, match="mixed original unit prices"):
+        ReturnService(session).create_return(
+            sale_id=sale.sale_id, product_id="P1", quantity=1
+        )
+
+
+def test_mixed_fx_duplicate_product_lines_rejected_without_sale_fx_snapshot(session):
+    sale = _sold(session, qty_sold=2)
+    sale.fx_rate_usd_to_irr = None
+    original = session.query(SaleItem).filter_by(sale_id=sale.sale_id, product_id="P1").one()
+    original.fx_rate_usd_to_irr = 1_000_000.0
+    duplicate = SaleItem(
+        sale_item_id="DUPLICATE-FX-LINE",
+        sale_id=sale.sale_id,
+        product_id="P1",
+        quantity=1,
+        unit_price_toman=original.unit_price_toman,
+        unit_price_usd=original.unit_price_usd,
+        fx_rate_usd_to_irr=2_000_000.0,
+    )
+    session.add(duplicate)
+    session.commit()
+
+    with pytest.raises(ValueError, match="mixed original FX rates"):
         ReturnService(session).create_return(
             sale_id=sale.sale_id, product_id="P1", quantity=1
         )
