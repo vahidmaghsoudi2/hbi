@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import NewHomePage from "./pages/NewHomePage";
+import NewDashboardGalleryHome from "./pages/NewDashboardGalleryHome";
 import CatalogPage from "./pages/CatalogPage";
 import PilotPage from "./pages/PilotPage";
 import RecommendationPage from "./pages/RecommendationPage";
@@ -17,7 +18,8 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<AdminLoginPage />} />
-      <Route path="/" element={<AdminGate><NewHomePage /></AdminGate>} />
+      <Route path="/" element={<AdminGate><NewDashboardGalleryHome /></AdminGate>} />
+      <Route path="/workspace" element={<AdminGate><NewHomePage /></AdminGate>} />
       <Route path="/catalog" element={<AdminGate><CatalogPage /></AdminGate>} />
       <Route path="/pilot" element={<AdminGate><PilotPage /></AdminGate>} />
       <Route path="/recommendation" element={<AdminGate><RecommendationPage /></AdminGate>} />
