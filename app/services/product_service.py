@@ -1,9 +1,7 @@
 from typing import Optional, List, Set
 import json
-import uuid
 from sqlalchemy.orm import Session
 from app.models.product import Product
-from app.models.inventory import Inventory
 from app.repositories.product_repository import ProductRepository
 from app.services.base import BaseService
 from app.core.governance import (
@@ -82,19 +80,10 @@ class ProductService(BaseService[Product, ProductRepository]):
         data["status"] = "DRAFT"
         data["qa_verdict"] = "PENDING"
         data["identity_status"] = "NEEDS_REVIEW"
+        # Product identity and physical stock are separate operational events.
+        # Intake must not fabricate availability; stock-in creates/updates Inventory
+        # and records the corresponding StockMovement after physical receipt.
         product = self.create(**data)
-        inventory = self.db.query(Inventory).filter(
-            Inventory.product_id == product.product_id
-        ).first()
-        if not inventory:
-            inventory = Inventory(
-                inventory_id=f"INV-{product.product_id}-{uuid.uuid4().hex[:8]}",
-                product_id=product.product_id,
-                quantity_available=1, quantity_reserved=0,
-                stock_status="AVAILABLE", sale_price_toman=0,
-            )
-            self.db.add(inventory)
-            self.db.flush()
         role = next((r for r in (ROLE_PO, ROLE_REVIEWER_QA, ROLE_EDITOR, ROLE_ADMIN) if r in roles), None)
         self.log.append(
             actor_id=actor_id, actor_role=role, action=ACTION_CREATE,
