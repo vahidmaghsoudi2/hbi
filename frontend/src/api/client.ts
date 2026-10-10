@@ -179,7 +179,7 @@ export function getProductEvidence(
   return request<EvidenceDTO[]>(`/evidence/?product_id=${encodeURIComponent(productId)}`, {}, token);
 }
 
-/** POST /api/v1/sales/ — requires auth; customer_id must match token identity */
+/** POST /api/v1/sales/ — requires ADMIN role; body.customer_id is the buyer (not the token subject). */
 export function createSale(
   body: SaleCreateRequest,
   token: string
@@ -191,7 +191,7 @@ export function createSale(
   );
 }
 
-/** GET /api/v1/sales/total — requires auth */
+/** GET /api/v1/sales/total — customer-session scoped total for the authenticated customer_id. */
 export function getTotalSales(token: string): Promise<{ total_sales: number }> {
   return request<{ total_sales: number }>("/sales/total", {}, token);
 }
