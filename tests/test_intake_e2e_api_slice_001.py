@@ -435,6 +435,13 @@ def test_editor_can_create_and_review_research_draft(client, db_session):
     assert draft.json()[1]["source_type"] == "CLINICAL_TRIAL"
     assert draft.json()[1]["qa_status"] == "PENDING"
 
+    missing_reason = client.post(
+        f"/api/v1/evidence/{evidence_id}/verify",
+        headers=editor,
+        json={"verdict": "VERIFIED"},
+    )
+    assert missing_reason.status_code == 422, missing_reason.text
+
     reviewed = client.post(
         f"/api/v1/evidence/{evidence_id}/verify",
         headers=editor,
