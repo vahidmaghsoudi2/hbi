@@ -7,6 +7,7 @@ Does not implement payment refunds.
 from __future__ import annotations
 
 import uuid
+from decimal import Decimal, InvalidOperation
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
@@ -63,9 +64,12 @@ class ReturnService:
         if not product_id:
             raise ValueError("product_id is required")
         try:
-            quantity = int(quantity)
-        except (TypeError, ValueError):
+            parsed_quantity = Decimal(str(quantity))
+        except (InvalidOperation, TypeError, ValueError):
             raise ValueError("quantity must be a positive integer")
+        if not parsed_quantity.is_finite() or parsed_quantity != parsed_quantity.to_integral_value():
+            raise ValueError("quantity must be a positive integer")
+        quantity = int(parsed_quantity)
         if quantity <= 0:
             raise ValueError("quantity must be positive")
 
