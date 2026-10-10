@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from app.core.auth import create_access_token
 from app.models.user_role import UserRole, ROLE_PO, ROLE_EDITOR
+from app.models.inventory import Inventory
 
 
 def _auth(db_session, subject="wp01_op", *roles):
@@ -254,3 +255,60 @@ def test_possible_match_rejects_mismatched_snapshot(client, db_session):
     )
     assert r.status_code == 422, r.text
     assert "input_snapshot" in r.text or "does not match" in r.text
+
+
+
+def test_product_intake_does_not_create_physical_inventory(client, db_session):
+    """Catalog identity creation must not fabricate physical stock."""
+    headers = _auth(db_session, "stock_separation", ROLE_PO, ROLE_EDITOR)
+    response = _create(
+        client,
+        headers,
+        product_id="WP01-NO-STOCK-001",
+        brand="StockBoundary",
+        product_name="Catalog Only Product",
+    )
+    assert response.status_code == 201, response.text
+    assert (
+        db_session.query(Inventory)
+        .filter(Inventory.product_id == "WP01-NO-STOCK-001")
+        .first()
+        is None
+    )
+
+
+
+def test_editor_can_create_and_review_research_draft_in_intake_flow(client, db_session):
+    """The intake editor can register and review traceable Research Draft assertions."""
+    headers = _auth(db_session, "research_editor", ROLE_EDITOR)
+    created = _create(
+        client,
+        headers,
+        product_id="WP01-RESEARCH-EDITOR",
+        brand="ResearchBoundary",
+        product_name="Research Flow Product",
+    )
+    assert created.status_code == 201, created.text
+
+    draft = client.post(
+        "/api/v1/products/WP01-RESEARCH-EDITOR/research-draft",
+        headers=headers,
+        json={"assertions": [{
+            "claim": "manufacturer states intended use",
+            "source_type": "MANUFACTURER",
+            "source_reference": "https://example.invalid/product",
+            "claim_type": "MANUFACTURER_CLAIM",
+            "field": "known_use_cases",
+        }]},
+    )
+    assert draft.status_code == 200, draft.text
+    evidence_id = draft.json()[0]["evidence_id"]
+    assert draft.json()[0]["qa_status"] == "PENDING"
+
+    reviewed = client.post(
+        f"/api/v1/evidence/{evidence_id}/verify",
+        headers=headers,
+        json={"verdict": "VERIFIED", "reason": "reviewed in intake workflow"},
+    )
+    assert reviewed.status_code == 200, reviewed.text
+    assert reviewed.json()["qa_status"] in ("VERIFIED", "APPROVED")
