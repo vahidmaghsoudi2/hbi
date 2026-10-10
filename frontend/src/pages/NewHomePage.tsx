@@ -1067,9 +1067,18 @@ export default function NewHomePage() {
               setReturnBusy(true);
               try {
                 await createReturn({ sale_id: returnSaleId.trim(), product_id: returnProductId.trim(), quantity: returnQty, reason: returnReason.trim() || undefined }, adminToken);
-                const rows = await listReturnsForSale(returnSaleId.trim(), adminToken);
-                setReturnRows(Array.isArray(rows) ? rows : []);
-                setStatusMsg("مرجوعی ثبت شد و سوابق فروش دوباره بارگذاری شدند."); setReturnReason("");
+                // The return is committed by the API before history is fetched. Keep that
+                // success explicit even if the separate history request fails, so users
+                // are not misled into submitting the same return a second time.
+                setStatusMsg("مرجوعی ثبت شد. در حال به‌روزرسانی سوابق فروش…");
+                setReturnReason("");
+                try {
+                  const rows = await listReturnsForSale(returnSaleId.trim(), adminToken);
+                  setReturnRows(Array.isArray(rows) ? rows : []);
+                  setStatusMsg("مرجوعی ثبت شد و سوابق فروش به‌روزرسانی شدند.");
+                } catch (historyErr) {
+                  setError("مرجوعی ثبت شده است، اما بارگذاری دوبارهٔ سوابق ناموفق بود. برای جلوگیری از ثبت تکراری، مرجوعی را دوباره ارسال نکنید؛ سوابق را جداگانه بارگذاری کنید.");
+                }
               } catch (err) { setError(err instanceof Error ? err.message : String(err)); }
               finally { setReturnBusy(false); }
             }}>
