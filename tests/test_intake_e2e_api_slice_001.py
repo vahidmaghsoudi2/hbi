@@ -366,18 +366,31 @@ def test_editor_can_create_and_review_research_draft(client, db_session):
     draft = client.post(
         f"/api/v1/products/{pid}/research-draft",
         headers=editor,
-        json={"assertions": [{
-            "claim": "Manufacturer states this is a moisturizer",
-            "source_type": "MANUFACTURER",
-            "source_reference": "https://example.test/product",
-            "claim_type": "MANUFACTURER_CLAIM",
-            "field": "claimed_benefits",
-        }]},
+        json={"assertions": [
+            {
+                "claim": "Manufacturer states this is a moisturizer",
+                "source_type": "MANUFACTURER",
+                "source_reference": "https://example.test/product",
+                "claim_type": "MANUFACTURER_CLAIM",
+                "field": "claimed_benefits",
+            },
+            {
+                "claim": "A clinical trial evaluated the stated outcome",
+                "source_type": "CLINICAL_TRIAL",
+                "source_reference": "trial-registry:TEST-001",
+                "claim_type": "FACT",
+                "field": "claimed_benefits",
+            },
+        ]},
     )
     assert draft.status_code == 200, draft.text
+    assert len(draft.json()) == 2
     evidence_id = draft.json()[0]["evidence_id"]
     assert draft.json()[0]["qa_status"] == "PENDING"
     assert draft.json()[0]["evidence_status"] == "UNKNOWN"
+    assert draft.json()[1]["claim_type"] == "FACT"
+    assert draft.json()[1]["source_type"] == "CLINICAL_TRIAL"
+    assert draft.json()[1]["qa_status"] == "PENDING"
 
     reviewed = client.post(
         f"/api/v1/evidence/{evidence_id}/verify",
