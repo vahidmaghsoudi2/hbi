@@ -11,7 +11,7 @@ from decimal import Decimal, InvalidOperation
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, update
 
 from app.models.inventory import Inventory
 from app.models.sale import Sale
@@ -73,9 +73,18 @@ class ReturnService:
         if quantity <= 0:
             raise ValueError("quantity must be positive")
 
-        # Serialize return attempts for the same sale on databases that support
-        # row-level locks. SQLite ignores FOR UPDATE; its write-lock behavior is
-        # not treated as a substitute for verified row-level serialization.
+        # Acquire a database write lock on the sale row before reading the
+        # returnable balance. PostgreSQL-like databases serialize this row update;
+        # SQLite ignores FOR UPDATE, but a real UPDATE (even a same-value update)
+        # acquires SQLite's write lock before the balance is read. The caller must
+        # keep this transaction open through commit/rollback.
+        lock_result = self.db.execute(
+            update(Sale)
+            .where(Sale.sale_id == sale_id)
+            .values(document_status=Sale.document_status)
+        )
+        if lock_result.rowcount == 0:
+            raise ValueError(f"Sale {sale_id} not found")
         sale = (
             self.db.query(Sale)
             .filter(Sale.sale_id == sale_id)
