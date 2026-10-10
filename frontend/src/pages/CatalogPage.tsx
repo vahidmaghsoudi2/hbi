@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { listProducts } from "../api/client";
 import type { ProductDTO } from "../types/api";
@@ -26,15 +26,15 @@ export default function CatalogPage() {
   return (
     <section>
       <h1>کاتالوگ محصولات</h1>
-      <p className="lead">فهرست عمومی محصولات تأییدشده (بدون نیاز به احراز هویت).</p>
+      <p className="lead">فهرست محصولات قابل نمایش از API HBI.</p>
       <div className="row" style={{ marginBottom: "1rem" }}>
-        <Link className="btn" to="/">بازگشت به داشبورد</Link>
+        <Link className="btn" to="/workspace">بازگشت به محیط عملیاتی</Link>
       </div>
       {loading && <div className="alert">در حال بارگذاری…</div>}
-      {error && <div className="alert error">{error}</div>}
+      {error && <div className="alert error">دریافت محصولات ناموفق بود. اتصال API را بررسی کنید.</div>}
       {!loading && !error && (
         <div className="product-list">
-          {products.length === 0 && <p>محصولی یافت نشد.</p>}
+          {products.length === 0 && <p>محصولی از API دریافت نشد.</p>}
           {products.map((p) => (
             <div key={p.product_id} className="card">
               <strong>{p.product_name}</strong>
