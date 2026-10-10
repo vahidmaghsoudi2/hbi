@@ -90,8 +90,10 @@ class ProductService(BaseService[Product, ProductRepository]):
             inventory = Inventory(
                 inventory_id=f"INV-{product.product_id}-{uuid.uuid4().hex[:8]}",
                 product_id=product.product_id,
-                quantity_available=1, quantity_reserved=0,
-                stock_status="AVAILABLE", sale_price_toman=0,
+                # Inventory row is only the stock ledger anchor. Product registration
+                # must not imply physical stock; only Stock-In creates sellable units.
+                quantity_available=0, quantity_reserved=0,
+                stock_status="OUT_OF_STOCK",
             )
             self.db.add(inventory)
             self.db.flush()
