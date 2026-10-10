@@ -18,6 +18,7 @@ from app.services.product_service import ProductService
 from app.services.product_transition_service import ProductTransitionService
 from app.services.recommendation_service import RecommendationService
 from app.services.skin_next_question_service import SkinNextQuestionService
+from app.services.stock_in_service import StockInService
 
 
 PO = {ROLE_PO}
@@ -111,6 +112,20 @@ def test_governed_intake_reaches_engine_ready_and_recommendation(db_session):
 
     assert transitions.approve(PID, "po_catalog", PO).status == "APPROVED"
     assert transitions.activate(PID, "po_catalog", PO).status == "ACTIVE"
+
+    # Recommendation candidates must have a separately recorded physical receipt.
+    stock = StockInService(db_session).stock_in(
+        product_id=PID,
+        quantity=1,
+        purchase_price_usd=0,
+        fx_rate_usd_to_irr=500000,
+        note="catalog intake readiness test receipt",
+        reference_type="TEST",
+        reference_id="MISSION-283",
+    )
+    db_session.flush()
+    assert stock["before_quantity"] == 0
+    assert stock["inventory"].quantity_available == 1
 
     candidates = ProductRepository(db_session).find_by_identity_status_and_active("VERIFIED")
     candidate_ids = {p.product_id for p in candidates}
