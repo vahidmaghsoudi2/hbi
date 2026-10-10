@@ -11,9 +11,9 @@ const galleryLines = [
 ];
 
 const workAreas = [
-  { title: "مشتری و مشاوره", detail: "پرونده، نیاز و پیشنهاد محصول", icon: "◎", to: "/workspace", tone: "violet" },
-  { title: "معرفی و بررسی محصول", detail: "ورود محصول و کنترل اطلاعات", icon: "✳", to: "/workspace", tone: "rose" },
-  { title: "فروش و برگشت", detail: "ثبت فروش و پیگیری برگشت کالا", icon: "↗", to: "/workspace", tone: "green" },
+  { title: "مشتری و مشاوره", detail: "ثبت مراجعه و دریافت پیشنهاد", icon: "◎", to: "/workspace?panel=consult", tone: "violet" },
+  { title: "معرفی و بررسی محصول", detail: "ورود محصول و بررسی پرونده", icon: "✳", to: "/workspace?panel=intake", tone: "rose" },
+  { title: "فروش", detail: "ثبت فروش و مشاهده جمع ثبت‌شده", icon: "↗", to: "/workspace?panel=sales", tone: "green" },
   { title: "خرید و موجودی", detail: "ثبت خرید و گردش موجودی", icon: "▤", to: "/purchase", tone: "gold" },
   { title: "مالی و حسابداری", detail: "ورود به بخش مالی موجود", icon: "◫", to: "/accounting", tone: "blue" },
   { title: "کاتالوگ محصولات", detail: "مشاهده فهرست محصولات ثبت‌شده", icon: "▦", to: "/catalog", tone: "peach" },
