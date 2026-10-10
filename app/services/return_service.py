@@ -74,7 +74,8 @@ class ReturnService:
             raise ValueError("quantity must be positive")
 
         # Serialize return attempts for the same sale on databases that support
-        # row-level locks. SQLite serializes writers at database level instead.
+        # row-level locks. SQLite ignores FOR UPDATE; its write-lock behavior is
+        # not treated as a substitute for verified row-level serialization.
         sale = (
             self.db.query(Sale)
             .filter(Sale.sale_id == sale_id)
