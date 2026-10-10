@@ -4,6 +4,12 @@ from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
+from sqlalchemy import func
+
+from app.models.sale import Sale
+from app.models.sale_item import SaleItem
+from app.models.sale_return import SaleReturn
+from app.models.product import Product
 
 from app.core.deps import get_db, get_current_customer_id
 from app.core.authorization import require_any_role
@@ -54,6 +60,69 @@ async def create_sale(
     except (ValueError, BusinessRuleError) as e:
         db.rollback()
         raise HTTPException(status_code=422, detail=str(e))
+
+
+@router.get("/detail/{sale_id}")
+async def get_sale_detail(
+    sale_id: str,
+    db: Session = Depends(get_db),
+    admin=Depends(require_any_role(ROLE_ADMIN)),
+):
+    """Return the original invoice lines plus verified returned/remaining quantities."""
+    sale = db.query(Sale).filter(Sale.sale_id == sale_id).first()
+    if not sale:
+        raise HTTPException(status_code=404, detail=f"Sale {sale_id} not found")
+
+    rows = (
+        db.query(SaleItem, Product)
+        .join(Product, Product.product_id == SaleItem.product_id)
+        .filter(SaleItem.sale_id == sale_id)
+        .all()
+    )
+    quantities = {}
+    for item, product in rows:
+        entry = quantities.setdefault(
+            item.product_id,
+            {
+                "product_id": item.product_id,
+                "product_name": product.product_name,
+                "brand": product.brand,
+                "sold_quantity": 0,
+                "unit_prices_toman": set(),
+            },
+        )
+        entry["sold_quantity"] += int(item.quantity)
+        entry["unit_prices_toman"].add(item.unit_price_toman)
+
+    returned_rows = (
+        db.query(SaleReturn.product_id, func.coalesce(func.sum(SaleReturn.quantity), 0))
+        .filter(SaleReturn.sale_id == sale_id)
+        .group_by(SaleReturn.product_id)
+        .all()
+    )
+    returned_by_product = {product_id: int(quantity or 0) for product_id, quantity in returned_rows}
+    items = []
+    for product_id, entry in quantities.items():
+        returned = returned_by_product.get(product_id, 0)
+        sold = entry["sold_quantity"]
+        prices = entry.pop("unit_prices_toman")
+        items.append({
+            **entry,
+            "already_returned_quantity": returned,
+            "remaining_quantity": max(0, sold - returned),
+            "unit_price_toman": next(iter(prices)) if len(prices) == 1 else None,
+        })
+
+    return {
+        "sale_id": sale.sale_id,
+        "customer_id": sale.customer_id,
+        "document_status": getattr(sale, "document_status", None) or "ACTIVE",
+        "total_amount_usd": sale.total_amount_usd,
+        "total_amount_irr": sale.total_amount_irr,
+        "total_amount_toman": sale.total_amount_toman,
+        "fx_rate_usd_to_irr": sale.fx_rate_usd_to_irr,
+        "items": items,
+    }
 
 
 @router.get("/total")
