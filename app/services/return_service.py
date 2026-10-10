@@ -78,15 +78,13 @@ class ReturnService:
         # SQLite ignores FOR UPDATE, but a real UPDATE (even a same-value update)
         # acquires SQLite's write lock before the balance is read. The caller must
         # keep this transaction open through commit/rollback.
-        lock_result = self.db.execute(
+        self.db.execute(
             text(
                 'UPDATE "Sale" SET document_status = document_status '
                 'WHERE sale_id = :sale_id'
             ),
             {"sale_id": sale_id},
         )
-        if lock_result.rowcount == 0:
-            raise ValueError(f"Sale {sale_id} not found")
         sale = (
             self.db.query(Sale)
             .filter(Sale.sale_id == sale_id)
