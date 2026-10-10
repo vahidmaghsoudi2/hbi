@@ -7,10 +7,11 @@ Does not implement payment refunds.
 from __future__ import annotations
 
 import uuid
+from decimal import Decimal, InvalidOperation
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, text
 
 from app.models.inventory import Inventory
 from app.models.sale import Sale
@@ -63,15 +64,39 @@ class ReturnService:
         if not product_id:
             raise ValueError("product_id is required")
         try:
-            quantity = int(quantity)
-        except (TypeError, ValueError):
+            parsed_quantity = Decimal(str(quantity))
+        except (InvalidOperation, TypeError, ValueError):
             raise ValueError("quantity must be a positive integer")
+        if not parsed_quantity.is_finite() or parsed_quantity != parsed_quantity.to_integral_value():
+            raise ValueError("quantity must be a positive integer")
+        quantity = int(parsed_quantity)
         if quantity <= 0:
             raise ValueError("quantity must be positive")
 
-        sale = self.db.query(Sale).filter(Sale.sale_id == sale_id).first()
+        # Acquire a database write lock on the sale row before reading the
+        # returnable balance. PostgreSQL-like databases serialize this row update;
+        # SQLite ignores FOR UPDATE, but a real UPDATE (even a same-value update)
+        # acquires SQLite's write lock before the balance is read. The caller must
+        # keep this transaction open through commit/rollback.
+        self.db.execute(
+            text(
+                'UPDATE "Sale" SET document_status = document_status '
+                'WHERE sale_id = :sale_id'
+            ),
+            {"sale_id": sale_id},
+        )
+        sale = (
+            self.db.query(Sale)
+            .filter(Sale.sale_id == sale_id)
+            .with_for_update()
+            .first()
+        )
         if not sale:
             raise ValueError(f"Sale {sale_id} not found")
+        if getattr(sale, "document_status", "ACTIVE") != "ACTIVE":
+            raise ValueError(
+                f"cannot return against sale {sale_id} with status {sale.document_status}"
+            )
 
         prior_usd = sale.total_amount_usd
         prior_irr = sale.total_amount_irr
@@ -88,6 +113,31 @@ class ReturnService:
                 f"SaleItem for sale {sale_id} product {product_id} not found"
             )
 
+        # SaleReturn currently stores product-level quantity, not the original
+        # SaleItem line ID. Do not silently value a return using the first line
+        # when matching lines carry different unit prices or relevant FX rates.
+        if any(item.unit_price_usd is None for item in items):
+            raise ValueError(
+                "cannot value return because an original USD unit price is missing"
+            )
+        unit_prices = {float(item.unit_price_usd) for item in items}
+        toman_prices = {int(item.unit_price_toman) for item in items}
+        if len(unit_prices) > 1 or len(toman_prices) > 1:
+            raise ValueError(
+                "cannot return product with mixed original unit prices; "
+                "invoice line allocation is required"
+            )
+        if sale.fx_rate_usd_to_irr is None:
+            item_fx_rates = {
+                None if item.fx_rate_usd_to_irr is None else float(item.fx_rate_usd_to_irr)
+                for item in items
+            }
+            if len(item_fx_rates) > 1:
+                raise ValueError(
+                    "cannot return product with mixed original FX rates; "
+                    "invoice line allocation is required"
+                )
+
         sold = self._sold_qty(sale_id, product_id)
         already = self._already_returned_qty(sale_id, product_id)
         remaining = sold - already
@@ -101,22 +151,17 @@ class ReturnService:
         if not inv:
             raise ValueError(f"Inventory for product {product_id} not found")
 
-        # Unit price from first matching sale item (USD)
-        unit_usd = items[0].unit_price_usd
-        if unit_usd is None:
-            unit_usd = 0.0
-        else:
-            unit_usd = float(unit_usd)
-
-        # FX: prefer explicit caller rate; else sale snapshot; else item snapshot
-        if fx_rate_usd_to_irr is not None:
-            if float(fx_rate_usd_to_irr) <= 0:
-                raise ValueError("fx_rate_usd_to_irr must be > 0 when provided")
-            fx_rate = float(fx_rate_usd_to_irr)
-        elif sale.fx_rate_usd_to_irr is not None and float(sale.fx_rate_usd_to_irr) > 0:
+        # Use the original invoice valuation; caller-provided FX is only a
+        # fallback when neither the sale nor its item has a valid snapshot.
+        unit_usd = float(items[0].unit_price_usd)
+        if fx_rate_usd_to_irr is not None and float(fx_rate_usd_to_irr) <= 0:
+            raise ValueError("fx_rate_usd_to_irr must be > 0 when provided")
+        if sale.fx_rate_usd_to_irr is not None and float(sale.fx_rate_usd_to_irr) > 0:
             fx_rate = float(sale.fx_rate_usd_to_irr)
         elif items[0].fx_rate_usd_to_irr is not None and float(items[0].fx_rate_usd_to_irr) > 0:
             fx_rate = float(items[0].fx_rate_usd_to_irr)
+        elif fx_rate_usd_to_irr is not None:
+            fx_rate = float(fx_rate_usd_to_irr)
         else:
             raise ValueError(
                 "fx_rate_usd_to_irr required (not on sale/item and not supplied)"

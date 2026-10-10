@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, StrictInt
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_customer_id
@@ -29,7 +29,7 @@ def _to_dict(obj):
 class ReturnCreateRequest(BaseModel):
     sale_id: str
     product_id: str
-    quantity: int = Field(..., gt=0)
+    quantity: StrictInt = Field(..., gt=0)
     fx_rate_usd_to_irr: Optional[float] = Field(
         None, gt=0, description="Optional if Sale already has FX snapshot"
     )
@@ -43,11 +43,9 @@ async def create_return(
     admin=Depends(require_any_role(ROLE_ADMIN)),
 ):
     # V1 PO Contract: ADMIN owns return financial mutation.
-    sale = db.query(Sale).filter(Sale.sale_id == body.sale_id).first()
-    if not sale:
-        raise HTTPException(status_code=404, detail=f"Sale {body.sale_id} not found")
-    if getattr(sale, "document_status", "ACTIVE") == "VOIDED":
-        raise HTTPException(status_code=422, detail=f"Sale {body.sale_id} is VOIDED")
+    # Do not pre-read Sale here: the service must acquire its write lock before
+    # any transaction read, otherwise concurrent SQLite requests can start as
+    # readers before attempting to serialize the returnable balance.
     svc = ReturnService(db)
     try:
         ret = svc.create_return(
@@ -62,6 +60,8 @@ async def create_return(
         return _to_dict(ret)
     except ValueError as e:
         db.rollback()
+        if str(e) == f"Sale {body.sale_id} not found":
+            raise HTTPException(status_code=404, detail=str(e))
         raise HTTPException(status_code=422, detail=str(e))
 
 
