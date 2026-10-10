@@ -9,6 +9,9 @@ import pytest
 from app.core.auth import create_access_token
 from app.models.user_role import UserRole, ROLE_PO, ROLE_REVIEWER_QA, ROLE_EDITOR
 from app.models.product import Product
+from app.models.inventory import Inventory
+from app.models.stock_movement import StockMovement
+from app.services.stock_in_service import StockInService
 
 
 def _auth(db_session, subject: str, *roles: str) -> dict:
@@ -192,6 +195,34 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
         variant="clear",
     )
     assert created["status"] == "DRAFT"
+
+    # Product registration creates only an empty inventory ledger row, not stock.
+    inventory = db_session.query(Inventory).filter(Inventory.product_id == pid).one()
+    assert inventory.quantity_available == 0
+    assert inventory.stock_status == "OUT_OF_STOCK"
+    assert db_session.query(StockMovement).filter(StockMovement.product_id == pid).count() == 0
+
+    # A physical receipt is a separate operation and must create a ledger movement.
+    stock_result = StockInService(db_session).stock_in(
+        product_id=pid,
+        quantity=3,
+        purchase_price_usd=2.5,
+        fx_rate_usd_to_irr=500000,
+        note="test physical receipt",
+        reference_type="TEST",
+        reference_id="INTAKE-E2E",
+    )
+    db_session.commit()
+    db_session.refresh(inventory)
+    assert stock_result["before_quantity"] == 0
+    assert inventory.quantity_available == 3
+    assert inventory.stock_status != "OUT_OF_STOCK"
+    movement = db_session.query(StockMovement).filter(
+        StockMovement.product_id == pid,
+        StockMovement.movement_type == "STOCK_IN",
+    ).one()
+    assert movement.quantity_delta == 3
+    assert movement.quantity_after == 3
 
     # DUPLICATE CHECK (same product_id → EXISTING / EXACT_PRODUCT_ID)
     dup = client.post(
