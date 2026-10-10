@@ -199,3 +199,15 @@ def test_invoice_detail_unknown_sale_is_404(session):
     with pytest.raises(HTTPException) as exc:
         asyncio.run(get_sale_detail("MISSING-SALE", session, admin=object()))
     assert exc.value.status_code == 404
+
+
+
+def test_return_rejected_for_voided_sale(session):
+    sale = _sold(session, qty_sold=2)
+    sale.document_status = "VOIDED"
+    session.commit()
+
+    with pytest.raises(ValueError, match="cannot return against sale"):
+        ReturnService(session).create_return(
+            sale_id=sale.sale_id, product_id="P1", quantity=1
+        )
