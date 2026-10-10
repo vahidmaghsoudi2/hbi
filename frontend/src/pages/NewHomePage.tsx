@@ -13,6 +13,7 @@ import {
   createSale,
   createReturn,
   listReturnsForSale,
+  getSaleDetail,
   getTotalSales,
   getCustomerById,
   searchCustomers,
@@ -30,6 +31,7 @@ import type {
   GuestCreateRequest,
   CustomerSearchResult,
   SaleDTO,
+  SaleDetailDTO,
 } from "../types/api";
 
 const CONCERN_OPTIONS = [
@@ -90,6 +92,7 @@ export default function NewHomePage() {
   const [returnQty, setReturnQty] = useState(1);
   const [returnReason, setReturnReason] = useState("");
   const [returnRows, setReturnRows] = useState<Record<string, unknown>[]>([]);
+  const [returnInvoice, setReturnInvoice] = useState<SaleDetailDTO | null>(null);
   const [returnBusy, setReturnBusy] = useState(false);
 
   const loadProducts = useCallback(async () => {
@@ -1054,55 +1057,104 @@ export default function NewHomePage() {
             <div className="pro-panel-head">
               <div>
                 <h1>ثبت و پیگیری مرجوعی</h1>
-                <p className="pro-lead">ثبت مرجوعی و مشاهده سوابق به نشست مدیر نیاز دارد. مرجوعی کالا به‌تنهایی به معنی بازپرداخت وجه نیست.</p>
+                <p className="pro-lead">ابتدا فاکتور اصلی را بارگذاری کنید. تعداد فروخته‌شده، مرجوع‌شده و باقی‌مانده از داده‌های ثبت‌شده محاسبه می‌شود. ثبت مرجوعی به‌تنهایی به معنی بازپرداخت وجه نیست.</p>
               </div>
               <Link to="/login" className="pro-btn-secondary">ورود مدیر</Link>
             </div>
             <form className="pro-form" onSubmit={async (e) => {
-              e.preventDefault(); setError(null); setStatusMsg(null); setReturnRows([]);
+              e.preventDefault(); setError(null); setStatusMsg(null);
               const adminToken = sessionStorage.getItem("hbi_admin_access_token");
               if (!adminToken) { setError("برای ثبت یا مشاهده مرجوعی، ابتدا وارد حساب مدیر شوید."); return; }
-              if (!returnSaleId.trim() || !returnProductId.trim()) { setError("شناسه فروش و شناسه محصول الزامی است."); return; }
+              if (!returnSaleId.trim()) { setError("شناسه فاکتور الزامی است."); return; }
+              if (!returnInvoice || returnInvoice.sale_id !== returnSaleId.trim()) { setError("ابتدا فاکتور همین شناسه را بارگذاری کنید."); return; }
+              if (returnInvoice.document_status === "VOIDED") { setError("برای فاکتور باطل‌شده مرجوعی ثبت نمی‌شود."); return; }
+              const selectedLine = returnInvoice.items.find((item) => item.product_id === returnProductId);
+              if (!selectedLine) { setError("محصول را از اقلام همین فاکتور انتخاب کنید."); return; }
               if (!Number.isInteger(returnQty) || returnQty < 1) { setError("تعداد مرجوعی باید عدد صحیح مثبت باشد."); return; }
+              if (returnQty > selectedLine.remaining_quantity) { setError(`حداکثر تعداد قابل مرجوعی این کالا: ${selectedLine.remaining_quantity}`); return; }
               setReturnBusy(true);
               try {
-                await createReturn({ sale_id: returnSaleId.trim(), product_id: returnProductId.trim(), quantity: returnQty, reason: returnReason.trim() || undefined }, adminToken);
-                // The return is committed by the API before history is fetched. Keep that
-                // success explicit even if the separate history request fails, so users
-                // are not misled into submitting the same return a second time.
-                setStatusMsg("مرجوعی ثبت شد. در حال به‌روزرسانی سوابق فروش…");
+                await createReturn({ sale_id: returnSaleId.trim(), product_id: selectedLine.product_id, quantity: returnQty, reason: returnReason.trim() || undefined }, adminToken);
+                setStatusMsg("مرجوعی ثبت شد. در حال به‌روزرسانی فاکتور و سوابق…");
                 setReturnReason("");
                 try {
-                  const rows = await listReturnsForSale(returnSaleId.trim(), adminToken);
+                  const [detail, rows] = await Promise.all([
+                    getSaleDetail(returnSaleId.trim(), adminToken),
+                    listReturnsForSale(returnSaleId.trim(), adminToken),
+                  ]);
+                  setReturnInvoice(detail);
                   setReturnRows(Array.isArray(rows) ? rows : []);
-                  setStatusMsg("مرجوعی ثبت شد و سوابق فروش به‌روزرسانی شدند.");
-                } catch (historyErr) {
-                  setError("مرجوعی ثبت شده است، اما بارگذاری دوبارهٔ سوابق ناموفق بود. برای جلوگیری از ثبت تکراری، مرجوعی را دوباره ارسال نکنید؛ سوابق را جداگانه بارگذاری کنید.");
+                  const refreshed = detail.items.find((item) => item.product_id === selectedLine.product_id);
+                  if (refreshed?.remaining_quantity === 0) setReturnProductId("");
+                  setStatusMsg("مرجوعی ثبت شد؛ تعداد باقی‌مانده و سوابق به‌روزرسانی شدند.");
+                } catch {
+                  setError("مرجوعی ثبت شده است، اما به‌روزرسانی فاکتور/سوابق ناموفق بود. برای جلوگیری از ثبت تکراری، دوباره ارسال نکنید؛ فاکتور را مجدداً بارگذاری کنید.");
                 }
               } catch (err) { setError(err instanceof Error ? err.message : String(err)); }
               finally { setReturnBusy(false); }
             }}>
               <fieldset className="pro-fieldset">
-                <legend>اطلاعات مرجوعی</legend>
-                <label className="pro-label" htmlFor="return-sale-id">شناسه فروش *</label>
-                <input id="return-sale-id" className="pro-input" value={returnSaleId} onChange={(e) => { setReturnSaleId(e.target.value); setReturnRows([]); }} required />
-                <label className="pro-label" htmlFor="return-product-id">شناسه محصول *</label>
-                <input id="return-product-id" className="pro-input" value={returnProductId} onChange={(e) => setReturnProductId(e.target.value)} required />
+                <legend>فاکتور و اقلام مرجوعی</legend>
+                <label className="pro-label" htmlFor="return-sale-id">شناسه فاکتور *</label>
+                <input id="return-sale-id" className="pro-input" value={returnSaleId} onChange={(e) => {
+                  setReturnSaleId(e.target.value); setReturnRows([]); setReturnInvoice(null); setReturnProductId("");
+                }} required />
+                <div className="pro-actions">
+                  <button type="button" className="pro-btn-secondary" disabled={returnBusy || !returnSaleId.trim()} onClick={async () => {
+                    setError(null); setStatusMsg(null); setReturnRows([]); setReturnInvoice(null); setReturnProductId("");
+                    const adminToken = sessionStorage.getItem("hbi_admin_access_token");
+                    if (!adminToken) { setError("برای مشاهده فاکتور و مرجوعی، ابتدا وارد حساب مدیر شوید."); return; }
+                    setReturnBusy(true);
+                    try {
+                      const [detail, rows] = await Promise.all([
+                        getSaleDetail(returnSaleId.trim(), adminToken),
+                        listReturnsForSale(returnSaleId.trim(), adminToken),
+                      ]);
+                      setReturnInvoice(detail);
+                      setReturnRows(Array.isArray(rows) ? rows : []);
+                      setStatusMsg(`فاکتور بارگذاری شد؛ ${detail.items.length} قلم کالا و ${rows.length} سابقه مرجوعی.`);
+                    } catch (err) { setError(err instanceof Error ? err.message : String(err)); }
+                    finally { setReturnBusy(false); }
+                  }}>بارگذاری فاکتور و سوابق</button>
+                </div>
+                {returnInvoice && returnInvoice.sale_id === returnSaleId.trim() ? (
+                  <div className="pro-product-grid" style={{ marginTop: "1rem" }}>
+                    <article className="pro-product-card">
+                      <h3>فاکتور {returnInvoice.sale_id}</h3>
+                      <p>وضعیت: {returnInvoice.document_status === "VOIDED" ? "باطل‌شده" : "فعال"}</p>
+                      <p>مبلغ تاریخی فاکتور: {returnInvoice.total_amount_toman == null ? "ثبت نشده" : Number(returnInvoice.total_amount_toman).toLocaleString("fa-IR") + " تومان"}</p>
+                    </article>
+                    {returnInvoice.items.map((item) => (
+                      <article className="pro-product-card" key={item.product_id}>
+                        <h3>{item.product_name}</h3>
+                        <p className="pro-muted">{item.brand} · {item.product_id}</p>
+                        <p>فروخته‌شده: {item.sold_quantity}</p>
+                        <p>قبلاً مرجوع‌شده: {item.already_returned_quantity}</p>
+                        <p>باقی‌مانده قابل مرجوعی: {item.remaining_quantity}</p>
+                        <button type="button" className="pro-btn-secondary" disabled={returnBusy || item.remaining_quantity < 1 || returnInvoice.document_status === "VOIDED"} onClick={() => {
+                          setReturnProductId(item.product_id); setReturnQty(Math.min(1, item.remaining_quantity));
+                        }}>{returnProductId === item.product_id ? "انتخاب شده" : "انتخاب برای مرجوعی"}</button>
+                      </article>
+                    ))}
+                  </div>
+                ) : null}
+                <label className="pro-label" htmlFor="return-product-id">کالای انتخاب‌شده *</label>
+                <select id="return-product-id" className="pro-input" value={returnProductId} onChange={(e) => setReturnProductId(e.target.value)} required disabled={!returnInvoice || returnInvoice.document_status === "VOIDED"}>
+                  <option value="">انتخاب کالا از فاکتور</option>
+                  {(returnInvoice?.items ?? []).filter((item) => item.remaining_quantity > 0).map((item) => (
+                    <option key={item.product_id} value={item.product_id}>{item.product_name} ({item.product_id}) · باقی‌مانده {item.remaining_quantity}</option>
+                  ))}
+                </select>
+                {returnInvoice?.items.find((item) => item.product_id === returnProductId) ? (
+                  <p className="pro-muted">حداکثر قابل مرجوعی: {returnInvoice.items.find((item) => item.product_id === returnProductId)?.remaining_quantity}</p>
+                ) : null}
                 <label className="pro-label" htmlFor="return-qty">تعداد مرجوعی *</label>
-                <input id="return-qty" className="pro-input" type="number" min={1} step={1} value={returnQty} onChange={(e) => setReturnQty(Number(e.target.value))} required />
+                <input id="return-qty" className="pro-input" type="number" min={1} max={returnInvoice?.items.find((item) => item.product_id === returnProductId)?.remaining_quantity ?? 1} step={1} value={returnQty} onChange={(e) => setReturnQty(Number(e.target.value))} required />
                 <label className="pro-label" htmlFor="return-reason">علت مرجوعی</label>
                 <textarea id="return-reason" className="pro-input pro-textarea" rows={2} value={returnReason} onChange={(e) => setReturnReason(e.target.value)} placeholder="اختیاری" />
               </fieldset>
               <div className="pro-actions">
-                <button type="submit" className="pro-btn-primary" disabled={returnBusy}>{returnBusy ? "در حال ثبت…" : "ثبت مرجوعی"}</button>
-                <button type="button" className="pro-btn-secondary" disabled={returnBusy || !returnSaleId.trim()} onClick={async () => {
-                  setError(null); setReturnRows([]); const adminToken = sessionStorage.getItem("hbi_admin_access_token");
-                  if (!adminToken) { setError("برای مشاهده سوابق مرجوعی، ابتدا وارد حساب مدیر شوید."); return; }
-                  setReturnBusy(true);
-                  try { const rows = await listReturnsForSale(returnSaleId.trim(), adminToken); setReturnRows(Array.isArray(rows) ? rows : []); setStatusMsg(`تعداد مرجوعی‌های این فروش: ${rows.length}`); }
-                  catch (err) { setError(err instanceof Error ? err.message : String(err)); }
-                  finally { setReturnBusy(false); }
-                }}>بارگذاری سوابق فروش</button>
+                <button type="submit" className="pro-btn-primary" disabled={returnBusy || !returnInvoice || returnInvoice.document_status === "VOIDED"}>{returnBusy ? "در حال ثبت…" : "ثبت مرجوعی"}</button>
               </div>
             </form>
             <div className="pro-product-grid" style={{ marginTop: "1rem" }}>
@@ -1116,7 +1168,7 @@ export default function NewHomePage() {
                 </article>
               ))}
             </div>
-            {returnRows.length === 0 ? <p className="pro-muted">هنوز سوابق مرجوعی بارگذاری نشده‌اند.</p> : null}
+            {returnRows.length === 0 ? <p className="pro-muted">سوابق مرجوعی پس از بارگذاری فاکتور نمایش داده می‌شوند.</p> : null}
           </section>
         )}
 
