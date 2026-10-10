@@ -469,6 +469,7 @@ export default function NewHomePage() {
     e.preventDefault();
     setError(null);
     if (!token || !customerId) return setError("ابتدا مشاوره را ثبت کنید.");
+    // The backend currently restricts POST /sales/ to ADMIN. Keep this UI honest rather than attempting a role bypass.
     if (!saleProductId.trim()) return setError("محصول را انتخاب کنید.");
     if (saleQty < 1) return setError("تعداد نامعتبر است.");
     if (salePrice == null) return setError("قیمت فروش این محصول در دسترس نیست.");
