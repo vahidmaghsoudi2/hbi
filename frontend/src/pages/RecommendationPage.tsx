@@ -2,6 +2,7 @@ import { FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   generateRecommendations,
+  listRecommendationsByCase,
   createSpecialistOverride,
   createFeedback,
 } from "../api/client";
@@ -28,15 +29,18 @@ export default function RecommendationPage() {
       return;
     }
     try {
-      const result = await generateRecommendations(
-        {
-          case_id: caseId.trim(),
-          customer_profile: { concerns: concerns.trim() },
-        },
-        token
-      );
-      setItems(result);
+      const request = {
+        case_id: caseId.trim(),
+        customer_profile: { concerns: concerns.trim() },
+      };
+      await generateRecommendations(request, token);
+      // Render the persisted customer-facing view, not only the POST response.
+      const persisted = await listRecommendationsByCase(caseId.trim(), token);
+      setItems(persisted);
       setShowAll(false);
+      sessionStorage.setItem("hbi_case_id", caseId.trim());
+      sessionStorage.setItem("hbi_concerns", concerns.trim());
+      setInfo(`تولید انجام شد؛ ${persisted.length} پیشنهاد واجد شرایط از سوابق ذخیره‌شده بازخوانی شد.`);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -121,7 +125,35 @@ export default function RecommendationPage() {
           onChange={(e) => setConcerns(e.target.value)}
         />
         <button type="submit" disabled={busy}>
-          {busy ? "…" : "تولید Recommendation"}
+          {busy ? "…" : "تولید و بازخوانی Recommendation ذخیره‌شده"}
+        </button>
+        <button
+          type="button"
+          disabled={busy || !caseId.trim()}
+          onClick={async () => {
+            setError(null);
+            setInfo(null);
+            setBusy(true);
+            const token = sessionStorage.getItem("hbi_access_token");
+            if (!token) {
+              setError("ابتدا از مسیر Pilot توکن بگیرید.");
+              setBusy(false);
+              return;
+            }
+            try {
+              const persisted = await listRecommendationsByCase(caseId.trim(), token);
+              setItems(persisted);
+              setShowAll(false);
+              sessionStorage.setItem("hbi_case_id", caseId.trim());
+              setInfo(`از سوابق ذخیره‌شده ${persisted.length} پیشنهاد واجد شرایط بازخوانی شد.`);
+            } catch (err) {
+              setError(err instanceof Error ? err.message : String(err));
+            } finally {
+              setBusy(false);
+            }
+          }}
+        >
+          بارگذاری پیشنهادهای ذخیره‌شده
         </button>
         <Link className="btn secondary" to="/pilot">
           بازگشت به Pilot
