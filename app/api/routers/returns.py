@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, StrictInt
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_customer_id
@@ -29,7 +29,7 @@ def _to_dict(obj):
 class ReturnCreateRequest(BaseModel):
     sale_id: str
     product_id: str
-    quantity: int = Field(..., gt=0)
+    quantity: StrictInt = Field(..., gt=0)
     fx_rate_usd_to_irr: Optional[float] = Field(
         None, gt=0, description="Optional if Sale already has FX snapshot"
     )
