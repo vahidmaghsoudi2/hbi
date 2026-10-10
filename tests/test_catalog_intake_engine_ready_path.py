@@ -127,6 +127,17 @@ def test_governed_intake_reaches_engine_ready_and_recommendation(db_session):
     assert stock["before_quantity"] == 0
     assert stock["inventory"].quantity_available == 1
 
+    # Diagnostic invariants: isolate which candidate predicate fails.
+    db_session.refresh(product)
+    db_session.refresh(stock["inventory"])
+    assert product.identity_status == "VERIFIED", product.identity_status
+    assert product.status == "ACTIVE", product.status
+    assert product.qa_verdict == "VALID", product.qa_verdict
+    assert stock["inventory"].quantity_available - stock["inventory"].quantity_reserved > 0, (
+        stock["inventory"].quantity_available, stock["inventory"].quantity_reserved
+    )
+    assert stock["inventory"].stock_status != "OUT_OF_STOCK", stock["inventory"].stock_status
+
     candidates = ProductRepository(db_session).find_by_identity_status_and_active("VERIFIED")
     candidate_ids = {p.product_id for p in candidates}
     assert PID in candidate_ids
