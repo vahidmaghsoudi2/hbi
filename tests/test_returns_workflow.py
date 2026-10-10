@@ -368,3 +368,54 @@ def test_concurrent_returns_cannot_overreturn_sqlite(tmp_path):
     finally:
         Base.metadata.drop_all(bind=engine)
         engine.dispose()
+
+
+def test_original_sale_fx_snapshot_cannot_be_overridden_by_return_request(session):
+    sale = _sold(session, qty_sold=2)
+    ret = ReturnService(session).create_return(
+        sale_id=sale.sale_id,
+        product_id="P1",
+        quantity=1,
+        fx_rate_usd_to_irr=2_000_000.0,
+    )
+    session.commit()
+
+    assert ret.fx_rate_usd_to_irr == sale.fx_rate_usd_to_irr == 1_000_000.0
+
+
+def test_return_rejected_when_original_usd_unit_price_is_missing(session):
+    sale = _sold(session, qty_sold=2)
+    item = session.query(SaleItem).filter_by(
+        sale_id=sale.sale_id, product_id="P1"
+    ).one()
+    item.unit_price_usd = None
+    session.commit()
+
+    with pytest.raises(ValueError, match="original USD unit price is missing"):
+        ReturnService(session).create_return(
+            sale_id=sale.sale_id, product_id="P1", quantity=1
+        )
+
+
+def test_mixed_toman_prices_for_duplicate_lines_are_rejected(session):
+    sale = _sold(session, qty_sold=2)
+    original = session.query(SaleItem).filter_by(
+        sale_id=sale.sale_id, product_id="P1"
+    ).one()
+    session.add(
+        SaleItem(
+            sale_item_id="DUPLICATE-TOMAN-LINE",
+            sale_id=sale.sale_id,
+            product_id="P1",
+            quantity=1,
+            unit_price_toman=original.unit_price_toman + 1,
+            unit_price_usd=original.unit_price_usd,
+            fx_rate_usd_to_irr=original.fx_rate_usd_to_irr,
+        )
+    )
+    session.commit()
+
+    with pytest.raises(ValueError, match="mixed original unit prices"):
+        ReturnService(session).create_return(
+            sale_id=sale.sale_id, product_id="P1", quantity=1
+        )
