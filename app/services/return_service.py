@@ -118,8 +118,13 @@ class ReturnService:
         # SaleReturn currently stores product-level quantity, not the original
         # SaleItem line ID. Do not silently value a return using the first line
         # when matching lines carry different unit prices or relevant FX rates.
-        unit_prices = {None if item.unit_price_usd is None else float(item.unit_price_usd) for item in items}
-        if len(unit_prices) > 1:
+        if any(item.unit_price_usd is None for item in items):
+            raise ValueError(
+                "cannot value return because an original USD unit price is missing"
+            )
+        unit_prices = {float(item.unit_price_usd) for item in items}
+        toman_prices = {int(item.unit_price_toman) for item in items}
+        if len(unit_prices) > 1 or len(toman_prices) > 1:
             raise ValueError(
                 "cannot return product with mixed original unit prices; "
                 "invoice line allocation is required"
@@ -148,22 +153,17 @@ class ReturnService:
         if not inv:
             raise ValueError(f"Inventory for product {product_id} not found")
 
-        # Unit price from first matching sale item (USD)
-        unit_usd = items[0].unit_price_usd
-        if unit_usd is None:
-            unit_usd = 0.0
-        else:
-            unit_usd = float(unit_usd)
-
-        # FX: prefer explicit caller rate; else sale snapshot; else item snapshot
-        if fx_rate_usd_to_irr is not None:
-            if float(fx_rate_usd_to_irr) <= 0:
-                raise ValueError("fx_rate_usd_to_irr must be > 0 when provided")
-            fx_rate = float(fx_rate_usd_to_irr)
-        elif sale.fx_rate_usd_to_irr is not None and float(sale.fx_rate_usd_to_irr) > 0:
+        # Use the original invoice valuation; caller-provided FX is only a
+        # fallback when neither the sale nor its item has a valid snapshot.
+        unit_usd = float(items[0].unit_price_usd)
+        if fx_rate_usd_to_irr is not None and float(fx_rate_usd_to_irr) <= 0:
+            raise ValueError("fx_rate_usd_to_irr must be > 0 when provided")
+        if sale.fx_rate_usd_to_irr is not None and float(sale.fx_rate_usd_to_irr) > 0:
             fx_rate = float(sale.fx_rate_usd_to_irr)
         elif items[0].fx_rate_usd_to_irr is not None and float(items[0].fx_rate_usd_to_irr) > 0:
             fx_rate = float(items[0].fx_rate_usd_to_irr)
+        elif fx_rate_usd_to_irr is not None:
+            fx_rate = float(fx_rate_usd_to_irr)
         else:
             raise ValueError(
                 "fx_rate_usd_to_irr required (not on sale/item and not supplied)"
