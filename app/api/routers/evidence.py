@@ -107,6 +107,11 @@ async def verify_evidence(
     db: Session = Depends(get_db),
     auth=Depends(require_any_role(ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
 ):
+    if request.verdict == "VERIFIED" and not (request.reason or "").strip():
+        raise HTTPException(
+            status_code=422,
+            detail="A non-empty review reason is required to mark evidence VERIFIED.",
+        )
     facade = EvidenceFacade(db)
     try:
         subject_id, roles = auth
