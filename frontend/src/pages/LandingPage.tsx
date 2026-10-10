@@ -1,7 +1,33 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { listProducts } from "../api/client";
+import type { ProductDTO } from "../types/api";
 import "../styles/landing.css";
 
 export default function LandingPage() {
+  const [products, setProducts] = useState<ProductDTO[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [productsError, setProductsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void listProducts()
+      .then((items) => {
+        if (!cancelled) setProducts(Array.isArray(items) ? items : []);
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setProductsError(error instanceof Error ? error.message : "دریافت فهرست محصولات ناموفق بود.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setProductsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="landing-page" dir="rtl">
       <header className="landing-header">
@@ -11,7 +37,7 @@ export default function LandingPage() {
           <a href="#need">نیاز شما</a>
           <a href="#consultation">مشاوره</a>
         </nav>
-        <Link className="landing-login" to="/login">ورود به HBI</Link>
+        <Link className="landing-login" to="/login">ورود مدیر HBI</Link>
       </header>
 
       <main>
@@ -21,7 +47,7 @@ export default function LandingPage() {
             <h1>انتخاب درست،<br />از شناخت درست<br />شروع می‌شود.</h1>
             <p>ما فقط محصول نشان نمی‌دهیم؛ کمک می‌کنیم آگاهانه‌تر انتخاب کنید.</p>
             <div className="landing-actions">
-              <Link className="landing-primary" to="/login">ورود به محیط HBI</Link>
+              <Link className="landing-primary" to="/login">ورود مدیر به HBI</Link>
               <a className="landing-secondary" href="#approach">آشنایی با روش کار</a>
             </div>
           </div>
@@ -43,9 +69,10 @@ export default function LandingPage() {
           <span className="landing-eyebrow">از نیاز شروع می‌کنیم</span>
           <h2>امروز بیشتر دنبال چه چیزی هستید؟</h2>
           <p>مراقبت پوست، مراقبت مو یا راهنمای انتخاب؛ نیاز واقعی نقطهٔ شروع بررسی است.</p>
-          <div className="landing-pills">
+          <div className="landing-pills" aria-label="دسته‌های مراقبت">
             <span>مراقبت پوست</span><span>مراقبت مو</span><span>مراقبت پوست سر</span><span>راهنمای انتخاب</span>
           </div>
+          <p className="landing-note">برای ثبت مشاوره، از مسیر عملیاتی HBI و با دسترسی مجاز استفاده می‌شود.</p>
         </section>
 
         <section className="landing-section landing-approach" id="approach">
@@ -58,10 +85,34 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="landing-transparency" id="products">
+        <section className="landing-section landing-products" id="products">
+          <span className="landing-eyebrow">کاتالوگ عمومی</span>
+          <h2>محصولات قابل نمایش</h2>
+          <p>فهرست از API عمومی HBI دریافت می‌شود؛ این بخش اطلاعات ساختگی یا نمونه‌ای تولید نمی‌کند.</p>
+          {productsLoading && <p role="status" className="landing-product-state">در حال بارگذاری محصولات…</p>}
+          {!productsLoading && productsError && (
+            <p role="alert" className="landing-product-state">دریافت محصولات ممکن نشد. اتصال سرویس در این محیط باید بررسی شود.</p>
+          )}
+          {!productsLoading && !productsError && products.length === 0 && (
+            <p className="landing-product-state">در حال حاضر محصولی برای نمایش از API دریافت نشد.</p>
+          )}
+          {!productsLoading && !productsError && products.length > 0 && (
+            <div className="landing-product-grid">
+              {products.map((product) => (
+                <article className="landing-product-card" key={product.product_id}>
+                  <h3>{product.product_name || "نام ثبت نشده"}</h3>
+                  <p>{product.brand || "برند ثبت نشده"}</p>
+                  {product.variant && <p>گونه: {product.variant}</p>}
+                  {product.size_value != null && product.size_unit && <p>اندازه: {product.size_value} {product.size_unit}</p>}
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="landing-transparency">
           <div><span className="landing-eyebrow">اصل بنیادین HBI</span><h2>اطلاعات موجود را از فرضیات جدا می‌کنیم.</h2>
           <p>وقتی شواهد کافی نباشد، سیستم نباید با حدس‌زدن جای خالی اطلاعات را پر کند.</p></div>
-          <Link className="landing-primary" to="/login">ورود به محیط HBI</Link>
         </section>
 
         <section className="landing-section landing-consultation" id="consultation">
