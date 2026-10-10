@@ -1,4 +1,4 @@
- .landing-page{font-family:"Segoe UI",Tahoma,Arial,sans-serif;--ink:#24271f;--muted:#6d7065;--green:#486344;--line:#e4e0d5;direction:rtl;min-height:100vh;background:#f7f5ef;color:var(--ink);line-height:1.8}
+.landing-page{font-family:"Segoe UI",Tahoma,Arial,sans-serif;--ink:#24271f;--muted:#6d7065;--green:#486344;--line:#e4e0d5;direction:rtl;min-height:100vh;background:#f7f5ef;color:var(--ink);line-height:1.8}
 .landing-page *{box-sizing:border-box}
 .landing-header{max-width:1160px;margin:auto;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid var(--line)}
 .landing-brand{font-weight:800;font-size:1.1rem;color:var(--ink);text-decoration:none}
