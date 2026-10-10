@@ -17,7 +17,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<AdminLoginPage />} />
-      <Route path="/" element={<AdminGate><NewHomePage /></AdminGate>} />
+      <Route path="/" element={<NewHomePage />} />
       <Route path="/catalog" element={<AdminGate><CatalogPage /></AdminGate>} />
       <Route path="/pilot" element={<AdminGate><PilotPage /></AdminGate>} />
       <Route path="/recommendation" element={<AdminGate><RecommendationPage /></AdminGate>} />
