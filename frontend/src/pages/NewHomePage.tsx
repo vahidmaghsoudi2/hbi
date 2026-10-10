@@ -48,7 +48,16 @@ const INITIAL_RECOMMENDATION_LIMIT = 5;
 type Panel = "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about";
 
 export default function NewHomePage() {
-  const [active, setActive] = useState<Panel>("consult");
+  const [active, setActive] = useState<Panel>(() => {
+    const requestedPanel = new URLSearchParams(window.location.search).get("panel");
+    const supportedPanels: Panel[] = [
+      "consult", "previous", "profile", "catalog", "review",
+      "intake", "results", "sales", "about",
+    ];
+    return requestedPanel && supportedPanels.includes(requestedPanel as Panel)
+      ? (requestedPanel as Panel)
+      : "consult";
+  });
   const [token, setToken] = useState<string | null>(() => sessionStorage.getItem("hbi_access_token"));
   const [customerId, setCustomerId] = useState<string | null>(() => sessionStorage.getItem("hbi_customer_id"));
   const [caseId, setCaseId] = useState<string | null>(() => sessionStorage.getItem("hbi_case_id"));
