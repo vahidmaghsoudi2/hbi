@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import asyncio
+from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier
 import pytest
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
@@ -283,3 +285,86 @@ def test_mixed_fx_duplicate_product_lines_rejected_without_sale_fx_snapshot(sess
         ReturnService(session).create_return(
             sale_id=sale.sale_id, product_id="P1", quantity=1
         )
+
+
+def test_full_return_restores_sold_quantity_and_stock(session):
+    sale = _sold(session, qty_sold=3, stock_start=10)
+    assert session.get(Inventory, "INV-P1").quantity_available == 7
+
+    ret = ReturnService(session).create_return(
+        sale_id=sale.sale_id, product_id="P1", quantity=3
+    )
+    session.commit()
+
+    assert ret.quantity == 3
+    assert session.get(Inventory, "INV-P1").quantity_available == 10
+    assert session.query(SaleReturn).filter_by(sale_id=sale.sale_id).with_entities(
+        __import__("sqlalchemy").func.sum(SaleReturn.quantity)
+    ).scalar() == 3
+    movement = session.query(StockMovement).filter_by(reference_id=ret.return_id).one()
+    assert movement.quantity_delta == 3
+    assert movement.quantity_after == 10
+
+
+def test_concurrent_returns_cannot_overreturn_sqlite(tmp_path):
+    # Use a file-backed SQLite DB and independent connections. An in-memory
+    # StaticPool test cannot model separate transactions competing for the lock.
+    engine = create_engine(
+        f"sqlite:///{tmp_path / 'returns-concurrency.db'}",
+        connect_args={"check_same_thread": False, "timeout": 10},
+    )
+
+    @event.listens_for(engine, "connect")
+    def _fk(dbapi_connection, connection_record):
+        cur = dbapi_connection.cursor()
+        cur.execute("PRAGMA foreign_keys=ON")
+        cur.close()
+
+    Base.metadata.create_all(bind=engine)
+    Session = sessionmaker(bind=engine)
+    setup = Session()
+    try:
+        sale = _sold(setup, qty_sold=3, stock_start=10)
+        sale_id = sale.sale_id
+        setup.commit()
+    finally:
+        setup.close()
+
+    start = Barrier(2)
+
+    def attempt_return():
+        db = Session()
+        try:
+            start.wait(timeout=5)
+            ret = ReturnService(db).create_return(
+                sale_id=sale_id, product_id="P1", quantity=2
+            )
+            db.commit()
+            return ("ok", ret.return_id)
+        except Exception as exc:
+            db.rollback()
+            return ("error", str(exc))
+        finally:
+            db.close()
+
+    try:
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            outcomes = list(pool.map(lambda _: attempt_return(), range(2)))
+
+        assert sum(status == "ok" for status, _ in outcomes) == 1
+        assert sum(status == "error" for status, _ in outcomes) == 1
+
+        verify = Session()
+        try:
+            returned = verify.query(SaleReturn).filter_by(sale_id=sale_id).all()
+            assert sum(row.quantity for row in returned) == 2
+            assert verify.get(Inventory, "INV-P1").quantity_available == 9
+            movements = verify.query(StockMovement).filter_by(
+                reference_type="SALE_RETURN"
+            ).all()
+            assert sum(row.quantity_delta for row in movements) == 2
+        finally:
+            verify.close()
+    finally:
+        Base.metadata.drop_all(bind=engine)
+        engine.dispose()
