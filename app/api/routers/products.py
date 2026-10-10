@@ -55,63 +55,6 @@ async def create_research_draft(
     product_id: str,
     payload: ResearchDraftRequest,
     db: Session = Depends(get_db),
-    """P4 P0 — Product API with AuthN/AuthZ, informational PATCH, controlled transitions."""
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from app.core.deps import get_db
-from app.core.authorization import get_current_subject_and_roles, require_any_role
-from app.core.exceptions import NotFoundError, ValidationError, ConflictError
-from app.core.governance import can_view_mutation_log
-from app.interface.facades import ProductFacade
-from app.interface.schemas import (
-    ProductCreate, ProductUpdate, ProductTransitionRequest, ProductRejectRequest,
-    ProductQARequest, ProductIdentityVerifyRequest, ResearchDraftRequest,
-)
-from app.services.product_service import ProductService
-from app.services.product_transition_service import ProductTransitionService
-from app.services.mutation_log_service import MutationLogService
-from app.models.user_role import ROLE_EDITOR, ROLE_PO, ROLE_REVIEWER_QA, ROLE_ADMIN
-from app.services.research_draft_service import ResearchDraftService
-
-router = APIRouter()
-
-
-def _to_dict(obj):
-    if obj is None:
-        return None
-    if hasattr(obj, "__dict__"):
-        return {k: v for k, v in vars(obj).items() if not k.startswith("_")}
-    return obj
-
-
-def _http_from_domain(exc):
-    if isinstance(exc, NotFoundError):
-        raise HTTPException(status_code=404, detail=str(exc))
-    if isinstance(exc, ValidationError):
-        raise HTTPException(status_code=422, detail=str(exc))
-    if isinstance(exc, ConflictError):
-        raise HTTPException(status_code=409, detail=str(exc))
-    raise exc
-
-
-@router.get("/")
-async def list_products(db: Session = Depends(get_db)):
-    return [_to_dict(p) for p in ProductFacade(db).get_verified_products()]
-
-
-@router.get("/manage")
-async def list_manageable_products(
-    db: Session = Depends(get_db),
-    auth=Depends(require_any_role(ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
-):
-    return [_to_dict(p) for p in ProductFacade(db).list_all()]
-
-
-@router.post("/{product_id}/research-draft")
-async def create_research_draft(
-    product_id: str,
-    payload: ResearchDraftRequest,
-    db: Session = Depends(get_db),
     auth=Depends(require_any_role(ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
 ):
     subject_id, roles = auth
