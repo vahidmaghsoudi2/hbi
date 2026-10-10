@@ -72,6 +72,10 @@ class ReturnService:
         sale = self.db.query(Sale).filter(Sale.sale_id == sale_id).first()
         if not sale:
             raise ValueError(f"Sale {sale_id} not found")
+        if getattr(sale, "document_status", "ACTIVE") != "ACTIVE":
+            raise ValueError(
+                f"cannot return against sale {sale_id} with status {sale.document_status}"
+            )
 
         prior_usd = sale.total_amount_usd
         prior_irr = sale.total_amount_irr
