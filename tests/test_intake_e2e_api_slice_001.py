@@ -7,7 +7,7 @@ from __future__ import annotations
 import pytest
 
 from app.core.auth import create_access_token
-from app.models.user_role import UserRole, ROLE_PO, ROLE_REVIEWER_QA, ROLE_EDITOR
+from app.models.user_role import UserRole, ROLE_PO, ROLE_REVIEWER_QA, ROLE_EDITOR, ROLE_ADMIN
 from app.models.product import Product
 from app.models.inventory import Inventory
 from app.models.stock_movement import StockMovement
@@ -44,6 +44,49 @@ def _create_product(client, headers, product_id, **extra):
     r = client.post("/api/v1/products/", headers=headers, json=body)
     assert r.status_code == 201, r.text
     return r.json()
+
+
+# ---------------------------------------------------------------------------
+# A0) Physical Stock-In API path
+# ---------------------------------------------------------------------------
+
+
+def test_product_intake_requires_explicit_stock_in_api(client, db_session):
+    editor = _auth(db_session, "intake_stock_editor", ROLE_EDITOR, ROLE_PO)
+    admin = _auth(db_session, "intake_stock_admin", ROLE_ADMIN)
+    pid = "INTAKE-STOCK-API-001"
+    _create_product(
+        client, editor, pid,
+        brand="StockCo",
+        product_name="Explicit Stock-In Product",
+        product_line="SKIN",
+    )
+
+    inventory = db_session.query(Inventory).filter(Inventory.product_id == pid).one()
+    assert inventory.quantity_available == 0
+    assert inventory.stock_status == "OUT_OF_STOCK"
+    assert db_session.query(StockMovement).filter(StockMovement.product_id == pid).count() == 0
+
+    stock_in = client.post(
+        "/api/v1/inventory/stock-in",
+        headers=admin,
+        json={
+            "product_id": pid,
+            "quantity": 3,
+            "purchase_price_usd": 4.5,
+            "fx_rate_usd_to_irr": 500000,
+            "note": "explicit intake stock-in API test",
+            "reference_type": "TEST",
+            "reference_id": "INTAKE-STOCK-API-001",
+        },
+    )
+    assert stock_in.status_code == 200, stock_in.text
+    body = stock_in.json()
+    assert body["before_quantity"] == 0
+    assert body["inventory"]["quantity_available"] == 3
+    assert body["movement"]["quantity_delta"] == 3
+    assert body["movement"]["quantity_after"] == 3
+    assert body["movement"]["movement_type"] == "STOCK_IN"
 
 
 # ---------------------------------------------------------------------------
