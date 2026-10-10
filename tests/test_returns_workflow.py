@@ -1,4 +1,4 @@
-"""PHASE 10 — Returns workflow tests. In-memory only. No data/hbi.db."""
+"""PHASE 10 — Return workflow tests. Uses isolated in-memory and tmp-path SQLite DBs only."""
 from __future__ import annotations
 
 import asyncio
