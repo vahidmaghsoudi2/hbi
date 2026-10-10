@@ -1,6 +1,7 @@
 """PHASE 10 — Returns workflow tests. In-memory only. No data/hbi.db."""
 from __future__ import annotations
 
+import asyncio
 import pytest
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
@@ -15,6 +16,7 @@ from app.models.sale_return import SaleReturn
 from app.models.stock_movement import StockMovement
 from app.services.sale_service import SaleService
 from app.services.return_service import ReturnService
+from app.api.routers.sales import get_sale_detail
 
 
 @pytest.fixture()
@@ -170,3 +172,30 @@ def test_rollback_on_failure(session):
     session.rollback()
     assert session.get(Inventory, "INV-P1").quantity_available == before
     assert session.query(SaleReturn).count() == 0
+
+
+
+def test_invoice_detail_reports_remaining_return_quantity(session):
+    sale = _sold(session, qty_sold=4)
+    ReturnService(session).create_return(
+        sale_id=sale.sale_id, product_id="P1", quantity=1
+    )
+    session.commit()
+
+    detail = asyncio.run(get_sale_detail(sale.sale_id, session, admin=object()))
+
+    assert detail["sale_id"] == sale.sale_id
+    assert len(detail["items"]) == 1
+    item = detail["items"][0]
+    assert item["product_id"] == "P1"
+    assert item["sold_quantity"] == 4
+    assert item["already_returned_quantity"] == 1
+    assert item["remaining_quantity"] == 3
+
+
+def test_invoice_detail_unknown_sale_is_404(session):
+    from fastapi import HTTPException
+
+    with pytest.raises(HTTPException) as exc:
+        asyncio.run(get_sale_detail("MISSING-SALE", session, admin=object()))
+    assert exc.value.status_code == 404
