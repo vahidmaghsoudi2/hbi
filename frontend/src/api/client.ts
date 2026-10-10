@@ -22,6 +22,7 @@ import type {
   FinancialSummaryDTO,
   StockMovementDTO,
   EvidenceDTO,
+  ResearchDraftAssertion,
   MutationLogDTO,
   DuplicateCheckRequest,
   DuplicateCheckResponse,
@@ -177,6 +178,31 @@ export function getProductEvidence(
   token: string
 ): Promise<EvidenceDTO[]> {
   return request<EvidenceDTO[]>(`/evidence/?product_id=${encodeURIComponent(productId)}`, {}, token);
+}
+
+/** Create source-traceable Research Draft assertions for an existing product. */
+export function createResearchDraft(
+  productId: string,
+  assertions: ResearchDraftAssertion[],
+  token: string
+): Promise<EvidenceDTO[]> {
+  return request<EvidenceDTO[]>(`/products/${encodeURIComponent(productId)}/research-draft`, {
+    method: "POST",
+    body: JSON.stringify({ assertions }),
+  }, token);
+}
+
+/** Review a Research Draft evidence assertion. */
+export function verifyProductEvidence(
+  evidenceId: string,
+  verdict: "VERIFIED" | "REJECTED",
+  reason: string,
+  token: string
+): Promise<EvidenceDTO> {
+  return request<EvidenceDTO>(`/evidence/${encodeURIComponent(evidenceId)}/verify`, {
+    method: "POST",
+    body: JSON.stringify({ verdict, reason }),
+  }, token);
 }
 
 /** POST /api/v1/sales/ — requires auth; customer_id must match token identity */
