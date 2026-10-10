@@ -21,12 +21,10 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ username, password }),
       });
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data?.detail || "ورود ناموفق بود.");
-      }
+      if (!response.ok) throw new Error(data?.detail || "ورود ناموفق بود.");
       sessionStorage.setItem("hbi_admin_access_token", data.access_token);
       sessionStorage.setItem("hbi_admin_refresh_token", data.refresh_token);
-      navigate("/");
+      navigate("/workspace");
     } catch (err) {
       setError(err instanceof Error ? err.message : "ورود ناموفق بود.");
     } finally {
@@ -35,18 +33,12 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main style={{ maxWidth: 420, margin: "60px auto", padding: 24 }}>
+    <main style={{ maxWidth: 420, margin: "60px auto", padding: 24 }} dir="rtl">
       <h1>ورود مدیر HBI</h1>
       <p>برای ورود به محیط مدیریتی، نام کاربری و رمز عبور را وارد کنید.</p>
       <form onSubmit={submit}>
-        <label>
-          نام کاربری
-          <input value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" required />
-        </label>
-        <label>
-          رمز عبور
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
-        </label>
+        <label>نام کاربری<input value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" required /></label>
+        <label>رمز عبور<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required /></label>
         <button type="submit" disabled={busy}>{busy ? "در حال ورود..." : "ورود"}</button>
       </form>
       {error && <p role="alert">{error}</p>}
