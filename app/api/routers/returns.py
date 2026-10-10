@@ -9,7 +9,6 @@ from app.core.deps import get_db, get_current_customer_id
 from app.core.authorization import require_any_role
 from app.models.user_role import ROLE_ADMIN
 from app.services.return_service import ReturnService
-from app.models.sale import Sale
 
 router = APIRouter()
 
@@ -43,11 +42,9 @@ async def create_return(
     admin=Depends(require_any_role(ROLE_ADMIN)),
 ):
     # V1 PO Contract: ADMIN owns return financial mutation.
-    sale = db.query(Sale).filter(Sale.sale_id == body.sale_id).first()
-    if not sale:
-        raise HTTPException(status_code=404, detail=f"Sale {body.sale_id} not found")
-    if getattr(sale, "document_status", "ACTIVE") == "VOIDED":
-        raise HTTPException(status_code=422, detail=f"Sale {body.sale_id} is VOIDED")
+    # Do not pre-read Sale here: the service must acquire its write lock before
+    # any transaction read, otherwise concurrent SQLite requests can start as
+    # readers before attempting to serialize the returnable balance.
     svc = ReturnService(db)
     try:
         ret = svc.create_return(
@@ -62,6 +59,8 @@ async def create_return(
         return _to_dict(ret)
     except ValueError as e:
         db.rollback()
+        if str(e) == f"Sale {body.sale_id} not found":
+            raise HTTPException(status_code=404, detail=str(e))
         raise HTTPException(status_code=422, detail=str(e))
 
 
