@@ -284,6 +284,7 @@ export default function ProductIntakePanel({
   const [researchField, setResearchField] = useState("claimed_benefits");
   const [researchMarketRegion, setResearchMarketRegion] = useState("IR");
   const [researchNotes, setResearchNotes] = useState("");
+  const [researchReviewReason, setResearchReviewReason] = useState("");
   const [researchBusy, setResearchBusy] = useState(false);
   const editing = Boolean(editProduct?.product_id);
 
@@ -330,11 +331,16 @@ export default function ProductIntakePanel({
 
   async function reviewEvidence(evidenceId: string) {
     setErr(null);
+    if (!researchReviewReason.trim()) {
+      setErr("برای ثبت نتیجه بررسی شاهد، دلیل بررسی الزامی است.");
+      return;
+    }
     setResearchBusy(true);
     try {
       const activeToken = (await onEnsureSession?.()) ?? token;
       if (!activeToken) throw new Error("نشست فعال برای بررسی شاهد موجود نیست.");
-      await verifyEvidence(evidenceId, "VERIFIED", activeToken);
+      await verifyEvidence(evidenceId, "VERIFIED", activeToken, researchReviewReason.trim());
+      setResearchReviewReason("");
       setMsg("شاهد بررسی و به‌صورت VERIFIED ثبت شد.");
       if (researchProductId) await loadResearch(researchProductId);
     } catch (e) {
@@ -889,6 +895,7 @@ export default function ProductIntakePanel({
                 <option value="MANUFACTURER">تولیدکننده</option>
                 <option value="REGULATORY">مرجع مقرراتی</option>
                 <option value="PEER_REVIEWED">مقاله داوری‌شده</option>
+                <option value="CLINICAL_TRIAL">کارآزمایی بالینی</option>
                 <option value="OTHER">سایر</option>
                 <option value="OPERATOR_DECLARATION">اظهار اپراتور</option>
               </select>
@@ -944,6 +951,15 @@ export default function ProductIntakePanel({
               بازخوانی شواهد
             </button>
           </div>
+          <p className="pro-lead" role="note">
+            نقش‌های مجاز عملیاتی/QA می‌توانند نتیجه بررسی را ثبت کنند؛ هویت نقش و دلیل بررسی در سابقه ممیزی ذخیره می‌شود. وضعیت VERIFIED یعنی نتیجه بررسی ثبت شده است و به‌تنهایی تضمین صحت علمی یا ایمنی ادعا نیست.
+          </p>
+          <div style={{ marginTop: "0.75rem" }}>
+            <label className="pro-label">دلیل بررسی شاهد (برای ثبت VERIFIED الزامی است)</label>
+            <input className="pro-input" value={researchReviewReason}
+              onChange={(e) => setResearchReviewReason(e.target.value)}
+              placeholder="مثلاً تطبیق مرجع با سند اصلی و بررسی دامنه ادعا" />
+          </div>
           <div style={{ marginTop: "0.75rem" }}>
             <strong>شواهد ثبت‌شده ({researchRows.length})</strong>
             {researchRows.length === 0 ? <p className="pro-lead">هنوز شاهدی برای این محصول ثبت نشده است.</p> : (
@@ -959,7 +975,7 @@ export default function ProductIntakePanel({
                     </div>
                     {String(e.qa_status || "PENDING").toUpperCase() !== "VERIFIED" &&
                       String(e.qa_status || "PENDING").toUpperCase() !== "APPROVED" && (
-                        <button type="button" className="pro-btn-secondary" disabled={researchBusy}
+                        <button type="button" className="pro-btn-secondary" disabled={researchBusy || !researchReviewReason.trim()}
                           onClick={() => void reviewEvidence(e.evidence_id)}>
                           بررسی و ثبت VERIFIED
                         </button>
