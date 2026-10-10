@@ -5,7 +5,7 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from threading import Barrier
 import pytest
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, event, func
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -299,7 +299,7 @@ def test_full_return_restores_sold_quantity_and_stock(session):
     assert ret.quantity == 3
     assert session.get(Inventory, "INV-P1").quantity_available == 10
     assert session.query(SaleReturn).filter_by(sale_id=sale.sale_id).with_entities(
-        __import__("sqlalchemy").func.sum(SaleReturn.quantity)
+        func.sum(SaleReturn.quantity)
     ).scalar() == 3
     movement = session.query(StockMovement).filter_by(reference_id=ret.return_id).one()
     assert movement.quantity_delta == 3
