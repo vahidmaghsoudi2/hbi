@@ -21,6 +21,8 @@ export default function RecommendationPage() {
     e.preventDefault();
     setError(null);
     setInfo(null);
+    setItems([]);
+    setShowAll(false);
     setBusy(true);
     const token = sessionStorage.getItem("hbi_access_token");
     if (!token) {
@@ -133,6 +135,8 @@ export default function RecommendationPage() {
           onClick={async () => {
             setError(null);
             setInfo(null);
+            setItems([]);
+            setShowAll(false);
             setBusy(true);
             const token = sessionStorage.getItem("hbi_access_token");
             if (!token) {
