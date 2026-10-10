@@ -21,6 +21,7 @@ import {
   getCurrentFx,
   listSalesByCustomer,
 } from "../api/client";
+import type { SaleDetailDTO } from "../api/client";
 import ProductIntakePanel from "./ProductIntakePanel";
 import ProductReviewPanel from "./ProductReviewPanel";
 import type {
@@ -31,7 +32,6 @@ import type {
   GuestCreateRequest,
   CustomerSearchResult,
   SaleDTO,
-  SaleDetailDTO,
 } from "../types/api";
 
 const CONCERN_OPTIONS = [
