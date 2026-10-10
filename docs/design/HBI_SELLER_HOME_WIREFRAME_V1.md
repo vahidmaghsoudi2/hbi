@@ -66,15 +66,15 @@ A return must reference a recorded sale and cannot exceed the remaining sold qua
 - Current `CONSULTATION_LINES` contains only `SKIN`; the requested six lines are not yet reflected in this consultation selector.
 - `app/api/routers/sales.py` sale creation requires `ROLE_ADMIN`. A new admin-only `GET /sales/detail/{sale_id}` returns the recorded invoice and product-level sold / already-returned / remaining quantities.
 - `app/api/routers/returns.py` return creation and listing require `ROLE_ADMIN`.
-- `app/services/return_service.py` validates the original sale, matching sale item, and remaining returnable quantity; it increases inventory and records a `SaleReturn`. Its module documentation explicitly says payment refunds are not implemented.
+- `app/services/return_service.py` validates the original sale, matching sale item, and remaining returnable quantity; it increases inventory and records a `SaleReturn`. It acquires a sale-row write lock before reading the returnable balance so SQLite's database-level write lock can serialize competing return attempts as well as row-lock-capable databases. This must be verified by the file-backed SQLite concurrency regression test and CI. Its module documentation explicitly says payment refunds are not implemented.
 - The return panel now requires loading the original invoice, lets the operator select only products on that invoice, displays sold/already-returned/remaining quantities, and blocks quantities above the displayed remaining amount before submission. Backend validation remains authoritative.
 - `SaleReturn` stores sale/product/quantity/reason and monetary amounts, but the existence of fields is not proof that a complete refund/accounting workflow exists.
 - Current app route guard `AdminGate` checks a session token in the frontend; this is not, by itself, proof of backend authorization.
 
 ## 6. Gaps still open before acceptance
 
-1. Role policy: seller permissions for consultation, direct sale, return registration, and exceptional return approval. Current sale/return write APIs are admin-only.
-2. Return financial contract: refund/credit handling, document status, audit trail, idempotency, and inventory movement verification.
+1. Role policy: seller permissions for consultation, direct sale, return registration, and exceptional return approval. Product-safe default remains ADMIN-only for sale/return writes until the Product Owner approves a defined Seller role and permission matrix.
+2. Return financial contract: payment refunds are not implemented and must not be implied by a successful stock return. Refund/credit handling, document status, audit trail, and idempotency require an explicit Product Owner decision before a financial-refund workflow is enabled.
 3. Customer flow: confirm which operational token and identity model are intended for seller-side customer lookup and consultation.
 4. Taxonomy: canonical mapping for SKIN/BOOST and the six requested gallery lines; do not change schema/migrations by assumption.
 5. Indicators: define authoritative API and time window for today's sales, low stock, pending recommendations/returns. Hide metrics without reliable data.
@@ -92,4 +92,4 @@ A return must reference a recorded sale and cannot exceed the remaining sold qua
 
 ## 8. Next work
 
-Next: wait for CI on the latest commit; resolve any failures; then run the application against an isolated test database and record real end-to-end evidence. Obtain an independent review and a product decision for seller permissions/refund semantics. Keep the six-line taxonomy and management indicators disabled until their contracts and runtime behavior are verified. Do not merge to master until tests, runtime evidence, product decisions, and independent review are complete.
+Next: run the file-backed SQLite concurrency regression and full/partial return tests in CI; then run the application against an isolated runtime database and record UI/API end-to-end evidence. Obtain an independent review. Product policy stays conservative: sale/return writes remain ADMIN-only, and returns remain inventory-only with no payment refund, until the Product Owner explicitly approves changes. Keep the six-line taxonomy and management indicators disabled until their contracts and runtime behavior are verified. Do not merge to master until tests, runtime evidence, and independent review are complete.
