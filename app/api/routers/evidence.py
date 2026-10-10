@@ -21,7 +21,7 @@ router = APIRouter()
 async def create_evidence(
     data: EvidenceCreate,
     db: Session = Depends(get_db),
-    auth=Depends(require_any_role(ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
+    auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
 ):
     facade = EvidenceFacade(db)
     try:
@@ -105,7 +105,7 @@ async def verify_evidence(
     evidence_id: str,
     request: VerifyRequest,
     db: Session = Depends(get_db),
-    auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
+    auth=Depends(require_any_role(ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
 ):
     facade = EvidenceFacade(db)
     try:
