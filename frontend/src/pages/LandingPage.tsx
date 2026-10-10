@@ -34,8 +34,8 @@ export default function LandingPage() {
         <Link className="landing-brand" to="/">گالری مقصودی</Link>
         <nav aria-label="منوی اصلی">
           <a href="#products">محصولات</a>
-          <a href="#need">نیاز شما</a>
-          <a href="#consultation">مشاوره</a>
+          <a href="#need">حوزه‌های مراقبت</a>
+          <a href="#consultation">درباره مشاوره</a>
         </nav>
         <Link className="landing-login" to="/login">ورود مدیر HBI</Link>
       </header>
@@ -67,12 +67,12 @@ export default function LandingPage() {
 
         <section className="landing-section" id="need">
           <span className="landing-eyebrow">از نیاز شروع می‌کنیم</span>
-          <h2>امروز بیشتر دنبال چه چیزی هستید؟</h2>
-          <p>مراقبت پوست، مراقبت مو یا راهنمای انتخاب؛ نیاز واقعی نقطهٔ شروع بررسی است.</p>
+          <h2>حوزه‌هایی که HBI بررسی می‌کند</h2>
+          <p>این دسته‌ها برای معرفی حوزه‌های کاری HBI هستند و در این صفحه انتخاب تعاملی یا ثبت نیاز انجام نمی‌دهند.</p>
           <div className="landing-pills" aria-label="دسته‌های مراقبت">
             <span>مراقبت پوست</span><span>مراقبت مو</span><span>مراقبت پوست سر</span><span>راهنمای انتخاب</span>
           </div>
-          <p className="landing-note">برای ثبت مشاوره، از مسیر عملیاتی HBI و با دسترسی مجاز استفاده می‌شود.</p>
+          <p className="landing-note">ثبت مشتری، نیاز و مشاوره از این بخش انجام نمی‌شود؛ این عملیات فقط از مسیر عملیاتی مجاز HBI در دسترس است.</p>
         </section>
 
         <section className="landing-section landing-approach" id="approach">
@@ -116,8 +116,8 @@ export default function LandingPage() {
         </section>
 
         <section className="landing-section landing-consultation" id="consultation">
-          <h2>فناوری در خدمت انتخاب آگاهانه</h2>
-          <p>HBI ابزار پشتیبان تصمیم‌گیری است؛ اطلاعات، شواهد و بررسی انسانی همچنان اهمیت دارند.</p>
+          <h2>مشاوره در HBI</h2>
+          <p>این بخش معرفی است و پروندهٔ مشاوره ایجاد نمی‌کند. ثبت و پیگیری مشاوره در محیط عملیاتی مجاز HBI انجام می‌شود.</p>
         </section>
       </main>
       <footer className="landing-footer">گالری مقصودی · HBI · ۲۰۲۶</footer>
