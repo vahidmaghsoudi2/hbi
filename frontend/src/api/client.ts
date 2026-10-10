@@ -27,6 +27,7 @@ import type {
   DuplicateCheckResponse,
   DuplicateCheckOperatorDecisionRequest,
   DuplicateCheckOperatorDecisionResponse,
+  ResearchAssertionRequest,
 } from "../types/api";
 
 const BASE = import.meta.env?.VITE_API_BASE ?? "/api/v1";
@@ -177,6 +178,31 @@ export function getProductEvidence(
   token: string
 ): Promise<EvidenceDTO[]> {
   return request<EvidenceDTO[]>(`/evidence/?product_id=${encodeURIComponent(productId)}`, {}, token);
+}
+
+/** Create source-traceable research assertions; they remain PENDING/UNKNOWN until reviewed. */
+export function createResearchDraft(
+  productId: string,
+  assertions: ResearchAssertionRequest[],
+  token: string
+): Promise<EvidenceDTO[]> {
+  return request<EvidenceDTO[]>(`/products/${encodeURIComponent(productId)}/research-draft`, {
+    method: "POST",
+    body: JSON.stringify({ assertions }),
+  }, token);
+}
+
+/** Explicit QA review of one evidence record. */
+export function verifyEvidence(
+  evidenceId: string,
+  verdict: string,
+  token: string,
+  reason = "Product Intake research review"
+): Promise<EvidenceDTO> {
+  return request<EvidenceDTO>(`/evidence/${encodeURIComponent(evidenceId)}/verify`, {
+    method: "POST",
+    body: JSON.stringify({ verdict, reason }),
+  }, token);
 }
 
 /** POST /api/v1/sales/ — requires auth; customer_id must match token identity */
