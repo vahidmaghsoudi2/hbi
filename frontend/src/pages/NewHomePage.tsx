@@ -11,6 +11,8 @@ import {
   generateRecommendations,
   listInternalEvaluationsByCase,
   createSale,
+  createReturn,
+  listReturnsForSale,
   getTotalSales,
   getCustomerById,
   searchCustomers,
@@ -45,7 +47,7 @@ const SKIN_OPTIONS = ["خشک", "چرب", "مختلط", "معمولی", "حسا�
 const CONSULTATION_LINES = [{ id: "SKIN", label: "پوست" }] as const;
 const INITIAL_RECOMMENDATION_LIMIT = 5;
 
-type Panel = "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about";
+type Panel = "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "returns" | "about";
 
 export default function NewHomePage() {
   const [active, setActive] = useState<Panel>("consult");
@@ -83,6 +85,12 @@ export default function NewHomePage() {
   const [customerSearchResults, setCustomerSearchResults] = useState<CustomerSearchResult[]>([]);
   const [purchaseHistory, setPurchaseHistory] = useState<SaleDTO[]>([]);
   const [customerSearchBusy, setCustomerSearchBusy] = useState(false);
+  const [returnSaleId, setReturnSaleId] = useState("");
+  const [returnProductId, setReturnProductId] = useState("");
+  const [returnQty, setReturnQty] = useState(1);
+  const [returnReason, setReturnReason] = useState("");
+  const [returnRows, setReturnRows] = useState<Record<string, unknown>[]>([]);
+  const [returnBusy, setReturnBusy] = useState(false);
 
   const loadProducts = useCallback(async () => {
     setCatalogLoading(true);
@@ -468,8 +476,9 @@ export default function NewHomePage() {
   async function onSaleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!token || !customerId) return setError("ابتدا مشاوره را ثبت کنید.");
-    // The backend currently restricts POST /sales/ to ADMIN. Keep this UI honest rather than attempting a role bypass.
+    if (!customerId) return setError("ابتدا مشتری را انتخاب کنید.");
+    const adminToken = sessionStorage.getItem("hbi_admin_access_token");
+    if (!adminToken) return setError("ثبت فروش فقط برای مدیر مجاز است. ابتدا وارد حساب مدیر شوید.");
     if (!saleProductId.trim()) return setError("محصول را انتخاب کنید.");
     if (saleQty < 1) return setError("تعداد نامعتبر است.");
     if (salePrice == null) return setError("قیمت فروش این محصول در دسترس نیست.");
@@ -486,7 +495,7 @@ export default function NewHomePage() {
           items: [{ product_id: saleProductId.trim(), quantity: saleQty, ...(selectedRecommendationId ? { recommendation_id: selectedRecommendationId } : {}) }],
           fx_rate_usd_to_irr: currentFxRate,
         },
-        token
+        adminToken
       );
       setLastSale(sale);
       setSelectedRecommendationId(null);
@@ -559,6 +568,7 @@ export default function NewHomePage() {
     ["intake", "ورود محصول"],
     ["results", "پیشنهادها"],
     ["sales", "فروش"],
+    ["returns", "مرجوعی"],
     ["about", "درباره HBI"],
   ];
 
@@ -954,7 +964,7 @@ export default function NewHomePage() {
         {active === "sales" && (
           <section className="pro-panel" id="sales">
             <h1>ثبت فروش</h1>
-            <p className="pro-lead">API: POST /api/v1/sales/ و GET /api/v1/sales/total — نیاز به نشست فعال.</p>
+            <p className="pro-lead">ثبت فروش با نشست مدیر انجام می‌شود؛ نشست مشتری فقط برای پرونده و سابقه خرید استفاده می‌شود.</p>
             {!token || !customerId ? (
               <div className="pro-empty">
                 <strong>ابتدا مشاوره را ثبت کنید.</strong>
@@ -1036,6 +1046,68 @@ export default function NewHomePage() {
                 </div>
               </div>
             )}
+          </section>
+        )}
+
+        {active === "returns" && (
+          <section className="pro-panel">
+            <div className="pro-panel-head">
+              <div>
+                <h1>ثبت و پیگیری مرجوعی</h1>
+                <p className="pro-lead">ثبت مرجوعی و مشاهده سوابق به نشست مدیر نیاز دارد. مرجوعی کالا به‌تنهایی به معنی بازپرداخت وجه نیست.</p>
+              </div>
+              <Link to="/login" className="pro-btn-secondary">ورود مدیر</Link>
+            </div>
+            <form className="pro-form" onSubmit={async (e) => {
+              e.preventDefault(); setError(null); setStatusMsg(null);
+              const adminToken = sessionStorage.getItem("hbi_admin_access_token");
+              if (!adminToken) { setError("برای ثبت یا مشاهده مرجوعی، ابتدا وارد حساب مدیر شوید."); return; }
+              if (!returnSaleId.trim() || !returnProductId.trim()) { setError("شناسه فروش و شناسه محصول الزامی است."); return; }
+              if (!Number.isInteger(returnQty) || returnQty < 1) { setError("تعداد مرجوعی باید عدد صحیح مثبت باشد."); return; }
+              setReturnBusy(true);
+              try {
+                await createReturn({ sale_id: returnSaleId.trim(), product_id: returnProductId.trim(), quantity: returnQty, reason: returnReason.trim() || undefined }, adminToken);
+                const rows = await listReturnsForSale(returnSaleId.trim(), adminToken);
+                setReturnRows(Array.isArray(rows) ? rows : []);
+                setStatusMsg("مرجوعی ثبت شد و سوابق فروش دوباره بارگذاری شدند."); setReturnReason("");
+              } catch (err) { setError(err instanceof Error ? err.message : String(err)); }
+              finally { setReturnBusy(false); }
+            }}>
+              <fieldset className="pro-fieldset">
+                <legend>اطلاعات مرجوعی</legend>
+                <label className="pro-label" htmlFor="return-sale-id">شناسه فروش *</label>
+                <input id="return-sale-id" className="pro-input" value={returnSaleId} onChange={(e) => setReturnSaleId(e.target.value)} required />
+                <label className="pro-label" htmlFor="return-product-id">شناسه محصول *</label>
+                <input id="return-product-id" className="pro-input" value={returnProductId} onChange={(e) => setReturnProductId(e.target.value)} required />
+                <label className="pro-label" htmlFor="return-qty">تعداد مرجوعی *</label>
+                <input id="return-qty" className="pro-input" type="number" min={1} step={1} value={returnQty} onChange={(e) => setReturnQty(Number(e.target.value))} required />
+                <label className="pro-label" htmlFor="return-reason">علت مرجوعی</label>
+                <textarea id="return-reason" className="pro-input pro-textarea" rows={2} value={returnReason} onChange={(e) => setReturnReason(e.target.value)} placeholder="اختیاری" />
+              </fieldset>
+              <div className="pro-actions">
+                <button type="submit" className="pro-btn-primary" disabled={returnBusy}>{returnBusy ? "در حال ثبت…" : "ثبت مرجوعی"}</button>
+                <button type="button" className="pro-btn-secondary" disabled={returnBusy || !returnSaleId.trim()} onClick={async () => {
+                  setError(null); const adminToken = sessionStorage.getItem("hbi_admin_access_token");
+                  if (!adminToken) { setError("برای مشاهده سوابق مرجوعی، ابتدا وارد حساب مدیر شوید."); return; }
+                  setReturnBusy(true);
+                  try { const rows = await listReturnsForSale(returnSaleId.trim(), adminToken); setReturnRows(Array.isArray(rows) ? rows : []); setStatusMsg(`تعداد مرجوعی‌های این فروش: ${rows.length}`); }
+                  catch (err) { setError(err instanceof Error ? err.message : String(err)); }
+                  finally { setReturnBusy(false); }
+                }}>بارگذاری سوابق فروش</button>
+              </div>
+            </form>
+            <div className="pro-product-grid" style={{ marginTop: "1rem" }}>
+              {returnRows.map((row, index) => (
+                <article className="pro-product-card" key={String(row.return_id ?? `${row.sale_id ?? returnSaleId}-${index}`)}>
+                  <h3>مرجوعی {String(row.return_id ?? index + 1)}</h3>
+                  <p className="pro-muted">فروش: {String(row.sale_id ?? "—")} · محصول: {String(row.product_id ?? "—")}</p>
+                  <p>تعداد: {String(row.quantity ?? "—")}</p>
+                  <p className="pro-muted">علت: {String(row.reason ?? "ثبت نشده")}</p>
+                  <p className="pro-muted">زمان ثبت: {String(row.created_at ?? "—")}</p>
+                </article>
+              ))}
+            </div>
+            {returnRows.length === 0 ? <p className="pro-muted">هنوز سوابق مرجوعی بارگذاری نشده‌اند.</p> : null}
           </section>
         )}
 
