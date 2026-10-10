@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from app.core.auth import create_access_token
 from app.models.user_role import UserRole, ROLE_PO, ROLE_EDITOR
+from app.models.inventory import Inventory
 
 
 def _auth(db_session, subject="wp01_op", *roles):
@@ -254,3 +255,23 @@ def test_possible_match_rejects_mismatched_snapshot(client, db_session):
     )
     assert r.status_code == 422, r.text
     assert "input_snapshot" in r.text or "does not match" in r.text
+
+
+
+def test_product_intake_does_not_create_physical_inventory(client, db_session):
+    """Catalog identity creation must not fabricate physical stock."""
+    headers = _auth(db_session, "stock_separation", ROLE_PO, ROLE_EDITOR)
+    response = _create(
+        client,
+        headers,
+        product_id="WP01-NO-STOCK-001",
+        brand="StockBoundary",
+        product_name="Catalog Only Product",
+    )
+    assert response.status_code == 201, response.text
+    assert (
+        db_session.query(Inventory)
+        .filter(Inventory.product_id == "WP01-NO-STOCK-001")
+        .first()
+        is None
+    )
