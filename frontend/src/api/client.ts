@@ -211,6 +211,34 @@ export function createReturn(
   );
 }
 
+/** GET /api/v1/sales/detail/{saleId} — admin-only invoice detail and remaining return quantities. */
+export interface SaleDetailDTO {
+  sale_id: string;
+  customer_id: string;
+  document_status: string;
+  total_amount_usd?: number | null;
+  total_amount_irr?: number | null;
+  total_amount_toman?: number | null;
+  fx_rate_usd_to_irr?: number | null;
+  items: Array<{
+    product_id: string;
+    product_name: string;
+    brand: string;
+    sold_quantity: number;
+    already_returned_quantity: number;
+    remaining_quantity: number;
+    unit_price_toman?: number | null;
+  }>;
+}
+
+export function getSaleDetail(saleId: string, adminToken: string): Promise<SaleDetailDTO> {
+  return request<SaleDetailDTO>(
+    `/sales/detail/${encodeURIComponent(saleId)}`,
+    {},
+    adminToken
+  );
+}
+
 /** GET /api/v1/returns/sale/{saleId} — backend currently requires an ADMIN role. */
 export function listReturnsForSale(
   saleId: string,
