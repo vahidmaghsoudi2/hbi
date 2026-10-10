@@ -11,7 +11,7 @@ from decimal import Decimal, InvalidOperation
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
-from sqlalchemy import func, update
+from sqlalchemy import func, text
 
 from app.models.inventory import Inventory
 from app.models.sale import Sale
@@ -79,9 +79,11 @@ class ReturnService:
         # acquires SQLite's write lock before the balance is read. The caller must
         # keep this transaction open through commit/rollback.
         lock_result = self.db.execute(
-            update(Sale)
-            .where(Sale.sale_id == sale_id)
-            .values(document_status=Sale.document_status)
+            text(
+                'UPDATE "Sale" SET document_status = document_status '
+                'WHERE sale_id = :sale_id'
+            ),
+            {"sale_id": sale_id},
         )
         if lock_result.rowcount == 0:
             raise ValueError(f"Sale {sale_id} not found")
