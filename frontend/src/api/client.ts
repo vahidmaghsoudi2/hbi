@@ -179,7 +179,7 @@ export function getProductEvidence(
   return request<EvidenceDTO[]>(`/evidence/?product_id=${encodeURIComponent(productId)}`, {}, token);
 }
 
-/** POST /api/v1/sales/ — requires auth; customer_id must match token identity */
+/** POST /api/v1/sales/ — backend currently requires an ADMIN role; customer_id identifies the buyer. */
 export function createSale(
   body: SaleCreateRequest,
   token: string
@@ -188,6 +188,38 @@ export function createSale(
     "/sales/",
     { method: "POST", body: JSON.stringify(body) },
     token
+  );
+}
+
+/** POST /api/v1/returns/ — backend currently requires an ADMIN role.
+ * This records a stock return; it does not by itself issue a payment refund.
+ */
+export function createReturn(
+  body: {
+    sale_id: string;
+    product_id: string;
+    quantity: number;
+    fx_rate_usd_to_irr?: number | null;
+    reason?: string | null;
+  },
+  adminToken: string
+): Promise<Record<string, unknown>> {
+  return request<Record<string, unknown>>(
+    "/returns/",
+    { method: "POST", body: JSON.stringify(body) },
+    adminToken
+  );
+}
+
+/** GET /api/v1/returns/sale/{saleId} — backend currently requires an ADMIN role. */
+export function listReturnsForSale(
+  saleId: string,
+  adminToken: string
+): Promise<Record<string, unknown>[]> {
+  return request<Record<string, unknown>[]>(
+    `/returns/sale/${encodeURIComponent(saleId)}`,
+    {},
+    adminToken
   );
 }
 
