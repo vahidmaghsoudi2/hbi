@@ -1,3 +1,6 @@
+> **STALE BASELINE / RECONCILE BEFORE CURRENT USE (audit 2026-10-09)**  
+> This audit is pinned to `master @ 849b7ac0b5105526e65ea78a05bbee1f9c5f7269`, not the current recorded `master @ 0bef18c3d4403e3148b62f2a646ec6b489a1f28f`. Its test results (116 passed) are evidence for the audited snapshot only. Do not copy its VERIFIED/PARTIAL verdicts as current-master claims until a delta audit checks relevant code, tests, and runtime paths against the current SHA. The audit's explicit non-authorization boundary remains in force.  
+>
 # HBI-ACCOUNTING-POST-ACCEPTANCE-REALITY-001
 
 # Accounting V1 Post-Acceptance Reality Audit

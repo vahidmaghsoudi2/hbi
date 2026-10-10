@@ -1,3 +1,6 @@
+> **HISTORICAL / NOT AUTHORITATIVE FOR CURRENT AUTHORIZATION (audit 2026-10-09)**  
+> This document records an earlier Phase 10 checkpoint. Its generic “Auth: required” line is not a current authorization specification; the current return-creation mutation is Admin-controlled. The return/refund boundary described below remains a separate capability boundary and must not be interpreted as evidence that refunds exist. Verify current behavior against [`app/api/routers/returns.py`](../../app/api/routers/returns.py), [`app/services/return_service.py`](../../app/services/return_service.py), and current tests. The historical test counts below are not fresh test results.  
+>
 # PHASE 10 — Returns Workflow Evidence
 
 **Status:** **CLOSED / PASS**  

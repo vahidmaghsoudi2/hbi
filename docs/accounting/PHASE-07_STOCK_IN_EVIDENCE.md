@@ -1,3 +1,6 @@
+> **STALE / SUPERSEDED FOR CURRENT AUTHORIZATION (audit 2026-10-09)**  
+> This document records an earlier Phase 07 state. Do not use its stock-in authentication description as current truth. Current `POST /api/v1/inventory/stock-in` is Admin-only; verify against [`app/api/routers/inventory.py`](../../app/api/routers/inventory.py) and current authorization tests before relying on it. This notice preserves the historical record and does not certify a fresh runtime pass.  
+>
 # PHASE 07 — Stock-In Workflow Evidence
 
 **Status:** **CLOSED / PASS**  

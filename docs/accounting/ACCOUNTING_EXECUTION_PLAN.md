@@ -1,3 +1,6 @@
+> **HISTORICAL ACCEPTANCE RECORD / NOT CURRENT RUNTIME PROOF (audit 2026-10-09)**  
+> This plan records the original Accounting V1 acceptance and frozen scope as of its last update (2026-09-02). It remains useful for historical scope and decisions, but its CLOSED/PASS and ACCEPTED labels do not prove the current Home-to-sale/payment/return workflows or current repository/runtime state. For current code-level accounting findings, consult [`ACCOUNTING_POST_ACCEPTANCE_REALITY_AUDIT_001.md`](ACCOUNTING_POST_ACCEPTANCE_REALITY_AUDIT_001.md) and then verify that audit's pinned SHA against current `master` before relying on its verdicts. Do not treat “No Phase 18 in this contract” as a prohibition on later PO-authorized work outside the historical V1 scope.  
+>
 # HBI Accounting — Execution Plan (Tracking)
 **Contract:** HBI ACCOUNTING MASTER EXECUTION CONTRACT V1.0  
 **Implementation Owner:** Grok2  

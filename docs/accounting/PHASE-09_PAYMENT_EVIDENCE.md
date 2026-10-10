@@ -1,3 +1,6 @@
+> **HISTORICAL / NOT AUTHORITATIVE FOR CURRENT PAYMENT RULES (audit 2026-10-09)**  
+> This document records an earlier Phase 09 checkpoint. Its statement that there is no overpayment rule is superseded by the later post-acceptance audit and current `PaymentService` behavior, which enforce a cumulative payment ceiling against the sale total. Its generic “Auth: required” line is not a current authorization specification; the current payment mutation route is Admin-controlled. Verify current behavior against [`app/services/payment_service.py`](../../app/services/payment_service.py), [`app/api/routers/payments.py`](../../app/api/routers/payments.py), and current tests. The historical test counts below are not fresh test results.  
+>
 # PHASE 09 — Payment Workflow Evidence
 
 **Status:** **CLOSED / PASS**  
