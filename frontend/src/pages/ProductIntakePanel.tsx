@@ -2,11 +2,15 @@ import { useEffect, useState } from "react";
 import {
   checkDuplicate,
   createProduct,
+  createResearchDraft,
+  getProductEvidence,
   recordDuplicateDecision,
   updateProduct,
+  verifyProductEvidence,
 } from "../api/client";
 import type {
   DuplicateCheckResponse,
+  EvidenceDTO,
   ProductCreateRequest,
   ProductDTO,
   ProductUpdateRequest,
@@ -271,12 +275,22 @@ export default function ProductIntakePanel({
   const [dupFingerprint, setDupFingerprint] = useState<string | null>(null);
   const [recordedDecision, setRecordedDecision] = useState<string | null>(null);
   const [decisionReason, setDecisionReason] = useState("");
+  const [researchReady, setResearchReady] = useState(false);
+  const [researchClaim, setResearchClaim] = useState("");
+  const [researchSourceType, setResearchSourceType] = useState("MANUFACTURER");
+  const [researchSourceReference, setResearchSourceReference] = useState("");
+  const [researchClaimType, setResearchClaimType] = useState("MANUFACTURER_CLAIM");
+  const [researchField, setResearchField] = useState("known_use_cases");
+  const [researchBusy, setResearchBusy] = useState(false);
+  const [evidenceRows, setEvidenceRows] = useState<EvidenceDTO[]>([]);
+  const [evidenceLoading, setEvidenceLoading] = useState(false);
   const editing = Boolean(editProduct?.product_id);
 
   useEffect(() => {
     if (editProduct?.product_id) {
       const next = fromProduct(editProduct);
       setDraft(next);
+      setResearchReady(true);
       setInitialProductLine(normalizeProductLine(next.product_line));
       setIntro("");
       setMsg(`ویرایش محصول: ${editProduct.product_id}`);
@@ -284,6 +298,9 @@ export default function ProductIntakePanel({
       setDupResult(null);
       setDupFingerprint(null);
       setRecordedDecision(null);
+    } else {
+      setResearchReady(false);
+      setEvidenceRows([]);
     }
   }, [editProduct]);
 
@@ -445,6 +462,66 @@ export default function ProductIntakePanel({
     }
   }
 
+  async function refreshResearchEvidence(productId: string, activeToken: string) {
+    setEvidenceLoading(true);
+    try {
+      setEvidenceRows(await getProductEvidence(productId, activeToken));
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : String(e));
+    } finally {
+      setEvidenceLoading(false);
+    }
+  }
+
+  async function submitResearchDraft() {
+    setErr(null);
+    if (!draft.product_id.trim() || !researchClaim.trim() || !researchSourceType.trim() || !researchSourceReference.trim()) {
+      setErr("برای ثبت شواهد، ادعا، نوع منبع و ارجاع دقیق منبع الزامی است.");
+      return;
+    }
+    setResearchBusy(true);
+    try {
+      const activeToken = (await onEnsureSession?.()) ?? token;
+      if (!activeToken) {
+        setErr("نشست عملیاتی برای ثبت Research Draft در دسترس نیست.");
+        return;
+      }
+      const created = await createResearchDraft(draft.product_id.trim(), [{
+        claim: researchClaim.trim(),
+        source_type: researchSourceType.trim(),
+        source_reference: researchSourceReference.trim(),
+        claim_type: researchClaimType,
+        field: researchField.trim() || null,
+      }], activeToken);
+      setEvidenceRows((previous) => [...created, ...previous.filter((row) => !created.some((item) => item.evidence_id === row.evidence_id))]);
+      setResearchClaim("");
+      setMsg("Research Draft ثبت شد؛ شواهد تا زمان بررسی صریح در وضعیت PENDING/UNKNOWN باقی می‌مانند.");
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : String(e));
+    } finally {
+      setResearchBusy(false);
+    }
+  }
+
+  async function reviewEvidence(evidenceId: string, verdict: "VERIFIED" | "REJECTED") {
+    setErr(null);
+    setResearchBusy(true);
+    try {
+      const activeToken = (await onEnsureSession?.()) ?? token;
+      if (!activeToken) {
+        setErr("نشست عملیاتی برای بررسی شواهد در دسترس نیست.");
+        return;
+      }
+      const updated = await verifyProductEvidence(evidenceId, verdict, "Reviewed in Product Intake workflow", activeToken);
+      setEvidenceRows((previous) => previous.map((row) => row.evidence_id === evidenceId ? updated : row));
+      setMsg(`وضعیت شاهد ${evidenceId}: ${verdict}`);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : String(e));
+    } finally {
+      setResearchBusy(false);
+    }
+  }
+
   async function save() {
     setErr(null);
     setMsg(null);
@@ -526,7 +603,8 @@ export default function ProductIntakePanel({
           body.duplicate_check_id = dupResult.check_id;
         }
         const created = await createProduct(body, activeToken);
-        setMsg(`ثبت اولیه انجام شد: ${created.product_id} — وضعیت محصول: Draft`);
+        setResearchReady(true);
+        setMsg(`ثبت اولیه انجام شد: ${created.product_id} — وضعیت محصول: Draft. اکنون می‌توانید شواهد پژوهش را در همین گردش ثبت کنید.`);
         setIntro("");
         clearDuplicateState();
         onRegistered?.(created.product_id);
@@ -694,6 +772,80 @@ export default function ProductIntakePanel({
           </div>
         </div>
       </fieldset>
+
+      {researchReady && draft.product_id.trim() && (
+        <fieldset className="pro-fieldset" style={{ marginTop: "1rem" }}>
+          <legend>Research Draft — ثبت و بررسی شواهد</legend>
+          <p className="pro-lead" style={{ fontSize: "0.9rem" }}>
+            هر ادعا باید به منبع قابل ردیابی متصل باشد. ثبت ادعا به‌تنهایی آن را تأیید نمی‌کند؛ وضعیت اولیه PENDING/UNKNOWN است.
+          </p>
+          <div className="pro-grid">
+            <div>
+              <label className="pro-label">ادعا / Assertion</label>
+              <textarea className="pro-input" value={researchClaim} onChange={(e) => setResearchClaim(e.target.value)} rows={2} />
+            </div>
+            <div>
+              <label className="pro-label">نوع منبع</label>
+              <select className="pro-input" value={researchSourceType} onChange={(e) => setResearchSourceType(e.target.value)}>
+                <option value="MANUFACTURER">MANUFACTURER</option>
+                <option value="PEER_REVIEWED">PEER_REVIEWED</option>
+                <option value="REGULATORY">REGULATORY</option>
+                <option value="OPERATOR_DECLARATION">OPERATOR_DECLARATION</option>
+                <option value="OTHER">OTHER</option>
+              </select>
+            </div>
+            <div>
+              <label className="pro-label">ارجاع منبع (URL / شناسه سند)</label>
+              <input className="pro-input" value={researchSourceReference} onChange={(e) => setResearchSourceReference(e.target.value)} placeholder="نشانی یا شناسه دقیق منبع" />
+            </div>
+            <div>
+              <label className="pro-label">نوع ادعا</label>
+              <select className="pro-input" value={researchClaimType} onChange={(e) => setResearchClaimType(e.target.value)}>
+                <option value="MANUFACTURER_CLAIM">MANUFACTURER_CLAIM</option>
+                <option value="FACT">FACT</option>
+                <option value="EVIDENCE">EVIDENCE</option>
+                <option value="INFERENCE">INFERENCE</option>
+                <option value="UNKNOWN">UNKNOWN</option>
+                <option value="CONFLICT">CONFLICT</option>
+              </select>
+            </div>
+            <div>
+              <label className="pro-label">فیلد دانش محصول</label>
+              <input className="pro-input" value={researchField} onChange={(e) => setResearchField(e.target.value)} placeholder="مثلاً known_use_cases / contraindications" />
+            </div>
+          </div>
+          <div className="pro-actions" style={{ marginTop: "0.5rem" }}>
+            <button type="button" className="pro-btn-primary" disabled={researchBusy} onClick={() => void submitResearchDraft()}>
+              {researchBusy ? "در حال ثبت…" : "ثبت Research Draft"}
+            </button>
+            <button type="button" className="pro-btn-secondary" disabled={researchBusy || evidenceLoading} onClick={() => void (async () => {
+              const activeToken = (await onEnsureSession?.()) ?? token;
+              if (activeToken) await refreshResearchEvidence(draft.product_id.trim(), activeToken);
+              else setErr("نشست عملیاتی برای بارگذاری شواهد در دسترس نیست.");
+            })()}>
+              بارگذاری / تازه‌سازی شواهد
+            </button>
+          </div>
+          <p className="pro-lead" style={{ fontSize: "0.85rem" }}>
+            {evidenceLoading ? "در حال بارگذاری شواهد…" : `تعداد شواهد بارگذاری‌شده: ${evidenceRows.length}`}
+          </p>
+          {evidenceRows.map((evidence) => (
+            <div key={evidence.evidence_id} className="pro-status-msg" style={{ marginTop: "0.5rem" }}>
+              <strong>{evidence.field || "بدون فیلد"}</strong> — {evidence.claim || "بدون ادعا"}
+              <div style={{ fontSize: "0.85rem" }}>
+                منبع: {evidence.source_type || "—"} · {evidence.source_reference || "—"}
+                {" · "}وضعیت بررسی: {evidence.qa_status || "UNKNOWN"}{" · "}وضعیت شاهد: {evidence.evidence_status || "UNKNOWN"}
+              </div>
+              {String(evidence.qa_status || "").toUpperCase() === "PENDING" && (
+                <div className="pro-actions" style={{ marginTop: "0.35rem" }}>
+                  <button type="button" className="pro-btn-primary" disabled={researchBusy} onClick={() => void reviewEvidence(evidence.evidence_id, "VERIFIED")}>تأیید شاهد</button>
+                  <button type="button" className="pro-btn-secondary" disabled={researchBusy} onClick={() => void reviewEvidence(evidence.evidence_id, "REJECTED")}>رد شاهد</button>
+                </div>
+              )}
+            </div>
+          ))}
+        </fieldset>
+      )}
 
       {!editing && (
         <fieldset className="pro-fieldset" style={{ marginTop: "1rem" }}>
