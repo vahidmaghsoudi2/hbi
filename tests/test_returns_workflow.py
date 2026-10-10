@@ -108,6 +108,21 @@ def test_zero_and_negative_rejected(session):
         )
 
 
+@pytest.mark.parametrize("quantity", [1.5, "1.5", float("nan"), float("inf")])
+def test_fractional_or_non_finite_return_quantity_rejected(session, quantity):
+    sale = _sold(session, qty_sold=3)
+    before = session.get(Inventory, "INV-P1").quantity_available
+
+    with pytest.raises(ValueError, match="quantity must be a positive integer"):
+        ReturnService(session).create_return(
+            sale_id=sale.sale_id, product_id="P1", quantity=quantity
+        )
+
+    session.rollback()
+    assert session.get(Inventory, "INV-P1").quantity_available == before
+    assert session.query(SaleReturn).count() == 0
+
+
 def test_exceeds_sold_rejected(session):
     sale = _sold(session, qty_sold=2)
     with pytest.raises(ValueError, match="exceeds remaining"):
