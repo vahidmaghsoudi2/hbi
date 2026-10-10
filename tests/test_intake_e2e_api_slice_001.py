@@ -351,3 +351,38 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
     db_session.expire_all()
     product = db_session.query(Product).filter(Product.product_id == pid).one()
     assert product.status == "ACTIVE"
+
+
+def test_editor_can_create_and_review_research_draft(client, db_session):
+    """The Product Intake session can submit a source-traceable draft and review its evidence."""
+    editor = _auth(db_session, "intake_research_editor", ROLE_EDITOR)
+    pid = "INTAKE-RESEARCH-EDITOR-001"
+    _create_product(
+        client, editor, pid,
+        brand="ResearchCo",
+        product_name="Research Workflow Product",
+        product_line="SKIN",
+    )
+    draft = client.post(
+        f"/api/v1/products/{pid}/research-draft",
+        headers=editor,
+        json={"assertions": [{
+            "claim": "Manufacturer states this is a moisturizer",
+            "source_type": "MANUFACTURER",
+            "source_reference": "https://example.test/product",
+            "claim_type": "MANUFACTURER_CLAIM",
+            "field": "claimed_benefits",
+        }]},
+    )
+    assert draft.status_code == 200, draft.text
+    evidence_id = draft.json()[0]["evidence_id"]
+    assert draft.json()[0]["qa_status"] == "PENDING"
+    assert draft.json()[0]["evidence_status"] == "UNKNOWN"
+
+    reviewed = client.post(
+        f"/api/v1/evidence/{evidence_id}/verify",
+        headers=editor,
+        json={"verdict": "VERIFIED", "reason": "intake workflow test"},
+    )
+    assert reviewed.status_code == 200, reviewed.text
+    assert reviewed.json()["qa_status"] == "VERIFIED"
