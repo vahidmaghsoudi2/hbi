@@ -1059,7 +1059,7 @@ export default function NewHomePage() {
               <Link to="/login" className="pro-btn-secondary">ورود مدیر</Link>
             </div>
             <form className="pro-form" onSubmit={async (e) => {
-              e.preventDefault(); setError(null); setStatusMsg(null);
+              e.preventDefault(); setError(null); setStatusMsg(null); setReturnRows([]);
               const adminToken = sessionStorage.getItem("hbi_admin_access_token");
               if (!adminToken) { setError("برای ثبت یا مشاهده مرجوعی، ابتدا وارد حساب مدیر شوید."); return; }
               if (!returnSaleId.trim() || !returnProductId.trim()) { setError("شناسه فروش و شناسه محصول الزامی است."); return; }
