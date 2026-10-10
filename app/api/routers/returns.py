@@ -9,6 +9,7 @@ from app.core.deps import get_db, get_current_customer_id
 from app.core.authorization import require_any_role
 from app.models.user_role import ROLE_ADMIN
 from app.services.return_service import ReturnService
+from app.models.sale import Sale
 
 router = APIRouter()
 
