@@ -11,7 +11,7 @@ from app.interface.schemas import (
     ProductKnowledgeResponse, ConflictEntryResponse
 )
 from app.interface.facades import EvidenceFacade, ProductKnowledgeFacade
-from app.models.user_role import ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN
+from app.models.user_role import ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN
 from app.services.evidence_mutation_log_service import EvidenceMutationLogService
 
 router = APIRouter()
@@ -105,7 +105,7 @@ async def verify_evidence(
     evidence_id: str,
     request: VerifyRequest,
     db: Session = Depends(get_db),
-    auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
+    auth=Depends(require_any_role(ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
 ):
     facade = EvidenceFacade(db)
     try:
