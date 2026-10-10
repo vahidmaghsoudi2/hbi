@@ -1085,7 +1085,7 @@ export default function NewHomePage() {
               <fieldset className="pro-fieldset">
                 <legend>اطلاعات مرجوعی</legend>
                 <label className="pro-label" htmlFor="return-sale-id">شناسه فروش *</label>
-                <input id="return-sale-id" className="pro-input" value={returnSaleId} onChange={(e) => setReturnSaleId(e.target.value)} required />
+                <input id="return-sale-id" className="pro-input" value={returnSaleId} onChange={(e) => { setReturnSaleId(e.target.value); setReturnRows([]); }} required />
                 <label className="pro-label" htmlFor="return-product-id">شناسه محصول *</label>
                 <input id="return-product-id" className="pro-input" value={returnProductId} onChange={(e) => setReturnProductId(e.target.value)} required />
                 <label className="pro-label" htmlFor="return-qty">تعداد مرجوعی *</label>
@@ -1096,7 +1096,7 @@ export default function NewHomePage() {
               <div className="pro-actions">
                 <button type="submit" className="pro-btn-primary" disabled={returnBusy}>{returnBusy ? "در حال ثبت…" : "ثبت مرجوعی"}</button>
                 <button type="button" className="pro-btn-secondary" disabled={returnBusy || !returnSaleId.trim()} onClick={async () => {
-                  setError(null); const adminToken = sessionStorage.getItem("hbi_admin_access_token");
+                  setError(null); setReturnRows([]); const adminToken = sessionStorage.getItem("hbi_admin_access_token");
                   if (!adminToken) { setError("برای مشاهده سوابق مرجوعی، ابتدا وارد حساب مدیر شوید."); return; }
                   setReturnBusy(true);
                   try { const rows = await listReturnsForSale(returnSaleId.trim(), adminToken); setReturnRows(Array.isArray(rows) ? rows : []); setStatusMsg(`تعداد مرجوعی‌های این فروش: ${rows.length}`); }
