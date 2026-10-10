@@ -300,3 +300,17 @@ export interface MutationLogDTO {
   created_at?: string | null;
   [key: string]: unknown;
 }
+
+
+/** POST /api/v1/products/{id}/research-draft — source-traceable assertion. */
+export interface ResearchAssertionRequest {
+  claim: string;
+  source_type: string;
+  source_reference: string;
+  claim_type?: string;
+  field?: string;
+  source_date?: string;
+  evidence_strength?: string;
+  market_region?: string;
+  notes?: string;
+}
