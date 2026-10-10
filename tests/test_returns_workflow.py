@@ -17,6 +17,8 @@ from app.models.stock_movement import StockMovement
 from app.services.sale_service import SaleService
 from app.services.return_service import ReturnService
 from app.api.routers.sales import get_sale_detail
+from app.api.routers.returns import ReturnCreateRequest
+from pydantic import ValidationError
 
 
 @pytest.fixture()
@@ -121,6 +123,16 @@ def test_fractional_or_non_finite_return_quantity_rejected(session, quantity):
     session.rollback()
     assert session.get(Inventory, "INV-P1").quantity_available == before
     assert session.query(SaleReturn).count() == 0
+
+
+@pytest.mark.parametrize("quantity", [1.5, 2.25])
+def test_return_api_schema_rejects_fractional_quantity(quantity):
+    with pytest.raises(ValidationError):
+        ReturnCreateRequest(
+            sale_id="SALE-1",
+            product_id="P1",
+            quantity=quantity,
+        )
 
 
 def test_exceeds_sold_rejected(session):
