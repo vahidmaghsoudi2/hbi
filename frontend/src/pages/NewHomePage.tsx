@@ -227,6 +227,12 @@ export default function NewHomePage() {
   }
 
   async function ensureProductSession(): Promise<string | null> {
+    // The operational homepage is Admin-gated. Reuse that authenticated session
+    // for operator-capable catalog/report reads instead of minting a pilot token.
+    const adminToken = sessionStorage.getItem("hbi_admin_access_token");
+    if (adminToken) return adminToken;
+
+    // Keep the non-production pilot fallback for isolated pilot flows only.
     const cached = sessionStorage.getItem("hbi_operator_access_token");
     if (cached) return cached;
     const pair = await pilotOperatorToken();
