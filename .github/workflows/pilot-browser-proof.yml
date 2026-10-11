@@ -36,7 +36,6 @@ jobs:
         working-directory: frontend
         run: |
           npm install --no-audit --no-fund
-          npm install --no-save @playwright/test
           npx playwright install --with-deps chromium
       - name: Prepare isolated SQLite fixture
         run: |
@@ -54,6 +53,9 @@ jobs:
           cat /tmp/hbi-pilot-web.log
           exit 1
       - name: Run real-browser proof
+        env:
+          # Config lives at repo root but @playwright/test is installed under frontend/.
+          NODE_PATH: ${{ github.workspace }}/frontend/node_modules
         run: ./frontend/node_modules/.bin/playwright test --config=playwright.config.cjs
       - name: Upload browser evidence
         if: always()
