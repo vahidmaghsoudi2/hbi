@@ -468,7 +468,8 @@ export default function NewHomePage() {
   async function onSaleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!token || !customerId) return setError("ابتدا مشاوره را ثبت کنید.");
+    if (!customerId) return setError("برای ثبت فروش، مشتری را انتخاب کنید؛ ثبت مشاوره الزامی نیست.");
+    if (!sessionStorage.getItem("hbi_admin_access_token")) return setError("برای ثبت فروش ابتدا با حساب مدیر وارد شوید.");
     if (!saleProductId.trim()) return setError("محصول را انتخاب کنید.");
     if (saleQty < 1) return setError("تعداد نامعتبر است.");
     if (salePrice == null) return setError("قیمت فروش این محصول در دسترس نیست.");
@@ -953,13 +954,18 @@ export default function NewHomePage() {
         {active === "sales" && (
           <section className="pro-panel" id="sales">
             <h1>ثبت فروش</h1>
-            <p className="pro-lead">API: POST /api/v1/sales/ و GET /api/v1/sales/total — نیاز به نشست فعال.</p>
-            {!token || !customerId ? (
+            <p className="pro-lead">ثبت فروش مستقل از مشاوره است. نشست مدیر و انتخاب مشتری لازم است؛ اتصال به مشاوره اختیاری است.</p>
+            {!customerId ? (
               <div className="pro-empty">
-                <strong>ابتدا مشاوره را ثبت کنید.</strong>
-                <button type="button" className="pro-btn-primary" onClick={() => go("consult")}>
-                  رفتن به مشاوره
-                </button>
+                <strong>مشتری فاکتور را انتخاب کنید؛ پروندهٔ مشاوره لازم نیست.</strong>
+                <div className="pro-form">
+                  <label className="pro-label" htmlFor="sale-customer-search">جست‌وجوی مشتری با نام یا شماره موبایل</label>
+                  <input id="sale-customer-search" className="pro-input" value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} placeholder="نام یا شماره موبایل" />
+                  <button type="button" className="pro-btn-primary" onClick={() => void searchPreviousCustomers()} disabled={customerSearchBusy}>{customerSearchBusy ? "در حال جست‌وجو…" : "جست‌وجوی مشتری"}</button>
+                  {customerSearchResults.map((customer) => <button key={customer.customer_id} type="button" className="pro-btn-secondary" onClick={() => { void (async () => { await selectPreviousCustomer(customer); setActive("sales"); })(); }}>{customer.name} · {customer.mobile ?? "بدون موبایل"} · {customer.customer_id}</button>)}
+                  <p className="pro-muted">برای مشتری جدید، ابتدا پروفایل مشتری را ثبت کنید؛ پروندهٔ مشاوره لازم نیست.</p>
+                  <button type="button" className="pro-btn-secondary" onClick={() => go("profile")}>ثبت پروفایل مشتری جدید</button>
+                </div>
               </div>
             ) : (
               <form className="pro-form" onSubmit={onSaleSubmit}>
