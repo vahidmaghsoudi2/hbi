@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import "../styles/dashboard-gallery.css";
+import HomeOperationalSummary from "./HomeOperationalSummary";
 
 const galleryLines = [
   { number: "01", title: "پوست", subtitle: "مراقبت و سلامت پوست", icon: "✳", tone: "rose" },
@@ -55,6 +56,8 @@ export default function NewDashboardGalleryHome() {
             <span className="hbi-orbit-chip chip-three">تصمیم</span>
           </div>
         </section>
+
+        <HomeOperationalSummary />
 
         <section className="hbi-section" id="gallery">
           <div className="hbi-section-heading">
