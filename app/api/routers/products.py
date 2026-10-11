@@ -55,7 +55,7 @@ async def create_research_draft(
     product_id: str,
     payload: ResearchDraftRequest,
     db: Session = Depends(get_db),
-    auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
+    auth=Depends(require_any_role(ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
 ):
     subject_id, roles = auth
     try:
