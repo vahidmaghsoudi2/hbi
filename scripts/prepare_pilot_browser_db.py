@@ -1,6 +1,12 @@
 """Create isolated, disposable DB fixtures for the Playwright pilot proof."""
 from pathlib import Path
 import os
+import sys
+
+# Running a script from scripts/ sets sys.path[0] to that directory, not the repo root.
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 os.environ.setdefault("HBI_ENV", "development")
 db_url = os.environ.get("DATABASE_URL")
