@@ -153,9 +153,9 @@ export default function NewHomePage() {
     setError(null);
     setCustomerSearchBusy(true);
     try {
-      const operatorToken = await ensureProductSession();
-      if (!operatorToken) throw new Error("نشست جست‌وجوی مشتری در دسترس نیست.");
-      const found = await searchCustomers(query, operatorToken);
+      const adminToken = sessionStorage.getItem("hbi_admin_access_token");
+      if (!adminToken) throw new Error("برای جست‌وجوی مشتری باید با حساب مدیر وارد شوید.");
+      const found = await searchCustomers(query, adminToken);
       setCustomerSearchResults(Array.isArray(found) ? found : []);
     } catch (err) {
       setCustomerSearchResults([]);
@@ -163,6 +163,33 @@ export default function NewHomePage() {
     } finally {
       setCustomerSearchBusy(false);
     }
+  }
+
+  function selectCustomerForSale(customer: CustomerSearchResult) {
+    // Sale selection is an operator action, not a customer login. Do not mint
+    // a pilot/customer token merely to attach an existing buyer to a sale.
+    sessionStorage.removeItem("hbi_access_token");
+    sessionStorage.removeItem("hbi_refresh_token");
+    sessionStorage.removeItem("hbi_case_id");
+    sessionStorage.removeItem("hbi_customer_id");
+    setToken(null);
+    setCustomerId(customer.customer_id);
+    setCaseId(null);
+    setName(customer.name ?? "");
+    setMobile(customer.mobile ?? "");
+    setConcerns([]);
+    setSkin([]);
+    setNote("");
+    setRecs([]);
+    setRecDone(false);
+    setShowAllRecommendations(false);
+    setSelectedRecommendationId(null);
+    setSaleProductId("");
+    setLastSale(null);
+    setPurchaseHistory([]);
+    setStatusMsg(`مشتری ${customer.customer_id} برای فروش انتخاب شد؛ مشاوره الزامی نیست.`);
+    setError(null);
+    setActive("sales");
   }
 
   async function selectPreviousCustomer(customer: CustomerSearchResult) {
@@ -973,7 +1000,16 @@ export default function NewHomePage() {
                   <label className="pro-label" htmlFor="sale-customer-search">جست‌وجوی مشتری با نام یا شماره موبایل</label>
                   <input id="sale-customer-search" className="pro-input" value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} placeholder="نام یا شماره موبایل" />
                   <button type="button" className="pro-btn-primary" onClick={() => void searchPreviousCustomers()} disabled={customerSearchBusy}>{customerSearchBusy ? "در حال جست‌وجو…" : "جست‌وجوی مشتری"}</button>
-                  {customerSearchResults.map((customer) => <button key={customer.customer_id} type="button" className="pro-btn-secondary" onClick={() => { void (async () => { await selectPreviousCustomer(customer); setActive("sales"); })(); }}>{customer.name} · {customer.mobile ?? "بدون موبایل"} · {customer.customer_id}</button>)}
+                  {customerSearchResults.map((customer) => (
+                    <div key={customer.customer_id} className="pro-actions">
+                      <button type="button" className="pro-btn-primary" onClick={() => selectCustomerForSale(customer)}>
+                        انتخاب برای فروش: {customer.name} · {customer.mobile ?? "بدون موبایل"}
+                      </button>
+                      <button type="button" className="pro-btn-secondary" onClick={() => { void selectPreviousCustomer(customer); }}>
+                        انتخاب برای مشاوره: {customer.name} · {customer.customer_id}
+                      </button>
+                    </div>
+                  ))}
                   <p className="pro-muted">برای مشتری جدید، ابتدا پروفایل مشتری را ثبت کنید؛ پروندهٔ مشاوره لازم نیست.</p>
                   <button type="button" className="pro-btn-secondary" onClick={() => go("profile")}>ثبت پروفایل مشتری جدید</button>
                 </div>
