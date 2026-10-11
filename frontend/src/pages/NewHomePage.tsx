@@ -480,13 +480,15 @@ export default function NewHomePage() {
       if (fx.fx_rate_usd_to_irr == null) throw new Error("نرخ عملیاتی ارز در دسترس نیست؛ فروش متوقف شد.");
       const currentFxRate = fx.fx_rate_usd_to_irr;
       setSaleFxRate(currentFxRate);
+      const adminToken = sessionStorage.getItem("hbi_admin_access_token");
+      if (!adminToken) throw new Error("برای ثبت فروش ابتدا با حساب مدیر وارد شوید.");
       const sale = await createSale(
         {
           customer_id: customerId,
           items: [{ product_id: saleProductId.trim(), quantity: saleQty, ...(selectedRecommendationId ? { recommendation_id: selectedRecommendationId } : {}) }],
           fx_rate_usd_to_irr: currentFxRate,
         },
-        token
+        adminToken
       );
       setLastSale(sale);
       setSelectedRecommendationId(null);
