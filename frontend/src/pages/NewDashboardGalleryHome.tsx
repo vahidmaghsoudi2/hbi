@@ -16,7 +16,8 @@ const workAreas = [
   { title: "فروش", detail: "ثبت فروش و مشاهده جمع ثبت‌شده", icon: "↗", to: "/workspace?panel=sales", tone: "green" },
   { title: "خرید و موجودی", detail: "ثبت خرید و گردش موجودی", icon: "▤", to: "/purchase", tone: "gold" },
   { title: "مالی و حسابداری", detail: "ورود به بخش مالی موجود", icon: "◫", to: "/accounting", tone: "blue" },
-  { title: "کاتالوگ محصولات", detail: "مشاهده فهرست محصولات ثبت‌شده", icon: "▦", to: "/catalog", tone: "peach" },
+  { title: "گالری محصولات قابل عرضه", detail: "محصولات فعال و قابل نمایش در کاتالوگ", icon: "▦", to: "/catalog", tone: "peach" },
+  { title: "مدیریت پرونده محصولات", detail: "فهرست مدیریتی، پیش‌نویس‌ها و ورود به بررسی", icon: "▧", to: "/workspace?panel=catalog", tone: "rose" },
 ];
 
 export default function NewDashboardGalleryHome() {
