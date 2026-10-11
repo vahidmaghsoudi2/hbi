@@ -587,6 +587,9 @@ export default function NewHomePage() {
                 {label}
               </button>
             ))}
+            <Link to="/" className="pro-nav-btn">
+              داشبورد جدید
+            </Link>
             <Link to="/purchase" className="pro-nav-btn">
               خرید
             </Link>
@@ -812,7 +815,7 @@ export default function NewHomePage() {
         {active === "catalog" && (
           <section className="pro-panel">
             <div className="pro-panel-head">
-              <h1>محصولات</h1>
+              <h1>مدیریت پرونده محصولات</h1>
               <button type="button" className="pro-btn-secondary" onClick={() => void loadProducts()}>
                 نوسازی
               </button>
@@ -871,8 +874,9 @@ export default function NewHomePage() {
             onEnsureSession={ensureProductSession}
             editProduct={editProduct}
             onCancelEdit={() => setEditProduct(null)}
-            onRegistered={() => {
+            onRegistered={(productId) => {
               setEditProduct(null);
+              sessionStorage.setItem("hbi_review_product_id", productId);
               void loadProducts();
             }}
           />
