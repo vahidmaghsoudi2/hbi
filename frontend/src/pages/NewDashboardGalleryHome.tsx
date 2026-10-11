@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../styles/dashboard-gallery.css";
 
 const galleryLines = [
@@ -21,6 +21,22 @@ const workAreas = [
 ];
 
 export default function NewDashboardGalleryHome() {
+  const navigate = useNavigate();
+
+  function logout() {
+    [
+      "hbi_admin_access_token",
+      "hbi_admin_refresh_token",
+      "hbi_access_token",
+      "hbi_refresh_token",
+      "hbi_customer_id",
+      "hbi_case_id",
+      "hbi_operator_access_token",
+      "hbi_po_access_token",
+    ].forEach((key) => sessionStorage.removeItem(key));
+    navigate("/login", { replace: true });
+  }
+
   return (
     <main className="hbi-home" dir="rtl">
       <header className="hbi-topbar">
@@ -33,7 +49,7 @@ export default function NewDashboardGalleryHome() {
           <a href="#gallery">گالری محصولات</a>
           <a href="#workspaces">حوزه‌های کاری</a>
         </nav>
-        <div className="hbi-operator"><span className="hbi-online-dot" /> فضای کاری مدیر <span className="hbi-avatar">و</span></div>
+        <div className="hbi-operator"><span className="hbi-online-dot" /> فضای کاری مدیر <span className="hbi-avatar">و</span><button type="button" className="hbi-logout" onClick={logout}>خروج</button></div>
       </header>
 
       <div className="hbi-page-wrap">
