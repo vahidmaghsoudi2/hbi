@@ -17,7 +17,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<AdminLoginPage />} />
-      <Route path="/" element={<NewHomePage />} />
+      <Route path="/" element={<AdminGate><NewHomePage /></AdminGate>} />
       <Route path="/catalog" element={<AdminGate><CatalogPage /></AdminGate>} />
       {/* Pilot and Recommendation use a separate non-production customer/pilot
           session. AdminGate checks hbi_admin_access_token and would block this
