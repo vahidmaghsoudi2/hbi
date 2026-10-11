@@ -20,7 +20,11 @@ export default function App() {
       <Route path="/" element={<NewHomePage />} />
       <Route path="/catalog" element={<AdminGate><CatalogPage /></AdminGate>} />
       <Route path="/pilot" element={<AdminGate><PilotPage /></AdminGate>} />
-      <Route path="/recommendation" element={<AdminGate><RecommendationPage /></AdminGate>} />
+      {/* RecommendationPage uses the pilot/customer token (hbi_access_token),
+          not the separate admin token. Its API calls enforce endpoint-level
+          authorization, so the route must not redirect valid pilot sessions
+          to the admin login page before the persisted-readback flow can run. */}
+      <Route path="/recommendation" element={<RecommendationPage />} />
       <Route path="/accounting" element={<AdminGate><AccountingHomePage /></AdminGate>} />
       <Route path="/purchase" element={<AdminGate><PurchasePage /></AdminGate>} />
     </Routes>
