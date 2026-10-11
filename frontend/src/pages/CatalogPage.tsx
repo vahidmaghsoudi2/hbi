@@ -26,7 +26,7 @@ export default function CatalogPage() {
   return (
     <section>
       <h1>کاتالوگ محصولات</h1>
-      <p className="lead">فهرست عمومی محصولات تأییدشده (بدون نیاز به احراز هویت).</p>
+      <p className="lead">فهرست محصولات برای اپراتور واردشده؛ دسترسی از مسیر احراز هویت مدیر کنترل می‌شود.</p>
       <div className="row" style={{ marginBottom: "1rem" }}>
         <Link className="btn" to="/">بازگشت به داشبورد</Link>
       </div>
