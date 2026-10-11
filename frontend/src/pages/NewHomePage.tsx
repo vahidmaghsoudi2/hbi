@@ -78,6 +78,7 @@ export default function NewHomePage() {
   const [recDone, setRecDone] = useState(false);
   const [showAllRecommendations, setShowAllRecommendations] = useState(false);
   const [saleProductId, setSaleProductId] = useState("");
+  const [saleBuyerName, setSaleBuyerName] = useState("");
   const [selectedRecommendationId, setSelectedRecommendationId] = useState<string | null>(null);
   const [saleQty, setSaleQty] = useState(1);
   const [salePrice, setSalePrice] = useState<number | null>(null);
@@ -477,32 +478,62 @@ export default function NewHomePage() {
   async function onSaleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!token || !customerId) return setError("ابتدا مشاوره را ثبت کنید.");
+    if (!sessionStorage.getItem("hbi_admin_access_token")) {
+      return setError("برای ثبت فروش، نشست Admin لازم است. مشاوره برای فروش الزامی نیست.");
+    }
     if (!saleProductId.trim()) return setError("محصول را انتخاب کنید.");
     if (saleQty < 1) return setError("تعداد نامعتبر است.");
     if (salePrice == null) return setError("قیمت فروش این محصول در دسترس نیست.");
     if (saleStock != null && saleQty > saleStock) return setError(`موجودی قابل فروش: ${saleStock}`);
     setSaleBusy(true);
     try {
+      let currentCustomerId = customerId;
+      let currentToken = token;
+
+      // Direct sale creates a buyer profile only; it deliberately does not open a Case.
+      if (!currentCustomerId) {
+        const buyerName = saleBuyerName.trim();
+        if (!buyerName) throw new Error("برای فروش مستقیم، نام خریدار را وارد کنید. ثبت مشاوره لازم نیست.");
+        const guest = (await createGuest({ name: buyerName, consent: 0 })) as { customer_id?: string };
+        if (!guest?.customer_id) throw new Error("ثبت پروفایل خریدار برای فروش مستقیم ناموفق بود.");
+        currentCustomerId = guest.customer_id;
+        sessionStorage.setItem("hbi_customer_id", currentCustomerId);
+        setCustomerId(currentCustomerId);
+      }
+
+      if (!currentToken) {
+        const pair = await pilotToken({ customer_id: currentCustomerId });
+        sessionStorage.setItem("hbi_access_token", pair.access_token);
+        sessionStorage.setItem("hbi_refresh_token", pair.refresh_token);
+        currentToken = pair.access_token;
+        setToken(currentToken);
+      }
+
       const fx = await getCurrentFx();
       if (fx.fx_rate_usd_to_irr == null) throw new Error("نرخ عملیاتی ارز در دسترس نیست؛ فروش متوقف شد.");
       const currentFxRate = fx.fx_rate_usd_to_irr;
       setSaleFxRate(currentFxRate);
       const sale = await createSale(
         {
-          customer_id: customerId,
+          customer_id: currentCustomerId,
           items: [{ product_id: saleProductId.trim(), quantity: saleQty, ...(selectedRecommendationId ? { recommendation_id: selectedRecommendationId } : {}) }],
           fx_rate_usd_to_irr: currentFxRate,
         },
-        token
+        currentToken
       );
       setLastSale(sale);
       setSelectedRecommendationId(null);
       setSaleProductId("");
+      setSaleBuyerName("");
       setStatusMsg(`فروش ثبت شد: ${sale.sale_id ?? "OK"}`);
-      await refreshSalesTotal();
       try {
-        const updatedHistory = await listSalesByCustomer(customerId, token);
+        const total = await getTotalSales(currentToken);
+        setTotalSales(total.total_sales ?? 0);
+      } catch {
+        setTotalSales(null);
+      }
+      try {
+        const updatedHistory = await listSalesByCustomer(currentCustomerId, currentToken);
         setPurchaseHistory(Array.isArray(updatedHistory) ? updatedHistory : []);
       } catch {
         // The sale is already committed; history refresh is best-effort.
@@ -966,23 +997,30 @@ export default function NewHomePage() {
         {active === "sales" && (
           <section className="pro-panel" id="sales">
             <h1>ثبت فروش</h1>
-            <p className="pro-lead">API: POST /api/v1/sales/ و GET /api/v1/sales/total — نیاز به نشست فعال.</p>
-            {!token || !customerId ? (
-              <div className="pro-empty">
-                <strong>ابتدا مشاوره را ثبت کنید.</strong>
-                <button type="button" className="pro-btn-primary" onClick={() => go("consult")}>
-                  رفتن به مشاوره
-                </button>
-              </div>
-            ) : (
-              <form className="pro-form" onSubmit={onSaleSubmit}>
-                <fieldset className="pro-fieldset">
-                  <legend>مشتری</legend>
+            <p className="pro-lead">فروش مستقیم بدون مشاوره مجاز است. نشست Admin برای ثبت مالی لازم است؛ پرونده مشاوره اختیاری است.</p>
+            <form className="pro-form" onSubmit={onSaleSubmit}>
+              <fieldset className="pro-fieldset">
+                <legend>خریدار</legend>
+                {customerId ? (
                   <p className="pro-muted">
-                    <code>{customerId}</code>
+                    مشتری فعال: <code>{customerId}</code>
                   </p>
-                  <p className="pro-muted">جمع فروش: {totalSales === null ? "—" : totalSales.toLocaleString("fa-IR")}</p>
-                </fieldset>
+                ) : (
+                  <>
+                    <label className="pro-label" htmlFor="sale-buyer-name">نام خریدار *</label>
+                    <input
+                      id="sale-buyer-name"
+                      className="pro-input"
+                      value={saleBuyerName}
+                      onChange={(e) => setSaleBuyerName(e.target.value)}
+                      placeholder="نام خریدار برای ثبت فروش"
+                      required
+                    />
+                    <p className="pro-muted">پروفایل خریدار ثبت می‌شود؛ پروندهٔ مشاوره‌ای ساخته نمی‌شود.</p>
+                  </>
+                )}
+                <p className="pro-muted">جمع فروش: {totalSales === null ? "—" : totalSales.toLocaleString("fa-IR")}</p>
+              </fieldset>
                 <fieldset className="pro-fieldset">
                   <legend>اقلام</legend>
                   <label className="pro-label" htmlFor="sale-product">
@@ -1035,8 +1073,7 @@ export default function NewHomePage() {
                     بروزرسانی جمع
                   </button>
                 </div>
-              </form>
-            )}
+            </form>
             {lastSale && (
               <div className="pro-rec-card" style={{ marginTop: "1rem" }}>
                 <div className="pro-rec-rank">✓</div>
