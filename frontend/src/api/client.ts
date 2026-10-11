@@ -179,15 +179,28 @@ export function getProductEvidence(
   return request<EvidenceDTO[]>(`/evidence/?product_id=${encodeURIComponent(productId)}`, {}, token);
 }
 
-/** POST /api/v1/sales/ — requires auth; customer_id must match token identity */
+/** POST /api/v1/sales/ — ADMIN-only financial write.
+ * Uses the AdminGate session; customer/pilot tokens must never authorize a sale.
+ */
 export function createSale(
   body: SaleCreateRequest,
-  token: string
+  _token: string
 ): Promise<SaleDTO> {
+  const adminToken =
+    typeof sessionStorage !== "undefined"
+      ? sessionStorage.getItem("hbi_admin_access_token")
+      : null;
+  if (!adminToken) {
+    return Promise.reject(
+      new Error(
+        "برای ثبت فروش باید با حساب مدیر وارد شده باشید. نشست مشتری برای ثبت فروش کافی نیست."
+      )
+    );
+  }
   return request<SaleDTO>(
     "/sales/",
     { method: "POST", body: JSON.stringify(body) },
-    token
+    adminToken
   );
 }
 
