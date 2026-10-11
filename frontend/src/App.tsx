@@ -19,11 +19,11 @@ export default function App() {
       <Route path="/login" element={<AdminLoginPage />} />
       <Route path="/" element={<NewHomePage />} />
       <Route path="/catalog" element={<AdminGate><CatalogPage /></AdminGate>} />
-      <Route path="/pilot" element={<AdminGate><PilotPage /></AdminGate>} />
-      {/* RecommendationPage uses the pilot/customer token (hbi_access_token),
-          not the separate admin token. Its API calls enforce endpoint-level
-          authorization, so the route must not redirect valid pilot sessions
-          to the admin login page before the persisted-readback flow can run. */}
+      {/* Pilot and Recommendation use a separate non-production customer/pilot
+          session. AdminGate checks hbi_admin_access_token and would block this
+          flow before its own token acquisition. API endpoints remain responsible
+          for authorization; the pilot-token endpoint is disabled in production. */}
+      <Route path="/pilot" element={<PilotPage />} />
       <Route path="/recommendation" element={<RecommendationPage />} />
       <Route path="/accounting" element={<AdminGate><AccountingHomePage /></AdminGate>} />
       <Route path="/purchase" element={<AdminGate><PurchasePage /></AdminGate>} />
