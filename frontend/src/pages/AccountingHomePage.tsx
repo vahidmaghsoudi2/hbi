@@ -16,15 +16,11 @@ import type {
 
 type Section = "sales" | "inventory" | "stock-flow" | "finance-report";
 
-const MENU_ITEMS: { id: Section | "stock-in" | "customers" | "settings"; label: string; active: boolean }[] = [
-  { id: "sales", label: "فروش", active: true },
-  { id: "inventory", label: "موجودی", active: true },
-  { id: "stock-in", label: "ورود کالا", active: false },
-  { id: "stock-flow", label: "گردش کالا", active: true },
-  { id: "sales-report", label: "گزارش فروش", active: true },
-  { id: "finance-report", label: "گزارش مالی", active: true },
-  { id: "customers", label: "مشتریان", active: false },
-  { id: "settings", label: "تنظیمات", active: false },
+const MENU_ITEMS: { id: Section; label: string }[] = [
+  { id: "sales", label: "فروش امروز" },
+  { id: "inventory", label: "موجودی" },
+  { id: "stock-flow", label: "گردش کالا" },
+  { id: "finance-report", label: "گزارش مالی" },
 ];
 
 function formatNumber(value: number | null | undefined): string {
@@ -211,21 +207,9 @@ export default function AccountingHomePage() {
           </div>
           <nav className="acc-menu" aria-label="منوی حسابداری">
             {MENU_ITEMS.map((item) => (
-              item.active ? (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={`acc-menu-item ${activeSection === (item.id === "sales-report" ? "sales" : item.id) ? "selected" : ""}`}
-                  onClick={() => setActiveSection((item.id === "sales-report" ? "sales" : item.id) as Section)}
-                >
-                  <span className="acc-menu-label">{item.label}</span>
-                </button>
-              ) : (
-                <button key={item.id} type="button" className="acc-menu-item" disabled>
-                  <span className="acc-menu-label">{item.label}</span>
-                  <span className="acc-menu-badge">مرحله بعد</span>
-                </button>
-              )
+              <button key={item.id} type="button" className={`acc-menu-item ${activeSection === item.id ? "selected" : ""}`} onClick={() => setActiveSection(item.id)}>
+                <span className="acc-menu-label">{item.label}</span>
+              </button>
             ))}
           </nav>
         </section>
