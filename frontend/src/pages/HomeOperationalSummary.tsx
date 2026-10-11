@@ -42,10 +42,22 @@ export default function HomeOperationalSummary() {
         getInventoryReport(token),
         getLowStockReport(5, token),
       ]);
+      if (
+        !Array.isArray(inventoryRows) ||
+        !Array.isArray(lowStockRows) ||
+        typeof todaySales?.revenue_toman !== "number" ||
+        typeof todaySales?.sale_count !== "number"
+      ) {
+        throw new Error("ساختار یکی از گزارش‌ها با قرارداد مورد انتظار مطابقت ندارد.");
+      }
       setSales(todaySales);
-      setInventoryCount(Array.isArray(inventoryRows) ? inventoryRows.length : 0);
-      setLowStockCount(Array.isArray(lowStockRows) ? lowStockRows.length : 0);
+      setInventoryCount(inventoryRows.length);
+      setLowStockCount(lowStockRows.length);
     } catch (err) {
+      // Do not leave stale figures visible when a refresh fails.
+      setSales(null);
+      setInventoryCount(null);
+      setLowStockCount(null);
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
