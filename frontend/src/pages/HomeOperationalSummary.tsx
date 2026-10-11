@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getInventoryReport, getLowStockReport, getSalesPeriod } from "../api/client";
-import type { InventoryReportRow, SalesReportDTO } from "../types/api";
+import type { SalesReportDTO } from "../types/api";
 
 function formatNumber(value: number | null | undefined): string {
   return value == null ? "—" : value.toLocaleString("fa-IR");
