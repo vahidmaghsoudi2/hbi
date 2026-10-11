@@ -1,0 +1,76 @@
+name: HBI Pilot Browser Proof
+
+on:
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pilot-browser-proof:
+    name: pilot-browser-proof
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HBI_ENV: development
+      DATABASE_URL: sqlite:////tmp/hbi-pilot-browser-proof.sqlite
+      HBI_CORS_ORIGINS: http://127.0.0.1:4173,http://localhost:4173
+      HBI_TEST_API_URL: http://127.0.0.1:8765/api/v1
+      HBI_TEST_WEB_URL: http://127.0.0.1:4173
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest httpx
+      - name: Install frontend and Playwright
+        working-directory: frontend
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Prepare isolated SQLite fixture
+        run: |
+          rm -f /tmp/hbi-pilot-browser-proof.sqlite
+          python scripts/prepare_pilot_browser_db.py
+      - name: Start API and frontend
+        run: |
+          (uvicorn app.main:app --host 127.0.0.1 --port 8765 > /tmp/hbi-pilot-api.log 2>&1 & echo $! > /tmp/hbi-pilot-api.pid)
+          (cd frontend && VITE_API_BASE=http://127.0.0.1:8765/api/v1 npm run dev -- --host 127.0.0.1 --port 4173 > /tmp/hbi-pilot-web.log 2>&1 & echo $! > /tmp/hbi-pilot-web.pid)
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8765/health >/dev/null && curl -fsS http://127.0.0.1:4173/pilot >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/hbi-pilot-api.log
+          cat /tmp/hbi-pilot-web.log
+          exit 1
+      - name: Run real-browser proof
+        env:
+          # Config lives at repo root but @playwright/test is installed under frontend/.
+          NODE_PATH: ${{ github.workspace }}/frontend/node_modules
+        run: ./frontend/node_modules/.bin/playwright test --config=playwright.config.cjs
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pilot-browser-proof-${{ github.sha }}
+          if-no-files-found: warn
+          path: |
+            playwright-report/
+            test-results/
+            /tmp/hbi-pilot-api.log
+            /tmp/hbi-pilot-web.log
+      - name: Cleanup disposable services and database
+        if: always()
+        run: |
+          if [ -f /tmp/hbi-pilot-api.pid ]; then kill "$(cat /tmp/hbi-pilot-api.pid)" || true; fi
+          if [ -f /tmp/hbi-pilot-web.pid ]; then kill "$(cat /tmp/hbi-pilot-web.pid)" || true; fi
+          rm -f /tmp/hbi-pilot-browser-proof.sqlite /tmp/hbi-pilot-browser-proof.sqlite-shm /tmp/hbi-pilot-browser-proof.sqlite-wal

@@ -118,6 +118,20 @@ def test_pilot_token_and_generate_persist(client):
     assert len(body) >= 1
     assert body[0].get("case_id") == "CASE-PILOT-1"
     assert body[0].get("product_id")
+    assert body[0].get("eligibility_status") == "ELIGIBLE"
+
+    # Customer-facing retrieval must return the persisted eligible recommendation,
+    # not merely the in-memory POST response.
+    recommendation_id = body[0].get("recommendation_id")
+    assert recommendation_id
+    retrieved = c.get(
+        "/api/v1/recommendations/case/CASE-PILOT-1",
+        headers=headers,
+    )
+    assert retrieved.status_code == 200, retrieved.text
+    retrieved_rows = retrieved.json()
+    assert any(row.get("recommendation_id") == recommendation_id for row in retrieved_rows)
+    assert any(row.get("product_id") == body[0].get("product_id") for row in retrieved_rows)
 
 
 def test_pilot_token_disabled_in_production(client, monkeypatch):
