@@ -49,7 +49,7 @@ export default function NewDashboardGalleryHome() {
           <a href="#gallery">گالری محصولات</a>
           <a href="#workspaces">حوزه‌های کاری</a>
         </nav>
-        <div className="hbi-operator"><span className="hbi-online-dot" /> فضای کاری مدیر <span className="hbi-avatar">و</span><button type="button" className="hbi-logout" onClick={logout}>خروج</button></div>
+        <div className="hbi-operator">فضای کاری مدیر <span className="hbi-avatar" aria-hidden="true">و</span><button type="button" className="hbi-logout" onClick={logout}>خروج</button></div>
       </header>
 
       <div className="hbi-page-wrap">
@@ -94,7 +94,7 @@ export default function NewDashboardGalleryHome() {
         <section className="hbi-section hbi-work-section" id="workspaces">
           <div className="hbi-section-heading">
             <div><span className="hbi-kicker">DAILY WORKSPACE</span><h2>مسیرهای اصلی کار</h2><p>قابلیت‌های موجود از اینجا در دسترس‌اند؛ چیزی صرفاً برای پرکردن صفحه جعل نشده است.</p></div>
-            <span className="hbi-live-label"><span /> فضای کاری عملیاتی</span>
+            <span className="hbi-live-label">مسیرهای کاری</span>
           </div>
           <div className="hbi-work-grid">
             {workAreas.map((area) => (
