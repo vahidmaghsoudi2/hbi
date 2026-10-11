@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom";
-import "../styles/dashboard-gallery.css";
+import { Link, useNavigate } from "react-router-dom";
 import HomeOperationalSummary from "./HomeOperationalSummary";
+import "../styles/dashboard-gallery.css";
 
 const galleryLines = [
   { number: "01", title: "پوست", subtitle: "مراقبت و سلامت پوست", icon: "✳", tone: "rose" },
@@ -22,6 +22,22 @@ const workAreas = [
 ];
 
 export default function NewDashboardGalleryHome() {
+  const navigate = useNavigate();
+
+  function logout() {
+    [
+      "hbi_admin_access_token",
+      "hbi_admin_refresh_token",
+      "hbi_access_token",
+      "hbi_refresh_token",
+      "hbi_customer_id",
+      "hbi_case_id",
+      "hbi_operator_access_token",
+      "hbi_po_access_token",
+    ].forEach((key) => sessionStorage.removeItem(key));
+    navigate("/login", { replace: true });
+  }
+
   return (
     <main className="hbi-home" dir="rtl">
       <header className="hbi-topbar">
@@ -34,7 +50,7 @@ export default function NewDashboardGalleryHome() {
           <a href="#gallery">گالری محصولات</a>
           <a href="#workspaces">حوزه‌های کاری</a>
         </nav>
-        <div className="hbi-operator"><span className="hbi-online-dot" /> فضای کاری مدیر <span className="hbi-avatar">و</span></div>
+        <div className="hbi-operator">فضای کاری مدیر <span className="hbi-avatar" aria-hidden="true">و</span><button type="button" className="hbi-logout" onClick={logout}>خروج</button></div>
       </header>
 
       <div className="hbi-page-wrap">
@@ -81,7 +97,7 @@ export default function NewDashboardGalleryHome() {
         <section className="hbi-section hbi-work-section" id="workspaces">
           <div className="hbi-section-heading">
             <div><span className="hbi-kicker">DAILY WORKSPACE</span><h2>مسیرهای اصلی کار</h2><p>قابلیت‌های موجود از اینجا در دسترس‌اند؛ چیزی صرفاً برای پرکردن صفحه جعل نشده است.</p></div>
-            <span className="hbi-live-label"><span /> فضای کاری عملیاتی</span>
+            <span className="hbi-live-label">مسیرهای کاری</span>
           </div>
           <div className="hbi-work-grid">
             {workAreas.map((area) => (
