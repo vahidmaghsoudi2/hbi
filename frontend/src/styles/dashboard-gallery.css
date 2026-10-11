@@ -15,7 +15,7 @@
 .hbi-topnav a.is-current { color: var(--green); font-weight: 800; }
 .hbi-topnav a.is-current:after { content: ""; position: absolute; bottom: 0; right: 0; left: 0; height: 3px; border-radius: 5px 5px 0 0; background: #3b9275; }
 .hbi-operator { display: flex; align-items: center; gap: 9px; color: #52605b; font-size: 12px; white-space: nowrap; }
-.hbi-online-dot, .hbi-live-label span { width: 7px; height: 7px; display: inline-block; border-radius: 50%; background: #42a57c; box-shadow: 0 0 0 4px #42a57c1c; }
+.hbi-online-dot, 
 .hbi-avatar { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #e7f1eb; color: #27664f; font-weight: 800; }
 .hbi-logout { border: 1px solid #d9e3dc; border-radius: 8px; padding: 6px 10px; background: #fff; color: #52605b; font: inherit; cursor: pointer; }
 .hbi-logout:hover { border-color: #a9c8b4; background: #f3f8f4; }
@@ -60,7 +60,7 @@
 .hbi-honesty-note { display: flex; align-items: center; gap: 8px; color: #87928c; font-size: 10px; margin: 12px 2px 0; line-height: 1.8; }
 .hbi-honesty-note span { display: inline-grid; place-items: center; width: 15px; height: 15px; flex: 0 0 15px; border: 1px solid #c7d0c9; border-radius: 50%; font-size: 9px; }
 .hbi-work-section { margin-top: 39px; }
-.hbi-live-label { display: inline-flex; align-items: center; gap: 9px; color: #4e8069; background: #eaf4ec; padding: 8px 12px; border-radius: 30px; font-size: 10px; white-space: nowrap; }
+.hbi-live-label { display: inline-flex; align-items: center; color: #526b5c; background: #f0f4ef; padding: 8px 12px; border-radius: 30px; font-size: 10px; white-space: nowrap; }
 .hbi-work-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; }
 .hbi-work-card { display: flex; align-items: center; gap: 14px; min-width: 0; padding: 16px; border: 1px solid #e7ece6; border-radius: 14px; background: #fff; text-decoration: none; color: inherit; transition: border-color .2s, transform .2s, box-shadow .2s; }
 .hbi-work-card:hover { transform: translateY(-2px); border-color: #cbdcd0; box-shadow: 0 9px 20px #263b2d0b; }
