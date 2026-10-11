@@ -489,6 +489,7 @@ export default function NewHomePage() {
     try {
       let currentCustomerId = customerId;
       let currentToken = token;
+      let createdDirectBuyer = false;
 
       // Direct sale creates a buyer profile only; it deliberately does not open a Case.
       if (!currentCustomerId) {
@@ -497,11 +498,12 @@ export default function NewHomePage() {
         const guest = (await createGuest({ name: buyerName, consent: 0 })) as { customer_id?: string };
         if (!guest?.customer_id) throw new Error("ثبت پروفایل خریدار برای فروش مستقیم ناموفق بود.");
         currentCustomerId = guest.customer_id;
+        createdDirectBuyer = true;
         sessionStorage.setItem("hbi_customer_id", currentCustomerId);
         setCustomerId(currentCustomerId);
       }
 
-      if (!currentToken) {
+      if (createdDirectBuyer || !currentToken) {
         const pair = await pilotToken({ customer_id: currentCustomerId });
         sessionStorage.setItem("hbi_access_token", pair.access_token);
         sessionStorage.setItem("hbi_refresh_token", pair.refresh_token);
