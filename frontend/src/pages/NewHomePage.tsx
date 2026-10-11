@@ -88,8 +88,8 @@ export default function NewHomePage() {
     setCatalogLoading(true);
     setCatalogError(null);
     try {
-      const operatorToken = await ensureProductSession();
-      if (!operatorToken) throw new Error("نشست اپراتور برای مشاهده محصولات در دسترس نیست.");
+      const operatorToken = await ensureAdminProductReadSession();
+      if (!operatorToken) throw new Error("نشست مدیر برای مشاهده محصولات در دسترس نیست.");
       const data = await listManageableProducts(operatorToken);
       setProducts(Array.isArray(data) ? data : []);
     } catch (e) {
@@ -227,17 +227,20 @@ export default function NewHomePage() {
   }
 
   async function ensureProductSession(): Promise<string | null> {
-    // The operational homepage is Admin-gated. Reuse that authenticated session
-    // for operator-capable catalog/report reads instead of minting a pilot token.
-    const adminToken = sessionStorage.getItem("hbi_admin_access_token");
-    if (adminToken) return adminToken;
-
-    // Keep the non-production pilot fallback for isolated pilot flows only.
+    // Product Intake keeps its separately governed operator session.
     const cached = sessionStorage.getItem("hbi_operator_access_token");
     if (cached) return cached;
     const pair = await pilotOperatorToken();
     sessionStorage.setItem("hbi_operator_access_token", pair.access_token);
     return pair.access_token;
+  }
+
+  async function ensureAdminProductReadSession(): Promise<string | null> {
+    // The operational homepage uses the signed-in Admin session for catalog,
+    // internal evaluation, and inventory reads. Keep this separate from the
+    // Product Intake operator session because its governance transitions have
+    // narrower role requirements.
+    return sessionStorage.getItem("hbi_admin_access_token");
   }
 
   async function ensureReviewSession(): Promise<string | null> {
@@ -407,7 +410,7 @@ export default function NewHomePage() {
         { case_id: newCaseId, customer_profile: { concerns: concernsText, skin_type: skin.join(",") || undefined } },
         currentToken
       );
-      const operatorToken = await ensureProductSession();
+      const operatorToken = await ensureAdminProductReadSession();
       const evaluations = operatorToken
         ? await listInternalEvaluationsByCase(newCaseId, operatorToken)
         : list;
@@ -441,7 +444,7 @@ export default function NewHomePage() {
     // Inventory sell-read requires Operator/Admin — not the customer JWT.
     setSalePrice(null);
     setSaleFxRate(null);
-    void ensureProductSession()
+    void ensureAdminProductReadSession()
       .then(async (operatorToken) => {
         if (cancelled || !operatorToken) throw new Error("operator session unavailable");
         const [inv, fx] = await Promise.all([
