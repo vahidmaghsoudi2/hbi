@@ -396,9 +396,10 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
     assert product.status == "ACTIVE"
 
 
-def test_editor_can_create_and_review_research_draft(client, db_session):
-    """The Product Intake session can submit a source-traceable draft and review its evidence."""
+def test_editor_can_create_research_draft_but_verify_requires_qa(client, db_session):
+    """Editor may submit source-traceable Research Draft; VERIFIED requires QA/PO/Admin."""
     editor = _auth(db_session, "intake_research_editor", ROLE_EDITOR)
+    qa = _auth(db_session, "intake_research_qa", ROLE_REVIEWER_QA)
     pid = "INTAKE-RESEARCH-EDITOR-001"
     _create_product(
         client, editor, pid,
@@ -435,16 +436,25 @@ def test_editor_can_create_and_review_research_draft(client, db_session):
     assert draft.json()[1]["source_type"] == "CLINICAL_TRIAL"
     assert draft.json()[1]["qa_status"] == "PENDING"
 
-    missing_reason = client.post(
+    # Editor must not mark evidence VERIFIED (governance baseline).
+    editor_blocked = client.post(
         f"/api/v1/evidence/{evidence_id}/verify",
         headers=editor,
+        json={"verdict": "VERIFIED", "reason": "intake workflow test"},
+    )
+    assert editor_blocked.status_code == 403, editor_blocked.text
+
+    # QA without reason is rejected before verify.
+    missing_reason = client.post(
+        f"/api/v1/evidence/{evidence_id}/verify",
+        headers=qa,
         json={"verdict": "VERIFIED"},
     )
     assert missing_reason.status_code == 422, missing_reason.text
 
     reviewed = client.post(
         f"/api/v1/evidence/{evidence_id}/verify",
-        headers=editor,
+        headers=qa,
         json={"verdict": "VERIFIED", "reason": "intake workflow test"},
     )
     assert reviewed.status_code == 200, reviewed.text
