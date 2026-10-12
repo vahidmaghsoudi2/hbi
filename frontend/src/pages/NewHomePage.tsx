@@ -1,7 +1,6 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  listProducts,
   listManageableProducts,
   pilotToken,
   pilotOperatorToken,
@@ -75,6 +74,7 @@ export default function NewHomePage() {
   const [error, setError] = useState<string | null>(null);
   const [products, setProducts] = useState<ProductDTO[]>([]);
   const [sellableProducts, setSellableProducts] = useState<ProductDTO[]>([]);
+  const [sellableProductsError, setSellableProductsError] = useState<string | null>(null);
   const [catalogError, setCatalogError] = useState<string | null>(null);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [recs, setRecs] = useState<RecommendationDTO[]>([]);
@@ -116,11 +116,20 @@ export default function NewHomePage() {
   }, [loadProducts]);
 
   const loadSellableProducts = useCallback(async () => {
+    setSellableProductsError(null);
     try {
-      const data = await listProducts();
-      setSellableProducts(Array.isArray(data) ? data : []);
-    } catch {
+      const adminToken = sessionStorage.getItem("hbi_admin_access_token");
+      if (!adminToken) throw new Error("برای بارگذاری فهرست فروش، نشست مدیر در دسترس نیست.");
+      const data = await listManageableProducts(adminToken);
+      // The operational catalog includes drafts; only ACTIVE products can be sold.
+      setSellableProducts(
+        (Array.isArray(data) ? data : []).filter(
+          (product) => String(product.status ?? "").trim().toUpperCase() === "ACTIVE"
+        )
+      );
+    } catch (e) {
       setSellableProducts([]);
+      setSellableProductsError(e instanceof Error ? e.message : String(e));
     }
   }, []);
 
@@ -1032,16 +1041,15 @@ export default function NewHomePage() {
                     <option value="">— انتخاب از کاتالوگ —</option>
                     {sellableProducts.map((p) => (
                       <option key={p.product_id} value={p.product_id}>
-                        {p.product_name} ({p.brand})
+                        {p.product_name} ({p.brand}) · {p.product_id}
                       </option>
                     ))}
                   </select>
-                  <label className="pro-label" htmlFor="sale-manual">
-                    یا product_id دستی
-                  </label>
-                  <input id="sale-manual" className="pro-input" value={saleProductId} onChange={(e) => {
-                      setSaleProductId(e.target.value);
-                    }} />
+                  {sellableProductsError ? (
+                    <p className="pro-alert" role="alert">{sellableProductsError}</p>
+                  ) : sellableProducts.length === 0 ? (
+                    <p className="pro-muted" role="status">محصول ACTIVE برای فروش در کاتالوگ پیدا نشد. محصول آزمایشی وارد نکنید؛ ابتدا کاتالوگ معتبر و وضعیت محصول بررسی شود.</p>
+                  ) : null}
                   <div className="pro-grid-2">
                     <div>
                       <label className="pro-label" htmlFor="sale-qty">
