@@ -23,7 +23,6 @@
   - Quick action: **گالری محصولات** → `/catalog`
   - Quick action: **خرید و موجودی** → `/purchase`
   - Other direct links:
-    - **پیشنهاد محصول** → `/recommendation` (not AdminGate at router level; separate pilot/customer token flow)
     - **بررسی پرونده کالا** → `/workspace?panel=review`
     - **نتایج مشاوره** → `/workspace?panel=results`
     - **سوابق مراجعه** → `/workspace?panel=previous`
@@ -46,17 +45,16 @@
 - `/catalog` — `CatalogPage`, guarded by `AdminGate`. Must audit actual list endpoint and product eligibility.
 - `/purchase` — `PurchasePage`, guarded by `AdminGate`; loads manageable products using Admin token, obtains FX rate, submits stock-in, updates inventory.
 - `/accounting` — `AccountingHomePage`, guarded by `AdminGate`; four sections: today's sales, inventory, stock flow, financial report. Gross profit remains deferred pending approved COGS policy.
-- `/recommendation` — `RecommendationPage`, currently not router-guarded by AdminGate and uses a separate pilot/customer-token workflow. Role and placement require a product decision before presenting it as an Admin operation.
-- `/pilot` — `PilotPage`, separate pilot/customer flow; not a customer-facing access path in the target operating model and must not be exposed as part of the manager's primary operational navigation without an explicit reason.
+- `/recommendation` — `RecommendationPage`, now guarded by `AdminGate`. The page still consumes the internal pilot/customer token and is not linked from the operational homepage; treat it as a restricted internal/non-production workflow until its operator-owned end-to-end flow is redesigned and verified.
+- `/pilot` — `PilotPage`, now guarded by `AdminGate`. It is an internal/non-production case-creation utility, not a customer login or a primary navigation destination.
 - `/login` — `AdminLoginPage`.
 
 ## First-priority sales findings
 - The homepage sales link and router panel mapping are consistent: `/workspace?panel=sales` selects the sales panel.
-- The sales panel's product dropdown is populated from `loadSellableProducts()`, which currently calls `listProducts()` with no Admin token. By contrast, the workspace product list calls `listManageableProducts()` after ensuring an Admin product-read session. This endpoint/auth/data-source mismatch is a concrete investigation target, but not yet proven to be the sole cause of an empty dropdown.
-- Sale submit uses Admin session via `createSale`; customer search also uses Admin token. The selection path explicitly clears customer/pilot token and does not require consultation.
-- Product choice drives inventory lookup; submit validates customer, Admin token, product ID, quantity, unit price, and available stock.
-- The UI also allows manual product_id entry. This is an unsafe/poor operator experience and should be assessed for removal or replacement with a clear catalog-empty state after backend sale-eligibility semantics are confirmed.
-- Do not simply replace `listProducts()` with `listManageableProducts()` until the API contracts and eligibility filters are inspected; a manageable product is not automatically a sale-eligible product.
+- The sales panel's product dropdown now calls `listManageableProducts()` with the Admin session and filters to `ACTIVE` products with readable inventory, positive unreserved quantity, and a non-null authoritative `sale_price_usd`. This is source-level implementation, not yet local-runtime proof.
+- Sale submit uses the Admin session via `createSale`; customer search also uses the Admin token. Selecting a buyer for direct sale clears customer/pilot tokens and does not require a consultation.
+- The manual product-ID bypass has been removed. If no eligible catalog/inventory rows exist, the UI should show an empty/error state rather than accepting an arbitrary ID.
+- The browser test covers eligible vs draft/out-of-stock/unpriced products, but mocked API responses do not prove that the local backend and database provide the expected records.
 - Local environment previously had a default SQLite database with zero products. If still empty, a blank dropdown may reflect missing validated data, and must not be “fixed” by silently importing old test products.
 
 ## Disposition matrix (provisional)
@@ -68,17 +66,17 @@
 | Customer & Consultation | KEEP but split by task within its section | customer search/profile/consultation/history/results links and identity rules |
 | Sales panel inside general workspace | REPAIR placement, then decide separate page | inspect route consumers, API contracts, tests; preserve deep links |
 | Product intake/review | MOVE/KEEP under Products & Inventory (provisional) | identify all consumers and permissions |
-| Recommendation direct link | REVIEW / likely REWORK | determine Admin operator flow; avoid pilot/customer-token requirement |
+| Recommendation direct link | REMOVED from homepage; route Admin-gated | redesign/verify operator-owned flow before restoring a shortcut |
 | Purchase | KEEP under Products & Inventory | runtime stock-in test with valid product and FX |
 | Accounting | KEEP as separate area | runtime API data; preserve deferred gross profit |
-| Pilot route | HIDE from manager IA unless explicitly needed | inspect inbound links and purpose |
+| Pilot route | REMOVED from homepage; route Admin-gated | retain only as restricted internal/non-production utility |
 | Settings | CREATE only after current settings/ logout capabilities are inventoried | avoid inventing non-existent settings pages |
 | Logout | KEEP under account/session area | verify session cleanup and login redirect |
 
 ## Audit and test plan
-1. Inspect backend routes and frontend API functions for product list/manageable products, inventory lookup, create sale, customer search, stock-in, and financial reports.
-2. Inspect automated tests and route tests; add focused tests for any source changes.
-3. Repair the narrowest proven defect first; avoid broad component rewrites before mapping dependencies.
-4. Run frontend typecheck/build and targeted tests in CI or local environment; record exact result and commit.
+1. Source-check the API contracts and frontend calls for product management, inventory lookup, create sale, customer search, stock-in, and financial reports.
+2. Add focused browser coverage for Admin route gates and sale-picker eligibility.
+3. Keep the recommendation/pilot utilities out of homepage navigation and require Admin session at the router while their internal token workflow remains non-production.
+4. Run frontend typecheck/build and targeted tests in CI; record the exact head SHA and results.
 5. User runs the branch on the laptop and verifies actual Admin login, sale picker, valid catalog item, price/stock lookup, sale submission, and accounting/inventory reflection. If there is no approved catalog/inventory data, report that as a data prerequisite rather than importing legacy test products.
 6. Only after this, apply the final submenu tree and verify every moved route, quick link, back-navigation, and logout.
