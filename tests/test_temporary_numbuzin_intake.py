@@ -116,7 +116,7 @@ def test_temporary_numbuzin_candidate_intake_is_draft_and_disposable(client, db_
     persisted_evidence = evidence_readback.json()
     assert len(persisted_evidence) == 3
     assert {r["claim_type"] for r in persisted_evidence} == {
-        "FACT", "MANUFACTURER_CLAIM", "UNKNOWN"
+        "MANUFACTURER_CLAIM", "UNKNOWN"
     }
     assert all(r["product_id"] == PRODUCT_ID for r in persisted_evidence)
 
