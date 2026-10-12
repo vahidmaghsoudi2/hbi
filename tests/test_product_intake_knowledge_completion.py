@@ -162,7 +162,8 @@ def test_bound_claim_alias_requires_manufacturer_claim_type(db, claim_type, expe
         assert knowledge.manufacturer_claims is None
 
 
-def test_manufacturer_claim_field_still_maps_without_claim_type_gate(db):
+def test_manufacturer_claim_field_requires_manufacturer_claim_type(db):
+    """WP-INTAKE-CLAIM-INTEGRITY-001: singular manufacturer_claim needs MANUFACTURER_CLAIM."""
     _product(db)
     _evidence(
         db,
@@ -173,5 +174,4 @@ def test_manufacturer_claim_field_still_maps_without_claim_type_gate(db):
         claim_type="FACT",
     )
     knowledge = ProductKnowledgeService(db).update_from_evidence("P-KC-001")
-    assert knowledge.manufacturer_claims is not None
-    assert "fragrance-free" in knowledge.manufacturer_claims
+    assert knowledge.manufacturer_claims is None
