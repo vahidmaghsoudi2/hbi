@@ -81,11 +81,12 @@ test("existing customer consultation retains the legacy pilot-token session flow
   }));
 
   await page.goto("/");
-  await page.locator('a.hbi-nav-item[href="/workspace?panel=consult"]').click();
-  await expect(page).toHaveURL(/\/workspace\?panel=consult$/);
+  await page.locator('a.hbi-nav-item[href="/workspace?panel=sales"]').click();
+  await expect(page).toHaveURL(/\/workspace\?panel=sales$/);
   await page.locator("#sale-customer-search").fill("09121111111");
   await page.getByRole("button", { name: "جست‌وجوی مشتری" }).click();
   await page.getByRole("button", { name: /انتخاب برای مشاوره: Consult Buyer/ }).click();
+  await expect(page).toHaveURL(/\/workspace\?panel=consult$/);
 
   await expect(page.getByRole("button", { name: "ثبت مراجعه + دریافت پیشنهاد" })).toBeVisible();
   await expect.poll(() => page.evaluate(() => sessionStorage.getItem("hbi_access_token"))).toBe("browser-test-customer-token");
