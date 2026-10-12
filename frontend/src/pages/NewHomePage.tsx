@@ -1,5 +1,5 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   listProducts,
   listManageableProducts,
@@ -55,6 +55,7 @@ function panelFromSearch(search: string): Panel {
 
 export default function NewHomePage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [active, setActive] = useState<Panel>(() => panelFromSearch(location.search));
 
   useEffect(() => {
@@ -229,6 +230,8 @@ export default function NewHomePage() {
       setStatusMsg(`مشتری قبلی انتخاب شد. ${history.length} خرید قبلی بارگذاری شد؛ مشکل امروز را ثبت کنید.`);
       setCustomerSearchResults([]);
       setActive("consult");
+      // Keep the URL aligned with the selected panel so refresh/back do not reopen stale sales.
+      navigate("?panel=consult", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -238,6 +241,7 @@ export default function NewHomePage() {
 
   function go(panel: Panel) {
     setActive(panel);
+    navigate(`?panel=${panel}`, { replace: true });
     setError(null);
   }
 
