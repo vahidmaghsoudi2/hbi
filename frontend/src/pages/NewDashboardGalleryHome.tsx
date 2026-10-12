@@ -2,11 +2,27 @@ import { Link, useNavigate } from "react-router-dom";
 import "../styles/dashboard-gallery.css";
 
 const navigation = [
-  { label: "خانه", detail: "نمای کلی", icon: "⌂", to: "/", current: true },
-  { label: "کالا و انبار", detail: "گالری، پرونده و خرید", icon: "▦", to: "/catalog" },
-  { label: "مشتری و مشاوره", detail: "مشتری، مراجعه و پیشنهاد", icon: "◎", to: "/workspace?panel=consult" },
-  { label: "فروش", detail: "ثبت فروش مستقیم", icon: "↗", to: "/workspace?panel=sales" },
-  { label: "مالی و حسابداری", detail: "گزارش‌ها و امور مالی", icon: "▤", to: "/accounting" },
+  { label: "خانه و داشبورد", detail: "نمای کلی عملیات", icon: "⌂", to: "/", current: true, children: [] },
+  {
+    label: "کالا و انبار", detail: "کاتالوگ، پرونده و موجودی", icon: "▦", to: "/catalog",
+    children: [
+      { label: "کاتالوگ کالاها", to: "/catalog" },
+      { label: "بررسی پرونده کالا", to: "/workspace?panel=review" },
+      { label: "ثبت و ویرایش کالا", to: "/workspace?panel=intake" },
+      { label: "خرید و ورود موجودی", to: "/purchase" },
+    ],
+  },
+  {
+    label: "مشتری و مشاوره", detail: "پرونده، مراجعه و نتایج", icon: "◎", to: "/workspace?panel=consult",
+    children: [
+      { label: "ثبت مراجعه و مشاوره", to: "/workspace?panel=consult" },
+      { label: "پرونده مشتری", to: "/workspace?panel=profile" },
+      { label: "سوابق مراجعه", to: "/workspace?panel=previous" },
+      { label: "نتایج ارزیابی و پیشنهاد", to: "/workspace?panel=results" },
+    ],
+  },
+  { label: "فروش", detail: "ثبت فروش مستقیم", icon: "↗", to: "/workspace?panel=sales", children: [] },
+  { label: "مالی و حسابداری", detail: "گزارش‌ها و امور مالی", icon: "▤", to: "/accounting", children: [] },
 ];
 
 const quickActions = [
@@ -21,8 +37,6 @@ const moreActions = [
   { title: "نتایج مشاوره", description: "مشاهده نتایج ثبت‌شده", icon: "⌕", to: "/workspace?panel=results" },
   { title: "سوابق مراجعه", description: "دسترسی به سوابق قبلی", icon: "◷", to: "/workspace?panel=previous" },
   { title: "پرونده مشتری", description: "مشاهده اطلاعات پرونده مشتری", icon: "♙", to: "/workspace?panel=profile" },
-  { title: "محیط کاری کامل", description: "ورود به فضای کاری و ابزارهای موجود", icon: "▤", to: "/workspace" },
-  { title: "مالی و حسابداری", description: "ورود مستقیم به بخش مالی", icon: "◫", to: "/accounting" },
 ];
 
 export default function NewDashboardGalleryHome() {
@@ -53,11 +67,22 @@ export default function NewDashboardGalleryHome() {
         <div className="hbi-nav-label">فضای کاری</div>
         <nav className="hbi-side-nav" aria-label="منوی اصلی">
           {navigation.map((item) => (
-            <Link key={item.label} className={item.current ? "hbi-nav-item is-current" : "hbi-nav-item"} to={item.to}>
-              <span className="hbi-nav-icon" aria-hidden="true">{item.icon}</span>
-              <span className="hbi-nav-copy"><strong>{item.label}</strong><small>{item.detail}</small></span>
-              {item.current ? <span className="hbi-nav-indicator" aria-hidden="true" /> : null}
-            </Link>
+            <div key={item.label} className="hbi-nav-group">
+              <Link className={item.current ? "hbi-nav-item is-current" : "hbi-nav-item"} to={item.to}>
+                <span className="hbi-nav-icon" aria-hidden="true">{item.icon}</span>
+                <span className="hbi-nav-copy"><strong>{item.label}</strong><small>{item.detail}</small></span>
+                {item.current ? <span className="hbi-nav-indicator" aria-hidden="true" /> : null}
+              </Link>
+              {item.children.length > 0 ? (
+                <div className="hbi-subnav" style={{ display: "grid", gap: 2, margin: "2px 10px 8px 0", paddingRight: 13, borderRight: "1px solid #e6ebe7" }}>
+                  {item.children.map((child) => (
+                    <Link key={child.label} to={child.to} style={{ display: "block", padding: "7px 10px", borderRadius: 7, color: "#65716b", textDecoration: "none", fontSize: 10, lineHeight: 1.8 }}>
+                      {child.label}
+                    </Link>
+                  ))}
+                </div>
+              ) : null}
+            </div>
           ))}
         </nav>
 
