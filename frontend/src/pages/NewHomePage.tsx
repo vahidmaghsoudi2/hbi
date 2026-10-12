@@ -1,5 +1,5 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   listProducts,
   listManageableProducts,
@@ -47,8 +47,19 @@ const INITIAL_RECOMMENDATION_LIMIT = 5;
 
 type Panel = "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about";
 
+function panelFromSearch(search: string): Panel {
+  const requested = new URLSearchParams(search).get("panel");
+  const allowed: Panel[] = ["consult", "previous", "profile", "catalog", "review", "intake", "results", "sales", "about"];
+  return allowed.includes(requested as Panel) ? (requested as Panel) : "consult";
+}
+
 export default function NewHomePage() {
-  const [active, setActive] = useState<Panel>("consult");
+  const location = useLocation();
+  const [active, setActive] = useState<Panel>(() => panelFromSearch(location.search));
+
+  useEffect(() => {
+    setActive(panelFromSearch(location.search));
+  }, [location.search]);
   const [token, setToken] = useState<string | null>(() => sessionStorage.getItem("hbi_access_token"));
   const [customerId, setCustomerId] = useState<string | null>(() => sessionStorage.getItem("hbi_customer_id"));
   const [caseId, setCaseId] = useState<string | null>(() => sessionStorage.getItem("hbi_case_id"));
