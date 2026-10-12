@@ -9,7 +9,7 @@ test("operational homepage redirects unauthenticated visits to Admin login", asy
 test("pilot and recommendation routes require the Admin session", async ({ page }) => {
   for (const path of ["/pilot", "/recommendation"]) {
     await page.goto(path);
-    await expect(page).toHaveURL(/\\/login$/);
+    await expect(page).toHaveURL(/\/login$/);
     await expect(page.getByRole("heading", { name: "ورود مدیر HBI" })).toBeVisible();
   }
 });
