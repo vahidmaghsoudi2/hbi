@@ -17,7 +17,6 @@ const quickActions = [
 ];
 
 const moreActions = [
-  { title: "پیشنهاد محصول", description: "ورود به مسیر پیشنهاد و تصمیم", icon: "✳", to: "/recommendation" },
   { title: "بررسی پرونده کالا", description: "بازبینی پرونده‌های موجود", icon: "▧", to: "/workspace?panel=review" },
   { title: "نتایج مشاوره", description: "مشاهده نتایج ثبت‌شده", icon: "⌕", to: "/workspace?panel=results" },
   { title: "سوابق مراجعه", description: "دسترسی به سوابق قبلی", icon: "◷", to: "/workspace?panel=previous" },
