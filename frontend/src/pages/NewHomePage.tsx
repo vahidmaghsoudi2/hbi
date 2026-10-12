@@ -353,7 +353,7 @@ export default function NewHomePage() {
         setCustomerId(resolvedId);
       }
       sessionStorage.setItem("hbi_concerns", concernsText);
-      setStatusMsg("پروفایل مشتری فعال ذخیره شد. همین مشتری در مشاوره، پرونده و فروش استفاده می‌شود.");
+      setStatusMsg("پروفایل مشتری فعال ذخیره شد. همین مشتری در مشاوره و پرونده استفاده می‌شود.");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
