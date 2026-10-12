@@ -101,6 +101,20 @@ def test_operator_editor_reads_inventory_then_admin_sale(client, db_session):
     assert movement.quantity_delta == -1
     assert movement.quantity_after == 2
 
+    ledger = client.get(
+        "/api/v1/inventory/movements?product_id=P-SALE&movement_type=SALE",
+        headers=_auth("USR_ADMIN"),
+    )
+    assert ledger.status_code == 200, ledger.text
+    assert any(row["reference_id"] == sale_id for row in ledger.json())
+
+    # Verify the accounting report read model can see the sale just recorded.
+    report = client.get("/api/v1/reports/sales/period/today", headers=_auth("USR_ADMIN"))
+    assert report.status_code == 200, report.text
+    report_data = report.json()
+    assert report_data["sale_count"] == 1
+    assert any(row["sale_id"] == sale_id for row in report_data["sales"])
+
     inv2 = client.get("/api/v1/inventory/product/P-SALE", headers=_auth("OP-EDITOR"))
     assert inv2.status_code == 200
     assert inv2.json()["quantity_available"] == 2
