@@ -385,17 +385,6 @@ export default function NewHomePage() {
     setActive("profile");
   }
 
-  function selectRecommendationForSale(r: RecommendationDTO) {
-    if ((r.eligibility_status ?? r.eligibility ?? "").trim().toUpperCase() !== "ELIGIBLE") {
-      setError("این مورد واجد شرایط پیشنهاد نهایی نیست و قابل انتخاب برای فروش از بخش پیشنهادها نیست.");
-      return;
-    }
-    setSaleProductId(r.product_id);
-    setSelectedRecommendationId(r.recommendation_id);
-    setStatusMsg(`پیشنهاد ${r.recommendation_id} برای فروش انتخاب شد.`);
-    setActive("sales");
-  }
-
   async function runFullFlow(e: FormEvent) {
     e.preventDefault();
     setError(null);
@@ -800,7 +789,7 @@ export default function NewHomePage() {
             <div className="pro-panel-head">
               <div>
                 <h1>پروفایل مشتری</h1>
-                <p className="pro-lead">این مشتری فعال، مرجع مشترک مشاوره، پرونده، پیشنهاد و فروش است.</p>
+                <p className="pro-lead">این مشتری فعال، مرجع مشترک مشاوره، پرونده و پیشنهادها است.</p>
               </div>
               <button type="button" className="pro-btn-secondary" onClick={startNewCustomer}>مشتری جدید</button>
             </div>
@@ -951,7 +940,6 @@ export default function NewHomePage() {
                           {r.reasoning ? <div><dt>ReasoningEngine</dt><dd>{r.reasoning}</dd></div> : null}
                         </dl>
                       </details>
-                      <button type="button" className="pro-btn-primary" onClick={() => selectRecommendationForSale(r)}>انتخاب این پیشنهاد برای فروش</button>
                     </div>
                   </article>
                 );
@@ -967,7 +955,7 @@ export default function NewHomePage() {
             {rejectedRecs.length > 0 ? (
               <section className="pro-panel" style={{ marginTop: "1rem" }} aria-label="موارد ارزیابی‌شده و ردشده">
                 <h2>سوابق داخلی محصولات ردشده</h2>
-                <p className="pro-muted">این موارد برای بررسی تیم نگهداری می‌شوند و پیشنهاد نهایی نیستند؛ از این بخش امکان انتخاب برای فروش وجود ندارد.</p>
+                <p className="pro-muted">این موارد برای بررسی داخلی نگهداری می‌شوند و پیشنهاد نهایی نیستند.</p>
                 <div className="pro-rec-list">
                   {rejectedRecs.map((r) => (
                     <article key={r.recommendation_id} className="pro-rec-card">
@@ -1104,7 +1092,7 @@ export default function NewHomePage() {
           </section>
         )}
       </main>
-      <footer className="pro-footer">HBI · گالری مقصودی · مشاوره تا فروش در یک صفحه</footer>
+      <footer className="pro-footer">HBI · گالری مقصودی · مدیریت یکپارچه مشتری و مشاوره</footer>
     </div>
   );
 }
