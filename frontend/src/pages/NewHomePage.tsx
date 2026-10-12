@@ -121,12 +121,28 @@ export default function NewHomePage() {
       const adminToken = sessionStorage.getItem("hbi_admin_access_token");
       if (!adminToken) throw new Error("برای بارگذاری فهرست فروش، نشست مدیر در دسترس نیست.");
       const data = await listManageableProducts(adminToken);
-      // The operational catalog includes drafts; only ACTIVE products can be sold.
-      setSellableProducts(
-        (Array.isArray(data) ? data : []).filter(
-          (product) => String(product.status ?? "").trim().toUpperCase() === "ACTIVE"
-        )
+      // Match the backend sale contract: ACTIVE, inventory row, positive sellable
+      // quantity, and an authoritative Inventory.sale_price_usd value.
+      const activeProducts = (Array.isArray(data) ? data : []).filter(
+        (product) => String(product.status ?? "").trim().toUpperCase() === "ACTIVE"
       );
+      const checked = await Promise.all(
+        activeProducts.map(async (product) => {
+          try {
+            const inventory = await getInventoryByProduct(product.product_id, adminToken);
+            const sellableQuantity = (inventory.quantity_available ?? 0) - (inventory.quantity_reserved ?? 0);
+            if (sellableQuantity <= 0 || inventory.sale_price_usd == null) return null;
+            return product;
+          } catch {
+            // Missing inventory or an unreadable inventory row means not sellable.
+            return null;
+          }
+        })
+      );
+      setSellableProducts(checked.filter((product): product is ProductDTO => product !== null));
+      if (activeProducts.length > 0 && checked.every((product) => product === null)) {
+        setSellableProductsError("کالای فعال با موجودی قابل فروش و قیمت معتبر پیدا نشد.");
+      }
     } catch (e) {
       setSellableProducts([]);
       setSellableProductsError(e instanceof Error ? e.message : String(e));
