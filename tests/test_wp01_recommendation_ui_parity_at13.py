@@ -36,3 +36,9 @@ def test_at13_no_recommendation_selection_or_backend_filter_was_added():
     source = _source()
     assert "selectRecommendationForSale(r)" not in source
     assert "generateRecommendations(" in source
+
+def test_consultation_inventory_error_uses_current_validation_result():
+    source = _source()
+    assert "Promise<{ evaluations: RecommendationDTO[]; error: string | null }>" in source
+    assert "setStatusMsg(inventoryChecked.error ? inventoryChecked.error" in source
+    assert "consultationInventoryError ? consultationInventoryError" not in source
