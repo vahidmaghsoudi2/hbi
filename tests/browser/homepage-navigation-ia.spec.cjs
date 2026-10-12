@@ -33,6 +33,13 @@ test("homepage navigation exposes each operational domain and its intended desti
     await expect(link).toHaveAttribute("href", href);
   }
 
+  // The main domains must expose their operations in the correct submenu, without
+  // duplicate generic-workspace/accounting cards in the homepage's secondary area.
+  await expect(page.locator(".hbi-subnav").filter({ hasText: "کاتالوگ کالاها" })).toBeVisible();
+  await expect(page.locator(".hbi-subnav").filter({ hasText: "پرونده مشتری" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "محیط کاری کامل" })).toHaveCount(0);
+  await expect(page.locator(".hbi-more-card").filter({ hasText: "مالی و حسابداری" })).toHaveCount(0);
+
   // Direct sale must remain a first-class route and not be nested under consultation.
   await page.locator('a.hbi-nav-item[href="/workspace?panel=sales"]').click();
   await expect(page).toHaveURL(/\/workspace\?panel=sales$/);
