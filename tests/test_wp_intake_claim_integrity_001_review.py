@@ -199,6 +199,17 @@ def test_inference_and_fact_rows_preserve_claim_type_on_create(db):
     assert fact.claim_type == "FACT"
     assert inference.claim_type != fact.claim_type
 
+    # Evidence provenance remains attached to each typed row after service persistence.
+    assert inference.source_reference == "test://inference"
+    assert fact.source_reference == "test://fact"
+    assert inference.product_id == fact.product_id == "P-REV-001"
+    persisted_inference = db.query(Evidence).filter_by(evidence_id=inference.evidence_id).one()
+    persisted_fact = db.query(Evidence).filter_by(evidence_id=fact.evidence_id).one()
+    assert persisted_inference.claim_type == "INFERENCE"
+    assert persisted_fact.claim_type == "FACT"
+    assert persisted_inference.source_reference == "test://inference"
+    assert persisted_fact.source_reference == "test://fact"
+
 
 def test_fact_never_silently_becomes_manufacturer_claim_in_knowledge(db):
     _product(db)
