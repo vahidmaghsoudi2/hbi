@@ -10,10 +10,20 @@ const navigation = [
 ];
 
 const quickActions = [
-  { title: "ثبت فروش", description: "ثبت خرید مشتری، بدون نیاز به مشاوره قبلی", icon: "↗", to: "/workspace?panel=sales", tag: "عملیات روزانه" },
+  { title: "ثبت فروش", description: "ثبت فروش مستقیم، بدون نیاز به مشاوره قبلی", icon: "↗", to: "/workspace?panel=sales", tag: "عملیات روزانه" },
   { title: "مشتری و مشاوره", description: "جست‌وجوی مشتری یا ثبت مراجعه و نیاز", icon: "◎", to: "/workspace?panel=consult", tag: "ارتباط با مشتری" },
-  { title: "گالری و پرونده کالا", description: "مشاهده محصولات و ورود به پرونده‌های موجود", icon: "▦", to: "/catalog", tag: "کالا و انبار" },
+  { title: "گالری محصولات", description: "مشاهده کاتالوگ محصولات موجود", icon: "▦", to: "/catalog", tag: "کالا و انبار" },
   { title: "خرید و موجودی", description: "ثبت خرید و پیگیری گردش موجودی", icon: "▤", to: "/purchase", tag: "تأمین کالا" },
+];
+
+const moreActions = [
+  { title: "پیشنهاد محصول", description: "ورود به مسیر پیشنهاد و تصمیم", icon: "✳", to: "/recommendation" },
+  { title: "بررسی پرونده کالا", description: "بازبینی پرونده‌های موجود", icon: "▧", to: "/workspace?panel=review" },
+  { title: "نتایج مشاوره", description: "مشاهده نتایج ثبت‌شده", icon: "⌕", to: "/workspace?panel=results" },
+  { title: "سوابق مراجعه", description: "دسترسی به سوابق قبلی", icon: "◷", to: "/workspace?panel=previous" },
+  { title: "پرونده مشتری", description: "مشاهده اطلاعات پرونده مشتری", icon: "♙", to: "/workspace?panel=profile" },
+  { title: "محیط کاری کامل", description: "ورود به فضای کاری و ابزارهای موجود", icon: "▤", to: "/workspace" },
+  { title: "مالی و حسابداری", description: "ورود مستقیم به بخش مالی", icon: "◫", to: "/accounting" },
 ];
 
 export default function NewDashboardGalleryHome() {
@@ -83,7 +93,7 @@ export default function NewDashboardGalleryHome() {
 
           <section className="hbi-section" aria-labelledby="quick-actions-title">
             <div className="hbi-section-heading">
-              <div><span className="hbi-kicker">دسترسی سریع</span><h2 id="quick-actions-title">از کجا شروع می‌کنید؟</h2><p>عملیات پرتکرار را مستقیم باز کنید.</p></div>
+              <div><span className="hbi-kicker">دسترسی سریع</span><h2 id="quick-actions-title">کارهای پرتکرار</h2><p>عملیات اصلی را مستقیم باز کنید.</p></div>
             </div>
             <div className="hbi-action-grid">
               {quickActions.map((action, index) => (
@@ -96,6 +106,21 @@ export default function NewDashboardGalleryHome() {
                   <strong className="hbi-action-title">{action.title}</strong>
                   <span className="hbi-action-description">{action.description}</span>
                   <span className="hbi-action-link">ورود به بخش <span aria-hidden="true">←</span></span>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          <section className="hbi-section hbi-more-section" aria-labelledby="more-actions-title">
+            <div className="hbi-section-heading">
+              <div><span className="hbi-kicker">دسترسی‌های مستقیم</span><h2 id="more-actions-title">سایر بخش‌های کاری</h2><p>برای رسیدن به ابزارهای موجود لازم نیست از چند منو عبور کنید.</p></div>
+            </div>
+            <div className="hbi-more-grid">
+              {moreActions.map((action) => (
+                <Link className="hbi-more-card" to={action.to} key={action.title}>
+                  <span className="hbi-more-icon" aria-hidden="true">{action.icon}</span>
+                  <span className="hbi-more-copy"><strong>{action.title}</strong><small>{action.description}</small></span>
+                  <span className="hbi-more-arrow" aria-hidden="true">←</span>
                 </Link>
               ))}
             </div>
