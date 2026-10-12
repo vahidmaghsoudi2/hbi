@@ -6,9 +6,12 @@ test("operational homepage redirects unauthenticated visits to Admin login", asy
   await expect(page.getByRole("heading", { name: "ورود مدیر HBI" })).toBeVisible();
 });
 
-test("pilot consultation route remains independently reachable without Admin session", async ({ page }) => {
-  await page.goto("/pilot");
-  await expect(page.getByRole("button", { name: "دریافت JWT" })).toBeVisible();
+test("pilot and recommendation routes require the Admin session", async ({ page }) => {
+  for (const path of ["/pilot", "/recommendation"]) {
+    await page.goto(path);
+    await expect(page).toHaveURL(/\\/login$/);
+    await expect(page.getByRole("heading", { name: "ورود مدیر HBI" })).toBeVisible();
+  }
 });
 
 test("existing buyer can be selected for sale without minting a customer or pilot token", async ({ page }) => {
