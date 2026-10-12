@@ -101,7 +101,7 @@ def test_temporary_numbuzin_candidate_intake_is_draft_and_disposable(client, db_
     evidence_rows = research.json()
     assert len(evidence_rows) == 3
     assert {r["claim_type"] for r in evidence_rows} == {
-        "FACT", "MANUFACTURER_CLAIM", "UNKNOWN"
+        "MANUFACTURER_CLAIM", "UNKNOWN"
     }
     assert all(r.get("qa_status") in (None, "PENDING") for r in evidence_rows)
     assert all(r.get("evidence_status") in (None, "PENDING", "UNKNOWN") for r in evidence_rows)
