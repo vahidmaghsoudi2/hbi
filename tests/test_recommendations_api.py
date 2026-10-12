@@ -214,6 +214,56 @@ def test_inventory_zero_excluded(api_env):
     ).count() == 0, "pre-evaluation zero-stock exclusions must not create why-not records"
 
 
+def test_inventory_fully_reserved_excluded(api_env):
+    """A product with stock fully reserved must not enter consultation evaluation."""
+    client, db, case = api_env
+
+    reserved_product = Product(
+        product_id="reserved_inv_test_001",
+        brand="TestBrand",
+        product_name="Fully Reserved Product",
+        identity_status="VERIFIED",
+        qa_verdict="VALID",
+        status="ACTIVE",
+    )
+    db.add(reserved_product)
+    db.flush()
+    db.add(Inventory(
+        inventory_id="inv-reserved_inv_test_001",
+        product_id=reserved_product.product_id,
+        quantity_available=3,
+        quantity_reserved=3,
+        quantity_damaged=0,
+        stock_status="active",
+    ))
+    db.commit()
+
+    token = _token(client)
+    response = client.post(
+        "/api/v1/recommendations/generate",
+        json={
+            "case_id": case.case_id,
+            "customer_profile": {"concerns": "test"},
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    if isinstance(data, list):
+        product_ids = [item.get("product_id") for item in data if isinstance(item, dict)]
+    else:
+        product_ids = [
+            item.get("product_id")
+            for item in data.get("recommendations", data.get("products", []))
+            if isinstance(item, dict)
+        ]
+
+    assert reserved_product.product_id not in product_ids
+    assert db.query(Recommendation).filter_by(
+        case_id=case.case_id, product_id=reserved_product.product_id
+    ).count() == 0, "fully reserved products must not create consultation evaluation records"
+
+
 def test_verified_evidence_is_decision_usable(api_env):
     client, db, case = api_env
 
