@@ -1,3 +1,26 @@
+> ## 🔴 HISTORICAL BASELINE / RECONCILIATION REQUIRED — READ FIRST
+>
+> **This document is a strategic vision proposal, not the current execution plan.** Its baseline `89bb72004f4d8740f24535a8f8a6de87f8b11eba` is stale; current master was verified at `cc7848e472b837746e99103ea94ff4bb28eb0c2b` on 2026-10-12. Do not copy old status, priority, scope, or next-action statements into current work without rechecking current master and accepted contracts.
+>
+> ### Section-by-section disposition (2026-10-12)
+> - **KEEP AS STRATEGIC VISION ONLY:** §§1–4, 6–15, 18, 20–22. These express useful direction/governance; they do not prove implementation or authorize changes.
+> - **§5 — UPDATE / SCOPE-LIMITED:** structured ingredients and product comparison remain possible strategic capabilities, **not automatic V1 requirements**. Any implementation requires demonstrated business need, a bounded work package, acceptance criteria, and explicit authorization.
+> - **§16 — SUPERSEDED AS AN EXECUTION QUEUE:** its workstream ordering must not be used as the live task list. Use current reconciled work in Issue #278 and the current skin-consultation roadmap proposal in PR #348; validate against current master before acting.
+> - **§17 — PARTIALLY SUPERSEDED:** do not reopen the Home Page design mission from this paragraph. The Home Page is already active/current and its acceptance checklist has later updates on master. Product Line, category, and menu continuity questions may still matter, but must be checked against current routes and the currently assigned product/menu work—not inferred from this old vision.
+> - **§19 — NOT RECHECKED:** E-03 is described here as a separate PERFUME runtime mission. This document alone does not establish its present status; verify the current E-03 issue and evidence before reusing that instruction.
+> - **Baseline and all historical “current” wording — SUPERSEDED:** the old SHA is a historical checkpoint, not current Reality evidence.
+>
+> ### Current authority and guardrails
+> 1. The approved skin intake execution baseline remains `docs/architecture/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md`; do not reopen approved decisions without contrary evidence and explicit PO direction.
+> 2. Issue #278 is the consolidated skin Product Intake reconciliation/decision index. Its historical checkpoints still require SHA-aware interpretation.
+> 3. PR #348 is a proposal for the skin consultation/intelligence roadmap and remains separate from this broad strategic vision; it is not implementation or merge authorization.
+> 4. PRs #332, #334 and #345, and the merged #322 work, are later implementation evidence for their bounded scopes. They do not, by themselves, close G8 / Issue #283.
+> 5. Preserve this document for traceability. Do not delete useful strategic context; do not treat it as the live operational checklist. No code, contract, or merge is authorized by this reconciliation.
+>
+> Links: [Issue #278](https://github.com/vahidmaghsoudi2/hbi/issues/278) · [PR #348](https://github.com/vahidmaghsoudi2/hbi/pull/348) · [Issue #283 / G8](https://github.com/vahidmaghsoudi2/hbi/issues/283) · [PR #345](https://github.com/vahidmaghsoudi2/hbi/pull/345)
+>
+> ---
+>
 # HBI — ابلاغ رسمی جهت جدید معماری و دستور مشورت یکپارچه
 
 **از طرف: وحید مقصودی — Product Owner**  
