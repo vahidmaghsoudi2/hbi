@@ -1,23 +1,19 @@
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/dashboard-gallery.css";
 
-const galleryLines = [
-  { number: "01", title: "پوست", subtitle: "مراقبت و سلامت پوست", icon: "✳", tone: "rose" },
-  { number: "02", title: "مو", subtitle: "مراقبت مو و پوست سر", icon: "〰", tone: "violet" },
-  { number: "03", title: "آرایشی", subtitle: "زیبایی و آرایش", icon: "✦", tone: "peach" },
-  { number: "04", title: "ادکلن و عطر", subtitle: "رایحه‌ها و عطرها", icon: "❋", tone: "gold" },
-  { number: "05", title: "ابزار", subtitle: "ابزار و تجهیزات مراقبت", icon: "⌁", tone: "blue" },
-  { number: "06", title: "متفرقه", subtitle: "سایر محصولات", icon: "＋", tone: "green" },
+const navigation = [
+  { label: "خانه", detail: "نمای کلی", icon: "⌂", to: "/", current: true },
+  { label: "کالا و انبار", detail: "گالری، پرونده و خرید", icon: "▦", to: "/catalog" },
+  { label: "مشتری و مشاوره", detail: "مشتری، مراجعه و پیشنهاد", icon: "◎", to: "/workspace?panel=consult" },
+  { label: "فروش", detail: "ثبت فروش مستقیم", icon: "↗", to: "/workspace?panel=sales" },
+  { label: "مالی و حسابداری", detail: "گزارش‌ها و امور مالی", icon: "▤", to: "/accounting" },
 ];
 
-const workAreas = [
-  { title: "مشتری و مشاوره", detail: "ثبت مراجعه و دریافت پیشنهاد", icon: "◎", to: "/workspace?panel=consult", tone: "violet" },
-  { title: "معرفی و بررسی محصول", detail: "ورود محصول و بررسی پرونده", icon: "✳", to: "/workspace?panel=intake", tone: "rose" },
-  { title: "فروش", detail: "ثبت فروش و مشاهده جمع ثبت‌شده", icon: "↗", to: "/workspace?panel=sales", tone: "green" },
-  { title: "خرید و موجودی", detail: "ثبت خرید و گردش موجودی", icon: "▤", to: "/purchase", tone: "gold" },
-  { title: "مالی و حسابداری", detail: "ورود به بخش مالی موجود", icon: "◫", to: "/accounting", tone: "blue" },
-  { title: "گالری محصولات قابل عرضه", detail: "محصولات فعال و قابل نمایش در کاتالوگ", icon: "▦", to: "/catalog", tone: "peach" },
-  { title: "مدیریت پرونده محصولات", detail: "فهرست مدیریتی، پیش‌نویس‌ها و ورود به بررسی", icon: "▧", to: "/workspace?panel=catalog", tone: "rose" },
+const quickActions = [
+  { title: "ثبت فروش", description: "ثبت خرید مشتری، بدون نیاز به مشاوره قبلی", icon: "↗", to: "/workspace?panel=sales", tag: "عملیات روزانه" },
+  { title: "مشتری و مشاوره", description: "جست‌وجوی مشتری یا ثبت مراجعه و نیاز", icon: "◎", to: "/workspace?panel=consult", tag: "ارتباط با مشتری" },
+  { title: "گالری و پرونده کالا", description: "مشاهده محصولات و ورود به پرونده‌های موجود", icon: "▦", to: "/catalog", tag: "کالا و انبار" },
+  { title: "خرید و موجودی", description: "ثبت خرید و پیگیری گردش موجودی", icon: "▤", to: "/purchase", tag: "تأمین کالا" },
 ];
 
 export default function NewDashboardGalleryHome() {
@@ -39,78 +35,91 @@ export default function NewDashboardGalleryHome() {
 
   return (
     <main className="hbi-home" dir="rtl">
-      <header className="hbi-topbar">
+      <aside className="hbi-sidebar">
         <Link className="hbi-brand" to="/" aria-label="صفحه اصلی HBI">
           <span className="hbi-brand-mark">H</span>
-          <span><strong>HBI</strong><small>هوشمندی سلامت و زیبایی</small></span>
+          <span className="hbi-brand-copy"><strong>HBI</strong><small>مدیریت سلامت و زیبایی</small></span>
         </Link>
-        <nav className="hbi-topnav" aria-label="ناوبری اصلی">
-          <a className="is-current" href="#dashboard">داشبورد</a>
-          <a href="#gallery">گالری محصولات</a>
-          <a href="#workspaces">حوزه‌های کاری</a>
+
+        <div className="hbi-nav-label">فضای کاری</div>
+        <nav className="hbi-side-nav" aria-label="منوی اصلی">
+          {navigation.map((item) => (
+            <Link key={item.label} className={item.current ? "hbi-nav-item is-current" : "hbi-nav-item"} to={item.to}>
+              <span className="hbi-nav-icon" aria-hidden="true">{item.icon}</span>
+              <span className="hbi-nav-copy"><strong>{item.label}</strong><small>{item.detail}</small></span>
+              {item.current ? <span className="hbi-nav-indicator" aria-hidden="true" /> : null}
+            </Link>
+          ))}
         </nav>
-        <div className="hbi-operator">فضای کاری مدیر <span className="hbi-avatar" aria-hidden="true">و</span><button type="button" className="hbi-logout" onClick={logout}>خروج</button></div>
-      </header>
 
-      <div className="hbi-page-wrap">
-        <section className="hbi-welcome" id="dashboard">
-          <div className="hbi-welcome-copy">
-            <span className="hbi-eyebrow"><span /> مرکز مدیریت HBI</span>
-            <h1>کسب‌وکار شما، <em>یک‌جا و روشن.</em></h1>
-            <p>از گالری محصولات تا مشاوره، فروش و حسابداری؛ مسیرهای اصلی کار روزانه در یک صفحه.</p>
-            <div className="hbi-welcome-actions">
-              <a className="hbi-primary-btn" href="#gallery">ورود به گالری <span>←</span></a>
-              <Link className="hbi-secondary-btn" to="/workspace">شروع کار روزانه</Link>
+        <div className="hbi-sidebar-bottom">
+          <div className="hbi-operator-card">
+            <span className="hbi-avatar" aria-hidden="true">م</span>
+            <span><strong>مدیر سیستم</strong><small>دسترسی عملیاتی</small></span>
+          </div>
+          <button type="button" className="hbi-logout" onClick={logout}><span aria-hidden="true">↪</span> خروج از حساب</button>
+        </div>
+      </aside>
+
+      <div className="hbi-main">
+        <header className="hbi-topbar">
+          <div className="hbi-breadcrumb"><span>فضای کاری</span><span className="hbi-breadcrumb-separator">/</span><strong>خانه</strong></div>
+          <div className="hbi-topbar-note"><span className="hbi-status-dot" /> پنل مدیریت HBI</div>
+        </header>
+
+        <div className="hbi-page-wrap">
+          <section className="hbi-welcome" id="dashboard">
+            <div className="hbi-welcome-copy">
+              <span className="hbi-eyebrow">مرکز مدیریت HBI</span>
+              <h1>کار امروز را از اینجا شروع کنید.</h1>
+              <p>دسترسی روشن به کارهای روزانه؛ هر بخش در جای خودش، بدون شلوغی اضافه.</p>
             </div>
-          </div>
-          <div className="hbi-orbit-art" aria-hidden="true">
-            <div className="hbi-orbit orbit-one" /><div className="hbi-orbit orbit-two" />
-            <div className="hbi-orbit-core"><span>HBI</span><small>CARE · BEAUTY · INTELLIGENCE</small></div>
-            <span className="hbi-orbit-chip chip-one">محصول</span>
-            <span className="hbi-orbit-chip chip-two">دانش</span>
-            <span className="hbi-orbit-chip chip-three">تصمیم</span>
-          </div>
-        </section>
+            <div className="hbi-welcome-mark" aria-hidden="true">
+              <span className="hbi-welcome-mark-core">H</span>
+              <span className="hbi-welcome-mark-orbit orbit-one" />
+              <span className="hbi-welcome-mark-orbit orbit-two" />
+            </div>
+          </section>
 
-        <section className="hbi-section" id="gallery">
-          <div className="hbi-section-heading">
-            <div><span className="hbi-kicker">PRODUCT GALLERY</span><h2>گالری محصولات</h2><p>شش حوزهٔ مستقل برای مرتب‌کردن سبد محصولات HBI</p></div>
-            <Link className="hbi-text-link" to="/catalog">فهرست محصولات ثبت‌شده <span>←</span></Link>
-          </div>
-          <div className="hbi-gallery-grid">
-            {galleryLines.map((line) => (
-              <Link className={`hbi-gallery-card tone-${line.tone}`} to="/catalog" key={line.number}>
-                <span className="hbi-card-number">{line.number}</span>
-                <span className="hbi-gallery-icon">{line.icon}</span>
-                <span className="hbi-gallery-title">{line.title}</span>
-                <span className="hbi-gallery-subtitle">{line.subtitle}</span>
-                <span className="hbi-card-arrow" aria-hidden="true">↙</span>
-              </Link>
-            ))}
-          </div>
-          <p className="hbi-honesty-note"><span>i</span> ورود هر حوزه به کاتالوگ فعلی انجام می‌شود؛ فیلتر اختصاصی هر حوزه تا زمان پیاده‌سازی، فعال فرض نشده است.</p>
-        </section>
+          <section className="hbi-section" aria-labelledby="quick-actions-title">
+            <div className="hbi-section-heading">
+              <div><span className="hbi-kicker">دسترسی سریع</span><h2 id="quick-actions-title">از کجا شروع می‌کنید؟</h2><p>عملیات پرتکرار را مستقیم باز کنید.</p></div>
+            </div>
+            <div className="hbi-action-grid">
+              {quickActions.map((action, index) => (
+                <Link className="hbi-action-card" to={action.to} key={action.title}>
+                  <div className="hbi-action-card-top">
+                    <span className="hbi-action-icon" aria-hidden="true">{action.icon}</span>
+                    <span className="hbi-action-number">0{index + 1}</span>
+                  </div>
+                  <span className="hbi-action-tag">{action.tag}</span>
+                  <strong className="hbi-action-title">{action.title}</strong>
+                  <span className="hbi-action-description">{action.description}</span>
+                  <span className="hbi-action-link">ورود به بخش <span aria-hidden="true">←</span></span>
+                </Link>
+              ))}
+            </div>
+          </section>
 
-        <section className="hbi-section hbi-work-section" id="workspaces">
-          <div className="hbi-section-heading">
-            <div><span className="hbi-kicker">DAILY WORKSPACE</span><h2>مسیرهای اصلی کار</h2><p>قابلیت‌های موجود از اینجا در دسترس‌اند؛ چیزی صرفاً برای پرکردن صفحه جعل نشده است.</p></div>
-            <span className="hbi-live-label">مسیرهای کاری</span>
-          </div>
-          <div className="hbi-work-grid">
-            {workAreas.map((area) => (
-              <Link className="hbi-work-card" to={area.to} key={area.title}>
-                <span className={`hbi-work-icon tone-${area.tone}`}>{area.icon}</span>
-                <span className="hbi-work-copy"><strong>{area.title}</strong><small>{area.detail}</small></span>
-                <span className="hbi-work-arrow">←</span>
-              </Link>
-            ))}
-          </div>
-        </section>
+          <section className="hbi-section hbi-flow-section" aria-labelledby="flow-title">
+            <div className="hbi-section-heading">
+              <div><span className="hbi-kicker">نقشهٔ کار</span><h2 id="flow-title">جریان اصلی فعالیت در HBI</h2><p>مسیرها از هم جدا هستند و فقط در نقاط لازم به هم متصل می‌شوند.</p></div>
+            </div>
+            <div className="hbi-flow-strip">
+              <div className="hbi-flow-step"><span>۱</span><strong>شناخت نیاز</strong><small>مشتری و مشاوره، در صورت نیاز</small></div>
+              <span className="hbi-flow-arrow" aria-hidden="true">←</span>
+              <div className="hbi-flow-step"><span>۲</span><strong>بررسی محصول</strong><small>بر پایهٔ شواهد و موجودی</small></div>
+              <span className="hbi-flow-arrow" aria-hidden="true">←</span>
+              <div className="hbi-flow-step"><span>۳</span><strong>تصمیم و اقدام</strong><small>پیشنهاد یا فروش مستقل</small></div>
+            </div>
+            <p className="hbi-flow-note">فروش مستقیم همیشه از منوی «فروش» در دسترس است؛ مشاوره پیش‌نیاز ثبت فروش نیست.</p>
+          </section>
 
-        <footer className="hbi-home-footer">
-          <span><strong>HBI</strong> · مرکز تصمیم‌یار سلامت و زیبایی</span>
-          <span>واقعیت موجود، مبنای تصمیم است.</span>
-        </footer>
+          <footer className="hbi-home-footer">
+            <span><strong>HBI</strong> · فضای کاری مدیر</span>
+            <span>هر کار در جای خودش.</span>
+          </footer>
+        </div>
       </div>
     </main>
   );
