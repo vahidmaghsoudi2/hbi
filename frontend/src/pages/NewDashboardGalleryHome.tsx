@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/dashboard-gallery.css";
+import "../styles/homepage-navigation.css";
 
 const navigation = [
   { label: "خانه و داشبورد", detail: "نمای کلی عملیات", icon: "⌂", to: "/", current: true, children: [] },
@@ -74,9 +75,9 @@ export default function NewDashboardGalleryHome() {
                 {item.current ? <span className="hbi-nav-indicator" aria-hidden="true" /> : null}
               </Link>
               {item.children.length > 0 ? (
-                <div className="hbi-subnav" style={{ display: "grid", gap: 2, margin: "2px 10px 8px 0", paddingRight: 13, borderRight: "1px solid #e6ebe7" }}>
+                <div className="hbi-subnav" aria-label={`زیرمنوهای ${item.label}`}>
                   {item.children.map((child) => (
-                    <Link key={child.label} to={child.to} style={{ display: "block", padding: "7px 10px", borderRadius: 7, color: "#65716b", textDecoration: "none", fontSize: 10, lineHeight: 1.8 }}>
+                    <Link key={child.label} className="hbi-subnav-link" to={child.to}>
                       {child.label}
                     </Link>
                   ))}
