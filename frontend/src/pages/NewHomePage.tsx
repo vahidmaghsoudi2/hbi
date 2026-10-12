@@ -211,7 +211,7 @@ export default function NewHomePage() {
       setRecs([]);
       setRecDone(false);
       setShowAllRecommendations(false);
-        setSaleProductId("");
+      setSaleProductId("");
       setLastSale(null);
       const history = await listSalesByCustomer(customer.customer_id, pair.access_token);
       setPurchaseHistory(Array.isArray(history) ? history : []);
@@ -512,7 +512,7 @@ export default function NewHomePage() {
         adminToken
       );
       setLastSale(sale);
-        setSaleProductId("");
+      setSaleProductId("");
       setStatusMsg(`فروش ثبت شد: ${sale.sale_id ?? "OK"}`);
       await refreshSalesTotal();
       try {
@@ -1013,7 +1013,7 @@ export default function NewHomePage() {
                   </label>
                   <select id="sale-product" className="pro-input" value={saleProductId} onChange={(e) => {
                       setSaleProductId(e.target.value);
-                                      }}>
+                    }}>
                     <option value="">— انتخاب از کاتالوگ —</option>
                     {sellableProducts.map((p) => (
                       <option key={p.product_id} value={p.product_id}>
@@ -1026,7 +1026,7 @@ export default function NewHomePage() {
                   </label>
                   <input id="sale-manual" className="pro-input" value={saleProductId} onChange={(e) => {
                       setSaleProductId(e.target.value);
-                                      }} />
+                    }} />
                   <div className="pro-grid-2">
                     <div>
                       <label className="pro-label" htmlFor="sale-qty">
