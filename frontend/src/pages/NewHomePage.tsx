@@ -75,6 +75,7 @@ export default function NewHomePage() {
   const [products, setProducts] = useState<ProductDTO[]>([]);
   const [sellableProducts, setSellableProducts] = useState<ProductDTO[]>([]);
   const [sellableProductsError, setSellableProductsError] = useState<string | null>(null);
+  const [consultationInventoryError, setConsultationInventoryError] = useState<string | null>(null);
   const [catalogError, setCatalogError] = useState<string | null>(null);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [recs, setRecs] = useState<RecommendationDTO[]>([]);
@@ -307,6 +308,35 @@ export default function NewHomePage() {
     return sessionStorage.getItem("hbi_admin_access_token");
   }
 
+  async function filterConsultationEvaluations(evaluations: RecommendationDTO[]): Promise<RecommendationDTO[]> {
+    setConsultationInventoryError(null);
+    const adminToken = await ensureAdminProductReadSession();
+    if (!adminToken) {
+      setConsultationInventoryError("نشست مدیر برای بررسی موجودی مشاوره در دسترس نیست؛ هیچ محصولی نمایش داده نشد.");
+      return [];
+    }
+    try {
+      const manageable = await listManageableProducts(adminToken);
+      const activeProducts = (Array.isArray(manageable) ? manageable : []).filter(
+        (product) => String(product.status ?? "").trim().toUpperCase() === "ACTIVE"
+      );
+      const availableIds = new Set<string>();
+      await Promise.all(activeProducts.map(async (product) => {
+        try {
+          const inventory = await getInventoryByProduct(product.product_id, adminToken);
+          const availableQuantity = (inventory.quantity_available ?? 0) - (inventory.quantity_reserved ?? 0);
+          if (availableQuantity > 0) availableIds.add(product.product_id);
+        } catch {
+          // Fail closed: missing or unreadable inventory never enters consultation explanations.
+        }
+      }));
+      return evaluations.filter((evaluation) => Boolean(evaluation.product_id && availableIds.has(evaluation.product_id)));
+    } catch (err) {
+      setConsultationInventoryError("موجودی محصولات برای مشاوره قابل تأیید نیست؛ هیچ محصولی نمایش داده نشد.");
+      return [];
+    }
+  }
+
   async function ensureReviewSession(): Promise<string | null> {
     const cached = sessionStorage.getItem("hbi_po_access_token");
     if (cached) return cached;
@@ -356,8 +386,9 @@ export default function NewHomePage() {
         const operatorToken = await ensureProductSession();
         if (!operatorToken) throw new Error("نشست اپراتور در دسترس نیست.");
         const list = await listInternalEvaluationsByCase(storedCaseId, operatorToken);
+        const inventoryChecked = await filterConsultationEvaluations(Array.isArray(list) ? list : []);
         if (cancelled) return;
-        setRecs(Array.isArray(list) ? list : []);
+        setRecs(inventoryChecked);
         setRecDone(true);
       } catch {
         if (cancelled) return;
@@ -466,13 +497,14 @@ export default function NewHomePage() {
       const evaluations = operatorToken
         ? await listInternalEvaluationsByCase(newCaseId, operatorToken)
         : list;
-      const eligibleCount = (Array.isArray(evaluations) ? evaluations : []).filter(
+      const inventoryChecked = await filterConsultationEvaluations(Array.isArray(evaluations) ? evaluations : []);
+      const eligibleCount = inventoryChecked.filter(
         (r) => (r.eligibility_status ?? r.eligibility ?? "").trim().toUpperCase() === "ELIGIBLE"
       ).length;
-      setRecs(Array.isArray(evaluations) ? evaluations : []);
+      setRecs(inventoryChecked);
       setShowAllRecommendations(false);
       setRecDone(true);
-      setStatusMsg(eligibleCount ? `${eligibleCount} پیشنهاد واجد شرایط آماده است.` : "پیشنهاد واجد شرایطی با شواهد کافی یافت نشد.");
+      setStatusMsg(consultationInventoryError ? consultationInventoryError : eligibleCount ? `${eligibleCount} پیشنهاد واجد شرایط با موجودی مثبت آماده است.` : "محصول واجد شرایط با موجودی مثبت پیدا نشد.");
       setActive("results");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -672,6 +704,8 @@ export default function NewHomePage() {
             {error}
           </div>
         ) : null}
+
+        {consultationInventoryError && active === "results" ? <div className="pro-alert" role="alert">{consultationInventoryError}</div> : null}
 
         {active === "previous" && (
           <section className="pro-panel">
