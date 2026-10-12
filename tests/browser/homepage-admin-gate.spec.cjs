@@ -93,3 +93,40 @@ test("existing customer consultation retains the legacy pilot-token session flow
   await expect.poll(() => historyAuthorization).toBe("Bearer browser-test-customer-token");
   expect(pilotTokenRequests).toBe(1);
 });
+
+test("sale picker uses Admin-managed catalog, excludes drafts, and has no manual product-id bypass", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "browser-test-admin-token");
+  });
+
+  let publicProductListRequests = 0;
+  page.on("request", request => {
+    if (/\\/api\\/v1\\/products\\/$/.test(new URL(request.url()).pathname)) publicProductListRequests += 1;
+  });
+
+  await page.route("**/api/v1/products/manage", route => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify([
+      { product_id: "P-ACTIVE", product_name: "Active sunscreen", brand: "Brand A", status: "ACTIVE", identity_status: "VERIFIED", qa_verdict: "VALID" },
+      { product_id: "P-DRAFT", product_name: "Draft sunscreen", brand: "Brand B", status: "DRAFT", identity_status: "NEEDS_REVIEW", qa_verdict: "PENDING" }
+    ])
+  }));
+  await page.route("**/api/v1/customers/search?**", route => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify([{ customer_id: "CUST-PICKER-1", name: "Picker Buyer", mobile: "09123334444" }])
+  }));
+
+  await page.goto("/");
+  await page.locator('a.hbi-nav-item[href="/workspace?panel=sales"]').click();
+  await page.locator("#sale-customer-search").fill("09123334444");
+  await page.getByRole("button", { name: "جست‌وجوی مشتری" }).click();
+  await page.getByRole("button", { name: /انتخاب برای فروش: Picker Buyer/ }).click();
+
+  const picker = page.locator("#sale-product");
+  await expect(picker.locator("option", { hasText: "Active sunscreen" })).toHaveCount(1);
+  await expect(picker.locator("option", { hasText: "Draft sunscreen" })).toHaveCount(0);
+  await expect(page.locator("#sale-manual")).toHaveCount(0);
+  expect(publicProductListRequests).toBe(0);
+});
