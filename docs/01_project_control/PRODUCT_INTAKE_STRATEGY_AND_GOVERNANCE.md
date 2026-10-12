@@ -1,3 +1,13 @@
+> ## 🔴 STRATEGIC GOVERNANCE RETAINED — OPERATIONAL STATUS SECTIONS REQUIRE RECONCILIATION
+>
+> This document contains still-valid strategic principles (one Product Master, protected identity relationships, human approval authority, traceability, and no silent business-rule changes). However, its “CURRENT REPOSITORY REALITY,” “CURRENT IMPLEMENTATION GAPS,” “CURRENT DECISION STATE,” “CONTRACT — NEXT ARTIFACT,” “CURRENT PHASE,” and related continuation instructions were written before later implementation and the approved `docs/architecture/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md`.
+>
+> **Do not use this document’s old “OPEN” decisions, Contract v1 next-step instruction, or phase/status labels as current facts.** For skin Product Intake, use the approved v1.1 contract and the latest SHA-aware reconciliation in Issue #278; reconcile each historical gap against current master before calling it open or resolved.
+>
+> Preserve this governance document for its strategic rationale. This warning does not supersede the approved contract, does not mean every old gap is resolved, and does not authorize implementation or contract changes.
+>
+> ---
+>
 ﻿# PRODUCT INTAKE — STRATEGY & GOVERNANCE
 
 **Document Type:** Master Strategy / Policy / Governance  
