@@ -7,7 +7,7 @@
 
 ## 1. Purpose and product priority
 
-HBI is primarily a high-quality consultation and decision-support system, not merely a product catalogue or a product recommender. Approximately 90% of the intended value is in rich, accurate consultation; approximately 80% of current effort is focused on skin-product features, ingredients, uses, and evidence. These are strategic planning estimates, not measured production metrics.
+HBI is primarily a high-quality consultation and decision-support system, not merely a product catalogue or a product recommender. Rich, accurate consultation and evidence-grounded decision support are the priority; product recommendation is downstream and must be justified by the consultation findings. No percentage estimate is used as a product requirement or performance metric.
 
 The target workflow starts with a customer's skin concern, develops and tests plausible explanations, uses known customer context to reduce uncertainty, asks targeted follow-up questions where valuable, supports human review, and only then evaluates whether any product recommendation is justified.
 
