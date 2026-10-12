@@ -46,11 +46,6 @@ def _create_product(client, headers, product_id, **extra):
     return r.json()
 
 
-# ---------------------------------------------------------------------------
-# A0) Physical Stock-In API path
-# ---------------------------------------------------------------------------
-
-
 def test_product_intake_requires_explicit_stock_in_api(client, db_session):
     editor = _auth(db_session, "intake_stock_editor", ROLE_EDITOR, ROLE_PO)
     admin = _auth(db_session, "intake_stock_admin", ROLE_ADMIN)
@@ -87,11 +82,6 @@ def test_product_intake_requires_explicit_stock_in_api(client, db_session):
     assert body["movement"]["quantity_delta"] == 3
     assert body["movement"]["quantity_after"] == 3
     assert body["movement"]["movement_type"] == "STOCK_IN"
-
-
-# ---------------------------------------------------------------------------
-# A) Duplicate Check API
-# ---------------------------------------------------------------------------
 
 
 def test_duplicate_exact_product_id_returns_existing(client, db_session):
@@ -208,14 +198,8 @@ def test_duplicate_different_variant_or_size_is_distinct_not_possible_match(
     )
     assert r.status_code == 200, r.text
     body = r.json()
-    # Size/variant difference => not a duplicate candidate (algorithm unchanged)
     assert body["result"] == "NEW"
     assert body.get("candidates") in (None, [])
-
-
-# ---------------------------------------------------------------------------
-# B) Single vertical slice CREATE → … → ACTIVE
-# ---------------------------------------------------------------------------
 
 
 def test_intake_api_vertical_slice_reaches_active(client, db_session):
@@ -225,7 +209,6 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
     po = _auth(db_session, "slice_po", ROLE_PO, ROLE_REVIEWER_QA, ROLE_EDITOR)
     pid = "SLICE-E2E-001"
 
-    # CREATE
     created = _create_product(
         client,
         po,
@@ -239,13 +222,11 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
     )
     assert created["status"] == "DRAFT"
 
-    # Product registration creates only an empty inventory ledger row, not stock.
     inventory = db_session.query(Inventory).filter(Inventory.product_id == pid).one()
     assert inventory.quantity_available == 0
     assert inventory.stock_status == "OUT_OF_STOCK"
     assert db_session.query(StockMovement).filter(StockMovement.product_id == pid).count() == 0
 
-    # A physical receipt is a separate operation and must create a ledger movement.
     stock_result = StockInService(db_session).stock_in(
         product_id=pid,
         quantity=3,
@@ -267,7 +248,6 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
     assert movement.quantity_delta == 3
     assert movement.quantity_after == 3
 
-    # DUPLICATE CHECK (same product_id → EXISTING / EXACT_PRODUCT_ID)
     dup = client.post(
         "/api/v1/products/duplicate-check/",
         headers=po,
@@ -286,7 +266,6 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
         for candidate in dup_body.get("candidates", [])
     )
 
-    # RESEARCH DRAFT (PENDING evidence)
     draft = client.post(
         f"/api/v1/products/{pid}/research-draft",
         headers=po,
@@ -307,7 +286,6 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
     assert isinstance(draft_rows, list) and len(draft_rows) >= 1
     draft_eid = draft_rows[0]["evidence_id"]
 
-    # EVIDENCE CREATE (additional claim-level evidence for D3/readiness path)
     ev = client.post(
         "/api/v1/evidence/",
         headers=po,
@@ -316,7 +294,7 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
             "claim": "hydration benefit",
             "source_type": "PEER_REVIEWED",
             "source_reference": "test://slice-evidence",
-            "claim_type": "BENEFIT",
+            "claim_type": "EVIDENCE",
             "field": "claimed_benefits",
             "evidence_strength": "HIGH",
         },
@@ -324,7 +302,6 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
     assert ev.status_code == 201, ev.text
     evidence_id = ev.json()["evidence_id"]
 
-    # WP-02: verified contraindications required for SKIN before APPROVE/ACTIVATE.
     safe = client.post(
         "/api/v1/evidence/",
         headers=po,
@@ -340,8 +317,6 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
     assert safe.status_code == 201, safe.text
     safe_id = safe.json()["evidence_id"]
 
-    # EVIDENCE VERIFY — clear PENDING from research draft + approve new evidence
-    # so EvidenceReadiness can pass (no PENDING/REJECTED left unresolved).
     for eid, verdict in ((draft_eid, "VERIFIED"), (evidence_id, "VERIFIED"), (safe_id, "VERIFIED")):
         v = client.post(
             f"/api/v1/evidence/{eid}/verify",
@@ -351,14 +326,12 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
         assert v.status_code == 200, v.text
         assert v.json()["qa_status"] in ("VERIFIED", "APPROVED")
 
-    # SUBMIT → QA_REVIEW
     assert client.post(f"/api/v1/products/{pid}/submit", headers=po).status_code == 200
     assert (
         client.post(f"/api/v1/products/{pid}/enter-qa-review", headers=po).status_code
         == 200
     )
 
-    # QA VALID (D3 + readiness enforced by transition service)
     qa = client.post(
         f"/api/v1/products/{pid}/qa",
         headers=po,
@@ -367,7 +340,6 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
     assert qa.status_code == 200, qa.text
     assert qa.json()["qa_verdict"] == "VALID"
 
-    # IDENTITY VERIFIED
     ident = client.post(
         f"/api/v1/products/{pid}/verify-identity",
         headers=po,
@@ -380,7 +352,6 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
     assert ident.status_code == 200, ident.text
     assert ident.json()["identity_status"] == "VERIFIED"
 
-    # APPROVE → ACTIVATE
     ap = client.post(f"/api/v1/products/{pid}/approve", headers=po)
     assert ap.status_code == 200, ap.text
     assert ap.json()["status"] == "APPROVED"
@@ -389,7 +360,6 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
     assert act.status_code == 200, act.text
     assert act.json()["status"] == "ACTIVE"
 
-    # Final explicit assert against persisted Product.status (DTO GET omits status)
     assert act.json()["status"] == "ACTIVE"
     db_session.expire_all()
     product = db_session.query(Product).filter(Product.product_id == pid).one()
@@ -436,7 +406,6 @@ def test_editor_can_create_research_draft_but_verify_requires_qa(client, db_sess
     assert draft.json()[1]["source_type"] == "CLINICAL_TRIAL"
     assert draft.json()[1]["qa_status"] == "PENDING"
 
-    # Editor must not mark evidence VERIFIED (governance baseline).
     editor_blocked = client.post(
         f"/api/v1/evidence/{evidence_id}/verify",
         headers=editor,
@@ -444,7 +413,6 @@ def test_editor_can_create_research_draft_but_verify_requires_qa(client, db_sess
     )
     assert editor_blocked.status_code == 403, editor_blocked.text
 
-    # QA without reason is rejected before verify.
     missing_reason = client.post(
         f"/api/v1/evidence/{evidence_id}/verify",
         headers=qa,
