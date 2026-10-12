@@ -21,7 +21,22 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
         super().__init__(EvidenceRepository(db), db)
         self.audit = EvidenceMutationLogService(db)
 
+    ALLOWED_CLAIM_TYPES = frozenset({
+        "FACT",
+        "MANUFACTURER_CLAIM",
+        "EVIDENCE",
+        "INFERENCE",
+        "UNKNOWN",
+        "CONFLICT",
+    })
+
     def _validate_claim_boundary(self, claim_type: str, source_type: str) -> None:
+        """Reject unsupported claim types for HTTP and non-HTTP callers."""
+        if claim_type not in self.ALLOWED_CLAIM_TYPES:
+            raise ValidationError(
+                f"Unsupported claim_type {claim_type!r}; allowed: "
+                + ", ".join(sorted(self.ALLOWED_CLAIM_TYPES))
+            )
         if claim_type == "FACT":
             allowed_sources = {"PEER_REVIEWED", "CLINICAL_TRIAL", "REGULATORY"}
             if source_type not in allowed_sources:
@@ -66,7 +81,8 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
 
         data = dict(evidence_data)
         product_id = data["product_id"]
-        claim_type = (data.get("claim_type") or "UNKNOWN").upper()
+        claim_type = (data.get("claim_type") or "UNKNOWN")
+        claim_type = str(claim_type).strip().upper() or "UNKNOWN"
         source_type = data.get("source_type") or "UNKNOWN"
         self._validate_claim_boundary(claim_type, source_type)
 
