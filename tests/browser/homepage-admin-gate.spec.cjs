@@ -101,7 +101,7 @@ test("sale picker uses Admin-managed catalog, excludes drafts, and has no manual
 
   let publicProductListRequests = 0;
   page.on("request", request => {
-    if (/\\/api\\/v1\\/products\\/$/.test(new URL(request.url()).pathname)) publicProductListRequests += 1;
+    if (new URL(request.url()).pathname === "/api/v1/products/") publicProductListRequests += 1;
   });
 
   await page.route("**/api/v1/products/manage", route => route.fulfill({
