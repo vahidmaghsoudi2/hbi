@@ -1,3 +1,11 @@
+> ## 🔴 HISTORICAL PHASE-2 HANDOVER — NOT CURRENT END-TO-END ACCEPTANCE
+>
+> This handover is dated 2026-08-18 and certifies an earlier REST API milestone against commit `72841f3`. Its “Phase 1/Phase 2 COMPLETE” and gate approvals apply only to that historical scope; they do not certify the later Skin Product Intake → Stock-In → Activation → Recommendation → real pilot path.
+>
+> Keep this handover for traceability. Current product-pilot/G8 status requires current master plus observed runtime evidence, tracked in Issues #278 and #283. Do not generalize the old phase completion to present-day operational acceptance.
+>
+> ---
+
 ﻿═══════════════════════════════════════════════════════
 HBI PROJECT — PHASE 2 FINAL HANDOVER
 ═══════════════════════════════════════════════════════
