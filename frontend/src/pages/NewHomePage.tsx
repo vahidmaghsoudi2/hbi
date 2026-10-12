@@ -69,7 +69,6 @@ export default function NewHomePage() {
   const [recDone, setRecDone] = useState(false);
   const [showAllRecommendations, setShowAllRecommendations] = useState(false);
   const [saleProductId, setSaleProductId] = useState("");
-  const [selectedRecommendationId, setSelectedRecommendationId] = useState<string | null>(null);
   const [saleQty, setSaleQty] = useState(1);
   const [salePrice, setSalePrice] = useState<number | null>(null);
   const [saleStock, setSaleStock] = useState<number | null>(null);
@@ -183,7 +182,6 @@ export default function NewHomePage() {
     setRecs([]);
     setRecDone(false);
     setShowAllRecommendations(false);
-    setSelectedRecommendationId(null);
     setSaleProductId("");
     setLastSale(null);
     setPurchaseHistory([]);
@@ -213,8 +211,7 @@ export default function NewHomePage() {
       setRecs([]);
       setRecDone(false);
       setShowAllRecommendations(false);
-      setSelectedRecommendationId(null);
-      setSaleProductId("");
+        setSaleProductId("");
       setLastSale(null);
       const history = await listSalesByCustomer(customer.customer_id, pair.access_token);
       setPurchaseHistory(Array.isArray(history) ? history : []);
@@ -377,7 +374,6 @@ export default function NewHomePage() {
     setNote("");
     setRecs([]);
     setRecDone(false);
-    setSelectedRecommendationId(null);
     setSaleProductId("");
     setLastSale(null);
     setPurchaseHistory([]);
@@ -510,14 +506,13 @@ export default function NewHomePage() {
       const sale = await createSale(
         {
           customer_id: customerId,
-          items: [{ product_id: saleProductId.trim(), quantity: saleQty, ...(selectedRecommendationId ? { recommendation_id: selectedRecommendationId } : {}) }],
+          items: [{ product_id: saleProductId.trim(), quantity: saleQty }],
           fx_rate_usd_to_irr: currentFxRate,
         },
         adminToken
       );
       setLastSale(sale);
-      setSelectedRecommendationId(null);
-      setSaleProductId("");
+        setSaleProductId("");
       setStatusMsg(`فروش ثبت شد: ${sale.sale_id ?? "OK"}`);
       await refreshSalesTotal();
       try {
@@ -1018,8 +1013,7 @@ export default function NewHomePage() {
                   </label>
                   <select id="sale-product" className="pro-input" value={saleProductId} onChange={(e) => {
                       setSaleProductId(e.target.value);
-                      setSelectedRecommendationId(null);
-                    }}>
+                                      }}>
                     <option value="">— انتخاب از کاتالوگ —</option>
                     {sellableProducts.map((p) => (
                       <option key={p.product_id} value={p.product_id}>
@@ -1032,8 +1026,7 @@ export default function NewHomePage() {
                   </label>
                   <input id="sale-manual" className="pro-input" value={saleProductId} onChange={(e) => {
                       setSaleProductId(e.target.value);
-                      setSelectedRecommendationId(null);
-                    }} />
+                                      }} />
                   <div className="pro-grid-2">
                     <div>
                       <label className="pro-label" htmlFor="sale-qty">
