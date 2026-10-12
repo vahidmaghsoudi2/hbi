@@ -147,6 +147,15 @@ This is the target conceptual flow. It is not a claim that every stage is implem
 
 **Goal:** Ensure the product record is trustworthy and operationally usable before it can be recommended.
 
+
+**Medical scope clarification — skin assessment and professional escalation (planning rule; not a new clinical protocol)**
+
+HBI must not avoid medically relevant terminology or evidence-based analysis merely because the consultation concerns skin. Within the gallery's approved scope, the workflow may assess routine skin-care concerns, review relevant reported or observed skin features, and evaluate product ingredients, intended use, evidence of finished-product efficacy, contraindications, precautions, adverse effects, and customer-specific suitability. Each material conclusion must retain its evidence/provenance, uncertainty, and review status.
+
+This is decision support for skin care, not an autonomous diagnosis or a substitute for medical assessment. A staff member's medical credential does not, by itself, establish specialist dermatology qualification or authorize every clinical decision. HBI must support human review and a documented referral/defer outcome when symptoms suggest a possible skin disease, warning conditions are present, uncertainty exceeds the approved scope, or diagnosis/treatment by a qualified clinician is needed. It must not force a product recommendation in those cases.
+
+Do not invent clinical warning criteria, diagnostic rules, or referral thresholds during implementation. Any operational clinical safety/escalation policy must be evidence-based, explicitly scoped, and reviewed by appropriately qualified stakeholders before it is treated as an executable rule. This clarification records the product/business boundary; it does not authorize a new diagnosis engine, treatment workflow, schema, or clinical protocol.
+
 Apply the PO-approved contract `SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md`:
 
 - Draft minimum identity: `product_id`, `product_name`, `brand`; requirements increase by lifecycle stage.
