@@ -75,7 +75,7 @@ def test_temporary_numbuzin_candidate_intake_is_draft_and_disposable(client, db_
                     "claim": "The official brand webpage displays the product name and nominal size as No.9 NAD+ BIO Lifting-sil Essence, 50 mL.",
                     "source_type": "MANUFACTURER",
                     "source_reference": "https://us.numbuzin.com/products/no-9-nad-bio-lifting-sil-essence",
-                    "claim_type": "FACT",
+                    "claim_type": "MANUFACTURER_CLAIM",
                     "field": "product_identity_webpage",
                     "market_region": "US_WEBPAGE",
                     "notes": "Webpage display only; does not verify a physical unit or its market variant.",
