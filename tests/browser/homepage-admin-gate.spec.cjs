@@ -50,7 +50,7 @@ test("sales customer selection stays independent from consultation", async ({ pa
 
   let pilotTokenRequests = 0;
   page.on("request", request => {
-    if (/\\/auth\\/(pilot-token|pilot-operator-token)$/.test(new URL(request.url()).pathname)) pilotTokenRequests += 1;
+    if (/\/auth\/(pilot-token|pilot-operator-token)$/.test(new URL(request.url()).pathname)) pilotTokenRequests += 1;
   });
 
   await page.route("**/api/v1/products/manage", route => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
