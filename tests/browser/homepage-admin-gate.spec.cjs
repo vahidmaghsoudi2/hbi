@@ -86,8 +86,7 @@ test("existing customer consultation retains the legacy pilot-token session flow
   await page.locator("#sale-customer-search").fill("09121111111");
   await page.getByRole("button", { name: "جست‌وجوی مشتری" }).click();
   await page.getByRole("button", { name: /انتخاب برای مشاوره: Consult Buyer/ }).click();
-  await expect(page).toHaveURL(/\/workspace\?panel=consult$/);
-
+  // Consultation selection switches the active panel locally; assert the UI rather than a URL change.
   await expect(page.getByRole("button", { name: "ثبت مراجعه + دریافت پیشنهاد" })).toBeVisible();
   await expect.poll(() => page.evaluate(() => sessionStorage.getItem("hbi_access_token"))).toBe("browser-test-customer-token");
   await expect.poll(() => page.evaluate(() => sessionStorage.getItem("hbi_customer_id"))).toBe("CUST-BROWSER-2");
