@@ -30,7 +30,9 @@ test("existing buyer can be selected for sale without minting a customer or pilo
   }));
 
   await page.goto("/");
-  await page.getByRole("button", { name: "فروش", exact: true }).click();
+  await page.locator('a[href="/workspace?panel=sales"]').click();
+  await expect(page).toHaveURL(/\/workspace\?panel=sales$/);
+  await expect(page.getByRole("heading", { name: "ثبت فروش" })).toBeVisible();
   await page.locator("#sale-customer-search").fill("09120000000");
   await page.getByRole("button", { name: "جست‌وجوی مشتری" }).click();
   await page.getByRole("button", { name: /انتخاب برای فروش: Browser Buyer/ }).click();
@@ -79,7 +81,8 @@ test("existing customer consultation retains the legacy pilot-token session flow
   }));
 
   await page.goto("/");
-  await page.getByRole("button", { name: "فروش", exact: true }).click();
+  await page.locator('a[href="/workspace?panel=consult"]').click();
+  await expect(page).toHaveURL(/\/workspace\?panel=consult$/);
   await page.locator("#sale-customer-search").fill("09121111111");
   await page.getByRole("button", { name: "جست‌وجوی مشتری" }).click();
   await page.getByRole("button", { name: /انتخاب برای مشاوره: Consult Buyer/ }).click();
