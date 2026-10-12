@@ -27,6 +27,8 @@ export default function App() {
       <Route path="/recommendation" element={<AdminGate><RecommendationPage /></AdminGate>} />
       <Route path="/accounting" element={<AdminGate><AccountingHomePage /></AdminGate>} />
       <Route path="/purchase" element={<AdminGate><PurchasePage /></AdminGate>} />
+      {/* Unknown paths should never render an empty shell or bypass AdminGate. */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
