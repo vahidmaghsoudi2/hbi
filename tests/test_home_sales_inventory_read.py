@@ -4,6 +4,7 @@ from app.core.auth import create_access_token
 from app.models.customer import Customer
 from app.models.inventory import Inventory
 from app.models.product import Product
+from app.models.stock_movement import StockMovement
 from app.models.user_role import ROLE_ADMIN, ROLE_EDITOR, UserRole
 
 
@@ -91,6 +92,15 @@ def test_operator_editor_reads_inventory_then_admin_sale(client, db_session):
         headers=_auth("USR_ADMIN"),
     )
     assert sale.status_code == 201, sale.text
+    sale_id = sale.json()["sale_id"]
+
+    # Prove one API sale creates its durable stock-ledger row, not only a UI success.
+    movement = db_session.query(StockMovement).filter_by(reference_id=sale_id).one()
+    assert movement.movement_type == "SALE"
+    assert movement.reference_type == "SALE"
+    assert movement.quantity_delta == -1
+    assert movement.quantity_after == 2
+
     inv2 = client.get("/api/v1/inventory/product/P-SALE", headers=_auth("OP-EDITOR"))
     assert inv2.status_code == 200
     assert inv2.json()["quantity_available"] == 2
