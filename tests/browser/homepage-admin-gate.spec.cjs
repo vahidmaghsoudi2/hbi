@@ -109,8 +109,22 @@ test("sale picker uses Admin-managed catalog, excludes drafts, and has no manual
     contentType: "application/json",
     body: JSON.stringify([
       { product_id: "P-ACTIVE", product_name: "Active sunscreen", brand: "Brand A", status: "ACTIVE", identity_status: "VERIFIED", qa_verdict: "VALID" },
-      { product_id: "P-DRAFT", product_name: "Draft sunscreen", brand: "Brand B", status: "DRAFT", identity_status: "NEEDS_REVIEW", qa_verdict: "PENDING" }
+      { product_id: "P-DRAFT", product_name: "Draft sunscreen", brand: "Brand B", status: "DRAFT", identity_status: "NEEDS_REVIEW", qa_verdict: "PENDING" },
+      { product_id: "P-NOSTOCK", product_name: "Out of stock sunscreen", brand: "Brand C", status: "ACTIVE", identity_status: "VERIFIED", qa_verdict: "VALID" },
+      { product_id: "P-NOPRICE", product_name: "Unpriced sunscreen", brand: "Brand D", status: "ACTIVE", identity_status: "VERIFIED", qa_verdict: "VALID" }
     ])
+  }));
+  await page.route("**/api/v1/inventory/product/P-ACTIVE", route => route.fulfill({
+    status: 200, contentType: "application/json",
+    body: JSON.stringify({ product_id: "P-ACTIVE", quantity_available: 5, quantity_reserved: 1, stock_status: "active", sale_price_usd: 12 })
+  }));
+  await page.route("**/api/v1/inventory/product/P-NOSTOCK", route => route.fulfill({
+    status: 200, contentType: "application/json",
+    body: JSON.stringify({ product_id: "P-NOSTOCK", quantity_available: 0, quantity_reserved: 0, stock_status: "OUT_OF_STOCK", sale_price_usd: 12 })
+  }));
+  await page.route("**/api/v1/inventory/product/P-NOPRICE", route => route.fulfill({
+    status: 200, contentType: "application/json",
+    body: JSON.stringify({ product_id: "P-NOPRICE", quantity_available: 5, quantity_reserved: 0, stock_status: "active", sale_price_usd: null })
   }));
   await page.route("**/api/v1/customers/search?**", route => route.fulfill({
     status: 200,
@@ -127,6 +141,8 @@ test("sale picker uses Admin-managed catalog, excludes drafts, and has no manual
   const picker = page.locator("#sale-product");
   await expect(picker.locator("option", { hasText: "Active sunscreen" })).toHaveCount(1);
   await expect(picker.locator("option", { hasText: "Draft sunscreen" })).toHaveCount(0);
+  await expect(picker.locator("option", { hasText: "Out of stock sunscreen" })).toHaveCount(0);
+  await expect(picker.locator("option", { hasText: "Unpriced sunscreen" })).toHaveCount(0);
   await expect(page.locator("#sale-manual")).toHaveCount(0);
   expect(publicProductListRequests).toBe(0);
 });
