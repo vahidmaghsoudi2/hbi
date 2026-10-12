@@ -33,5 +33,5 @@ def test_at13_backend_full_result_set_is_still_stored():
 
 def test_at13_no_recommendation_selection_or_backend_filter_was_added():
     source = _source()
-    assert "selectRecommendationForSale(r)" in source
+    assert "selectRecommendationForSale(r)" not in source
     assert "generateRecommendations(" in source
