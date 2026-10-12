@@ -1062,9 +1062,6 @@ export default function NewHomePage() {
                       <button type="button" className="pro-btn-primary" onClick={() => selectCustomerForSale(customer)}>
                         انتخاب برای فروش: {customer.name} · {customer.mobile ?? "بدون موبایل"}
                       </button>
-                      <button type="button" className="pro-btn-secondary" onClick={() => { void selectPreviousCustomer(customer); }}>
-                        انتخاب برای مشاوره: {customer.name} · {customer.customer_id}
-                      </button>
                     </div>
                   ))}
                   <p className="pro-muted">برای مشتری جدید، ابتدا پروفایل مشتری را ثبت کنید؛ پروندهٔ مشاوره لازم نیست.</p>
