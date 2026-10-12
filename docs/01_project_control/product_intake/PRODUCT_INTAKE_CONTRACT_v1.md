@@ -1,3 +1,11 @@
+> ## 🔴 SCOPE / VERSION PRECEDENCE NOTE — DO NOT APPLY GENERIC V1 BLINDLY TO SKIN
+>
+> This document was accepted on 2026-09-07 against an older baseline. It is retained as a historical/general Product Intake contract record; **for Skin Product Intake, the later PO-approved `docs/architecture/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md` is the specific execution baseline** and Issue #278 is the current reconciliation index.
+>
+> Do not assume this generic v1 is globally deleted or invalid, and do not silently rewrite it. Where skin-specific execution rules differ, follow the approved skin-specific v1.1 contract. For other product domains, confirm applicable contract scope and authority before reusing a clause. This note does not authorize implementation outside separately authorized WPs.
+>
+> ---
+
 # HBI — PRODUCT INTAKE CONTRACT v1
 
 **Contract ID:** HBI-PI-CONTRACT-001  

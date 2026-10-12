@@ -1,3 +1,11 @@
+> ## 🔴 HISTORICAL PRE-IMPLEMENTATION BASELINE — NEXT-PATH TEXT IS NOT CURRENT EXECUTION ORDER
+>
+> This v0.1 strategic baseline was registered against old master `7e90681e587c228949eac57d2e1e8d52ae351e7a` and explicitly predates the approved Skin Product Intake Execution Contract v1.1 and later reconciliation in Issue #278. Its strategic safety/Need/Recommendation boundaries remain useful context, but its “Next path: Reality Mapping → Contracts A/B/C → Skin Problem Universe” must not be treated as the current execution queue.
+>
+> For current Skin Product Intake execution, use the approved v1.1 contract, Issue #278, and the proposal in PR #348. Do not reopen approved decisions or invent clinical criteria; implementation still requires a separately authorized work package.
+>
+> ---
+
 # ورود محصولات پوستی
 
 **English secondary title (repo path only):** Skin Product Intake  

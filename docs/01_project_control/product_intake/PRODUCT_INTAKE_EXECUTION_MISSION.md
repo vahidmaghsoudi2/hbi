@@ -1,3 +1,11 @@
+> ## 🔴 COMPLETED HISTORICAL MISSION — OLD NEXT-ACTION TEXT IS SUPERSEDED
+>
+> This document records a completed governance/reality reconciliation mission. Its closing instruction (“next authorized work is Contract definition”) predates the approved `SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md` and later Product Intake work. **Do not execute the old next-action instruction.**
+>
+> Keep the mission report for traceability. Current Product Intake status and follow-up decisions must be taken from the approved v1.1 contract, current master evidence, and consolidated Issue #278. Historical claims in this report must be revalidated before reuse; this banner does not imply that every old gap is resolved.
+>
+> ---
+
 ﻿# HBI — PRODUCT INTAKE EXECUTION MISSION
 
 **Mission ID:** PI-GOV-RECON-001  

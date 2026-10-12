@@ -1,3 +1,11 @@
+> ## 🔴 HISTORICAL STATUS SNAPSHOT — RECONCILIATION REQUIRED
+>
+> This ledger is dated 2026-09-09 and pinned to an old baseline (`90788e854e8205c1493f2dd41d876a1521f20fa7`). Its statements such as “Current Phase F0,” “WP-CORE-01 Next Authorized Step: Implementation Design,” and the old PR #39 checkpoint are **historical, not current authorization or current project status**.
+>
+> Preserve this ledger as an audit record. Before using any status or next-action row, reconcile it against current master (`cc7848e472b837746e99103ea94ff4bb28eb0c2b`), later accepted direction, and current Issues/PRs. Do not restart WP-CORE-01 from this document or infer authorization from its “ACTIVE” label. This warning does not claim that every historical finding is resolved.
+>
+> ---
+
 # HBI — Execution Ledger V1
 
 **Document ID:** `HBI-LEDGER-EXEC-001`  
