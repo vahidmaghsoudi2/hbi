@@ -1,3 +1,11 @@
+> ## 🔴 HISTORICAL PHASE PLAN — DO NOT RESTART HOME-PAGE DESIGN FROM THIS ROADMAP
+>
+> This roadmap was approved on 2026-08-27 and contains the old H0–H7 phase sequence, including Home consolidation and Product Intake vertical-slice steps. The Home Page is already active and has later implementation/acceptance work on current master. **The phase list and its “Phase H3” prerequisite are not a current task queue.**
+>
+> Retain the principles below (real user/action, no fake data, master as technical source) as strategic guidance. For current work, focus only on verified product-entry visibility and menu/route continuity, and validate against current routes, acceptance evidence, and current issues/PRs. Do not reopen Home Page design or infer current status from this historical phase plan.
+>
+> ---
+
 # HBI — Home & Operational Experience Roadmap
 
 **Status:** APPROVED BY PO  
