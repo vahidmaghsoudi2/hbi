@@ -21,10 +21,10 @@ export default function App() {
       <Route path="/" element={<AdminGate><NewDashboardGalleryHome /></AdminGate>} />
       <Route path="/workspace" element={<AdminGate><NewHomePage /></AdminGate>} />
       <Route path="/catalog" element={<AdminGate><CatalogPage /></AdminGate>} />
-      {/* Pilot and Recommendation use a separate non-production customer/pilot
-          session. API endpoints remain responsible for authorization. */}
-      <Route path="/pilot" element={<PilotPage />} />
-      <Route path="/recommendation" element={<RecommendationPage />} />
+      {/* Pilot/recommendation are operator-only internal workflows, not customer
+          entry points. Their API tokens do not grant access to the HBI UI. */}
+      <Route path="/pilot" element={<AdminGate><PilotPage /></AdminGate>} />
+      <Route path="/recommendation" element={<AdminGate><RecommendationPage /></AdminGate>} />
       <Route path="/accounting" element={<AdminGate><AccountingHomePage /></AdminGate>} />
       <Route path="/purchase" element={<AdminGate><PurchasePage /></AdminGate>} />
     </Routes>
