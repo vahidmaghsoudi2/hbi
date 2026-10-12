@@ -1,3 +1,11 @@
+> ## 🔴 HISTORICAL INITIAL ROADMAP — EXECUTION ORDER SUPERSEDED
+>
+> This document is dated 2026-08-27 and labels itself “ACTIVE - Initial Roadmap,” with “CURRENT FIRST ACTION: Reality Baseline.” That label and first-action line are historical, not the current execution queue. For skin Product Intake reconciliation, use Issue #278 and the current skin consultation/intelligence roadmap proposal in PR #348; later implementation evidence in PRs #322, #332, #334 and #345 must be interpreted only within their actual scopes. G8 / Issue #283 remains a separate verification gate.
+>
+> Retain the broader Customer → Need → Product Knowledge → Evidence → Recommendation vision as strategic context. Do not restart its old task sequence or treat this document as proof of current implementation. Verify each claim against current master and evidence before reuse.
+>
+> ---
+
 # HBI - Information Feeding & Customer Recommendation Roadmap
 
 **Project:** HBI - Maqsoudi Gallery
