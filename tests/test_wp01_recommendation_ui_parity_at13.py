@@ -28,8 +28,7 @@ def test_at13_show_more_exists_only_when_more_than_five_results():
 def test_at13_backend_full_result_set_is_still_stored():
     source = _source()
     assert "const list = await generateRecommendations(" in source
-    assert "setRecs(inventoryChecked);" in source
-    assert "const list = await generateRecommendations(" in source
+    assert "setRecs(inventoryChecked.evaluations);" in source
 
 
 def test_at13_no_recommendation_selection_or_backend_filter_was_added():
