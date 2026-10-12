@@ -308,12 +308,15 @@ export default function NewHomePage() {
     return sessionStorage.getItem("hbi_admin_access_token");
   }
 
-  async function filterConsultationEvaluations(evaluations: RecommendationDTO[]): Promise<RecommendationDTO[]> {
+  async function filterConsultationEvaluations(
+    evaluations: RecommendationDTO[]
+  ): Promise<{ evaluations: RecommendationDTO[]; error: string | null }> {
     setConsultationInventoryError(null);
     const adminToken = await ensureAdminProductReadSession();
     if (!adminToken) {
-      setConsultationInventoryError("نشست مدیر برای بررسی موجودی مشاوره در دسترس نیست؛ هیچ محصولی نمایش داده نشد.");
-      return [];
+      const error = "نشست مدیر برای بررسی موجودی مشاوره در دسترس نیست؛ هیچ محصولی نمایش داده نشد.";
+      setConsultationInventoryError(error);
+      return { evaluations: [], error };
     }
     try {
       const manageable = await listManageableProducts(adminToken);
@@ -330,10 +333,14 @@ export default function NewHomePage() {
           // Fail closed: missing or unreadable inventory never enters consultation explanations.
         }
       }));
-      return evaluations.filter((evaluation) => Boolean(evaluation.product_id && availableIds.has(evaluation.product_id)));
+      return {
+        evaluations: evaluations.filter((evaluation) => Boolean(evaluation.product_id && availableIds.has(evaluation.product_id))),
+        error: null,
+      };
     } catch {
-      setConsultationInventoryError("موجودی محصولات برای مشاوره قابل تأیید نیست؛ هیچ محصولی نمایش داده نشد.");
-      return [];
+      const error = "موجودی محصولات برای مشاوره قابل تأیید نیست؛ هیچ محصولی نمایش داده نشد.";
+      setConsultationInventoryError(error);
+      return { evaluations: [], error };
     }
   }
 
@@ -388,7 +395,8 @@ export default function NewHomePage() {
         const list = await listInternalEvaluationsByCase(storedCaseId, operatorToken);
         const inventoryChecked = await filterConsultationEvaluations(Array.isArray(list) ? list : []);
         if (cancelled) return;
-        setRecs(inventoryChecked);
+        setConsultationInventoryError(inventoryChecked.error);
+        setRecs(inventoryChecked.evaluations);
         setRecDone(true);
       } catch {
         if (cancelled) return;
@@ -498,13 +506,14 @@ export default function NewHomePage() {
         ? await listInternalEvaluationsByCase(newCaseId, operatorToken)
         : list;
       const inventoryChecked = await filterConsultationEvaluations(Array.isArray(evaluations) ? evaluations : []);
-      const eligibleCount = inventoryChecked.filter(
+      setConsultationInventoryError(inventoryChecked.error);
+      const eligibleCount = inventoryChecked.evaluations.filter(
         (r) => (r.eligibility_status ?? r.eligibility ?? "").trim().toUpperCase() === "ELIGIBLE"
       ).length;
-      setRecs(inventoryChecked);
+      setRecs(inventoryChecked.evaluations);
       setShowAllRecommendations(false);
       setRecDone(true);
-      setStatusMsg(consultationInventoryError ? consultationInventoryError : eligibleCount ? `${eligibleCount} پیشنهاد واجد شرایط با موجودی مثبت آماده است.` : "محصول واجد شرایط با موجودی مثبت پیدا نشد.");
+      setStatusMsg(inventoryChecked.error ? inventoryChecked.error : eligibleCount ? `${eligibleCount} پیشنهاد واجد شرایط با موجودی مثبت آماده است.` : "محصول واجد شرایط با موجودی مثبت پیدا نشد.");
       setActive("results");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
