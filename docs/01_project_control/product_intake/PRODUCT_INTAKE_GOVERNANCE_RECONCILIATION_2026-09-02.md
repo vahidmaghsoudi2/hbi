@@ -1,3 +1,11 @@
+> ## 🔴 HISTORICAL RECONCILIATION SNAPSHOT — VERSION / STATUS DRIFT
+>
+> This amendment is dated 2026-09-02. It remains useful as historical evidence that Product Intake existed and was not to be rebuilt from zero, but its “ACTIVE / CURRENT” labels and references to **Product Intake Contract v1** are not authoritative for today's status. The approved execution baseline is now `docs/architecture/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md`; later work and the current delta audit are tracked through Issue #278.
+>
+> Preserve this document. Do not follow its old phase or next-step statements without checking current master, the approved v1.1 contract, and the later PRs. Do not interpret this warning as proof that every finding in the amendment is resolved.
+>
+> ---
+
 ﻿# HBI — PRODUCT INTAKE GOVERNANCE RECONCILIATION
 ## 2026-09-02
 
