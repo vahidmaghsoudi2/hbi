@@ -252,7 +252,7 @@ These references establish relevant prior work and constraints; they do not, by 
 
 ## 8. Immediate execution sequence
 
-1. **Now:** treat this document as the integrated roadmap proposal and register it through a documentation-only PR.
+1. **Documentation proposal registered:** PR #348 contains this roadmap; it remains open for PO review. Registration is not acceptance or merge authorization.
 2. **Next:** perform a current-master reality audit, beginning with SHA capture and a source-linked matrix for the stages above.
 3. **Then:** reconcile the audit against #223/#225/#278 and identify the smallest genuine gap without duplicating existing work.
 4. **Then:** present a bounded work package with acceptance tests and explicit out-of-scope items for PO authorization.
