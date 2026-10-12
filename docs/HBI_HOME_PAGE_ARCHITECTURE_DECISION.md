@@ -1,3 +1,11 @@
+> ## 🔴 HISTORICAL ARCHITECTURE DECISION — RECHECK THE “NEXT ACTION”
+>
+> This ADR was recorded on 2026-08-27. Its data-integrity and no-fake-data principles remain useful; however, the final instruction “Next Action: Backend contract definition for Attention Queue and System Status” is a historical checkpoint, not an instruction to restart that work. The Home Page is already active and has later acceptance work on current master.
+>
+> Preserve the decision record. Do not use its old phased roadmap or next-action line as current execution authority. Current work is limited to verified product-entry visibility and menu/route continuity unless a later PO decision explicitly expands scope.
+>
+> ---
+
 ﻿# HBI Home Page Architecture Decision Record (ADR)
 
 **Status:** APPROVED  
