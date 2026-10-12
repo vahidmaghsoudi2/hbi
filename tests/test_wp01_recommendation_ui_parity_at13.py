@@ -27,7 +27,8 @@ def test_at13_show_more_exists_only_when_more_than_five_results():
 
 def test_at13_backend_full_result_set_is_still_stored():
     source = _source()
-    assert "setRecs(Array.isArray(list) ? list : []);" in source
+    assert "const list = await generateRecommendations(" in source
+    assert "setRecs(inventoryChecked);" in source
     assert "const list = await generateRecommendations(" in source
 
 
