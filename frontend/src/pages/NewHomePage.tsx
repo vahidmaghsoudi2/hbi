@@ -331,7 +331,7 @@ export default function NewHomePage() {
         }
       }));
       return evaluations.filter((evaluation) => Boolean(evaluation.product_id && availableIds.has(evaluation.product_id)));
-    } catch (err) {
+    } catch {
       setConsultationInventoryError("موجودی محصولات برای مشاوره قابل تأیید نیست؛ هیچ محصولی نمایش داده نشد.");
       return [];
     }
