@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { listProducts } from "../api/client";
 import type { ProductDTO } from "../types/api";
@@ -25,10 +25,11 @@ export default function CatalogPage() {
 
   return (
     <section>
-      <h1>کاتالوگ محصولات</h1>
-      <p className="lead">فهرست محصولات برای اپراتور واردشده؛ دسترسی از مسیر احراز هویت مدیر کنترل می‌شود.</p>
-      <div className="row" style={{ marginBottom: "1rem" }}>
-        <Link className="btn" to="/">بازگشت به داشبورد</Link>
+      <h1>کاتالوگ کالاها</h1>
+      <p className="lead">فهرست کالاهای ثبت‌شده در سیستم. خرید و ورود موجودی از منوی «کالا و انبار → خرید» است، نه از این فهرست.</p>
+      <div className="row" style={{ marginBottom: "1rem", gap: "0.5rem", display: "flex", flexWrap: "wrap" }}>
+        <Link className="btn" to="/">← داشبورد</Link>
+        <Link className="btn" to="/purchase">خرید و ورود موجودی</Link>
       </div>
       {loading && <div className="alert">در حال بارگذاری…</div>}
       {error && <div className="alert error">{error}</div>}
