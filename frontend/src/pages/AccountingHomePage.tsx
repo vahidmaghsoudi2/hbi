@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   getFinancialSummary,
   getInventoryReport,
@@ -23,6 +23,10 @@ const MENU_ITEMS: { id: Section; label: string }[] = [
   { id: "finance-report", label: "گزارش مالی" },
 ];
 
+function isSection(value: string | null): value is Section {
+  return MENU_ITEMS.some((item) => item.id === value);
+}
+
 function formatNumber(value: number | null | undefined): string {
   return value == null ? "—" : value.toLocaleString("fa-IR");
 }
@@ -32,10 +36,14 @@ function formatMoneyToman(value: number | null | undefined): string {
 }
 
 export default function AccountingHomePage() {
+  const [searchParams] = useSearchParams();
+  const requestedSection = searchParams.get("section");
   const [adminToken, setAdminToken] = useState<string | null>(() =>
     sessionStorage.getItem("hbi_admin_access_token")
   );
-  const [activeSection, setActiveSection] = useState<Section>("sales");
+  const [activeSection, setActiveSection] = useState<Section>(() =>
+    isSection(requestedSection) ? requestedSection : "sales"
+  );
   const [sales, setSales] = useState<SalesReportDTO | null>(null);
   const [financial, setFinancial] = useState<FinancialSummaryDTO | null>(null);
   const [inventory, setInventory] = useState<InventoryReportRow[]>([]);
@@ -84,6 +92,10 @@ export default function AccountingHomePage() {
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (isSection(requestedSection)) setActiveSection(requestedSection);
+  }, [requestedSection]);
 
   useEffect(() => {
     void loadDashboard();
