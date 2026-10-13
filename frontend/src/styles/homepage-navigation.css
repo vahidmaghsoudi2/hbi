@@ -1,5 +1,36 @@
 /* HBI homepage information-architecture navigation */
 .hbi-nav-group { min-width: 0; }
+.hbi-nav-row {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  min-width: 0;
+}
+.hbi-nav-row .hbi-nav-item {
+  flex: 1;
+  min-width: 0;
+}
+.hbi-nav-toggle {
+  flex: 0 0 28px;
+  width: 28px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #7a8780;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  transition: background .16s, color .16s;
+}
+.hbi-nav-toggle:hover,
+.hbi-nav-toggle:focus-visible {
+  background: #f2f6f3;
+  color: var(--green, #236a56);
+  outline: none;
+}
+.hbi-nav-toggle:focus-visible { box-shadow: 0 0 0 2px #8eb9a0; }
 .hbi-subnav {
   display: grid;
   gap: 2px;
@@ -27,6 +58,8 @@
 .hbi-subnav-link:focus-visible { box-shadow: 0 0 0 2px #8eb9a0; }
 @media (max-width: 760px) {
   .hbi-nav-group { flex: 0 0 auto; }
+  .hbi-nav-row { flex-direction: column; }
+  .hbi-nav-toggle { width: 100%; min-height: 28px; }
   .hbi-subnav {
     max-width: 76vw;
     margin: 3px 0 0;
