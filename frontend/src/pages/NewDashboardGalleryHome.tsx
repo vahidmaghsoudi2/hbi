@@ -9,7 +9,6 @@ const navigation = [
     children: [
       { label: "کاتالوگ کالاها", to: "/catalog" },
       { label: "بررسی پرونده کالا", to: "/workspace?panel=review" },
-      { label: "ثبت و ویرایش کالا", to: "/workspace?panel=intake" },
       { label: "خرید و ورود موجودی", to: "/purchase" },
     ],
   },
