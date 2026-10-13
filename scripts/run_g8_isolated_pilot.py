@@ -7,7 +7,6 @@ The database is deleted on shutdown; the API log is retained for evidence review
 from __future__ import annotations
 
 import os
-import shutil
 import socket
 import subprocess
 import sys
