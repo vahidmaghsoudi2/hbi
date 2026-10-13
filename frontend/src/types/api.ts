@@ -110,7 +110,7 @@ export interface GuestCreateRequest {
 
 /** Sale create */
 export interface SaleCreateRequest {
-  customer_id: string;
+  customer_id?: string | null;
   items?: Array<{ product_id?: string; quantity?: number; recommendation_id?: string | null }>;
   [key: string]: unknown;
 }
