@@ -7,6 +7,7 @@ import {
   getProductEvidence,
   getProductMutationLog,
   rejectProduct,
+  resolveEvidenceConflict,
   setProductQa,
   submitProduct,
   verifyProductIdentity,
@@ -71,6 +72,7 @@ export default function ProductReviewPanel({
   const [identityRefs, setIdentityRefs] = useState("");
   const [identityConfidence, setIdentityConfidence] = useState("");
   const [rejectReason, setRejectReason] = useState("");
+  const [conflictResolutionReason, setConflictResolutionReason] = useState("");
   const [selectedId, setSelectedId] = useState(productId ?? "");
 
   const load = async (id: string) => {
@@ -147,6 +149,31 @@ export default function ProductReviewPanel({
       setProduct(updated);
       setNotice(success);
       await load(updated.product_id);
+      onProductChanged?.();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function resolveConflictForEvidence(evidenceId: string) {
+    if (!product) return;
+    const reason = conflictResolutionReason.trim();
+    if (!reason) {
+      setError("برای حل تعارض، دلیل تصمیم لازم است.");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const opToken = (await onEnsureSession?.()) ?? token;
+      if (!opToken) throw new Error("نشست اپراتور برای حل تعارض در دسترس نیست.");
+      await resolveEvidenceConflict(evidenceId, reason, opToken);
+      setConflictResolutionReason("");
+      setNotice(`تعارض با انتخاب ${evidenceId} به‌عنوان ادعای برنده ثبت شد.`);
+      await load(product.product_id);
       onProductChanged?.();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -354,6 +381,21 @@ export default function ProductReviewPanel({
 
           <fieldset className="pro-fieldset">
             <legend>Evidence / Provenance</legend>
+            {evidences.some((ev) => upper(ev.conflict_status) === "CONFLICT") ? (
+              <div className="pro-form-row">
+                <label htmlFor="conflict-resolution-reason">دلیل تصمیم حل تعارض (اجباری)</label>
+                <input
+                  id="conflict-resolution-reason"
+                  value={conflictResolutionReason}
+                  onChange={(event) => setConflictResolutionReason(event.target.value)}
+                  disabled={busy}
+                  placeholder="مبنای انتخاب این ادعا را ثبت کنید"
+                />
+                <p className="pro-muted">
+                  با انتخاب یک ادعا، همان مورد برنده می‌شود و ادعاهای متعارض دیگر برای QA رد می‌شوند.
+                </p>
+              </div>
+            ) : null}
             {evidences.length === 0 ? (
               <p className="pro-muted">Evidence ثبت‌شده‌ای برای این Product پیدا نشد.</p>
             ) : (
@@ -369,6 +411,16 @@ export default function ProductReviewPanel({
                     </div>
                     <p className="pro-muted">Source: {ev.source_type || "—"} · {ev.source_reference || "—"}</p>
                     <code className="pro-code">{ev.evidence_id}</code>
+                    {upper(ev.conflict_status) === "CONFLICT" ? (
+                      <button
+                        type="button"
+                        className="pro-btn-secondary"
+                        disabled={busy || !conflictResolutionReason.trim()}
+                        onClick={() => void resolveConflictForEvidence(ev.evidence_id)}
+                      >
+                        انتخاب این ادعا به‌عنوان برنده
+                      </button>
+                    ) : null}
                   </article>
                 ))}
               </div>
