@@ -25,11 +25,11 @@ test("homepage navigation exposes each operational domain and its intended desti
 
   // Top-level domains (always visible).
   const topLevel = [
-    ["خانه و داشبورد", "/"],
+    ["خانه", "/"],
     ["کالا و انبار", "/catalog"],
-    ["مشتری و مشاوره", "/workspace?panel=consult"],
-    ["فروش", "/workspace?panel=sales"],
-    ["مالی و حسابداری", "/accounting"],
+    ["مشتری و مشاوره", "/workspace?panel=previous"],
+    ["فروش", "/sales"],
+    ["حسابداری و گزارش", "/accounting"],
   ];
   for (const [label, href] of topLevel) {
     const link = page.locator(`a.hbi-nav-item[href="${href}"]`).filter({ hasText: label }).first();
@@ -44,10 +44,10 @@ test("homepage navigation exposes each operational domain and its intended desti
 
   // Expand کالا و انبار and assert destinations.
   await openSubmenu(page, "کالا و انبار");
-  const goodsSub = page.locator(".hbi-subnav").filter({ hasText: "کاتالوگ کالاها" });
+  const goodsSub = page.locator(".hbi-subnav").filter({ hasText: "محصولات (کاتالوگ)" });
   await expect(goodsSub).toBeVisible();
-  await expect(goodsSub.locator("a.hbi-subnav-link", { hasText: "کاتالوگ کالاها" })).toHaveAttribute("href", "/catalog");
-  await expect(goodsSub.locator("a.hbi-subnav-link", { hasText: "خرید و ورود موجودی" })).toHaveAttribute("href", "/purchase");
+  await expect(goodsSub.locator("a.hbi-subnav-link", { hasText: "محصولات (کاتالوگ)" })).toHaveAttribute("href", "/catalog");
+  await expect(goodsSub.locator("a.hbi-subnav-link", { hasText: "ورود کالا / خرید" })).toHaveAttribute("href", "/purchase");
   // Product file review is governance (ProductReviewPanel), not inventory — not in homepage menu.
   await expect(page.locator("a.hbi-subnav-link", { hasText: "بررسی پرونده کالا" })).toHaveCount(0);
   await expect(page.locator("a.hbi-nav-item, a.hbi-subnav-link, a.hbi-action-card").filter({ hasText: "ورود محصول" })).toHaveCount(0);
@@ -56,7 +56,7 @@ test("homepage navigation exposes each operational domain and its intended desti
   await openSubmenu(page, "مشتری و مشاوره");
   const consultSub = page.locator(".hbi-subnav").filter({ hasText: "پرونده مشتری" });
   await expect(consultSub).toBeVisible();
-  await expect(consultSub.locator("a.hbi-subnav-link", { hasText: "ثبت مراجعه و مشاوره" })).toHaveAttribute(
+  await expect(consultSub.locator("a.hbi-subnav-link", { hasText: "مشاوره جدید" })).toHaveAttribute(
     "href",
     "/workspace?panel=consult"
   );
@@ -64,16 +64,16 @@ test("homepage navigation exposes each operational domain and its intended desti
     "href",
     "/workspace?panel=profile"
   );
-  await expect(consultSub.locator("a.hbi-subnav-link", { hasText: "سوابق مراجعه" })).toHaveAttribute(
+  await expect(consultSub.locator("a.hbi-subnav-link", { hasText: "سوابق مشاوره" })).toHaveAttribute(
     "href",
     "/workspace?panel=previous"
   );
-  await expect(consultSub.locator("a.hbi-subnav-link", { hasText: "نتایج ارزیابی و پیشنهاد" })).toHaveAttribute(
+  await expect(consultSub.locator("a.hbi-subnav-link", { hasText: "پیشنهاد محصول" })).toHaveAttribute(
     "href",
     "/workspace?panel=results"
   );
   // Accordion: کالا submenu closed.
-  await expect(page.locator(".hbi-subnav").filter({ hasText: "کاتالوگ کالاها" })).toHaveCount(0);
+  await expect(page.locator(".hbi-subnav").filter({ hasText: "محصولات (کاتالوگ)" })).toHaveCount(0);
 
   // Dashboard must not mirror the full submenu list as a second grid.
   await expect(page.locator(".hbi-more-card")).toHaveCount(0);
@@ -83,7 +83,7 @@ test("homepage navigation exposes each operational domain and its intended desti
   await expect(page.locator(".hbi-action-card")).toHaveCount(3);
 
   // Direct sale remains first-class and not nested under consultation.
-  await page.locator('a.hbi-nav-item[href="/workspace?panel=sales"]').click();
+  await page.locator('a.hbi-nav-item[href="/sales"]').click();
   await expect(page).toHaveURL(/\/workspace\?panel=sales$/);
   await expect(page.getByRole("heading", { name: "ثبت فروش" })).toBeVisible();
 });
