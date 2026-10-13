@@ -13,26 +13,35 @@ type NavItem = {
 };
 
 const navigation: NavItem[] = [
-  { label: "خانه", detail: "داشبورد", icon: "⌂", to: "/", children: [] },
+  {
+    label: "خانه",
+    detail: "داشبورد و میان‌برها",
+    icon: "⌂",
+    to: "/",
+    children: [],
+  },
   {
     label: "مشتری و مشاوره",
-    detail: "پرونده و مشاوره",
+    detail: "مشتریان و روند مشاوره",
     icon: "◎",
     to: "/workspace?panel=previous",
     children: [
-      { label: "فهرست مشتریان", to: "/workspace?panel=previous" },
-      { label: "پرونده مشتری", to: "/workspace?panel=profile" },
+      { label: "مشتریان", to: "/workspace?panel=previous" },
+      { label: "پرونده مشاوره / مشتری", to: "/workspace?panel=profile" },
       { label: "مشاوره جدید", to: "/workspace?panel=consult" },
       { label: "پیشنهاد محصول", to: "/recommendation" },
       { label: "سوابق مشاوره", to: "/workspace?panel=previous" },
     ],
   },
   {
-    label: "فروش",
-    detail: "ثبت فروش مستقیم",
+    label: "خرید و فروش",
+    detail: "فروش مستقیم و خرید کالا",
     icon: "↗",
     to: "/sales",
-    children: [{ label: "ثبت فروش", to: "/sales" }],
+    children: [
+      { label: "ثبت فروش", to: "/sales" },
+      { label: "سفارش خرید / ورود کالا", to: "/purchase" },
+    ],
   },
   {
     label: "کالا و انبار",
@@ -40,16 +49,18 @@ const navigation: NavItem[] = [
     icon: "▦",
     to: "/catalog",
     children: [
-      { label: "محصولات (کاتالوگ)", to: "/catalog" },
-      { label: "ورود کالا / خرید", to: "/purchase" },
+      { label: "محصولات (گالری / کاتالوگ)", to: "/catalog" },
+      { label: "ورود کالا", to: "/purchase" },
     ],
   },
   {
     label: "حسابداری و گزارش",
-    detail: "گزارش‌های موجود",
+    detail: "گزارش‌های موجود در سیستم",
     icon: "▤",
     to: "/accounting",
-    children: [{ label: "خانه حسابداری", to: "/accounting" }],
+    children: [
+      { label: "گزارش فروش / خانه حسابداری", to: "/accounting" },
+    ],
   },
 ];
 
@@ -70,7 +81,7 @@ export default function OperatorShell() {
       if (pathMatches(item.to, location.pathname, location.search)) return item.label;
       if (item.children.some((c) => pathMatches(c.to, location.pathname, location.search))) return item.label;
     }
-    return "فروش";
+    return "خرید و فروش";
   });
 
   function logout() {
