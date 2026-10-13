@@ -1,6 +1,6 @@
 # Product Intake Execution Log
 
-**Status:** Phase 0 baseline recorded; real G8 pilot not yet executed.  
+**Status:** Phase 0 CLOSED (SSOT files merged to master); Phase 1 preflight pending; real G8 pilot not yet executed.  
 **Governing tracker:** [Issue #283](https://github.com/vahidmaghsoudi2/hbi/issues/283)  
 **Roadmap:** [PRODUCT_INTAKE_ROADMAP.md](PRODUCT_INTAKE_ROADMAP.md)  
 **Binding contract:** [SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md](../architecture/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md)
@@ -38,3 +38,12 @@ Required fields per future entry:
 - Product Master and recommendation readback, if legitimately reached
 - Cleanup and production-isolation proof
 - Artifact links and independent verifier disposition
+
+
+## Entry 2026-10-13 — Phase 0 closure verified
+
+- PR #364 merged to `master`: [merge commit `7d962720a60c1291b8c21360dff0cc95b6fc0d1a`](https://github.com/vahidmaghsoudi2/hbi/commit/7d962720a60c1291b8c21360dff0cc95b6fc0d1a).
+- The three SSOT files are present on the default branch. Phase 0 is **CLOSED** for its documented SSOT-placement condition.
+- Phase 1 is **READY TO START — preflight pending**. No operator-driven pilot is claimed to have run.
+- G8 remains **BLOCKED / NOT VERIFIED**; the A1–A9 ledger is unchanged because no new runtime evidence has been captured.
+- Immediate next gate: verify a disposable isolated environment, exact code SHA, operator/session context, production isolation, and raw evidence capture before creating candidate data. Stop if these cannot be proven.
