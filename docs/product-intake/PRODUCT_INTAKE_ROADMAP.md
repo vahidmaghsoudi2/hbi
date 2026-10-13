@@ -2,7 +2,7 @@
 
 **Status:** Phase 0 = CLOSED (SSOT placement verified); Phase 1 = READY TO START after isolated-environment preflight; G8 = **BLOCKED / NOT VERIFIED**  
 **Source of truth:** GitHub repository `vahidmaghsoudi2/hbi`  
-**Current baseline:** `0a2ec9b477f89954ba1865ec59e3701a5a0f3831`  
+**Current baseline:** `7d962720a60c1291b8c21360dff0cc95b6fc0d1a`  
 **Last updated:** 2026-10-13
 
 ## 1. Purpose and authority
@@ -21,7 +21,7 @@ Primary references:
 
 ### Phase 0 — SSOT baseline on master: CLOSED
 
-Baseline master commit: `0a2ec9b477f89954ba1865ec59e3701a5a0f3831`.
+Baseline master commit for this execution record: `7d962720a60c1291b8c21360dff0cc95b6fc0d1a`. Earlier CI run references below are historical and are not asserted to run on this SHA.
 
 Exact-SHA push checks:
 - [HBI CI run 38396795619](https://github.com/vahidmaghsoudi2/hbi/actions/runs/38396795619) — success
