@@ -70,7 +70,7 @@ test("homepage navigation exposes each operational domain and its intended desti
   );
   await expect(consultSub.locator("a.hbi-subnav-link", { hasText: "پیشنهاد محصول" })).toHaveAttribute(
     "href",
-    "/workspace?panel=results"
+    "/recommendation"
   );
   // Accordion: کالا submenu closed.
   await expect(page.locator(".hbi-subnav").filter({ hasText: "محصولات (کاتالوگ)" })).toHaveCount(0);
