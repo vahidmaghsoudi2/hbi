@@ -7,6 +7,7 @@ import PilotPage from "./pages/PilotPage";
 import RecommendationPage from "./pages/RecommendationPage";
 import AccountingHomePage from "./pages/AccountingHomePage";
 import PurchasePage from "./pages/PurchasePage";
+import SimpleSalesPage from "./pages/SimpleSalesPage";
 import AdminLoginPage from "./pages/AdminLoginPage";
 
 function AdminGate({ children }: { children: ReactNode }) {
@@ -27,6 +28,7 @@ export default function App() {
       <Route path="/recommendation" element={<AdminGate><RecommendationPage /></AdminGate>} />
       <Route path="/accounting" element={<AdminGate><AccountingHomePage /></AdminGate>} />
       <Route path="/purchase" element={<AdminGate><PurchasePage /></AdminGate>} />
+      <Route path="/sales" element={<AdminGate><SimpleSalesPage /></AdminGate>} />
       {/* Unknown paths should never render an empty shell or bypass AdminGate. */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
