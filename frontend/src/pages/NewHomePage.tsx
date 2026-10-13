@@ -50,7 +50,6 @@ type Panel = "home" | "consult" | "previous" | "profile" | "catalog" | "review" 
 export default function NewHomePage() {
   const navigate = useNavigate();
   const [active, setActive] = useState<Panel>("home");
-  const [productsMenuOpen, setProductsMenuOpen] = useState(false);
   const [token, setToken] = useState<string | null>(() => sessionStorage.getItem("hbi_access_token"));
   const [customerId, setCustomerId] = useState<string | null>(() => sessionStorage.getItem("hbi_customer_id"));
   const [caseId, setCaseId] = useState<string | null>(() => sessionStorage.getItem("hbi_case_id"));
