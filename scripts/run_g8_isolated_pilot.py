@@ -63,6 +63,8 @@ def _remove_disposable_db(session_dir: Path, db_path: Path) -> bool:
 
 
 def main() -> int:
+    smoke_test = "--smoke-test" in sys.argv[1:]
+    runtime_ok = False
     if os.getenv("HBI_ENV", "").lower() == "production":
         print("REFUSED: HBI_ENV=production.", flush=True)
         return 2
@@ -134,7 +136,11 @@ def main() -> int:
                     print(f"REFUSED: API exited during startup (code={process.returncode}).", flush=True)
                     break
                 if _health_ok():
+                    runtime_ok = True
                     print("PILOT_API_READY=YES", flush=True)
+                    if smoke_test:
+                        print("SMOKE_TEST=PASS", flush=True)
+                        break
                     print("OPERATOR_ACTION: use /docs and record raw request/response evidence.", flush=True)
                     print("STOP: press Ctrl+C here after the pilot session.", flush=True)
                     while process.poll() is None:
@@ -157,7 +163,7 @@ def main() -> int:
         print(f"DATABASE_CLEANUP={'PASS' if cleanup_ok else 'FAIL'}", flush=True)
         print(f"API_LOG_RETAINED={log_path}", flush=True)
 
-    return 0 if cleanup_ok else 3
+    return 0 if cleanup_ok and runtime_ok else 3
 
 
 if __name__ == "__main__":
