@@ -4,8 +4,6 @@ import {
   listProducts,
   listManageableProducts,
   pilotToken,
-  pilotOperatorToken,
-  pilotPoToken,
   customerIntake,
   createGuest,
   generateRecommendations,
@@ -303,19 +301,17 @@ export default function NewHomePage() {
   }
 
   async function ensureProductSession(): Promise<string | null> {
-    const cached = sessionStorage.getItem("hbi_operator_access_token");
-    if (cached) return cached;
-    const pair = await pilotOperatorToken();
-    sessionStorage.setItem("hbi_operator_access_token", pair.access_token);
-    return pair.access_token;
+    // There is one system operator: the authenticated Admin. Never mint a Pilot/Operator token.
+    const adminToken = sessionStorage.getItem("hbi_admin_access_token");
+    if (!adminToken) throw new Error("نشست مدیر در دسترس نیست؛ با همان حساب مدیر وارد شوید.");
+    return adminToken;
   }
 
   async function ensureReviewSession(): Promise<string | null> {
-    const cached = sessionStorage.getItem("hbi_po_access_token");
-    if (cached) return cached;
-    const pair = await pilotPoToken();
-    sessionStorage.setItem("hbi_po_access_token", pair.access_token);
-    return pair.access_token;
+    // Product-review actions use the same Admin session, not a separate PO/Pilot identity.
+    const adminToken = sessionStorage.getItem("hbi_admin_access_token");
+    if (!adminToken) throw new Error("نشست مدیر در دسترس نیست؛ با همان حساب مدیر وارد شوید.");
+    return adminToken;
   }
 
   async function loadActiveCustomerProfile() {
