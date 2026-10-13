@@ -2,6 +2,9 @@
 from pathlib import Path
 import os
 import sys
+import tempfile
+
+from sqlalchemy.engine import make_url
 
 # Running a script from scripts/ sets sys.path[0] to that directory, not the repo root.
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -13,14 +16,48 @@ db_url = os.environ.get("DATABASE_URL")
 if not db_url or not db_url.startswith("sqlite:///"):
     raise SystemExit("Refusing browser setup without an explicit disposable SQLite DATABASE_URL")
 
+if os.environ.get("HBI_PILOT_FIXTURE_MODE") != "browser-fixture":
+    raise SystemExit("Refusing fixture seeding unless HBI_PILOT_FIXTURE_MODE=browser-fixture")
+
+try:
+    database_name = make_url(db_url).database
+except Exception as exc:
+    raise SystemExit(f"Refusing invalid DATABASE_URL: {exc}") from exc
+
+if not database_name or database_name == ":memory:":
+    raise SystemExit("Refusing browser setup: a file-backed disposable SQLite DB is required")
+
+db_path = Path(database_name)
+if not db_path.is_absolute():
+    raise SystemExit("Refusing browser setup: DATABASE_URL must resolve to an absolute file path")
+
+temp_root = Path(tempfile.gettempdir()).resolve()
+pilot_root = temp_root / "hbi-g8-pilot"
+if pilot_root.is_symlink():
+    raise SystemExit(f"Refusing browser setup: pilot root cannot be a symlink: {pilot_root}")
+pilot_root.mkdir(parents=True, exist_ok=True)
+
+resolved_db_path = db_path.resolve(strict=False)
+if resolved_db_path.parent != pilot_root.resolve():
+    raise SystemExit(
+        "Refusing browser setup: SQLite file must be directly inside the dedicated "
+        f"temporary pilot directory {pilot_root}; got {resolved_db_path}"
+    )
+if resolved_db_path.name not in {"pilot-browser-proof.sqlite", "pilot.db"}:
+    raise SystemExit("Refusing browser setup: unexpected disposable database filename")
+if db_path.is_symlink():
+    raise SystemExit("Refusing browser setup: database target cannot be a symlink")
+if db_path.exists() and db_path.stat().st_size > 0:
+    raise SystemExit(
+        f"Refusing browser setup: database already exists and is non-empty: {db_path}"
+    )
+
 from app.database import init_db, SessionLocal
 from scripts.seed_products_from_records import seed
 from app.models.customer import Customer
-from app.models.case import Case
 from app.models.evidence import Evidence
 from app.models.product import Product
 from app.models.product_knowledge import ProductKnowledge
-from app.services.skin_next_question_service import SkinNextQuestionService
 
 init_db()
 db = SessionLocal()
