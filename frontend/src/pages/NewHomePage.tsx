@@ -649,7 +649,7 @@ export default function NewHomePage() {
               </button>
             ) : null}
             <button type="button" className="pro-btn-secondary" onClick={logout}>خروج از حساب مدیر</button>
-          </div>    </nav>
+          </div>
         </div>
       </header>
 
