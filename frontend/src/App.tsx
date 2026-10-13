@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import NewHomePage from "./pages/NewHomePage";
 import NewDashboardGalleryHome from "./pages/NewDashboardGalleryHome";
 import CatalogPage from "./pages/CatalogPage";
@@ -15,12 +15,29 @@ function AdminGate({ children }: { children: ReactNode }) {
   return token ? children : <Navigate to="/login" replace />;
 }
 
+/**
+ * Compatibility router for old homepage panel links.
+ * Sales is a standalone workflow and must never render inside the legacy
+ * all-in-one workspace. Keep other legacy panels intact until each has a
+ * verified dedicated destination.
+ */
+function WorkspaceRoute() {
+  const location = useLocation();
+  const panel = new URLSearchParams(location.search).get("panel");
+
+  if (panel === "sales") return <Navigate to="/sales" replace />;
+  if (panel === "catalog") return <Navigate to="/catalog" replace />;
+  if (panel === "purchase") return <Navigate to="/purchase" replace />;
+
+  return <NewHomePage />;
+}
+
 export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<AdminLoginPage />} />
       <Route path="/" element={<AdminGate><NewDashboardGalleryHome /></AdminGate>} />
-      <Route path="/workspace" element={<AdminGate><NewHomePage /></AdminGate>} />
+      <Route path="/workspace" element={<AdminGate><WorkspaceRoute /></AdminGate>} />
       <Route path="/catalog" element={<AdminGate><CatalogPage /></AdminGate>} />
       {/* Pilot/recommendation are operator-only internal workflows, not customer
           entry points. Their API tokens do not grant access to the HBI UI. */}
