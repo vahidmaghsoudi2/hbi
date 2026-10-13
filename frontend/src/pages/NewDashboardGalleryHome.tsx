@@ -174,7 +174,7 @@ export default function NewDashboardGalleryHome() {
             <span aria-hidden="true">/</span>
             <strong>خانه</strong>
           </div>
-          <div className="hbi-topbar-status">
+          <div className="hbi-topbar-note">
             <span className="hbi-status-dot" /> پنل مدیریت HBI
           </div>
         </header>
