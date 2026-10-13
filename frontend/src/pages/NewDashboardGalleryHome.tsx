@@ -31,7 +31,7 @@ const navigation: NavItem[] = [
       { label: "فهرست و جست‌وجوی مشتری", to: "/workspace?panel=previous" },
       { label: "پرونده مشتری", to: "/workspace?panel=profile" },
       { label: "مشاوره جدید", to: "/workspace?panel=consult" },
-      { label: "پیشنهاد محصول", to: "/workspace?panel=results" },
+      { label: "پیشنهاد محصول", to: "/recommendation" },
       { label: "سوابق مشاوره", to: "/workspace?panel=previous" },
     ],
   },
@@ -62,13 +62,6 @@ const navigation: NavItem[] = [
     children: [
       { label: "خانه حسابداری", to: "/accounting" },
     ],
-  },
-  {
-    label: "تنظیمات",
-    detail: "خروج از نوار پایین",
-    icon: "⚙",
-    to: "/",
-    children: [],
   },
 ];
 
