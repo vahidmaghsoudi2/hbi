@@ -20,10 +20,10 @@ const navigation: NavItem[] = [
     detail: "کاتالوگ و موجودی",
     icon: "▦",
     to: "/catalog",
+    // Product review (ProductReviewPanel / panel=review) is product governance, not inventory.
     children: [
       { label: "کاتالوگ کالاها", to: "/catalog" },
       { label: "خرید و ورود موجودی", to: "/purchase" },
-      { label: "بررسی پرونده کالا", to: "/workspace?panel=review" },
     ],
   },
   {
