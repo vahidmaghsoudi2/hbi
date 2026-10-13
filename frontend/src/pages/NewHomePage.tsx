@@ -53,10 +53,14 @@ const CONSULTATION_LINES = [{ id: "SKIN", label: "پوست" }] as const;
 const INITIAL_RECOMMENDATION_LIMIT = 5;
 
 type Panel = "home" | "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about";
+type MainSection = "home" | "customers" | "consultation" | "sales" | "products" | "purchases" | "settings";
+type PageView = "main" | "section" | "content";
 
 export default function NewHomePage() {
   const navigate = useNavigate();
   const [active, setActive] = useState<Panel>("home");
+  const [pageView, setPageView] = useState<PageView>("main");
+  const [mainSection, setMainSection] = useState<MainSection>("home");
   const [token, setToken] = useState<string | null>(() => sessionStorage.getItem("hbi_access_token"));
   const [customerId, setCustomerId] = useState<string | null>(() => sessionStorage.getItem("hbi_customer_id"));
   const [caseId, setCaseId] = useState<string | null>(() => sessionStorage.getItem("hbi_case_id"));
@@ -253,7 +257,24 @@ export default function NewHomePage() {
 
   function go(panel: Panel) {
     setActive(panel);
+    setPageView("content");
     setError(null);
+  }
+
+  function openMainSection(next: MainSection) {
+    setMainSection(next);
+    setError(null);
+    if (next === "home") {
+      setActive("home");
+      setPageView("content");
+    } else {
+      setPageView("section");
+    }
+  }
+
+  function backToNavigation() {
+    setError(null);
+    setPageView(mainSection === "home" ? "main" : "section");
   }
 
   function logout() {
@@ -607,14 +628,6 @@ export default function NewHomePage() {
     if (score >= 0.5) return "متوسط";
     return "محدود";
   }
-  const navGroups: { label: string; items: [Panel, string][] }[] = [
-    { label: "خانه", items: [["home", "داشبورد"]] },
-    { label: "مشتریان", items: [["previous", "جست‌وجو و سابقه"], ["profile", "پروفایل مشتری"]] },
-    { label: "مشاوره", items: [["consult", "مشاوره جدید"], ["results", "پیشنهادها و تصمیم اپراتور"]] },
-    { label: "فروش", items: [["sales", "ثبت فروش و تاریخچه"]] },
-    { label: "مدیریت محصولات", items: [["catalog", "فهرست محصولات"], ["intake", "ورود و ویرایش محصول"], ["review", "بررسی و تأیید QA"]] },
-  ];
-
   return (
     <div className="home-root pro-home">
       <header className="pro-header">
@@ -626,33 +639,17 @@ export default function NewHomePage() {
               <div className="pro-brand-sub">هوش زیبایی و مراقبت · فضای کاری مدیر</div>
             </div>
           </div>
-          <nav className="pro-nav" aria-label="ناوبری اصلی HBI">
-            {navGroups.map((group) => (
-              <div key={group.label} className="pro-nav-group">
-                <span className="pro-nav-group-label">{group.label}</span>
-                <div className="pro-nav-group-items">
-                  {group.items.map(([id, label]) => (
-                    <button key={id} type="button" className={active === id ? "pro-nav-btn on" : "pro-nav-btn"} aria-current={active === id ? "page" : undefined} onClick={() => go(id)}>
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-            <div className="pro-nav-group">
-              <span className="pro-nav-group-label">خرید و گزارش‌ها</span>
-              <div className="pro-nav-group-items">
-                <Link to="/purchase" className="pro-nav-btn">خرید / ورود موجودی</Link>
-                <Link to="/accounting" className="pro-nav-btn">گزارش‌ها و حسابداری</Link>
-              </div>
-            </div>
-            <div className="pro-nav-group">
-              <span className="pro-nav-group-label">تنظیمات</span>
-              <div className="pro-nav-group-items">
-                <button type="button" className="pro-nav-btn" onClick={logout}>خروج از حساب مدیر</button>
-              </div>
-            </div>
-          </nav>
+          <div className="pro-actions" style={{ alignItems: "center", justifyContent: "flex-end" }}>
+            {pageView !== "main" ? (
+              <button type="button" className="pro-btn-secondary" onClick={() => setPageView("main")}>منوی اصلی</button>
+            ) : null}
+            {pageView !== "main" ? (
+              <button type="button" className="pro-btn-secondary" onClick={backToNavigation}>
+                {pageView === "content" ? "بازگشت به بخش" : "بازگشت"}
+              </button>
+            ) : null}
+            <button type="button" className="pro-btn-secondary" onClick={logout}>خروج از حساب مدیر</button>
+          </div>    </nav>
         </div>
       </header>
 
@@ -678,7 +675,58 @@ export default function NewHomePage() {
           </div>
         ) : null}
 
-        {active === "home" && (
+        {pageView === "main" && (
+          <section className="pro-panel" aria-labelledby="main-menu-title">
+            <h1 id="main-menu-title">فضای کاری مدیر</h1>
+            <p className="pro-lead">یک حوزه را انتخاب کنید. زیرمنوها فقط پس از ورود به همان حوزه نمایش داده می‌شوند.</p>
+            <div className="pro-product-grid">
+              <article className="pro-product-card"><h2>خانه و داشبورد</h2><p className="pro-muted">نمای کلی عملیات و هشدارهای قابل اقدام.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("home")}>بازکردن داشبورد</button></article>
+              <article className="pro-product-card"><h2>مشتریان</h2><p className="pro-muted">پروفایل، جست‌وجو و سابقهٔ خرید مشتری.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("customers")}>ورود به مشتریان</button></article>
+              <article className="pro-product-card"><h2>مشاوره</h2><p className="pro-muted">ثبت مسئله، بررسی نیاز، پیشنهادها و تصمیم اپراتور.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("consultation")}>ورود به مشاوره</button></article>
+              <article className="pro-product-card"><h2>فروش</h2><p className="pro-muted">ثبت فروش؛ مشاوره پیش‌نیاز فروش مستقیم نیست.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("sales")}>ورود به فروش</button></article>
+              <article className="pro-product-card"><h2>مدیریت محصولات</h2><p className="pro-muted">فهرست، ورود اطلاعات و بررسی QA؛ مستقل از ورود فیزیکی موجودی.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("products")}>ورود به مدیریت محصولات</button></article>
+              <article className="pro-product-card"><h2>خرید و گزارش‌ها</h2><p className="pro-muted">خرید، ورود موجودی، گزارش‌ها و حسابداری.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("purchases")}>ورود به خرید و گزارش‌ها</button></article>
+              <article className="pro-product-card"><h2>تنظیمات</h2><p className="pro-muted">عملیات تنظیمات موجود و خروج از حساب مدیر.</p><button type="button" className="pro-btn-secondary" onClick={() => openMainSection("settings")}>بازکردن تنظیمات</button></article>
+            </div>
+          </section>
+        )}
+
+        {pageView === "section" && (
+          <section className="pro-panel" aria-labelledby="section-menu-title">
+            <div className="pro-section-head">
+              <h1 id="section-menu-title">{({
+                customers: "مشتریان", consultation: "مشاوره", sales: "فروش",
+                products: "مدیریت محصولات", purchases: "خرید و گزارش‌ها",
+                settings: "تنظیمات", home: "خانه و داشبورد",
+              } as Record<MainSection, string>)[mainSection]}</h1>
+              <button type="button" className="pro-btn-secondary" onClick={() => setPageView("main")}>بازگشت به منوی اصلی</button>
+            </div>
+            <p className="pro-lead">فقط عملیات مربوط به این حوزه در این صفحه قرار دارد.</p>
+            <div className="pro-product-grid">
+              {mainSection === "customers" ? <>
+                <article className="pro-product-card"><h2>جست‌وجو و سابقه</h2><p className="pro-muted">یافتن مشتری و مشاهدهٔ سابقهٔ خرید.</p><button type="button" className="pro-btn-primary" onClick={() => go("previous")}>بازکردن جست‌وجوی مشتری</button></article>
+                <article className="pro-product-card"><h2>پروفایل مشتری</h2><p className="pro-muted">ثبت یا تکمیل اطلاعات مشتری.</p><button type="button" className="pro-btn-primary" onClick={() => go("profile")}>بازکردن پروفایل مشتری</button></article>
+              </> : null}
+              {mainSection === "consultation" ? <>
+                <article className="pro-product-card"><h2>مشاوره جدید</h2><p className="pro-muted">ثبت واقعیت مراجعه و مسئلهٔ مشتری.</p><button type="button" className="pro-btn-primary" onClick={() => go("consult")}>شروع مشاوره</button></article>
+                <article className="pro-product-card"><h2>پیشنهادها و تصمیم اپراتور</h2><p className="pro-muted">بررسی نتایج و تصمیم‌گیری اپراتور.</p><button type="button" className="pro-btn-primary" onClick={() => go("results")}>بازکردن پیشنهادها</button></article>
+              </> : null}
+              {mainSection === "sales" ? <article className="pro-product-card"><h2>ثبت فروش و تاریخچه</h2><p className="pro-muted">ثبت فروش مستقیم بدون الزام به مشاورهٔ قبلی.</p><button type="button" className="pro-btn-primary" onClick={() => go("sales")}>بازکردن فروش</button></article> : null}
+              {mainSection === "products" ? <>
+                <article className="pro-product-card"><h2>فهرست محصولات</h2><p className="pro-muted">مشاهدهٔ محصولات قابل مدیریت.</p><button type="button" className="pro-btn-primary" onClick={() => go("catalog")}>بازکردن فهرست محصولات</button></article>
+                <article className="pro-product-card"><h2>ورود و ویرایش محصول</h2><p className="pro-muted">ثبت مشخصات محصول؛ جدا از موجودی فیزیکی.</p><button type="button" className="pro-btn-primary" onClick={() => go("intake")}>ورود و ویرایش محصول</button></article>
+                <article className="pro-product-card"><h2>بررسی و تأیید QA</h2><p className="pro-muted">بررسی شواهد و وضعیت تأیید محصول.</p><button type="button" className="pro-btn-primary" onClick={() => go("review")}>بازکردن بررسی QA</button></article>
+              </> : null}
+              {mainSection === "purchases" ? <>
+                <article className="pro-product-card"><h2>خرید / ورود موجودی</h2><p className="pro-muted">ثبت خرید و ورود فیزیکی کالا.</p><Link to="/purchase" className="pro-btn-primary">بازکردن خرید و موجودی</Link></article>
+                <article className="pro-product-card"><h2>گزارش‌ها و حسابداری</h2><p className="pro-muted">گزارش فروش، موجودی و گردش‌های مالی.</p><Link to="/accounting" className="pro-btn-primary">بازکردن گزارش‌ها</Link></article>
+              </> : null}
+              {mainSection === "settings" ? <article className="pro-product-card"><h2>خروج از حساب مدیر</h2><p className="pro-muted">پایان‌دادن به نشست فعلی مدیر.</p><button type="button" className="pro-btn-secondary" onClick={logout}>خروج از حساب مدیر</button></article> : null}
+            </div>
+          </section>
+        )}
+
+        {pageView === "content" && active === "home" && (
           <section className="pro-panel">
             <h1>داشبورد HBI</h1>
             <p className="pro-lead">میانبرهای عملیات در اولویت‌اند. خلاصه‌ها و هشدارهای زیر از APIهای مدیریتی خوانده می‌شوند؛ دادهٔ ناموجود به‌صورت عدد ساختگی نمایش داده نمی‌شود.</p>
@@ -792,7 +840,7 @@ export default function NewHomePage() {
           </section>
         )}
 
-        {active === "previous" && (
+        {pageView === "content" && active === "previous" && (
           <section className="pro-panel">
             <h1>مشتری قبلی / جست‌وجو</h1>
             <p className="pro-lead">مشتری را پیدا کنید، سابقه او را بارگذاری کنید و سپس مشکل امروز را در یک پرونده جدید ثبت کنید.</p>
@@ -844,7 +892,7 @@ export default function NewHomePage() {
           </section>
         )}
 
-        {active === "consult" && (
+        {pageView === "content" && active === "consult" && (
           <section className="pro-panel">
             {purchaseHistory.length > 0 ? (
               <div className="pro-panel" style={{ marginBottom: "1rem" }}>
@@ -938,7 +986,7 @@ export default function NewHomePage() {
           </section>
         )}
 
-        {active === "profile" && (
+        {pageView === "content" && active === "profile" && (
           <section className="pro-panel">
             <div className="pro-panel-head">
               <div>
@@ -982,7 +1030,7 @@ export default function NewHomePage() {
           </section>
         )}
 
-        {active === "catalog" && (
+        {pageView === "content" && active === "catalog" && (
           <section className="pro-panel">
             <div className="pro-panel-head">
               <h1>محصولات</h1>
@@ -1029,7 +1077,7 @@ export default function NewHomePage() {
           </section>
         )}
 
-        {active === "review" && (
+        {pageView === "content" && active === "review" && (
           <ProductReviewPanel
             token={sessionStorage.getItem("hbi_po_access_token")}
             productId={sessionStorage.getItem("hbi_review_product_id")}
@@ -1038,7 +1086,7 @@ export default function NewHomePage() {
           />
         )}
 
-        {active === "intake" && (
+        {pageView === "content" && active === "intake" && (
           <ProductIntakePanel
             token={token}
             onEnsureSession={ensureProductSession}
@@ -1051,7 +1099,7 @@ export default function NewHomePage() {
           />
         )}
 
-        {active === "results" && (
+        {pageView === "content" && active === "results" && (
           <section className="pro-panel">
             <h1>پیشنهادهای نهایی برای اپراتور</h1>
             {(() => {
@@ -1132,7 +1180,7 @@ export default function NewHomePage() {
           </section>
         )}
 
-        {active === "sales" && (
+        {pageView === "content" && active === "sales" && (
           <section className="pro-panel" id="sales">
             <h1>ثبت فروش</h1>
             <p className="pro-lead">ثبت فروش مستقل از مشاوره است. نشست مدیر و انتخاب مشتری لازم است؛ اتصال به مشاوره اختیاری است.</p>
@@ -1225,7 +1273,7 @@ export default function NewHomePage() {
           </section>
         )}
 
-        {active === "about" && (
+        {pageView === "content" && active === "about" && (
           <section className="pro-panel">
             <h1>مسیر HBI روی این صفحه</h1>
             <ol className="pro-ol">
