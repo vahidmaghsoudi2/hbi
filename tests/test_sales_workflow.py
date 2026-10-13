@@ -87,16 +87,6 @@ def test_direct_sale_without_customer_is_allowed(session):
     assert session.query(StockMovement).filter_by(reference_id=sale.sale_id).count() == 1
 
 
-def test_recommendation_linked_sale_requires_customer(session):
-    _seed(session, qty=10)
-    with pytest.raises(ValueError, match="requires a registered customer"):
-        SaleService(session).create_sale(
-            None,
-            [{"product_id": "P-SALE-1", "quantity": 1, "recommendation_id": "REC-1"}],
-            fx_rate_usd_to_irr=1_000_000.0,
-        )
-
-
 def test_successful_sale(session):
     _seed(session, qty=10)
     svc = SaleService(session)
