@@ -90,9 +90,11 @@ jobs:
           New-Item -ItemType Directory -Force data | Out-Null
           $env:DATABASE_URL = "sqlite:///./data/hbi-windows-smoke.db"
           $apiLog = Join-Path $env:RUNNER_TEMP "hbi-api-windows.log"
+          $apiErr = Join-Path $env:RUNNER_TEMP "hbi-api-windows.err.log"
           $webLog = Join-Path $env:RUNNER_TEMP "hbi-web-windows.log"
-          $api = Start-Process -FilePath python -ArgumentList @("-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8765") -WorkingDirectory $PWD.Path -PassThru -RedirectStandardOutput $apiLog -RedirectStandardError $apiLog
-          $web = Start-Process -FilePath "cmd.exe" -ArgumentList @("/c", "npm run dev -- --host 127.0.0.1 --port 4173") -WorkingDirectory (Join-Path $PWD.Path "frontend") -PassThru -RedirectStandardOutput $webLog -RedirectStandardError $webLog
+          $webErr = Join-Path $env:RUNNER_TEMP "hbi-web-windows.err.log"
+          $api = Start-Process -FilePath python -ArgumentList @("-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8765") -WorkingDirectory $PWD.Path -PassThru -RedirectStandardOutput $apiLog -RedirectStandardError $apiErr
+          $web = Start-Process -FilePath "cmd.exe" -ArgumentList @("/c", "npm run dev -- --host 127.0.0.1 --port 4173") -WorkingDirectory (Join-Path $PWD.Path "frontend") -PassThru -RedirectStandardOutput $webLog -RedirectStandardError $webErr
           try {
             $apiReady = $false
             $webReady = $false
