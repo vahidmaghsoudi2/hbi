@@ -7,6 +7,8 @@
 
 ## Entry 2026-10-13 — Phase 0 baseline
 
+**Phase 0 close rule:** Phase 0 closes only after PR #364 is explicitly authorized and merged to `master`, placing all three SSOT files on the default branch. Until then, Phase 0 remains **PARTIAL**. Green CI on the code baseline or on the documentation branch does not close Phase 0.
+
 - Baseline master SHA: `0a2ec9b477f89954ba1865ec59e3701a5a0f3831`.
 - PR #360 merged at that SHA.
 - PR #361 merged at `868fdbb1c0cee620a655eec06899043139e13428`.
