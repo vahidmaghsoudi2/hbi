@@ -58,7 +58,7 @@ test("unknown route returns to the authenticated homepage instead of rendering a
 
 test("unknown route without an Admin session redirects to login", async ({ page }) => {
   await page.goto("/this-route-does-not-exist");
-  await expect(page).toHaveURL(/\\/login$/);
+  await expect(page).toHaveURL(/\/login$/);
 });
 
 test("settings are not presented as an implemented page before a real settings route exists", async ({ page }) => {
@@ -72,10 +72,10 @@ test("settings are not presented as an implemented page before a real settings r
 });
 
 test("logout returns to login and protected routes remain gated", async ({ page }) => {
-  await page.addInitScript(() => {
+  await page.goto("/login");
+  await page.evaluate(() => {
     sessionStorage.setItem("hbi_admin_access_token", "browser-test-admin-token");
   });
-
   await page.goto("/");
   await page.getByRole("button", { name: /خروج از حساب/ }).click();
   await expect(page).toHaveURL(/\/login$/);
