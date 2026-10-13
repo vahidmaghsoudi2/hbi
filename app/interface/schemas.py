@@ -26,14 +26,38 @@ from app.domain.claim_taxonomy import normalize_claim_type_value
 class RecommendationBase(BaseModel):
     """Shared DB-mapped fields between Create/Update/Response."""
 
-    recommendation_id: str = Field(..., description="Unique identifier. PK in SQLAlchemy.")
-    case_id: str = Field(..., description="FK to Case.case_id (CASCADE). NOT NULL in DB.")
-    product_id: str = Field(..., description="FK to Product.product_id (RESTRICT). NOT NULL in DB.")
-    need_match_score: Optional[float] = Field(None, description="Match score from need analysis. Nullable in DB.")
-    evidence_score: Optional[float] = Field(None, description="Evidence-based score. Nullable in DB.")
-    eligibility_status: Optional[str] = Field(None, description="Eligibility status. Nullable in DB.")
-    ranking_score: Optional[float] = Field(None, description="Ranking score. Nullable in DB.")
-    ranking_reasons: Optional[str] = Field(None, description="Reasons for ranking. Nullable in DB.")
+    recommendation_id: str = Field(
+        ...,
+        description="Unique identifier. PK in SQLAlchemy."
+    )
+    case_id: str = Field(
+        ...,
+        description="FK to Case.case_id (CASCADE). NOT NULL in DB."
+    )
+    product_id: str = Field(
+        ...,
+        description="FK to Product.product_id (RESTRICT). NOT NULL in DB."
+    )
+    need_match_score: Optional[float] = Field(
+        None,
+        description="Match score from need analysis. Nullable in DB."
+    )
+    evidence_score: Optional[float] = Field(
+        None,
+        description="Evidence-based score. Nullable in DB."
+    )
+    eligibility_status: Optional[str] = Field(
+        None,
+        description="Eligibility status. Nullable in DB."
+    )
+    ranking_score: Optional[float] = Field(
+        None,
+        description="Ranking score. Nullable in DB."
+    )
+    ranking_reasons: Optional[str] = Field(
+        None,
+        description="Reasons for ranking. Nullable in DB."
+    )
 
 
 class RecommendationCreate(RecommendationBase):
@@ -192,7 +216,7 @@ class ProductCreate(BaseModel):
     product_id: str
     brand: str
     product_name: str
-    product_line: str
+    product_line: str  # Product Line V1 — required operator classification
     variant: Optional[str] = None
     size_value: Optional[float] = None
     size_unit: Optional[str] = None
@@ -203,11 +227,15 @@ class ProductCreate(BaseModel):
     knowledge_use_cases: Optional[str] = None
     knowledge_evidence_claim: Optional[str] = None
     knowledge_evidence_source_reference: Optional[str] = None
+    # WP-01: resolution token after POSSIBLE_MATCH operator decision=NEW (not a Product column)
     duplicate_check_id: Optional[str] = None
 
 
 class ProductUpdate(BaseModel):
-    """Informational fields only — governance fields forbidden (P4 P0)."""
+    """Informational fields only — governance fields forbidden (P4 P0).
+    extra=\"forbid\" ensures any governance key in PATCH body is rejected at schema boundary
+    (Pydantic v2 default is ignore, which would silently discard status/identity_status/qa_verdict).
+    """
     brand: Optional[str] = None
     product_name: Optional[str] = None
     variant: Optional[str] = None
@@ -218,7 +246,7 @@ class ProductUpdate(BaseModel):
     country_of_origin: Optional[str] = None
     packaging_version: Optional[str] = None
     category_id: Optional[str] = None
-    product_line: Optional[str] = None
+    product_line: Optional[str] = None  # Product Line V1 — operator-controlled change only
     model_config = ConfigDict(extra="forbid")
 
 
