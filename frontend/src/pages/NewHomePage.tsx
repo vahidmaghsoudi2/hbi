@@ -544,8 +544,7 @@ export default function NewHomePage() {
   async function onSaleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!customerId) return setError("برای ثبت فروش، مشتری را انتخاب کنید؛ ثبت مشاوره الزامی نیست.");
-    if (!sessionStorage.getItem("hbi_admin_access_token")) return setError("برای ثبت فروش ابتدا با حساب مدیر وارد شوید.");
+    if (!sessionStorage.getItem("hbi_admin_access_token")) return setError("نشست مدیر در دسترس نیست؛ یک‌بار وارد حساب مدیر شوید.");
     if (!saleProductId.trim()) return setError("محصول را انتخاب کنید.");
     if (saleQty < 1) return setError("تعداد نامعتبر است.");
     if (salePrice == null) return setError("قیمت فروش این محصول در دسترس نیست.");
@@ -560,7 +559,7 @@ export default function NewHomePage() {
       if (!adminToken) throw new Error("برای ثبت فروش ابتدا با حساب مدیر وارد شوید.");
       const sale = await createSale(
         {
-          customer_id: customerId,
+          ...(customerId ? { customer_id: customerId } : {}),
           items: [{ product_id: saleProductId.trim(), quantity: saleQty, ...(selectedRecommendationId ? { recommendation_id: selectedRecommendationId } : {}) }],
           fx_rate_usd_to_irr: currentFxRate,
         },
@@ -571,11 +570,13 @@ export default function NewHomePage() {
       setSaleProductId("");
       setStatusMsg(`فروش ثبت شد: ${sale.sale_id ?? "OK"}`);
       await refreshSalesTotal();
-      try {
-        const updatedHistory = await listSalesByCustomer(customerId, token);
-        setPurchaseHistory(Array.isArray(updatedHistory) ? updatedHistory : []);
-      } catch {
-        // The sale is already committed; history refresh is best-effort.
+      if (customerId && token) {
+        try {
+          const updatedHistory = await listSalesByCustomer(customerId, token);
+          setPurchaseHistory(Array.isArray(updatedHistory) ? updatedHistory : []);
+        } catch {
+          // The sale is already committed; history refresh is best-effort.
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
