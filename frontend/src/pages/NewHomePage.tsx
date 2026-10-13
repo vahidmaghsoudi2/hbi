@@ -1,5 +1,5 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   listProducts,
   listManageableProducts,
@@ -45,10 +45,11 @@ const SKIN_OPTIONS = ["خشک", "چرب", "مختلط", "معمولی", "حسا�
 const CONSULTATION_LINES = [{ id: "SKIN", label: "پوست" }] as const;
 const INITIAL_RECOMMENDATION_LIMIT = 5;
 
-type Panel = "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about";
+type Panel = "home" | "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about";
 
 export default function NewHomePage() {
-  const [active, setActive] = useState<Panel>("consult");
+  const navigate = useNavigate();
+  const [active, setActive] = useState<Panel>("home");
   const [productsMenuOpen, setProductsMenuOpen] = useState(false);
   const [token, setToken] = useState<string | null>(() => sessionStorage.getItem("hbi_access_token"));
   const [customerId, setCustomerId] = useState<string | null>(() => sessionStorage.getItem("hbi_customer_id"));
@@ -205,6 +206,11 @@ export default function NewHomePage() {
   function go(panel: Panel) {
     setActive(panel);
     setError(null);
+  }
+
+  function logout() {
+    sessionStorage.clear();
+    navigate("/login", { replace: true });
   }
 
   async function ensureSession(displayName: string, concernsForGuest: string) {
@@ -553,13 +559,12 @@ export default function NewHomePage() {
     if (score >= 0.5) return "متوسط";
     return "محدود";
   }
-  const nav: [Panel, string][] = [
-    ["consult", "مشاوره"],
-    ["previous", "مشتری قبلی / جست‌وجو"],
-    ["profile", "پروفایل"],
-    ["results", "پیشنهادها"],
-    ["sales", "فروش"],
-    ["about", "درباره HBI"],
+  const navGroups: { label: string; items: [Panel, string][] }[] = [
+    { label: "خانه", items: [["home", "داشبورد"]] },
+    { label: "مشتریان", items: [["previous", "جست‌وجو و سابقه"], ["profile", "پروفایل مشتری"]] },
+    { label: "مشاوره", items: [["consult", "مشاوره جدید"], ["results", "پیشنهادها و تصمیم اپراتور"]] },
+    { label: "فروش", items: [["sales", "ثبت فروش و تاریخچه"]] },
+    { label: "مدیریت محصولات", items: [["catalog", "فهرست محصولات"], ["intake", "ورود و ویرایش محصول"], ["review", "بررسی و تأیید QA"]] },
   ];
 
   return (
@@ -570,54 +575,35 @@ export default function NewHomePage() {
             <span className="pro-brand-mark">HBI</span>
             <div>
               <div className="pro-brand-title">گالری مقصودی</div>
-              <div className="pro-brand-sub">هوش زیبایی و مراقبت · یک صفحه کامل</div>
+              <div className="pro-brand-sub">هوش زیبایی و مراقبت · فضای کاری مدیر</div>
             </div>
           </div>
-          <nav className="pro-nav" aria-label="بخش‌های صفحه">
-            {nav.map(([id, label]) => (
-              <button key={id} type="button" className={active === id ? "pro-nav-btn on" : "pro-nav-btn"} onClick={() => go(id)}>
-                {label}
-              </button>
-            ))}
-            <div className="pro-products-menu">
-              <button
-                type="button"
-                className={(["catalog", "review", "intake"] as Panel[]).includes(active) ? "pro-nav-btn on" : "pro-nav-btn"}
-                aria-haspopup="true"
-                aria-expanded={productsMenuOpen}
-                aria-controls="pro-products-submenu"
-                onClick={() => setProductsMenuOpen((open) => !open)}
-              >
-                محصولات <span aria-hidden="true">⌄</span>
-              </button>
-              {productsMenuOpen && (
-                <div id="pro-products-submenu" className="pro-products-submenu" role="group" aria-label="بخش‌های محصولات">
-                  {([
-                    ["catalog", "فهرست محصولات"],
-                    ["intake", "ورود محصول"],
-                    ["review", "بررسی و تأیید محصول"],
-                  ] as [Panel, string][]).map(([id, label]) => (
-                    <button
-                      key={id}
-                      type="button"
-                      className={active === id ? "pro-products-submenu-btn on" : "pro-products-submenu-btn"}
-                      onClick={() => {
-                        go(id);
-                        setProductsMenuOpen(false);
-                      }}
-                    >
+          <nav className="pro-nav" aria-label="ناوبری اصلی HBI">
+            {navGroups.map((group) => (
+              <div key={group.label} className="pro-nav-group">
+                <span className="pro-nav-group-label">{group.label}</span>
+                <div className="pro-nav-group-items">
+                  {group.items.map(([id, label]) => (
+                    <button key={id} type="button" className={active === id ? "pro-nav-btn on" : "pro-nav-btn"} aria-current={active === id ? "page" : undefined} onClick={() => go(id)}>
                       {label}
                     </button>
                   ))}
                 </div>
-              )}
+              </div>
+            ))}
+            <div className="pro-nav-group">
+              <span className="pro-nav-group-label">خرید و گزارش‌ها</span>
+              <div className="pro-nav-group-items">
+                <Link to="/purchase" className="pro-nav-btn">خرید / ورود موجودی</Link>
+                <Link to="/accounting" className="pro-nav-btn">گزارش‌ها و حسابداری</Link>
+              </div>
             </div>
-            <Link to="/purchase" className="pro-nav-btn">
-              خرید
-            </Link>
-            <Link to="/accounting" className="pro-nav-btn">
-              حسابداری
-            </Link>
+            <div className="pro-nav-group">
+              <span className="pro-nav-group-label">تنظیمات</span>
+              <div className="pro-nav-group-items">
+                <button type="button" className="pro-nav-btn" onClick={logout}>خروج از حساب مدیر</button>
+              </div>
+            </div>
           </nav>
         </div>
       </header>
@@ -643,6 +629,55 @@ export default function NewHomePage() {
             {error}
           </div>
         ) : null}
+
+        {active === "home" && (
+          <section className="pro-panel">
+            <h1>داشبورد HBI</h1>
+            <p className="pro-lead">نمای کلی و میانبر عملیات مدیر. ورود محصول، تأیید QA و ورود فیزیکی موجودی سه کار جدا هستند.</p>
+            <div className="pro-product-grid">
+              <article className="pro-product-card">
+                <h2>مشتریان</h2>
+                <p className="pro-muted">جست‌وجو، انتخاب مشتری، پروفایل و سابقه خرید.</p>
+                <div className="pro-actions">
+                  <button type="button" className="pro-btn-primary" onClick={() => go("previous")}>جست‌وجوی مشتری</button>
+                  <button type="button" className="pro-btn-secondary" onClick={() => go("profile")}>پروفایل / مشتری جدید</button>
+                </div>
+              </article>
+              <article className="pro-product-card">
+                <h2>مشاوره و پیشنهاد</h2>
+                <p className="pro-muted">ثبت مسئله، اعتبارسنجی نیاز، مشاهده پیشنهاد و تصمیم اپراتور.</p>
+                <div className="pro-actions">
+                  <button type="button" className="pro-btn-primary" onClick={() => go("consult")}>شروع مشاوره</button>
+                  <button type="button" className="pro-btn-secondary" onClick={() => go("results")}>مشاهده پیشنهادها</button>
+                </div>
+              </article>
+              <article className="pro-product-card">
+                <h2>فروش مستقیم</h2>
+                <p className="pro-muted">ثبت فروش بدون اجبار به ایجاد پرونده مشاوره.</p>
+                <button type="button" className="pro-btn-primary" onClick={() => go("sales")}>ورود به فروش</button>
+              </article>
+              <article className="pro-product-card">
+                <h2>مدیریت محصول</h2>
+                <p className="pro-muted">پذیرش مشخصات و شواهد، بررسی و تأیید QA.</p>
+                <div className="pro-actions">
+                  <button type="button" className="pro-btn-primary" onClick={() => go("intake")}>ورود محصول</button>
+                  <button type="button" className="pro-btn-secondary" onClick={() => go("review")}>بررسی و QA</button>
+                  <button type="button" className="pro-btn-secondary" onClick={() => go("catalog")}>فهرست محصولات</button>
+                </div>
+              </article>
+              <article className="pro-product-card">
+                <h2>خرید و انبار</h2>
+                <p className="pro-muted">ثبت خرید و ورود فیزیکی موجودی؛ مستقل از پذیرش محصول.</p>
+                <Link to="/purchase" className="pro-btn-secondary">خرید / ورود موجودی</Link>
+              </article>
+              <article className="pro-product-card">
+                <h2>گزارش‌ها</h2>
+                <p className="pro-muted">گزارش‌های فروش و موجودی در بخش حسابداری.</p>
+                <Link to="/accounting" className="pro-btn-secondary">گزارش‌ها و حسابداری</Link>
+              </article>
+            </div>
+          </section>
+        )}
 
         {active === "previous" && (
           <section className="pro-panel">
@@ -1090,7 +1125,7 @@ export default function NewHomePage() {
           </section>
         )}
       </main>
-      <footer className="pro-footer">HBI · گالری مقصودی · مشاوره تا فروش در یک صفحه</footer>
+      <footer className="pro-footer">HBI · گالری مقصودی · فضای کاری مدیر</footer>
     </div>
   );
 }
