@@ -49,6 +49,7 @@ type Panel = "consult" | "previous" | "profile" | "catalog" | "review" | "intake
 
 export default function NewHomePage() {
   const [active, setActive] = useState<Panel>("consult");
+  const [productsMenuOpen, setProductsMenuOpen] = useState(false);
   const [token, setToken] = useState<string | null>(() => sessionStorage.getItem("hbi_access_token"));
   const [customerId, setCustomerId] = useState<string | null>(() => sessionStorage.getItem("hbi_customer_id"));
   const [caseId, setCaseId] = useState<string | null>(() => sessionStorage.getItem("hbi_case_id"));
@@ -556,9 +557,6 @@ export default function NewHomePage() {
     ["consult", "مشاوره"],
     ["previous", "مشتری قبلی / جست‌وجو"],
     ["profile", "پروفایل"],
-    ["catalog", "محصولات"],
-    ["review", "بررسی محصول"],
-    ["intake", "ورود محصول"],
     ["results", "پیشنهادها"],
     ["sales", "فروش"],
     ["about", "درباره HBI"],
@@ -581,6 +579,39 @@ export default function NewHomePage() {
                 {label}
               </button>
             ))}
+            <div className="pro-products-menu">
+              <button
+                type="button"
+                className={(["catalog", "review", "intake"] as Panel[]).includes(active) ? "pro-nav-btn on" : "pro-nav-btn"}
+                aria-haspopup="true"
+                aria-expanded={productsMenuOpen}
+                aria-controls="pro-products-submenu"
+                onClick={() => setProductsMenuOpen((open) => !open)}
+              >
+                محصولات <span aria-hidden="true">⌄</span>
+              </button>
+              {productsMenuOpen && (
+                <div id="pro-products-submenu" className="pro-products-submenu" role="group" aria-label="بخش‌های محصولات">
+                  {([
+                    ["catalog", "فهرست محصولات"],
+                    ["intake", "ورود محصول"],
+                    ["review", "بررسی و تأیید محصول"],
+                  ] as [Panel, string][]).map(([id, label]) => (
+                    <button
+                      key={id}
+                      type="button"
+                      className={active === id ? "pro-products-submenu-btn on" : "pro-products-submenu-btn"}
+                      onClick={() => {
+                        go(id);
+                        setProductsMenuOpen(false);
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <Link to="/purchase" className="pro-nav-btn">
               خرید
             </Link>
