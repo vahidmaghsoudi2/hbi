@@ -44,30 +44,31 @@ test("homepage navigation exposes each operational domain and its intended desti
 
   // Expand کالا و انبار and assert destinations.
   await openSubmenu(page, "کالا و انبار");
-  await expect(page.locator(".hbi-subnav").filter({ hasText: "کاتالوگ کالاها" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "کاتالوگ کالاها" })).toHaveAttribute("href", "/catalog");
-  await expect(page.getByRole("link", { name: "خرید و ورود موجودی" })).toHaveAttribute("href", "/purchase");
-  await expect(page.getByRole("link", { name: "بررسی پرونده کالا" })).toHaveAttribute(
-    "href",
-    "/workspace?panel=review"
-  );
+  const goodsSub = page.locator(".hbi-subnav").filter({ hasText: "کاتالوگ کالاها" });
+  await expect(goodsSub).toBeVisible();
+  await expect(goodsSub.locator("a.hbi-subnav-link", { hasText: "کاتالوگ کالاها" })).toHaveAttribute("href", "/catalog");
+  await expect(goodsSub.locator("a.hbi-subnav-link", { hasText: "خرید و ورود موجودی" })).toHaveAttribute("href", "/purchase");
+  // Product file review is governance (ProductReviewPanel), not inventory — not in homepage menu.
+  await expect(page.locator("a.hbi-subnav-link", { hasText: "بررسی پرونده کالا" })).toHaveCount(0);
+  await expect(page.locator("a.hbi-nav-item, a.hbi-subnav-link, a.hbi-action-card").filter({ hasText: "ورود محصول" })).toHaveCount(0);
 
   // Expand مشتری و مشاوره (accordion closes previous).
   await openSubmenu(page, "مشتری و مشاوره");
-  await expect(page.locator(".hbi-subnav").filter({ hasText: "پرونده مشتری" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "ثبت مراجعه و مشاوره" })).toHaveAttribute(
+  const consultSub = page.locator(".hbi-subnav").filter({ hasText: "پرونده مشتری" });
+  await expect(consultSub).toBeVisible();
+  await expect(consultSub.locator("a.hbi-subnav-link", { hasText: "ثبت مراجعه و مشاوره" })).toHaveAttribute(
     "href",
     "/workspace?panel=consult"
   );
-  await expect(page.getByRole("link", { name: "پرونده مشتری" })).toHaveAttribute(
+  await expect(consultSub.locator("a.hbi-subnav-link", { hasText: "پرونده مشتری" })).toHaveAttribute(
     "href",
     "/workspace?panel=profile"
   );
-  await expect(page.getByRole("link", { name: "سوابق مراجعه" })).toHaveAttribute(
+  await expect(consultSub.locator("a.hbi-subnav-link", { hasText: "سوابق مراجعه" })).toHaveAttribute(
     "href",
     "/workspace?panel=previous"
   );
-  await expect(page.getByRole("link", { name: "نتایج ارزیابی و پیشنهاد" })).toHaveAttribute(
+  await expect(consultSub.locator("a.hbi-subnav-link", { hasText: "نتایج ارزیابی و پیشنهاد" })).toHaveAttribute(
     "href",
     "/workspace?panel=results"
   );
