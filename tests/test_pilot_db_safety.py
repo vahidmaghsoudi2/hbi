@@ -57,3 +57,33 @@ def test_browser_fixture_builder_requires_explicit_fixture_mode() -> None:
 
     assert result.returncode != 0
     assert "HBI_PILOT_FIXTURE_MODE=browser-fixture" in result.stderr
+
+
+def test_isolated_g8_runner_smoke_starts_and_cleans_its_database() -> None:
+    from sqlalchemy.engine import make_url
+
+    env = os.environ.copy()
+    env["HBI_ENV"] = "development"
+    env.pop("DATABASE_URL", None)
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "run_g8_isolated_pilot.py"), "--smoke-test"],
+        cwd=ROOT,
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+        timeout=60,
+    )
+
+    output = result.stdout + "\\n" + result.stderr
+    assert result.returncode == 0, output
+    assert "PILOT_API_READY=YES" in output
+    assert "SMOKE_TEST=PASS" in output
+    assert "DATABASE_CLEANUP=PASS" in output
+
+    db_url_line = next(line for line in output.splitlines() if line.startswith("DATABASE_URL="))
+    db_path = Path(make_url(db_url_line.split("=", 1)[1]).database)
+    assert not db_path.exists()
+
+    log_line = next(line for line in output.splitlines() if line.startswith("API_LOG_RETAINED="))
+    assert Path(log_line.split("=", 1)[1]).is_file()
