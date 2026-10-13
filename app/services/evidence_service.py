@@ -71,7 +71,7 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
 
         data = dict(evidence_data)
         product_id = data["product_id"]
-        claim_type = (data.get("claim_type") or "UNKNOWN").upper()
+        claim_type = str(data.get("claim_type") or "UNKNOWN").strip().upper() or "UNKNOWN"
         source_type = data.get("source_type") or "UNKNOWN"
         self._validate_claim_boundary(claim_type, source_type)
 
