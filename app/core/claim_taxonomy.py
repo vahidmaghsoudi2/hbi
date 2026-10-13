@@ -1,14 +1,4 @@
-"""Canonical claim-type vocabulary for the Skin Product Intake evidence contract.
+"""Compatibility import; canonical claim taxonomy lives in app.domain."""
+from app.domain.claim_taxonomy import CLAIM_TYPES
 
-Keep this vocabulary separate from reasoning-engine promotion labels. Claim types
-describe the epistemic status of an evidence row, not its recommendation score.
-"""
-
-CLAIM_TYPES = frozenset({
-    "FACT",
-    "MANUFACTURER_CLAIM",
-    "EVIDENCE",
-    "INFERENCE",
-    "UNKNOWN",
-    "CONFLICT",
-})
+__all__ = ["CLAIM_TYPES"]
