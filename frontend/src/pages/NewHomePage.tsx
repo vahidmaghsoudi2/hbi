@@ -4,9 +4,7 @@ import {
   listProducts,
   listManageableProducts,
   pilotToken,
-  pilotOperatorToken,
-  pilotPoToken,
-  customerIntake,
+    customerIntake,
   createGuest,
   generateRecommendations,
   listInternalEvaluationsByCase,
@@ -76,6 +74,7 @@ export default function NewHomePage() {
   const [saleStock, setSaleStock] = useState<number | null>(null);
   const [saleFxRate, setSaleFxRate] = useState<number | null>(null);
   const [saleBusy, setSaleBusy] = useState(false);
+  const [walkInSale, setWalkInSale] = useState(false);
   const [lastSale, setLastSale] = useState<SaleDTO | null>(null);
   const [totalSales, setTotalSales] = useState<number | null>(null);
   const [editProduct, setEditProduct] = useState<ProductDTO | null>(null);
@@ -228,19 +227,17 @@ export default function NewHomePage() {
   }
 
   async function ensureProductSession(): Promise<string | null> {
-    const cached = sessionStorage.getItem("hbi_operator_access_token");
-    if (cached) return cached;
-    const pair = await pilotOperatorToken();
-    sessionStorage.setItem("hbi_operator_access_token", pair.access_token);
-    return pair.access_token;
+    // The single system operator is Admin; do not mint a separate Pilot/Operator token.
+    const adminToken = sessionStorage.getItem("hbi_admin_access_token");
+    if (!adminToken) throw new Error("نشست مدیر در دسترس نیست؛ با همان حساب مدیر وارد شوید.");
+    return adminToken;
   }
 
   async function ensureReviewSession(): Promise<string | null> {
-    const cached = sessionStorage.getItem("hbi_po_access_token");
-    if (cached) return cached;
-    const pair = await pilotPoToken();
-    sessionStorage.setItem("hbi_po_access_token", pair.access_token);
-    return pair.access_token;
+    // Product review uses the same Admin session, not a separate PO/Pilot identity.
+    const adminToken = sessionStorage.getItem("hbi_admin_access_token");
+    if (!adminToken) throw new Error("نشست مدیر در دسترس نیست؛ با همان حساب مدیر وارد شوید.");
+    return adminToken;
   }
 
   async function loadActiveCustomerProfile() {
@@ -469,8 +466,7 @@ export default function NewHomePage() {
   async function onSaleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!customerId) return setError("برای ثبت فروش، مشتری را انتخاب کنید؛ ثبت مشاوره الزامی نیست.");
-    if (!sessionStorage.getItem("hbi_admin_access_token")) return setError("برای ثبت فروش ابتدا با حساب مدیر وارد شوید.");
+    if (!sessionStorage.getItem("hbi_admin_access_token")) return setError("نشست مدیر در دسترس نیست؛ با همان حساب مدیر وارد شوید.");
     if (!saleProductId.trim()) return setError("محصول را انتخاب کنید.");
     if (saleQty < 1) return setError("تعداد نامعتبر است.");
     if (salePrice == null) return setError("قیمت فروش این محصول در دسترس نیست.");
@@ -485,7 +481,7 @@ export default function NewHomePage() {
       if (!adminToken) throw new Error("برای ثبت فروش ابتدا با حساب مدیر وارد شوید.");
       const sale = await createSale(
         {
-          customer_id: customerId,
+          ...(customerId ? { customer_id: customerId } : {}),
           items: [{ product_id: saleProductId.trim(), quantity: saleQty, ...(selectedRecommendationId ? { recommendation_id: selectedRecommendationId } : {}) }],
           fx_rate_usd_to_irr: currentFxRate,
         },
@@ -496,11 +492,13 @@ export default function NewHomePage() {
       setSaleProductId("");
       setStatusMsg(`فروش ثبت شد: ${sale.sale_id ?? "OK"}`);
       await refreshSalesTotal();
-      try {
-        const updatedHistory = await listSalesByCustomer(customerId, token);
-        setPurchaseHistory(Array.isArray(updatedHistory) ? updatedHistory : []);
-      } catch {
-        // The sale is already committed; history refresh is best-effort.
+      if (customerId && token) {
+        try {
+          const updatedHistory = await listSalesByCustomer(customerId, token);
+          setPurchaseHistory(Array.isArray(updatedHistory) ? updatedHistory : []);
+        } catch {
+          // The sale is already committed; history refresh is best-effort.
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -987,8 +985,8 @@ export default function NewHomePage() {
         {active === "sales" && (
           <section className="pro-panel" id="sales">
             <h1>ثبت فروش</h1>
-            <p className="pro-lead">ثبت فروش مستقل از مشاوره است. نشست مدیر و انتخاب مشتری لازم است؛ اتصال به مشاوره اختیاری است.</p>
-            {!customerId ? (
+            <p className="pro-lead">ثبت فروش مستقل از مشاوره و ثبت مشتری است. اتصال به مشتری و پرونده فقط در صورت وجود اختیاری است.</p>
+            {!customerId && !walkInSale ? (
               <div className="pro-empty">
                 <strong>مشتری فاکتور را انتخاب کنید؛ پروندهٔ مشاوره لازم نیست.</strong>
                 <div className="pro-form">
@@ -996,19 +994,18 @@ export default function NewHomePage() {
                   <input id="sale-customer-search" className="pro-input" value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} placeholder="نام یا شماره موبایل" />
                   <button type="button" className="pro-btn-primary" onClick={() => void searchPreviousCustomers()} disabled={customerSearchBusy}>{customerSearchBusy ? "در حال جست‌وجو…" : "جست‌وجوی مشتری"}</button>
                   {customerSearchResults.map((customer) => <button key={customer.customer_id} type="button" className="pro-btn-secondary" onClick={() => { void (async () => { await selectPreviousCustomer(customer); setActive("sales"); })(); }}>{customer.name} · {customer.mobile ?? "بدون موبایل"} · {customer.customer_id}</button>)}
-                  <p className="pro-muted">برای مشتری جدید، ابتدا پروفایل مشتری را ثبت کنید؛ پروندهٔ مشاوره لازم نیست.</p>
+                  <p className="pro-muted">اگر مشتری نمی‌خواهد ثبت شود، فروش مستقیم را بدون اتصال به پروندهٔ مشتری انجام دهید.</p>
+                  <button type="button" className="pro-btn-primary" onClick={() => { setWalkInSale(true); setError(null); }}>ادامهٔ فروش بدون ثبت مشتری</button>
                   <button type="button" className="pro-btn-secondary" onClick={() => go("profile")}>ثبت پروفایل مشتری جدید</button>
                 </div>
               </div>
             ) : (
               <form className="pro-form" onSubmit={onSaleSubmit}>
-                <fieldset className="pro-fieldset">
-                  <legend>مشتری</legend>
-                  <p className="pro-muted">
-                    <code>{customerId}</code>
-                  </p>
-                  <p className="pro-muted">جمع فروش: {totalSales === null ? "—" : totalSales.toLocaleString("fa-IR")}</p>
-                </fieldset>
+                {customerId ? <fieldset className="pro-fieldset">
+                  <legend>مشتری پیوندشده</legend>
+                  <p className="pro-muted"><code>{customerId}</code></p>
+                  <p className="pro-muted">جمع فروش مشتری: {totalSales === null ? "—" : totalSales.toLocaleString("fa-IR")}</p>
+                </fieldset> : <p className="pro-muted">فروش مستقیم؛ بدون ایجاد یا انتخاب پروندهٔ مشتری.</p>}
                 <fieldset className="pro-fieldset">
                   <legend>اقلام</legend>
                   <label className="pro-label" htmlFor="sale-product">
