@@ -14,52 +14,82 @@ type NavItem = {
 };
 
 const navigation: NavItem[] = [
-  { label: "خانه و داشبورد", detail: "نمای کلی عملیات", icon: "⌂", to: "/", current: true, children: [] },
+  {
+    label: "خانه",
+    detail: "داشبورد و میان‌برها",
+    icon: "⌂",
+    to: "/",
+    current: true,
+    children: [],
+  },
+  {
+    label: "مشتری و مشاوره",
+    detail: "پرونده و روند مشاوره",
+    icon: "◎",
+    to: "/workspace?panel=previous",
+    children: [
+      { label: "فهرست و جست‌وجوی مشتری", to: "/workspace?panel=previous" },
+      { label: "پرونده مشتری", to: "/workspace?panel=profile" },
+      { label: "مشاوره جدید", to: "/workspace?panel=consult" },
+      { label: "پیشنهاد محصول", to: "/workspace?panel=results" },
+      { label: "سوابق مشاوره", to: "/workspace?panel=previous" },
+    ],
+  },
+  {
+    label: "فروش",
+    detail: "ثبت فروش مستقیم",
+    icon: "↗",
+    to: "/sales",
+    children: [
+      { label: "ثبت فروش", to: "/sales" },
+    ],
+  },
   {
     label: "کالا و انبار",
     detail: "کاتالوگ و موجودی",
     icon: "▦",
     to: "/catalog",
-    // Product review (ProductReviewPanel / panel=review) is product governance, not inventory.
     children: [
-      { label: "کاتالوگ کالاها", to: "/catalog" },
-      { label: "خرید و ورود موجودی", to: "/purchase" },
+      { label: "محصولات (کاتالوگ)", to: "/catalog" },
+      { label: "ورود کالا / خرید", to: "/purchase" },
     ],
   },
   {
-    label: "مشتری و مشاوره",
-    detail: "پرونده، مراجعه و نتایج",
-    icon: "◎",
-    to: "/workspace?panel=consult",
+    label: "حسابداری و گزارش",
+    detail: "گزارش‌های موجود",
+    icon: "▤",
+    to: "/accounting",
     children: [
-      { label: "ثبت مراجعه و مشاوره", to: "/workspace?panel=consult" },
-      { label: "پرونده مشتری", to: "/workspace?panel=profile" },
-      { label: "سوابق مراجعه", to: "/workspace?panel=previous" },
-      { label: "نتایج ارزیابی و پیشنهاد", to: "/workspace?panel=results" },
+      { label: "خانه حسابداری", to: "/accounting" },
     ],
   },
-  { label: "فروش", detail: "ثبت فروش مستقیم", icon: "↗", to: "/workspace?panel=sales", children: [] },
-  { label: "مالی و حسابداری", detail: "گزارش‌ها و امور مالی", icon: "▤", to: "/accounting", children: [] },
+  {
+    label: "تنظیمات",
+    detail: "خروج از نوار پایین",
+    icon: "⚙",
+    to: "/",
+    children: [],
+  },
 ];
 
 const quickActions = [
   {
     title: "ثبت فروش",
-    description: "فروش مستقیم؛ مشاوره پیش‌نیاز نیست",
+    description: "فروش ساده؛ بدون مشاوره",
     icon: "↗",
-    to: "/workspace?panel=sales",
+    to: "/sales",
     tag: "عملیات روزانه",
   },
   {
     title: "مشتری و مشاوره",
-    description: "ثبت مراجعه یا ادامهٔ مشاوره در صورت نیاز",
+    description: "جست‌وجو یا شروع مشاوره",
     icon: "◎",
-    to: "/workspace?panel=consult",
+    to: "/workspace?panel=previous",
     tag: "ارتباط با مشتری",
   },
   {
-    title: "گالری محصولات",
-    description: "مشاهدهٔ کاتالوگ کالاهای موجود",
+    title: "کاتالوگ کالا",
+    description: "فهرست کالاهای ثبت‌شده",
     icon: "▦",
     to: "/catalog",
     tag: "کالا و انبار",
