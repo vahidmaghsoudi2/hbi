@@ -55,7 +55,6 @@ if db_path.exists() and db_path.stat().st_size > 0:
 from app.database import init_db, SessionLocal
 from scripts.seed_products_from_records import seed
 from app.models.customer import Customer
-from app.models.customer import Customer
 from app.models.evidence import Evidence
 from app.models.product import Product
 from app.models.product_knowledge import ProductKnowledge
