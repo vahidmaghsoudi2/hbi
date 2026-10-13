@@ -107,9 +107,12 @@ def _ensure_sale_customer_optional():
         available = [c for c in columns if c in old_columns]
         quoted = ", ".join(f'"{c}"' for c in available)
         cursor.execute(f'INSERT INTO "Sale_new" ({quoted}) SELECT {quoted} FROM "Sale"')
+        # The compatibility view references Sale and must be recreated around the rebuild.
+        cursor.execute('DROP VIEW IF EXISTS "CustomerPurchaseHistory"')
         cursor.execute('DROP TABLE "Sale"')
         cursor.execute('ALTER TABLE "Sale_new" RENAME TO "Sale"')
         cursor.execute('CREATE INDEX IF NOT EXISTS ix_Sale_idempotency_key ON "Sale" (idempotency_key)')
+        cursor.execute('CREATE VIEW IF NOT EXISTS CustomerPurchaseHistory AS SELECT c.customer_id, si.product_id, si.quantity, s.created_at AS purchase_date FROM "Sale" s JOIN "SaleItem" si ON s.sale_id = si.sale_id JOIN "Customer" c ON s.customer_id = c.customer_id')
         raw.commit()
         cursor.execute("PRAGMA foreign_keys=ON")
         violations = cursor.execute("PRAGMA foreign_key_check").fetchall()
