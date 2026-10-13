@@ -59,7 +59,7 @@ type PageView = "main" | "section" | "content";
 export default function NewHomePage() {
   const navigate = useNavigate();
   const [active, setActive] = useState<Panel>("home");
-  const [pageView, setPageView] = useState<PageView>("main");
+  const [pageView, setPageView] = useState<PageView>("content");
   const [mainSection, setMainSection] = useState<MainSection>("home");
   const [token, setToken] = useState<string | null>(() => sessionStorage.getItem("hbi_access_token"));
   const [customerId, setCustomerId] = useState<string | null>(() => sessionStorage.getItem("hbi_customer_id"));
