@@ -17,6 +17,10 @@ import {
   getInventoryByProduct,
   getCurrentFx,
   listSalesByCustomer,
+  getSalesPeriod,
+  getInventoryReport,
+  getLowStockReport,
+  getStockMovements,
 } from "../api/client";
 import ProductIntakePanel from "./ProductIntakePanel";
 import ProductReviewPanel from "./ProductReviewPanel";
@@ -28,6 +32,9 @@ import type {
   GuestCreateRequest,
   CustomerSearchResult,
   SaleDTO,
+  SalesReportDTO,
+  InventoryReportRow,
+  StockMovementDTO,
 } from "../types/api";
 
 const CONCERN_OPTIONS = [
@@ -84,6 +91,12 @@ export default function NewHomePage() {
   const [customerSearchResults, setCustomerSearchResults] = useState<CustomerSearchResult[]>([]);
   const [purchaseHistory, setPurchaseHistory] = useState<SaleDTO[]>([]);
   const [customerSearchBusy, setCustomerSearchBusy] = useState(false);
+  const [dashboardLoading, setDashboardLoading] = useState(false);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
+  const [dashboardSales, setDashboardSales] = useState<SalesReportDTO | null>(null);
+  const [dashboardInventory, setDashboardInventory] = useState<InventoryReportRow[] | null>(null);
+  const [dashboardLowStock, setDashboardLowStock] = useState<InventoryReportRow[] | null>(null);
+  const [dashboardMovements, setDashboardMovements] = useState<StockMovementDTO[] | null>(null);
 
   const loadProducts = useCallback(async () => {
     setCatalogLoading(true);
@@ -134,6 +147,42 @@ export default function NewHomePage() {
   useEffect(() => {
     if (active === "sales") void refreshSalesTotal();
   }, [active, refreshSalesTotal]);
+
+  const refreshDashboard = useCallback(async () => {
+    const adminToken = sessionStorage.getItem("hbi_admin_access_token");
+    if (!adminToken) {
+      setDashboardSales(null);
+      setDashboardInventory(null);
+      setDashboardLowStock(null);
+      setDashboardMovements(null);
+      setDashboardError("نشست مدیر موجود نیست؛ ابتدا وارد حساب مدیر شوید.");
+      return;
+    }
+
+    setDashboardLoading(true);
+    setDashboardError(null);
+    const results = await Promise.allSettled([
+      getSalesPeriod("today", adminToken),
+      getInventoryReport(adminToken),
+      getLowStockReport(5, adminToken),
+      getStockMovements(adminToken, { limit: 5 }),
+    ]);
+    let failed = 0;
+    if (results[0].status === "fulfilled") setDashboardSales(results[0].value);
+    else { setDashboardSales(null); failed += 1; }
+    if (results[1].status === "fulfilled") setDashboardInventory(results[1].value);
+    else { setDashboardInventory(null); failed += 1; }
+    if (results[2].status === "fulfilled") setDashboardLowStock(results[2].value);
+    else { setDashboardLowStock(null); failed += 1; }
+    if (results[3].status === "fulfilled") setDashboardMovements(results[3].value);
+    else { setDashboardMovements(null); failed += 1; }
+    setDashboardError(failed ? `${failed} بخش از خلاصه عملیاتی بارگذاری نشد؛ جزئیات را در گزارش‌ها بررسی کنید.` : null);
+    setDashboardLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (active === "home") void refreshDashboard();
+  }, [active, refreshDashboard]);
 
   const concernsText = useMemo(() => {
     const parts = [...concerns, ...skin.map((s) => `پوست ${s}`)];
@@ -632,49 +681,114 @@ export default function NewHomePage() {
         {active === "home" && (
           <section className="pro-panel">
             <h1>داشبورد HBI</h1>
-            <p className="pro-lead">نمای کلی و میانبر عملیات مدیر. ورود محصول، تأیید QA و ورود فیزیکی موجودی سه کار جدا هستند.</p>
-            <div className="pro-product-grid">
-              <article className="pro-product-card">
-                <h2>مشتریان</h2>
-                <p className="pro-muted">جست‌وجو، انتخاب مشتری، پروفایل و سابقه خرید.</p>
-                <div className="pro-actions">
-                  <button type="button" className="pro-btn-primary" onClick={() => go("previous")}>جست‌وجوی مشتری</button>
-                  <button type="button" className="pro-btn-secondary" onClick={() => go("profile")}>پروفایل / مشتری جدید</button>
-                </div>
-              </article>
-              <article className="pro-product-card">
-                <h2>مشاوره و پیشنهاد</h2>
-                <p className="pro-muted">ثبت مسئله، اعتبارسنجی نیاز، مشاهده پیشنهاد و تصمیم اپراتور.</p>
-                <div className="pro-actions">
+            <p className="pro-lead">میانبرهای عملیات در اولویت‌اند. خلاصه‌ها و هشدارهای زیر از APIهای مدیریتی خوانده می‌شوند؛ دادهٔ ناموجود به‌صورت عدد ساختگی نمایش داده نمی‌شود.</p>
+
+            <section aria-labelledby="dashboard-actions-title">
+              <h2 id="dashboard-actions-title">اقدام سریع</h2>
+              <div className="pro-product-grid">
+                <article className="pro-product-card">
+                  <h3>فروش مستقیم</h3>
+                  <p className="pro-muted">ثبت فروش، مستقل از پروندهٔ مشاوره.</p>
+                  <button type="button" className="pro-btn-primary" onClick={() => go("sales")}>ثبت فروش</button>
+                </article>
+                <article className="pro-product-card">
+                  <h3>مشتریان</h3>
+                  <p className="pro-muted">جست‌وجو، ایجاد پروفایل و سابقهٔ خرید.</p>
+                  <div className="pro-actions">
+                    <button type="button" className="pro-btn-primary" onClick={() => go("previous")}>جست‌وجوی مشتری</button>
+                    <button type="button" className="pro-btn-secondary" onClick={() => go("profile")}>مشتری جدید</button>
+                  </div>
+                </article>
+                <article className="pro-product-card">
+                  <h3>مشاوره</h3>
+                  <p className="pro-muted">ثبت مسئله، اعتبارسنجی نیاز و تصمیم اپراتور.</p>
                   <button type="button" className="pro-btn-primary" onClick={() => go("consult")}>شروع مشاوره</button>
-                  <button type="button" className="pro-btn-secondary" onClick={() => go("results")}>مشاهده پیشنهادها</button>
-                </div>
-              </article>
-              <article className="pro-product-card">
-                <h2>فروش مستقیم</h2>
-                <p className="pro-muted">ثبت فروش بدون اجبار به ایجاد پرونده مشاوره.</p>
-                <button type="button" className="pro-btn-primary" onClick={() => go("sales")}>ورود به فروش</button>
-              </article>
-              <article className="pro-product-card">
-                <h2>مدیریت محصول</h2>
-                <p className="pro-muted">پذیرش مشخصات و شواهد، بررسی و تأیید QA.</p>
-                <div className="pro-actions">
+                </article>
+                <article className="pro-product-card">
+                  <h3>ورود اطلاعات محصول</h3>
+                  <p className="pro-muted">ثبت مشخصات محصول؛ جدا از ورود فیزیکی موجودی.</p>
                   <button type="button" className="pro-btn-primary" onClick={() => go("intake")}>ورود محصول</button>
-                  <button type="button" className="pro-btn-secondary" onClick={() => go("review")}>بررسی و QA</button>
-                  <button type="button" className="pro-btn-secondary" onClick={() => go("catalog")}>فهرست محصولات</button>
-                </div>
-              </article>
-              <article className="pro-product-card">
-                <h2>خرید و انبار</h2>
-                <p className="pro-muted">ثبت خرید و ورود فیزیکی موجودی؛ مستقل از پذیرش محصول.</p>
-                <Link to="/purchase" className="pro-btn-secondary">خرید / ورود موجودی</Link>
-              </article>
-              <article className="pro-product-card">
-                <h2>گزارش‌ها</h2>
-                <p className="pro-muted">گزارش‌های فروش و موجودی در بخش حسابداری.</p>
-                <Link to="/accounting" className="pro-btn-secondary">گزارش‌ها و حسابداری</Link>
-              </article>
-            </div>
+                </article>
+                <article className="pro-product-card">
+                  <h3>بررسی و تأیید QA</h3>
+                  <p className="pro-muted">بررسی وضعیت و موانع تأیید محصول.</p>
+                  <button type="button" className="pro-btn-secondary" onClick={() => go("review")}>رفتن به بررسی QA</button>
+                </article>
+                <article className="pro-product-card">
+                  <h3>خرید و ورود موجودی</h3>
+                  <p className="pro-muted">ثبت ورود فیزیکی کالا و گردش انبار.</p>
+                  <Link to="/purchase" className="pro-btn-secondary">ثبت خرید / ورود موجودی</Link>
+                </article>
+              </div>
+            </section>
+
+            <section aria-labelledby="dashboard-summary-title">
+              <div className="pro-section-head">
+                <h2 id="dashboard-summary-title">خلاصهٔ عملیات</h2>
+                <button type="button" className="pro-btn-secondary" onClick={() => void refreshDashboard()} disabled={dashboardLoading}>
+                  {dashboardLoading ? "در حال دریافت…" : "نوسازی داده‌ها"}
+                </button>
+              </div>
+              {dashboardError && <p className="pro-error" role="status">{dashboardError}</p>}
+              <div className="pro-product-grid">
+                <article className="pro-product-card">
+                  <h3>فروش امروز</h3>
+                  <p className="pro-summary">{dashboardSales ? dashboardSales.sale_count.toLocaleString("fa-IR") : "—"} تراکنش</p>
+                  <p className="pro-muted">{dashboardSales ? dashboardSales.revenue_toman.toLocaleString("fa-IR") + " تومان درآمد ثبت‌شده" : "دادهٔ فروش در دسترس نیست."}</p>
+                  <Link to="/accounting" className="pro-btn-secondary">گزارش فروش</Link>
+                </article>
+                <article className="pro-product-card">
+                  <h3>موجودی انبار</h3>
+                  <p className="pro-summary">{dashboardInventory ? dashboardInventory.length.toLocaleString("fa-IR") : "—"} ردیف موجودی</p>
+                  <p className="pro-muted">{dashboardInventory ? "بر اساس گزارش موجودی فعلی." : "دادهٔ موجودی در دسترس نیست."}</p>
+                  <Link to="/accounting" className="pro-btn-secondary">مشاهدهٔ موجودی</Link>
+                </article>
+                <article className="pro-product-card">
+                  <h3>هشدار موجودی کم</h3>
+                  <p className="pro-summary">{dashboardLowStock ? dashboardLowStock.length.toLocaleString("fa-IR") : "—"} قلم</p>
+                  <p className="pro-muted">آستانهٔ هشدار: موجودی قابل دسترس ≤ ۵؛ از گزارش رسمی موجودی کم.</p>
+                  <Link to="/accounting" className="pro-btn-secondary">بررسی موجودی</Link>
+                </article>
+              </div>
+            </section>
+
+            <section aria-labelledby="dashboard-alerts-title">
+              <h2 id="dashboard-alerts-title">موارد نیازمند توجه</h2>
+              <div className="pro-product-card">
+                {dashboardLowStock === null ? (
+                  <p className="pro-muted">هشدار موجودی کم قابل تأیید نیست؛ گزارش موجودی در دسترس نیست.</p>
+                ) : dashboardLowStock.length === 0 ? (
+                  <p className="pro-muted">طبق آستانهٔ ۵، موردی در گزارش موجودی کم ثبت نشده است.</p>
+                ) : (
+                  <>
+                    <p role="status">{dashboardLowStock.length.toLocaleString("fa-IR")} قلم با موجودی ≤ ۵ نیازمند بررسی است.</p>
+                    <Link to="/accounting" className="pro-btn-primary">بازکردن گزارش موجودی</Link>
+                  </>
+                )}
+                <p className="pro-muted">وضعیت پذیرش و QA محصول در این داشبورد عددگذاری نشده؛ API مدیریتیِ تأییدشده برای خلاصهٔ چرخهٔ محصول هنوز احراز نشده است.</p>
+              </div>
+            </section>
+
+            <section aria-labelledby="dashboard-activity-title">
+              <h2 id="dashboard-activity-title">آخرین گردش‌های انبار</h2>
+              <div className="pro-product-card">
+                {dashboardMovements === null ? (
+                  <p className="pro-muted">گردش اخیر در دسترس نیست؛ گزارش حسابداری را بررسی کنید.</p>
+                ) : dashboardMovements.length === 0 ? (
+                  <p className="pro-muted">گردشی برای نمایش ثبت نشده است.</p>
+                ) : (
+                  <ul className="pro-ol">
+                    {dashboardMovements.map((movement) => (
+                      <li key={movement.movement_id}>
+                        {movement.movement_type} · {movement.product_id} · تغییر {movement.quantity_delta.toLocaleString("fa-IR")} · موجودی پس از عملیات {movement.quantity_after.toLocaleString("fa-IR")}
+                        {movement.created_at ? ` · ${new Date(movement.created_at).toLocaleString("fa-IR")}` : ""}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <Link to="/accounting" className="pro-btn-secondary">همهٔ گردش‌ها</Link>
+              </div>
+            </section>
           </section>
         )}
 
