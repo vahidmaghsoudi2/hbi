@@ -47,16 +47,8 @@ export default function App() {
         <Route path="/accounting" element={<AccountingHomePage />} />
         <Route path="/recommendation" element={<RecommendationPage />} />
         <Route path="/pilot" element={<PilotPage />} />
+        <Route path="/workspace" element={<WorkspaceRoute />} />
       </Route>
-
-      <Route
-        path="/workspace"
-        element={
-          <AdminGate>
-            <WorkspaceRoute />
-          </AdminGate>
-        }
-      />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
