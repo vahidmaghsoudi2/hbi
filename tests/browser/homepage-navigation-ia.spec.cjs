@@ -84,7 +84,7 @@ test("homepage navigation exposes each operational domain and its intended desti
 
   // Direct sale remains first-class and not nested under consultation.
   await page.locator('a.hbi-nav-item[href="/sales"]').click();
-  await expect(page).toHaveURL(/\/workspace\?panel=sales$/);
+  await expect(page).toHaveURL(/\/sales$/);
   await expect(page.getByRole("heading", { name: "ثبت فروش" })).toBeVisible();
 });
 
