@@ -126,3 +126,28 @@ test("logout returns to login and protected routes remain gated", async ({ page 
   await page.goto("/accounting");
   await expect(page).toHaveURL(/\/login$/);
 });
+
+
+test("workspace deep links select the requested customer panel and legacy sales redirects", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "browser-test-admin-token");
+  });
+
+  await page.route("**/api/v1/products/manage", (route) =>
+    route.fulfill({ status: 200, contentType: "application/json", body: "[]" })
+  );
+  await page.route("**/api/v1/products/", (route) =>
+    route.fulfill({ status: 200, contentType: "application/json", body: "[]" })
+  );
+
+  await page.goto("/workspace?panel=profile");
+  await expect(page.getByRole("heading", { name: "پروفایل مشتری" })).toBeVisible();
+
+  await page.goto("/workspace?panel=consult");
+  await expect(page.getByRole("heading", { name: "فرم مشاوره سریع" })).toBeVisible();
+
+  await page.goto("/workspace?panel=sales");
+  await expect(page).toHaveURL(/\\/sales$/);
+  await expect(page.getByRole("heading", { name: "ثبت فروش" })).toBeVisible();
+});
+
