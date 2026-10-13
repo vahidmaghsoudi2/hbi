@@ -112,3 +112,25 @@ The inspected sources do not prove a complete consultation review action that:
 - Merge authorization: none.
 
 **Decision:** Stage 5 and Stage 6 reality audit recorded. Proceed next by authorizing one bounded implementation WP at a time after its exact data/behavior contract is settled. G8 remains BLOCKED / NOT VERIFIED.
+
+
+## Addendum — Stage 6 writer/reader trace (2026-10-13)
+
+A deeper source trace was performed after the initial audit. This is still a repository-level trace, not runtime evidence.
+
+| Surface | Observed behavior | Consequence |
+|---|---|---|
+| `Evidence.evidence_status` | Separate field on Evidence; `EvidenceService.add_evidence` defaults it to `UNKNOWN`; `ResearchDraftService.create_draft` explicitly writes `UNKNOWN` and `qa_status=PENDING` | Do not confuse Evidence row status with ProductKnowledge aggregate status. |
+| `ProductKnowledge.evidence_status` | Model permits `SUPPORTED`, `PARTIAL`, `CONFLICT`, `UNKNOWN`, or NULL | The allowed vocabulary exists, but the inspected contract does not define its derivation. |
+| ProductKnowledge rebuild writer | `ProductKnowledgeService.update_from_evidence` writes aggregate attributes, evidence refs and `knowledge_confidence`; it does not assign `ProductKnowledge.evidence_status` | Confirmed missing assignment in this writer; whether this is a user-visible defect depends on intended semantics and other writers. |
+| Read path | `ProductKnowledgeFacade._to_knowledge_dto` returns the field; `GET /knowledge/{product_id}` and `POST /knowledge/{product_id}/refresh` return the DTO | The status is externally readable, but its lifecycle is not fully specified by the inspected code. |
+| Rebuild triggers | Evidence verification, conflict resolution, and research-draft flows call `update_from_evidence` | These paths can refresh other ProductKnowledge fields without updating its status. |
+| Contract v1.1 | PENDING and unresolved-conflict evidence must not become trusted ProductKnowledge; EMPTY and explicit UNKNOWN are distinct | Status derivation must preserve these rules and must not treat QA approval as independent proof of finished-product efficacy. |
+
+### Stage 6 implementation gate
+
+The evidence supports a **status-contract gap**, not yet a conclusively defined defect. The four ProductKnowledge status values have no proven deterministic mapping in the audited contract. Do not infer that `SUPPORTED` means merely “one QA-approved row exists”; that would overstate evidence, particularly for manufacturer claims. Before modifying the rebuild writer, define and test the mapping for unresolved conflicts, no eligible evidence, approved partial evidence, and explicitly supported evidence.
+
+A second integration gate remains: PR #353 and PR #357 are both Draft/Open/unmerged, both touch schemas, EvidenceService, and ProductKnowledgeService, and currently introduce taxonomy helpers at different module paths (`app/domain/claim_taxonomy.py` vs `app/core/claim_taxonomy.py`). Stage 6 code must follow a single reconciled integration head.
+
+No code, schema, migration, scoring, production data, or runtime behavior changed. G8 remains BLOCKED / NOT VERIFIED.
