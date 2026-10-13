@@ -71,7 +71,8 @@ def _ensure_sale_customer_optional():
     if "Sale" not in inspector.get_table_names():
         return
     customer_col = next((c for c in inspector.get_columns("Sale") if c["name"] == "customer_id"), None)
-    if not customer_col or not customer_col.get("nullable", True):
+    # Skip when the column is already nullable; rebuild only legacy NOT NULL schemas.
+    if not customer_col or customer_col.get("nullable", True):
         return
 
     # SQLite cannot drop NOT NULL in place. Disable FK enforcement only on this
