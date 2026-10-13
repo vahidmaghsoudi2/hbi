@@ -205,6 +205,18 @@ export function verifyEvidence(
   }, token);
 }
 
+/** Resolve an evidence conflict by selecting this evidence row as the winning claim. */
+export function resolveEvidenceConflict(
+  evidenceId: string,
+  resolution: string,
+  token: string
+): Promise<EvidenceDTO> {
+  return request<EvidenceDTO>(`/evidence/${encodeURIComponent(evidenceId)}/resolve`, {
+    method: "POST",
+    body: JSON.stringify({ resolution }),
+  }, token);
+}
+
 /** POST /api/v1/sales/ — requires ADMIN role; body.customer_id is the buyer (not the token subject).
  * Auth header uses hbi_admin_access_token when present (AdminGate session).
  * Pilot/customer session token must not authorize financial sale writes.

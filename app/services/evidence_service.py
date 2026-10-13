@@ -9,6 +9,7 @@ from app.models.evidence import Evidence
 from app.repositories.evidence_repository import EvidenceRepository
 from app.services.base import BaseService
 from app.core.exceptions import ValidationError, ConflictError, NotFoundError
+from app.domain.claim_taxonomy import CLAIM_TYPES
 from app.services.evidence_mutation_log_service import EvidenceMutationLogService
 
 logger = logging.getLogger(__name__)
@@ -22,6 +23,10 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
         self.audit = EvidenceMutationLogService(db)
 
     def _validate_claim_boundary(self, claim_type: str, source_type: str) -> None:
+        if claim_type not in CLAIM_TYPES:
+            raise ValidationError(
+                f"Unsupported claim_type {claim_type!r}; allowed values: {sorted(CLAIM_TYPES)}"
+            )
         if claim_type == "FACT":
             allowed_sources = {"PEER_REVIEWED", "CLINICAL_TRIAL", "REGULATORY"}
             if source_type not in allowed_sources:
@@ -66,7 +71,7 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
 
         data = dict(evidence_data)
         product_id = data["product_id"]
-        claim_type = (data.get("claim_type") or "UNKNOWN").upper()
+        claim_type = str(data.get("claim_type") or "UNKNOWN").strip().upper() or "UNKNOWN"
         source_type = data.get("source_type") or "UNKNOWN"
         self._validate_claim_boundary(claim_type, source_type)
 

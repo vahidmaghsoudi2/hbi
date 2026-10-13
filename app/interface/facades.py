@@ -20,6 +20,8 @@ def _to_product_dto(p) -> ProductDTO:
         product_name=p.product_name,
         identity_status=p.identity_status,
         qa_verdict=p.qa_verdict,
+        status=getattr(p, "status", "DRAFT"),
+        product_line=getattr(p, "product_line", None),
         variant=p.variant,
         size_value=p.size_value,
         size_unit=p.size_unit

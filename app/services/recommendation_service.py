@@ -27,6 +27,18 @@ logger = logging.getLogger(__name__)
 # V1 eligibility no longer uses this threshold; Need Match is ranking-only.
 NEED_MATCH_SUFFICIENT = 0.40
 
+
+def _candidate_matches_case_product_line(product, case_type: Optional[str]) -> bool:
+    """Keep explicitly Skin-scoped cases inside the Skin product line.
+
+    Legacy/non-Skin case types retain their existing candidate behavior until
+    they have an explicit product-line contract.
+    """
+    if (case_type or "").strip().upper() == "SKIN":
+        return (getattr(product, "product_line", None) or "").strip().upper() == "SKIN"
+    return True
+
+
 _EVIDENCE_WEIGHTS = {
     "PEER_REVIEWED": 1.0,
     "CLINICAL_TRIAL": 1.0,
@@ -377,6 +389,12 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         if decision_state["medical_context_active"]:
             decision_state["decision_status"] = "REFERRAL"
         products = self.product_repo.find_by_identity_status_and_active("VERIFIED")
+        case_row = self.db.query(Case).filter(Case.case_id == case_id).first()
+        case_type = getattr(case_row, "case_type", None)
+        products = [
+            product for product in products
+            if _candidate_matches_case_product_line(product, case_type)
+        ]
         recommendations: List[Recommendation] = []
         existing_case_recs = list(self.repository.find_by_case(case_id))
         kept_product_ids = set()

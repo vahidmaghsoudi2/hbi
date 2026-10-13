@@ -16,7 +16,8 @@ STATUS: FOR AUDIT ONLY — DO NOT PASTE INTO PROJECT YET.
 
 from datetime import datetime
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_validator
+from app.domain.claim_taxonomy import normalize_claim_type_value
 
 
 # ──────────────────────────────────────────────
@@ -108,6 +109,11 @@ class EvidenceCreate(BaseModel):
     notes: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
+    @field_validator("claim_type", mode="before")
+    @classmethod
+    def _normalize_claim_type_create(cls, value):
+        return normalize_claim_type_value(value, missing_default="UNKNOWN")
+
 
 class EvidenceUpdate(BaseModel):
     claim: Optional[str] = None
@@ -121,6 +127,11 @@ class EvidenceUpdate(BaseModel):
     qa_status: Optional[str] = None
     conflict_status: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
+
+    @field_validator("claim_type", mode="before")
+    @classmethod
+    def _normalize_claim_type_update(cls, value):
+        return normalize_claim_type_value(value, missing_default=None)
 
 
 class EvidenceResponse(BaseModel):
@@ -163,6 +174,11 @@ class ResearchAssertion(BaseModel):
     evidence_strength: Optional[str] = None
     market_region: Optional[str] = None
     notes: Optional[str] = None
+
+    @field_validator("claim_type", mode="before")
+    @classmethod
+    def _normalize_claim_type_research(cls, value):
+        return normalize_claim_type_value(value, missing_default="UNKNOWN")
 
 
 class ResearchDraftRequest(BaseModel):
