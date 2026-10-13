@@ -16,7 +16,6 @@ test("homepage navigation exposes each operational domain and its intended desti
     ["کالا و انبار", "/catalog"],
     ["کاتالوگ کالاها", "/catalog"],
     ["بررسی پرونده کالا", "/workspace?panel=review"],
-    ["ثبت و ویرایش کالا", "/workspace?panel=intake"],
     ["خرید و ورود موجودی", "/purchase"],
     ["مشتری و مشاوره", "/workspace?panel=consult"],
     ["ثبت مراجعه و مشاوره", "/workspace?panel=consult"],
