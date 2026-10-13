@@ -97,7 +97,7 @@ jobs:
           $frontendPath = Join-Path $PWD.Path "frontend"
           $viteScript = Join-Path $frontendPath "node_modules\vite\bin\vite.js"
           if (-not (Test-Path $viteScript)) { throw "Vite entry point not found: $viteScript" }
-          $web = Start-Process -FilePath node -ArgumentList @($viteScript, "--host", "127.0.0.1", "--port", "4173", "--strictPort") -WorkingDirectory $frontendPath -PassThru -RedirectStandardOutput $webLog -RedirectStandardError $webErr
+          $web = Start-Process -FilePath node -ArgumentList @($viteScript, "preview", "--host", "127.0.0.1", "--port", "4173", "--strictPort") -WorkingDirectory $frontendPath -PassThru -RedirectStandardOutput $webLog -RedirectStandardError $webErr
           try {
             $apiReady = $false
             $webReady = $false
