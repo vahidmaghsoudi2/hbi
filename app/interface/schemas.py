@@ -15,10 +15,9 @@ STATUS: FOR AUDIT ONLY — DO NOT PASTE INTO PROJECT YET.
 """
 
 from datetime import datetime
-from typing import Optional, List, Dict, Any, Literal
-from pydantic import BaseModel, Field, ConfigDict
-
-ClaimType = Literal["FACT", "MANUFACTURER_CLAIM", "EVIDENCE", "INFERENCE", "UNKNOWN", "CONFLICT"]
+from typing import Optional, List, Dict, Any
+from pydantic import BaseModel, Field, ConfigDict, field_validator
+from app.domain.claim_taxonomy import normalize_claim_type_value
 
 
 # ──────────────────────────────────────────────
@@ -27,38 +26,14 @@ ClaimType = Literal["FACT", "MANUFACTURER_CLAIM", "EVIDENCE", "INFERENCE", "UNKN
 class RecommendationBase(BaseModel):
     """Shared DB-mapped fields between Create/Update/Response."""
 
-    recommendation_id: str = Field(
-        ...,
-        description="Unique identifier. PK in SQLAlchemy."
-    )
-    case_id: str = Field(
-        ...,
-        description="FK to Case.case_id (CASCADE). NOT NULL in DB."
-    )
-    product_id: str = Field(
-        ...,
-        description="FK to Product.product_id (RESTRICT). NOT NULL in DB."
-    )
-    need_match_score: Optional[float] = Field(
-        None,
-        description="Match score from need analysis. Nullable in DB."
-    )
-    evidence_score: Optional[float] = Field(
-        None,
-        description="Evidence-based score. Nullable in DB."
-    )
-    eligibility_status: Optional[str] = Field(
-        None,
-        description="Eligibility status. Nullable in DB."
-    )
-    ranking_score: Optional[float] = Field(
-        None,
-        description="Ranking score. Nullable in DB."
-    )
-    ranking_reasons: Optional[str] = Field(
-        None,
-        description="Reasons for ranking. Nullable in DB."
-    )
+    recommendation_id: str = Field(..., description="Unique identifier. PK in SQLAlchemy.")
+    case_id: str = Field(..., description="FK to Case.case_id (CASCADE). NOT NULL in DB.")
+    product_id: str = Field(..., description="FK to Product.product_id (RESTRICT). NOT NULL in DB.")
+    need_match_score: Optional[float] = Field(None, description="Match score from need analysis. Nullable in DB.")
+    evidence_score: Optional[float] = Field(None, description="Evidence-based score. Nullable in DB.")
+    eligibility_status: Optional[str] = Field(None, description="Eligibility status. Nullable in DB.")
+    ranking_score: Optional[float] = Field(None, description="Ranking score. Nullable in DB.")
+    ranking_reasons: Optional[str] = Field(None, description="Reasons for ranking. Nullable in DB.")
 
 
 class RecommendationCreate(RecommendationBase):
@@ -102,7 +77,7 @@ class EvidenceCreate(BaseModel):
     claim: str
     source_type: str
     source_reference: str
-    claim_type: Optional[ClaimType] = "UNKNOWN"
+    claim_type: Optional[str] = "UNKNOWN"
     field: Optional[str] = None
     source_date: Optional[str] = None
     evidence_strength: Optional[str] = None
@@ -110,10 +85,15 @@ class EvidenceCreate(BaseModel):
     notes: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
+    @field_validator("claim_type", mode="before")
+    @classmethod
+    def _normalize_claim_type_create(cls, value):
+        return normalize_claim_type_value(value, missing_default="UNKNOWN")
+
 
 class EvidenceUpdate(BaseModel):
     claim: Optional[str] = None
-    claim_type: Optional[ClaimType] = None
+    claim_type: Optional[str] = None
     source_type: Optional[str] = None
     source_reference: Optional[str] = None
     source_date: Optional[str] = None
@@ -123,6 +103,11 @@ class EvidenceUpdate(BaseModel):
     qa_status: Optional[str] = None
     conflict_status: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
+
+    @field_validator("claim_type", mode="before")
+    @classmethod
+    def _normalize_claim_type_update(cls, value):
+        return normalize_claim_type_value(value, missing_default=None)
 
 
 class EvidenceResponse(BaseModel):
@@ -159,12 +144,17 @@ class ResearchAssertion(BaseModel):
     claim: str
     source_type: str
     source_reference: str
-    claim_type: Optional[ClaimType] = "UNKNOWN"
+    claim_type: Optional[str] = "UNKNOWN"
     field: Optional[str] = None
     source_date: Optional[str] = None
     evidence_strength: Optional[str] = None
     market_region: Optional[str] = None
     notes: Optional[str] = None
+
+    @field_validator("claim_type", mode="before")
+    @classmethod
+    def _normalize_claim_type_research(cls, value):
+        return normalize_claim_type_value(value, missing_default="UNKNOWN")
 
 
 class ResearchDraftRequest(BaseModel):
@@ -202,7 +192,7 @@ class ProductCreate(BaseModel):
     product_id: str
     brand: str
     product_name: str
-    product_line: str  # Product Line V1 — required operator classification
+    product_line: str
     variant: Optional[str] = None
     size_value: Optional[float] = None
     size_unit: Optional[str] = None
@@ -213,15 +203,11 @@ class ProductCreate(BaseModel):
     knowledge_use_cases: Optional[str] = None
     knowledge_evidence_claim: Optional[str] = None
     knowledge_evidence_source_reference: Optional[str] = None
-    # WP-01: resolution token after POSSIBLE_MATCH operator decision=NEW (not a Product column)
     duplicate_check_id: Optional[str] = None
 
 
 class ProductUpdate(BaseModel):
-    """Informational fields only — governance fields forbidden (P4 P0).
-    extra=\"forbid\" ensures any governance key in PATCH body is rejected at schema boundary
-    (Pydantic v2 default is ignore, which would silently discard status/identity_status/qa_verdict).
-    """
+    """Informational fields only — governance fields forbidden (P4 P0)."""
     brand: Optional[str] = None
     product_name: Optional[str] = None
     variant: Optional[str] = None
@@ -232,7 +218,7 @@ class ProductUpdate(BaseModel):
     country_of_origin: Optional[str] = None
     packaging_version: Optional[str] = None
     category_id: Optional[str] = None
-    product_line: Optional[str] = None  # Product Line V1 — operator-controlled change only
+    product_line: Optional[str] = None
     model_config = ConfigDict(extra="forbid")
 
 
