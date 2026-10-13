@@ -9,18 +9,14 @@ import AccountingHomePage from "./pages/AccountingHomePage";
 import PurchasePage from "./pages/PurchasePage";
 import SimpleSalesPage from "./pages/SimpleSalesPage";
 import AdminLoginPage from "./pages/AdminLoginPage";
+import OperatorShell from "./layout/OperatorShell";
 
 function AdminGate({ children }: { children: ReactNode }) {
   const token = sessionStorage.getItem("hbi_admin_access_token");
-  return token ? children : <Navigate to="/login" replace />;
+  return token ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
-/**
- * Compatibility router for old homepage panel links.
- * Sales is a standalone workflow and must never render inside the legacy
- * all-in-one workspace. Keep other legacy panels intact until each has a
- * verified dedicated destination.
- */
+/** Old /workspace?panel=sales must never render the kitchen-sink page. */
 function WorkspaceRoute() {
   const location = useLocation();
   const panel = new URLSearchParams(location.search).get("panel");
@@ -36,17 +32,32 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<AdminLoginPage />} />
-      <Route path="/" element={<AdminGate><NewDashboardGalleryHome /></AdminGate>} />
-      <Route path="/workspace" element={<AdminGate><WorkspaceRoute /></AdminGate>} />
-      <Route path="/catalog" element={<AdminGate><CatalogPage /></AdminGate>} />
-      {/* Pilot/recommendation are operator-only internal workflows, not customer
-          entry points. Their API tokens do not grant access to the HBI UI. */}
-      <Route path="/pilot" element={<AdminGate><PilotPage /></AdminGate>} />
-      <Route path="/recommendation" element={<AdminGate><RecommendationPage /></AdminGate>} />
-      <Route path="/accounting" element={<AdminGate><AccountingHomePage /></AdminGate>} />
-      <Route path="/purchase" element={<AdminGate><PurchasePage /></AdminGate>} />
-      <Route path="/sales" element={<AdminGate><SimpleSalesPage /></AdminGate>} />
-      {/* Unknown paths should never render an empty shell or bypass AdminGate. */}
+
+      <Route
+        element={
+          <AdminGate>
+            <OperatorShell />
+          </AdminGate>
+        }
+      >
+        <Route path="/" element={<NewDashboardGalleryHome />} />
+        <Route path="/sales" element={<SimpleSalesPage />} />
+        <Route path="/catalog" element={<CatalogPage />} />
+        <Route path="/purchase" element={<PurchasePage />} />
+        <Route path="/accounting" element={<AccountingHomePage />} />
+        <Route path="/recommendation" element={<RecommendationPage />} />
+        <Route path="/pilot" element={<PilotPage />} />
+      </Route>
+
+      <Route
+        path="/workspace"
+        element={
+          <AdminGate>
+            <WorkspaceRoute />
+          </AdminGate>
+        }
+      />
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
