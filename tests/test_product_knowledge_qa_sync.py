@@ -135,3 +135,69 @@ def test_needs_review_verdict_clears_approved_claim(db):
     db.expire_all()
     pk = db.query(ProductKnowledge).filter_by(product_id="P-PK-QA").one()
     assert not (pk.known_use_cases and "sunscreen" in pk.known_use_cases)
+
+
+
+def test_product_knowledge_status_is_unknown_without_eligible_evidence(db):
+    _seed_product(db, pid="P-PK-STATUS-UNKNOWN")
+    pk = ProductKnowledgeService(db).update_from_evidence("P-PK-STATUS-UNKNOWN")
+    db.commit()
+    db.expire_all()
+    persisted = db.query(ProductKnowledge).filter_by(
+        product_id="P-PK-STATUS-UNKNOWN"
+    ).one()
+    assert pk.evidence_status == "UNKNOWN"
+    assert persisted.evidence_status == "UNKNOWN"
+
+
+def test_product_knowledge_status_is_partial_for_approved_evidence(db):
+    _seed_product(db, pid="P-PK-STATUS-PARTIAL")
+    _add_use_case_evidence(
+        db,
+        pid="P-PK-STATUS-PARTIAL",
+        eid="E-STATUS-PARTIAL",
+        qa="VERIFIED",
+    )
+    pk = ProductKnowledgeService(db).update_from_evidence("P-PK-STATUS-PARTIAL")
+    db.commit()
+    db.expire_all()
+    persisted = db.query(ProductKnowledge).filter_by(
+        product_id="P-PK-STATUS-PARTIAL"
+    ).one()
+    assert pk.evidence_status == "PARTIAL"
+    assert persisted.evidence_status == "PARTIAL"
+
+
+def test_unresolved_conflict_takes_precedence_over_approved_evidence_status(db):
+    _seed_product(db, pid="P-PK-STATUS-CONFLICT")
+    _add_use_case_evidence(
+        db,
+        pid="P-PK-STATUS-CONFLICT",
+        eid="E-STATUS-APPROVED",
+        qa="VERIFIED",
+    )
+    db.add(
+        Evidence(
+            evidence_id="E-STATUS-CONFLICT",
+            product_id="P-PK-STATUS-CONFLICT",
+            claim_id="CLM-E-STATUS-CONFLICT",
+            source_type="OFFICIAL_MANUFACTURER",
+            source_reference="label",
+            claim="conflicting claim",
+            field="known_use_cases",
+            qa_status="PENDING",
+            evidence_status="UNKNOWN",
+            conflict_status="CONFLICT",
+        )
+    )
+    db.commit()
+
+    pk = ProductKnowledgeService(db).update_from_evidence("P-PK-STATUS-CONFLICT")
+    db.commit()
+    db.expire_all()
+    persisted = db.query(ProductKnowledge).filter_by(
+        product_id="P-PK-STATUS-CONFLICT"
+    ).one()
+    assert pk.evidence_status == "CONFLICT"
+    assert persisted.evidence_status == "CONFLICT"
+    assert "conflicting claim" not in (persisted.known_use_cases or "")
