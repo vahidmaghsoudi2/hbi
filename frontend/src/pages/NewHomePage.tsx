@@ -654,6 +654,7 @@ export default function NewHomePage() {
       </header>
 
       <main className="pro-main">
+        {pageView === "content" ? (
         <div className="pro-status-bar">
           <span className={token ? "dot on" : "dot"} />
           <span>{token ? "نشست فعال" : "نشست ندارد"}</span>
@@ -668,6 +669,7 @@ export default function NewHomePage() {
             </>
           ) : null}
         </div>
+        ) : null}
 
         {error ? (
           <div className="pro-alert" role="alert">
