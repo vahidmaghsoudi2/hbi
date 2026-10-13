@@ -16,7 +16,8 @@ router = APIRouter()
 
 
 class SaleCreateRequest(BaseModel):
-    customer_id: str
+    # Omitted for a direct walk-in sale; no synthetic customer record is created.
+    customer_id: Optional[str] = None
     items: List[Dict[str, Any]]
     fx_rate_usd_to_irr: float = Field(..., gt=0, description="IRR per 1 USD; required, never invented")
     idempotency_key: Optional[str] = Field(None, description="Optional durable sale idempotency key")
