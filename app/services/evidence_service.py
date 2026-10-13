@@ -9,7 +9,7 @@ from app.models.evidence import Evidence
 from app.repositories.evidence_repository import EvidenceRepository
 from app.services.base import BaseService
 from app.core.exceptions import ValidationError, ConflictError, NotFoundError
-from app.core.claim_taxonomy import CLAIM_TYPES
+from app.domain.claim_taxonomy import CLAIM_TYPES
 from app.services.evidence_mutation_log_service import EvidenceMutationLogService
 
 logger = logging.getLogger(__name__)
