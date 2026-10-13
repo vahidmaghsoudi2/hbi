@@ -1,6 +1,6 @@
 # HBI Product Intake Roadmap and Phase 1 Execution Record
 
-**Status:** Phase 0 complete; Phase 1 in progress; G8 **BLOCKED / NOT VERIFIED**  
+**Status:** Phase 0 = PARTIAL until all SSOT files are on master; Phase 1 = NOT STARTED; G8 = **BLOCKED / NOT VERIFIED**  
 **Source of truth:** GitHub repository `vahidmaghsoudi2/hbi`  
 **Current baseline:** `0a2ec9b477f89954ba1865ec59e3701a5a0f3831`  
 **Last updated:** 2026-10-13
@@ -19,7 +19,7 @@ Primary references:
 
 ## 2. Current baseline and completed work
 
-### Phase 0 — establish a trusted repository baseline: COMPLETE
+### Phase 0 — SSOT baseline on master: PARTIAL
 
 Baseline master commit: `0a2ec9b477f89954ba1865ec59e3701a5a0f3831`.
 
@@ -28,7 +28,7 @@ Exact-SHA push checks:
 - [HBI Auto Tasks / Live test evidence run 38396795733](https://github.com/vahidmaghsoudi2/hbi/actions/runs/38396795733) — success
 - Exact-SHA checks `test`, `governance-tests`, and `Live test evidence` succeeded.
 
-This establishes a clean CI baseline only. It is not proof that the real G8 operator pilot passed. The Phase 0 outcome is recorded in [Issue #283 comment](https://github.com/vahidmaghsoudi2/hbi/issues/283#issuecomment-6145815790).
+The merge SHA and green exact-SHA CI establish a code baseline only. Phase 0 remains PARTIAL because the SSOT files are not yet on master; Phase 0 closes only after PR #364 is explicitly authorized and merged. This is not proof that the real G8 operator pilot passed. The Phase 0 outcome is recorded in [Issue #283 comment](https://github.com/vahidmaghsoudi2/hbi/issues/283#issuecomment-6145815790).
 
 ### Relevant merged work
 
@@ -46,7 +46,7 @@ The pilot must demonstrate actual permitted transitions and persisted readback. 
 
 ## 4. Phase 1 — isolated G8 execution pilot
 
-**Status: IN PROGRESS — NOT ACCEPTED.**
+**Status: NOT STARTED.** Phase 1 may begin only after Phase 0 closes through SSOT merge to master.
 
 ### Scope
 
@@ -118,8 +118,8 @@ Do not substitute a narrative summary for raw artifacts.
 
 ## 7. Current decision
 
-Phase 0 is complete. Phase 1 has not yet been demonstrated end-to-end. PR #355 is useful supporting API-test evidence, but is not the real pilot and does not satisfy G8.
+Phase 0 is PARTIAL and remains open until PR #364 is explicitly authorized and merged to master. Phase 1 has not started. PR #355 is useful supporting API-test evidence, but is not the real pilot and does not satisfy G8.
 
 **Current gate: G8 = BLOCKED / NOT VERIFIED.**
 
-The next meaningful action is execution of the isolated operator pilot and collection of missing A1–A9 artifacts—not another general roadmap review. No production changes or merge are authorized by this document.
+The next action is to finish Phase 0 by placing the three SSOT files on master through PR #364. Do not start Phase 1 until that merge occurs. After Phase 0 closes, the next phase will be the isolated operator pilot and collection of missing A1–A9 artifacts. No production changes or merge are authorized by this document.
