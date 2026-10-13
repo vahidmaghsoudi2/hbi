@@ -15,8 +15,11 @@ STATUS: FOR AUDIT ONLY — DO NOT PASTE INTO PROJECT YET.
 """
 
 from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Literal
 from pydantic import BaseModel, Field, ConfigDict
+from app.core.claim_taxonomy import CLAIM_TYPES
+
+ClaimType = Literal["FACT", "MANUFACTURER_CLAIM", "EVIDENCE", "INFERENCE", "UNKNOWN", "CONFLICT"]
 
 
 # ──────────────────────────────────────────────
@@ -100,7 +103,7 @@ class EvidenceCreate(BaseModel):
     claim: str
     source_type: str
     source_reference: str
-    claim_type: Optional[str] = "UNKNOWN"
+    claim_type: Optional[ClaimType] = "UNKNOWN"
     field: Optional[str] = None
     source_date: Optional[str] = None
     evidence_strength: Optional[str] = None
@@ -111,7 +114,7 @@ class EvidenceCreate(BaseModel):
 
 class EvidenceUpdate(BaseModel):
     claim: Optional[str] = None
-    claim_type: Optional[str] = None
+    claim_type: Optional[ClaimType] = None
     source_type: Optional[str] = None
     source_reference: Optional[str] = None
     source_date: Optional[str] = None
