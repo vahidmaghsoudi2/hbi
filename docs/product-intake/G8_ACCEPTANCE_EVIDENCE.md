@@ -24,7 +24,8 @@ A criterion is PASS only when raw evidence is linked, tied to an exact SHA/envir
 - [PR #355](https://github.com/vahidmaghsoudi2/hbi/pull/355): draft disposable API test; not a real operator pilot and not merged.
 - [HBI CI run 38315913219](https://github.com/vahidmaghsoudi2/hbi/actions/runs/38315913219): successful test run on the PR #355 test head.
 - [Pilot Browser Proof run 38315913216](https://github.com/vahidmaghsoudi2/hbi/actions/runs/38315913216): fixture/browser workflow, not end-to-end real product acceptance.
-- [PR #364](https://github.com/vahidmaghsoudi2/hbi/pull/364): documentation-only draft; its green workflows do not prove G8.
+- [PR #364](https://github.com/vahidmaghsoudi2/hbi/pull/364): merged SSOT roadmap, execution log and acceptance ledger; establishes the documentation prerequisite only.
+- [PR #373](https://github.com/vahidmaghsoudi2/hbi/pull/373): merged traceable regression bundle runner for eight existing test modules. Supporting regression evidence only; it does not establish real operator login, production isolation, or A1–A9 acceptance. Post-merge CI was not verified in the connector check.
 
 ## Acceptance rule
 
