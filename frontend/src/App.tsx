@@ -7,7 +7,6 @@ import PilotPage from "./pages/PilotPage";
 import RecommendationPage from "./pages/RecommendationPage";
 import AccountingHomePage from "./pages/AccountingHomePage";
 import PurchasePage from "./pages/PurchasePage";
-import AdminLoginPage from "./pages/AdminLoginPage";
 
 const API_BASE = import.meta.env?.VITE_API_BASE ?? "/api/v1";
 
