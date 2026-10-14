@@ -53,7 +53,7 @@ const CONSULTATION_LINES = [{ id: "SKIN", label: "پوست" }] as const;
 const INITIAL_RECOMMENDATION_LIMIT = 5;
 
 type Panel = "home" | "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about";
-type MainSection = "home" | "customers" | "consultation" | "sales" | "products" | "purchases" | "settings";
+type MainSection = "home" | "customers" | "consultation" | "sales" | "products" | "purchases" | "reports";
 type PageView = "main" | "section" | "content";
 
 export default function NewHomePage() {
@@ -687,8 +687,8 @@ export default function NewHomePage() {
               <article className="pro-product-card"><h2>مشاوره</h2><p className="pro-muted">ثبت مسئله، بررسی نیاز، پیشنهادها و تصمیم اپراتور.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("consultation")}>ورود به مشاوره</button></article>
               <article className="pro-product-card"><h2>فروش</h2><p className="pro-muted">ثبت فروش؛ مشاوره پیش‌نیاز فروش مستقیم نیست.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("sales")}>ورود به فروش</button></article>
               <article className="pro-product-card"><h2>مدیریت محصولات</h2><p className="pro-muted">فهرست، ورود اطلاعات و بررسی QA؛ مستقل از ورود فیزیکی موجودی.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("products")}>ورود به مدیریت محصولات</button></article>
-              <article className="pro-product-card"><h2>خرید و گزارش‌ها</h2><p className="pro-muted">خرید، ورود موجودی، گزارش‌ها و حسابداری.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("purchases")}>ورود به خرید و گزارش‌ها</button></article>
-              <article className="pro-product-card"><h2>تنظیمات</h2><p className="pro-muted">عملیات تنظیمات موجود و خروج از حساب مدیر.</p><button type="button" className="pro-btn-secondary" onClick={() => openMainSection("settings")}>بازکردن تنظیمات</button></article>
+              <article className="pro-product-card"><h2>خرید</h2><p className="pro-muted">ثبت خرید و ورود فیزیکی موجودی.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("purchases")}>ورود به خرید</button></article>
+              <article className="pro-product-card"><h2>گزارش‌ها</h2><p className="pro-muted">مشاهدهٔ گزارش‌های عملیاتی و مالی موجود.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("reports")}>ورود به گزارش‌ها</button></article>
             </div>
           </section>
         )}
@@ -698,8 +698,8 @@ export default function NewHomePage() {
             <div className="pro-section-head">
               <h1 id="section-menu-title">{({
                 customers: "مشتریان", consultation: "مشاوره", sales: "فروش",
-                products: "مدیریت محصولات", purchases: "خرید و گزارش‌ها",
-                settings: "تنظیمات", home: "خانه و داشبورد",
+                products: "مدیریت محصولات", purchases: "خرید",
+                reports: "گزارش‌ها", home: "خانه و داشبورد",
               } as Record<MainSection, string>)[mainSection]}</h1>
               <button type="button" className="pro-btn-secondary" onClick={() => setPageView("main")}>بازگشت به منوی اصلی</button>
             </div>
@@ -719,11 +719,8 @@ export default function NewHomePage() {
                 <article className="pro-product-card"><h2>ورود و ویرایش محصول</h2><p className="pro-muted">ثبت مشخصات محصول؛ جدا از موجودی فیزیکی.</p><button type="button" className="pro-btn-primary" onClick={() => go("intake")}>ورود و ویرایش محصول</button></article>
                 <article className="pro-product-card"><h2>بررسی و تأیید QA</h2><p className="pro-muted">بررسی شواهد و وضعیت تأیید محصول.</p><button type="button" className="pro-btn-primary" onClick={() => go("review")}>بازکردن بررسی QA</button></article>
               </> : null}
-              {mainSection === "purchases" ? <>
-                <article className="pro-product-card"><h2>خرید / ورود موجودی</h2><p className="pro-muted">ثبت خرید و ورود فیزیکی کالا.</p><Link to="/purchase" className="pro-btn-primary">بازکردن خرید و موجودی</Link></article>
-                <article className="pro-product-card"><h2>گزارش‌ها و حسابداری</h2><p className="pro-muted">گزارش فروش، موجودی و گردش‌های مالی.</p><Link to="/accounting" className="pro-btn-primary">بازکردن گزارش‌ها</Link></article>
-              </> : null}
-              {mainSection === "settings" ? <article className="pro-product-card"><h2>خروج از حساب مدیر</h2><p className="pro-muted">پایان‌دادن به نشست فعلی مدیر.</p><button type="button" className="pro-btn-secondary" onClick={logout}>خروج از حساب مدیر</button></article> : null}
+              {mainSection === "purchases" ? <article className="pro-product-card"><h2>خرید / ورود موجودی</h2><p className="pro-muted">ثبت خرید و ورود فیزیکی کالا.</p><Link to="/purchase" className="pro-btn-primary">بازکردن خرید و موجودی</Link></article> : null}
+              {mainSection === "reports" ? <article className="pro-product-card"><h2>گزارش‌ها</h2><p className="pro-muted">گزارش فروش، موجودی و گردش‌های مالی موجود.</p><Link to="/accounting" className="pro-btn-primary">بازکردن گزارش‌ها</Link></article> : null}
             </div>
           </section>
         )}
