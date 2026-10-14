@@ -88,8 +88,8 @@ def _ensure_sale_customer_optional():
         ddl = create_row[0]
         import re
         new_ddl = re.sub(
-            r'(customer_id\\s+VARCHAR)\\s+NOT NULL',
-            r'\\1',
+            r'(customer_id\s+VARCHAR)\s+NOT NULL,
+            r'\1,
             ddl,
             count=1,
             flags=re.IGNORECASE,
@@ -97,7 +97,7 @@ def _ensure_sale_customer_optional():
         if new_ddl == ddl:
             raise RuntimeError("Cannot safely migrate Sale.customer_id nullable constraint")
         new_ddl = re.sub(
-            r'CREATE TABLE\\s+(?:IF NOT EXISTS\\s+)?["\\[]?Sale["\\]]?',
+            r'CREATE TABLE\s+(?:IF NOT EXISTS\s+)?["\[]?Sale["\]]?,
             'CREATE TABLE "Sale__direct_sale_new"',
             new_ddl,
             count=1,
