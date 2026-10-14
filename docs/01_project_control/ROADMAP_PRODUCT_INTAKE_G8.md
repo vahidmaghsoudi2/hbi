@@ -136,3 +136,18 @@ Never state that G8 is complete merely because all administrative roadmap checkb
 ---
 
 **Governance intent:** This protocol prevents duplicate work and status drift while preserving evidence-based correction, PO authority, and the existing binding Product Intake contract.
+
+## 11. PO-approved correction, single source, and minimum-document rule
+
+This rule is mandatory for every agent working on HBI Product Intake.
+
+1. **Identify before acting.** When an error or contradiction is suspected, locate the authoritative file or work item and gather the evidence. Do not guess from a chat summary or create another record to work around uncertainty.
+2. **Propose and obtain PO approval.** Before changing or removing anything, state the evidence, the exact correction, the existing artifact to change, the expected impact, and any unavoidable repository constraint. Wait for the PO's explicit approval. Do not create branches, PRs, documents, or close work items before that approval.
+3. **Correct the existing authoritative artifact.** After approval, replace the incorrect content in its current authoritative file or work item. Do not create a second policy, roadmap, status ledger, or equivalent document. Keep the number of authoritative documents to the minimum required by the existing architecture.
+4. **Respect repository controls without multiplying records.** If the protected default branch rejects direct edits, use the repository-required review path to change the existing file only. Such a PR is a delivery mechanism for that one correction, not a new source of truth. Do not open parallel PRs for the same correction. Reuse an existing suitable, unmerged PR only if its purpose and scope can be changed without preserving unrelated or misleading work; otherwise explain the constraint and obtain PO approval before opening a replacement.
+5. **Remove superseded active paths.** Once the approved replacement is in place, close or remove duplicate, unmerged work as explicitly directed by the PO. Do not leave obsolete drafts presented as active instructions. Preserve the repository's historical audit trail; do not rewrite merged Git history.
+6. **Verify and report state.** Confirm the exact file, branch, commit, PR state, and whether the correction is merged. Clearly separate DONE, NOT DONE, BLOCKED, and awaiting PO action. Never report a proposed or unmerged correction as applied to the default branch.
+7. **No routine repetition.** Before starting work, inspect the current authoritative record and prior evidence. Do not repeat completed work or ask the PO to repeat a check when existing evidence is available, unless a specific gap or regression is demonstrated.
+
+**Default principle:** one authoritative document per purpose, one approved correction path per defect, no duplicate source of truth, and no execution before PO approval.
+
