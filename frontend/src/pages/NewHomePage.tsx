@@ -560,7 +560,7 @@ export default function NewHomePage() {
       const sale = await createSale(
         {
           ...(customerId ? { customer_id: customerId } : {}),
-          items: [{ product_id: saleProductId.trim(), quantity: saleQty, ...(selectedRecommendationId ? { recommendation_id: selectedRecommendationId } : {}) }],
+          items: [{ product_id: saleProductId.trim(), quantity: saleQty, ...(customerId && selectedRecommendationId ? { recommendation_id: selectedRecommendationId } : {}) }],
           fx_rate_usd_to_irr: currentFxRate,
         },
         adminToken
