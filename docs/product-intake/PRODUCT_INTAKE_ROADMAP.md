@@ -1,9 +1,9 @@
 # HBI Product Intake Roadmap and Phase 1 Execution Record
 
-**Status:** Phase 0 = PARTIAL until all SSOT files are on master; Phase 1 = NOT STARTED; G8 = **BLOCKED / NOT VERIFIED**  
+**Status:** Phase 0 = CLOSED (SSOT files merged); Phase 1 = READY — real A1–A9 evidence collection pending; G8 = **BLOCKED / NOT VERIFIED**  
 **Source of truth:** GitHub repository `vahidmaghsoudi2/hbi`  
-**Current baseline:** `0a2ec9b477f89954ba1865ec59e3701a5a0f3831`  
-**Last updated:** 2026-10-13
+**Current baseline:** `63093d0e201d84720c647fd6a5b172041dfd3c60`  
+**Last updated:** 2026-10-14
 
 ## 1. Purpose and authority
 
@@ -16,19 +16,21 @@ Primary references:
 - [PR #360 — claim integrity and evidence/UI consolidation](https://github.com/vahidmaghsoudi2/hbi/pull/360)
 - [PR #361 — Product menu action grouping](https://github.com/vahidmaghsoudi2/hbi/pull/361)
 - [PR #355 — disposable Numbuzin intake API test (draft; not G8 proof)](https://github.com/vahidmaghsoudi2/hbi/pull/355)
+- [PR #364 — Phase 1 roadmap and evidence ledger (merged)](https://github.com/vahidmaghsoudi2/hbi/pull/364)
+- [PR #373 — traceable G8 regression bundle runner (merged; supporting evidence only)](https://github.com/vahidmaghsoudi2/hbi/pull/373)
 
 ## 2. Current baseline and completed work
 
-### Phase 0 — SSOT baseline on master: PARTIAL
+### Phase 0 — SSOT baseline on master: CLOSED
 
-Baseline master commit: `0a2ec9b477f89954ba1865ec59e3701a5a0f3831`.
+The SSOT roadmap, execution log and acceptance ledger are present on `master` through PR #364 (merge SHA `7d962720a60c1291b8c21360dff0cc95b6fc0d1a`). Current master baseline after PR #373 is `63093d0e201d84720c647fd6a5b172041dfd3c60`.
 
 Exact-SHA push checks:
 - [HBI CI run 38396795619](https://github.com/vahidmaghsoudi2/hbi/actions/runs/38396795619) — success
 - [HBI Auto Tasks / Live test evidence run 38396795733](https://github.com/vahidmaghsoudi2/hbi/actions/runs/38396795733) — success
 - Exact-SHA checks `test`, `governance-tests`, and `Live test evidence` succeeded.
 
-The merge SHA and green exact-SHA CI establish a code baseline only. Phase 0 remains PARTIAL because the SSOT files are not yet on master; Phase 0 closes only after PR #364 is explicitly authorized and merged. This is not proof that the real G8 operator pilot passed. The Phase 0 outcome is recorded in [Issue #283 comment](https://github.com/vahidmaghsoudi2/hbi/issues/283#issuecomment-6145815790).
+The historical merge SHA and green exact-SHA CI establish a code baseline only. PR #364 has since been authorized and merged, so Phase 0 is CLOSED. This does not prove that the real G8 operator pilot passed. PR #373 adds a traceable runner for eight existing regression modules; its fixture-based results remain supporting evidence only.
 
 ### Relevant merged work
 
@@ -46,7 +48,7 @@ The pilot must demonstrate actual permitted transitions and persisted readback. 
 
 ## 4. Phase 1 — isolated G8 execution pilot
 
-**Status: NOT STARTED.** Phase 1 may begin only after Phase 0 closes through SSOT merge to master.
+**Status: READY — real A1–A9 acceptance evidence is still incomplete.** Phase 0 is closed because PR #364 is merged. Phase 1 may proceed within the existing contract and safety boundaries.
 
 ### Scope
 
@@ -118,8 +120,8 @@ Do not substitute a narrative summary for raw artifacts.
 
 ## 7. Current decision
 
-Phase 0 is PARTIAL and remains open until PR #364 is explicitly authorized and merged to master. Phase 1 has not started. PR #355 is useful supporting API-test evidence, but is not the real pilot and does not satisfy G8.
+Phase 0 is CLOSED: PR #364 placed the three SSOT files on master. PR #373 is also merged and provides a repeatable regression bundle, but neither CI success nor fixture-based tests establish real G8 acceptance. Phase 1 is READY for isolated operator execution and collection of missing A1–A9 artifacts.
 
 **Current gate: G8 = BLOCKED / NOT VERIFIED.**
 
-The next action is to finish Phase 0 by placing the three SSOT files on master through PR #364. Do not start Phase 1 until that merge occurs. After Phase 0 closes, the next phase will be the isolated operator pilot and collection of missing A1–A9 artifacts. No production changes or merge are authorized by this document.
+Next action: collect traceable raw evidence for A1–A9 in the disposable runtime, then obtain independent review. Do not change production data, bypass gates, or claim G8 PASS before every required criterion is proven.
