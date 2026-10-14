@@ -60,6 +60,78 @@ jobs:
             htmlcov/
             coverage.xml
 
+  windows-runtime-smoke:
+    name: windows-runtime-smoke
+    runs-on: windows-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest httpx
+          Push-Location frontend
+          npm install --no-audit --no-fund
+          Pop-Location
+
+      - name: Compile, regression-test and build on Windows
+        shell: pwsh
+        run: |
+          python -m compileall app tests
+          python -m pytest -q tests/test_sales_workflow.py tests/test_sale_customer_migration.py --tb=short
+          Push-Location frontend
+          npm run build
+          Pop-Location
+
+      - name: Start API and frontend on Windows and check health
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force data | Out-Null
+          $env:DATABASE_URL = "sqlite:///./data/hbi-windows-smoke.db"
+          $apiLog = Join-Path $env:RUNNER_TEMP "hbi-api-windows.log"
+          $apiErr = Join-Path $env:RUNNER_TEMP "hbi-api-windows.err.log"
+          $webLog = Join-Path $env:RUNNER_TEMP "hbi-web-windows.log"
+          $webErr = Join-Path $env:RUNNER_TEMP "hbi-web-windows.err.log"
+          $api = Start-Process -FilePath python -ArgumentList @("-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8765") -WorkingDirectory $PWD.Path -PassThru -RedirectStandardOutput $apiLog -RedirectStandardError $apiErr
+          $web = Start-Process -FilePath "cmd.exe" -ArgumentList @("/c", "npm run dev -- --host 127.0.0.1 --port 4173") -WorkingDirectory (Join-Path $PWD.Path "frontend") -PassThru -RedirectStandardOutput $webLog -RedirectStandardError $webErr
+          try {
+            $apiReady = $false
+            $webReady = $false
+            for ($i = 0; $i -lt 45; $i++) {
+              try {
+                $health = Invoke-WebRequest -Uri "http://127.0.0.1:8765/health" -TimeoutSec 2
+                if ($health.StatusCode -eq 200) { $apiReady = $true }
+              } catch {}
+              try {
+                $home = Invoke-WebRequest -Uri "http://127.0.0.1:4173/" -TimeoutSec 2
+                if ($home.StatusCode -eq 200) { $webReady = $true }
+              } catch {}
+              if ($apiReady -and $webReady) { break }
+              Start-Sleep -Seconds 2
+            }
+            if (-not $apiReady) { Get-Content $apiLog -ErrorAction SilentlyContinue; throw "Windows API health check failed." }
+            if (-not $webReady) { Get-Content $webLog -ErrorAction SilentlyContinue; throw "Windows frontend health check failed." }
+            Write-Host "Windows API and frontend both returned HTTP 200."
+          } finally {
+            if ($web -and -not $web.HasExited) { Stop-Process -Id $web.Id -Force -ErrorAction SilentlyContinue }
+            if ($api -and -not $api.HasExited) { Stop-Process -Id $api.Id -Force -ErrorAction SilentlyContinue }
+          }
+
   # WP-06 / Issue #20: dedicated governance gate for P4 Contract §16–§18
   # Justification: stable named status check for future branch protection;
   # faster targeted feedback without re-running accounting/inventory suites.
