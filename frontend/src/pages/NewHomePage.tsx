@@ -559,8 +559,9 @@ export default function NewHomePage() {
       if (!adminToken) throw new Error("برای ثبت فروش ابتدا با حساب مدیر وارد شوید.");
       const sale = await createSale(
         {
-          ...(customerId ? { customer_id: customerId } : {}),
-          items: [{ product_id: saleProductId.trim(), quantity: saleQty, ...(customerId && selectedRecommendationId ? { recommendation_id: selectedRecommendationId } : {}) }],
+          // Direct sale is intentionally independent of whichever customer was last opened.
+          // Customer/recommendation linkage must be an explicit sale-form choice, never session carry-over.
+          items: [{ product_id: saleProductId.trim(), quantity: saleQty }],
           fx_rate_usd_to_irr: currentFxRate,
         },
         adminToken
