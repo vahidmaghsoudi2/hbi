@@ -251,3 +251,28 @@ def test_total_sales_is_customer_scoped(session):
 
     assert SaleService(session).get_total_sales("CUST-1") == 2_000_000
     assert SaleService(session).get_total_sales("CUST-2") == 9_000_000
+
+def test_direct_sale_without_customer(session):
+    _seed(session, qty=3)
+    sale = SaleService(session).create_sale(
+        None,
+        [{"product_id": "P-SALE-1", "quantity": 1}],
+        fx_rate_usd_to_irr=1_000_000.0,
+        idempotency_key="walk-in-001",
+    )
+    session.commit()
+    assert sale.customer_id is None
+    assert sale.total_amount_toman == 2_000_000
+    assert session.get(Inventory, "INV-P-SALE-1").quantity_available == 2
+    assert session.query(StockMovement).filter_by(reference_id=sale.sale_id).count() == 1
+
+
+def test_direct_sale_cannot_link_consultation_recommendation(session):
+    _seed(session)
+    with pytest.raises(ValueError, match="without a customer"):
+        SaleService(session).create_sale(
+            None,
+            [{"product_id": "P-SALE-1", "quantity": 1, "recommendation_id": "REC-1"}],
+            fx_rate_usd_to_irr=1_000_000.0,
+        )
+
