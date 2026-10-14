@@ -107,7 +107,19 @@ def _ensure_sale_customer_optional():
             "WHERE tbl_name='Sale' AND type IN ('index','trigger') AND sql IS NOT NULL"
         ).fetchall()
         conn.commit()
-        conn.exec_driver_sql("PRAGMA foreign_keys=OFF")
+        # SQLite ignores PRAGMA foreign_keys changes inside an active transaction.
+        # Set it through the raw DB-API connection after committing, before SQLAlchemy
+        # starts the DDL transaction, and verify that SQLite actually applied it.
+        raw_connection = conn.connection.driver_connection
+        pragma_cursor = raw_connection.cursor()
+        try:
+            pragma_cursor.execute("PRAGMA foreign_keys=OFF")
+            pragma_cursor.execute("PRAGMA foreign_keys")
+            foreign_keys_disabled = pragma_cursor.fetchone()[0] == 0
+        finally:
+            pragma_cursor.close()
+        if not foreign_keys_disabled:
+            raise RuntimeError("Cannot safely migrate Sale.customer_id: SQLite foreign keys remained enabled")
         try:
             conn.exec_driver_sql(new_ddl)
             conn.exec_driver_sql(
@@ -122,7 +134,17 @@ def _ensure_sale_customer_optional():
             conn.rollback()
             raise
         finally:
-            conn.exec_driver_sql("PRAGMA foreign_keys=ON")
+            # Restore enforcement outside any SQLAlchemy-managed transaction.
+            conn.commit()
+            pragma_cursor = raw_connection.cursor()
+            try:
+                pragma_cursor.execute("PRAGMA foreign_keys=ON")
+                pragma_cursor.execute("PRAGMA foreign_keys")
+                foreign_keys_enabled = pragma_cursor.fetchone()[0] == 1
+            finally:
+                pragma_cursor.close()
+            if not foreign_keys_enabled:
+                raise RuntimeError("SQLite foreign-key enforcement could not be restored after Sale migration")
         violations = conn.exec_driver_sql("PRAGMA foreign_key_check").fetchall()
         if violations:
             raise RuntimeError(f"Foreign-key violations after Sale migration: {violations[:5]}")
