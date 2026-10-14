@@ -1183,7 +1183,7 @@ export default function NewHomePage() {
           <section className="pro-panel" id="sales">
             <h1>ثبت فروش</h1>
             <p className="pro-lead">ثبت فروش مستقیم بدون مشاوره و بدون ثبت مشتری اجباری است. در صورت انتخاب مشتری، سابقهٔ خرید نیز به او متصل می‌شود.</p>
-            {!customerId ? (
+            {false ? (
               <div className="pro-empty">
                 <strong>مشتری فاکتور را انتخاب کنید؛ پروندهٔ مشاوره لازم نیست.</strong>
                 <div className="pro-form">
