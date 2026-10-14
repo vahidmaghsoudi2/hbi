@@ -74,7 +74,7 @@ export default function NewHomePage() {
   const [saleStock, setSaleStock] = useState<number | null>(null);
   const [saleFxRate, setSaleFxRate] = useState<number | null>(null);
   const [saleBusy, setSaleBusy] = useState(false);
-  const [walkInSale, setWalkInSale] = useState(false);
+  const [walkInSale, setWalkInSale] = useState(true);
   const [lastSale, setLastSale] = useState<SaleDTO | null>(null);
   const [totalSales, setTotalSales] = useState<number | null>(null);
   const [editProduct, setEditProduct] = useState<ProductDTO | null>(null);
