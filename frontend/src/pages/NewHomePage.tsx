@@ -1200,7 +1200,7 @@ export default function NewHomePage() {
                 <fieldset className="pro-fieldset">
                   <legend>مشتری</legend>
                   <p className="pro-muted">
-                    <code>{customerId}</code>
+                    <code>{customerId ?? "فروش مستقیم، بدون ثبت مشتری"}</code>
                   </p>
                   <p className="pro-muted">جمع فروش: {totalSales === null ? "—" : totalSales.toLocaleString("fa-IR")}</p>
                 </fieldset>
