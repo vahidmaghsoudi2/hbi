@@ -544,7 +544,6 @@ export default function NewHomePage() {
   async function onSaleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!customerId) return setError("برای ثبت فروش، مشتری را انتخاب کنید؛ ثبت مشاوره الزامی نیست.");
     if (!sessionStorage.getItem("hbi_admin_access_token")) return setError("برای ثبت فروش ابتدا با حساب مدیر وارد شوید.");
     if (!saleProductId.trim()) return setError("محصول را انتخاب کنید.");
     if (saleQty < 1) return setError("تعداد نامعتبر است.");
@@ -560,7 +559,7 @@ export default function NewHomePage() {
       if (!adminToken) throw new Error("برای ثبت فروش ابتدا با حساب مدیر وارد شوید.");
       const sale = await createSale(
         {
-          customer_id: customerId,
+          ...(customerId ? { customer_id: customerId } : {}),
           items: [{ product_id: saleProductId.trim(), quantity: saleQty, ...(selectedRecommendationId ? { recommendation_id: selectedRecommendationId } : {}) }],
           fx_rate_usd_to_irr: currentFxRate,
         },
@@ -572,6 +571,7 @@ export default function NewHomePage() {
       setStatusMsg(`فروش ثبت شد: ${sale.sale_id ?? "OK"}`);
       await refreshSalesTotal();
       try {
+        if (!customerId || !token) return;
         const updatedHistory = await listSalesByCustomer(customerId, token);
         setPurchaseHistory(Array.isArray(updatedHistory) ? updatedHistory : []);
       } catch {
@@ -1182,7 +1182,7 @@ export default function NewHomePage() {
         {pageView === "content" && active === "sales" && (
           <section className="pro-panel" id="sales">
             <h1>ثبت فروش</h1>
-            <p className="pro-lead">ثبت فروش مستقل از مشاوره است. نشست مدیر و انتخاب مشتری لازم است؛ اتصال به مشاوره اختیاری است.</p>
+            <p className="pro-lead">ثبت فروش مستقیم بدون مشاوره و بدون ثبت مشتری اجباری است. در صورت انتخاب مشتری، سابقهٔ خرید نیز به او متصل می‌شود.</p>
             {!customerId ? (
               <div className="pro-empty">
                 <strong>مشتری فاکتور را انتخاب کنید؛ پروندهٔ مشاوره لازم نیست.</strong>
