@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 from app.core.rate_limit import RateLimitMiddleware
 from app.database import init_db, SessionLocal
 from app.services.admin_auth_service import ensure_admin_account
+from app.api.routers.local_session import router as local_session_router
 
 from app.api.routers import (
     auth_router, products_router, duplicate_checks_router, customers_router, cases_router,
@@ -108,6 +109,7 @@ if ValidationError:
         )
 
 app.include_router(auth_router, prefix="/api/v1/auth", tags=["Authentication"])
+app.include_router(local_session_router, prefix="/api/v1/auth", tags=["Local Workstation Session"])
 app.include_router(products_router, prefix="/api/v1/products", tags=["Products"])
 app.include_router(duplicate_checks_router, prefix="/api/v1/products/duplicate-check", tags=["Product Duplicate Check"])
 app.include_router(customers_router, prefix="/api/v1/customers", tags=["Customers"])
