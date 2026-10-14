@@ -1,8 +1,8 @@
 # HBI Product Intake Roadmap and Phase 1 Execution Record
 
-**Status:** Phase 0 = PARTIAL until all SSOT files are on master; Phase 1 = NOT STARTED; G8 = **BLOCKED / NOT VERIFIED**  
+**Status:** Phase 0 / SSOT placement = COMPLETE; isolated pilot preparation = IN PROGRESS; G8 = **BLOCKED / NOT VERIFIED**  
 **Source of truth:** GitHub repository `vahidmaghsoudi2/hbi`  
-**Current baseline:** `0a2ec9b477f89954ba1865ec59e3701a5a0f3831`  
+**Current governance baseline:** `0b0315391e663c74c1c4511c906d1582636aa70d`  
 **Last updated:** 2026-10-13
 
 ## 1. Purpose and authority
@@ -19,16 +19,11 @@ Primary references:
 
 ## 2. Current baseline and completed work
 
-### Phase 0 — SSOT baseline on master: PARTIAL
+### Phase 0 — SSOT baseline on master: COMPLETE
 
-Baseline master commit: `0a2ec9b477f89954ba1865ec59e3701a5a0f3831`.
+The three canonical Product Intake SSOT files are present on `master`; PR #364 was merged at `7d962720a60c1291b8c21360dff0cc95b6fc0d1a`. This closes Phase 0's documentation-placement requirement only; it does not prove that the real G8 operator pilot passed.
 
-Exact-SHA push checks:
-- [HBI CI run 38396795619](https://github.com/vahidmaghsoudi2/hbi/actions/runs/38396795619) — success
-- [HBI Auto Tasks / Live test evidence run 38396795733](https://github.com/vahidmaghsoudi2/hbi/actions/runs/38396795733) — success
-- Exact-SHA checks `test`, `governance-tests`, and `Live test evidence` succeeded.
-
-The merge SHA and green exact-SHA CI establish a code baseline only. Phase 0 remains PARTIAL because the SSOT files are not yet on master; Phase 0 closes only after PR #364 is explicitly authorized and merged. This is not proof that the real G8 operator pilot passed. The Phase 0 outcome is recorded in [Issue #283 comment](https://github.com/vahidmaghsoudi2/hbi/issues/283#issuecomment-6145815790).
+Subsequent governance baseline: PR #376 merged at `9aa154c966b736afe58a0c926fcc4126e705f9f5`; PR #377 reconciled the execution log at `0b0315391e663c74c1c4511c906d1582636aa70d`. PR #373 regression tooling is supporting evidence only. The Phase 0 outcome is recorded in [Issue #283](https://github.com/vahidmaghsoudi2/hbi/issues/283).
 
 ### Relevant merged work
 
@@ -46,7 +41,7 @@ The pilot must demonstrate actual permitted transitions and persisted readback. 
 
 ## 4. Phase 1 — isolated G8 execution pilot
 
-**Status: NOT STARTED.** Phase 1 may begin only after Phase 0 closes through SSOT merge to master.
+**Status: IN PROGRESS — isolated runtime preparation exists; real operator A1–A9 execution is not yet independently accepted.** Phase 1 can proceed because Phase 0 SSOT placement is complete.
 
 ### Scope
 
@@ -118,8 +113,8 @@ Do not substitute a narrative summary for raw artifacts.
 
 ## 7. Current decision
 
-Phase 0 is PARTIAL and remains open until PR #364 is explicitly authorized and merged to master. Phase 1 has not started. PR #355 is useful supporting API-test evidence, but is not the real pilot and does not satisfy G8.
+Phase 0 SSOT placement is COMPLETE. The execution-control protocol and execution log are current on master, but this roadmap's historical status had not been reconciled; this change corrects that status without changing the binding contract or A1–A9 dispositions.
 
 **Current gate: G8 = BLOCKED / NOT VERIFIED.**
 
-The next action is to finish Phase 0 by placing the three SSOT files on master through PR #364. Do not start Phase 1 until that merge occurs. After Phase 0 closes, the next phase will be the isolated operator pilot and collection of missing A1–A9 artifacts. No production changes or merge are authorized by this document.
+The next operational task is to establish a current, mergeable and independently reviewed isolated-runtime implementation baseline, then continue the real operator pilot and collect the missing A1–A9 artifacts. PR #369 contains the isolated runtime guard but is based on an older master SHA and currently reports a mergeability conflict; do not merge it until the conflict is resolved and checks are rerun. No production changes or merge are authorized by this roadmap.
