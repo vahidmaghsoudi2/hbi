@@ -49,6 +49,8 @@ if (-not (Test-Path $nodeModules)) {
     Write-Host "[1/4] Frontend آماده است." -ForegroundColor Cyan
 }
 
+# Enable passwordless operator session only for this loopback workstation launcher.
+$env:HBI_LOCAL_AUTO_LOGIN = "1"
 Write-Host "[2/4] Backend :8000 ..." -ForegroundColor Cyan
 Start-Process -FilePath "cmd.exe" -ArgumentList "/k", "python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload" -WorkingDirectory $Root -WindowStyle Normal
 
