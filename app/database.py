@@ -64,47 +64,48 @@ def _ensure_accounting_control_columns():
 
 
 def _ensure_sale_customer_optional():
-    """SQLite-safe migration: allow walk-in/direct sales without a Customer row.
-
-    Rebuilds only Sale, preserving all rows and declared constraints. Foreign-key
-    enforcement is disabled outside a transaction for the rebuild and restored
-    immediately; callers should still run the normal integrity checks.
-    """
+    """Allow direct/walk-in sales on legacy SQLite databases without losing history."""
     if engine.dialect.name != "sqlite":
         return
     with engine.connect() as conn:
-        tables = inspect(conn).get_table_names()
-        if "Sale" not in tables:
+        if "Sale" not in inspect(conn).get_table_names():
             return
-        info = conn.execute(text('PRAGMA table_info("Sale")')).fetchall()
+        info = conn.exec_driver_sql('PRAGMA table_info("Sale")').fetchall()
         customer_col = next((row for row in info if row[1] == "customer_id"), None)
         if customer_col is None or int(customer_col[3]) == 0:
             return
-        create_row = conn.execute(text(
+        ddl_row = conn.exec_driver_sql(
             "SELECT sql FROM sqlite_master WHERE type='table' AND name='Sale'"
-        )).fetchone()
-        if not create_row or not create_row[0]:
+        ).fetchone()
+        if not ddl_row or not ddl_row[0]:
             raise RuntimeError("Cannot migrate Sale.customer_id: table DDL unavailable")
-        ddl = create_row[0]
         import re
-        new_ddl = re.sub(
-            r'(customer_id\s+VARCHAR)\s+NOT NULL,
-            r'\1,
+        ddl = ddl_row[0]
+        new_ddl, replacements = re.subn(
+            r'(\bcustomer_id\b\s+VARCHAR)\s+NOT\s+NULL\b',
+            r'\1',
             ddl,
             count=1,
             flags=re.IGNORECASE,
         )
-        if new_ddl == ddl:
-            raise RuntimeError("Cannot safely migrate Sale.customer_id nullable constraint")
-        new_ddl = re.sub(
-            r'CREATE TABLE\s+(?:IF NOT EXISTS\s+)?["\[]?Sale["\]]?,
+        if replacements != 1:
+            raise RuntimeError("Cannot safely identify Sale.customer_id NOT NULL constraint")
+        new_ddl, renamed = re.subn(
+            r'^\s*CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?["\[]?Sale["\]]?',
             'CREATE TABLE "Sale__direct_sale_new"',
             new_ddl,
             count=1,
             flags=re.IGNORECASE,
         )
+        if renamed != 1:
+            raise RuntimeError("Cannot safely rename Sale table DDL for rebuild")
+
         columns = [row[1] for row in info]
         quoted = ", ".join('"' + name.replace('"', '""') + '"' for name in columns)
+        objects = conn.exec_driver_sql(
+            "SELECT type, name, sql FROM sqlite_master "
+            "WHERE tbl_name='Sale' AND type IN ('index','trigger') AND sql IS NOT NULL"
+        ).fetchall()
         conn.commit()
         conn.exec_driver_sql("PRAGMA foreign_keys=OFF")
         try:
@@ -114,6 +115,8 @@ def _ensure_sale_customer_optional():
             )
             conn.exec_driver_sql('DROP TABLE "Sale"')
             conn.exec_driver_sql('ALTER TABLE "Sale__direct_sale_new" RENAME TO "Sale"')
+            for kind, _name, sql in objects:
+                conn.exec_driver_sql(sql)
             conn.commit()
         except Exception:
             conn.rollback()
