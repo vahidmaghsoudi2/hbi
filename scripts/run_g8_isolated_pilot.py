@@ -6,6 +6,7 @@ The database is deleted on shutdown; the API log is retained for evidence review
 """
 from __future__ import annotations
 
+import getpass
 import os
 import socket
 import subprocess
@@ -107,8 +108,22 @@ def main() -> int:
     env["HBI_ENV"] = "development"
     env["DATABASE_URL"] = db_url
     env["HBI_CORS_ORIGINS"] = f"http://{HOST}:4173,http://localhost:4173"
-    env.pop("HBI_ADMIN_USERNAME", None)
-    env.pop("HBI_ADMIN_PASSWORD", None)
+
+    # Use the existing HBI login interface in the isolated DB. The configured
+    # username/password are entered locally and never printed or written to the
+    # evidence log. The app hashes the password into this disposable DB only.
+    if not smoke_test:
+        username = input("HBI login username for this isolated pilot: ").strip()
+        password = getpass.getpass("HBI login password (input hidden): ")
+        if not username or not password:
+            print("REFUSED: username and password are required for standard login.", flush=True)
+            try:
+                session_dir.rmdir()
+            except OSError:
+                pass
+            return 2
+        env["HBI_ADMIN_USERNAME"] = username
+        env["HBI_ADMIN_PASSWORD"] = password
 
     command = [
         sys.executable, "-m", "uvicorn", "app.main:app",
@@ -119,7 +134,7 @@ def main() -> int:
     print(f"API_DOCS=http://{HOST}:{PORT}/docs", flush=True)
     print(f"HEALTH={HEALTH_URL}", flush=True)
     print(f"API_LOG={log_path}", flush=True)
-    print("MODE=EMPTY_ISOLATED_DATABASE; NO_FIXTURES; NO_AUTO_ACTIVATION", flush=True)
+    print("MODE=EMPTY_ISOLATED_DATABASE; STANDARD_LOGIN; NO_FIXTURES; NO_AUTO_ACTIVATION", flush=True)
 
     process = None
     cleanup_ok = False
