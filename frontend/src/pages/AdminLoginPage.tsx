@@ -20,7 +20,15 @@ export default function AdminLoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
-      const data = await response.json();
+      const raw = await response.text();
+      let data: { detail?: string; access_token?: string; refresh_token?: string } = {};
+      if (raw) {
+        try {
+          data = JSON.parse(raw);
+        } catch {
+          throw new Error("پاسخ سرور خالی یا نامعتبر است؛ سرویس HBI را بررسی کنید.");
+        }
+      }
       if (!response.ok) {
         throw new Error(data?.detail || "ورود ناموفق بود.");
       }
