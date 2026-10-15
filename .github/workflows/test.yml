@@ -2,9 +2,9 @@ name: HBI CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, feat/homepage-navigation-ia-stage1-final ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, feat/homepage-navigation-ia-stage1-final ]
 
 jobs:
   test:
