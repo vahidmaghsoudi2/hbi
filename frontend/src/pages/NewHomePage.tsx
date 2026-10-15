@@ -891,7 +891,7 @@ export default function NewHomePage() {
                 value={customerSearch}
                 onChange={(e) => setCustomerSearch(e.target.value)}
                 placeholder="نام خانوادگی یا شماره موبایل مشتری…"
-                aria-label="جست‌وجوی مشتری قبلی با نام یا موبایل"
+                aria-label="جست‌وجوی مشتری قبلی با نام خانوادگی یا موبایل"
               />
               <button type="submit" className="pro-btn-primary" disabled={customerSearchBusy}>
                 {customerSearchBusy ? "در حال جست‌وجو…" : "جست‌وجو"}
