@@ -20,6 +20,7 @@ from app.models.case import Case
 from app.models.evidence import Evidence
 from app.models.product import Product
 from app.models.product_knowledge import ProductKnowledge
+from app.models.inventory import Inventory
 from app.services.skin_next_question_service import SkinNextQuestionService
 
 init_db()
@@ -27,8 +28,31 @@ db = SessionLocal()
 try:
     seed(db)
     product = db.query(Product).filter_by(product_id="ISDIN-FOTOUTRA100-50ML").one()
+    # Sellable catalog requires ACTIVE + VERIFIED + VALID + stock + sale_price_usd.
     product.status = "ACTIVE"
+    product.identity_status = "VERIFIED"
     product.qa_verdict = "VALID"
+    inv = db.query(Inventory).filter_by(product_id=product.product_id).first()
+    if inv is None:
+        inv = Inventory(
+            inventory_id=f"INV-{product.product_id}",
+            product_id=product.product_id,
+            quantity_available=5,
+            quantity_reserved=0,
+            quantity_damaged=0,
+            stock_status="AVAILABLE",
+            sale_price_usd=20.0,
+            sale_price_toman=2_000_000,
+        )
+        db.add(inv)
+    else:
+        inv.quantity_available = max(int(inv.quantity_available or 0), 5)
+        inv.quantity_reserved = int(inv.quantity_reserved or 0)
+        if inv.sale_price_usd is None:
+            inv.sale_price_usd = 20.0
+        if inv.sale_price_toman is None:
+            inv.sale_price_toman = 2_000_000
+        inv.stock_status = "AVAILABLE"
     pk = db.query(ProductKnowledge).filter_by(product_id=product.product_id).one()
     pk.known_use_cases = "sun protection"
     if db.get(Evidence, "EV-PILOT-BROWSER-APPROVED-001") is None:
