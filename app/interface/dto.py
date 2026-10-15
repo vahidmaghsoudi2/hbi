@@ -73,7 +73,7 @@ class SaleItemDTO:
 @dataclass
 class SaleDTO:
     sale_id: str
-    customer_id: str
+    customer_id: Optional[str]
     total_amount_toman: int
     items: Optional[List[SaleItemDTO]] = None
 

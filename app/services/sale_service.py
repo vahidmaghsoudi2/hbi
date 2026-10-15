@@ -46,7 +46,7 @@ class SaleService(BaseService[Sale, SaleRepository]):
 
     def create_sale(
         self,
-        customer_id: str,
+        customer_id: Optional[str],
         items: list,
         *,
         fx_rate_usd_to_irr: float,
@@ -66,9 +66,10 @@ class SaleService(BaseService[Sale, SaleRepository]):
                     raise ValueError("idempotency_key already used for a different customer")
                 return existing
 
-        customer = self.db.query(Customer).filter(Customer.customer_id == customer_id).first()
-        if not customer:
-            raise ValueError(f"Customer {customer_id} not found")
+        if customer_id is not None:
+            customer = self.db.query(Customer).filter(Customer.customer_id == customer_id).first()
+            if not customer:
+                raise ValueError(f"Customer {customer_id} not found")
 
         validated = []
         for item_data in items:
@@ -92,6 +93,8 @@ class SaleService(BaseService[Sale, SaleRepository]):
                 if not recommendation:
                     raise ValueError(f"Recommendation {recommendation_id} not found")
                 case = self.db.query(Case).filter_by(case_id=recommendation.case_id).first()
+                if customer_id is None:
+                    raise ValueError("A recommendation-linked sale requires a registered customer")
                 if not case or case.customer_id != customer_id:
                     raise ValueError("Recommendation does not belong to the sale customer")
                 if recommendation.product_id != product_id:
