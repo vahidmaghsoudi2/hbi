@@ -847,7 +847,7 @@ export default function NewHomePage() {
               <h2 id="dashboard-activity-title">آخرین گردش‌های انبار</h2>
               <div className="pro-product-card">
                 {dashboardMovements === null ? (
-                  <p className="pro-muted">گردش اخیر در دسترس نیست؛ گزارش حسابداری را بررسی کنید.</p>
+                  <p className="pro-muted">گردش اخیر در دسترس نیست؛ گزارش گردش کالا را در بخش «کالا و موجودی» بررسی کنید.</p>
                 ) : dashboardMovements.length === 0 ? (
                   <p className="pro-muted">گردشی برای نمایش ثبت نشده است.</p>
                 ) : (
@@ -1003,9 +1003,6 @@ export default function NewHomePage() {
               <div className="pro-actions">
                 <button type="submit" className="pro-btn-primary" disabled={busy}>
                   {busy ? "در حال اجرا…" : "ثبت مراجعه + دریافت پیشنهاد"}
-                </button>
-                <button type="button" className="pro-btn-secondary" onClick={() => go("catalog")}>
-                  محصولات
                 </button>
               </div>
             </form>
