@@ -14,7 +14,7 @@ Legend: **✓** belongs in the proposed location; **X** misplaced or duplicated;
 | `/` | NewHomePage | AdminGate | Main menu, dashboard and embedded operational panels |
 | `/catalog` | CatalogPage | AdminGate | Read-only list via `listProducts`; NewHomePage product panel uses `listManageableProducts` and also exposes intake/edit and QA. Similar entry labels, but not proven functionally identical |
 | `/accounting` | AccountingHomePage | AdminGate | Sales report and finance report only; `?section=` selects a report |\n| `/inventory` | InventoryHomePage | AdminGate | Inventory report, low-stock report, and stock-flow report; `?section=` selects the view |
-| `/purchase` | PurchasePage | AdminGate | Stock-in/purchase form; links back Home and Accounting |
+| `/purchase` | PurchasePage | AdminGate | Stock-in/purchase form; links back Home and Inventory |
 | `/pilot` | PilotPage | AdminGate; separate pilot session still required for API calls | Non-production pilot flow; direct browser entry redirects to Admin login |
 | `/recommendation` | RecommendationPage | AdminGate; separate pilot session still required for API calls | Non-production recommendation flow; direct browser entry redirects to Admin login |
 
