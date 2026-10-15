@@ -17,6 +17,7 @@ class ProductDTO:
 class CustomerDTO:
     customer_id: str
     name: str
+    family_name: Optional[str] = None
     mobile: Optional[str] = None
     consent_to_store_data: int = 0
 
