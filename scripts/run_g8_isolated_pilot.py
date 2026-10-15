@@ -49,8 +49,10 @@ def _health_check() -> tuple[bool, str]:
             if response.status == 200:
                 return True, f"HTTP {response.status}"
             return False, f"HTTP {response.status}"
+    except urllib.error.HTTPError as exc:
+        return False, f"HTTP {exc.code} {exc.reason}"[:500]
     except (OSError, urllib.error.URLError, TimeoutError) as exc:
-        # Keep this to transport/status diagnostics; never include request credentials.
+        # Keep this to transport diagnostics; never include request credentials.
         reason = getattr(exc, "reason", None)
         detail = f"{type(exc).__name__}: {reason if reason is not None else exc}"
         return False, detail[:500]
