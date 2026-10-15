@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core.rate_limit import RateLimitMiddleware
+from app.g8_http_evidence import G8RawHttpEvidenceMiddleware
 from app.database import init_db, SessionLocal
 from app.services.admin_auth_service import ensure_admin_account
 
@@ -73,6 +74,11 @@ app.add_middleware(
 )
 
 app.add_middleware(RateLimitMiddleware)
+
+# The G8 runner opts in explicitly; normal application runs do not write HTTP bodies.
+_g8_evidence_dir = os.getenv("G8_RAW_HTTP_EVIDENCE_DIR", "").strip()
+if _g8_evidence_dir:
+    app.add_middleware(G8RawHttpEvidenceMiddleware, output_dir=_g8_evidence_dir)
 
 
 if NotFoundError:

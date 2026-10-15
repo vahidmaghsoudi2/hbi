@@ -188,15 +188,32 @@ def _finalize_evidence(
 
         counts = _export_database_readback(db_path, evidence_dir / "database-readback.json")
         raw_http_dir = evidence_dir / "raw-http"
+        if not raw_http_dir.exists() or raw_http_dir.is_symlink() or not raw_http_dir.is_dir():
+            raise RuntimeError("raw-http evidence path is missing or unsafe")
+        raw_paths = sorted(path for path in raw_http_dir.rglob("*") if path.is_file())
+        if any(path.is_symlink() for path in raw_paths):
+            raise RuntimeError("raw-http evidence contains a symlink")
+        if not raw_paths:
+            raise RuntimeError("no raw HTTP request/response artifacts were captured")
         raw_http_files = []
-        if raw_http_dir.exists():
-            if raw_http_dir.is_symlink() or not raw_http_dir.is_dir():
-                raise RuntimeError("raw-http evidence path is unsafe")
-            raw_http_files = sorted(
-                str(path.relative_to(evidence_dir).as_posix())
-                for path in raw_http_dir.rglob("*")
-                if path.is_file() and not path.is_symlink()
-            )
+        for path in raw_paths:
+            if path.suffix.lower() != ".json":
+                raise RuntimeError(f"unexpected non-JSON raw HTTP artifact: {path.name}")
+            try:
+                artifact = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as exc:
+                raise RuntimeError(f"invalid raw HTTP artifact {path.name}: {exc}") from exc
+            request = artifact.get("request", {})
+            response = artifact.get("response", {})
+            if artifact.get("schema") != "hbi.g8.raw-http.v1" or not artifact.get("request_id"):
+                raise RuntimeError(f"raw HTTP artifact lacks schema/request identity: {path.name}")
+            if not request.get("complete") or not response.get("started") or not response.get("complete"):
+                raise RuntimeError(f"raw HTTP request/response pair is incomplete: {path.name}")
+            if not isinstance(response.get("status"), int):
+                raise RuntimeError(f"raw HTTP response status is missing: {path.name}")
+            if not request.get("body", {}).get("captured") or not response.get("body", {}).get("captured"):
+                raise RuntimeError(f"raw HTTP body capture is incomplete or exceeded limits: {path.name}")
+            raw_http_files.append(str(path.relative_to(evidence_dir).as_posix()))
 
         metadata = {
             "status": "FINALIZED",
@@ -215,7 +232,8 @@ def _finalize_evidence(
             "raw_http_files": raw_http_files,
             "note": (
                 "Database readback is a persisted-state snapshot, not proof that A1-A9 passed. "
-                "Operator-supplied raw HTTP artifacts are listed when present."
+                "Raw HTTP artifacts are automatically captured by the opt-in middleware; "
+                "their presence is necessary but not sufficient for A1-A9 acceptance."
             ),
         }
         (evidence_dir / "session-metadata.json").write_text(
@@ -331,6 +349,7 @@ def main() -> int:
     env = os.environ.copy()
     env["HBI_ENV"] = "development"
     env["DATABASE_URL"] = db_url
+    env["G8_RAW_HTTP_EVIDENCE_DIR"] = str(evidence_dir / "raw-http")
     env["HBI_CORS_ORIGINS"] = f"http://{HOST}:4173,http://localhost:4173"
 
     if not smoke_test:
@@ -354,7 +373,8 @@ def main() -> int:
     print(f"API_LOG={log_path}", flush=True)
     print(f"RAW_HTTP_EVIDENCE_DIR={evidence_dir / 'raw-http'}", flush=True)
     print("MODE=EMPTY_ISOLATED_DATABASE; STANDARD_LOGIN; NO_FIXTURES; NO_AUTO_ACTIVATION", flush=True)
-    print("BEFORE STOP: save available raw request/response artifacts under RAW_HTTP_EVIDENCE_DIR.", flush=True)
+    print("HTTP_CAPTURE=AUTOMATIC; secrets are redacted and body hashes retained.", flush=True)
+    print("BEFORE STOP: confirm each operator action produced a paired JSON artifact; finalization validates all pairs.", flush=True)
 
     process = None
     finalized = False
@@ -376,7 +396,7 @@ def main() -> int:
                     if smoke_test:
                         print("SMOKE_TEST=PASS", flush=True)
                         break
-                    print("OPERATOR_ACTION: use /docs and preserve raw request/response artifacts.", flush=True)
+                    print("OPERATOR_ACTION: use /docs for the real pilot; HTTP request/response artifacts are captured automatically.", flush=True)
                     print("STOP: press Ctrl+C here after the pilot session.", flush=True)
                     while process.poll() is None:
                         time.sleep(0.5)
