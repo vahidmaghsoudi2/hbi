@@ -5,6 +5,7 @@ import CatalogPage from "./pages/CatalogPage";
 import PilotPage from "./pages/PilotPage";
 import RecommendationPage from "./pages/RecommendationPage";
 import AccountingHomePage from "./pages/AccountingHomePage";
+import InventoryHomePage from "./pages/InventoryHomePage";
 import PurchasePage from "./pages/PurchasePage";
 import AdminLoginPage from "./pages/AdminLoginPage";
 
