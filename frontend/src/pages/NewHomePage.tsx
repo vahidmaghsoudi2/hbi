@@ -81,7 +81,6 @@ export default function NewHomePage() {
   const [recDone, setRecDone] = useState(false);
   const [showAllRecommendations, setShowAllRecommendations] = useState(false);
   const [saleProductId, setSaleProductId] = useState("");
-  const [selectedRecommendationId, setSelectedRecommendationId] = useState<string | null>(null);
   const [saleQty, setSaleQty] = useState(1);
   const [salePrice, setSalePrice] = useState<number | null>(null);
   const [saleStock, setSaleStock] = useState<number | null>(null);
@@ -240,7 +239,6 @@ export default function NewHomePage() {
       setRecs([]);
       setRecDone(false);
       setShowAllRecommendations(false);
-      setSelectedRecommendationId(null);
       setSaleProductId("");
       setLastSale(null);
       const history = await listSalesByCustomer(customer.customer_id, pair.access_token);
@@ -417,23 +415,11 @@ export default function NewHomePage() {
     setNote("");
     setRecs([]);
     setRecDone(false);
-    setSelectedRecommendationId(null);
     setSaleProductId("");
     setLastSale(null);
     setPurchaseHistory([]);
     setStatusMsg("مشتری جدید آماده ثبت است. نشست محصولات/اپراتور دست‌نخورده باقی ماند.");
     setActive("profile");
-  }
-
-  function selectRecommendationForSale(r: RecommendationDTO) {
-    if ((r.eligibility_status ?? r.eligibility ?? "").trim().toUpperCase() !== "ELIGIBLE") {
-      setError("این مورد واجد شرایط پیشنهاد نهایی نیست و قابل انتخاب برای فروش از بخش پیشنهادها نیست.");
-      return;
-    }
-    setSaleProductId(r.product_id);
-    setSelectedRecommendationId(r.recommendation_id);
-    setStatusMsg(`پیشنهاد ${r.recommendation_id} برای فروش انتخاب شد.`);
-    setActive("sales");
   }
 
   async function runFullFlow(e: FormEvent) {
@@ -567,7 +553,6 @@ export default function NewHomePage() {
         adminToken
       );
       setLastSale(sale);
-      setSelectedRecommendationId(null);
       setSaleProductId("");
       setStatusMsg(`فروش ثبت شد: ${sale.sale_id ?? "OK"}`);
       await refreshSalesTotal();
@@ -1142,7 +1127,6 @@ export default function NewHomePage() {
                           {r.reasoning ? <div><dt>ReasoningEngine</dt><dd>{r.reasoning}</dd></div> : null}
                         </dl>
                       </details>
-                      <button type="button" className="pro-btn-primary" onClick={() => selectRecommendationForSale(r)}>انتخاب این پیشنهاد برای فروش</button>
                     </div>
                   </article>
                 );
@@ -1212,7 +1196,6 @@ export default function NewHomePage() {
                   </label>
                   <select id="sale-product" className="pro-input" value={saleProductId} onChange={(e) => {
                       setSaleProductId(e.target.value);
-                      setSelectedRecommendationId(null);
                     }}>
                     <option value="">— انتخاب از کاتالوگ —</option>
                     {sellableProducts.map((p) => (
@@ -1226,7 +1209,6 @@ export default function NewHomePage() {
                   </label>
                   <input id="sale-manual" className="pro-input" value={saleProductId} onChange={(e) => {
                       setSaleProductId(e.target.value);
-                      setSelectedRecommendationId(null);
                     }} />
                   <div className="pro-grid-2">
                     <div>
