@@ -29,6 +29,7 @@ def _to_customer_dto(c) -> CustomerDTO:
     return CustomerDTO(
         customer_id=c.customer_id,
         name=c.name,
+        family_name=getattr(c, "family_name", None),
         mobile=c.mobile,
         consent_to_store_data=c.consent_to_store_data
     )
@@ -134,11 +135,12 @@ class CustomerFacade:
     def __init__(self, db: Session):
         self.service = CustomerService(db)
 
-    def register(self, name: str, mobile: Optional[str] = None, consent: int = 0) -> CustomerDTO:
+    def register(self, name: str, mobile: Optional[str] = None, consent: int = 0, family_name: Optional[str] = None) -> CustomerDTO:
         try:
             customer = self.service.register_customer(
                 name=name,
                 mobile=mobile,
+                family_name=family_name,
                 consent_to_store_data=consent
             )
             return _to_customer_dto(customer)
