@@ -325,8 +325,8 @@ class EvidenceFacade:
             field=conflict.get("field"),
             values=conflict.get("values", []),
             evidence_ids=conflict.get("evidence_ids", []),
-            severity="HIGH",
-            status="UNRESOLVED"
+            severity=conflict.get("severity", "HIGH"),
+            status=conflict.get("status", "UNRESOLVED")
         )
 
 
