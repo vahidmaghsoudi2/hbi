@@ -123,7 +123,7 @@ def test_intake_invalid_consent_422(client):
 
 
 def test_intake_mobile_mismatch_409(client):
-    """JWT sub looks like mobile and differs from body mobile → 403."""
+    """JWT sub looks like mobile and differs from body mobile → 409."""
     headers = _auth(sub="09131112233")
     r = client.post(
         "/api/v1/customers/intake",
@@ -135,7 +135,7 @@ def test_intake_mobile_mismatch_409(client):
             "open_case": False,
         },
     )
-    assert r.status_code == 403
+    assert r.status_code == 409
 
 
 
