@@ -75,6 +75,10 @@ export default function NewHomePage() {
   const [error, setError] = useState<string | null>(null);
   const [products, setProducts] = useState<ProductDTO[]>([]);
   const [sellableProducts, setSellableProducts] = useState<ProductDTO[]>([]);
+  const [saleProductsError, setSaleProductsError] = useState<string | null>(null);
+  const [saleCustomerSearch, setSaleCustomerSearch] = useState("");
+  const [saleCustomerId, setSaleCustomerId] = useState<string | null>(null);
+  const [saleCustomerLabel, setSaleCustomerLabel] = useState<string | null>(null);
   const [catalogError, setCatalogError] = useState<string | null>(null);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [recs, setRecs] = useState<RecommendationDTO[]>([]);
@@ -122,11 +126,18 @@ export default function NewHomePage() {
   }, [loadProducts]);
 
   const loadSellableProducts = useCallback(async () => {
+    setSaleProductsError(null);
     try {
+      // The public catalog endpoint is intentionally used here so the sale picker
+      // does not expose unapproved DRAFT products from the operator-managed list.
       const data = await listProducts();
       setSellableProducts(Array.isArray(data) ? data : []);
-    } catch {
+      if (!Array.isArray(data) || data.length === 0) {
+        setSaleProductsError("در کاتالوگ فروش محصول قابل انتخابی وجود ندارد؛ وضعیت تأیید محصول و داده‌های کاتالوگ را بررسی کنید.");
+      }
+    } catch (err) {
       setSellableProducts([]);
+      setSaleProductsError(err instanceof Error ? err.message : "دریافت کاتالوگ فروش ناموفق بود.");
     }
   }, []);
 
@@ -216,6 +227,38 @@ export default function NewHomePage() {
     } finally {
       setCustomerSearchBusy(false);
     }
+  }
+
+  async function searchSaleCustomers() {
+    const query = saleCustomerSearch.trim();
+    if (!query) {
+      setCustomerSearchResults([]);
+      setError("برای جست‌وجوی مشتری، شماره موبایل یا نام را وارد کنید.");
+      return;
+    }
+    setError(null);
+    setCustomerSearchBusy(true);
+    try {
+      const operatorToken = await ensureProductSession();
+      if (!operatorToken) throw new Error("نشست مدیر برای جست‌وجوی مشتری در دسترس نیست.");
+      const found = await searchCustomers(query, operatorToken);
+      setCustomerSearchResults(Array.isArray(found) ? found : []);
+      if (!Array.isArray(found) || found.length === 0) setStatusMsg("مشتری مطابق جست‌وجو پیدا نشد؛ فروش مستقیم همچنان ممکن است.");
+    } catch (err) {
+      setCustomerSearchResults([]);
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setCustomerSearchBusy(false);
+    }
+  }
+
+  function chooseSaleCustomer(customer: CustomerSearchResult) {
+    setSaleCustomerId(customer.customer_id);
+    setSaleCustomerLabel(`${customer.name ?? "بدون نام"} · ${customer.mobile ?? "بدون موبایل"}`);
+    setCustomerSearchResults([]);
+    setSaleCustomerSearch("");
+    setError(null);
+    setStatusMsg("مشتری فقط برای این فروش انتخاب شد؛ نشست مشاوره تغییر نکرد.");
   }
 
   async function selectPreviousCustomer(customer: CustomerSearchResult) {
@@ -545,8 +588,8 @@ export default function NewHomePage() {
       if (!adminToken) throw new Error("برای ثبت فروش ابتدا با حساب مدیر وارد شوید.");
       const sale = await createSale(
         {
-          // Direct sale is intentionally independent of whichever customer was last opened.
-          // Customer/recommendation linkage must be an explicit sale-form choice, never session carry-over.
+          // Customer association is an explicit choice on this sale form, never session carry-over.
+          customer_id: saleCustomerId,
           items: [{ product_id: saleProductId.trim(), quantity: saleQty }],
           fx_rate_usd_to_irr: currentFxRate,
         },
@@ -554,6 +597,8 @@ export default function NewHomePage() {
       );
       setLastSale(sale);
       setSaleProductId("");
+      setSaleCustomerId(null);
+      setSaleCustomerLabel(null);
       setStatusMsg(`فروش ثبت شد: ${sale.sale_id ?? "OK"}`);
       await refreshSalesTotal();
       try {
@@ -1168,25 +1213,27 @@ export default function NewHomePage() {
           <section className="pro-panel" id="sales">
             <h1>ثبت فروش</h1>
             <p className="pro-lead">ثبت فروش مستقیم بدون مشاوره و بدون ثبت مشتری اجباری است. در صورت انتخاب مشتری، سابقهٔ خرید نیز به او متصل می‌شود.</p>
-            {false ? (
-              <div className="pro-empty">
-                <strong>مشتری فاکتور را انتخاب کنید؛ پروندهٔ مشاوره لازم نیست.</strong>
-                <div className="pro-form">
-                  <label className="pro-label" htmlFor="sale-customer-search">جست‌وجوی مشتری با نام یا شماره موبایل</label>
-                  <input id="sale-customer-search" className="pro-input" value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} placeholder="نام یا شماره موبایل" />
-                  <button type="button" className="pro-btn-primary" onClick={() => void searchPreviousCustomers()} disabled={customerSearchBusy}>{customerSearchBusy ? "در حال جست‌وجو…" : "جست‌وجوی مشتری"}</button>
-                  {customerSearchResults.map((customer) => <button key={customer.customer_id} type="button" className="pro-btn-secondary" onClick={() => { void (async () => { await selectPreviousCustomer(customer); setActive("sales"); })(); }}>{customer.name} · {customer.mobile ?? "بدون موبایل"} · {customer.customer_id}</button>)}
-                  <p className="pro-muted">برای مشتری جدید، ابتدا پروفایل مشتری را ثبت کنید؛ پروندهٔ مشاوره لازم نیست.</p>
-                  <button type="button" className="pro-btn-secondary" onClick={() => go("profile")}>ثبت پروفایل مشتری جدید</button>
-                </div>
-              </div>
-            ) : (
-              <form className="pro-form" onSubmit={onSaleSubmit}>
+            <form className="pro-form" onSubmit={onSaleSubmit}>
                 <fieldset className="pro-fieldset">
-                  <legend>مشتری</legend>
-                  <p className="pro-muted">
-                    <code>{customerId ?? "فروش مستقیم، بدون ثبت مشتری"}</code>
-                  </p>
+                  <legend>مشتری (اختیاری)</legend>
+                  {saleCustomerId ? (
+                    <div className="pro-actions">
+                      <p className="pro-muted">مشتری انتخاب‌شده برای این فروش: <strong>{saleCustomerLabel}</strong> · <code>{saleCustomerId}</code></p>
+                      <button type="button" className="pro-btn-secondary" onClick={() => { setSaleCustomerId(null); setSaleCustomerLabel(null); }}>حذف مشتری از این فروش</button>
+                    </div>
+                  ) : (
+                    <>
+                      <label className="pro-label" htmlFor="sale-customer-search">جست‌وجوی مشتری با شماره موبایل یا نام خانوادگی</label>
+                      <input id="sale-customer-search" className="pro-input" value={saleCustomerSearch} onChange={(e) => setSaleCustomerSearch(e.target.value)} placeholder="شماره موبایل یا نام خانوادگی" />
+                      <button type="button" className="pro-btn-secondary" onClick={() => void searchSaleCustomers()} disabled={customerSearchBusy}>{customerSearchBusy ? "در حال جست‌وجو…" : "جست‌وجوی مشتری"}</button>
+                      {customerSearchResults.map((customer) => (
+                        <button key={customer.customer_id} type="button" className="pro-btn-secondary" onClick={() => chooseSaleCustomer(customer)}>
+                          {customer.name ?? "بدون نام"} · {customer.mobile ?? "بدون موبایل"} · {customer.customer_id}
+                        </button>
+                      ))}
+                      <p className="pro-muted">می‌توانید بدون انتخاب مشتری فروش را ثبت کنید. برای مشتری جدید هم ثبت مشاوره پیش‌نیاز نیست.</p>
+                    </>
+                  )}
                   <p className="pro-muted">جمع فروش: {totalSales === null ? "—" : totalSales.toLocaleString("fa-IR")}</p>
                 </fieldset>
                 <fieldset className="pro-fieldset">
@@ -1194,6 +1241,7 @@ export default function NewHomePage() {
                   <label className="pro-label" htmlFor="sale-product">
                     محصول
                   </label>
+                  {saleProductsError ? <p className="pro-error" role="status">{saleProductsError}</p> : null}
                   <select id="sale-product" className="pro-input" value={saleProductId} onChange={(e) => {
                       setSaleProductId(e.target.value);
                     }}>
@@ -1204,6 +1252,7 @@ export default function NewHomePage() {
                       </option>
                     ))}
                   </select>
+                  {sellableProducts.length === 0 && !saleProductsError ? <p className="pro-muted">هنوز محصول قابل انتخابی در کاتالوگ فروش موجود نیست.</p> : null}
                   <label className="pro-label" htmlFor="sale-manual">
                     یا product_id دستی
                   </label>
