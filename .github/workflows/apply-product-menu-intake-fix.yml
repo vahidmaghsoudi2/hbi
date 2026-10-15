@@ -1,0 +1,41 @@
+name: apply-product-menu-intake-fix
+on:
+  workflow_dispatch:
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/product-menu-new-intake-clears-edit
+          fetch-depth: 0
+      - name: Restore NewHomePage from stage2 and apply fix
+        run: |
+          git fetch origin feat/homepage-dashboard-stage2
+          git checkout origin/feat/homepage-dashboard-stage2 -- frontend/src/pages/NewHomePage.tsx
+          python3 <<'PY'
+          from pathlib import Path
+          path = Path("frontend/src/pages/NewHomePage.tsx")
+          text = path.read_text(encoding="utf-8")
+          old = (
+              '                <article className="pro-product-card"><h2>ورود و ویرایش محصول</h2>'
+              '<p className="pro-muted">ثبت مشخصات محصول؛ جدا از موجودی فیزیکی.</p>'
+              '<button type="button" className="pro-btn-primary" onClick={() => go("intake")}>ورود و ویرایش محصول</button></article>'
+          )
+          new = (
+              '                <article className="pro-product-card"><h2>ورود و ویرایش محصول</h2>'
+              '<p className="pro-muted">ثبت مشخصات محصول؛ جدا از موجودی فیزیکی.</p>'
+              '<button type="button" className="pro-btn-primary" onClick={() => { setEditProduct(null); go("intake"); }}>ورود و ویرایش محصول</button></article>'
+          )
+          if old not in text:
+              raise SystemExit("target button not found in restored file")
+          path.write_text(text.replace(old, new, 1), encoding="utf-8")
+          print("patched ok")
+          PY
+          git config user.name "Grok"
+          git config user.email "grok@x.ai"
+          git add frontend/src/pages/NewHomePage.tsx
+          git commit -m "fix(home): clear edit state when opening product intake from menu"
+          git push origin HEAD:fix/product-menu-new-intake-clears-edit
