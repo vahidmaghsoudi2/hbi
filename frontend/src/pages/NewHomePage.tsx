@@ -752,9 +752,17 @@ export default function NewHomePage() {
                 <article className="pro-product-card"><h2>ورود و ویرایش محصول</h2><p className="pro-muted">ثبت مشخصات محصول؛ جدا از موجودی فیزیکی.</p><button type="button" className="pro-btn-primary" onClick={() => go("intake")}>ورود و ویرایش محصول</button></article>
                 <article className="pro-product-card"><h2>بررسی و تأیید QA</h2><p className="pro-muted">بررسی شواهد و وضعیت تأیید محصول.</p><button type="button" className="pro-btn-primary" onClick={() => go("review")}>بازکردن بررسی QA</button></article>
               </> : null}
-              {mainSection === "inventory" ? <article className="pro-product-card"><h2>موجودی و گردش انبار</h2><p className="pro-muted">مشاهده گزارش موجودی، هشدارهای کمبود و گردش‌های ثبت‌شده.</p><Link to="/accounting" className="pro-btn-primary">بازکردن گزارش موجودی</Link></article> : null}
+              {mainSection === "inventory" ? <>
+                <article className="pro-product-card"><h2>موجودی کالا</h2><p className="pro-muted">موجودی قابل مشاهده و ارزش‌گذاری‌شده بر پایه آخرین قیمت خرید ثبت‌شده.</p><Link to="/accounting?section=inventory" className="pro-btn-primary">بازکردن گزارش موجودی</Link></article>
+                <article className="pro-product-card"><h2>گردش کالا</h2><p className="pro-muted">بررسی گردش‌های ثبت‌شدهٔ ورود و خروج کالا.</p><Link to="/accounting?section=stock-flow" className="pro-btn-primary">بازکردن گردش کالا</Link></article>
+              </> : null}
               {mainSection === "purchases" ? <article className="pro-product-card"><h2>خرید / ورود موجودی</h2><p className="pro-muted">ثبت خرید و ورود فیزیکی کالا.</p><Link to="/purchase" className="pro-btn-primary">بازکردن خرید و موجودی</Link></article> : null}
-              {mainSection === "reports" ? <article className="pro-product-card"><h2>گزارش‌ها</h2><p className="pro-muted">گزارش فروش، موجودی و گردش‌های مالی موجود.</p><Link to="/accounting" className="pro-btn-primary">بازکردن گزارش‌ها</Link></article> : null}
+              {mainSection === "reports" ? <>
+                <article className="pro-product-card"><h2>گزارش فروش</h2><p className="pro-muted">خلاصه فروش روز جاری.</p><Link to="/accounting?section=sales" className="pro-btn-primary">بازکردن گزارش فروش</Link></article>
+                <article className="pro-product-card"><h2>گزارش موجودی</h2><p className="pro-muted">موجودی و ارزش کالاها.</p><Link to="/accounting?section=inventory" className="pro-btn-primary">بازکردن گزارش موجودی</Link></article>
+                <article className="pro-product-card"><h2>گردش کالا</h2><p className="pro-muted">گزارش گردش‌های ثبت‌شدهٔ کالا.</p><Link to="/accounting?section=stock-flow" className="pro-btn-primary">بازکردن گردش کالا</Link></article>
+                <article className="pro-product-card"><h2>گزارش مالی</h2><p className="pro-muted">خلاصه گزارش مالی موجود.</p><Link to="/accounting?section=finance-report" className="pro-btn-primary">بازکردن گزارش مالی</Link></article>
+              </> : null}
             </div>
           </section>
         )}
