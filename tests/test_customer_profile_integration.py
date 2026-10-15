@@ -52,6 +52,7 @@ def test_customer_update_concerns_same_mobile(client, db_session):
         headers=_auth(),
         json={
             "name": "سارا CP01",
+            "family_name": "سارا",
             "mobile": "09130000002",
             "concerns": "آبرسان",
             "consent": 1,
@@ -134,6 +135,49 @@ def test_intake_mobile_mismatch_403(client):
         },
     )
     assert r.status_code == 403
+
+
+
+def test_existing_mobile_requires_matching_family_name(client):
+    headers = _auth()
+    first = client.post(
+        "/api/v1/customers/intake",
+        headers=headers,
+        json={"name": "Legacy Display", "family_name": "Rahimi", "mobile": "09135550111", "consent": 0, "open_case": False},
+    )
+    assert first.status_code == 201, first.text
+
+    missing = client.post(
+        "/api/v1/customers/intake",
+        headers=headers,
+        json={"name": "Another Display", "mobile": "09135550111", "consent": 0, "open_case": False},
+    )
+    assert missing.status_code == 409, missing.text
+
+    mismatch = client.post(
+        "/api/v1/customers/intake",
+        headers=headers,
+        json={"name": "Another Display", "family_name": "Karimi", "mobile": "09135550111", "consent": 0, "open_case": False},
+    )
+    assert mismatch.status_code == 409, mismatch.text
+
+
+def test_customer_search_uses_family_name_not_legacy_name(client):
+    headers = _auth()
+    created = client.post(
+        "/api/v1/customers/intake",
+        headers=headers,
+        json={"name": "Legacy Display", "family_name": "Rahimi", "mobile": "09135550112", "consent": 0, "open_case": False},
+    )
+    assert created.status_code == 201, created.text
+
+    family_search = client.get("/api/v1/customers/search", headers=headers, params={"q": "Rahimi"})
+    assert family_search.status_code == 200
+    assert family_search.json()[0]["family_name"] == "Rahimi"
+
+    given_or_legacy_search = client.get("/api/v1/customers/search", headers=headers, params={"q": "Legacy Display"})
+    assert given_or_legacy_search.status_code == 200
+    assert given_or_legacy_search.json() == []
 
 
 # ---------------------------------------------------------------------------
