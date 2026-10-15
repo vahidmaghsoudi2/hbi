@@ -85,3 +85,26 @@ def test_different_sources_with_different_claims_remain_high_unresolved(db_sessi
     assert len(conflicts) == 1
     assert conflicts[0]["severity"] == "HIGH"
     assert conflicts[0]["status"] == "UNRESOLVED"
+
+def test_missing_source_reference_cannot_be_classified_as_same_source(db_session):
+    product_id = _add_product_and_evidence(
+        db_session,
+        [
+            {
+                "source_type": "MANUFACTURER_WEBSITE",
+                "source_reference": "",
+                "claim": "The product features NAD+.",
+            },
+            {
+                "source_type": "MANUFACTURER_WEBSITE",
+                "source_reference": "",
+                "claim": "The product features NAD+ and peptides.",
+            },
+        ],
+    )
+
+    conflicts = EvidenceService(db_session).detect_conflicts(product_id)
+
+    assert len(conflicts) == 1
+    assert conflicts[0]["severity"] == "HIGH"
+    assert conflicts[0]["status"] == "UNRESOLVED"
