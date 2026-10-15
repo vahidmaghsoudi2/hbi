@@ -72,6 +72,18 @@ test("Dashboard report shortcuts preserve their own report destinations", async 
   await expect(page.getByRole("link", { name: "همهٔ گردش‌ها" })).toHaveAttribute("href", "/inventory?section=stock-flow");
 });
 
+test("Consultation actions stay focused on the customer problem and recommendation flow", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-consultation-boundary-test-token");
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "ورود به مشاوره" }).click();
+  await page.getByRole("button", { name: "شروع مشاوره" }).click();
+  await expect(page.getByRole("heading", { name: "فرم مشاوره سریع" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "ثبت مراجعه + دریافت پیشنهاد" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "محصولات", exact: true })).toHaveCount(0);
+});
+
 test("Settings is a separate homepage section and owns the logout action", async ({ page }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-settings-test-token");
