@@ -23,6 +23,11 @@ test("Homepage navigation keeps sales, inventory, and reports in their own desti
   await expect(page.getByRole("heading", { name: "ثبت فروش" })).toBeVisible();
   await expect(page.getByText(/ثبت فروش مستقیم بدون مشاوره/)).toBeVisible();
   await expect(page.locator("#sale-product")).toBeVisible();
+  // The product picker must either offer real options or explain why it is empty.
+  const productOptionCount = await page.locator("#sale-product option").count();
+  if (productOptionCount <= 1) {
+    await expect(page.getByRole("status")).toBeVisible();
+  }
 
   // Inventory must open the inventory report, not silently land on today's sales.
   await page.getByRole("button", { name: "منوی اصلی" }).click();
@@ -40,4 +45,20 @@ test("Homepage navigation keeps sales, inventory, and reports in their own desti
   await page.getByRole("link", { name: "بازکردن گزارش مالی" }).click();
   await expect(page).toHaveURL(/\/accounting\?section=finance-report$/);
   await expect(page.getByText("بخش فعال: گزارش مالی")).toBeVisible();
+});
+
+test("Settings is a separate homepage section and owns the logout action", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-settings-test-token");
+  });
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "فضای کاری مدیر" })).toBeVisible();
+
+  await expect(page.getByRole("button", { name: "خروج از حساب مدیر" })).toHaveCount(0);
+  await page.getByRole("button", { name: "ورود به تنظیمات" }).click();
+  await expect(page.getByRole("heading", { name: "تنظیمات", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "حساب مدیر" })).toBeVisible();
+  await page.getByRole("button", { name: "خروج از حساب مدیر" }).click();
+  await expect(page).toHaveURL(/\\/login$/);
+  await expect(page.getByRole("heading", { name: "ورود مدیر HBI" })).toBeVisible();
 });
