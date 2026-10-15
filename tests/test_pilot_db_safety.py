@@ -90,9 +90,37 @@ def _make_session(tmp_path: Path):
     return session_dir, evidence_dir, db_path, api_log
 
 
+def _write_valid_raw_http_artifact(evidence_dir: Path) -> Path:
+    raw_http_dir = evidence_dir / "raw-http"
+    artifact_path = raw_http_dir / "20261015T000000Z-test-request.json"
+    artifact = {
+        "schema": "hbi.g8.raw-http.v1",
+        "request_id": "test-request-001",
+        "started_at_utc": "2026-10-15T00:00:00.000Z",
+        "finished_at_utc": "2026-10-15T00:00:00.010Z",
+        "request": {
+            "method": "GET",
+            "path": "/health",
+            "headers": {"accept": "application/json"},
+            "complete": True,
+            "body": {"captured": True, "size_bytes": 0, "sha256_observed_bytes": "e3b0c442"},
+        },
+        "response": {
+            "status": 200,
+            "headers": {"content-type": "application/json"},
+            "started": True,
+            "complete": True,
+            "body": {"captured": True, "size_bytes": 11, "sha256_observed_bytes": "a" * 64},
+        },
+    }
+    artifact_path.write_text(json.dumps(artifact), encoding="utf-8")
+    return artifact_path
+
+
 def test_successful_finalization_preserves_readback_manifest_then_allows_cleanup(tmp_path: Path) -> None:
     runner = _load_runner_module()
     session_dir, evidence_dir, db_path, api_log = _make_session(tmp_path)
+    raw_http_artifact = _write_valid_raw_http_artifact(evidence_dir)
 
     finalized = runner._finalize_evidence(
         session_id="session-success",
@@ -109,6 +137,8 @@ def test_successful_finalization_preserves_readback_manifest_then_allows_cleanup
     manifest_path = evidence_dir / "integrity-manifest.json"
     metadata_path = evidence_dir / "session-metadata.json"
     assert readback_path.is_file() and manifest_path.is_file() and metadata_path.is_file()
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    assert "raw-http/" + raw_http_artifact.name in metadata["raw_http_files"]
     readback = json.loads(readback_path.read_text(encoding="utf-8"))
     assert readback["tables"]["products"]["rows"][0]["lifecycle"] == "DRAFT"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -139,6 +169,27 @@ def test_failed_finalization_retains_database_and_writes_marker(tmp_path: Path) 
     assert "injected export failure" in marker.read_text(encoding="utf-8")
     assert db_path.is_file()
     assert session_dir.is_dir()
+
+
+def test_finalization_refuses_session_without_http_artifacts_and_retains_database(tmp_path: Path) -> None:
+    runner = _load_runner_module()
+    session_dir, evidence_dir, db_path, api_log = _make_session(tmp_path)
+
+    finalized = runner._finalize_evidence(
+        session_id="session-no-http",
+        session_dir=session_dir,
+        db_path=db_path,
+        evidence_dir=evidence_dir,
+        api_log_path=api_log,
+        code_sha="c" * 40,
+        started_at_utc="2026-10-15T00:00:00Z",
+    )
+
+    assert finalized is False
+    assert db_path.is_file()
+    marker = evidence_dir / "FINALIZATION_FAILED.txt"
+    assert marker.is_file()
+    assert "no raw HTTP request/response artifacts" in marker.read_text(encoding="utf-8")
 
 
 def test_finalization_refuses_unknown_code_sha_and_retains_database(tmp_path: Path) -> None:
