@@ -42,7 +42,7 @@ test("Homepage navigation keeps sales, inventory, and reports in their own desti
   await page.getByRole("button", { name: "ورود به کالا و موجودی" }).click();
   await page.getByRole("link", { name: "بازکردن گزارش موجودی" }).click();
   await expect(page).toHaveURL(/\/accounting\?section=inventory$/);
-  await expect(page.getByText("بخش فعال: موجودی")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "کالا و موجودی", exact: true })).toBeVisible();
 
   // Reports expose the existing report destinations explicitly.
   await page.getByRole("link", { name: "بازگشت به خانه HBI" }).click();
@@ -52,7 +52,7 @@ test("Homepage navigation keeps sales, inventory, and reports in their own desti
   await expect(page.getByRole("link", { name: "بازکردن گردش کالا" })).toHaveCount(0);
   await page.getByRole("link", { name: "بازکردن گزارش مالی" }).click();
   await expect(page).toHaveURL(/\/accounting\?section=finance-report$/);
-  await expect(page.getByText("بخش فعال: گزارش مالی")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "گزارش مالی عملیاتی" })).toBeVisible();
 });
 
 test("Dashboard report shortcuts preserve their own report destinations", async ({ page }) => {
@@ -64,10 +64,10 @@ test("Dashboard report shortcuts preserve their own report destinations", async 
   await expect(page.getByRole("heading", { name: "داشبورد HBI" })).toBeVisible();
 
   await expect(page.getByRole("link", { name: "گزارش فروش" })).toHaveAttribute("href", "/accounting?section=sales");
-  await expect(page.getByRole("link", { name: "مشاهدهٔ موجودی" })).toHaveAttribute("href", "/accounting?section=inventory");
+  await expect(page.getByRole("link", { name: "مشاهدهٔ موجودی" })).toHaveAttribute("href", "/inventory?section=inventory");
   await expect(page.getByRole("link", { name: "بررسی موجودی" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "مشاهدهٔ موجودی" })).toHaveCount(1);
-  await expect(page.getByRole("link", { name: "همهٔ گردش‌ها" })).toHaveAttribute("href", "/accounting?section=stock-flow");
+  await expect(page.getByRole("link", { name: "همهٔ گردش‌ها" })).toHaveAttribute("href", "/inventory?section=stock-flow");
 });
 
 test("Settings is a separate homepage section and owns the logout action", async ({ page }) => {
