@@ -7,7 +7,7 @@ class Customer(Base):
     __tablename__ = "Customer"
     customer_id = Column(String, primary_key=True)
     name = Column(String, nullable=False, server_default="")
-    family_name = Column(String, nullable=True, index=True)
+    family_name = Column(String, nullable=True)
     mobile = Column(String, nullable=True)
     consent_to_store_data = Column(Integer, nullable=False, server_default="0")
     consent_date = Column(DateTime, nullable=True)
