@@ -160,13 +160,40 @@ def test_finalization_refuses_unknown_code_sha_and_retains_database(tmp_path: Pa
     assert db_path.is_file()
 
 
+
+def test_finalization_refuses_database_without_application_tables(tmp_path: Path) -> None:
+    runner = _load_runner_module()
+    session_dir = tmp_path / "isolated-session"
+    session_dir.mkdir()
+    evidence_dir = tmp_path / "evidence"
+    evidence_dir.mkdir()
+    (evidence_dir / "raw-http").mkdir()
+    db_path = session_dir / "pilot.db"
+    sqlite3.connect(db_path).close()
+    api_log = evidence_dir / "api.log"
+    api_log.write_text("startup log\\n", encoding="utf-8")
+
+    finalized = runner._finalize_evidence(
+        session_id="session-empty-db",
+        session_dir=session_dir,
+        db_path=db_path,
+        evidence_dir=evidence_dir,
+        api_log_path=api_log,
+        code_sha="c" * 40,
+        started_at_utc="2026-10-15T00:00:00Z",
+    )
+
+    assert finalized is False
+    assert (evidence_dir / "FINALIZATION_FAILED.txt").is_file()
+    assert db_path.is_file()
+
+
 def test_isolated_g8_runner_smoke_starts_finalizes_and_cleans_its_database() -> None:
     from sqlalchemy.engine import make_url
 
     env = os.environ.copy()
     env["HBI_ENV"] = "development"
     env.pop("DATABASE_URL", None)
-    env["G8_CODE_SHA"] = "test-smoke-sha"
     result = subprocess.run(
         [sys.executable, str(RUNNER), "--smoke-test"],
         cwd=ROOT,
