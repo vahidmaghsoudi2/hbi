@@ -49,7 +49,7 @@ def _seed(session, *, qty=5, price=10.0, customer_id="C1", product_id="P1"):
             brand="B",
             product_name="N",
             identity_status="VERIFIED",
-            qa_verdict="PENDING",
+            qa_verdict="VALID",
             status="ACTIVE",
         )
     )
@@ -217,7 +217,7 @@ def test_payment_authorization_foreign_customer(session):
 
 def test_sale_rollback_leaves_no_orphan_on_failure(session):
     _seed(session, qty=5, price=10.0)
-    session.add(Product(product_id="P2", brand="B", product_name="N2", identity_status="VERIFIED", qa_verdict="PENDING", status="ACTIVE"))
+    session.add(Product(product_id="P2", brand="B", product_name="N2", identity_status="VERIFIED", qa_verdict="VALID", status="ACTIVE"))
     session.commit()
     with pytest.raises(ValueError, match="Inventory"):
         SaleService(session).create_sale(
