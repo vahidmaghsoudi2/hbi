@@ -99,3 +99,17 @@ test("Settings is a separate homepage section and owns the logout action", async
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByRole("heading", { name: "ورود مدیر HBI" })).toBeVisible();
 });
+
+
+test("Purchase navigation returns to inventory, not accounting", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-purchase-navigation-test-token");
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "ورود به خرید" }).click();
+  await page.getByRole("link", { name: "بازکردن خرید و موجودی" }).click();
+  await expect(page).toHaveURL(/\\/purchase$/);
+  await expect(page.getByRole("heading", { name: "خرید \/ ورود کالا" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "کالا و موجودی" })).toHaveAttribute("href", "/inventory?section=inventory");
+  await expect(page.getByRole("link", { name: "حسابداری" })).toHaveCount(0);
+});
