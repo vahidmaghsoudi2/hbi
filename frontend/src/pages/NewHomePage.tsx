@@ -963,7 +963,7 @@ export default function NewHomePage() {
                     <input id="name" className="pro-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="نام خانوادگی مشتری" />
                   </div>
                   <div>
-                    <label className="pro-label" htmlFor="mobile">موبایل</label>
+                    <label className="pro-label" htmlFor="mobile">موبایل *</label>
                     <input id="mobile" className="pro-input" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="09…" />
                   </div>
                 </div>
@@ -1040,7 +1040,7 @@ export default function NewHomePage() {
               <legend>اطلاعات مشتری فعال</legend>
               <div className="pro-grid-2">
                 <div><label className="pro-label" htmlFor="profile-name">نام خانوادگی *</label><input id="profile-name" className="pro-input" value={name} onChange={(e) => setName(e.target.value)} /></div>
-                <div><label className="pro-label" htmlFor="profile-mobile">موبایل</label><input id="profile-mobile" className="pro-input" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="09…" /></div>
+                <div><label className="pro-label" htmlFor="profile-mobile">موبایل *</label><input id="profile-mobile" className="pro-input" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="09…" /></div>
               </div>
             </fieldset>
             <dl className="pro-dl">
