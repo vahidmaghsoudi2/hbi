@@ -122,7 +122,7 @@ def test_intake_invalid_consent_422(client):
     assert r.status_code == 422
 
 
-def test_intake_mobile_mismatch_403(client):
+def test_intake_mobile_mismatch_409(client):
     """JWT sub looks like mobile and differs from body mobile → 403."""
     headers = _auth(sub="09131112233")
     r = client.post(
