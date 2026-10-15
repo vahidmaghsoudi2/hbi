@@ -720,7 +720,7 @@ export default function NewHomePage() {
               <article className="pro-product-card"><h2>مدیریت محصولات</h2><p className="pro-muted">فهرست، ورود اطلاعات و بررسی QA؛ مستقل از ورود فیزیکی موجودی.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("products")}>ورود به مدیریت محصولات</button></article>
               <article className="pro-product-card"><h2>کالا و موجودی</h2><p className="pro-muted">مشاهده موجودی و گردش‌های انبار؛ جدا از مدیریت اطلاعات و تأیید محصول.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("inventory")}>ورود به کالا و موجودی</button></article>
               <article className="pro-product-card"><h2>خرید</h2><p className="pro-muted">ثبت خرید و ورود فیزیکی موجودی.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("purchases")}>ورود به خرید</button></article>
-              <article className="pro-product-card"><h2>گزارش‌ها</h2><p className="pro-muted">مشاهدهٔ گزارش‌های عملیاتی و مالی موجود.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("reports")}>ورود به گزارش‌ها</button></article>
+              <article className="pro-product-card"><h2>حسابداری و گزارش‌ها</h2><p className="pro-muted">گزارش فروش و مالی؛ گزارش موجودی و گردش کالا در بخش «کالا و موجودی» قرار دارد.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("reports")}>ورود به حسابداری و گزارش‌ها</button></article>
               <article className="pro-product-card"><h2>تنظیمات</h2><p className="pro-muted">وضعیت حساب مدیر و خروج امن از سامانه.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("settings")}>ورود به تنظیمات</button></article>
             </div>
           </section>
@@ -732,7 +732,7 @@ export default function NewHomePage() {
               <h1 id="section-menu-title">{({
                 customers: "مشتریان", consultation: "مشاوره", sales: "فروش",
                 products: "مدیریت محصولات", inventory: "کالا و موجودی", purchases: "خرید",
-                reports: "گزارش‌ها", home: "خانه و داشبورد", settings: "تنظیمات",
+                reports: "حسابداری و گزارش‌ها", home: "خانه و داشبورد", settings: "تنظیمات",
               } as Record<MainSection, string>)[mainSection]}</h1>
               <button type="button" className="pro-btn-secondary" onClick={() => setPageView("main")}>بازگشت به منوی اصلی</button>
             </div>
@@ -760,8 +760,6 @@ export default function NewHomePage() {
               {mainSection === "settings" ? <article className="pro-product-card"><h2>حساب مدیر</h2><p className="pro-muted">دسترسی این محیط فقط برای مدیر سامانه است. تنظیمات عملیاتی دیگری در این بخش هنوز تعریف نشده است.</p><button type="button" className="pro-btn-secondary" onClick={logout}>خروج از حساب مدیر</button></article> : null}
               {mainSection === "reports" ? <>
                 <article className="pro-product-card"><h2>گزارش فروش</h2><p className="pro-muted">خلاصه فروش روز جاری.</p><Link to="/accounting?section=sales" className="pro-btn-primary">بازکردن گزارش فروش</Link></article>
-                <article className="pro-product-card"><h2>گزارش موجودی</h2><p className="pro-muted">موجودی و ارزش کالاها.</p><Link to="/accounting?section=inventory" className="pro-btn-primary">بازکردن گزارش موجودی</Link></article>
-                <article className="pro-product-card"><h2>گردش کالا</h2><p className="pro-muted">گزارش گردش‌های ثبت‌شدهٔ کالا.</p><Link to="/accounting?section=stock-flow" className="pro-btn-primary">بازکردن گردش کالا</Link></article>
                 <article className="pro-product-card"><h2>گزارش مالی</h2><p className="pro-muted">خلاصه گزارش مالی موجود.</p><Link to="/accounting?section=finance-report" className="pro-btn-primary">بازکردن گزارش مالی</Link></article>
               </> : null}
             </div>
