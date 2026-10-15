@@ -9,6 +9,13 @@ on:
       - "tests/**"
       - "requirements.txt"
       - ".github/workflows/hbi_auto.yml"
+  pull_request:
+    branches: [master]
+    paths:
+      - "app/**"
+      - "tests/**"
+      - "requirements.txt"
+      - ".github/workflows/hbi_auto.yml"
 
 jobs:
   evidence:
@@ -46,10 +53,12 @@ jobs:
         id: pytest
         run: |
           set -o pipefail
+          # Keep the live pytest stream outside the checkout. The G8 smoke test
+          # requires a clean worktree when it records the exact code SHA.
           python -m pytest tests/ -v --tb=line \
             --cov=app --cov-report=term-missing \
             --cov-report=xml --cov-report=html \
-            | tee pytest-output.txt
+            | tee "$RUNNER_TEMP/pytest-output.txt"
           echo "PYTEST_EXIT=0" >> "$GITHUB_ENV"
 
       - name: Write evidence summary
@@ -65,8 +74,8 @@ jobs:
             echo "python=3.12"
             echo "finished_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo "----------------------------------------"
-            if [ -f pytest-output.txt ]; then
-              tail -n 40 pytest-output.txt
+            if [ -f "$RUNNER_TEMP/pytest-output.txt" ]; then
+              tail -n 40 "$RUNNER_TEMP/pytest-output.txt"
             else
               echo "pytest-output.txt missing"
             fi
@@ -79,7 +88,7 @@ jobs:
         with:
           name: hbi-evidence-${{ github.sha }}
           path: |
-            pytest-output.txt
+            ${{ runner.temp }}/pytest-output.txt
             evidence-summary.txt
             coverage.xml
             htmlcov/
