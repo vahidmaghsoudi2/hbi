@@ -1288,8 +1288,7 @@ export default function NewHomePage() {
                     بروزرسانی جمع
                   </button>
                 </div>
-              </form>
-            )}
+            </form>
             {lastSale && (
               <div className="pro-rec-card" style={{ marginTop: "1rem" }}>
                 <div className="pro-rec-rank">✓</div>
