@@ -59,6 +59,6 @@ test("Settings is a separate homepage section and owns the logout action", async
   await expect(page.getByRole("heading", { name: "تنظیمات", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "حساب مدیر" })).toBeVisible();
   await page.getByRole("button", { name: "خروج از حساب مدیر" }).click();
-  await expect(page).toHaveURL(/\\/login$/);
+  await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByRole("heading", { name: "ورود مدیر HBI" })).toBeVisible();
 });
