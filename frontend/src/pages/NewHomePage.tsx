@@ -816,7 +816,7 @@ export default function NewHomePage() {
                   <h3>موجودی انبار</h3>
                   <p className="pro-summary">{dashboardInventory ? dashboardInventory.length.toLocaleString("fa-IR") : "—"} ردیف موجودی</p>
                   <p className="pro-muted">{dashboardInventory ? "بر اساس گزارش موجودی فعلی." : "دادهٔ موجودی در دسترس نیست."}</p>
-                  <button type="button" className="pro-btn-secondary" onClick={() => { setMainSection("inventory"); setPageView("section"); }}>مشاهدهٔ موجودی</button>
+                  <Link to="/accounting?section=inventory" className="pro-btn-secondary">مشاهدهٔ موجودی</Link>
                 </article>
                 <article className="pro-product-card">
                   <h3>هشدار موجودی کم</h3>
