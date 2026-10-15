@@ -53,7 +53,7 @@ const CONSULTATION_LINES = [{ id: "SKIN", label: "پوست" }] as const;
 const INITIAL_RECOMMENDATION_LIMIT = 5;
 
 type Panel = "home" | "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about";
-type MainSection = "home" | "customers" | "consultation" | "sales" | "products" | "inventory" | "purchases" | "reports";
+type MainSection = "home" | "customers" | "consultation" | "sales" | "products" | "inventory" | "purchases" | "reports" | "settings";
 type PageView = "main" | "section" | "content";
 
 export default function NewHomePage() {
@@ -680,7 +680,6 @@ export default function NewHomePage() {
                 {pageView === "content" ? "بازگشت به بخش" : "بازگشت"}
               </button>
             ) : null}
-            <button type="button" className="pro-btn-secondary" onClick={logout}>خروج از حساب مدیر</button>
           </div>
         </div>
       </header>
@@ -722,6 +721,7 @@ export default function NewHomePage() {
               <article className="pro-product-card"><h2>کالا و موجودی</h2><p className="pro-muted">مشاهده موجودی و گردش‌های انبار؛ جدا از مدیریت اطلاعات و تأیید محصول.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("inventory")}>ورود به کالا و موجودی</button></article>
               <article className="pro-product-card"><h2>خرید</h2><p className="pro-muted">ثبت خرید و ورود فیزیکی موجودی.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("purchases")}>ورود به خرید</button></article>
               <article className="pro-product-card"><h2>گزارش‌ها</h2><p className="pro-muted">مشاهدهٔ گزارش‌های عملیاتی و مالی موجود.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("reports")}>ورود به گزارش‌ها</button></article>
+              <article className="pro-product-card"><h2>تنظیمات</h2><p className="pro-muted">وضعیت حساب مدیر و خروج امن از سامانه.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("settings")}>ورود به تنظیمات</button></article>
             </div>
           </section>
         )}
@@ -732,7 +732,7 @@ export default function NewHomePage() {
               <h1 id="section-menu-title">{({
                 customers: "مشتریان", consultation: "مشاوره", sales: "فروش",
                 products: "مدیریت محصولات", inventory: "کالا و موجودی", purchases: "خرید",
-                reports: "گزارش‌ها", home: "خانه و داشبورد",
+                reports: "گزارش‌ها", home: "خانه و داشبورد", settings: "تنظیمات",
               } as Record<MainSection, string>)[mainSection]}</h1>
               <button type="button" className="pro-btn-secondary" onClick={() => setPageView("main")}>بازگشت به منوی اصلی</button>
             </div>
@@ -757,6 +757,7 @@ export default function NewHomePage() {
                 <article className="pro-product-card"><h2>گردش کالا</h2><p className="pro-muted">بررسی گردش‌های ثبت‌شدهٔ ورود و خروج کالا.</p><Link to="/accounting?section=stock-flow" className="pro-btn-primary">بازکردن گردش کالا</Link></article>
               </> : null}
               {mainSection === "purchases" ? <article className="pro-product-card"><h2>خرید / ورود موجودی</h2><p className="pro-muted">ثبت خرید و ورود فیزیکی کالا.</p><Link to="/purchase" className="pro-btn-primary">بازکردن خرید و موجودی</Link></article> : null}
+              {mainSection === "settings" ? <article className="pro-product-card"><h2>حساب مدیر</h2><p className="pro-muted">دسترسی این محیط فقط برای مدیر سامانه است. تنظیمات عملیاتی دیگری در این بخش هنوز تعریف نشده است.</p><button type="button" className="pro-btn-secondary" onClick={logout}>خروج از حساب مدیر</button></article> : null}
               {mainSection === "reports" ? <>
                 <article className="pro-product-card"><h2>گزارش فروش</h2><p className="pro-muted">خلاصه فروش روز جاری.</p><Link to="/accounting?section=sales" className="pro-btn-primary">بازکردن گزارش فروش</Link></article>
                 <article className="pro-product-card"><h2>گزارش موجودی</h2><p className="pro-muted">موجودی و ارزش کالاها.</p><Link to="/accounting?section=inventory" className="pro-btn-primary">بازکردن گزارش موجودی</Link></article>
