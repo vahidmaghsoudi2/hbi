@@ -108,3 +108,30 @@ def test_missing_source_reference_cannot_be_classified_as_same_source(db_session
     assert len(conflicts) == 1
     assert conflicts[0]["severity"] == "HIGH"
     assert conflicts[0]["status"] == "UNRESOLVED"
+
+def test_facade_preserves_same_source_classification_in_conflict_dto(db_session):
+    product_id = _add_product_and_evidence(
+        db_session,
+        [
+            {
+                "source_type": "MANUFACTURER_WEBSITE",
+                "source_reference": "https://example.test/product",
+                "claim": "The manufacturer presents the product as featuring NAD+.",
+            },
+            {
+                "source_type": "MANUFACTURER_WEBSITE",
+                "source_reference": "https://example.test/product/",
+                "claim": "The manufacturer describes the product as featuring NAD+.",
+            },
+        ],
+    )
+
+    from app.interface.facades import EvidenceFacade
+
+    conflicts = EvidenceFacade(db_session).detect_conflicts(product_id)
+
+    assert len(conflicts) == 1
+    assert conflicts[0].severity == "REVIEW_REQUIRED"
+    assert conflicts[0].status == "NEEDS_REVIEW"
+    rows = db_session.query(Evidence).filter(Evidence.product_id == product_id).all()
+    assert all(row.conflict_status == "CONFLICT" for row in rows)
