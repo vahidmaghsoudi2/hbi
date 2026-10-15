@@ -12,7 +12,7 @@ Legend: **✓** belongs in the proposed location; **X** misplaced or duplicated;
 |---|---|---|---|
 | `/login` | AdminLoginPage | Public login entry | Entry to Admin workspace |
 | `/` | NewHomePage | AdminGate | Main menu, dashboard and embedded operational panels |
-| `/catalog` | CatalogPage | AdminGate | Separate catalog route; overlaps with the product list embedded in NewHomePage |
+| `/catalog` | CatalogPage | AdminGate | Read-only list via `listProducts`; NewHomePage product panel uses `listManageableProducts` and also exposes intake/edit and QA. Similar entry labels, but not proven functionally identical |
 | `/accounting` | AccountingHomePage | AdminGate | Sales report, inventory report, stock flow, finance report; `?section=` selects a section |
 | `/purchase` | PurchasePage | AdminGate | Stock-in/purchase form; links back Home and Accounting |
 | `/pilot` | PilotPage | No AdminGate; separate pilot session | Non-production pilot flow; **?** verify that this is unavailable as a customer-facing production route |
@@ -83,7 +83,7 @@ HBI Admin workspace (/)
 | Sales report appears under both Accounting and Reports | X | Two labels lead to the same `/accounting?section=sales`; decide whether Reports is a shortcut group or a separate reporting destination, then avoid duplicating a full module |
 | Inventory and stock-flow appear under both Inventory and Reports | X | Duplicate destinations: `/accounting?section=inventory` and `/accounting?section=stock-flow`; keep one canonical owner and make other occurrences explicit shortcuts only |
 | Dashboard quick actions for Intake, QA and Purchase | ? | Acceptable only as clearly labelled shortcuts. They must not imply those modules are dashboard children or replace their canonical menu location |
-| Product list embedded in NewHomePage plus `/catalog` route | X / ? | Two entry points to catalog-like screens can confuse ownership; inspect CatalogPage behavior before deciding one canonical route |
+| Product list embedded in NewHomePage plus `/catalog` route | ? | Code inspection shows different APIs and purposes: `/catalog` is a read-only list; the embedded panel uses manageable products and provides intake/edit and QA. Decide whether the read-only catalog is a useful distinct destination or an unnecessary duplicate; do not remove either based on label similarity alone |
 | Settings separate, logout inside Settings | ✓ | Keep account/logout out of the main operational menu and avoid an always-visible logout action |
 | `/pilot` and `/recommendation` routes | ? | They bypass AdminGate by design for isolated pilot sessions. Verify production exposure policy; do not confuse pilot/test routes with the operator workspace |
 | Dashboard API failure/empty states | ✓ | Keep unknown values unknown; do not fabricate sales, inventory, QA or profit values |
@@ -238,7 +238,7 @@ These are placement sketches, not visual redesigns. ✓ = belongs; X = misplaced
 ## 7. Decisions needed before structural implementation
 
 1. **Canonical reporting owner:** Should Sales/Inventory/Stock-flow/Finance live only under “Accounting” (with Dashboard shortcuts), or should “Reports” remain a separate top-level shortcut group? Recommendation: one canonical Accounting/Reports destination; dashboard shortcuts are fine.
-2. **Catalog duplication:** Keep either the embedded product-list panel or `/catalog` as canonical, unless their purposes are clearly different.
+2. **Catalog role:** Decide whether the read-only `/catalog` page has a distinct operator use case from the manageable product list/intake/QA panel. Rename or remove an entry only after the purpose is explicit; current code does not prove they are identical.
 3. **Pilot routes:** Confirm deployment restrictions for `/pilot` and `/recommendation`.
 4. **Dashboard shortcuts:** Keep only high-frequency actions; label Intake/QA/Purchase as shortcuts, not nested dashboard submodules.
 
