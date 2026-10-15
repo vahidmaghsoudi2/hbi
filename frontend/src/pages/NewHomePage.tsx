@@ -1,7 +1,7 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  listProducts,
+  listSellableProducts,
   listManageableProducts,
   pilotToken,
   pilotOperatorToken,
@@ -128,12 +128,12 @@ export default function NewHomePage() {
   const loadSellableProducts = useCallback(async () => {
     setSaleProductsError(null);
     try {
-      // The public catalog endpoint is intentionally used here so the sale picker
-      // does not expose unapproved DRAFT products from the operator-managed list.
-      const data = await listProducts();
+      const adminToken = sessionStorage.getItem("hbi_admin_access_token");
+      if (!adminToken) throw new Error("برای دریافت کاتالوگ فروش، نشست مدیر لازم است.");
+      const data = await listSellableProducts(adminToken);
       setSellableProducts(Array.isArray(data) ? data : []);
       if (!Array.isArray(data) || data.length === 0) {
-        setSaleProductsError("در کاتالوگ فروش محصول قابل انتخابی وجود ندارد؛ وضعیت تأیید محصول و داده‌های کاتالوگ را بررسی کنید.");
+        setSaleProductsError("محصول فعال، تأییدشده، دارای موجودی و قیمت فروش در دسترس نیست.");
       }
     } catch (err) {
       setSellableProducts([]);
@@ -537,14 +537,14 @@ export default function NewHomePage() {
       return;
     }
     let cancelled = false;
-    // Inventory sell-read requires Operator/Admin — not the customer JWT.
+    // Sale inventory reads use the Admin session, never a customer/pilot token.
     setSalePrice(null);
     setSaleFxRate(null);
-    void ensureProductSession()
-      .then(async (operatorToken) => {
-        if (cancelled || !operatorToken) throw new Error("operator session unavailable");
+    void Promise.resolve(sessionStorage.getItem("hbi_admin_access_token"))
+      .then(async (adminToken) => {
+        if (cancelled || !adminToken) throw new Error("برای دریافت قیمت و موجودی، نشست مدیر لازم است.");
         const [inv, fx] = await Promise.all([
-          getInventoryByProduct(saleProductId, operatorToken),
+          getInventoryByProduct(saleProductId, adminToken),
           getCurrentFx(),
         ]);
         if (fx.fx_rate_usd_to_irr == null) throw new Error("نرخ عملیاتی ارز در دسترس نیست؛ فروش متوقف شد.");
@@ -1253,12 +1253,6 @@ export default function NewHomePage() {
                     ))}
                   </select>
                   {sellableProducts.length === 0 && !saleProductsError ? <p className="pro-muted">هنوز محصول قابل انتخابی در کاتالوگ فروش موجود نیست.</p> : null}
-                  <label className="pro-label" htmlFor="sale-manual">
-                    یا product_id دستی
-                  </label>
-                  <input id="sale-manual" className="pro-input" value={saleProductId} onChange={(e) => {
-                      setSaleProductId(e.target.value);
-                    }} />
                   <div className="pro-grid-2">
                     <div>
                       <label className="pro-label" htmlFor="sale-qty">
