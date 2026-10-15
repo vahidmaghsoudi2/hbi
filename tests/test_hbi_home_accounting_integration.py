@@ -27,7 +27,7 @@ def test_single_accounting_home_component():
 
 def test_new_home_has_accounting_link_to_canonical_route():
     src = (FRONTEND / "pages" / "NewHomePage.tsx").read_text(encoding="utf-8")
-    assert 'to="/accounting"' in src
+    assert 'to="/accounting?section=inventory"' in src or 'to="/accounting?section=sales"' in src
     assert "حسابداری" in src
     assert "Link" in src and "react-router-dom" in src
 
