@@ -187,7 +187,15 @@ class G8RawHttpEvidenceMiddleware:
                 temp = target.with_suffix(".tmp")
                 temp.write_text(json.dumps(record, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
                 temp.replace(target)
-            except Exception:
-                # Fail closed: the runner's finalizer will reject a session with no
-                # valid complete paired artifacts. Do not mask the original response.
-                pass
+            except Exception as exc:
+                # A marker lets finalization fail closed even if earlier requests were
+                # recorded successfully but a later artifact write fails.
+                try:
+                    output = Path(self.output_dir)
+                    output.mkdir(parents=True, exist_ok=True)
+                    (output / "CAPTURE_FAILURE.txt").write_text(
+                        f"failed_at_utc={_utc_now()}\\nrequest_id={request_id}\\nerror={type(exc).__name__}\\n",
+                        encoding="utf-8",
+                    )
+                except Exception:
+                    pass
