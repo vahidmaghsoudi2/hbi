@@ -112,14 +112,24 @@ class G8RawHttpEvidenceMiddleware:
         scope_path = scope.get("path", "")
         method = scope.get("method", "UNKNOWN")
 
-        async def wrapped_receive():
-            nonlocal request_complete
+        # Buffer and replay the request body so middleware still records it when
+        # downstream middleware (for example CORS preflight) does not consume it.
+        while True:
             message = await receive()
-            if message["type"] == "http.request":
-                request_chunks.append(message.get("body", b""))
-                if not message.get("more_body", False):
-                    request_complete = True
-            return message
+            if message["type"] != "http.request":
+                continue
+            request_chunks.append(message.get("body", b""))
+            if not message.get("more_body", False):
+                request_complete = True
+                break
+        replayed = False
+
+        async def wrapped_receive():
+            nonlocal replayed
+            if not replayed:
+                replayed = True
+                return {"type": "http.request", "body": b"".join(request_chunks), "more_body": False}
+            return {"type": "http.request", "body": b"", "more_body": False}
 
         async def wrapped_send(message):
             nonlocal response_status, response_headers, response_started, response_complete
