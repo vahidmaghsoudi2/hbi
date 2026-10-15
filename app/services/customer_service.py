@@ -22,13 +22,16 @@ class CustomerService(BaseService[Customer, CustomerRepository]):
     def find_by_name(self, name: str) -> List[Customer]:
         return self.repository.find_by_name(name)
 
+    def find_by_family_name(self, family_name: str) -> List[Customer]:
+        return self.repository.find_by_family_name(family_name)
+
     def get_with_cases(self, customer_id: str) -> Optional[Customer]:
         return self.repository.get_with_cases(customer_id)
 
     def get_by_id(self, customer_id: str) -> Optional[Customer]:
         return self.repository.get_by_id(customer_id)
 
-    def register_customer(self, name: str, mobile: Optional[str] = None, **kwargs) -> Customer:
+    def register_customer(self, name: str, mobile: Optional[str] = None, family_name: Optional[str] = None, **kwargs) -> Customer:
         if mobile:
             existing = self.find_by_mobile(mobile)
             if existing:
@@ -44,6 +47,7 @@ class CustomerService(BaseService[Customer, CustomerRepository]):
         customer = self.create(
             customer_id=_new_customer_id("CUST"),
             name=name,
+            family_name=family_name.strip() if family_name and family_name.strip() else None,
             mobile=mobile,
             **kwargs,
         )
@@ -69,6 +73,7 @@ class CustomerService(BaseService[Customer, CustomerRepository]):
         *,
         name: str,
         mobile: Optional[str] = None,
+        family_name: Optional[str] = None,
         concerns: Optional[str] = None,
         consent: int = 0,
         skin_profile: Optional[str] = None,
@@ -91,10 +96,14 @@ class CustomerService(BaseService[Customer, CustomerRepository]):
             return self.register_guest(name=name, **fields)
 
         existing = self.find_by_mobile(mobile)
+        normalized_family = family_name.strip() if family_name and family_name.strip() else None
         if existing:
-            return self.repository.update(existing.customer_id, **fields) or existing
+            # A mobile number alone never transfers or confirms identity.
+            if not normalized_family or not existing.family_name or existing.family_name.casefold() != normalized_family.casefold():
+                raise ValueError("Customer identity conflict: mobile and family_name must both match")
+            return self.repository.update(existing.customer_id, **fields)
 
-        return self.register_customer(name=name, mobile=mobile, **fields)
+        return self.register_customer(name=name, mobile=mobile, family_name=normalized_family, **fields)
 
     def build_recommendation_profile(
         self,
