@@ -2,7 +2,7 @@ name: HBI Pilot Browser Proof
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [ master, feat/homepage-navigation-ia-stage1-final ]
   workflow_dispatch:
 
 permissions:
@@ -54,7 +54,6 @@ jobs:
           exit 1
       - name: Run real-browser proof
         env:
-          # Config lives at repo root but @playwright/test is installed under frontend/.
           NODE_PATH: ${{ github.workspace }}/frontend/node_modules
         run: ./frontend/node_modules/.bin/playwright test --config=playwright.config.cjs
       - name: Upload browser evidence
