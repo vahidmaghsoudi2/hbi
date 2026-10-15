@@ -55,9 +55,20 @@ def _code_sha() -> str:
     if len(configured) == 40 and all(char in "0123456789abcdefABCDEF" for char in configured):
         return configured
     try:
+        repo_root = Path(__file__).resolve().parents[1]
+        status = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=repo_root,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=5,
+        )
+        if status.returncode != 0 or status.stdout.strip():
+            return ""
         result = subprocess.run(
             ["git", "rev-parse", "HEAD"],
-            cwd=Path(__file__).resolve().parents[1],
+            cwd=repo_root,
             text=True,
             capture_output=True,
             check=False,
