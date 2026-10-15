@@ -19,12 +19,11 @@ export default function App() {
       <Route path="/login" element={<AdminLoginPage />} />
       <Route path="/" element={<AdminGate><NewHomePage /></AdminGate>} />
       <Route path="/catalog" element={<AdminGate><CatalogPage /></AdminGate>} />
-      {/* Pilot and Recommendation use a separate non-production customer/pilot
-          session. AdminGate checks hbi_admin_access_token and would block this
-          flow before its own token acquisition. API endpoints remain responsible
-          for authorization; the pilot-token endpoint is disabled in production. */}
-      <Route path="/pilot" element={<PilotPage />} />
-      <Route path="/recommendation" element={<RecommendationPage />} />
+      {/* HBI has one system user: the Admin/Operator. Customer records do not
+          grant browser access to operational pages. API authorization remains
+          independently enforced by the backend. */}
+      <Route path="/pilot" element={<AdminGate><PilotPage /></AdminGate>} />
+      <Route path="/recommendation" element={<AdminGate><RecommendationPage /></AdminGate>} />
       <Route path="/accounting" element={<AdminGate><AccountingHomePage /></AdminGate>} />
       <Route path="/purchase" element={<AdminGate><PurchasePage /></AdminGate>} />
     </Routes>
