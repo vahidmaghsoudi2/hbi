@@ -77,7 +77,7 @@ def _bootstrap(session):
             brand="B",
             product_name="Item",
             identity_status="VERIFIED",
-            qa_verdict="PENDING",
+            qa_verdict="VALID",
             status="ACTIVE",
             category_id="BOOST",
         )
@@ -88,7 +88,7 @@ def _bootstrap(session):
             brand="B",
             product_name="HairItem",
             identity_status="VERIFIED",
-            qa_verdict="PENDING",
+            qa_verdict="VALID",
             status="ACTIVE",
             category_id="HAIR",
         )
