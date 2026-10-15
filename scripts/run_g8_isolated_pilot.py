@@ -51,9 +51,14 @@ def _health_ok() -> bool:
 
 
 def _code_sha() -> str:
+    """Return the actual clean checkout HEAD; never trust an environment override."""
     configured = os.getenv("G8_CODE_SHA", "").strip()
-    if len(configured) == 40 and all(char in "0123456789abcdefABCDEF" for char in configured):
-        return configured
+    if configured and (
+        len(configured) != 40
+        or any(char not in "0123456789abcdefABCDEF" for char in configured)
+    ):
+        return ""
+
     try:
         repo_root = Path(__file__).resolve().parents[1]
         status = subprocess.run(
@@ -64,8 +69,10 @@ def _code_sha() -> str:
             check=False,
             timeout=5,
         )
+        # The working tree must be clean even when G8_CODE_SHA is supplied.
         if status.returncode != 0 or status.stdout.strip():
             return ""
+
         result = subprocess.run(
             ["git", "rev-parse", "HEAD"],
             cwd=repo_root,
@@ -76,7 +83,15 @@ def _code_sha() -> str:
         )
     except (OSError, subprocess.TimeoutExpired):
         return ""
-    return result.stdout.strip() if result.returncode == 0 else ""
+
+    if result.returncode != 0:
+        return ""
+    actual_head = result.stdout.strip()
+    if len(actual_head) != 40 or any(char not in "0123456789abcdefABCDEF" for char in actual_head):
+        return ""
+    if configured and configured.lower() != actual_head.lower():
+        return ""
+    return actual_head
 
 
 def _json_value(value: Any) -> Any:
