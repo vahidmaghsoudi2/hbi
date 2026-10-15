@@ -38,10 +38,10 @@ test("Homepage navigation keeps sales, inventory, and reports in their own desti
 
   // Reports expose the existing report destinations explicitly.
   await page.getByRole("link", { name: "بازگشت به خانه HBI" }).click();
-  await page.getByRole("button", { name: "ورود به گزارش‌ها" }).click();
+  await page.getByRole("button", { name: "ورود به حسابداری و گزارش‌ها" }).click();
   await expect(page.getByRole("link", { name: "بازکردن گزارش فروش" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "بازکردن گزارش موجودی" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "بازکردن گردش کالا" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "بازکردن گزارش موجودی" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "بازکردن گردش کالا" })).toHaveCount(0);
   await page.getByRole("link", { name: "بازکردن گزارش مالی" }).click();
   await expect(page).toHaveURL(/\/accounting\?section=finance-report$/);
   await expect(page.getByText("بخش فعال: گزارش مالی")).toBeVisible();
