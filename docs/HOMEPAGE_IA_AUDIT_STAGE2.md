@@ -15,8 +15,8 @@ Legend: **✓** belongs in the proposed location; **X** misplaced or duplicated;
 | `/catalog` | CatalogPage | AdminGate | Read-only list via `listProducts`; NewHomePage product panel uses `listManageableProducts` and also exposes intake/edit and QA. Similar entry labels, but not proven functionally identical |
 | `/accounting` | AccountingHomePage | AdminGate | Sales report, inventory report, stock flow, finance report; `?section=` selects a section |
 | `/purchase` | PurchasePage | AdminGate | Stock-in/purchase form; links back Home and Accounting |
-| `/pilot` | PilotPage | No AdminGate; separate pilot session | Non-production pilot flow; **?** verify that this is unavailable as a customer-facing production route |
-| `/recommendation` | RecommendationPage | No AdminGate; separate pilot session | Non-production recommendation flow; **?** verify that this is unavailable as a customer-facing production route |
+| `/pilot` | PilotPage | AdminGate; separate pilot session still required for API calls | Non-production pilot flow; direct browser entry redirects to Admin login |
+| `/recommendation` | RecommendationPage | AdminGate; separate pilot session still required for API calls | Non-production recommendation flow; direct browser entry redirects to Admin login |
 
 ## 2. Existing homepage tree
 
@@ -85,7 +85,7 @@ HBI Admin workspace (/)
 | Dashboard quick actions for Intake, QA and Purchase | ? | Acceptable only as clearly labelled shortcuts. They must not imply those modules are dashboard children or replace their canonical menu location |
 | Product list embedded in NewHomePage plus `/catalog` route | ? | Code inspection shows different APIs and purposes: `/catalog` is a read-only list; the embedded panel uses manageable products and provides intake/edit and QA. Decide whether the read-only catalog is a useful distinct destination or an unnecessary duplicate; do not remove either based on label similarity alone |
 | Settings separate, logout inside Settings | ✓ | Keep account/logout out of the main operational menu and avoid an always-visible logout action |
-| `/pilot` and `/recommendation` routes | ? | They bypass AdminGate by design for isolated pilot sessions. Verify production exposure policy; do not confuse pilot/test routes with the operator workspace |
+| `/pilot` and `/recommendation` routes | ✓ | AdminGate now protects browser entry. The pilot/customer JWT remains separate and API authorization must still be tested independently |
 | Dashboard API failure/empty states | ✓ | Keep unknown values unknown; do not fabricate sales, inventory, QA or profit values |
 | Gross profit on Accounting page | ? | Current UI says deferred by PO; do not present gross profit as calculated until cost-of-goods policy is approved |
 
