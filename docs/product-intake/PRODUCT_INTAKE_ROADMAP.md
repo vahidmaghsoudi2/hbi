@@ -1,9 +1,9 @@
 # HBI Product Intake Roadmap and Phase 1 Execution Record
 
-**Status:** Phase 0 = PARTIAL until all SSOT files are on master; Phase 1 = NOT STARTED; G8 = **BLOCKED / NOT VERIFIED**  
+**Status:** Phase 0 = COMPLETE (SSOT files merged); Phase 1 = PREPARATION / real operator pilot NOT STARTED; G8 = **BLOCKED / NOT VERIFIED**  
 **Source of truth:** GitHub repository `vahidmaghsoudi2/hbi`  
-**Current baseline:** `0a2ec9b477f89954ba1865ec59e3701a5a0f3831`  
-**Last updated:** 2026-10-13
+**Verified master baseline for this correction:** `310ce38f67c7f2c864e35bf78293cd3ad3b810cd` (current master after PR #369 merge; documentation branch still needs baseline reconciliation)  
+**Last updated:** 2026-10-15
 
 ## 1. Purpose and authority
 
@@ -19,21 +19,22 @@ Primary references:
 
 ## 2. Current baseline and completed work
 
-### Phase 0 — SSOT baseline on master: PARTIAL
+### Phase 0 — SSOT baseline on master: COMPLETE
 
-Baseline master commit: `0a2ec9b477f89954ba1865ec59e3701a5a0f3831`.
+Verified current master baseline: `310ce38f67c7f2c864e35bf78293cd3ad3b810cd` (includes PR #369).
 
 Exact-SHA push checks:
 - [HBI CI run 38396795619](https://github.com/vahidmaghsoudi2/hbi/actions/runs/38396795619) — success
 - [HBI Auto Tasks / Live test evidence run 38396795733](https://github.com/vahidmaghsoudi2/hbi/actions/runs/38396795733) — success
 - Exact-SHA checks `test`, `governance-tests`, and `Live test evidence` succeeded.
 
-The merge SHA and green exact-SHA CI establish a code baseline only. Phase 0 remains PARTIAL because the SSOT files are not yet on master; Phase 0 closes only after PR #364 is explicitly authorized and merged. This is not proof that the real G8 operator pilot passed. The Phase 0 outcome is recorded in [Issue #283 comment](https://github.com/vahidmaghsoudi2/hbi/issues/283#issuecomment-6145815790).
+The SSOT files are present on master following PR #364, merged at `7d962720a60c1291b8c21360dff0cc95b6fc0d1a`; Phase 0 is COMPLETE for documentation placement only. The merge and green CI are not proof that the real G8 operator pilot passed. The Phase 0 outcome is recorded in [Issue #283 comment](https://github.com/vahidmaghsoudi2/hbi/issues/283#issuecomment-6145815790).
 
 ### Relevant merged work
 
 - PR #360 merged at `0a2ec9b477f89954ba1865ec59e3701a5a0f3831`. The reviewed scope consolidated claim taxonomy/validation, manufacturer-claim destination guard, Skin candidate boundary and evidence-conflict UI while preserving scoring and Product A–D boundaries.
 - PR #361 merged at `868fdbb1c0cee620a655eec06899043139e13428`. UI-only grouping of product actions under the Products menu.
+- PR #369 merged at `310ce38f67c7f2c864e35bf78293cd3ad3b810cd`, adding fail-closed G8 isolated-runner evidence finalization. This is pilot infrastructure, not real-pilot acceptance.
 - PRs #353 and #357 were closed as superseded, not merged. See the Issue #283 execution record.
 
 ## 3. Product Intake lifecycle
@@ -46,7 +47,7 @@ The pilot must demonstrate actual permitted transitions and persisted readback. 
 
 ## 4. Phase 1 — isolated G8 execution pilot
 
-**Status: NOT STARTED.** Phase 1 may begin only after Phase 0 closes through SSOT merge to master.
+**Status: PREPARATION; real operator pilot NOT STARTED.** Phase 0 is complete. Pilot execution remains blocked until the isolated runner, environment, and evidence-capture process are verified; no real operator session is claimed.
 
 ### Scope
 
@@ -118,8 +119,8 @@ Do not substitute a narrative summary for raw artifacts.
 
 ## 7. Current decision
 
-Phase 0 is PARTIAL and remains open until PR #364 is explicitly authorized and merged to master. Phase 1 has not started. PR #355 is useful supporting API-test evidence, but is not the real pilot and does not satisfy G8.
+Phase 0 SSOT placement is COMPLETE following merged PR #364. Phase 1 is in preparation; the real operator pilot has NOT STARTED. PR #355 is supporting API-test evidence only, not the real pilot and not G8 proof.
 
 **Current gate: G8 = BLOCKED / NOT VERIFIED.**
 
-The next action is to finish Phase 0 by placing the three SSOT files on master through PR #364. Do not start Phase 1 until that merge occurs. After Phase 0 closes, the next phase will be the isolated operator pilot and collection of missing A1–A9 artifacts. No production changes or merge are authorized by this document.
+The next action is to complete safe preparation for the isolated operator pilot and collect raw A1–A9 artifacts only in an approved disposable environment. G8 remains BLOCKED / NOT VERIFIED until the evidence package meets the contract and is independently reviewed. No production changes or merge are authorized by this document.

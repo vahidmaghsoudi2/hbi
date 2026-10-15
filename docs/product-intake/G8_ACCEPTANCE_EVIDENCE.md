@@ -24,7 +24,7 @@ A criterion is PASS only when raw evidence is linked, tied to an exact SHA/envir
 - [PR #355](https://github.com/vahidmaghsoudi2/hbi/pull/355): draft disposable API test; not a real operator pilot and not merged.
 - [HBI CI run 38315913219](https://github.com/vahidmaghsoudi2/hbi/actions/runs/38315913219): successful test run on the PR #355 test head.
 - [Pilot Browser Proof run 38315913216](https://github.com/vahidmaghsoudi2/hbi/actions/runs/38315913216): fixture/browser workflow, not end-to-end real product acceptance.
-- [PR #364](https://github.com/vahidmaghsoudi2/hbi/pull/364): documentation-only draft; its green workflows do not prove G8.
+- [PR #364](https://github.com/vahidmaghsoudi2/hbi/pull/364): merged on 2026-10-13 at `7d962720a60c1291b8c21360dff0cc95b6fc0d1a`; SSOT placement is complete, but the merge and green workflows do not prove G8.
 
 ## Acceptance rule
 
