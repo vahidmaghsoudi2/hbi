@@ -103,6 +103,10 @@ class SaleService(BaseService[Sale, SaleRepository]):
                     raise ValueError("Only an ELIGIBLE recommendation can be linked to a sale")
             if getattr(product, "status", None) != "ACTIVE":
                 raise ValueError(f"Product {product_id} is not ACTIVE")
+            if getattr(product, "identity_status", None) != "VERIFIED":
+                raise ValueError(f"Product {product_id} identity is not VERIFIED")
+            if getattr(product, "qa_verdict", None) != "VALID":
+                raise ValueError(f"Product {product_id} QA verdict is not VALID")
 
             inv = (
                 self.db.query(Inventory)
