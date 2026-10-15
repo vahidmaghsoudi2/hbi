@@ -139,7 +139,7 @@ def test_missing_inventory_rejected(session):
             brand="B",
             product_name="N",
             identity_status="VERIFIED",
-            qa_verdict="PENDING",
+            qa_verdict="VALID",
             status="ACTIVE",
         )
     )
