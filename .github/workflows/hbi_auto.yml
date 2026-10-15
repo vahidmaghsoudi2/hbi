@@ -9,6 +9,13 @@ on:
       - "tests/**"
       - "requirements.txt"
       - ".github/workflows/hbi_auto.yml"
+  pull_request:
+    branches: [master]
+    paths:
+      - "app/**"
+      - "tests/**"
+      - "requirements.txt"
+      - ".github/workflows/hbi_auto.yml"
 
 jobs:
   evidence:
