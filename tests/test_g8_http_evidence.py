@@ -70,3 +70,50 @@ def test_middleware_is_opt_in_when_no_output_directory():
     middleware = G8RawHttpEvidenceMiddleware(app, "")
     asyncio.run(middleware({"type": "http", "method": "GET", "path": "/"}, None, None))
     assert calls == ["called"]
+
+
+def test_middleware_forwards_disconnect_after_request_replay(tmp_path: Path):
+    received = []
+
+    async def app(scope, receive, send):
+        first = await receive()
+        received.append(first)
+        assert first["type"] == "http.request"
+        assert first["body"] == b'{"pilot":true}'
+
+        second = await receive()
+        received.append(second)
+        assert second["type"] == "http.disconnect"
+
+        await send({"type": "http.response.start", "status": 200, "headers": []})
+        await send({"type": "http.response.body", "body": b"ok", "more_body": False})
+
+    messages = [
+        {"type": "http.request", "body": b'{"pilot":true}', "more_body": False},
+        {"type": "http.disconnect"},
+    ]
+
+    async def receive():
+        if messages:
+            return messages.pop(0)
+        return {"type": "http.disconnect"}
+
+    async def send(message):
+        pass
+
+    scope = {
+        "type": "http",
+        "method": "POST",
+        "path": "/g8-regression-test",
+        "http_version": "1.1",
+        "headers": [(b"content-type", b"application/json")],
+    }
+
+    middleware = G8RawHttpEvidenceMiddleware(app, str(tmp_path))
+    asyncio.run(middleware(scope, receive, send))
+
+    assert [message["type"] for message in received] == [
+        "http.request",
+        "http.disconnect",
+    ]
+    assert len(list(tmp_path.glob("*.json"))) == 1

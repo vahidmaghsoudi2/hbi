@@ -139,7 +139,7 @@ class G8RawHttpEvidenceMiddleware:
             if not replayed:
                 replayed = True
                 return {"type": "http.request", "body": b"".join(request_chunks), "more_body": False}
-            return {"type": "http.request", "body": b"", "more_body": False}
+            return await receive()
 
         async def wrapped_send(message):
             nonlocal response_status, response_headers, response_started, response_complete
