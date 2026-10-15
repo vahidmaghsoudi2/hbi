@@ -794,21 +794,6 @@ export default function NewHomePage() {
                   <p className="pro-muted">ثبت مسئله، اعتبارسنجی نیاز و تصمیم اپراتور.</p>
                   <button type="button" className="pro-btn-primary" onClick={() => go("consult")}>شروع مشاوره</button>
                 </article>
-                <article className="pro-product-card">
-                  <h3>ورود اطلاعات محصول</h3>
-                  <p className="pro-muted">ثبت مشخصات محصول؛ جدا از ورود فیزیکی موجودی.</p>
-                  <button type="button" className="pro-btn-primary" onClick={() => go("intake")}>ورود محصول</button>
-                </article>
-                <article className="pro-product-card">
-                  <h3>بررسی و تأیید QA</h3>
-                  <p className="pro-muted">بررسی وضعیت و موانع تأیید محصول.</p>
-                  <button type="button" className="pro-btn-secondary" onClick={() => go("review")}>رفتن به بررسی QA</button>
-                </article>
-                <article className="pro-product-card">
-                  <h3>خرید و ورود موجودی</h3>
-                  <p className="pro-muted">ثبت ورود فیزیکی کالا و گردش انبار.</p>
-                  <Link to="/purchase" className="pro-btn-secondary">ثبت خرید / ورود موجودی</Link>
-                </article>
               </div>
             </section>
 
