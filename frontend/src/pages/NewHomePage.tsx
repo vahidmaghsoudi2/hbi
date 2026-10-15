@@ -755,8 +755,8 @@ export default function NewHomePage() {
                 <article className="pro-product-card"><h2>بررسی و تأیید QA</h2><p className="pro-muted">بررسی شواهد و وضعیت تأیید محصول.</p><button type="button" className="pro-btn-primary" onClick={() => go("review")}>بازکردن بررسی QA</button></article>
               </> : null}
               {mainSection === "inventory" ? <>
-                <article className="pro-product-card"><h2>موجودی کالا</h2><p className="pro-muted">موجودی قابل مشاهده و ارزش‌گذاری‌شده بر پایه آخرین قیمت خرید ثبت‌شده.</p><Link to="/accounting?section=inventory" className="pro-btn-primary">بازکردن گزارش موجودی</Link></article>
-                <article className="pro-product-card"><h2>گردش کالا</h2><p className="pro-muted">بررسی گردش‌های ثبت‌شدهٔ ورود و خروج کالا.</p><Link to="/accounting?section=stock-flow" className="pro-btn-primary">بازکردن گردش کالا</Link></article>
+                <article className="pro-product-card"><h2>موجودی کالا</h2><p className="pro-muted">موجودی قابل مشاهده و ارزش‌گذاری‌شده بر پایه آخرین قیمت خرید ثبت‌شده.</p><Link to="/inventory?section=inventory" className="pro-btn-primary">بازکردن گزارش موجودی</Link></article>
+                <article className="pro-product-card"><h2>گردش کالا</h2><p className="pro-muted">بررسی گردش‌های ثبت‌شدهٔ ورود و خروج کالا.</p><Link to="/inventory?section=stock-flow" className="pro-btn-primary">بازکردن گردش کالا</Link></article>
               </> : null}
               {mainSection === "purchases" ? <article className="pro-product-card"><h2>خرید / ورود موجودی</h2><p className="pro-muted">ثبت خرید و ورود فیزیکی کالا.</p><Link to="/purchase" className="pro-btn-primary">بازکردن خرید و موجودی</Link></article> : null}
               {mainSection === "settings" ? <article className="pro-product-card"><h2>حساب مدیر</h2><p className="pro-muted">دسترسی این محیط فقط برای مدیر سامانه است. تنظیمات عملیاتی دیگری در این بخش هنوز تعریف نشده است.</p><button type="button" className="pro-btn-secondary" onClick={logout}>خروج از حساب مدیر</button></article> : null}
@@ -816,7 +816,7 @@ export default function NewHomePage() {
                   <h3>موجودی انبار</h3>
                   <p className="pro-summary">{dashboardInventory ? dashboardInventory.length.toLocaleString("fa-IR") : "—"} ردیف موجودی</p>
                   <p className="pro-muted">{dashboardInventory ? "بر اساس گزارش موجودی فعلی." : "دادهٔ موجودی در دسترس نیست."}</p>
-                  <Link to="/accounting?section=inventory" className="pro-btn-secondary">مشاهدهٔ موجودی</Link>
+                  <Link to="/inventory?section=inventory" className="pro-btn-secondary">مشاهدهٔ موجودی</Link>
                 </article>
                 <article className="pro-product-card">
                   <h3>هشدار موجودی کم</h3>
@@ -836,7 +836,7 @@ export default function NewHomePage() {
                 ) : (
                   <>
                     <p role="status">{dashboardLowStock.length.toLocaleString("fa-IR")} قلم با موجودی ≤ ۵ نیازمند بررسی است.</p>
-                    <Link to="/accounting?section=inventory" className="pro-btn-primary">بازکردن گزارش موجودی</Link>
+                    <Link to="/inventory?section=inventory" className="pro-btn-primary">بازکردن گزارش موجودی</Link>
                   </>
                 )}
                 <p className="pro-muted">وضعیت پذیرش و QA محصول در این داشبورد عددگذاری نشده؛ API مدیریتیِ تأییدشده برای خلاصهٔ چرخهٔ محصول هنوز احراز نشده است.</p>
@@ -860,7 +860,7 @@ export default function NewHomePage() {
                     ))}
                   </ul>
                 )}
-                <Link to="/accounting?section=stock-flow" className="pro-btn-secondary">همهٔ گردش‌ها</Link>
+                <Link to="/inventory?section=stock-flow" className="pro-btn-secondary">همهٔ گردش‌ها</Link>
               </div>
             </section>
           </section>
