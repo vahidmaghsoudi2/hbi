@@ -54,14 +54,17 @@ def _code_sha() -> str:
     configured = os.getenv("G8_CODE_SHA", "").strip()
     if configured:
         return configured
-    result = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=Path(__file__).resolve().parents[1],
-        text=True,
-        capture_output=True,
-        check=False,
-        timeout=5,
-    )
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=Path(__file__).resolve().parents[1],
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return ""
     return result.stdout.strip() if result.returncode == 0 else ""
 
 
@@ -88,6 +91,8 @@ def _export_database_readback(db_path: Path, output_path: Path) -> dict[str, int
                 "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
             )
         ]
+        if not table_names:
+            raise RuntimeError("SQLite database has no application tables; refusing evidence finalization")
         tables: dict[str, Any] = {}
         counts: dict[str, int] = {}
         for table_name in table_names:
