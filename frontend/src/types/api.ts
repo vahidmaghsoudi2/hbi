@@ -83,6 +83,7 @@ export interface ProductDTO {
 export interface CustomerSearchResult {
   customer_id: string;
   name: string;
+  family_name?: string | null;
   mobile?: string | null;
   consent_to_store_data?: number;
   concerns?: string | null;
@@ -92,6 +93,7 @@ export interface CustomerSearchResult {
 /** POST /api/v1/customers/intake request */
 export interface CustomerIntakeRequest {
   name: string;
+  family_name?: string;
   mobile?: string;
   concerns?: string;
   consent: number;
