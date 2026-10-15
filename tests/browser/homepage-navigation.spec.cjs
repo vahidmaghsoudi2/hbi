@@ -47,6 +47,21 @@ test("Homepage navigation keeps sales, inventory, and reports in their own desti
   await expect(page.getByText("بخش فعال: گزارش مالی")).toBeVisible();
 });
 
+test("Dashboard report shortcuts preserve their own report destinations", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-dashboard-links-test-token");
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "بازکردن داشبورد" }).click();
+  await expect(page.getByRole("heading", { name: "داشبورد HBI" })).toBeVisible();
+
+  await expect(page.getByRole("link", { name: "گزارش فروش" })).toHaveAttribute("href", "/accounting?section=sales");
+  await expect(page.getByRole("link", { name: "مشاهدهٔ موجودی" })).toHaveAttribute("href", "/accounting?section=inventory");
+  await expect(page.getByRole("link", { name: "بررسی موجودی" })).toHaveAttribute("href", "/accounting?section=inventory");
+  await expect(page.getByRole("link", { name: "بازکردن گزارش موجودی" })).toHaveAttribute("href", "/accounting?section=inventory");
+  await expect(page.getByRole("link", { name: "همهٔ گردش‌ها" })).toHaveAttribute("href", "/accounting?section=stock-flow");
+});
+
 test("Settings is a separate homepage section and owns the logout action", async ({ page }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-settings-test-token");
