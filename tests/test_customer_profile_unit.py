@@ -45,6 +45,8 @@ def test_intake_new_and_update_concerns(db):
         consent=1,
     )
     assert c2.customer_id == c1.customer_id
+    assert c2.name == c1.name
+    assert c2.family_name == c1.family_name
     assert c2.concerns == "ضدآفتاب, لک"
 
 
