@@ -337,9 +337,12 @@ async def quick_intake(
         if authenticated is not None:
             # Continue the same identity as the JWT (Home Front Door path).
             fields: Dict[str, Any] = {
-                "name": data.name,
                 "consent_to_store_data": data.consent,
             }
+            # Preserve the legacy display-name field for established customers.
+            # The new family_name field is authoritative for identity checks.
+            if authenticated.customer_id.startswith("CUST_GUEST_"):
+                fields["name"] = data.name
             supplied_family = data.family_name.strip() if data.family_name and data.family_name.strip() else None
             if mobile and not data.guest:
                 if not supplied_family:
