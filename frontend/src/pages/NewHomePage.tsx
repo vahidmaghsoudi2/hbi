@@ -96,6 +96,7 @@ export default function NewHomePage() {
   const [profileSaving, setProfileSaving] = useState(false);
   const [customerSearch, setCustomerSearch] = useState("");
   const [customerSearchResults, setCustomerSearchResults] = useState<CustomerSearchResult[]>([]);
+  const [saleCustomerSearchResults, setSaleCustomerSearchResults] = useState<CustomerSearchResult[]>([]);
   const [purchaseHistory, setPurchaseHistory] = useState<SaleDTO[]>([]);
   const [customerSearchBusy, setCustomerSearchBusy] = useState(false);
   const [dashboardLoading, setDashboardLoading] = useState(false);
@@ -232,7 +233,7 @@ export default function NewHomePage() {
   async function searchSaleCustomers() {
     const query = saleCustomerSearch.trim();
     if (!query) {
-      setCustomerSearchResults([]);
+      setSaleCustomerSearchResults([]);
       setError("برای جست‌وجوی مشتری، شماره موبایل یا نام خانوادگی را وارد کنید.");
       return;
     }
@@ -242,10 +243,10 @@ export default function NewHomePage() {
       const operatorToken = await ensureProductSession();
       if (!operatorToken) throw new Error("نشست مدیر برای جست‌وجوی مشتری در دسترس نیست.");
       const found = await searchCustomers(query, operatorToken);
-      setCustomerSearchResults(Array.isArray(found) ? found : []);
+      setSaleCustomerSearchResults(Array.isArray(found) ? found : []);
       if (!Array.isArray(found) || found.length === 0) setStatusMsg("مشتری مطابق جست‌وجو پیدا نشد؛ فروش مستقیم همچنان ممکن است.");
     } catch (err) {
-      setCustomerSearchResults([]);
+      setSaleCustomerSearchResults([]);
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setCustomerSearchBusy(false);
@@ -255,7 +256,7 @@ export default function NewHomePage() {
   function chooseSaleCustomer(customer: CustomerSearchResult) {
     setSaleCustomerId(customer.customer_id);
     setSaleCustomerLabel(`${customer.family_name ?? "نام خانوادگی ثبت نشده"} · ${customer.mobile ?? "بدون موبایل"}`);
-    setCustomerSearchResults([]);
+    setSaleCustomerSearchResults([]);
     setSaleCustomerSearch("");
     setError(null);
     setStatusMsg("مشتری فقط برای این فروش انتخاب شد؛ نشست مشاوره تغییر نکرد.");
@@ -1219,7 +1220,7 @@ export default function NewHomePage() {
                       <label className="pro-label" htmlFor="sale-customer-search">جست‌وجوی مشتری با شماره موبایل یا نام خانوادگی</label>
                       <input id="sale-customer-search" className="pro-input" value={saleCustomerSearch} onChange={(e) => setSaleCustomerSearch(e.target.value)} placeholder="شماره موبایل یا نام خانوادگی" />
                       <button type="button" className="pro-btn-secondary" onClick={() => void searchSaleCustomers()} disabled={customerSearchBusy}>{customerSearchBusy ? "در حال جست‌وجو…" : "جست‌وجوی مشتری"}</button>
-                      {customerSearchResults.map((customer) => (
+                      {saleCustomerSearchResults.map((customer) => (
                         <button key={customer.customer_id} type="button" className="pro-btn-secondary" onClick={() => chooseSaleCustomer(customer)}>
                           {customer.family_name ?? "نام خانوادگی ثبت نشده"} · {customer.mobile ?? "بدون موبایل"} · {customer.customer_id}
                         </button>
