@@ -39,6 +39,7 @@ def test_intake_new_and_update_concerns(db):
 
     c2 = svc.record_intake(
         name="سارا",
+        family_name="سارا",
         mobile="09129990001",
         concerns="ضدآفتاب, لک",
         consent=1,
