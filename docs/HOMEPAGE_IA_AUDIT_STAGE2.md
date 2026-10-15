@@ -1,6 +1,6 @@
 # HBI Homepage Navigation & Page Placement Audit — Stage 2
 
-**Audit target:** `feat/homepage-dashboard-stage2` at `0e5f99aa28ac424ef8e7ee30df541f03e92a4231`  
+**Audit target:** `feat/homepage-dashboard-stage2` (current Stage 2 IA ownership patch)  
 **Status:** inventory and placement review only; no IA redesign approved by this artifact.  
 **Guardrails:** do not merge to `master`; do not change Product Intake/QA lifecycle or the other team's product data. Customer is a record, not a system user. Direct sale must remain possible without consultation.
 
@@ -13,7 +13,7 @@ Legend: **✓** belongs in the proposed location; **X** misplaced or duplicated;
 | `/login` | AdminLoginPage | Public login entry | Entry to Admin workspace |
 | `/` | NewHomePage | AdminGate | Main menu, dashboard and embedded operational panels |
 | `/catalog` | CatalogPage | AdminGate | Read-only list via `listProducts`; NewHomePage product panel uses `listManageableProducts` and also exposes intake/edit and QA. Similar entry labels, but not proven functionally identical |
-| `/accounting` | AccountingHomePage | AdminGate | Sales report, inventory report, stock flow, finance report; `?section=` selects a section |
+| `/accounting` | AccountingHomePage | AdminGate | Sales report and finance report only; `?section=` selects a report |\n| `/inventory` | InventoryHomePage | AdminGate | Inventory report, low-stock report, and stock-flow report; `?section=` selects the view |
 | `/purchase` | PurchasePage | AdminGate | Stock-in/purchase form; links back Home and Accounting |
 | `/pilot` | PilotPage | AdminGate; separate pilot session still required for API calls | Non-production pilot flow; direct browser entry redirects to Admin login |
 | `/recommendation` | RecommendationPage | AdminGate; separate pilot session still required for API calls | Non-production recommendation flow; direct browser entry redirects to Admin login |
@@ -81,7 +81,7 @@ HBI Admin workspace (/)
 | Purchase/stock-in as a separate destination | ✓ | It is a stock operation, independent of consultation and sales |
 | Accounting / Reports separate from product management | ✓ | Sales, stock and finance reporting belong in accounting/reporting |
 | Sales report has one canonical menu owner | ✓ | The main menu now uses “حسابداری و گزارش‌ها”; its submenu contains sales and finance reports only |
-| Inventory and stock-flow should be owned by Products & Inventory | ? | Current report rendering still lives in `/accounting?section=inventory` and `/accounting?section=stock-flow`; the homepage links are functional, but ownership has not actually been moved. Do not describe this as implemented until the report views are moved or the IA decision is explicitly revised |
+| Inventory and stock-flow are owned by Products & Inventory | ✓ | Report rendering is now in `InventoryHomePage` at `/inventory`; Accounting retains sales and finance reports only. Dashboard and section shortcuts target the inventory route |
 | Dashboard quick actions for Intake, QA and Purchase | ? | Acceptable only as clearly labelled shortcuts. They must not imply those modules are dashboard children or replace their canonical menu location |
 | Product list embedded in NewHomePage plus `/catalog` route | ? | Code inspection shows different APIs and purposes: `/catalog` is a read-only list; the embedded panel uses manageable products and provides intake/edit and QA. Decide whether the read-only catalog is a useful distinct destination or an unnecessary duplicate; do not remove either based on label similarity alone |
 | Settings separate, logout inside Settings | ✓ | Keep account/logout out of the main operational menu and avoid an always-visible logout action |
@@ -202,7 +202,7 @@ These are placement sketches, not visual redesigns. ✓ = belongs; X = misplaced
 +----------------------+  +----------------------+
 | ✓ ACCOUNTING / REPORTS                       |
 +---------------------------------------------+
-| ✓ Sales | ✓ Inventory | ✓ Stock flow | ✓ Finance |
+| ✓ Sales | ✓ Finance (Accounting) · ✓ Inventory | ✓ Stock flow (Products & Inventory) |
 | X Avoid duplicate full destinations in menus |
 +---------------------------------------------+
 ```
@@ -242,4 +242,4 @@ These are placement sketches, not visual redesigns. ✓ = belongs; X = misplaced
 3. **Pilot routes:** Confirm deployment restrictions for `/pilot` and `/recommendation`.
 4. **Dashboard shortcuts:** Keep only high-frequency actions; label Intake/QA/Purchase as shortcuts, not nested dashboard submodules.
 
-**Stop line:** This audit does not authorize broad navigation changes. Once placement decisions are accepted, implement one bounded IA patch on the homepage branch and re-run exact-head CI/browser proof. Keep `master` untouched.
+**Verification boundary:** This patch moves the actual inventory/stock-flow views into `/inventory` and updates navigation tests. Exact-head CI and browser proof must pass before this structural change is considered verified. Keep `master` untouched.
