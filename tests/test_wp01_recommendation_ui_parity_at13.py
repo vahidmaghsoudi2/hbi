@@ -31,7 +31,14 @@ def test_at13_backend_full_result_set_is_still_stored():
     assert "const list = await generateRecommendations(" in source
 
 
-def test_at13_no_recommendation_selection_or_backend_filter_was_added():
+def test_at13_consultation_recommendations_remain_separate_from_direct_sale():
     source = _source()
-    assert "selectRecommendationForSale(r)" in source
     assert "generateRecommendations(" in source
+    assert "selectRecommendationForSale(r)" not in source
+    assert "selectedRecommendationId" not in source
+
+    # Direct sale accepts an explicitly chosen customer, but is not coupled to
+    # a consultation recommendation. Consultation/accounting linkage belongs
+    # to the consultation flow, not as a prerequisite in the sales form.
+    sale_call = source.split("const sale = await createSale(", 1)[1].split("setLastSale", 1)[0]
+    assert "recommendation_id" not in sale_call
