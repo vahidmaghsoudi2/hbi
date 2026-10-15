@@ -340,11 +340,20 @@ async def quick_intake(
                 "name": data.name,
                 "consent_to_store_data": data.consent,
             }
+            supplied_family = data.family_name.strip() if data.family_name and data.family_name.strip() else None
             if mobile and not data.guest:
-                supplied_family = data.family_name.strip() if data.family_name and data.family_name.strip() else None
-                stored_family = authenticated.family_name.strip() if authenticated.family_name else None
-                if not supplied_family or not stored_family or supplied_family.casefold() != stored_family.casefold():
-                    raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Customer identity conflict: mobile and family_name must both match")
+                if not supplied_family:
+                    raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Customer identity conflict: family_name is required with mobile")
+                other_customer = svc.find_by_mobile(mobile)
+                if other_customer and other_customer.customer_id != authenticated.customer_id:
+                    raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Customer identity conflict: select the existing customer by mobile and family name; ownership is never transferred")
+                if not authenticated.customer_id.startswith("CUST_GUEST_"):
+                    stored_family = authenticated.family_name.strip() if authenticated.family_name else None
+                    if not stored_family or stored_family.casefold() != supplied_family.casefold():
+                        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Customer identity conflict: mobile and family_name must both match")
+                fields["family_name"] = supplied_family
+            elif supplied_family:
+                fields["family_name"] = supplied_family
             # A consultation is case-scoped input. Do not overwrite the
             # persistent customer profile here: Recommendation combines the
             # saved profile with today's consultation payload.
