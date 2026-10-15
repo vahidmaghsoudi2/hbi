@@ -150,9 +150,23 @@ def _ensure_sale_customer_optional():
             raise RuntimeError(f"Foreign-key violations after Sale migration: {violations[:5]}")
 
 
+def _ensure_customer_family_name_column():
+    """Additive, backward-safe identity field for existing SQLite databases."""
+    inspector = inspect(engine)
+    if "Customer" not in inspector.get_table_names():
+        return
+    columns = {c["name"] for c in inspector.get_columns("Customer")}
+    if "family_name" not in columns:
+        with engine.begin() as conn:
+            conn.execute(text('ALTER TABLE "Customer" ADD COLUMN family_name VARCHAR'))
+    # Existing rows intentionally remain NULL: never infer a family name from
+    # the legacy name field or overwrite historical identity data.
+
+
 def init_db():
     from app.models import product, product_knowledge, evidence, evidence_mutation_log, customer, case, recommendation, inventory, sale, sale_item, category, stock_movement, payment, sale_return, operational_fx_rate, product_mutation_log, duplicate_check_audit, user_role, profile_fact, admin_credential, feedback, follow_up, outcome_assessment
     Base.metadata.create_all(bind=engine)
+    _ensure_customer_family_name_column()
     _ensure_recommendation_trace_columns()
     _ensure_accounting_control_columns()
     _ensure_sale_customer_optional()
