@@ -42,12 +42,20 @@ def _port_is_free() -> bool:
         return True
 
 
-def _health_ok() -> bool:
+def _health_check() -> tuple[bool, str]:
+    """Return readiness and a safe diagnostic instead of hiding connection failures."""
     try:
         with urllib.request.urlopen(HEALTH_URL, timeout=1) as response:
-            return response.status == 200
-    except (OSError, urllib.error.URLError):
-        return False
+            if response.status == 200:
+                return True, f"HTTP {response.status}"
+            return False, f"HTTP {response.status}"
+    except urllib.error.HTTPError as exc:
+        return False, f"HTTP {exc.code} {exc.reason}"[:500]
+    except (OSError, urllib.error.URLError, TimeoutError) as exc:
+        # Keep this to transport diagnostics; never include request credentials.
+        reason = getattr(exc, "reason", None)
+        detail = f"{type(exc).__name__}: {reason if reason is not None else exc}"
+        return False, detail[:500]
 
 
 def _code_sha() -> str:
@@ -389,13 +397,16 @@ def main() -> int:
                 env=env, stdout=log, stderr=subprocess.STDOUT,
             )
             deadline = time.monotonic() + 45
+            last_health_detail = "health check has not run"
+            last_health_log_at = 0.0
             while time.monotonic() < deadline:
                 if process.poll() is not None:
                     print(f"REFUSED: API exited during startup (code={process.returncode}).", flush=True)
                     break
-                if _health_ok():
+                health_ok, last_health_detail = _health_check()
+                if health_ok:
                     runtime_ok = True
-                    print("PILOT_API_READY=YES", flush=True)
+                    print(f"PILOT_API_READY=YES HEALTH_RESULT={last_health_detail}", flush=True)
                     if smoke_test:
                         print("SMOKE_TEST=PASS", flush=True)
                         break
@@ -404,9 +415,21 @@ def main() -> int:
                     while process.poll() is None:
                         time.sleep(0.5)
                     break
+                elapsed = time.monotonic() - (deadline - 45)
+                if elapsed - last_health_log_at >= 5:
+                    print(
+                        f"HEALTH_WAIT elapsed_seconds={int(elapsed)} "
+                        f"last_result={last_health_detail}",
+                        flush=True,
+                    )
+                    last_health_log_at = elapsed
                 time.sleep(0.5)
             else:
-                print("REFUSED: API health check timed out. Inspect API_LOG.", flush=True)
+                print(
+                    "REFUSED: API health check timed out. "
+                    f"elapsed_seconds=45 last_result={last_health_detail}. Inspect API_LOG.",
+                    flush=True,
+                )
     except KeyboardInterrupt:
         print("STOP_REQUESTED=YES", flush=True)
     finally:
