@@ -186,14 +186,22 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
                     # proof of a factual contradiction. Keep the persisted
                     # CONFLICT block fail-closed, but report it for review
                     # rather than asserting HIGH / UNRESOLVED contradiction.
-                    same_source_group = len({
-                        (
-                            (entry.get("source_reference") or "").rstrip("/").casefold(),
-                            (entry.get("source_type") or "").strip().upper(),
-                            (entry.get("claim_type") or "").strip().upper(),
-                        )
+                    normalized_references = [
+                        (entry.get("source_reference") or "").strip().rstrip("/").casefold()
                         for entry in entries
-                    }) == 1
+                    ]
+                    # Missing source references cannot establish source identity.
+                    same_source_group = (
+                        all(normalized_references)
+                        and len(set(normalized_references)) == 1
+                        and len({
+                            (
+                                (entry.get("source_type") or "").strip().upper(),
+                                (entry.get("claim_type") or "").strip().upper(),
+                            )
+                            for entry in entries
+                        }) == 1
+                    )
                     conflicts.append({
                         "field": field,
                         "values": [entry["value"] for entry in entries],
