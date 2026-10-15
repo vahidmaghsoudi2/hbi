@@ -237,7 +237,7 @@ These are placement sketches, not visual redesigns. ✓ = belongs; X = misplaced
 
 ## 7. Decisions needed before structural implementation
 
-1. **Canonical reporting owner:** Partially implemented. The homepage separates the “کالا و موجودی” entry point from “حسابداری و گزارش‌ها”, but the actual inventory and stock-flow views still render on the Accounting page. Current links are functional; the remaining IA task is to move those views into the inventory section or explicitly accept Accounting as their canonical owner. Dashboard shortcuts remain allowed.
+1. **Canonical reporting owner:** Implemented in this patch. Inventory, low-stock and stock-flow views render at `/inventory`; Accounting owns only sales and finance reporting. Dashboard shortcuts remain allowed.
 2. **Catalog role:** Decide whether the read-only `/catalog` page has a distinct operator use case from the manageable product list/intake/QA panel. Rename or remove an entry only after the purpose is explicit; current code does not prove they are identical.
 3. **Pilot routes:** Confirm deployment restrictions for `/pilot` and `/recommendation`.
 4. **Dashboard shortcuts:** Keep only high-frequency actions; label Intake/QA/Purchase as shortcuts, not nested dashboard submodules.
