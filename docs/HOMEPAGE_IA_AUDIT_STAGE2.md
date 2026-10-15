@@ -223,7 +223,7 @@ These are placement sketches, not visual redesigns. ✓ = belongs; X = misplaced
 
 - **Global/home shell:** main-menu button, page heading, current section label, return-to-main-menu button.
 - **Main menu:** nine section cards/buttons listed in section 2.
-- **Customers:** search field (name/mobile), search button, result/customer-selection buttons, purchase-history list, profile form, save profile, new customer.
+- **Customers:** search field (name/mobile), search button, result/customer-selection buttons, purchase-history list, profile form, save profile, new customer. **X Identity mismatch to resolve before acceptance:** current profile form uses a generic `name` field and mobile, while the agreed identity rule requires family name for identity checks and must not use first/given name as identity. Do not silently reinterpret or migrate existing records in this IA-only patch.
 - **Consultation:** customer/profile fields, consultation line, concern and skin-type choices, notes, start/generate consultation action, status/error feedback.
 - **Recommendation/operator results:** eligible recommendation cards, evidence/score details, show-all action, rejected/internal records panel; rejected items are not sale choices.
 - **Sales:** optional customer search/select/remove, sellable-product select, quantity, unit price, available stock, amount summary, submit sale, refresh sales total, last-sale result.
