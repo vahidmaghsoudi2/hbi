@@ -64,6 +64,7 @@ def test_customer_update_concerns_same_mobile(client, db_session):
         headers=_auth(),
         json={
             "name": "سارا CP01",
+            "family_name": "سارا",
             "mobile": "09130000002",
             "concerns": "ضدآفتاب, لک",
             "consent": 1,
