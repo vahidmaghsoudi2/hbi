@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 test("Pilot browser: generate, persisted readback, reload, and fail closed", async ({ page, request }) => {
-  const api = process.env.HBI_TEST_API_URL || "http://127.0.0.1:8765/api/v1";
+  // Route-level access is covered by homepage-navigation.spec.cjs. This proof uses a\n  // dummy AdminGate session to exercise the pilot workflow; API tokens are still\n  // obtained and validated through the real backend below.\n  await page.addInitScript(() => {\n    sessionStorage.setItem("hbi_admin_access_token", "pilot-browser-proof-admin-gate-token");\n  });\n\n  const api = process.env.HBI_TEST_API_URL || "http://127.0.0.1:8765/api/v1";
   const generated = [];
   const readbacks = [];
   let generateRequests = 0;
