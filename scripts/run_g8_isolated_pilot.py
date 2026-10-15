@@ -45,7 +45,11 @@ def _port_is_free() -> bool:
 def _health_check() -> tuple[bool, str]:
     """Return readiness and a safe diagnostic instead of hiding connection failures."""
     try:
-        with urllib.request.urlopen(HEALTH_URL, timeout=1) as response:
+        # This probe targets a loopback-only server. Do not route it through
+        # HTTP(S)_PROXY environment settings; some environments omit loopback
+        # from NO_PROXY, causing false readiness failures and RemoteDisconnected.
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        with opener.open(HEALTH_URL, timeout=1) as response:
             if response.status == 200:
                 return True, f"HTTP {response.status}"
             return False, f"HTTP {response.status}"
