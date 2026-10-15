@@ -232,7 +232,8 @@ def _finalize_evidence(
             "raw_http_files": raw_http_files,
             "note": (
                 "Database readback is a persisted-state snapshot, not proof that A1-A9 passed. "
-                "Operator-supplied raw HTTP artifacts are listed when present."
+                "Raw HTTP artifacts are automatically captured by the opt-in middleware; "
+                "their presence is necessary but not sufficient for A1-A9 acceptance."
             ),
         }
         (evidence_dir / "session-metadata.json").write_text(
