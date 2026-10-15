@@ -62,6 +62,19 @@ def _health_check() -> tuple[bool, str]:
         return False, detail[:500]
 
 
+def _wait_for_raw_http_capture(raw_http_dir: Path, timeout: float = 5.0) -> bool:
+    """Wait until the health request's atomic evidence write has completed."""
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if raw_http_dir.is_dir():
+            pending = list(raw_http_dir.glob("*.tmp"))
+            completed = list(raw_http_dir.glob("*.json"))
+            if completed and not pending:
+                return True
+        time.sleep(0.05)
+    return False
+
+
 def _code_sha() -> str:
     """Return the actual clean checkout HEAD; never trust an environment override."""
     configured = os.getenv("G8_CODE_SHA", "").strip()
@@ -413,6 +426,10 @@ def main() -> int:
                     print(f"PILOT_API_READY=YES HEALTH_RESULT={last_health_detail}", flush=True)
                     if smoke_test:
                         print("SMOKE_TEST=PASS", flush=True)
+                        if _wait_for_raw_http_capture(evidence_dir / "raw-http"):
+                            print("SMOKE_CAPTURE=PASS", flush=True)
+                        else:
+                            print("SMOKE_CAPTURE=FAIL (raw HTTP artifact did not finish within 5 seconds)", flush=True)
                         break
                     print("OPERATOR_ACTION: use /docs for the real pilot; HTTP request/response artifacts are captured automatically.", flush=True)
                     print("STOP: press Ctrl+C here after the pilot session.", flush=True)
