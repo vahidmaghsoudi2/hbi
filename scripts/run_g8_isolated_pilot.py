@@ -190,6 +190,9 @@ def _finalize_evidence(
         raw_http_dir = evidence_dir / "raw-http"
         if not raw_http_dir.exists() or raw_http_dir.is_symlink() or not raw_http_dir.is_dir():
             raise RuntimeError("raw-http evidence path is missing or unsafe")
+        capture_failure = raw_http_dir / "CAPTURE_FAILURE.txt"
+        if capture_failure.exists():
+            raise RuntimeError("raw HTTP middleware reported CAPTURE_FAILURE.txt; evidence is incomplete")
         raw_paths = sorted(path for path in raw_http_dir.rglob("*") if path.is_file())
         if any(path.is_symlink() for path in raw_paths):
             raise RuntimeError("raw-http evidence contains a symlink")
