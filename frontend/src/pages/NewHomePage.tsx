@@ -825,19 +825,19 @@ export default function NewHomePage() {
                   <h3>فروش امروز</h3>
                   <p className="pro-summary">{dashboardSales ? dashboardSales.sale_count.toLocaleString("fa-IR") : "—"} تراکنش</p>
                   <p className="pro-muted">{dashboardSales ? dashboardSales.revenue_toman.toLocaleString("fa-IR") + " تومان درآمد ثبت‌شده" : "دادهٔ فروش در دسترس نیست."}</p>
-                  <Link to="/accounting" className="pro-btn-secondary">گزارش فروش</Link>
+                  <Link to="/accounting?section=sales" className="pro-btn-secondary">گزارش فروش</Link>
                 </article>
                 <article className="pro-product-card">
                   <h3>موجودی انبار</h3>
                   <p className="pro-summary">{dashboardInventory ? dashboardInventory.length.toLocaleString("fa-IR") : "—"} ردیف موجودی</p>
                   <p className="pro-muted">{dashboardInventory ? "بر اساس گزارش موجودی فعلی." : "دادهٔ موجودی در دسترس نیست."}</p>
-                  <Link to="/accounting" className="pro-btn-secondary">مشاهدهٔ موجودی</Link>
+                  <Link to="/accounting?section=inventory" className="pro-btn-secondary">مشاهدهٔ موجودی</Link>
                 </article>
                 <article className="pro-product-card">
                   <h3>هشدار موجودی کم</h3>
                   <p className="pro-summary">{dashboardLowStock ? dashboardLowStock.length.toLocaleString("fa-IR") : "—"} قلم</p>
                   <p className="pro-muted">آستانهٔ هشدار: موجودی قابل دسترس ≤ ۵؛ از گزارش رسمی موجودی کم.</p>
-                  <Link to="/accounting" className="pro-btn-secondary">بررسی موجودی</Link>
+                  <Link to="/accounting?section=inventory" className="pro-btn-secondary">بررسی موجودی</Link>
                 </article>
               </div>
             </section>
@@ -852,7 +852,7 @@ export default function NewHomePage() {
                 ) : (
                   <>
                     <p role="status">{dashboardLowStock.length.toLocaleString("fa-IR")} قلم با موجودی ≤ ۵ نیازمند بررسی است.</p>
-                    <Link to="/accounting" className="pro-btn-primary">بازکردن گزارش موجودی</Link>
+                    <Link to="/accounting?section=inventory" className="pro-btn-primary">بازکردن گزارش موجودی</Link>
                   </>
                 )}
                 <p className="pro-muted">وضعیت پذیرش و QA محصول در این داشبورد عددگذاری نشده؛ API مدیریتیِ تأییدشده برای خلاصهٔ چرخهٔ محصول هنوز احراز نشده است.</p>
@@ -876,7 +876,7 @@ export default function NewHomePage() {
                     ))}
                   </ul>
                 )}
-                <Link to="/accounting" className="pro-btn-secondary">همهٔ گردش‌ها</Link>
+                <Link to="/accounting?section=stock-flow" className="pro-btn-secondary">همهٔ گردش‌ها</Link>
               </div>
             </section>
           </section>
