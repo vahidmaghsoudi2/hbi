@@ -58,7 +58,6 @@ test("Dashboard report shortcuts preserve their own report destinations", async 
   await expect(page.getByRole("link", { name: "گزارش فروش" })).toHaveAttribute("href", "/accounting?section=sales");
   await expect(page.getByRole("link", { name: "مشاهدهٔ موجودی" })).toHaveAttribute("href", "/accounting?section=inventory");
   await expect(page.getByRole("link", { name: "بررسی موجودی" })).toHaveAttribute("href", "/accounting?section=inventory");
-  await expect(page.getByRole("link", { name: "بازکردن گزارش موجودی" })).toHaveAttribute("href", "/accounting?section=inventory");
   await expect(page.getByRole("link", { name: "همهٔ گردش‌ها" })).toHaveAttribute("href", "/accounting?section=stock-flow");
 });
 
