@@ -6,6 +6,14 @@ test("Homepage requires the Admin session before exposing the workspace", async 
   await expect(page.getByRole("heading", { name: "ورود مدیر HBI" })).toBeVisible();
 });
 
+test("Pilot and recommendation routes require the Admin/Operator session", async ({ page }) => {
+  for (const path of ["/pilot", "/recommendation"]) {
+    await page.goto(path);
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.getByRole("heading", { name: "ورود مدیر HBI" })).toBeVisible();
+  }
+});
+
 test("Homepage navigation keeps sales, inventory, and reports in their own destinations", async ({ page }) => {
   // The route gate checks presence of the Admin session token. API authorization
   // is covered separately; this UI test uses a dummy token to exercise navigation.
