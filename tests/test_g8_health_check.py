@@ -42,3 +42,13 @@ def test_health_check_bypasses_environment_proxies(monkeypatch):
     assert isinstance(handlers[0], urllib.request.ProxyHandler)
     assert handlers[0].proxies == {}
     assert opener.calls == [(runner.HEALTH_URL, 1)]
+
+
+def test_wait_for_raw_http_capture_requires_completed_json(tmp_path):
+    pending = tmp_path / "pending.tmp"
+    pending.write_text("partial", encoding="utf-8")
+    assert runner._wait_for_raw_http_capture(tmp_path, timeout=0.05) is False
+
+    pending.unlink()
+    (tmp_path / "captured.json").write_text("{}", encoding="utf-8")
+    assert runner._wait_for_raw_http_capture(tmp_path, timeout=0.05) is True
