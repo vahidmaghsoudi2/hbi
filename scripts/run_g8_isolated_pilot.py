@@ -52,7 +52,7 @@ def _health_ok() -> bool:
 
 def _code_sha() -> str:
     configured = os.getenv("G8_CODE_SHA", "").strip()
-    if configured:
+    if len(configured) == 40 and all(char in "0123456789abcdefABCDEF" for char in configured):
         return configured
     try:
         result = subprocess.run(
@@ -149,8 +149,8 @@ def _finalize_evidence(
 ) -> bool:
     """Export persisted state and write hashes; false means retain the database."""
     try:
-        if not code_sha or code_sha == "unknown":
-            raise RuntimeError("exact code SHA is unavailable; set G8_CODE_SHA or run from a Git checkout")
+        if len(code_sha) != 40 or any(char not in "0123456789abcdefABCDEF" for char in code_sha):
+            raise RuntimeError("exact 40-character Git commit SHA is unavailable; run from a Git checkout or set G8_CODE_SHA")
         if session_dir.is_symlink() or not session_dir.is_dir():
             raise RuntimeError(f"isolated session directory is missing or unsafe: {session_dir}")
         if evidence_dir.is_symlink() or not evidence_dir.is_dir():
