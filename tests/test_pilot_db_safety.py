@@ -221,3 +221,48 @@ def test_isolated_g8_runner_smoke_starts_finalizes_and_cleans_its_database() -> 
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert manifest["algorithm"] == "sha256"
     assert any(item["path"] == "database-readback.json" for item in manifest["artifacts"])
+
+def test_code_sha_override_does_not_bypass_dirty_worktree_check(monkeypatch: pytest.MonkeyPatch) -> None:
+    runner = _load_runner_module()
+    monkeypatch.setenv("G8_CODE_SHA", "a" * 40)
+    dirty_status = subprocess.CompletedProcess(
+        args=["git", "status", "--porcelain"], returncode=0, stdout=" M scripts/example.py\n", stderr=""
+    )
+
+    with patch.object(runner.subprocess, "run", return_value=dirty_status) as run:
+        assert runner._code_sha() == ""
+
+    run.assert_called_once()
+
+
+def test_code_sha_override_must_match_actual_head(monkeypatch: pytest.MonkeyPatch) -> None:
+    runner = _load_runner_module()
+    monkeypatch.setenv("G8_CODE_SHA", "a" * 40)
+    clean_status = subprocess.CompletedProcess(
+        args=["git", "status", "--porcelain"], returncode=0, stdout="", stderr=""
+    )
+    actual_head = "b" * 40
+    head_result = subprocess.CompletedProcess(
+        args=["git", "rev-parse", "HEAD"], returncode=0, stdout=actual_head + "\n", stderr=""
+    )
+
+    with patch.object(runner.subprocess, "run", side_effect=[clean_status, head_result]):
+        assert runner._code_sha() == ""
+
+
+def test_code_sha_returns_actual_head_when_matching_override_is_supplied(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = _load_runner_module()
+    actual_head = "a" * 40
+    monkeypatch.setenv("G8_CODE_SHA", actual_head.upper())
+    clean_status = subprocess.CompletedProcess(
+        args=["git", "status", "--porcelain"], returncode=0, stdout="", stderr=""
+    )
+    head_result = subprocess.CompletedProcess(
+        args=["git", "rev-parse", "HEAD"], returncode=0, stdout=actual_head + "\n", stderr=""
+    )
+
+    with patch.object(runner.subprocess, "run", side_effect=[clean_status, head_result]):
+        assert runner._code_sha() == actual_head
+
