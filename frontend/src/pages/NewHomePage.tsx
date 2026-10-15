@@ -233,7 +233,7 @@ export default function NewHomePage() {
     const query = saleCustomerSearch.trim();
     if (!query) {
       setCustomerSearchResults([]);
-      setError("برای جست‌وجوی مشتری، شماره موبایل یا نام را وارد کنید.");
+      setError("برای جست‌وجوی مشتری، شماره موبایل یا نام خانوادگی را وارد کنید.");
       return;
     }
     setError(null);
@@ -254,7 +254,7 @@ export default function NewHomePage() {
 
   function chooseSaleCustomer(customer: CustomerSearchResult) {
     setSaleCustomerId(customer.customer_id);
-    setSaleCustomerLabel(`${customer.name ?? "بدون نام"} · ${customer.mobile ?? "بدون موبایل"}`);
+    setSaleCustomerLabel(`${customer.family_name ?? "نام خانوادگی ثبت نشده"} · ${customer.mobile ?? "بدون موبایل"}`);
     setCustomerSearchResults([]);
     setSaleCustomerSearch("");
     setError(null);
@@ -274,7 +274,7 @@ export default function NewHomePage() {
       setToken(pair.access_token);
       setCustomerId(customer.customer_id);
       setCaseId(null);
-      setName(customer.name ?? "");
+      setName(customer.family_name ?? "");
       setMobile(customer.mobile ?? "");
       setConcerns(customer.concerns ? customer.concerns.split(",").map((x) => x.trim()).filter(Boolean) : []);
       setSkin(customer.skin_profile ? customer.skin_profile.split(",").map((x) => x.trim()).filter(Boolean) : []);
@@ -363,8 +363,8 @@ export default function NewHomePage() {
   async function loadActiveCustomerProfile() {
     if (!token || !customerId) return;
     try {
-      const profile = (await getCustomerById(customerId, token)) as { name?: string; mobile?: string | null; concerns?: string | null; skin_profile?: string | null };
-      if (profile.name) setName(profile.name);
+      const profile = (await getCustomerById(customerId, token)) as { name?: string; family_name?: string | null; mobile?: string | null; concerns?: string | null; skin_profile?: string | null };
+      if (profile.family_name) setName(profile.family_name);
       if (profile.mobile) {
         setMobile(profile.mobile);
       }
@@ -418,13 +418,14 @@ export default function NewHomePage() {
   async function saveActiveProfile() {
     setError(null);
     setStatusMsg(null);
-    if (!name.trim()) return setError("نام الزامی است.");
+    if (!name.trim()) return setError("نام خانوادگی الزامی است.");
     if (!mobile.trim()) return setError("شماره موبایل الزامی است.");
     setProfileSaving(true);
     try {
       const currentToken = await ensureSession(name.trim(), concernsText);
       const intake = (await customerIntake({
         name: name.trim(),
+        family_name: name.trim(),
         mobile: mobile.trim() || undefined,
         concerns: concernsText || undefined,
         consent: 0,
@@ -484,6 +485,7 @@ export default function NewHomePage() {
       const intake = (await customerIntake(
         {
           name: name.trim(),
+          family_name: name.trim(),
           mobile: mobile.trim() || undefined,
           concerns: concernsText,
           consent: 0,
@@ -888,7 +890,7 @@ export default function NewHomePage() {
                 className="pro-input"
                 value={customerSearch}
                 onChange={(e) => setCustomerSearch(e.target.value)}
-                placeholder="نام یا شماره موبایل مشتری…"
+                placeholder="نام خانوادگی یا شماره موبایل مشتری…"
                 aria-label="جست‌وجوی مشتری قبلی با نام یا موبایل"
               />
               <button type="submit" className="pro-btn-primary" disabled={customerSearchBusy}>
@@ -916,7 +918,7 @@ export default function NewHomePage() {
               <div className="pro-product-grid" style={{ marginTop: "1rem" }}>
                 {customerSearchResults.map((customer) => (
                   <article key={customer.customer_id} className="pro-product-card">
-                    <h3>{customer.name}</h3>
+                    <h3>{customer.family_name ?? "نام خانوادگی ثبت نشده"}</h3>
                     <p className="pro-muted">{customer.mobile ?? "موبایل ثبت نشده"}</p>
                     <p className="pro-muted">{customer.concerns ?? "سابقه دغدغه ثبت نشده"}</p>
                     <button type="button" className="pro-btn-primary" onClick={() => void selectPreviousCustomer(customer)} disabled={busy}>
@@ -957,8 +959,8 @@ export default function NewHomePage() {
                 <legend>۱) هویت</legend>
                 <div className="pro-grid-2">
                   <div>
-                    <label className="pro-label" htmlFor="name">نام *</label>
-                    <input id="name" className="pro-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="نام مشتری" />
+                    <label className="pro-label" htmlFor="name">نام خانوادگی *</label>
+                    <input id="name" className="pro-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="نام خانوادگی مشتری" />
                   </div>
                   <div>
                     <label className="pro-label" htmlFor="mobile">موبایل</label>
@@ -1037,7 +1039,7 @@ export default function NewHomePage() {
             <fieldset className="pro-fieldset">
               <legend>اطلاعات مشتری فعال</legend>
               <div className="pro-grid-2">
-                <div><label className="pro-label" htmlFor="profile-name">نام *</label><input id="profile-name" className="pro-input" value={name} onChange={(e) => setName(e.target.value)} /></div>
+                <div><label className="pro-label" htmlFor="profile-name">نام خانوادگی *</label><input id="profile-name" className="pro-input" value={name} onChange={(e) => setName(e.target.value)} /></div>
                 <div><label className="pro-label" htmlFor="profile-mobile">موبایل</label><input id="profile-mobile" className="pro-input" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="09…" /></div>
               </div>
             </fieldset>
@@ -1237,7 +1239,7 @@ export default function NewHomePage() {
                       <button type="button" className="pro-btn-secondary" onClick={() => void searchSaleCustomers()} disabled={customerSearchBusy}>{customerSearchBusy ? "در حال جست‌وجو…" : "جست‌وجوی مشتری"}</button>
                       {customerSearchResults.map((customer) => (
                         <button key={customer.customer_id} type="button" className="pro-btn-secondary" onClick={() => chooseSaleCustomer(customer)}>
-                          {customer.name ?? "بدون نام"} · {customer.mobile ?? "بدون موبایل"} · {customer.customer_id}
+                          {customer.family_name ?? "نام خانوادگی ثبت نشده"} · {customer.mobile ?? "بدون موبایل"} · {customer.customer_id}
                         </button>
                       ))}
                       <p className="pro-muted">می‌توانید بدون انتخاب مشتری فروش را ثبت کنید. برای مشتری جدید هم ثبت مشاوره پیش‌نیاز نیست.</p>
