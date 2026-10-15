@@ -41,7 +41,7 @@ test("Homepage navigation keeps sales, inventory, and reports in their own desti
   await page.getByRole("button", { name: "منوی اصلی" }).click();
   await page.getByRole("button", { name: "ورود به کالا و موجودی" }).click();
   await page.getByRole("link", { name: "بازکردن گزارش موجودی" }).click();
-  await expect(page).toHaveURL(/\/accounting\?section=inventory$/);
+  await expect(page).toHaveURL(/\/inventory\?section=inventory$/);
   await expect(page.getByRole("heading", { name: "کالا و موجودی", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "گردش کالا" }).click();
   await expect(page.getByRole("heading", { name: "گردش کالا", exact: true })).toBeVisible();
