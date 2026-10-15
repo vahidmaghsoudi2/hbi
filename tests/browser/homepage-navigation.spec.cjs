@@ -108,7 +108,7 @@ test("Purchase navigation returns to inventory, not accounting", async ({ page }
   await page.goto("/");
   await page.getByRole("button", { name: "ورود به خرید" }).click();
   await page.getByRole("link", { name: "بازکردن خرید و موجودی" }).click();
-  await expect(page).toHaveURL(/\\/purchase$/);
+  await expect(page).toHaveURL(/\/purchase$/);
   await expect(page.getByRole("heading", { name: "خرید \/ ورود کالا" })).toBeVisible();
   await expect(page.getByRole("link", { name: "کالا و موجودی" })).toHaveAttribute("href", "/inventory?section=inventory");
   await expect(page.getByRole("link", { name: "حسابداری" })).toHaveCount(0);
