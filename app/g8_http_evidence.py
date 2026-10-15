@@ -119,6 +119,8 @@ class G8RawHttpEvidenceMiddleware:
         # downstream middleware (for example CORS preflight) does not consume it.
         while True:
             message = await receive()
+            if message["type"] == "http.disconnect":
+                break
             if message["type"] != "http.request":
                 continue
             request_chunks.append(message.get("body", b""))
