@@ -755,7 +755,7 @@ export default function NewHomePage() {
                 <article className="pro-product-card"><h2>بررسی و تأیید QA</h2><p className="pro-muted">بررسی شواهد و وضعیت تأیید محصول.</p><button type="button" className="pro-btn-primary" onClick={() => go("review")}>بازکردن بررسی QA</button></article>
               </> : null}
               {mainSection === "inventory" ? <>
-                <article className="pro-product-card"><h2>موجودی کالا</h2><p className="pro-muted">موجودی قابل مشاهده و ارزش‌گذاری‌شده بر پایه آخرین قیمت خرید ثبت‌شده.</p><button type="button" className="pro-btn-primary" onClick={() => { setMainSection("inventory"); setPageView("section"); }}>بازکردن گزارش موجودی</button></article>
+                <article className="pro-product-card"><h2>موجودی کالا</h2><p className="pro-muted">موجودی قابل مشاهده و ارزش‌گذاری‌شده بر پایه آخرین قیمت خرید ثبت‌شده.</p><Link to="/accounting?section=inventory" className="pro-btn-primary">بازکردن گزارش موجودی</Link></article>
                 <article className="pro-product-card"><h2>گردش کالا</h2><p className="pro-muted">بررسی گردش‌های ثبت‌شدهٔ ورود و خروج کالا.</p><Link to="/accounting?section=stock-flow" className="pro-btn-primary">بازکردن گردش کالا</Link></article>
               </> : null}
               {mainSection === "purchases" ? <article className="pro-product-card"><h2>خرید / ورود موجودی</h2><p className="pro-muted">ثبت خرید و ورود فیزیکی کالا.</p><Link to="/purchase" className="pro-btn-primary">بازکردن خرید و موجودی</Link></article> : null}
