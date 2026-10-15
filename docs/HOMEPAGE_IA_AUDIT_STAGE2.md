@@ -1,0 +1,245 @@
+# HBI Homepage Navigation & Page Placement Audit — Stage 2
+
+**Audit target:** `feat/homepage-dashboard-stage2` at `0e5f99aa28ac424ef8e7ee30df541f03e92a4231`  
+**Status:** inventory and placement review only; no IA redesign approved by this artifact.  
+**Guardrails:** do not merge to `master`; do not change Product Intake/QA lifecycle or the other team's product data. Customer is a record, not a system user. Direct sale must remain possible without consultation.
+
+Legend: **✓** belongs in the proposed location; **X** misplaced or duplicated; **?** requires product decision/evidence before moving.
+
+## 1. Existing route/page inventory
+
+| Route | Current page | Access guard | Navigation relationship |
+|---|---|---|---|
+| `/login` | AdminLoginPage | Public login entry | Entry to Admin workspace |
+| `/` | NewHomePage | AdminGate | Main menu, dashboard and embedded operational panels |
+| `/catalog` | CatalogPage | AdminGate | Separate catalog route; overlaps with the product list embedded in NewHomePage |
+| `/accounting` | AccountingHomePage | AdminGate | Sales report, inventory report, stock flow, finance report; `?section=` selects a section |
+| `/purchase` | PurchasePage | AdminGate | Stock-in/purchase form; links back Home and Accounting |
+| `/pilot` | PilotPage | No AdminGate; separate pilot session | Non-production pilot flow; **?** verify that this is unavailable as a customer-facing production route |
+| `/recommendation` | RecommendationPage | No AdminGate; separate pilot session | Non-production recommendation flow; **?** verify that this is unavailable as a customer-facing production route |
+
+## 2. Existing homepage tree
+
+```text
+HBI Admin workspace (/)
+├── Home & Dashboard
+│   ├── Quick actions
+│   │   ├── Direct sale
+│   │   ├── Customer search
+│   │   ├── New customer
+│   │   ├── Consultation
+│   │   ├── Product intake
+│   │   ├── Product QA review
+│   │   └── Purchase / stock-in
+│   ├── Operational summary
+│   │   ├── Sales today
+│   │   ├── Inventory
+│   │   └── Low-stock alerts
+│   ├── Attention / error states
+│   └── Latest stock movements
+├── Customers
+│   ├── Search & history
+│   └── Customer profile
+├── Consultation
+│   ├── New consultation
+│   └── Recommendations & operator decision
+├── Sales
+│   └── Register sale & sales total/history
+│       ├── Optional customer search/selection
+│       ├── Sellable product picker
+│       ├── Quantity / unit price / stock
+│       └── Submit sale
+├── Product Management
+│   ├── Product list
+│   ├── Product intake/edit
+│   └── QA review
+├── Products & Inventory
+│   ├── Inventory report
+│   └── Stock movement report
+├── Purchase
+│   └── Purchase / stock-in
+├── Reports
+│   ├── Sales report
+│   ├── Inventory report
+│   ├── Stock movement report
+│   └── Finance report
+└── Settings
+    ├── Admin account
+    └── Logout
+```
+
+## 3. Placement verdict against the agreed operating model
+
+| Item / relationship | Verdict | Reason / action |
+|---|---|---|
+| Home/Dashboard as a standalone main destination | ✓ | Keep summary, alerts, recent movements and quick actions here; do not turn it into a parent for unrelated modules |
+| Customers as a standalone main destination | ✓ | Customer record/search/history belongs here; customer does not receive system access |
+| Consultation separate from Product Management | ✓ | Consultation records the real problem/need and leads to eligible-product recommendation/operator decision |
+| Sales separate from Consultation | ✓ | Direct sale is a valid path; customer and consultation are optional for a walk-in sale |
+| Product Management owns product list, intake/edit, QA review | ✓ / ? | Grouping is coherent, but lifecycle actions must remain those owned by the Product Intake/QA team; do not change those internals in this homepage pass |
+| Products & Inventory separate from Product Management | ✓ | Inventory quantity/movement is operational stock, not product knowledge/intake/QA |
+| Purchase/stock-in as a separate destination | ✓ | It is a stock operation, independent of consultation and sales |
+| Accounting / Reports separate from product management | ✓ | Sales, stock and finance reporting belong in accounting/reporting |
+| Sales report appears under both Accounting and Reports | X | Two labels lead to the same `/accounting?section=sales`; decide whether Reports is a shortcut group or a separate reporting destination, then avoid duplicating a full module |
+| Inventory and stock-flow appear under both Inventory and Reports | X | Duplicate destinations: `/accounting?section=inventory` and `/accounting?section=stock-flow`; keep one canonical owner and make other occurrences explicit shortcuts only |
+| Dashboard quick actions for Intake, QA and Purchase | ? | Acceptable only as clearly labelled shortcuts. They must not imply those modules are dashboard children or replace their canonical menu location |
+| Product list embedded in NewHomePage plus `/catalog` route | X / ? | Two entry points to catalog-like screens can confuse ownership; inspect CatalogPage behavior before deciding one canonical route |
+| Settings separate, logout inside Settings | ✓ | Keep account/logout out of the main operational menu and avoid an always-visible logout action |
+| `/pilot` and `/recommendation` routes | ? | They bypass AdminGate by design for isolated pilot sessions. Verify production exposure policy; do not confuse pilot/test routes with the operator workspace |
+| Dashboard API failure/empty states | ✓ | Keep unknown values unknown; do not fabricate sales, inventory, QA or profit values |
+| Gross profit on Accounting page | ? | Current UI says deferred by PO; do not present gross profit as calculated until cost-of-goods policy is approved |
+
+## 4. Relationship map — intended business flow
+
+```text
+Customer record / consultation reality
+                 |
+                 v
+          Problem / valid need
+                 |
+                 v
+  Eligible HBI Gallery product + evidence
+                 |
+                 v
+       Recommendation for operator
+                 |
+                 v
+        Operator decision / report
+
+Independent operational path:
+Product catalog + QA eligibility + available stock
+                 |
+                 v
+            Direct sale
+      (customer optional; consultation optional)
+                 |
+                 v
+       Sale / inventory / accounting
+
+Stock replenishment:
+Purchase / stock-in ---> Inventory ---> Stock-flow and reports
+```
+
+## 5. Lightweight line-only placement sketches
+
+These are placement sketches, not visual redesigns. ✓ = belongs; X = misplaced/duplicated; ? = decision required.
+
+### A. Main navigation
+
+```text
++---------------------------------------------+
+| HBI / Admin workspace                       |
++---------------------------------------------+
+| ✓ Home & Dashboard                          |
+| ✓ Customers                                 |
+| ✓ Consultation                              |
+| ✓ Sales                                     |
+| ✓ Product Management                        |
+| ✓ Products & Inventory                      |
+| ✓ Purchase                                  |
+| ✓ Accounting / Reports                      |
+| ✓ Settings                                  |
++---------------------------------------------+
+| X Do not nest Consultation under Products   |
+| X Do not nest Accounting under Products     |
+| X Do not nest Dashboard under Products      |
++---------------------------------------------+
+```
+
+### B. Home & Dashboard
+
+```text
++---------------------------------------------+
+| ✓ Dashboard summary                         |
++----------------------+----------------------+
+| ✓ Sales today        | ✓ Inventory          |
++----------------------+----------------------+
+| ✓ Low-stock alerts   | ✓ Recent movements   |
++---------------------------------------------+
+| ✓ Quick actions: Sale / Customer / Consult  |
+| ? Intake / QA / Purchase shortcuts          |
+| X Do not show duplicate full module menus   |
++---------------------------------------------+
+```
+
+### C. Customers and Consultation
+
+```text
++----------------------+  +----------------------+
+| ✓ CUSTOMERS          |  | ✓ CONSULTATION       |
++----------------------+  +----------------------+
+| ✓ Search/history     |  | ✓ New consultation   |
+| ✓ Customer profile   |  | ✓ Need/problem       |
+| ✓ Purchase history   |  | ✓ Recommendation     |
+|                      |  | ✓ Operator decision  |
++----------------------+  +----------------------+
+| Customer is a record; no customer login/UI  |
++---------------------------------------------+
+```
+
+### D. Sales and Product Management
+
+```text
++----------------------+  +----------------------+
+| ✓ SALES              |  | ✓ PRODUCT MANAGEMENT |
++----------------------+  +----------------------+
+| ✓ Direct sale        |  | ✓ Product list       |
+| ✓ Optional customer  |  | ✓ Intake/edit        |
+| ✓ Sellable picker    |  | ✓ QA review          |
+| ✓ Quantity/price     |  | ? Catalog route dup. |
+| X Consultation gate  |  | X Accounting here    |
++----------------------+  +----------------------+
+```
+
+### E. Inventory, Purchase and Accounting
+
+```text
++----------------------+  +----------------------+
+| ✓ INVENTORY          |  | ✓ PURCHASE           |
++----------------------+  +----------------------+
+| ✓ Inventory report   |  | ✓ Purchase / stock-in|
+| ✓ Stock movement     |  | ✓ Product + quantity |
++----------------------+  +----------------------+
+| ✓ ACCOUNTING / REPORTS                       |
++---------------------------------------------+
+| ✓ Sales | ✓ Inventory | ✓ Stock flow | ✓ Finance |
+| X Avoid duplicate full destinations in menus |
++---------------------------------------------+
+```
+
+### F. Settings
+
+```text
++---------------------------------------------+
+| ✓ SETTINGS                                  |
++---------------------------------------------+
+| ✓ Admin account                             |
+| ✓ Logout                                    |
+| X No consultation, product or accounting    |
++---------------------------------------------+
+```
+
+## 6. Controls and boxes currently present (page-level checklist)
+
+- **Global/home shell:** main-menu button, page heading, current section label, return-to-main-menu button.
+- **Main menu:** nine section cards/buttons listed in section 2.
+- **Customers:** search field (name/mobile), search button, result/customer-selection buttons, purchase-history list, profile form, save profile, new customer.
+- **Consultation:** customer/profile fields, consultation line, concern and skin-type choices, notes, start/generate consultation action, status/error feedback.
+- **Recommendation/operator results:** eligible recommendation cards, evidence/score details, show-all action, rejected/internal records panel; rejected items are not sale choices.
+- **Sales:** optional customer search/select/remove, sellable-product select, quantity, unit price, available stock, amount summary, submit sale, refresh sales total, last-sale result.
+- **Product Management:** product list, refresh, edit action, QA review action, intake/edit panel, review panel.
+- **Inventory:** inventory report shortcut, stock movement shortcut.
+- **Purchase:** product selector, quantity, purchase unit price, FX rate, reference ID, note, submit purchase, refresh, result summary.
+- **Reports:** sales, inventory, stock movement, finance report shortcuts.
+- **Accounting page:** Admin-session status, refresh, sales/net-revenue/inventory/gross-profit summary cards, four section buttons, active section content, error state, Home link.
+- **Settings:** Admin account entry and logout.
+- **Cross-cutting:** loading, empty, error and success messages. Keep them local to the relevant operation rather than showing unrelated errors in another module.
+
+## 7. Decisions needed before structural implementation
+
+1. **Canonical reporting owner:** Should Sales/Inventory/Stock-flow/Finance live only under “Accounting” (with Dashboard shortcuts), or should “Reports” remain a separate top-level shortcut group? Recommendation: one canonical Accounting/Reports destination; dashboard shortcuts are fine.
+2. **Catalog duplication:** Keep either the embedded product-list panel or `/catalog` as canonical, unless their purposes are clearly different.
+3. **Pilot routes:** Confirm deployment restrictions for `/pilot` and `/recommendation`.
+4. **Dashboard shortcuts:** Keep only high-frequency actions; label Intake/QA/Purchase as shortcuts, not nested dashboard submodules.
+
+**Stop line:** This audit does not authorize broad navigation changes. Once placement decisions are accepted, implement one bounded IA patch on the homepage branch and re-run exact-head CI/browser proof. Keep `master` untouched.
