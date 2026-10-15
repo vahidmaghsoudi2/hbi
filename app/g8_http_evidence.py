@@ -46,7 +46,12 @@ def _redact(value):
         return [_redact(item) for item in value]
     if isinstance(value, str):
         # Avoid leaking inline bearer/basic credentials in otherwise innocuous text.
-        return re.sub(r"(?i)\b(bearer|basic)\s+[^\s\"']+", r"\1 [REDACTED]", value)
+        value = re.sub(r"(?i)\\b(bearer|basic)\\s+[^\\s\"']+", r"\\1 [REDACTED]", value)
+        return re.sub(
+            r"(?i)\\b(password|passwd|client_secret|access_token|refresh_token|api[_-]?key)\\s*[:=]\\s*[^&\\s,;]+",
+            r"\\1=[REDACTED]",
+            value,
+        )
     return value
 
 
