@@ -29,8 +29,11 @@ def _safe_headers(raw_headers: list[tuple[bytes, bytes]]) -> dict[str, str]:
     result: dict[str, str] = {}
     for key, value in raw_headers:
         name = key.decode("latin-1")
-        if name.lower() in _SENSITIVE_HEADERS:
+        if name.lower() in _SENSITIVE_HEADERS or _SECRET_KEY.search(name):
             result[name] = "[REDACTED]"
+        elif name.lower() == "location":
+            # Redirect URLs can carry one-time credentials in query parameters.
+            result[name] = value.decode("latin-1").split("?", 1)[0][:4096]
         else:
             result[name] = value.decode("latin-1")[:4096]
     return result
