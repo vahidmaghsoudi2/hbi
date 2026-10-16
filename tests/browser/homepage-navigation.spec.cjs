@@ -87,10 +87,10 @@ test("Dashboard report shortcuts preserve their own report destinations", async 
   await expect(page.getByRole("heading", { name: "داشبورد HBI", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "گزارش فروش" })).toHaveAttribute("href", "/accounting?section=sales");
   await expect(page.getByRole("link", { name: "گزارش موجودی" })).toHaveAttribute("href", "/inventory?section=inventory");
-  await expect(page.getByRole("link", { name: "کمبود موجودی" })).toHaveAttribute("href", "/inventory?section=low-stock");
+  await expect(page.getByRole("link", { name: "کمبود موجودی", exact: true })).toHaveAttribute("href", "/inventory?section=low-stock");
   await expect(page.getByRole("link", { name: "گردش اخیر" })).toHaveAttribute("href", "/inventory?section=stock-flow");
   await expect(page.getByRole("link", { name: "بازکردن کمبود موجودی" })).toHaveAttribute("href", "/inventory?section=low-stock");
-  await page.getByRole("link", { name: "کمبود موجودی" }).click();
+  await page.getByRole("link", { name: "کمبود موجودی", exact: true }).click();
   await expect(page).toHaveURL(/\/inventory\?section=low-stock$/);
   await expect(page.getByRole("heading", { name: "کالا و موجودی", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "کمبود موجودی", exact: true })).toBeVisible();
