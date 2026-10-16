@@ -28,9 +28,9 @@ A CI pass, merged documentation, test fixture, or agent assertion does not by it
 
 This protocol defines **how work is controlled**. It does not create a second copy of phase checkboxes, current phase status, or A1–A9 dispositions.
 
-- Record phase/task status in `docs/product-intake/PRODUCT_INTAKE_ROADMAP.md`.
-- Record criterion-level proof and PASS / FAIL / NOT VERIFIED in `docs/product-intake/G8_ACCEPTANCE_EVIDENCE.md`.
-- Record dated operator sessions, exact environment, raw artifacts, and readbacks in `docs/product-intake/PRODUCT_INTAKE_EXECUTION_LOG.md`.
+- Record phase/task status in `docs/product-intake-knowledge-registry/PRODUCT_INTAKE_ROADMAP.md`.
+- Record criterion-level proof and PASS / FAIL / NOT VERIFIED in `docs/product-intake-knowledge-registry/G8_ACCEPTANCE_EVIDENCE.md`.
+- Record dated operator sessions, exact environment, raw artifacts, and readbacks in `docs/product-intake-knowledge-registry/PRODUCT_INTAKE_EXECUTION_LOG.md`.
 - Use Issue #283 as the governing operational tracker.
 - This file is the mandatory execution-control rule, not a substitute for those records.
 
