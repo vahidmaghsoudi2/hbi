@@ -832,7 +832,7 @@ export default function NewHomePage() {
                   <p className="pro-muted">جست‌وجو، ایجاد پروفایل و سابقهٔ خرید.</p>
                   <div className="pro-actions">
                     <button type="button" className="pro-btn-primary" onClick={() => { setReturnToDashboard(true); go("previous"); }}>جست‌وجوی مشتری</button>
-                    <button type="button" className="pro-btn-secondary" onClick={() => { setReturnToDashboard(true); go("profile"); }}>مشتری جدید</button>
+                    <button type="button" className="pro-btn-secondary" onClick={() => { setReturnToDashboard(true); startNewCustomer(); }}>مشتری جدید</button>
                   </div>
                 </article>
                 <article className="pro-product-card">
