@@ -683,7 +683,7 @@ export default function NewHomePage() {
           </div>
           <div className="pro-actions" style={{ alignItems: "center", justifyContent: "flex-end" }}>
             {pageView !== "main" ? (
-              <button type="button" className="pro-btn-secondary" onClick={() => setPageView("main")}>منوی اصلی</button>
+              <button type="button" className="pro-btn-secondary" onClick={() => { setError(null); setReturnToDashboard(false); setPageView("main"); }}>منوی اصلی</button>
             ) : null}
             {pageView === "content" ? (
               <button type="button" className="pro-btn-secondary" onClick={backToNavigation}>
