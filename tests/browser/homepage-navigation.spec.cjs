@@ -73,6 +73,33 @@ test("Homepage navigation keeps sales, inventory, and reports in their own desti
   await expect(page.getByRole("heading", { name: "فروش امروز", exact: true }).first()).toBeVisible();
 });
 
+test("Inventory report errors stay local to the selected inventory section", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-inventory-error-boundary-token");
+  });
+  await page.route("**/reports/inventory/low-stock*", (route) => route.fulfill({
+    status: 503,
+    contentType: "application/json",
+    body: JSON.stringify({ detail: "low-stock fixture unavailable" }),
+  }));
+  await page.route("**/reports/inventory", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: "[]",
+  }));
+  await page.route("**/inventory/movements*", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: "[]",
+  }));
+  await page.goto("/inventory?section=inventory");
+  await expect(page.getByRole("heading", { name: "کالا و موجودی", exact: true })).toBeVisible();
+  await expect(page.getByText("دریافت گزارش کمبود موجودی ناموفق بود.")).toHaveCount(0);
+  await expect(page.getByText("دادهٔ موجودی برای نمایش وجود ندارد.")).toBeVisible();
+  await page.getByRole("button", { name: "کمبود موجودی" }).click();
+  await expect(page.getByText("دریافت گزارش کمبود موجودی ناموفق بود.")).toBeVisible();
+});
+
 test("Customer search results do not leak into the optional sale-account picker", async ({ page }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-search-boundary-test-token");
