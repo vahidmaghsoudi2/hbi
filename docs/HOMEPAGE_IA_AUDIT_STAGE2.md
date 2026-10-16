@@ -23,49 +23,35 @@ Legend: **✓** belongs in the proposed location; **X** misplaced or duplicated;
 ```text
 HBI Admin workspace (/)
 ├── Home & Dashboard
-│   ├── Quick actions
-│   │   ├── Direct sale
-│   │   ├── Customer search
-│   │   ├── New customer
-│   │   ├── Consultation
-│   │   ├── Product intake
-│   │   ├── Product QA review
-│   │   └── Purchase / stock-in
-│   ├── Operational summary
-│   │   ├── Sales today
-│   │   ├── Inventory
-│   │   └── Low-stock alerts
+│   ├── Quick actions: Direct sale / Customer search / New customer / Consultation
+│   ├── Operational summary: Sales today / Inventory / Low-stock alerts
 │   ├── Attention / error states
 │   └── Latest stock movements
 ├── Customers
-│   ├── Search & history
+│   ├── Search & purchase history
 │   └── Customer profile
 ├── Consultation
 │   ├── New consultation
-│   └── Recommendations & operator decision
+│   └── Current-session evaluation results
 ├── Sales
-│   └── Register sale & sales total/history
+│   └── Direct sale
 │       ├── Optional customer search/selection
 │       ├── Sellable product picker
 │       ├── Quantity / unit price / stock
 │       └── Submit sale
 ├── Product Management
-│   ├── Product list
+│   ├── Managed product list
 │   ├── Product intake/edit
-│   └── QA review
+│   └── Product QA review
 ├── Products & Inventory
 │   ├── Inventory report
+│   ├── Low-stock report
 │   └── Stock movement report
 ├── Purchase
 │   └── Purchase / stock-in
-└── Accounting / Reports
-    ├── Sales report
-    └── Finance report
-
-Inventory reports are owned by Products & Inventory:
-    ├── Inventory report
-    ├── Low-stock report
-    └── Stock movement report
+├── Accounting / Reports
+│   ├── Sales report
+│   └── Finance report
 └── Settings
     ├── Admin account
     └── Logout
