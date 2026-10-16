@@ -1148,7 +1148,7 @@ export default function NewHomePage() {
 
         {pageView === "content" && active === "results" && (
           <section className="pro-panel">
-            <h1>پیشنهادهای نهایی برای اپراتور</h1>
+            <h1>نتایج ارزیابی برای اپراتور</h1>
             {(() => {
               const eligibleRecs = recs.filter((r) => (r.eligibility_status ?? r.eligibility ?? "").trim().toUpperCase() === "ELIGIBLE");
               const rejectedRecs = recs.filter((r) => (r.eligibility_status ?? r.eligibility ?? "").trim().toUpperCase() !== "ELIGIBLE");
@@ -1170,7 +1170,7 @@ export default function NewHomePage() {
                     <div>
                       <h3>{product?.product_name ?? r.product_id}</h3>
                       {product?.brand ? <p className="pro-muted">{product.brand}</p> : null}
-                      <p className="pro-lead">این محصول با نیاز ثبت‌شده شما برای ادامه بررسی مطابقت دارد.</p>
+                      <p className="pro-lead">طبق ارزیابی فعلی، این محصول با نیاز ثبت‌شده در این مشاوره سازگار تشخیص داده شده است.</p>
                       <div className="pro-tags">
                         <span className="pro-tag">تطابق با نیاز: {formatMatchLevel(r.need_match_score)}</span>
                         <span className="pro-tag">وضعیت پیشنهاد: {formatRecommendationStatus(r.eligibility_status ?? r.eligibility)}</span>
