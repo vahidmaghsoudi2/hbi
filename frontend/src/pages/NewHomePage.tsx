@@ -756,6 +756,7 @@ export default function NewHomePage() {
               </> : null}
               {mainSection === "inventory" ? <>
                 <article className="pro-product-card"><h2>موجودی کالا</h2><p className="pro-muted">موجودی قابل مشاهده و ارزش‌گذاری‌شده بر پایه آخرین قیمت خرید ثبت‌شده.</p><Link to="/inventory?section=inventory" className="pro-btn-primary">بازکردن گزارش موجودی</Link></article>
+                <article className="pro-product-card"><h2>کمبود موجودی</h2><p className="pro-muted">کالاهایی که موجودی قابل دسترس آن‌ها به آستانهٔ هشدار رسیده است.</p><Link to="/inventory?section=low-stock" className="pro-btn-primary">بازکردن کمبود موجودی</Link></article>
                 <article className="pro-product-card"><h2>گردش کالا</h2><p className="pro-muted">بررسی گردش‌های ثبت‌شدهٔ ورود و خروج کالا.</p><Link to="/inventory?section=stock-flow" className="pro-btn-primary">بازکردن گردش کالا</Link></article>
               </> : null}
               {mainSection === "purchases" ? <article className="pro-product-card"><h2>خرید / ورود موجودی</h2><p className="pro-muted">ثبت خرید و ورود فیزیکی کالا.</p><Link to="/purchase" className="pro-btn-primary">بازکردن خرید و موجودی</Link></article> : null}
