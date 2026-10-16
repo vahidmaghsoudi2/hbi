@@ -34,7 +34,7 @@ export default function CatalogPage() {
       {error && <div className="alert error" role="alert">{error}</div>}
       {!loading && !error && (
         <div className="product-list">
-          {products.length === 0 && <p role="status">محصول تأییدشده‌ای برای نمایش وجود ندارد.</p>}
+          {products.length === 0 && <p role="status">محصولی با هویت تأییدشده برای نمایش وجود ندارد.</p>}
           {products.map((p) => (
             <div key={p.product_id} className="card">
               <strong>{p.product_name}</strong>
