@@ -1,7 +1,7 @@
 # Product Intake Execution Log
 
 **Current status:** Phase 0 / SSOT placement = COMPLETE; isolated pilot preparation = BLOCKED pending proven isolation and evidence capture; G8 = **BLOCKED / NOT VERIFIED**.  
-**Current verified master SHA (2026-10-15):** `310ce38f67c7f2c864e35bf78293cd3ad3b810cd` (includes merged PR #369). Historical entries retain the SHA that was verified at their original timestamps.
+**Current verified master SHA (2026-10-16):** `335fd6e472dde72b9907366acaa04db28ebed943` (includes PR #369 and the subsequent G8 smoke-evidence finalization fix). Historical entries retain the SHA that was verified at their original timestamps.
 **Governing tracker:** [Issue #283](https://github.com/vahidmaghsoudi2/hbi/issues/283)  
 **Roadmap:** [PRODUCT_INTAKE_ROADMAP.md](PRODUCT_INTAKE_ROADMAP.md)  
 **Acceptance ledger:** [G8_ACCEPTANCE_EVIDENCE.md](G8_ACCEPTANCE_EVIDENCE.md)  
