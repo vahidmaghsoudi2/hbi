@@ -73,6 +73,29 @@ test("Homepage navigation keeps sales, inventory, and reports in their own desti
   await expect(page.getByRole("heading", { name: "فروش امروز", exact: true }).first()).toBeVisible();
 });
 
+test("Browser Back and Forward restore homepage menu and panel navigation", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-browser-history-test-token");
+  });
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "فضای کاری مدیر" })).toBeVisible();
+
+  await page.getByRole("button", { name: "ورود به فروش" }).click();
+  await expect(page.getByRole("heading", { name: "فروش", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "بازکردن ثبت فروش" }).click();
+  await expect(page.getByRole("heading", { name: "ثبت فروش" })).toBeVisible();
+
+  await page.goBack();
+  await expect(page.getByRole("heading", { name: "فروش", exact: true })).toBeVisible();
+  await page.goBack();
+  await expect(page.getByRole("heading", { name: "فضای کاری مدیر" })).toBeVisible();
+
+  await page.goForward();
+  await expect(page.getByRole("heading", { name: "فروش", exact: true })).toBeVisible();
+  await page.goForward();
+  await expect(page.getByRole("heading", { name: "ثبت فروش" })).toBeVisible();
+});
+
 test("Accounting errors stay within their own sales or finance report", async ({ page }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-accounting-error-boundary-token");
