@@ -1094,7 +1094,7 @@ export default function NewHomePage() {
               <button type="button" className="pro-btn-primary" disabled={profileSaving} onClick={() => void saveActiveProfile()}>
                 {profileSaving ? "در حال ذخیره…" : "ذخیره پروفایل مشتری"}
               </button>
-              <button type="button" className="pro-btn-secondary" onClick={() => go("consult")}>مشاوره همین مشتری</button>
+              <button type="button" className="pro-btn-secondary" disabled={!customerId || profileSaving} onClick={() => go("consult")}>{customerId ? "مشاوره همین مشتری" : "ابتدا مشتری را ذخیره کنید"}</button>
               <button type="button" className="pro-btn-secondary" onClick={clearSession}>مشتری جدید</button>
             </div>
           </section>
