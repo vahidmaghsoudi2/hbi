@@ -265,7 +265,7 @@ Find canonical record
 
 ## 14. Single-entry-point rule — anti-scatter control (2026-10-16)
 
-**The only intended entry point for Product Intake documentation is this registry.** PR #393 has been merged. The consolidated destinations listed below are the intended working locations; the statement that the old paths remain on `master` until PR #393 merges is historical and no longer current. Treat the table as a relocation map, not as permission for an unreviewed deletion. Before any further cleanup, verify each legacy path against current `master`, validate inbound links, and preserve the Git history/audit trail. Any remaining legacy copy must be handled in a reviewed, item-specific change.
+**The only intended entry point for Product Intake documentation is this registry.** PR #393 has been merged. The consolidated destinations listed below are the intended working locations; the prior pre-merge claim that old paths remain on `master` is historical and no longer current. Treat the table as a relocation map, not as permission for an unreviewed deletion. Before any further cleanup, verify each legacy path against current `master`, validate inbound links, and preserve the Git history/audit trail. Any remaining legacy copy must be handled in a reviewed, item-specific change.
 
 ### 14.1 Canonical destination map and legacy paths
 
@@ -281,7 +281,7 @@ Find canonical record
 
 **Relocation status after PR #393:** the consolidated destinations listed above are the intended working locations. The original PR review recorded that legacy paths were removed on the PR #393 branch and destinations created/updated. Do not rely on the old pre-merge statement as current runtime fact. Before any additional cleanup, verify each legacy path and inbound link against the current base branch; preserve Git history and handle any remaining legacy copy in a reviewed, item-specific change. Do not delete legacy paths manually merely to enforce a single entry point.
 
-### 14.3 Contract authority relationship — generic v1 vs skin execution v1.1
+### 14.2 Contract authority relationship — generic v1 vs skin execution v1.1
 
 The older `docs/01_project_control/product_intake/PRODUCT_INTAKE_CONTRACT_v1.md` is retained as a **historical design/acceptance record**, not a parallel current authority for skin-specific execution. Its recorded PO acceptance is tied to baseline `42cc77ec` and date 2026-09-07. The later `SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md` is the current PO-approved contract baseline for skin-product intake decisions and skin-specific requirements.
 
@@ -291,7 +291,7 @@ Apply the documents by scope:
 - **Generic Product Intake Contract v1** is historical context for its original design decisions. Do not use it to override v1.1 on skin-specific matters or to create a second approval/state machine.
 - If a concrete clause appears to conflict and cannot be resolved by this scope split, record the exact clauses and obtain PO adjudication in a reviewed change; do not silently delete or rewrite the historical contract.
 
-### 14.2 Problem Bank / Problem Space source register
+### 14.3 Problem Bank / Problem Space source register
 
 These artifacts remain separate open/draft PRs and are **not** silently absorbed or authorized by PR #393. This register is the sole navigation point until a separately approved consolidation decision says otherwise.
 
@@ -315,18 +315,18 @@ These artifacts remain separate open/draft PRs and are **not** silently absorbed
 
 **Do not misstate draft status as implementation or merge approval.** The current frozen Map V0.1 records P16 differently from the later correction/accepted audit. The later governance correction states P16 primary shelf is S03 and no cross-shelf relation; preserve the frozen Map unchanged and surface the discrepancy here. Relevant record: [Issue #293 correction comment](https://github.com/vahidmaghsoudi2/hbi/issues/293#issuecomment-5979025129). Also retain the management acceptance and pre-pilot audit trail: [acceptance with conditions](https://github.com/vahidmaghsoudi2/hbi/issues/293#issuecomment-5979222785), [pre-pilot readiness](https://github.com/vahidmaghsoudi2/hbi/issues/293#issuecomment-5982706812), [Customer Reality boundary](https://github.com/vahidmaghsoudi2/hbi/issues/293#issuecomment-5979521659), [L1/L2 evidence plan](https://github.com/vahidmaghsoudi2/hbi/issues/293#issuecomment-5979781170), [verified customer language = 0 / Phase 2.1 blocked](https://github.com/vahidmaghsoudi2/hbi/issues/293#issuecomment-5982622015).
 
-### 14.3 Consultation and lifecycle implementation references
+### 14.4 Consultation and lifecycle implementation references
 
 These are implementation/supporting references, not alternate Product Intake roadmaps:
 
 - Consultation framework / reality / vertical slice: Issues [#208](https://github.com/vahidmaghsoudi2/hbi/issues/208), [#209](https://github.com/vahidmaghsoudi2/hbi/issues/209), [#214](https://github.com/vahidmaghsoudi2/hbi/issues/214), [#221](https://github.com/vahidmaghsoudi2/hbi/issues/221), [#223](https://github.com/vahidmaghsoudi2/hbi/issues/223), [#225](https://github.com/vahidmaghsoudi2/hbi/issues/225); merged PR [#226](https://github.com/vahidmaghsoudi2/hbi/pull/226).
 - Customer response and outcomes: Issues [#232](https://github.com/vahidmaghsoudi2/hbi/issues/232), [#237](https://github.com/vahidmaghsoudi2/hbi/issues/237), [#249](https://github.com/vahidmaghsoudi2/hbi/issues/249), [#250](https://github.com/vahidmaghsoudi2/hbi/issues/250), [#252](https://github.com/vahidmaghsoudi2/hbi/issues/252), [#254](https://github.com/vahidmaghsoudi2/hbi/issues/254), [#255](https://github.com/vahidmaghsoudi2/hbi/issues/255); implementation PRs [#229](https://github.com/vahidmaghsoudi2/hbi/pull/229), [#233](https://github.com/vahidmaghsoudi2/hbi/pull/233), [#238](https://github.com/vahidmaghsoudi2/hbi/pull/238), [#246](https://github.com/vahidmaghsoudi2/hbi/pull/246), [#253](https://github.com/vahidmaghsoudi2/hbi/pull/253), [#259](https://github.com/vahidmaghsoudi2/hbi/pull/259).
 - Purchase-history / traceability boundary: merged PRs [#141](https://github.com/vahidmaghsoudi2/hbi/pull/141) and [#152](https://github.com/vahidmaghsoudi2/hbi/pull/152); PR [#143](https://github.com/vahidmaghsoudi2/hbi/pull/143) remains unmerged and must not be treated as integrated.
-- Recommendation/product-intake context: Issue [#37](https://github.com/vahidmaghsoudi2/hbi/issues/37) prohibits numeric weighting; Issue [#283](https://github.com/vahidmaghsoudi2/hbi/issues/283) is the operational tracker; PR [#393](https://github.com/vahidmaghsoudi2/hbi/pull/393) is the proposed consolidation path.
+- Recommendation/product-intake context: Issue [#37](https://github.com/vahidmaghsoudi2/hbi/issues/37) prohibits numeric weighting; Issue [#283](https://github.com/vahidmaghsoudi2/hbi/issues/283) is the operational tracker; merged PR [#393](https://github.com/vahidmaghsoudi2/hbi/pull/393) recorded the documentation consolidation change.
 
 Historical issue/PR threads are preserved as provenance/audit evidence; do not copy them into new competing roadmap documents. The registry records their role and links to the source.
 
-### 14.4 What “centralized” means — acceptance criteria
+### 14.5 What “centralized” means — acceptance criteria
 
 Before declaring consolidation complete, verify all of the following against the merged target branch:
 
