@@ -269,14 +269,14 @@ Find canonical record
 
 ### 14.1 Canonical destination map and legacy paths
 
-| Document (preserve original filename) | Consolidated destination | Legacy path currently known on master | Handling |
+| Document (preserve original filename) | Consolidated destination | Legacy path recorded in pre-merge audit (verify current status before cleanup) | Handling |
 |---|---|---|---|
 | `SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md` | `docs/product-intake-knowledge-registry/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md` | `docs/architecture/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md` | Preserve approved contract text; remove old path only in an explicitly reviewed move/cleanup change after destination is verified |
 | `SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md` | `docs/product-intake-knowledge-registry/SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md` | `docs/architecture/SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md` | Keep DESIGN / NOT AUTHORIZED |
-| `PRODUCT_INTAKE_ROADMAP.md` | `docs/product-intake-knowledge-registry/PRODUCT_INTAKE_ROADMAP.md` | `docs/product-intake/PRODUCT_INTAKE_ROADMAP.md` | Single canonical destination after merge |
+| `PRODUCT_INTAKE_ROADMAP.md` | `docs/product-intake-knowledge-registry/PRODUCT_INTAKE_ROADMAP.md` | `docs/product-intake/PRODUCT_INTAKE_ROADMAP.md` | Canonical destination |
 | `PRODUCT_INTAKE_EXECUTION_LOG.md` | `docs/product-intake-knowledge-registry/PRODUCT_INTAKE_EXECUTION_LOG.md` | `docs/product-intake/PRODUCT_INTAKE_EXECUTION_LOG.md` | Preserve history; append facts, do not rewrite historical results |
 | `G8_ACCEPTANCE_EVIDENCE.md` | `docs/product-intake-knowledge-registry/G8_ACCEPTANCE_EVIDENCE.md` | `docs/product-intake/G8_ACCEPTANCE_EVIDENCE.md` | A1–A9 only from raw execution evidence; current G8 remains BLOCKED / NOT VERIFIED |
-| `ROADMAP_PRODUCT_INTAKE_G8.md` | `docs/product-intake-knowledge-registry/ROADMAP_PRODUCT_INTAKE_G8.md` | `docs/01_project_control/ROADMAP_PRODUCT_INTAKE_G8.md` | One operational roadmap after merge |
+| `ROADMAP_PRODUCT_INTAKE_G8.md` | `docs/product-intake-knowledge-registry/ROADMAP_PRODUCT_INTAKE_G8.md` | `docs/01_project_control/ROADMAP_PRODUCT_INTAKE_G8.md` | Operational roadmap destination |
 | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` | `docs/product-intake-knowledge-registry/SKIN_PROBLEM_SPACE_MAP_V0.1.md` | No equivalent master destination verified in this audit | Structural map only; preserve its version and source caveats |
 
 **Relocation status after PR #393:** the consolidated destinations listed above are the intended working locations. The original PR review recorded that legacy paths were removed on the PR #393 branch and destinations created/updated. Do not rely on the old pre-merge statement as current runtime fact. Before any additional cleanup, verify each legacy path and inbound link against the current base branch; preserve Git history and handle any remaining legacy copy in a reviewed, item-specific change. Do not delete legacy paths manually merely to enforce a single entry point.
