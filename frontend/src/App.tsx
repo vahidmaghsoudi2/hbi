@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import NewHomePage from "./pages/NewHomePage";
-import CatalogPage from "./pages/CatalogPage";
 import PilotPage from "./pages/PilotPage";
 import RecommendationPage from "./pages/RecommendationPage";
 import AccountingHomePage from "./pages/AccountingHomePage";
@@ -19,7 +18,7 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<AdminLoginPage />} />
       <Route path="/" element={<AdminGate><NewHomePage /></AdminGate>} />
-      <Route path="/catalog" element={<AdminGate><CatalogPage /></AdminGate>} />
+      <Route path="/catalog" element={<Navigate to="/" replace />} />
       {/* HBI has one system user: the Admin/Operator. Customer records do not
           grant browser access to operational pages. API authorization remains
           independently enforced by the backend. */}
