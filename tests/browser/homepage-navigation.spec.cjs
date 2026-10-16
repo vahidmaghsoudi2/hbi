@@ -93,7 +93,6 @@ test("Customer search stays in customers domain and does not auto-start consulta
 });
 
 test("Consultation actions stay focused on the customer problem and recommendation flow", async ({ page }) => {
-  await page.goto("/");
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-consultation-boundary-test-token");
   });
