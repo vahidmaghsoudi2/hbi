@@ -206,6 +206,23 @@ test("Dashboard report shortcuts preserve their own report destinations", async 
   await expect(page.getByRole("heading", { name: "کمبود موجودی", exact: true })).toBeVisible();
 });
 
+test("Dashboard New customer action clears the previously active customer", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-new-customer-reset-token");
+    sessionStorage.setItem("hbi_customer_id", "CUS-OLD-1");
+    sessionStorage.setItem("hbi_access_token", "old-customer-token");
+    sessionStorage.setItem("hbi_refresh_token", "old-customer-refresh");
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "بازکردن داشبورد" }).click();
+  await page.getByRole("button", { name: "مشتری جدید" }).click();
+  await expect(page.getByRole("heading", { name: "پروفایل مشتری", exact: true })).toBeVisible();
+  await expect(page.getByText("CUS-OLD-1", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "ابتدا مشتری را ذخیره کنید" })).toBeDisabled();
+  await page.getByRole("button", { name: "بازگشت به داشبورد" }).click();
+  await expect(page.getByRole("heading", { name: "داشبورد HBI", exact: true })).toBeVisible();
+});
+
 test("A blank customer profile cannot claim to consult an existing customer", async ({ page }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-empty-profile-boundary-token");
