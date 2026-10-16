@@ -753,7 +753,7 @@ export default function NewHomePage() {
               </> : null}
               {mainSection === "consultation" ? <>
                 <article className="pro-product-card"><h2>مشاوره جدید</h2><p className="pro-muted">ثبت واقعیت مراجعه و مسئلهٔ مشتری.</p><button type="button" className="pro-btn-primary" onClick={() => { setReturnToDashboard(true); go("consult"); }}>شروع مشاوره</button></article>
-                <article className="pro-product-card"><h2>پیشنهادها و تصمیم اپراتور</h2><p className="pro-muted">بررسی نتایج و تصمیم‌گیری اپراتور.</p><button type="button" className="pro-btn-primary" onClick={() => go("results")}>بازکردن پیشنهادها</button></article>
+                <article className="pro-product-card"><h2>نتایج مشاوره جاری</h2><p className="pro-muted">مشاهده نتایج تولیدشده در همین نشست؛ تاریخچه و ثبت تصمیم نهایی اپراتور در این مسیر هنوز در دسترس نیست.</p><button type="button" className="pro-btn-primary" onClick={() => go("results")}>مشاهده نتایج همین نشست</button></article>
               </> : null}
               {mainSection === "sales" ? <article className="pro-product-card"><h2>ثبت فروش مستقیم</h2><p className="pro-muted">ثبت فروش بدون الزام به مشاورهٔ قبلی؛ نمایش آخرین فروش پس از ثبت.</p><button type="button" className="pro-btn-primary" onClick={() => go("sales")}>بازکردن ثبت فروش</button></article> : null}
               {mainSection === "products" ? <>
@@ -1022,7 +1022,7 @@ export default function NewHomePage() {
             <div className="pro-panel-head">
               <div>
                 <h1>پروفایل مشتری</h1>
-                <p className="pro-lead">این مشتری فعال، مرجع مشترک مشاوره، پرونده، پیشنهاد و فروش است.</p>
+                <p className="pro-lead">این پروفایل برای مشاوره و پرونده فعال است؛ اتصال مشتری به فروش فقط با انتخاب صریح در فرم فروش انجام می‌شود.</p>
               </div>
               <button type="button" className="pro-btn-secondary" onClick={startNewCustomer}>مشتری جدید</button>
             </div>
