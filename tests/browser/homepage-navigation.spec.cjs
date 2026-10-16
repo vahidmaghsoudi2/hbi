@@ -196,3 +196,19 @@ test("Settings does not invent extra configuration and keeps logout owned there"
   await expect(page.getByText(/تنظیمات عملیاتی دیگری در این بخش هنوز تعریف نشده/)).toBeVisible();
   await expect(page.getByRole("button", { name: "خروج از حساب مدیر" })).toBeVisible();
 });
+
+test("Product menu exposes the managed list and the separate approved catalog route", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-product-catalog-test-token");
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "ورود به مدیریت محصولات" }).click();
+  await expect(page.getByRole("button", { name: "بازکردن فهرست مدیریتی" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "ورود و ویرایش محصول" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "بازکردن بررسی QA" })).toBeVisible();
+  await page.getByRole("link", { name: "بازکردن کاتالوگ تأییدشده" }).click();
+  await expect(page).toHaveURL(/\/catalog$/);
+  await expect(page.getByRole("heading", { name: "کاتالوگ محصولات", exact: true })).toBeVisible();
+  await page.getByRole("link", { name: "بازگشت به منوی اصلی" }).click();
+  await expect(page.getByRole("heading", { name: "فضای کاری مدیر" })).toBeVisible();
+});
