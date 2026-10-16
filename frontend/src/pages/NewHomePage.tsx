@@ -694,7 +694,7 @@ export default function NewHomePage() {
             {pageView !== "main" ? (
               <button type="button" className="pro-btn-secondary" onClick={() => { setError(null); setReturnToDashboard(false); setPageView("main"); }}>منوی اصلی</button>
             ) : null}
-            {pageView === "content" ? (
+            {pageView === "content" && !(mainSection === "home" && active === "home" && !returnToDashboard) ? (
               <button type="button" className="pro-btn-secondary" onClick={backToNavigation}>
                 {returnToDashboard ? "بازگشت به داشبورد" : mainSection === "home" ? "بازگشت به منوی اصلی" : "بازگشت به بخش"}
               </button>
