@@ -920,7 +920,7 @@ export default function NewHomePage() {
                   </article>
                 ))}
               </div>
-            ) : customerSearch.trim() && !customerSearchBusy ? (
+            ) : customerSearch.trim() && !customerSearchBusy && !error ? (
               <div className="pro-empty" role="status"><strong>مشتری مطابق این جست‌وجو پیدا نشد.</strong></div>
             ) : null}
           </section>
