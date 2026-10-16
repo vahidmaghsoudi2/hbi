@@ -293,19 +293,16 @@ test("Consultation actions stay focused on the customer problem and recommendati
   await expect(page.getByText("هنوز پیشنهادی گرفته نشده — از مشاوره شروع کنید.")).toBeVisible();
 });
 
-test("Settings is a separate homepage section and owns the logout action", async ({ page }) => {
+test("Admin logout is always available in the fixed header, without a fake Settings menu", async ({ page }) => {
   await page.addInitScript(() => {
-    sessionStorage.setItem("hbi_admin_access_token", "homepage-settings-test-token");
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-header-logout-test-token");
   });
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "فضای کاری مدیر" })).toBeVisible();
 
-  await expect(page.getByRole("button", { name: "خروج از حساب مدیر" })).toHaveCount(0);
-  await page.getByRole("button", { name: "ورود به تنظیمات" }).click();
-  await expect(page.getByRole("heading", { name: "تنظیمات", exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "حساب مدیر" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "ورود به تنظیمات" })).toHaveCount(0);
   await page.getByRole("button", { name: "خروج از حساب مدیر" }).click();
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page).toHaveURL(/\\/login$/);
   await expect(page.getByRole("heading", { name: "ورود مدیر HBI" })).toBeVisible();
 });
 
