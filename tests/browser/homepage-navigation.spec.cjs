@@ -73,6 +73,32 @@ test("Homepage navigation keeps sales, inventory, and reports in their own desti
   await expect(page.getByRole("heading", { name: "فروش امروز", exact: true }).first()).toBeVisible();
 });
 
+test("Customer search results do not leak into the optional sale-account picker", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-search-boundary-test-token");
+    sessionStorage.setItem("hbi_operator_access_token", "homepage-operator-search-test-token");
+  });
+  await page.route("**/customers/search?*", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify([{
+      customer_id: "CUS-SEARCH-1",
+      name: "Test",
+      family_name: "آزمایشی",
+      mobile: "09000000000",
+    }]),
+  }));
+  await page.goto("/");
+  await page.getByRole("button", { name: "جست‌وجوی مشتری" }).click();
+  await page.getByLabel("جست‌وجوی مشتری قبلی با نام خانوادگی یا موبایل").fill("آزمایشی");
+  await page.getByRole("button", { name: "جست‌وجو" }).click();
+  await expect(page.getByRole("button", { name: /آزمایشی · CUS-SEARCH-1/ })).toBeVisible();
+  await page.getByRole("button", { name: "بازگشت به داشبورد" }).click();
+  await page.getByRole("button", { name: "ثبت فروش" }).click();
+  await expect(page.getByRole("heading", { name: "ثبت فروش" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /CUS-SEARCH-1/ })).toHaveCount(0);
+});
+
 test("Dashboard report shortcuts preserve their own report destinations", async ({ page }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-dashboard-links-test-token");
