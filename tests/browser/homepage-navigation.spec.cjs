@@ -213,9 +213,9 @@ test("Product menu exposes the managed list and the separate approved catalog ro
   await page.getByRole("button", { name: "انتخاب محصول برای QA" }).click();
   await expect(page.getByRole("heading", { name: "محصولات", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "بازگشت به بخش" }).click();
-  await page.getByRole("link", { name: "بازکردن کاتالوگ تأییدشده" }).click();
+  await page.getByRole("link", { name: "بازکردن کاتالوگ هویت‌تأییدشده" }).click();
   await expect(page).toHaveURL(/\/catalog$/);
-  await expect(page.getByRole("heading", { name: "کاتالوگ محصولات", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "کاتالوگ محصولات با هویت تأییدشده", exact: true })).toBeVisible();
   await page.getByRole("link", { name: "بازگشت به منوی اصلی" }).click();
   await expect(page.getByRole("heading", { name: "فضای کاری مدیر" })).toBeVisible();
 });
