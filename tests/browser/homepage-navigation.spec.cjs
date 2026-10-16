@@ -389,3 +389,13 @@ test("Product menu has one canonical list plus intake and QA actions", async ({ 
   await page.getByRole("button", { name: "بازگشت به بخش" }).click();
   await expect(page.getByRole("heading", { name: "مدیریت محصولات", exact: true })).toBeVisible();
 });
+
+test("Obsolete standalone catalog URL redirects to the homepage", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-obsolete-catalog-route-test-token");
+  });
+  await page.goto("/catalog");
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole("heading", { name: "فضای کاری مدیر" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "کاتالوگ محصولات با هویت تأییدشده" })).toHaveCount(0);
+});
