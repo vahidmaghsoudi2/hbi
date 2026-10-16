@@ -70,6 +70,59 @@ Customer Problem
 
 No-product recommendation یا referral نیز خروجی معتبر است.
 
+## 3A. Canonical categorization — Skin problems
+
+The problem-side catalog is maintained in `SKIN_PROBLEM_SPACE_MAP_V0.1.md`, not duplicated as a second list here. Its current draft groups the P01–P61 discovery stock into ten observational shelves:
+
+| Shelf | Domain | Catalog handling |
+|---|---|---|
+| S01 | Barrier / Hydration / Surface | Dryness, hydration-related presentation, sensitivity and surface integrity |
+| S02 | Oil / Sebum / Follicular Balance | Oiliness, sebum and related follicular characteristics |
+| S03 | Acne / Follicular / Pore Presentation | Acne presentations, lesion subtypes and related follicular presentations |
+| S04 | Pigmentation / Color | Hyperpigmentation, hypopigmentation and related presentations |
+| S05 | Redness / Inflammation / Rash | Redness, flushing, rash and inflammatory presentations |
+| S06 | Infection / Infestation | Infection- and infestation-related clinical presentations |
+| S07 | Texture / Keratinization / Surface Growth | Texture, keratinization and selected surface growths |
+| S08 | Lesions / Growths / Change | Moles, lesions and changes requiring careful safety boundaries |
+| S09 | Sun / UV-Related Change | UV context and related findings |
+| S10 | Systemic / Autoimmune / Clinically Significant Skin Presentation | Systemic-associated and clinically significant presentations |
+
+**Boundary rule:** these shelves organize discovery information; they are not a diagnosis taxonomy, a treatment database, an accepted Need list, or authorization to recommend products. The map explicitly preserves distinctions among Problem/Presentation, Manifestation, Clinical Condition, Safety/Referral Signal, Context and Need. Its V0.1 status, source limitations, overlap register and UNKNOWN/GAP items remain in the map itself.
+
+Do not flatten the following into duplicate problems without evidence: parent vs manifestation, presentation vs clinical condition, sequela vs original problem, contextual factor vs problem, and ordinary-care presentation vs safety/referral signal. Use the map's P-codes and boundary register as the stable working references until an approved later version supersedes them.
+
+## 3B. Canonical categorization — products in the gallery
+
+The available eight-document package does **not** establish a complete, verified inventory of all products currently present in the Gallery. Therefore this registry must not present a test candidate as an existing Gallery product or invent missing product records.
+
+For each product record discovered in the repository, organize information under these groups, retaining source and status for every assertion:
+
+1. **Identity and deduplication:** display name, brand, product line, variant/formulation, size, market, barcode/GTIN if known, packaging/identity source, duplicate-check result.
+2. **Composition:** full ingredient/INCI list, active or notable ingredients, concentration only when explicitly sourced, and formulation/variant boundaries.
+3. **Manufacturer statements:** intended use, directions, marketing claims and manufacturer-described target concerns. These remain `MANUFACTURER_CLAIM` unless independently supported.
+4. **Evidence-supported knowledge:** claim, evidence type, source, date/version where available, applicability and limitations.
+5. **Use and compatibility:** intended use, skin concern/Need relation, target skin/site where supported, suitability conditions and reasons.
+6. **Safety and exclusions:** avoid/caution conditions, warnings, uncertainty and any safety/referral boundary supported by the evidence.
+7. **Governance state:** source provenance, reviewer/approval status, lifecycle state, conflicts, unknowns and readback evidence.
+
+Do not create a new schema or eligibility flag as a consequence of this documentation taxonomy. Existing contract, claim types and approval gates remain binding.
+
+### Product identity discrepancy requiring resolution
+
+The current package contains two differently worded Numbuzin references:
+- `PRODUCT_INTAKE_ROADMAP.md` names the temporary test candidate as **Numbuzin No.9 NAD+ BIO Lifting-sil Essence, 50 mL**.
+- The WP-Research-04 line in this registry names **Numbuzin 50 Peptides**.
+
+The current documents do not prove these are the same product, the same variant, or two distinct products. Record this as **IDENTITY CONFLICT / UNRESOLVED** until an authoritative package/manufacturer identity source resolves it. Do not merge the names, infer an equivalence, or treat either reference as proof that the item is in the live Gallery. The roadmap explicitly limits its named candidate to a temporary test role.
+
+### Product catalog status at this reconciliation
+
+- Verified complete live Gallery inventory: **NOT PRESENT in this eight-document package**.
+- Named temporary test candidate: **present in the roadmap; not proof of a live Gallery record**.
+- Numbuzin name/variant equivalence: **UNKNOWN / CONFLICT**.
+- Product-specific INCI, source-attributed claims, suitability and caution details: must be sourced and reviewed per product; do not infer them from a product name.
+- Next cataloging rule: add only source-backed product identities found in authoritative repository/runtime evidence; retain uncertain matches as candidates for human review.
+
 ## 4. What is implemented
 
 - Product Line برای intake باید صریحاً توسط اپراتور انتخاب شود؛ از نام/دسته/AI inference نشود.
