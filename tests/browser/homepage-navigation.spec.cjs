@@ -66,6 +66,10 @@ test("Dashboard report shortcuts preserve their own report destinations", async 
   await expect(page.getByRole("link", { name: "گزارش موجودی" })).toHaveAttribute("href", "/inventory?section=inventory");
   await expect(page.getByRole("link", { name: "کمبود موجودی" })).toHaveAttribute("href", "/inventory?section=low-stock");
   await expect(page.getByRole("link", { name: "گردش اخیر" })).toHaveAttribute("href", "/inventory?section=stock-flow");
+  await page.getByRole("link", { name: "کمبود موجودی" }).click();
+  await expect(page).toHaveURL(/\/inventory\?section=low-stock$/);
+  await expect(page.getByRole("heading", { name: "کالا و موجودی", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "کمبود موجودی", exact: true })).toBeVisible();
 });
 
 test("Customer search stays in customers domain and does not auto-start consultation", async ({ page }) => {
