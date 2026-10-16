@@ -38,6 +38,9 @@ test("Homepage navigation keeps sales, inventory, and reports in their own desti
   if (productOptionCount <= 1) {
     await expect(page.getByRole("status")).toBeVisible();
   }
+  await page.getByRole("button", { name: "بازگشت به بخش" }).click();
+  await expect(page.getByRole("heading", { name: "داشبورد HBI", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "منوی اصلی" }).click();
 
   // Inventory must open the inventory report, not silently land on today's sales.
   await page.getByRole("button", { name: "منوی اصلی" }).click();
