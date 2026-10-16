@@ -2,15 +2,15 @@
 
 **Status:** Phase 0 = COMPLETE (SSOT files merged); Phase 1 = PREPARATION / real operator pilot NOT STARTED; G8 = **BLOCKED / NOT VERIFIED**  
 **Source of truth:** GitHub repository `vahidmaghsoudi2/hbi`  
-**Verified master baseline for this correction:** `310ce38f67c7f2c864e35bf78293cd3ad3b810cd` (current master after PR #369 merge; documentation branch still needs baseline reconciliation)  
-**Last updated:** 2026-10-15
+**Verified master baseline for this correction:** `335fd6e472dde72b9907366acaa04db28ebed943` (live `master` HEAD verified 2026-10-16; PR #393 base SHA matches this baseline)  
+**Last updated:** 2026-10-16
 
 ## 1. Purpose and authority
 
 This document is the operational roadmap and evidence index for the Product Intake execution pilot. It does not replace or amend the approved Product Intake contract. If there is a conflict, the approved contract and explicit Product Owner decisions govern.
 
 Primary references:
-- [Skin Product Intake Execution Contract v1.1](../architecture/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md)
+- [Skin Product Intake Execution Contract v1.1](SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md)
 - [P4 Product Intake Governance Contract V1](../P4_PRODUCT_INTAKE_GOVERNANCE_CONTRACT_V1.md)
 - [Issue #283 — governing mission](https://github.com/vahidmaghsoudi2/hbi/issues/283)
 - [PR #360 — claim integrity and evidence/UI consolidation](https://github.com/vahidmaghsoudi2/hbi/pull/360)
@@ -21,7 +21,7 @@ Primary references:
 
 ### Phase 0 — SSOT baseline on master: COMPLETE
 
-Verified current master baseline: `310ce38f67c7f2c864e35bf78293cd3ad3b810cd` (includes PR #369).
+Verified current master baseline at last reconciliation: `335fd6e472dde72b9907366acaa04db28ebed943` (includes PR #369 and the subsequent G8 smoke-evidence finalization fix).
 
 Exact-SHA push checks:
 - [HBI CI run 38396795619](https://github.com/vahidmaghsoudi2/hbi/actions/runs/38396795619) — success

@@ -1,18 +1,18 @@
 # Product Intake Execution Log
 
 **Current status:** Phase 0 / SSOT placement = COMPLETE; isolated pilot preparation = BLOCKED pending proven isolation and evidence capture; G8 = **BLOCKED / NOT VERIFIED**.  
-**Current verified master SHA (2026-10-15):** `310ce38f67c7f2c864e35bf78293cd3ad3b810cd` (includes merged PR #369). Historical entries retain the SHA that was verified at their original timestamps.
+**Current verified master SHA (2026-10-16):** `335fd6e472dde72b9907366acaa04db28ebed943` (includes PR #369 and the subsequent G8 smoke-evidence finalization fix). Historical entries retain the SHA that was verified at their original timestamps.
 **Governing tracker:** [Issue #283](https://github.com/vahidmaghsoudi2/hbi/issues/283)  
 **Roadmap:** [PRODUCT_INTAKE_ROADMAP.md](PRODUCT_INTAKE_ROADMAP.md)  
 **Acceptance ledger:** [G8_ACCEPTANCE_EVIDENCE.md](G8_ACCEPTANCE_EVIDENCE.md)  
-**Binding contract:** [SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md](../architecture/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md)  
-**Execution-control protocol:** [ROADMAP_PRODUCT_INTAKE_G8.md](../01_project_control/ROADMAP_PRODUCT_INTAKE_G8.md)
+**Binding contract:** [SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md](SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md)  
+**Execution-control protocol:** [ROADMAP_PRODUCT_INTAKE_G8.md](ROADMAP_PRODUCT_INTAKE_G8.md)
 
 ## Entry 2026-10-14 — Execution-control protocol registered
 
 - PR #376 merged: [Mandatory Staged Execution Protocol](https://github.com/vahidmaghsoudi2/hbi/pull/376).
 - Merge SHA: `9aa154c966b736afe58a0c926fcc4126e705f9f5`.
-- File: `docs/01_project_control/ROADMAP_PRODUCT_INTAKE_G8.md`.
+- File: `docs/product-intake-knowledge-registry/ROADMAP_PRODUCT_INTAKE_G8.md`.
 - Validation on PR head `a47656bb5efe3261e89f823d26aa4d6b06feda4f`: [HBI CI run 38619083919](https://github.com/vahidmaghsoudi2/hbi/actions/runs/38619083919) — success; [HBI Pilot Browser Proof run 38619084023](https://github.com/vahidmaghsoudi2/hbi/actions/runs/38619084023) — success.
 - The protocol defines execution control and evidence rules. It does not itself technically prevent all agents from ignoring instructions; the repository workflow and review controls remain relevant.
 - No runtime, database, product, schema, migration, scoring, Product A–D, or activation change was made by PR #376.
@@ -56,7 +56,7 @@ Required fields per runtime entry:
 ## Entry 2026-10-15 — live baseline and pilot preflight reconciliation
 
 - Verified live `master` HEAD: `310ce38f67c7f2c864e35bf78293cd3ad3b810cd`, including PR #369's isolated G8 runtime guard. Earlier references to `5d0878354eeb069716fa53d6d524211135204ae8` are the pre-#369 baseline; `7d962720a60c1291b8c21360dff0cc95b6fc0d1a` remains the historical PR #364 merge and Phase 0 SSOT-placement closure point.
-- PR #379 is merged and adds governance enforcement for PO-approved corrections and avoiding duplicate work. The mandatory execution-control protocol remains `docs/01_project_control/ROADMAP_PRODUCT_INTAKE_G8.md`.
+- PR #379 is merged and adds governance enforcement for PO-approved corrections and avoiding duplicate work. The mandatory execution-control protocol remains `docs/product-intake-knowledge-registry/ROADMAP_PRODUCT_INTAKE_G8.md`.
 - PR #371 is the sole approved open documentation-correction path. Its head is behind current master by the PR #369 merge and must be reconciled before merge. PR #365 is superseded and must not be merged. This entry records the approved path; it does not claim #371 is merged.
 - The latest operator-provided preflight report says the configured target is `C:\\Users\\F1\\AppData\\Local\\Temp\\hbi-g8-pilot\\pilot.db`, the file was zero bytes, and `APP_STARTED=NO`, `INIT_DB_CALLED=NO`, `SEED_CALLED=NO`. Path matching alone does not prove production isolation or evidence-capture readiness.
 - No product candidate was created by those checks. Do not initialize, seed, delete, or mutate the pilot DB until provenance, production separation, and raw evidence capture are proven.
