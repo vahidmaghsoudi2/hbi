@@ -62,6 +62,7 @@ export default function NewHomePage() {
   const [pageView, setPageView] = useState<PageView>("main");
   const [mainSection, setMainSection] = useState<MainSection>("home");
   const [returnToDashboard, setReturnToDashboard] = useState(false);
+  const [returnToCatalog, setReturnToCatalog] = useState(false);
   const [token, setToken] = useState<string | null>(() => sessionStorage.getItem("hbi_access_token"));
   const [customerId, setCustomerId] = useState<string | null>(() => sessionStorage.getItem("hbi_customer_id"));
   const [caseId, setCaseId] = useState<string | null>(() => sessionStorage.getItem("hbi_case_id"));
@@ -313,6 +314,7 @@ export default function NewHomePage() {
 
   function openMainSection(next: MainSection) {
     setReturnToDashboard(false);
+    setReturnToCatalog(false);
     setMainSection(next);
     setError(null);
     setStatusMsg(null);
@@ -329,6 +331,12 @@ export default function NewHomePage() {
     if (returnToDashboard) {
       setReturnToDashboard(false);
       setActive("home");
+      setPageView("content");
+      return;
+    }
+    if (returnToCatalog) {
+      setReturnToCatalog(false);
+      setActive("catalog");
       setPageView("content");
       return;
     }
@@ -692,11 +700,11 @@ export default function NewHomePage() {
           </div>
           <div className="pro-actions" style={{ alignItems: "center", justifyContent: "flex-end" }}>
             {pageView !== "main" ? (
-              <button type="button" className="pro-btn-secondary" onClick={() => { setError(null); setReturnToDashboard(false); setPageView("main"); }}>منوی اصلی</button>
+              <button type="button" className="pro-btn-secondary" onClick={() => { setError(null); setReturnToDashboard(false); setReturnToCatalog(false); setPageView("main"); }}>منوی اصلی</button>
             ) : null}
             {pageView === "content" && !(mainSection === "home" && active === "home" && !returnToDashboard) ? (
               <button type="button" className="pro-btn-secondary" onClick={backToNavigation}>
-                {returnToDashboard ? "بازگشت به داشبورد" : mainSection === "home" ? "بازگشت به منوی اصلی" : "بازگشت به بخش"}
+                {returnToDashboard ? "بازگشت به داشبورد" : returnToCatalog ? "بازگشت به فهرست محصولات" : mainSection === "home" ? "بازگشت به منوی اصلی" : "بازگشت به بخش"}
               </button>
             ) : null}
           </div>
@@ -1102,6 +1110,7 @@ export default function NewHomePage() {
                       className="pro-btn-secondary"
                       onClick={() => {
                         setEditProduct(p);
+                        setReturnToCatalog(true);
                         go("intake");
                       }}
                     >
@@ -1112,6 +1121,7 @@ export default function NewHomePage() {
                       className="pro-btn-primary"
                       onClick={() => {
                         sessionStorage.setItem("hbi_review_product_id", p.product_id);
+                        setReturnToCatalog(true);
                         go("review");
                       }}
                     >
@@ -1138,7 +1148,7 @@ export default function NewHomePage() {
             token={token}
             onEnsureSession={ensureProductSession}
             editProduct={editProduct}
-            onCancelEdit={() => { setEditProduct(null); go("catalog"); }}
+            onCancelEdit={() => { setEditProduct(null); setReturnToCatalog(false); go("catalog"); }}
             onRegistered={() => {
               setEditProduct(null);
               void loadProducts();
