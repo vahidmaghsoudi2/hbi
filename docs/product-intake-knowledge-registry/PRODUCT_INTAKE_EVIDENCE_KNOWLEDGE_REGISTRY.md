@@ -30,11 +30,14 @@
 | A1–A9 ledger | `docs/product-intake-knowledge-registry/G8_ACCEPTANCE_EVIDENCE.md` | CANONICAL |
 | Execution-control | `docs/product-intake-knowledge-registry/ROADMAP_PRODUCT_INTAKE_G8.md` | CANONICAL |
 | Strategic Skin baseline | `docs/product-intake-knowledge-registry/SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md` | DESIGN / NOT AUTHORIZED |
+| Skin Problem Space Map V0.1 | `docs/product-intake-knowledge-registry/SKIN_PROBLEM_SPACE_MAP_V0.1.md` | SUPPORTING — source artifact copied from Issue #293 comment 5972920377; later correction/acceptance records remain historical governance evidence |
 | New Home IA | Issue #352 + current New Home code | CANONICAL for homepage only |
 
 ## 3. Two required angles
 
 ### A. Customer / Problem side
+
+Supporting artifact: `SKIN_PROBLEM_SPACE_MAP_V0.1.md`. It structures the customer/problem side but is not a complete Problem Bank or Treatment Database; consult the historical governance records on Issue #293 for later corrections and acceptance status.
 ```
 Customer language
  → Skin Problem Representation
