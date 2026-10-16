@@ -53,7 +53,7 @@ const CONSULTATION_LINES = [{ id: "SKIN", label: "پوست" }] as const;
 const INITIAL_RECOMMENDATION_LIMIT = 5;
 
 type Panel = "home" | "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about";
-type MainSection = "home" | "customers" | "consultation" | "sales" | "products" | "inventory" | "purchases" | "reports" | "settings";
+type MainSection = "home" | "customers" | "consultation" | "sales" | "products" | "inventory" | "purchases" | "reports";
 type PageView = "main" | "section" | "content";
 
 export default function NewHomePage() {
@@ -781,6 +781,7 @@ export default function NewHomePage() {
             {pageView !== "main" ? (
               <button type="button" className="pro-btn-secondary" onClick={() => { setError(null); setReturnToDashboard(false); setReturnToCatalog(false); setPageView("main"); }}>منوی اصلی</button>
             ) : null}
+            <button type="button" className="pro-btn-secondary" onClick={logout}>خروج از حساب مدیر</button>
             {pageView === "content" && !(mainSection === "home" && active === "home" && !returnToDashboard) ? (
               <button type="button" className="pro-btn-secondary" onClick={backToNavigation}>
                 {returnToDashboard ? "بازگشت به داشبورد" : returnToCatalog ? "بازگشت به فهرست محصولات" : mainSection === "home" ? "بازگشت به منوی اصلی" : "بازگشت به بخش"}
@@ -827,7 +828,6 @@ export default function NewHomePage() {
               <article className="pro-product-card"><h2>کالا و موجودی</h2><p className="pro-muted">مشاهده موجودی و گردش‌های انبار؛ جدا از مدیریت اطلاعات و تأیید محصول.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("inventory")}>ورود به کالا و موجودی</button></article>
               <article className="pro-product-card"><h2>خرید</h2><p className="pro-muted">ثبت خرید و ورود فیزیکی موجودی.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("purchases")}>ورود به خرید</button></article>
               <article className="pro-product-card"><h2>حسابداری و گزارش‌ها</h2><p className="pro-muted">گزارش فروش و مالی؛ گزارش موجودی و گردش کالا در بخش «کالا و موجودی» قرار دارد.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("reports")}>ورود به حسابداری و گزارش‌ها</button></article>
-              <article className="pro-product-card"><h2>تنظیمات</h2><p className="pro-muted">وضعیت حساب مدیر و خروج امن از سامانه.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("settings")}>ورود به تنظیمات</button></article>
             </div>
           </section>
         )}
@@ -838,7 +838,7 @@ export default function NewHomePage() {
               <h1 id="section-menu-title">{({
                 customers: "مشتریان", consultation: "مشاوره", sales: "فروش",
                 products: "مدیریت محصولات", inventory: "کالا و موجودی", purchases: "خرید",
-                reports: "حسابداری و گزارش‌ها", home: "خانه و داشبورد", settings: "تنظیمات",
+                reports: "حسابداری و گزارش‌ها", home: "خانه و داشبورد",
               } as Record<MainSection, string>)[mainSection]}</h1>
             </div>
             <p className="pro-lead">فقط عملیات مربوط به این حوزه در این صفحه قرار دارد.</p>
@@ -863,7 +863,6 @@ export default function NewHomePage() {
                 <article className="pro-product-card"><h2>گردش کالا</h2><p className="pro-muted">بررسی گردش‌های ثبت‌شدهٔ ورود و خروج کالا.</p><Link to="/inventory?section=stock-flow" className="pro-btn-primary">بازکردن گردش کالا</Link></article>
               </> : null}
               {mainSection === "purchases" ? <article className="pro-product-card"><h2>خرید / ورود موجودی</h2><p className="pro-muted">ثبت خرید و ورود فیزیکی کالا.</p><Link to="/purchase" className="pro-btn-primary">بازکردن خرید و موجودی</Link></article> : null}
-              {mainSection === "settings" ? <article className="pro-product-card"><h2>حساب مدیر</h2><p className="pro-muted">دسترسی این محیط فقط برای مدیر سامانه است. تنظیمات عملیاتی دیگری در این بخش هنوز تعریف نشده است.</p><button type="button" className="pro-btn-secondary" onClick={logout}>خروج از حساب مدیر</button></article> : null}
               {mainSection === "reports" ? <>
                 <article className="pro-product-card"><h2>گزارش فروش</h2><p className="pro-muted">خلاصه فروش روز جاری.</p><Link to="/accounting?section=sales" className="pro-btn-primary">بازکردن گزارش فروش</Link></article>
                 <article className="pro-product-card"><h2>گزارش مالی</h2><p className="pro-muted">خلاصه گزارش مالی موجود.</p><Link to="/accounting?section=finance-report" className="pro-btn-primary">بازکردن گزارش مالی</Link></article>
