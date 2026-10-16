@@ -61,6 +61,7 @@ export default function NewHomePage() {
   const [active, setActive] = useState<Panel>("home");
   const [pageView, setPageView] = useState<PageView>("main");
   const [mainSection, setMainSection] = useState<MainSection>("home");
+  const [returnToDashboard, setReturnToDashboard] = useState(false);
   const [token, setToken] = useState<string | null>(() => sessionStorage.getItem("hbi_access_token"));
   const [customerId, setCustomerId] = useState<string | null>(() => sessionStorage.getItem("hbi_customer_id"));
   const [caseId, setCaseId] = useState<string | null>(() => sessionStorage.getItem("hbi_case_id"));
@@ -304,6 +305,7 @@ export default function NewHomePage() {
   }
 
   function openMainSection(next: MainSection) {
+    setReturnToDashboard(false);
     setMainSection(next);
     setError(null);
     if (next === "home") {
@@ -316,6 +318,12 @@ export default function NewHomePage() {
 
   function backToNavigation() {
     setError(null);
+    if (returnToDashboard) {
+      setReturnToDashboard(false);
+      setActive("home");
+      setPageView("content");
+      return;
+    }
     setPageView(mainSection === "home" ? "main" : "section");
   }
 
@@ -744,7 +752,7 @@ export default function NewHomePage() {
                 <article className="pro-product-card"><h2>پروفایل مشتری</h2><p className="pro-muted">ثبت یا تکمیل اطلاعات مشتری.</p><button type="button" className="pro-btn-primary" onClick={() => go("profile")}>بازکردن پروفایل مشتری</button></article>
               </> : null}
               {mainSection === "consultation" ? <>
-                <article className="pro-product-card"><h2>مشاوره جدید</h2><p className="pro-muted">ثبت واقعیت مراجعه و مسئلهٔ مشتری.</p><button type="button" className="pro-btn-primary" onClick={() => go("consult")}>شروع مشاوره</button></article>
+                <article className="pro-product-card"><h2>مشاوره جدید</h2><p className="pro-muted">ثبت واقعیت مراجعه و مسئلهٔ مشتری.</p><button type="button" className="pro-btn-primary" onClick={() => { setReturnToDashboard(true); go("consult"); }}>شروع مشاوره</button></article>
                 <article className="pro-product-card"><h2>پیشنهادها و تصمیم اپراتور</h2><p className="pro-muted">بررسی نتایج و تصمیم‌گیری اپراتور.</p><button type="button" className="pro-btn-primary" onClick={() => go("results")}>بازکردن پیشنهادها</button></article>
               </> : null}
               {mainSection === "sales" ? <article className="pro-product-card"><h2>ثبت فروش مستقیم</h2><p className="pro-muted">ثبت فروش بدون الزام به مشاورهٔ قبلی؛ نمایش آخرین فروش پس از ثبت.</p><button type="button" className="pro-btn-primary" onClick={() => go("sales")}>بازکردن ثبت فروش</button></article> : null}
@@ -779,14 +787,14 @@ export default function NewHomePage() {
                 <article className="pro-product-card">
                   <h3>فروش مستقیم</h3>
                   <p className="pro-muted">ثبت فروش، مستقل از پروندهٔ مشاوره.</p>
-                  <button type="button" className="pro-btn-primary" onClick={() => go("sales")}>ثبت فروش</button>
+                  <button type="button" className="pro-btn-primary" onClick={() => { setReturnToDashboard(true); go("sales"); }}>ثبت فروش</button>
                 </article>
                 <article className="pro-product-card">
                   <h3>مشتریان</h3>
                   <p className="pro-muted">جست‌وجو، ایجاد پروفایل و سابقهٔ خرید.</p>
                   <div className="pro-actions">
-                    <button type="button" className="pro-btn-primary" onClick={() => go("previous")}>جست‌وجوی مشتری</button>
-                    <button type="button" className="pro-btn-secondary" onClick={() => go("profile")}>مشتری جدید</button>
+                    <button type="button" className="pro-btn-primary" onClick={() => { setReturnToDashboard(true); go("previous"); }}>جست‌وجوی مشتری</button>
+                    <button type="button" className="pro-btn-secondary" onClick={() => { setReturnToDashboard(true); go("profile"); }}>مشتری جدید</button>
                   </div>
                 </article>
                 <article className="pro-product-card">
