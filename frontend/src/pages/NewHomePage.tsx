@@ -854,7 +854,8 @@ export default function NewHomePage() {
                 <article className="pro-product-card">
                   <h3>هشدار موجودی کم</h3>
                   <p className="pro-summary">{dashboardLowStock ? dashboardLowStock.length.toLocaleString("fa-IR") : "—"} قلم</p>
-                  <p className="pro-muted">آستانهٔ هشدار: موجودی ثبت‌شده ≤ ۵؛ بر پایهٔ گزارش رسمی موجودی کم.</p>\n                  <Link to="/inventory?section=low-stock" className="pro-btn-secondary">کمبود موجودی</Link>
+                  <p className="pro-muted">آستانهٔ هشدار: موجودی ثبت‌شده ≤ ۵؛ بر پایهٔ گزارش رسمی موجودی کم.</p>
+                  <Link to="/inventory?section=low-stock" className="pro-btn-secondary">کمبود موجودی</Link>
                 </article>
               </div>
             </section>
