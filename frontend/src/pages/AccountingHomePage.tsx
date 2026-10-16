@@ -19,7 +19,7 @@ function formatMoneyToman(value: number | null | undefined): string {
 }
 
 export default function AccountingHomePage() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const requestedSection = searchParams.get("section");
   const [adminToken, setAdminToken] = useState<string | null>(() => sessionStorage.getItem("hbi_admin_access_token"));
   const [activeSection, setActiveSection] = useState<Section>(() => isSection(requestedSection) ? requestedSection : "sales");
@@ -54,6 +54,11 @@ export default function AccountingHomePage() {
   useEffect(() => { if (isSection(requestedSection)) setActiveSection(requestedSection); }, [requestedSection]);
   useEffect(() => { void loadReports(); }, [loadReports]);
 
+  function openSection(next: Section) {
+    setActiveSection(next);
+    setSearchParams({ section: next });
+  }
+
   const activeTitle = activeSection === "sales" ? "فروش امروز" : "گزارش مالی";
   return (
     <div className="acc-root" dir="rtl">
@@ -69,11 +74,11 @@ export default function AccountingHomePage() {
           <div className="acc-summary-grid">
             <article className="acc-summary-card"><h3>فروش امروز</h3><p className="acc-summary-value">{formatMoneyToman(sales?.revenue_toman)}</p><p className="acc-summary-note">{formatNumber(sales?.sale_count)} فاکتور</p></article>
             <article className="acc-summary-card"><h3>خالص درآمد امروز</h3><p className="acc-summary-value">{formatMoneyToman(financial?.net_revenue_toman)}</p><p className="acc-summary-note">درآمد منهای مرجوعی، طبق API مالی موجود</p></article>
-            <article className="acc-summary-card"><h3>سود ناخالص</h3><p className="acc-summary-value acc-deferred">DEFERRED BY PO</p><p className="acc-summary-note">COGS هنوز سیاست مصوب محاسبه ندارد.</p></article>
+            <article className="acc-summary-card"><h3>سود ناخالص</h3><p className="acc-summary-value acc-deferred">DEFERRED</p><p className="acc-summary-note">COGS و سود ناخالص تا تأیید PO محاسبه نمی‌شوند</p></article>
           </div>
         </section>
-        <section className="acc-panel"><div className="acc-section-head"><h2>منوی حسابداری</h2><span className="acc-summary-note">بخش فعال: {activeTitle}</span></div>
-          <nav className="acc-menu" aria-label="منوی حسابداری">{MENU_ITEMS.map((item) => <button key={item.id} type="button" className={`acc-menu-item ${activeSection === item.id ? "selected" : ""}`} onClick={() => setActiveSection(item.id)}><span className="acc-menu-label">{item.label}</span></button>)}</nav>
+        <section className="acc-layout">
+          <nav className="acc-menu" aria-label="منوی حسابداری">{MENU_ITEMS.map((item) => <button key={item.id} type="button" className={`acc-menu-item ${activeSection === item.id ? "selected" : ""}`} onClick={() => openSection(item.id)}><span className="acc-menu-label">{item.label}</span></button>)}</nav>
         </section>
         {activeSection === "sales" && <section className="acc-panel"><div className="acc-section-head"><h2>فروش امروز</h2><span className="acc-summary-note">GET /reports/sales/period/today</span></div><div className="acc-kpi-row"><span>تعداد فروش: <strong>{formatNumber(sales?.sale_count)}</strong></span><span>درآمد: <strong>{formatMoneyToman(sales?.revenue_toman)}</strong></span><span>USD: <strong>{formatNumber(sales?.revenue_usd)}</strong></span></div></section>}
         {activeSection === "finance-report" && <section className="acc-panel"><div className="acc-section-head"><h2>گزارش مالی عملیاتی</h2><span className="acc-summary-note">GET /reports/financial · امروز</span></div><div className="acc-kpi-row"><span>درآمد: <strong>{formatMoneyToman(financial?.revenue_toman)}</strong></span><span>مرجوعی: <strong>{formatMoneyToman(financial?.returns_toman)}</strong></span><span>خالص: <strong>{formatMoneyToman(financial?.net_revenue_toman)}</strong></span></div><div className="acc-deferred-grid"><div><strong>COGS</strong><span>DEFERRED BY PO</span></div><div><strong>سود ناخالص</strong><span>DEFERRED BY PO</span></div><div><strong>تخفیف</strong><span>DEFERRED / UNSUPPORTED</span></div></div></section>}
