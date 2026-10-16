@@ -2,10 +2,10 @@
 
 **Authority:** Product Owner (PO)  
 **Governing mission:** [Issue #283 — HBI Product Intake → G8 Real Product Pilot](https://github.com/vahidmaghsoudi2/hbi/issues/283)  
-**Binding contract:** [Skin Product Intake Execution Contract v1.1](../architecture/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md)  
-**Progress roadmap:** [Product Intake Roadmap](../product-intake/PRODUCT_INTAKE_ROADMAP.md)  
-**Acceptance evidence ledger:** [G8 A1–A9 Evidence Ledger](../product-intake/G8_ACCEPTANCE_EVIDENCE.md)  
-**Execution log:** [Product Intake Execution Log](../product-intake/PRODUCT_INTAKE_EXECUTION_LOG.md)  
+**Binding contract:** [Skin Product Intake Execution Contract v1.1](SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md)  
+**Progress roadmap:** [Product Intake Roadmap](PRODUCT_INTAKE_ROADMAP.md)  
+**Acceptance evidence ledger:** [G8 A1–A9 Evidence Ledger](G8_ACCEPTANCE_EVIDENCE.md)  
+**Execution log:** [Product Intake Execution Log](PRODUCT_INTAKE_EXECUTION_LOG.md)  
 **Created:** 2026-10-14  
 **Purpose:** Prevent lost decisions, duplicate work, unsupported completion claims, and conflicting project status across agents and chat sessions.
 
