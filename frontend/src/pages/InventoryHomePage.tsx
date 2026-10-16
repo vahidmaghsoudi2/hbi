@@ -27,7 +27,7 @@ export default function InventoryHomePage() {
   const [lowStock, setLowStock] = useState<InventoryReportRow[] | null>(null);
   const [movements, setMovements] = useState<StockMovementDTO[] | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [reportErrors, setReportErrors] = useState<Record<Section, string | null>>({ inventory: null, "low-stock": null, "stock-flow": null });
 
   const refresh = useCallback(async () => {
     const token = sessionStorage.getItem("hbi_admin_access_token");
@@ -35,11 +35,11 @@ export default function InventoryHomePage() {
       setInventory(null);
       setLowStock(null);
       setMovements(null);
-      setError("نشست مدیر موجود نیست؛ دوباره وارد شوید.");
+      setReportErrors({ inventory: "نشست مدیر موجود نیست؛ دوباره وارد شوید.", "low-stock": "نشست مدیر موجود نیست؛ دوباره وارد شوید.", "stock-flow": "نشست مدیر موجود نیست؛ دوباره وارد شوید." });
       return;
     }
     setLoading(true);
-    setError(null);
+    setReportErrors({ inventory: null, "low-stock": null, "stock-flow": null });
     const results = await Promise.allSettled([
       getInventoryReport(token),
       getLowStockReport(5, token),
@@ -51,8 +51,11 @@ export default function InventoryHomePage() {
     else setLowStock(null);
     if (results[2].status === "fulfilled") setMovements(Array.isArray(results[2].value) ? results[2].value : []);
     else setMovements(null);
-    const failed = results.filter((r) => r.status === "rejected").length;
-    if (failed) setError(`دریافت ${failed} گزارش از ۳ گزارش موجودی/گردش ناموفق بود.`);
+    setReportErrors({
+      inventory: results[0].status === "rejected" ? "دریافت گزارش موجودی ناموفق بود." : null,
+      "low-stock": results[1].status === "rejected" ? "دریافت گزارش کمبود موجودی ناموفق بود." : null,
+      "stock-flow": results[2].status === "rejected" ? "دریافت گزارش گردش کالا ناموفق بود." : null,
+    });
     setLoading(false);
   }, []);
 
@@ -89,7 +92,7 @@ export default function InventoryHomePage() {
       </header>
       <main className="acc-main">
         {!adminToken && <p className="acc-error" role="alert">نشست مدیر لازم است.</p>}
-        {error && <p className="acc-error" role="alert">{error}</p>}
+        {adminToken && reportErrors[section] && <p className="acc-error" role="alert">{reportErrors[section]}</p>}
         <section className="acc-menu-panel">
           <nav className="acc-menu" aria-label="بخش‌های موجودی">
             <button type="button" className={`acc-menu-item ${section === "inventory" ? "selected" : ""}`} onClick={() => openSection("inventory")}>
@@ -132,7 +135,7 @@ export default function InventoryHomePage() {
                 </tbody>
               </table>
               {inventory?.length === 0 && <p className="acc-empty">دادهٔ موجودی برای نمایش وجود ندارد.</p>}
-              {inventory === null && !error && <p className="acc-empty">دادهٔ موجودی در دسترس نیست.</p>}
+              {inventory === null && !reportErrors.inventory && <p className="acc-empty">دادهٔ موجودی در دسترس نیست.</p>}
             </div>
           </section>
         )}
@@ -165,7 +168,7 @@ export default function InventoryHomePage() {
                 </tbody>
               </table>
               {lowStock?.length === 0 && <p className="acc-empty">قلم کمبود موجودی در آستانهٔ ≤۵ ثبت نشده است.</p>}
-              {lowStock === null && !error && <p className="acc-empty">گزارش کمبود موجودی در دسترس نیست.</p>}
+              {lowStock === null && !reportErrors["low-stock"] && <p className="acc-empty">گزارش کمبود موجودی در دسترس نیست.</p>}
             </div>
           </section>
         )}
@@ -200,7 +203,7 @@ export default function InventoryHomePage() {
                 </tbody>
               </table>
               {movements?.length === 0 && <p className="acc-empty">گردش کالایی برای نمایش ثبت نشده است.</p>}
-              {movements === null && !error && <p className="acc-empty">گزارش گردش در دسترس نیست.</p>}
+              {movements === null && !reportErrors["stock-flow"] && <p className="acc-empty">گزارش گردش در دسترس نیست.</p>}
             </div>
           </section>
         )}
