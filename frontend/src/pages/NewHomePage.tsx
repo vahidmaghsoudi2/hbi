@@ -757,7 +757,8 @@ export default function NewHomePage() {
               </> : null}
               {mainSection === "sales" ? <article className="pro-product-card"><h2>ثبت فروش مستقیم</h2><p className="pro-muted">ثبت فروش بدون الزام به مشاورهٔ قبلی؛ نمایش آخرین فروش پس از ثبت.</p><button type="button" className="pro-btn-primary" onClick={() => go("sales")}>بازکردن ثبت فروش</button></article> : null}
               {mainSection === "products" ? <>
-                <article className="pro-product-card"><h2>فهرست محصولات</h2><p className="pro-muted">مشاهدهٔ محصولات قابل مدیریت.</p><button type="button" className="pro-btn-primary" onClick={() => go("catalog")}>بازکردن فهرست محصولات</button></article>
+                <article className="pro-product-card"><h2>فهرست مدیریتی محصولات</h2><p className="pro-muted">فهرست قابل مدیریت با دسترسی به ویرایش و بررسی پرونده.</p><button type="button" className="pro-btn-primary" onClick={() => go("catalog")}>بازکردن فهرست مدیریتی</button></article>
+                <article className="pro-product-card"><h2>کاتالوگ محصولات تأییدشده</h2><p className="pro-muted">نمایش فقط محصولات منتشرشده و تأییدشده؛ بدون ابزار ویرایش.</p><Link to="/catalog" className="pro-btn-primary">بازکردن کاتالوگ تأییدشده</Link></article>
                 <article className="pro-product-card"><h2>ورود و ویرایش محصول</h2><p className="pro-muted">ثبت مشخصات محصول؛ جدا از موجودی فیزیکی.</p><button type="button" className="pro-btn-primary" onClick={() => { setEditProduct(null); go("intake"); }}>ورود و ویرایش محصول</button></article>
                 <article className="pro-product-card"><h2>بررسی و تأیید QA</h2><p className="pro-muted">بررسی شواهد و وضعیت تأیید محصول.</p><button type="button" className="pro-btn-primary" onClick={() => go("review")}>بازکردن بررسی QA</button></article>
               </> : null}
