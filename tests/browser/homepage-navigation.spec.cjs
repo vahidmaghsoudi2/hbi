@@ -179,7 +179,7 @@ test("Customer search results do not leak into the optional sale-account picker"
   await page.getByLabel("جست‌وجوی مشتری قبلی با نام خانوادگی یا موبایل").fill("آزمایشی");
   await page.getByRole("button", { name: "جست‌وجو" }).click();
   await expect(page.getByText("آزمایشی", { exact: true })).toBeVisible();
-  await expect(page.getByText("CUS-SEARCH-1", { exact: true })).toBeVisible();
+  await expect(page.getByText("09000000000", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "بازگشت به داشبورد" }).click();
   await page.getByRole("button", { name: "ثبت فروش" }).click();
   await expect(page.getByRole("heading", { name: "ثبت فروش" })).toBeVisible();
