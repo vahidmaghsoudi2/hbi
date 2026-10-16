@@ -116,7 +116,7 @@ test("Consultation actions stay focused on the customer problem and recommendati
   await page.getByRole("button", { name: "بازگشت به بخش" }).click();
   await expect(page.getByRole("heading", { name: "نتایج مشاوره جاری" })).toBeVisible();
   await page.getByRole("button", { name: "مشاهده نتایج همین نشست" }).click();
-  await expect(page.getByRole("heading", { name: "پیشنهادهای نهایی برای اپراتور" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "نتایج ارزیابی برای اپراتور" })).toBeVisible();
   await expect(page.getByText("هنوز پیشنهادی گرفته نشده — از مشاوره شروع کنید.")).toBeVisible();
 });
 
