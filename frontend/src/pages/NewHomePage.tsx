@@ -221,8 +221,6 @@ export default function NewHomePage() {
       setCustomerSearchResults([]);
       return;
     }
-    setError(null);
-    setStatusMsg(null);
     setCustomerSearchBusy(true);
     try {
       const operatorToken = await ensureProductSession();
