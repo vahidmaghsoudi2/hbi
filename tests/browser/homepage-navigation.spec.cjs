@@ -374,21 +374,18 @@ test("Settings does not invent extra configuration and keeps logout owned there"
   await expect(page.getByRole("button", { name: "خروج از حساب مدیر" })).toBeVisible();
 });
 
-test("Product menu exposes the managed list and the separate approved catalog route", async ({ page }) => {
+test("Product menu has one canonical list plus intake and QA actions", async ({ page }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-product-catalog-test-token");
   });
   await page.goto("/");
   await page.getByRole("button", { name: "ورود به مدیریت محصولات" }).click();
-  await expect(page.getByRole("button", { name: "بازکردن فهرست مدیریتی" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "بازکردن فهرست کالاها" })).toBeVisible();
   await expect(page.getByRole("button", { name: "ورود و ویرایش محصول" })).toBeVisible();
   await expect(page.getByRole("button", { name: "انتخاب محصول برای QA" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "بازکردن کاتالوگ هویت‌تأییدشده" })).toHaveCount(0);
   await page.getByRole("button", { name: "انتخاب محصول برای QA" }).click();
   await expect(page.getByRole("heading", { name: "محصولات", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "بازگشت به بخش" }).click();
-  await page.getByRole("link", { name: "بازکردن کاتالوگ هویت‌تأییدشده" }).click();
-  await expect(page).toHaveURL(/\/catalog$/);
-  await expect(page.getByRole("heading", { name: "کاتالوگ محصولات با هویت تأییدشده", exact: true })).toBeVisible();
-  await page.getByRole("link", { name: "بازگشت به منوی اصلی" }).click();
-  await expect(page.getByRole("heading", { name: "فضای کاری مدیر" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "مدیریت محصولات", exact: true })).toBeVisible();
 });
