@@ -751,7 +751,7 @@ export default function NewHomePage() {
               {mainSection === "sales" ? <article className="pro-product-card"><h2>ثبت فروش و تاریخچه</h2><p className="pro-muted">ثبت فروش مستقیم بدون الزام به مشاورهٔ قبلی.</p><button type="button" className="pro-btn-primary" onClick={() => go("sales")}>بازکردن فروش</button></article> : null}
               {mainSection === "products" ? <>
                 <article className="pro-product-card"><h2>فهرست محصولات</h2><p className="pro-muted">مشاهدهٔ محصولات قابل مدیریت.</p><button type="button" className="pro-btn-primary" onClick={() => go("catalog")}>بازکردن فهرست محصولات</button></article>
-                <article className="pro-product-card"><h2>ورود و ویرایش محصول</h2><p className="pro-muted">ثبت مشخصات محصول؛ جدا از موجودی فیزیکی.</p><button type="button" className="pro-btn-primary" onClick={() => go("intake")}>ورود و ویرایش محصول</button></article>
+                <article className="pro-product-card"><h2>ورود و ویرایش محصول</h2><p className="pro-muted">ثبت مشخصات محصول؛ جدا از موجودی فیزیکی.</p><button type="button" className="pro-btn-primary" onClick={() => { setEditProduct(null); go("intake"); }}>ورود و ویرایش محصول</button></article>
                 <article className="pro-product-card"><h2>بررسی و تأیید QA</h2><p className="pro-muted">بررسی شواهد و وضعیت تأیید محصول.</p><button type="button" className="pro-btn-primary" onClick={() => go("review")}>بازکردن بررسی QA</button></article>
               </> : null}
               {mainSection === "inventory" ? <>
