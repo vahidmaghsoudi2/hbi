@@ -93,6 +93,7 @@ test("Customer search stays in customers domain and does not auto-start consulta
 });
 
 test("Consultation actions stay focused on the customer problem and recommendation flow", async ({ page }) => {
+  await page.goto("/");
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-consultation-boundary-test-token");
   });
@@ -146,4 +147,33 @@ test("Accounting deep-links stay on sales and finance sections", async ({ page }
   // Inventory is not an accounting destination.
   await expect(page.getByRole("heading", { name: "موجودی کالا", exact: true })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "گردش کالا", exact: true })).toHaveCount(0);
+});
+
+test("Dashboard quick actions stay limited to sale, customers, and consultation", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-dashboard-actions-test-token");
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "بازکردن داشبورد" }).click();
+  await expect(page.getByRole("heading", { name: "داشبورد عملیاتی" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "اقدام سریع" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "ثبت فروش" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "جست‌وجوی مشتری" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "شروع مشاوره" })).toBeVisible();
+  // Product intake / purchase / QA are not dashboard quick actions.
+  await expect(page.getByRole("button", { name: "ورود و ویرایش محصول" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "بازکردن بررسی QA" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "بازکردن خرید و موجودی" })).toHaveCount(0);
+});
+
+test("Settings does not invent extra configuration and keeps logout owned there", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-settings-boundary-test-token");
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "ورود به تنظیمات" }).click();
+  await expect(page.getByRole("heading", { name: "تنظیمات", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "حساب مدیر" })).toBeVisible();
+  await expect(page.getByText(/تنظیمات عملیاتی دیگری در این بخش هنوز تعریف نشده/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "خروج از حساب مدیر" })).toBeVisible();
 });
