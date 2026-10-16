@@ -57,7 +57,7 @@ test("Homepage navigation keeps sales, inventory, and reports in their own desti
   await page.getByRole("link", { name: "بازکردن گزارش فروش" }).click();
   await expect(page).toHaveURL(/\/accounting\?section=sales$/);
   await expect(page.getByRole("heading", { name: "حسابداری و گزارش‌ها", exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "فروش امروز", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "فروش امروز", exact: true }).first()).toBeVisible();
 });
 
 test("Dashboard report shortcuts preserve their own report destinations", async ({ page }) => {
