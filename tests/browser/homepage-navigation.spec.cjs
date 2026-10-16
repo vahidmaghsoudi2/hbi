@@ -113,6 +113,11 @@ test("Consultation actions stay focused on the customer problem and recommendati
   await expect(page.getByRole("heading", { name: "فرم مشاوره سریع" })).toBeVisible();
   await expect(page.getByRole("button", { name: "ثبت مراجعه + دریافت پیشنهاد" })).toBeVisible();
   await expect(page.getByRole("button", { name: "محصولات", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "بازگشت به بخش" }).click();
+  await expect(page.getByRole("heading", { name: "نتایج مشاوره جاری" })).toBeVisible();
+  await page.getByRole("button", { name: "مشاهده نتایج همین نشست" }).click();
+  await expect(page.getByRole("heading", { name: "پیشنهادهای نهایی برای اپراتور" })).toBeVisible();
+  await expect(page.getByText("هنوز پیشنهادی گرفته نشده — از مشاوره شروع کنید.")).toBeVisible();
 });
 
 test("Settings is a separate homepage section and owns the logout action", async ({ page }) => {
