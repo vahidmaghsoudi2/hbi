@@ -5,8 +5,8 @@
 **Governing tracker:** [Issue #283](https://github.com/vahidmaghsoudi2/hbi/issues/283)  
 **Roadmap:** [PRODUCT_INTAKE_ROADMAP.md](PRODUCT_INTAKE_ROADMAP.md)  
 **Acceptance ledger:** [G8_ACCEPTANCE_EVIDENCE.md](G8_ACCEPTANCE_EVIDENCE.md)  
-**Binding contract:** [SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md](../architecture/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md)  
-**Execution-control protocol:** [ROADMAP_PRODUCT_INTAKE_G8.md](../01_project_control/ROADMAP_PRODUCT_INTAKE_G8.md)
+**Binding contract:** [SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md](SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md)  
+**Execution-control protocol:** [ROADMAP_PRODUCT_INTAKE_G8.md](ROADMAP_PRODUCT_INTAKE_G8.md)
 
 ## Entry 2026-10-14 — Execution-control protocol registered
 
