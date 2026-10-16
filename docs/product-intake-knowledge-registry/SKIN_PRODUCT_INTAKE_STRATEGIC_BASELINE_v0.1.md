@@ -363,6 +363,6 @@ NO ONTOLOGY IMPLEMENTATION
 | Title (searchable) | **ورود محصولات پوستی** |
 | Status | STRATEGIC DESIGN BASELINE / PRE-IMPLEMENTATION |
 | Implementation | NOT AUTHORIZED |
-| Repo path | `docs/architecture/SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md` |
+| Repo path | `docs/product-intake-knowledge-registry/SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md` |
 
 **End of Baseline v0.1**
