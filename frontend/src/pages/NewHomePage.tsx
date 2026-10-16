@@ -752,7 +752,7 @@ export default function NewHomePage() {
                 <article className="pro-product-card"><h2>پروفایل مشتری</h2><p className="pro-muted">ثبت یا تکمیل اطلاعات مشتری.</p><button type="button" className="pro-btn-primary" onClick={() => go("profile")}>بازکردن پروفایل مشتری</button></article>
               </> : null}
               {mainSection === "consultation" ? <>
-                <article className="pro-product-card"><h2>مشاوره جدید</h2><p className="pro-muted">ثبت واقعیت مراجعه و مسئلهٔ مشتری.</p><button type="button" className="pro-btn-primary" onClick={() => { setReturnToDashboard(true); go("consult"); }}>شروع مشاوره</button></article>
+                <article className="pro-product-card"><h2>مشاوره جدید</h2><p className="pro-muted">ثبت واقعیت مراجعه و مسئلهٔ مشتری.</p><button type="button" className="pro-btn-primary" onClick={() => go("consult")}>شروع مشاوره</button></article>
                 <article className="pro-product-card"><h2>نتایج مشاوره جاری</h2><p className="pro-muted">مشاهده نتایج تولیدشده در همین نشست؛ تاریخچه و ثبت تصمیم نهایی اپراتور در این مسیر هنوز در دسترس نیست.</p><button type="button" className="pro-btn-primary" onClick={() => go("results")}>مشاهده نتایج همین نشست</button></article>
               </> : null}
               {mainSection === "sales" ? <article className="pro-product-card"><h2>ثبت فروش مستقیم</h2><p className="pro-muted">ثبت فروش بدون الزام به مشاورهٔ قبلی؛ نمایش آخرین فروش پس از ثبت.</p><button type="button" className="pro-btn-primary" onClick={() => go("sales")}>بازکردن ثبت فروش</button></article> : null}
