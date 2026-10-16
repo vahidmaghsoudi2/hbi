@@ -28,13 +28,13 @@ export default function CatalogPage() {
       <h1>کاتالوگ محصولات</h1>
       <p className="lead">فهرست محصولات برای اپراتور واردشده؛ دسترسی از مسیر احراز هویت مدیر کنترل می‌شود.</p>
       <div className="row" style={{ marginBottom: "1rem" }}>
-        <Link className="btn" to="/">بازگشت به داشبورد</Link>
+        <Link className="btn" to="/">بازگشت به منوی اصلی</Link>
       </div>
       {loading && <div className="alert">در حال بارگذاری…</div>}
-      {error && <div className="alert error">{error}</div>}
+      {error && <div className="alert error" role="alert">{error}</div>}
       {!loading && !error && (
         <div className="product-list">
-          {products.length === 0 && <p>محصولی یافت نشد.</p>}
+          {products.length === 0 && <p role="status">محصول تأییدشده‌ای برای نمایش وجود ندارد.</p>}
           {products.map((p) => (
             <div key={p.product_id} className="card">
               <strong>{p.product_name}</strong>
