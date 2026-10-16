@@ -143,6 +143,7 @@ test("An in-flight customer search cannot repopulate another panel", async ({ pa
     });
   });
   await page.goto("/");
+  await page.getByRole("button", { name: "بازکردن داشبورد" }).click();
   await page.getByRole("button", { name: "جست‌وجوی مشتری" }).click();
   await page.getByLabel("جست‌وجوی مشتری قبلی با نام خانوادگی یا موبایل").fill("دیررس");
   const requestStarted = page.waitForRequest((request) => request.url().includes("/customers/search?"));
@@ -173,6 +174,7 @@ test("Customer search results do not leak into the optional sale-account picker"
     }]),
   }));
   await page.goto("/");
+  await page.getByRole("button", { name: "بازکردن داشبورد" }).click();
   await page.getByRole("button", { name: "جست‌وجوی مشتری" }).click();
   await page.getByLabel("جست‌وجوی مشتری قبلی با نام خانوادگی یا موبایل").fill("آزمایشی");
   await page.getByRole("button", { name: "جست‌وجو" }).click();
