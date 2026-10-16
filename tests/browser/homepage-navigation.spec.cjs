@@ -74,6 +74,11 @@ test("Dashboard report shortcuts preserve their own report destinations", async 
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-dashboard-links-test-token");
   });
+  await page.route("**/reports/inventory/low-stock?threshold=5", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify([{ inventory_id: "INV-LOW-1", product_id: "P-LOW-1", quantity_available: 2 }]),
+  }));
   await page.goto("/");
   await page.getByRole("button", { name: "بازکردن داشبورد" }).click();
   await expect(page.getByRole("heading", { name: "داشبورد HBI", exact: true })).toBeVisible();
@@ -81,6 +86,7 @@ test("Dashboard report shortcuts preserve their own report destinations", async 
   await expect(page.getByRole("link", { name: "گزارش موجودی" })).toHaveAttribute("href", "/inventory?section=inventory");
   await expect(page.getByRole("link", { name: "کمبود موجودی" })).toHaveAttribute("href", "/inventory?section=low-stock");
   await expect(page.getByRole("link", { name: "گردش اخیر" })).toHaveAttribute("href", "/inventory?section=stock-flow");
+  await expect(page.getByRole("link", { name: "بازکردن کمبود موجودی" })).toHaveAttribute("href", "/inventory?section=low-stock");
   await page.getByRole("link", { name: "کمبود موجودی" }).click();
   await expect(page).toHaveURL(/\/inventory\?section=low-stock$/);
   await expect(page.getByRole("heading", { name: "کالا و موجودی", exact: true })).toBeVisible();
