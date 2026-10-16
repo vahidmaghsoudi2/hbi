@@ -214,12 +214,15 @@ export default function NewHomePage() {
   }
 
   async function searchPreviousCustomers() {
+    setError(null);
+    setStatusMsg(null);
     const query = customerSearch.trim();
     if (!query) {
       setCustomerSearchResults([]);
       return;
     }
     setError(null);
+    setStatusMsg(null);
     setCustomerSearchBusy(true);
     try {
       const operatorToken = await ensureProductSession();
@@ -235,6 +238,7 @@ export default function NewHomePage() {
   }
 
   async function searchSaleCustomers() {
+    setStatusMsg(null);
     const query = saleCustomerSearch.trim();
     if (!query) {
       setCustomerSearchResults([]);
@@ -590,6 +594,7 @@ export default function NewHomePage() {
   async function onSaleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setStatusMsg(null);
     if (!sessionStorage.getItem("hbi_admin_access_token")) return setError("برای ثبت فروش ابتدا با حساب مدیر وارد شوید.");
     if (!saleProductId.trim()) return setError("محصول را انتخاب کنید.");
     if (saleQty < 1) return setError("تعداد نامعتبر است.");
