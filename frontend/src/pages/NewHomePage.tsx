@@ -762,7 +762,7 @@ export default function NewHomePage() {
                 <article className="pro-product-card"><h2>بررسی و تأیید QA</h2><p className="pro-muted">بررسی شواهد و وضعیت تأیید محصول.</p><button type="button" className="pro-btn-primary" onClick={() => go("review")}>بازکردن بررسی QA</button></article>
               </> : null}
               {mainSection === "inventory" ? <>
-                <article className="pro-product-card"><h2>موجودی کالا</h2><p className="pro-muted">موجودی قابل مشاهده و ارزش‌گذاری‌شده بر پایه آخرین قیمت خرید ثبت‌شده.</p><Link to="/inventory?section=low-stock" className="pro-btn-primary">بازکردن کمبود موجودی</Link></article>
+                <article className="pro-product-card"><h2>موجودی کالا</h2><p className="pro-muted">موجودی قابل مشاهده و ارزش‌گذاری‌شده بر پایه آخرین قیمت خرید ثبت‌شده.</p><Link to="/inventory?section=inventory" className="pro-btn-primary">بازکردن گزارش موجودی</Link></article>
                 <article className="pro-product-card"><h2>کمبود موجودی</h2><p className="pro-muted">کالاهایی که موجودی قابل دسترس آن‌ها به آستانهٔ هشدار رسیده است.</p><Link to="/inventory?section=low-stock" className="pro-btn-primary">بازکردن کمبود موجودی</Link></article>
                 <article className="pro-product-card"><h2>گردش کالا</h2><p className="pro-muted">بررسی گردش‌های ثبت‌شدهٔ ورود و خروج کالا.</p><Link to="/inventory?section=stock-flow" className="pro-btn-primary">بازکردن گردش کالا</Link></article>
               </> : null}
@@ -844,7 +844,7 @@ export default function NewHomePage() {
                 ) : (
                   <>
                     <p role="status">{dashboardLowStock.length.toLocaleString("fa-IR")} قلم با موجودی ≤ ۵ نیازمند بررسی است.</p>
-                    <Link to="/inventory?section=inventory" className="pro-btn-primary">بازکردن گزارش موجودی</Link>
+                    <Link to="/inventory?section=low-stock" className="pro-btn-primary">بازکردن کمبود موجودی</Link>
                   </>
                 )}
                 <p className="pro-muted">وضعیت پذیرش و QA محصول در این داشبورد عددگذاری نشده؛ API مدیریتیِ تأییدشده برای خلاصهٔ چرخهٔ محصول هنوز احراز نشده است.</p>
