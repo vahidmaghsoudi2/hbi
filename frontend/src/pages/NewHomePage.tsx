@@ -921,7 +921,7 @@ export default function NewHomePage() {
                 ))}
               </div>
             ) : customerSearch.trim() && !customerSearchBusy ? (
-              <div className="pro-empty"><strong>مشتری‌ای با این نام پیدا نشد.</strong></div>
+              <div className="pro-empty" role="status"><strong>مشتری مطابق این جست‌وجو پیدا نشد.</strong></div>
             ) : null}
           </section>
         )}
@@ -1070,7 +1070,13 @@ export default function NewHomePage() {
               </button>
             </div>
             {catalogLoading && <p className="pro-muted">بارگذاری…</p>}
-            {catalogError && <div className="pro-alert">{catalogError}</div>}
+            {catalogError && <div className="pro-alert" role="alert">{catalogError}</div>}
+            {!catalogLoading && !catalogError && products.length === 0 ? (
+              <div className="pro-empty" role="status">
+                <strong>محصولی برای نمایش در فهرست مدیریتی وجود ندارد.</strong>
+                <p>فهرست خالی است؛ این موضوع به‌تنهایی به معنی خطای بارگذاری نیست.</p>
+              </div>
+            ) : null}
             <div className="pro-product-grid">
               {products.map((p) => (
                 <article key={p.product_id} className="pro-product-card">
