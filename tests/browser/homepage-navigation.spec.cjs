@@ -49,7 +49,7 @@ test("Homepage navigation keeps sales, inventory, and reports in their own desti
   // Accounting owns sales/finance reports only; inventory stays in کالا و موجودی.
   await page.getByRole("link", { name: "بازگشت به خانه HBI" }).click();
   await page.getByRole("button", { name: "ورود به حسابداری و گزارش‌ها" }).click();
-  await expect(page.getByRole("heading", { name: "گزارش‌ها", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "حسابداری و گزارش‌ها", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "بازکردن گزارش فروش" })).toBeVisible();
   await expect(page.getByRole("link", { name: "بازکردن گزارش مالی" })).toBeVisible();
   await expect(page.getByRole("link", { name: "بازکردن گزارش موجودی" })).toHaveCount(0);
@@ -154,7 +154,7 @@ test("Dashboard quick actions stay limited to sale, customers, and consultation"
   });
   await page.goto("/");
   await page.getByRole("button", { name: "بازکردن داشبورد" }).click();
-  await expect(page.getByRole("heading", { name: "داشبورد عملیاتی" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "داشبورد HBI", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "اقدام سریع" })).toBeVisible();
   await expect(page.getByRole("button", { name: "ثبت فروش" })).toBeVisible();
   await expect(page.getByRole("button", { name: "جست‌وجوی مشتری" })).toBeVisible();
