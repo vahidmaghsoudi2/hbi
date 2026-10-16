@@ -43,7 +43,6 @@ test("Homepage navigation keeps sales, inventory, and reports in their own desti
   await page.getByRole("button", { name: "منوی اصلی" }).click();
 
   // Inventory must open the inventory report, not silently land on today's sales.
-  await page.getByRole("button", { name: "منوی اصلی" }).click();
   await page.getByRole("button", { name: "ورود به کالا و موجودی" }).click();
   await expect(page.getByRole("link", { name: "بازکردن کمبود موجودی" })).toHaveAttribute("href", "/inventory?section=low-stock");
   await page.getByRole("link", { name: "بازکردن کمبود موجودی" }).click();
