@@ -77,6 +77,7 @@ export default function NewHomePage() {
   const [products, setProducts] = useState<ProductDTO[]>([]);
   const [sellableProducts, setSellableProducts] = useState<ProductDTO[]>([]);
   const [saleProductsError, setSaleProductsError] = useState<string | null>(null);
+  const [saleProductsLoading, setSaleProductsLoading] = useState(true);
   const [saleCustomerSearch, setSaleCustomerSearch] = useState("");
   const [saleCustomerId, setSaleCustomerId] = useState<string | null>(null);
   const [saleCustomerLabel, setSaleCustomerLabel] = useState<string | null>(null);
@@ -127,6 +128,7 @@ export default function NewHomePage() {
   }, [loadProducts]);
 
   const loadSellableProducts = useCallback(async () => {
+    setSaleProductsLoading(true);
     setSaleProductsError(null);
     try {
       const adminToken = sessionStorage.getItem("hbi_admin_access_token");
@@ -139,6 +141,8 @@ export default function NewHomePage() {
     } catch (err) {
       setSellableProducts([]);
       setSaleProductsError(err instanceof Error ? err.message : "دریافت کاتالوگ فروش ناموفق بود.");
+    } finally {
+      setSaleProductsLoading(false);
     }
   }, []);
 
@@ -1260,7 +1264,13 @@ export default function NewHomePage() {
                       </option>
                     ))}
                   </select>
-                  {sellableProducts.length === 0 && !saleProductsError ? <p className="pro-muted">هنوز محصول قابل انتخابی در کاتالوگ فروش موجود نیست.</p> : null}
+                  <div className="pro-actions">
+                    <button type="button" className="pro-btn-secondary" onClick={() => void loadSellableProducts()} disabled={saleProductsLoading}>
+                      {saleProductsLoading ? "در حال بارگذاری کاتالوگ…" : "نوسازی کاتالوگ فروش"}
+                    </button>
+                  </div>
+                  {saleProductsLoading ? <p className="pro-muted" role="status">در حال دریافت کاتالوگ فروش…</p> : null}
+                  {!saleProductsLoading && sellableProducts.length === 0 && !saleProductsError ? <p className="pro-muted" role="status">هنوز محصول قابل انتخابی در کاتالوگ فروش موجود نیست.</p> : null}
                   <div className="pro-grid-2">
                     <div>
                       <label className="pro-label" htmlFor="sale-qty">
@@ -1271,12 +1281,12 @@ export default function NewHomePage() {
                     <div>
                       <span className="pro-label">قیمت واحد (تومان)</span>
                       <p className="pro-input" aria-live="polite">
-                        {salePrice == null ? "در حال دریافت…" : salePrice.toLocaleString("fa-IR")}
+                        {!saleProductId ? "پس از انتخاب محصول" : salePrice == null ? "در حال دریافت…" : salePrice.toLocaleString("fa-IR")}
                       </p>
                     </div>
                   </div>
                   <p className="pro-muted">
-                    موجودی قابل فروش: {saleStock == null ? "در حال دریافت…" : saleStock.toLocaleString("fa-IR")}
+                    موجودی قابل فروش: {!saleProductId ? "پس از انتخاب محصول" : saleStock == null ? "در حال دریافت…" : saleStock.toLocaleString("fa-IR")}
                   </p>
                   <p className="pro-summary">
                     مبلغ: <strong>{salePrice == null ? "—" : (saleQty * salePrice).toLocaleString("fa-IR")}</strong> تومان
