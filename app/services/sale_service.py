@@ -46,7 +46,7 @@ class SaleService(BaseService[Sale, SaleRepository]):
 
     def create_sale(
         self,
-        customer_id: str,
+        customer_id: Optional[str],
         items: list,
         *,
         fx_rate_usd_to_irr: float,
@@ -63,12 +63,13 @@ class SaleService(BaseService[Sale, SaleRepository]):
             existing = self.db.query(Sale).filter(Sale.idempotency_key == key).first()
             if existing is not None:
                 if existing.customer_id != customer_id:
-                    raise ValueError("idempotency_key already used for a different customer")
+                    raise ValueError("idempotency_key already used for a different customer context")
                 return existing
 
-        customer = self.db.query(Customer).filter(Customer.customer_id == customer_id).first()
-        if not customer:
-            raise ValueError(f"Customer {customer_id} not found")
+        if customer_id:
+            customer = self.db.query(Customer).filter(Customer.customer_id == customer_id).first()
+            if not customer:
+                raise ValueError(f"Customer {customer_id} not found")
 
         validated = []
         for item_data in items:
@@ -87,6 +88,8 @@ class SaleService(BaseService[Sale, SaleRepository]):
             if not product:
                 raise ValueError(f"Product {product_id} not found")
             recommendation = None
+            if recommendation_id and not customer_id:
+                raise ValueError("A recommendation cannot be linked to a sale without a customer")
             if recommendation_id:
                 recommendation = self.db.query(Recommendation).filter(Recommendation.recommendation_id == recommendation_id).first()
                 if not recommendation:
@@ -100,6 +103,10 @@ class SaleService(BaseService[Sale, SaleRepository]):
                     raise ValueError("Only an ELIGIBLE recommendation can be linked to a sale")
             if getattr(product, "status", None) != "ACTIVE":
                 raise ValueError(f"Product {product_id} is not ACTIVE")
+            if getattr(product, "identity_status", None) != "VERIFIED":
+                raise ValueError(f"Product {product_id} identity is not VERIFIED")
+            if getattr(product, "qa_verdict", None) != "VALID":
+                raise ValueError(f"Product {product_id} QA verdict is not VALID")
 
             inv = (
                 self.db.query(Inventory)
@@ -147,7 +154,7 @@ class SaleService(BaseService[Sale, SaleRepository]):
         try:
             sale = Sale(
                 sale_id=sale_id,
-                customer_id=customer_id,
+                customer_id=customer_id or None,
                 total_amount_toman=0,
                 total_amount_usd=0.0,
                 fx_rate_usd_to_irr=fx_rate,

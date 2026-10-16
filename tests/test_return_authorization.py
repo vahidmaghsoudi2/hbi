@@ -18,7 +18,7 @@ def _setup(db_session):
             brand="B",
             product_name="Return Product",
             identity_status="VERIFIED",
-            qa_verdict="PENDING",
+            qa_verdict="VALID",
             status="ACTIVE",
         ),
         UserRole(user_role_id="UR-ADMIN-RET", subject_id="USR_ADMIN", role=ROLE_ADMIN),

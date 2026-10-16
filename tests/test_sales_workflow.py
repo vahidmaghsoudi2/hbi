@@ -40,7 +40,7 @@ def session():
         Base.metadata.drop_all(bind=engine)
 
 
-def _seed(session, pid="P-SALE-1", qty=10, status="ACTIVE"):
+def _seed(session, pid="P-SALE-1", qty=10, status="ACTIVE", identity_status="VERIFIED", qa_verdict="VALID"):
     session.add(
         Customer(customer_id="CUST-1", name="Buyer", consent_to_store_data=1)
     )
@@ -49,8 +49,8 @@ def _seed(session, pid="P-SALE-1", qty=10, status="ACTIVE"):
             product_id=pid,
             brand="B",
             product_name="N",
-            identity_status="VERIFIED",
-            qa_verdict="PENDING",
+            identity_status=identity_status,
+            qa_verdict=qa_verdict,
             status=status,
         )
     )
@@ -139,7 +139,7 @@ def test_missing_inventory_rejected(session):
             brand="B",
             product_name="N",
             identity_status="VERIFIED",
-            qa_verdict="PENDING",
+            qa_verdict="VALID",
             status="ACTIVE",
         )
     )
@@ -251,3 +251,48 @@ def test_total_sales_is_customer_scoped(session):
 
     assert SaleService(session).get_total_sales("CUST-1") == 2_000_000
     assert SaleService(session).get_total_sales("CUST-2") == 9_000_000
+
+def test_direct_sale_without_customer(session):
+    _seed(session, qty=3)
+    sale = SaleService(session).create_sale(
+        None,
+        [{"product_id": "P-SALE-1", "quantity": 1}],
+        fx_rate_usd_to_irr=1_000_000.0,
+        idempotency_key="walk-in-001",
+    )
+    session.commit()
+    assert sale.customer_id is None
+    assert sale.total_amount_toman == 2_000_000
+    assert session.get(Inventory, "INV-P-SALE-1").quantity_available == 2
+    assert session.query(StockMovement).filter_by(reference_id=sale.sale_id).count() == 1
+
+
+def test_direct_sale_cannot_link_consultation_recommendation(session):
+    _seed(session)
+    with pytest.raises(ValueError, match="without a customer"):
+        SaleService(session).create_sale(
+            None,
+            [{"product_id": "P-SALE-1", "quantity": 1, "recommendation_id": "REC-1"}],
+            fx_rate_usd_to_irr=1_000_000.0,
+        )
+
+
+
+def test_identity_unverified_product_rejected(session):
+    _seed(session, identity_status="NEEDS_REVIEW")
+    with pytest.raises(ValueError, match="identity is not VERIFIED"):
+        SaleService(session).create_sale(
+            "CUST-1",
+            [{"product_id": "P-SALE-1", "quantity": 1}],
+            fx_rate_usd_to_irr=1_000_000.0,
+        )
+
+
+def test_qa_invalid_product_rejected(session):
+    _seed(session, qa_verdict="PENDING")
+    with pytest.raises(ValueError, match="QA verdict is not VALID"):
+        SaleService(session).create_sale(
+            "CUST-1",
+            [{"product_id": "P-SALE-1", "quantity": 1}],
+            fx_rate_usd_to_irr=1_000_000.0,
+        )

@@ -14,6 +14,8 @@ from app.services.product_service import ProductService
 from app.services.product_transition_service import ProductTransitionService
 from app.services.mutation_log_service import MutationLogService
 from app.models.user_role import ROLE_EDITOR, ROLE_PO, ROLE_REVIEWER_QA, ROLE_ADMIN
+from app.models.product import Product
+from app.models.inventory import Inventory
 from app.services.research_draft_service import ResearchDraftService
 
 router = APIRouter()
@@ -71,6 +73,30 @@ async def create_research_draft(
         ]
     except Exception as e:
         _http_from_domain(e)
+
+
+@router.get("/sellable")
+async def list_sellable_products(
+    db: Session = Depends(get_db),
+    auth=Depends(require_any_role(ROLE_ADMIN)),
+):
+    """Admin sale picker: only active, QA-valid, identity-verified products with stock and a USD sale price."""
+    return [
+        _to_dict(product)
+        for product in (
+            db.query(Product)
+            .join(Inventory, Inventory.product_id == Product.product_id)
+            .filter(
+                Product.status == "ACTIVE",
+                Product.identity_status == "VERIFIED",
+                Product.qa_verdict == "VALID",
+                Inventory.quantity_available > Inventory.quantity_reserved,
+                Inventory.sale_price_usd.isnot(None),
+            )
+            .order_by(Product.product_name.asc())
+            .all()
+        )
+    ]
 
 
 @router.get("/{product_id}")

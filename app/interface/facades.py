@@ -31,6 +31,7 @@ def _to_customer_dto(c) -> CustomerDTO:
     return CustomerDTO(
         customer_id=c.customer_id,
         name=c.name,
+        family_name=getattr(c, "family_name", None),
         mobile=c.mobile,
         consent_to_store_data=c.consent_to_store_data
     )
@@ -136,10 +137,11 @@ class CustomerFacade:
     def __init__(self, db: Session):
         self.service = CustomerService(db)
 
-    def register(self, name: str, mobile: Optional[str] = None, consent: int = 0) -> CustomerDTO:
+    def register(self, name: str, mobile: Optional[str] = None, consent: int = 0, family_name: Optional[str] = None) -> CustomerDTO:
         try:
             customer = self.service.register_customer(
                 name=name,
+                family_name=family_name,
                 mobile=mobile,
                 consent_to_store_data=consent
             )
@@ -209,7 +211,7 @@ class SaleFacade:
     def __init__(self, db: Session):
         self.service = SaleService(db)
 
-    def create_sale(self, customer_id: str, items: List[Dict], *, fx_rate_usd_to_irr: float, idempotency_key: Optional[str] = None) -> SaleDTO:
+    def create_sale(self, customer_id: Optional[str], items: List[Dict], *, fx_rate_usd_to_irr: float, idempotency_key: Optional[str] = None) -> SaleDTO:
         try:
             sale = self.service.create_sale(
                 customer_id, items, fx_rate_usd_to_irr=fx_rate_usd_to_irr,
@@ -228,7 +230,7 @@ class SaleFacade:
             ]
             return SaleDTO(
                 sale_id=sale.sale_id,
-                customer_id=sale.customer_id,
+                customer_id=getattr(sale, "customer_id", None),
                 total_amount_toman=sale.total_amount_toman,
                 items=item_dtos
             )
