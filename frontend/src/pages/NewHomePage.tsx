@@ -1138,7 +1138,7 @@ export default function NewHomePage() {
             token={token}
             onEnsureSession={ensureProductSession}
             editProduct={editProduct}
-            onCancelEdit={() => setEditProduct(null)}
+            onCancelEdit={() => { setEditProduct(null); go("catalog"); }}
             onRegistered={() => {
               setEditProduct(null);
               void loadProducts();
