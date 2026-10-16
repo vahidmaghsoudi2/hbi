@@ -26,17 +26,17 @@ export default function AccountingHomePage() {
   const [sales, setSales] = useState<SalesReportDTO | null>(null);
   const [financial, setFinancial] = useState<FinancialSummaryDTO | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [reportErrors, setReportErrors] = useState<Record<Section, string | null>>({ sales: null, "finance-report": null });
 
   const loadReports = useCallback(async () => {
     const token = sessionStorage.getItem("hbi_admin_access_token");
     setAdminToken(token);
     if (!token) {
       setSales(null); setFinancial(null);
-      setError("نشست مدیر موجود نیست؛ ابتدا وارد حساب مدیر شوید.");
+      setReportErrors({ sales: "نشست مدیر موجود نیست؛ ابتدا وارد حساب مدیر شوید.", "finance-report": "نشست مدیر موجود نیست؛ ابتدا وارد حساب مدیر شوید." });
       return;
     }
-    setLoading(true); setError(null);
+    setLoading(true); setReportErrors({ sales: null, "finance-report": null });
     const now = new Date();
     const start = new Date(now); start.setHours(0, 0, 0, 0);
     const end = new Date(start); end.setDate(end.getDate() + 1);
@@ -46,8 +46,10 @@ export default function AccountingHomePage() {
     ]);
     if (results[0].status === "fulfilled") setSales(results[0].value); else setSales(null);
     if (results[1].status === "fulfilled") setFinancial(results[1].value); else setFinancial(null);
-    const failed = results.filter((r) => r.status === "rejected").length;
-    if (failed) setError(`دریافت ${failed} گزارش مالی/فروش ناموفق بود.`);
+    setReportErrors({
+      sales: results[0].status === "rejected" ? "دریافت گزارش فروش ناموفق بود." : null,
+      "finance-report": results[1].status === "rejected" ? "دریافت گزارش مالی ناموفق بود." : null,
+    });
     setLoading(false);
   }, []);
 
@@ -69,11 +71,11 @@ export default function AccountingHomePage() {
       <main className="acc-main">
         <section className="acc-panel"><h1>حسابداری و گزارش‌ها</h1><p className="acc-lead">این بخش فقط گزارش‌های مالی و فروش را نگه می‌دارد. موجودی و گردش فیزیکی کالا در فضای کاری مستقل «کالا و موجودی» قرار دارد.</p></section>
         {!adminToken && <section className="acc-panel acc-auth-panel"><h2>احراز هویت مدیریتی موردنیاز</h2><p>گزارش‌های فروش و مالی با نقش <strong>Admin</strong> محافظت می‌شوند.</p><code>sessionStorage: hbi_admin_access_token</code></section>}
-        {error && <section className="acc-panel acc-error" role="alert"><strong>خطا در دریافت داده:</strong> {error}</section>}
+        {adminToken && reportErrors[activeSection] && <section className="acc-panel acc-error" role="alert"><strong>خطا در دریافت داده:</strong> {reportErrors[activeSection]}</section>}
         <section className="acc-panel"><div className="acc-section-head"><h2>خلاصه</h2><button type="button" className="acc-refresh-btn" onClick={() => void loadReports()} disabled={loading}>{loading ? "در حال دریافت…" : "نوسازی"}</button></div>
           <div className="acc-summary-grid">
-            <article className="acc-summary-card"><h3>فروش امروز</h3><p className="acc-summary-value">{formatMoneyToman(sales?.revenue_toman)}</p><p className="acc-summary-note">{formatNumber(sales?.sale_count)} فاکتور</p></article>
-            <article className="acc-summary-card"><h3>خالص درآمد امروز</h3><p className="acc-summary-value">{formatMoneyToman(financial?.net_revenue_toman)}</p><p className="acc-summary-note">درآمد منهای مرجوعی، طبق API مالی موجود</p></article>
+            <article className="acc-summary-card"><h3>فروش امروز</h3><p className="acc-summary-value">{formatMoneyToman(sales?.revenue_toman)}</p><p className="acc-summary-note">{reportErrors.sales ?? `${formatNumber(sales?.sale_count)} فاکتور`}</p></article>
+            <article className="acc-summary-card"><h3>خالص درآمد امروز</h3><p className="acc-summary-value">{formatMoneyToman(financial?.net_revenue_toman)}</p><p className="acc-summary-note">{reportErrors["finance-report"] ?? "درآمد منهای مرجوعی، طبق API مالی موجود"}</p></article>
             <article className="acc-summary-card"><h3>سود ناخالص</h3><p className="acc-summary-value acc-deferred">DEFERRED</p><p className="acc-summary-note">COGS و سود ناخالص تا تأیید PO محاسبه نمی‌شوند</p></article>
           </div>
         </section>
