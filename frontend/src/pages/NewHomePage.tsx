@@ -677,9 +677,9 @@ export default function NewHomePage() {
             {pageView !== "main" ? (
               <button type="button" className="pro-btn-secondary" onClick={() => setPageView("main")}>منوی اصلی</button>
             ) : null}
-            {pageView !== "main" ? (
+            {pageView === "content" ? (
               <button type="button" className="pro-btn-secondary" onClick={backToNavigation}>
-                {pageView === "content" ? "بازگشت به بخش" : "بازگشت"}
+                بازگشت به بخش
               </button>
             ) : null}
           </div>
@@ -736,7 +736,6 @@ export default function NewHomePage() {
                 products: "مدیریت محصولات", inventory: "کالا و موجودی", purchases: "خرید",
                 reports: "حسابداری و گزارش‌ها", home: "خانه و داشبورد", settings: "تنظیمات",
               } as Record<MainSection, string>)[mainSection]}</h1>
-              <button type="button" className="pro-btn-secondary" onClick={() => setPageView("main")}>بازگشت به منوی اصلی</button>
             </div>
             <p className="pro-lead">فقط عملیات مربوط به این حوزه در این صفحه قرار دارد.</p>
             <div className="pro-product-grid">
