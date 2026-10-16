@@ -265,7 +265,7 @@ Find canonical record
 
 ## 14. Single-entry-point rule — anti-scatter control (2026-10-16)
 
-**The only intended entry point for Product Intake documentation is this registry.** The folder `docs/product-intake-knowledge-registry/` is the proposed consolidated home for the documents listed in §2. This rule becomes effective repository-wide only when PR #393 is accepted and merged; until then, this branch is a proposal and the old `master` paths remain physically present. Do not claim relocation is complete before that merge.
+**The only intended entry point for Product Intake documentation is this registry.** The folder `docs/product-intake-knowledge-registry/` is the consolidated destination proposed by PR #393. Verified on the PR branch: all six legacy paths listed below are absent there, while the destination documents exist. On `master`, the old paths remain until PR #393 is accepted and merged; therefore repository-wide relocation is not yet complete.
 
 ### 14.1 Canonical destination map and legacy paths
 
@@ -279,7 +279,7 @@ Find canonical record
 | `ROADMAP_PRODUCT_INTAKE_G8.md` | `docs/product-intake-knowledge-registry/ROADMAP_PRODUCT_INTAKE_G8.md` | `docs/01_project_control/ROADMAP_PRODUCT_INTAKE_G8.md` | One operational roadmap after merge |
 | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` | `docs/product-intake-knowledge-registry/SKIN_PROBLEM_SPACE_MAP_V0.1.md` | No equivalent master destination verified in this audit | Structural map only; preserve its version and source caveats |
 
-**Cleanup guard:** do not delete the legacy paths in an unmerged proposal or before verifying destination bytes, history, and all inbound links. The intended final state is one canonical copy per document, with the original filename retained and legacy duplicate paths removed in the same reviewed relocation change. Git history remains the audit trail; it is not a second working location.
+**Branch-level relocation status:** the six legacy paths above have been removed from the PR #393 branch; the original filenames now live at the listed consolidated destinations. The contract and G8 evidence files were byte-identical to their old copies. The roadmap, execution log, strategic baseline and execution-control roadmap contain path/baseline updates; their differences were inspected at line level, and destination versions retain the current consolidation paths/baseline. The old paths remain on `master` only because PR #393 is not merged. Do not manually delete them from `master` separately. Before merge, complete inbound-link validation and review the full PR diff; after merge, verify that each legacy path returns not found and each destination remains present. Git history remains the audit trail; it is not a second working location.
 
 ### 14.2 Problem Bank / Problem Space source register
 
