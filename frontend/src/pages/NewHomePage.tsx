@@ -734,7 +734,7 @@ export default function NewHomePage() {
             <div className="pro-product-grid">
               <article className="pro-product-card"><h2>خانه و داشبورد</h2><p className="pro-muted">نمای کلی عملیات و هشدارهای قابل اقدام.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("home")}>بازکردن داشبورد</button></article>
               <article className="pro-product-card"><h2>مشتریان</h2><p className="pro-muted">پروفایل، جست‌وجو و سابقهٔ خرید مشتری.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("customers")}>ورود به مشتریان</button></article>
-              <article className="pro-product-card"><h2>مشاوره</h2><p className="pro-muted">ثبت مسئله، بررسی نیاز، پیشنهادها و تصمیم اپراتور.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("consultation")}>ورود به مشاوره</button></article>
+              <article className="pro-product-card"><h2>مشاوره</h2><p className="pro-muted">ثبت مسئله، بررسی نیاز و مشاهده پیشنهادهای واجد شرایط.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("consultation")}>ورود به مشاوره</button></article>
               <article className="pro-product-card"><h2>فروش</h2><p className="pro-muted">ثبت فروش؛ مشاوره پیش‌نیاز فروش مستقیم نیست.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("sales")}>ورود به فروش</button></article>
               <article className="pro-product-card"><h2>مدیریت محصولات</h2><p className="pro-muted">فهرست، ورود اطلاعات و بررسی QA؛ مستقل از ورود فیزیکی موجودی.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("products")}>ورود به مدیریت محصولات</button></article>
               <article className="pro-product-card"><h2>کالا و موجودی</h2><p className="pro-muted">مشاهده موجودی و گردش‌های انبار؛ جدا از مدیریت اطلاعات و تأیید محصول.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("inventory")}>ورود به کالا و موجودی</button></article>
@@ -809,8 +809,8 @@ export default function NewHomePage() {
                 </article>
                 <article className="pro-product-card">
                   <h3>مشاوره</h3>
-                  <p className="pro-muted">ثبت مسئله، اعتبارسنجی نیاز و تصمیم اپراتور.</p>
-                  <button type="button" className="pro-btn-primary" onClick={() => go("consult")}>شروع مشاوره</button>
+                  <p className="pro-muted">ثبت مسئله، بررسی نیاز و مشاهده پیشنهادهای واجد شرایط.</p>
+                  <button type="button" className="pro-btn-primary" onClick={() => { setReturnToDashboard(true); go("consult"); }}>شروع مشاوره</button>
                 </article>
               </div>
             </section>
