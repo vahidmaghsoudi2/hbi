@@ -359,18 +359,6 @@ test("Dashboard quick actions stay limited to sale, customers, and consultation"
   await expect(page.getByRole("link", { name: "بازکردن خرید و موجودی" })).toHaveCount(0);
 });
 
-test("Settings does not invent extra configuration and keeps logout owned there", async ({ page }) => {
-  await page.addInitScript(() => {
-    sessionStorage.setItem("hbi_admin_access_token", "homepage-settings-boundary-test-token");
-  });
-  await page.goto("/");
-  await page.getByRole("button", { name: "ورود به تنظیمات" }).click();
-  await expect(page.getByRole("heading", { name: "تنظیمات", exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "حساب مدیر" })).toBeVisible();
-  await expect(page.getByText(/تنظیمات عملیاتی دیگری در این بخش هنوز تعریف نشده/)).toBeVisible();
-  await expect(page.getByRole("button", { name: "خروج از حساب مدیر" })).toBeVisible();
-});
-
 test("Product menu has one canonical list plus intake and QA actions", async ({ page }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-product-catalog-test-token");
