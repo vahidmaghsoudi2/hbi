@@ -72,7 +72,7 @@ HBI Admin workspace (/)
 | Consultation form has no shortcut into product management | ✓ | Product review and intake are a separate module; consultation stays focused on customer reality, problem, need, recommendation, and operator decision. |
 | Sales report has one canonical menu owner | ✓ | The main menu now uses “حسابداری و گزارش‌ها”; its submenu contains sales and finance reports only |
 | Inventory and stock-flow are owned by Products & Inventory | ✓ | Report rendering is now in `InventoryHomePage` at `/inventory`; Accounting retains sales and finance reports only. Dashboard and section shortcuts target the inventory route |
-| Dashboard quick actions for Intake, QA and Purchase | ? | Acceptable only as clearly labelled shortcuts. They must not imply those modules are dashboard children or replace their canonical menu location |
+| Dashboard quick actions stay focused on high-frequency tasks | ✓ | Current dashboard shortcuts are direct sale, customer search/new customer, and consultation. Intake, QA, and purchase remain in their canonical modules |
 | Product list embedded in NewHomePage plus `/catalog` route | ? | Code inspection shows different APIs and purposes: `/catalog` is a read-only list; the embedded panel uses manageable products and provides intake/edit and QA. Decide whether the read-only catalog is a useful distinct destination or an unnecessary duplicate; do not remove either based on label similarity alone |
 | Settings separate, logout inside Settings | ✓ | Keep account/logout out of the main operational menu and avoid an always-visible logout action |
 | `/pilot` and `/recommendation` routes | ✓ | AdminGate now protects browser entry. The pilot/customer JWT remains separate and API authorization must still be tested independently |
@@ -147,7 +147,7 @@ These are placement sketches, not visual redesigns. ✓ = belongs; X = misplaced
 | ✓ Low-stock alerts   | ✓ Recent movements   |
 +---------------------------------------------+
 | ✓ Quick actions: Sale / Customer / Consult  |
-| ? Intake / QA / Purchase shortcuts          |
+| ✓ No Intake / QA / Purchase quick actions  |
 | X Do not show duplicate full module menus   |
 +---------------------------------------------+
 ```
