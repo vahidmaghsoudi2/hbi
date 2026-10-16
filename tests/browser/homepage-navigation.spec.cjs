@@ -122,6 +122,41 @@ test("Inventory report errors stay local to the selected inventory section", asy
   await expect(page.getByText("دریافت گزارش کمبود موجودی ناموفق بود.")).toBeVisible();
 });
 
+test("An in-flight customer search cannot repopulate another panel", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-inflight-search-boundary-token");
+    sessionStorage.setItem("hbi_operator_access_token", "homepage-operator-inflight-search-token");
+  });
+  let releaseSearch;
+  const holdSearch = new Promise((resolve) => { releaseSearch = resolve; });
+  await page.route("**/customers/search?*", async (route) => {
+    await holdSearch;
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify([{
+        customer_id: "CUS-LATE-1",
+        name: "Test",
+        family_name: "دیررس",
+        mobile: "09000000001",
+      }]),
+    });
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "جست‌وجوی مشتری" }).click();
+  await page.getByLabel("جست‌وجوی مشتری قبلی با نام خانوادگی یا موبایل").fill("دیررس");
+  const requestStarted = page.waitForRequest((request) => request.url().includes("/customers/search?"));
+  await page.getByRole("button", { name: "جست‌وجو" }).click();
+  await requestStarted;
+  await page.getByRole("button", { name: "بازگشت به داشبورد" }).click();
+  await page.getByRole("button", { name: "ثبت فروش" }).click();
+  const responseReceived = page.waitForResponse((response) => response.url().includes("/customers/search?"));
+  releaseSearch();
+  await responseReceived;
+  await expect(page.getByRole("heading", { name: "ثبت فروش" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /CUS-LATE-1/ })).toHaveCount(0);
+});
+
 test("Customer search results do not leak into the optional sale-account picker", async ({ page }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-search-boundary-test-token");
