@@ -48,13 +48,11 @@ test("Homepage navigation keeps sales, inventory, and reports in their own desti
 
   // Reports expose the existing report destinations explicitly.
   await page.getByRole("link", { name: "بازگشت به خانه HBI" }).click();
-  await page.getByRole("button", { name: "ورود به حسابداری و گزارش‌ها" }).click();
+  await page.getByRole("button", { name: "ورود به گزارش‌ها" }).click();
+  await expect(page.getByRole("heading", { name: "گزارش‌ها", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "بازکردن گزارش فروش" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "بازکردن گزارش موجودی" })).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "بازکردن گردش کالا" })).toHaveCount(0);
-  await page.getByRole("link", { name: "بازکردن گزارش مالی" }).click();
-  await expect(page).toHaveURL(/\/accounting\?section=finance-report$/);
-  await expect(page.getByRole("heading", { name: "گزارش مالی عملیاتی" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "بازکردن گزارش موجودی" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "بازکردن گردش کالا" })).toBeVisible();
 });
 
 test("Dashboard report shortcuts preserve their own report destinations", async ({ page }) => {
@@ -63,13 +61,26 @@ test("Dashboard report shortcuts preserve their own report destinations", async 
   });
   await page.goto("/");
   await page.getByRole("button", { name: "بازکردن داشبورد" }).click();
-  await expect(page.getByRole("heading", { name: "داشبورد HBI" })).toBeVisible();
-
+  await expect(page.getByRole("heading", { name: "داشبورد عملیاتی" })).toBeVisible();
   await expect(page.getByRole("link", { name: "گزارش فروش" })).toHaveAttribute("href", "/accounting?section=sales");
-  await expect(page.getByRole("link", { name: "مشاهدهٔ موجودی" })).toHaveAttribute("href", "/inventory?section=inventory");
-  await expect(page.getByRole("link", { name: "بررسی موجودی" })).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "مشاهدهٔ موجودی" })).toHaveCount(1);
-  await expect(page.getByRole("link", { name: "همهٔ گردش‌ها" })).toHaveAttribute("href", "/inventory?section=stock-flow");
+  await expect(page.getByRole("link", { name: "گزارش موجودی" })).toHaveAttribute("href", "/inventory?section=inventory");
+  await expect(page.getByRole("link", { name: "کمبود موجودی" })).toHaveAttribute("href", "/inventory?section=low-stock");
+  await expect(page.getByRole("link", { name: "گردش اخیر" })).toHaveAttribute("href", "/inventory?section=stock-flow");
+});
+
+test("Customer search stays in customers domain and does not auto-start consultation", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-customer-boundary-test-token");
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "ورود به مشتریان" }).click();
+  await expect(page.getByRole("heading", { name: "مشتریان", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "بازکردن جست‌وجوی مشتری" }).click();
+  await expect(page.getByRole("heading", { name: "مشتری قبلی / جست‌وجو" })).toBeVisible();
+  await expect(page.getByText(/انتخاب مشتری به‌خودی‌خود مشاوره را شروع نمی‌کند/)).toBeVisible();
+  // Consultation form must not appear until the operator explicitly opens consultation.
+  await expect(page.getByRole("heading", { name: "فرم مشاوره سریع" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "ثبت مراجعه + دریافت پیشنهاد" })).toHaveCount(0);
 });
 
 test("Consultation actions stay focused on the customer problem and recommendation flow", async ({ page }) => {
