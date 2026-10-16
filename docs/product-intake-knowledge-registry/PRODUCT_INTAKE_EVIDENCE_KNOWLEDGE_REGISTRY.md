@@ -23,13 +23,13 @@
 
 | حوزه | مرجع | وضعیت |
 |---|---|---|
-| Contract | `docs/architecture/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md` | CANONICAL |
+| Contract | `docs/product-intake-knowledge-registry/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md` | CANONICAL |
 | Operational tracker | Issue #283 | CANONICAL |
-| Phase roadmap | `docs/product-intake/PRODUCT_INTAKE_ROADMAP.md` | CANONICAL |
-| Runtime execution log | `docs/product-intake/PRODUCT_INTAKE_EXECUTION_LOG.md` | CANONICAL |
-| A1–A9 ledger | `docs/product-intake/G8_ACCEPTANCE_EVIDENCE.md` | CANONICAL |
-| Execution-control | `docs/01_project_control/ROADMAP_PRODUCT_INTAKE_G8.md` | CANONICAL |
-| Strategic Skin baseline | `docs/architecture/SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md` | DESIGN / NOT AUTHORIZED |
+| Phase roadmap | `docs/product-intake-knowledge-registry/PRODUCT_INTAKE_ROADMAP.md` | CANONICAL |
+| Runtime execution log | `docs/product-intake-knowledge-registry/PRODUCT_INTAKE_EXECUTION_LOG.md` | CANONICAL |
+| A1–A9 ledger | `docs/product-intake-knowledge-registry/G8_ACCEPTANCE_EVIDENCE.md` | CANONICAL |
+| Execution-control | `docs/product-intake-knowledge-registry/ROADMAP_PRODUCT_INTAKE_G8.md` | CANONICAL |
+| Strategic Skin baseline | `docs/product-intake-knowledge-registry/SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md` | DESIGN / NOT AUTHORIZED |
 | New Home IA | Issue #352 + current New Home code | CANONICAL for homepage only |
 
 ## 3. Two required angles
