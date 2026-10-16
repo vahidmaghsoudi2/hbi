@@ -697,8 +697,8 @@ export default function NewHomePage() {
       <main className="pro-main">
         {pageView === "content" ? (
         <div className="pro-status-bar">
-          <span className={token ? "dot on" : "dot"} />
-          <span>{token ? "نشست فعال" : "نشست ندارد"}</span>
+          <span className={sessionStorage.getItem("hbi_admin_access_token") ? "dot on" : "dot"} />
+          <span>{sessionStorage.getItem("hbi_admin_access_token") ? "نشست مدیر فعال" : "نشست مدیر ندارد"}</span>
           <span className="sep">|</span>
           <span>مشتری: {customerId ?? "—"}</span>
           <span className="sep">|</span>
