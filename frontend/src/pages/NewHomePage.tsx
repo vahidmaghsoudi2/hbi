@@ -108,6 +108,67 @@ export default function NewHomePage() {
   const [dashboardInventory, setDashboardInventory] = useState<InventoryReportRow[] | null>(null);
   const [dashboardLowStock, setDashboardLowStock] = useState<InventoryReportRow[] | null>(null);
   const [dashboardMovements, setDashboardMovements] = useState<StockMovementDTO[] | null>(null);
+  const lastHomepageHistorySnapshot = useRef<string | null>(null);
+
+  // Keep the browser's Back/Forward stack aligned with the in-page navigation.
+  // The URL stays stable; each entry stores only the visible homepage location.
+  useEffect(() => {
+    const initialNavigation = {
+      active: "home" as Panel,
+      pageView: "main" as PageView,
+      mainSection: "home" as MainSection,
+      returnToDashboard: false,
+      returnToCatalog: false,
+    };
+    window.history.replaceState(
+      { ...(window.history.state ?? {}), hbiHomepageNavigation: initialNavigation },
+      "",
+    );
+
+    function restoreHomepageNavigation(event: PopStateEvent) {
+      const saved = event.state?.hbiHomepageNavigation as {
+        active?: Panel;
+        pageView?: PageView;
+        mainSection?: MainSection;
+        returnToDashboard?: boolean;
+        returnToCatalog?: boolean;
+      } | undefined;
+      const next = saved ?? initialNavigation;
+      const snapshot = {
+        active: next.active ?? "home",
+        pageView: next.pageView ?? "main",
+        mainSection: next.mainSection ?? "home",
+        returnToDashboard: next.returnToDashboard ?? false,
+        returnToCatalog: next.returnToCatalog ?? false,
+      };
+      lastHomepageHistorySnapshot.current = JSON.stringify(snapshot);
+      setActive(snapshot.active);
+      setPageView(snapshot.pageView);
+      setMainSection(snapshot.mainSection);
+      setReturnToDashboard(snapshot.returnToDashboard);
+      setReturnToCatalog(snapshot.returnToCatalog);
+      setError(null);
+      setStatusMsg(null);
+    }
+
+    window.addEventListener("popstate", restoreHomepageNavigation);
+    return () => window.removeEventListener("popstate", restoreHomepageNavigation);
+  }, []);
+
+  useEffect(() => {
+    const snapshot = { active, pageView, mainSection, returnToDashboard, returnToCatalog };
+    const serialized = JSON.stringify(snapshot);
+    if (lastHomepageHistorySnapshot.current === null) {
+      lastHomepageHistorySnapshot.current = serialized;
+      return;
+    }
+    if (lastHomepageHistorySnapshot.current === serialized) return;
+    window.history.pushState(
+      { ...(window.history.state ?? {}), hbiHomepageNavigation: snapshot },
+      "",
+    );
+    lastHomepageHistorySnapshot.current = serialized;
+  }, [active, pageView, mainSection, returnToDashboard, returnToCatalog]);
 
   const loadProducts = useCallback(async () => {
     setCatalogLoading(true);
