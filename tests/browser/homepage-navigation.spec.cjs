@@ -31,7 +31,7 @@ test("Homepage navigation keeps sales, inventory, and reports in their own desti
   await page.getByRole("button", { name: "بازکردن ثبت فروش" }).click();
   await expect(page.getByRole("button", { name: "بازگشت به بخش" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "ثبت فروش" })).toBeVisible();
-  await expect(page.getByText(/الگوی صندوق فروش|فروش حضوری بدون/)).toBeVisible();
+  await expect(page.getByText(/الگوی صندوق فروش|فروش حضوری بدون/).first()).toBeVisible();
   await expect(page.getByText("اقلام فاکتور")).toBeVisible();
   await expect(page.getByLabel("جست‌وجوی طرف‌حساب با نام خانوادگی")).toBeVisible();
   await expect(page.locator("#sale-customer-search")).toHaveAttribute("placeholder", "نام خانوادگی…");
