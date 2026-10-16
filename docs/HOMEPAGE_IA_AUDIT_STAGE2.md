@@ -58,11 +58,14 @@ HBI Admin workspace (/)
 │   └── Stock movement report
 ├── Purchase
 │   └── Purchase / stock-in
-├── Reports
-│   ├── Sales report
-│   ├── Inventory report
-│   ├── Stock movement report
-│   └── Finance report
+└── Accounting / Reports
+    ├── Sales report
+    └── Finance report
+
+Inventory reports are owned by Products & Inventory:
+    ├── Inventory report
+    ├── Low-stock report
+    └── Stock movement report
 └── Settings
     ├── Admin account
     └── Logout
@@ -203,8 +206,9 @@ These are placement sketches, not visual redesigns. ✓ = belongs; X = misplaced
 +----------------------+  +----------------------+
 | ✓ ACCOUNTING / REPORTS                       |
 +---------------------------------------------+
-| ✓ Sales | ✓ Finance (Accounting) · ✓ Inventory | ✓ Stock flow (Products & Inventory) |
-| X Avoid duplicate full destinations in menus |
+| ✓ Sales report | ✓ Finance report            |
+| X Inventory and stock-flow reports here      |
+|   Those belong to Products & Inventory       |
 +---------------------------------------------+
 ```
 
@@ -231,8 +235,8 @@ These are placement sketches, not visual redesigns. ✓ = belongs; X = misplaced
 - **Product Management:** product list, refresh, edit action, QA review action, intake/edit panel, review panel.
 - **Inventory:** inventory report shortcut, stock movement shortcut.
 - **Purchase:** product selector, quantity, purchase unit price, FX rate, reference ID, note, submit purchase, refresh, result summary.
-- **Reports:** sales, inventory, stock movement, finance report shortcuts.
-- **Accounting page:** Admin-session status, refresh, sales/net-revenue/inventory/gross-profit summary cards, four section buttons, active section content, error state, Home link.
+- **Accounting / Reports:** sales and finance report shortcuts only. Inventory, low-stock, and stock-flow shortcuts live under Products & Inventory.
+- **Accounting page:** Admin-session status, refresh, sales/net-revenue/gross-profit summary cards, two section buttons (sales and finance), active section content, error state, Home link. Inventory and stock-flow reports are rendered only by the separate Products & Inventory page.
 - **Settings:** Admin account entry and logout.
 - **Cross-cutting:** loading, empty, error and success messages. Keep them local to the relevant operation rather than showing unrelated errors in another module.
 
