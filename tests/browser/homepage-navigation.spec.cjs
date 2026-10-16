@@ -77,7 +77,7 @@ test("Customer search stays in customers domain and does not auto-start consulta
   await expect(page.getByRole("heading", { name: "مشتریان", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "بازکردن جست‌وجوی مشتری" }).click();
   await expect(page.getByRole("heading", { name: "مشتری قبلی / جست‌وجو" })).toBeVisible();
-  await expect(page.getByText(/انتخاب مشتری به‌خودی‌خود مشاوره را شروع نمی‌کند/)).toBeVisible();
+  await expect(page.getByPlaceholder("نام خانوادگی یا شماره موبایل مشتری…")).toBeVisible();
   // Consultation form must not appear until the operator explicitly opens consultation.
   await expect(page.getByRole("heading", { name: "فرم مشاوره سریع" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "ثبت مراجعه + دریافت پیشنهاد" })).toHaveCount(0);
