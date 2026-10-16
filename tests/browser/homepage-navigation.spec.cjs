@@ -74,7 +74,7 @@ test("Dashboard report shortcuts preserve their own report destinations", async 
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-dashboard-links-test-token");
   });
-  await page.route("**/reports/inventory/low-stock?threshold=5", (route) => route.fulfill({
+  await page.route("**/reports/inventory/low-stock*", (route) => route.fulfill({
     status: 200,
     contentType: "application/json",
     body: JSON.stringify([{ inventory_id: "INV-LOW-1", product_id: "P-LOW-1", quantity_available: 2 }]),
