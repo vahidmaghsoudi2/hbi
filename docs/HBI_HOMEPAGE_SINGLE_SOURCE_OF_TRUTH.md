@@ -60,12 +60,15 @@ The standalone `/catalog` entry is obsolete and redirects to the approved route.
 | HP-04 | Reconcile and merge homepage integration | [PR #363](https://github.com/vahidmaghsoudi2/hbi/pull/363), merge `0463044d7b49b4847b70d388766484fce5504392` | MERGED |
 | HP-05 | Isolate Sales customer search results from Customers workflow | Confirmed on master `NewHomePage.tsx` that Sales search still writes to the shared `customerSearchResults`; previous draft [PR #392](https://github.com/vahidmaghsoudi2/hbi/pull/392) contains the targeted fix but is based on an old Stage 2 branch. Fix has been ported to this consolidation branch. | IMPLEMENTED IN THIS BRANCH — CI/targeted verification PENDING |
 | HP-06 | Local Windows runtime/database acceptance | Local frontend production build succeeded on `cff6845`; user launched the app. Menu click-through was already known to work and is not to be repeated absent a specific regression. No claim is made that real sales/database mutations were verified in this pass. | PARTIAL — do not repeat generic menu check |
+| HP-07 | Anonymous direct sale contract | Current homepage submits `customer_id: saleCustomerId`, which can be null; the API/schema/runtime acceptance of a truly anonymous sale has not been established in this consolidation. Former PR #344 instead asks for a buyer name and creates a guest customer, which conflicts with the PO rule that customer association is optional. Do not port that old implementation; verify the current backend contract before changing it. | NEEDS TARGETED API CONTRACT EVIDENCE |
 
-## 5. The only currently identified code follow-up
+## 5. Targeted follow-ups only
 
 **HP-05: isolate Sales customer-picker search state.** On current master, `searchSaleCustomers()` uses the same `customerSearchResults` state as Customers history/search. That can leak results between two independent workflows. The targeted fix introduces `saleCustomerSearchResults` and uses it only in Sales. It is included on the consolidation branch; exact-branch CI and appropriate test evidence are still required before acceptance.
 
 Do not expand this into a general navigation rewrite. Do not rerun generic menu checks to validate this state-isolation fix.
+
+**HP-07: anonymous direct sale.** The approved rule is that customer and consultation are both optional. The homepage currently passes the selected customer ID, including null when no customer is selected. Before changing code, establish whether the current API/schema accepts null; the closed PR #344 is not a valid implementation because it forces a name and creates a guest customer. Only this narrow API-contract question is open.
 
 ## 6. What is explicitly historical / superseded
 
@@ -76,8 +79,10 @@ The following were inspected and their useful current decisions have been reconc
 - `docs/HBI_HOME_OPERATIONAL_ROADMAP.md` — old phased plan superseded.
 - `docs/HBI_HOME_PAGE_ARCHITECTURE_DECISION.md` — old ADR and next-action text superseded.
 - Issues #290 and #175, and older homepage PR descriptions/comments — retained as GitHub history, not execution instructions.
-- PRs #339, #347, #354 and #362 — historical/overlapping proposals superseded by merged PR #363; close them as superseded rather than treating them as parallel workstreams.
-- PR #392 — its isolated customer-search fix is being consolidated into HP-05 here; do not maintain a parallel fix branch after this PR is verified.
+- PRs #339, #347, #354 and #362 — historical/overlapping proposals superseded by merged PR #363; closed as superseded.
+- PR #341 — its dashboard-summary concept is already represented by the current NewHomePage and its real report API calls; closed as superseded by merged PR #363.
+- PR #344 — closed as superseded/incompatible: its proposed guest-customer creation and mandatory buyer name conflict with the approved optional-customer rule. HP-07 tracks the remaining API-contract evidence gap.
+- PR #392 — its isolated customer-search fix has been ported into HP-05 here and the old-branch PR is closed; do not maintain a parallel fix branch.
 
 GitHub issue/PR history cannot be erased without destroying audit traceability. Historical records may remain visible, but they must point to this single active document and must not be treated as competing plans.
 
