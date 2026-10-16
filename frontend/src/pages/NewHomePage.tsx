@@ -504,8 +504,6 @@ export default function NewHomePage() {
     setNote("");
     setRecs([]);
     setRecDone(false);
-    setSaleProductId("");
-    setLastSale(null);
     setPurchaseHistory([]);
     setStatusMsg("مشتری جدید آماده ثبت است. نشست محصولات/اپراتور دست‌نخورده باقی ماند.");
     setActive("profile");
