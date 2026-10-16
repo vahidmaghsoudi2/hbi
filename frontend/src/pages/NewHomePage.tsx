@@ -306,6 +306,13 @@ export default function NewHomePage() {
   }
 
   function go(panel: Panel) {
+    // Customer search results are shared by the customer-history and optional
+    // sale-account selectors. Never carry matches from one context into the other.
+    if (panel === "sales" || panel === "previous") {
+      setCustomerSearchResults([]);
+      setCustomerSearch("");
+      setSaleCustomerSearch("");
+    }
     setActive(panel);
     setPageView("content");
     setError(null);
