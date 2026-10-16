@@ -2,7 +2,7 @@
 
 **Status:** EXECUTION REGISTRY — PO approved for consolidation work  
 **Scope:** Skin Product Intake / Product Intelligence / Problem–Need connection  
-**Baseline:** `335fd6e472dde72b9907366acaa04db28ebed943`  
+**Last verified against master:** `fc1f8f585f4f9d6cfa487a4709a24b57c3026d4b` (2026-10-16; historical verification point, not a claim that this SHA remains HEAD after later merges)  
 **Last reconciled:** 2026-10-16
 
 ## 1. Purpose
@@ -265,7 +265,7 @@ Find canonical record
 
 ## 14. Single-entry-point rule — anti-scatter control (2026-10-16)
 
-**The only intended entry point for Product Intake documentation is this registry.** The folder `docs/product-intake-knowledge-registry/` is the consolidated destination proposed by PR #393. Verified on the PR branch: all six legacy paths listed below are absent there, while the destination documents exist. On `master`, the old paths remain until PR #393 is accepted and merged; therefore repository-wide relocation is not yet complete.
+**The only intended entry point for Product Intake documentation is this registry.** PR #393 has been merged. The consolidated destinations listed below are the intended working locations; the statement that the old paths remain on `master` until PR #393 merges is historical and no longer current. Treat the table as a relocation map, not as permission for an unreviewed deletion. Before any further cleanup, verify each legacy path against current `master`, validate inbound links, and preserve the Git history/audit trail. Any remaining legacy copy must be handled in a reviewed, item-specific change.
 
 ### 14.1 Canonical destination map and legacy paths
 
@@ -280,6 +280,16 @@ Find canonical record
 | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` | `docs/product-intake-knowledge-registry/SKIN_PROBLEM_SPACE_MAP_V0.1.md` | No equivalent master destination verified in this audit | Structural map only; preserve its version and source caveats |
 
 **Branch-level relocation status:** the six legacy paths above have been removed from the PR #393 branch; the original filenames now live at the listed consolidated destinations. The contract and G8 evidence files were byte-identical to their old copies. The roadmap, execution log, strategic baseline and execution-control roadmap contain path/baseline updates; their differences were inspected at line level, and destination versions retain the current consolidation paths/baseline. The old paths remain on `master` only because PR #393 is not merged. Do not manually delete them from `master` separately. Before merge, complete inbound-link validation and review the full PR diff; after merge, verify that each legacy path returns not found and each destination remains present. Git history remains the audit trail; it is not a second working location.
+
+### 14.3 Contract authority relationship — generic v1 vs skin execution v1.1
+
+The older `docs/01_project_control/product_intake/PRODUCT_INTAKE_CONTRACT_v1.md` is retained as a **historical design/acceptance record**, not a parallel current authority for skin-specific execution. Its recorded PO acceptance is tied to baseline `42cc77ec` and date 2026-09-07. The later `SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md` is the current PO-approved contract baseline for skin-product intake decisions and skin-specific requirements.
+
+Apply the documents by scope:
+- **P4 Product Intake Governance Contract** remains binding for the governed product lifecycle, roles, approval/activation transitions, and mutation/audit rules where applicable.
+- **Skin Product Intake Execution Contract v1.1** is the current authority for skin-product intake, safety/UNKNOWN requirements, claim taxonomy, and skin-specific eligibility boundaries.
+- **Generic Product Intake Contract v1** is historical context for its original design decisions. Do not use it to override v1.1 on skin-specific matters or to create a second approval/state machine.
+- If a concrete clause appears to conflict and cannot be resolved by this scope split, record the exact clauses and obtain PO adjudication in a reviewed change; do not silently delete or rewrite the historical contract.
 
 ### 14.2 Problem Bank / Problem Space source register
 
