@@ -10,7 +10,7 @@
 This document is the operational roadmap and evidence index for the Product Intake execution pilot. It does not replace or amend the approved Product Intake contract. If there is a conflict, the approved contract and explicit Product Owner decisions govern.
 
 Primary references:
-- [Skin Product Intake Execution Contract v1.1](../architecture/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md)
+- [Skin Product Intake Execution Contract v1.1](SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md)
 - [P4 Product Intake Governance Contract V1](../P4_PRODUCT_INTAKE_GOVERNANCE_CONTRACT_V1.md)
 - [Issue #283 — governing mission](https://github.com/vahidmaghsoudi2/hbi/issues/283)
 - [PR #360 — claim integrity and evidence/UI consolidation](https://github.com/vahidmaghsoudi2/hbi/pull/360)
