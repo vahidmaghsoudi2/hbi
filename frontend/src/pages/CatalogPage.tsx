@@ -25,8 +25,8 @@ export default function CatalogPage() {
 
   return (
     <section>
-      <h1>کاتالوگ محصولات</h1>
-      <p className="lead">فهرست محصولات برای اپراتور واردشده؛ دسترسی از مسیر احراز هویت مدیر کنترل می‌شود.</p>
+      <h1>کاتالوگ محصولات با هویت تأییدشده</h1>
+      <p className="lead">فهرست فقط محصولاتی را نشان می‌دهد که هویت آن‌ها VERIFIED است؛ این به‌تنهایی به معنی فعال بودن یا قابل فروش بودن نیست. دسترسی از مسیر احراز هویت مدیر کنترل می‌شود.</p>
       <div className="row" style={{ marginBottom: "1rem" }}>
         <Link className="btn" to="/">بازگشت به منوی اصلی</Link>
       </div>
