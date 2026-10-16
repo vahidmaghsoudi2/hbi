@@ -302,7 +302,7 @@ test("Admin logout is always available in the fixed header, without a fake Setti
 
   await expect(page.getByRole("button", { name: "ورود به تنظیمات" })).toHaveCount(0);
   await page.getByRole("button", { name: "خروج از حساب مدیر" }).click();
-  await expect(page).toHaveURL(/\\/login$/);
+  await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByRole("heading", { name: "ورود مدیر HBI" })).toBeVisible();
 });
 
