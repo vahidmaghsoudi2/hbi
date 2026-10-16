@@ -48,7 +48,7 @@ test("Homepage navigation keeps sales, inventory, and reports in their own desti
 
   // Accounting owns sales/finance reports only; inventory stays in کالا و موجودی.
   await page.getByRole("link", { name: "بازگشت به خانه HBI" }).click();
-  await page.getByRole("button", { name: "ورود به گزارش‌ها" }).click();
+  await page.getByRole("button", { name: "ورود به حسابداری و گزارش‌ها" }).click();
   await expect(page.getByRole("heading", { name: "گزارش‌ها", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "بازکردن گزارش فروش" })).toBeVisible();
   await expect(page.getByRole("link", { name: "بازکردن گزارش مالی" })).toBeVisible();
@@ -66,7 +66,7 @@ test("Dashboard report shortcuts preserve their own report destinations", async 
   });
   await page.goto("/");
   await page.getByRole("button", { name: "بازکردن داشبورد" }).click();
-  await expect(page.getByRole("heading", { name: "داشبورد عملیاتی" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "داشبورد HBI", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "گزارش فروش" })).toHaveAttribute("href", "/accounting?section=sales");
   await expect(page.getByRole("link", { name: "گزارش موجودی" })).toHaveAttribute("href", "/inventory?section=inventory");
   await expect(page.getByRole("link", { name: "کمبود موجودی" })).toHaveAttribute("href", "/inventory?section=low-stock");
@@ -141,7 +141,7 @@ test("Accounting deep-links stay on sales and finance sections", async ({ page }
   await page.goto("/accounting?section=finance-report");
   await expect(page.getByRole("heading", { name: "حسابداری و گزارش‌ها", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "گزارش مالی عملیاتی", exact: true })).toBeVisible();
-  await expect(page.getByText("COGS")).toBeVisible();
+  await expect(page.getByText("COGS", { exact: true })).toBeVisible();
   await expect(page.getByText("DEFERRED BY PO").first()).toBeVisible();
   // Inventory is not an accounting destination.
   await expect(page.getByRole("heading", { name: "موجودی کالا", exact: true })).toHaveCount(0);
