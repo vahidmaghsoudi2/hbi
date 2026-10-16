@@ -48,7 +48,7 @@ def _sale(session, qty=5):
             brand="B",
             product_name="N",
             identity_status="VERIFIED",
-            qa_verdict="PENDING",
+            qa_verdict="VALID",
             status="ACTIVE",
         )
     )

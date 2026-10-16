@@ -6,7 +6,7 @@ from app.models.base import Base
 class Sale(Base):
     __tablename__ = "Sale"
     sale_id = Column(String, primary_key=True)
-    customer_id = Column(String, ForeignKey("Customer.customer_id", ondelete="RESTRICT"), nullable=False)
+    customer_id = Column(String, ForeignKey("Customer.customer_id", ondelete="RESTRICT"), nullable=True)
     total_amount_toman = Column(Integer, nullable=False)  # legacy retained
     total_amount_usd = Column(Float, nullable=True)
     fx_rate_usd_to_irr = Column(Float, nullable=True)  # IRR per 1 USD snapshot

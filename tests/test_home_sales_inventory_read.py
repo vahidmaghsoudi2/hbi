@@ -133,3 +133,43 @@ def test_unauthenticated_cannot_read_or_mutate(client, db_session):
             "fx_rate_usd_to_irr": 1_000_000.0,
         },
     ).status_code == 401
+
+
+def test_admin_sellable_catalog_lists_eligible_product(client, db_session):
+    """Homepage sale picker source: GET /products/sellable for Admin only."""
+    _seed(db_session)
+    _grant(db_session, "USR_ADMIN", ROLE_ADMIN)
+
+    denied = client.get("/api/v1/products/sellable", headers=_auth("C-SALE"))
+    assert denied.status_code == 403, denied.text
+
+    ok = client.get("/api/v1/products/sellable", headers=_auth("USR_ADMIN"))
+    assert ok.status_code == 200, ok.text
+    rows = ok.json()
+    assert isinstance(rows, list)
+    assert [r["product_id"] for r in rows] == ["P-SALE"]
+
+
+def test_admin_walk_in_sale_without_customer(client, db_session):
+    """Direct sale: Admin may post with customer_id null; stock must decrease."""
+    _seed(db_session)
+    _grant(db_session, "USR_ADMIN", ROLE_ADMIN)
+
+    sale = client.post(
+        "/api/v1/sales/",
+        json={
+            "customer_id": None,
+            "items": [{"product_id": "P-SALE", "quantity": 1}],
+            "fx_rate_usd_to_irr": 1_000_000.0,
+            "idempotency_key": "walk-in-home-001",
+        },
+        headers=_auth("USR_ADMIN"),
+    )
+    assert sale.status_code == 201, sale.text
+    body = sale.json()
+    assert body.get("customer_id") in (None, "")
+    assert body.get("sale_id")
+
+    inv = client.get("/api/v1/inventory/product/P-SALE", headers=_auth("USR_ADMIN"))
+    assert inv.status_code == 200, inv.text
+    assert inv.json()["quantity_available"] == 2

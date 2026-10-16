@@ -82,7 +82,7 @@ def test_operational_fx_does_not_mutate_history(session):
             brand="B",
             product_name="N",
             identity_status="VERIFIED",
-            qa_verdict="PENDING",
+            qa_verdict="VALID",
             status="ACTIVE",
         )
     )
@@ -152,7 +152,7 @@ def test_toman_preservation_on_stock_in(session):
             brand="B",
             product_name="N",
             identity_status="VERIFIED",
-            qa_verdict="PENDING",
+            qa_verdict="VALID",
             status="ACTIVE",
         )
     )

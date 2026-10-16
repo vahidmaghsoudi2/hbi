@@ -49,7 +49,7 @@ def _sold(session, qty_sold=3, stock_start=10):
             brand="B",
             product_name="N",
             identity_status="VERIFIED",
-            qa_verdict="PENDING",
+            qa_verdict="VALID",
             status="ACTIVE",
         )
     )

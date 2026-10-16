@@ -1,7 +1,7 @@
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
-  listProducts,
+  listSellableProducts,
   listManageableProducts,
   pilotToken,
   pilotOperatorToken,
@@ -17,6 +17,10 @@ import {
   getInventoryByProduct,
   getCurrentFx,
   listSalesByCustomer,
+  getSalesPeriod,
+  getInventoryReport,
+  getLowStockReport,
+  getStockMovements,
 } from "../api/client";
 import ProductIntakePanel from "./ProductIntakePanel";
 import ProductReviewPanel from "./ProductReviewPanel";
@@ -28,6 +32,9 @@ import type {
   GuestCreateRequest,
   CustomerSearchResult,
   SaleDTO,
+  SalesReportDTO,
+  InventoryReportRow,
+  StockMovementDTO,
 } from "../types/api";
 
 const CONCERN_OPTIONS = [
@@ -45,11 +52,17 @@ const SKIN_OPTIONS = ["خشک", "چرب", "مختلط", "معمولی", "حسا�
 const CONSULTATION_LINES = [{ id: "SKIN", label: "پوست" }] as const;
 const INITIAL_RECOMMENDATION_LIMIT = 5;
 
-type Panel = "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about";
+type Panel = "home" | "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about";
+type MainSection = "home" | "customers" | "consultation" | "sales" | "products" | "inventory" | "purchases" | "reports";
+type PageView = "main" | "section" | "content";
 
 export default function NewHomePage() {
-  const [active, setActive] = useState<Panel>("consult");
-  const [productsMenuOpen, setProductsMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const [active, setActive] = useState<Panel>("home");
+  const [pageView, setPageView] = useState<PageView>("main");
+  const [mainSection, setMainSection] = useState<MainSection>("home");
+  const [returnToDashboard, setReturnToDashboard] = useState(false);
+  const [returnToCatalog, setReturnToCatalog] = useState(false);
   const [token, setToken] = useState<string | null>(() => sessionStorage.getItem("hbi_access_token"));
   const [customerId, setCustomerId] = useState<string | null>(() => sessionStorage.getItem("hbi_customer_id"));
   const [caseId, setCaseId] = useState<string | null>(() => sessionStorage.getItem("hbi_case_id"));
@@ -64,13 +77,17 @@ export default function NewHomePage() {
   const [error, setError] = useState<string | null>(null);
   const [products, setProducts] = useState<ProductDTO[]>([]);
   const [sellableProducts, setSellableProducts] = useState<ProductDTO[]>([]);
+  const [saleProductsError, setSaleProductsError] = useState<string | null>(null);
+  const [saleProductsLoading, setSaleProductsLoading] = useState(true);
+  const [saleCustomerSearch, setSaleCustomerSearch] = useState("");
+  const [saleCustomerId, setSaleCustomerId] = useState<string | null>(null);
+  const [saleCustomerLabel, setSaleCustomerLabel] = useState<string | null>(null);
   const [catalogError, setCatalogError] = useState<string | null>(null);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [recs, setRecs] = useState<RecommendationDTO[]>([]);
   const [recDone, setRecDone] = useState(false);
   const [showAllRecommendations, setShowAllRecommendations] = useState(false);
   const [saleProductId, setSaleProductId] = useState("");
-  const [selectedRecommendationId, setSelectedRecommendationId] = useState<string | null>(null);
   const [saleQty, setSaleQty] = useState(1);
   const [salePrice, setSalePrice] = useState<number | null>(null);
   const [saleStock, setSaleStock] = useState<number | null>(null);
@@ -84,6 +101,74 @@ export default function NewHomePage() {
   const [customerSearchResults, setCustomerSearchResults] = useState<CustomerSearchResult[]>([]);
   const [purchaseHistory, setPurchaseHistory] = useState<SaleDTO[]>([]);
   const [customerSearchBusy, setCustomerSearchBusy] = useState(false);
+  const customerSearchRequestId = useRef(0);
+  const [dashboardLoading, setDashboardLoading] = useState(false);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
+  const [dashboardSales, setDashboardSales] = useState<SalesReportDTO | null>(null);
+  const [dashboardInventory, setDashboardInventory] = useState<InventoryReportRow[] | null>(null);
+  const [dashboardLowStock, setDashboardLowStock] = useState<InventoryReportRow[] | null>(null);
+  const [dashboardMovements, setDashboardMovements] = useState<StockMovementDTO[] | null>(null);
+  const lastHomepageHistorySnapshot = useRef<string | null>(null);
+
+  // Keep the browser's Back/Forward stack aligned with the in-page navigation.
+  // The URL stays stable; each entry stores only the visible homepage location.
+  useEffect(() => {
+    const initialNavigation = {
+      active: "home" as Panel,
+      pageView: "main" as PageView,
+      mainSection: "home" as MainSection,
+      returnToDashboard: false,
+      returnToCatalog: false,
+    };
+    window.history.replaceState(
+      { ...(window.history.state ?? {}), hbiHomepageNavigation: initialNavigation },
+      "",
+    );
+
+    function restoreHomepageNavigation(event: PopStateEvent) {
+      const saved = event.state?.hbiHomepageNavigation as {
+        active?: Panel;
+        pageView?: PageView;
+        mainSection?: MainSection;
+        returnToDashboard?: boolean;
+        returnToCatalog?: boolean;
+      } | undefined;
+      const next = saved ?? initialNavigation;
+      const snapshot = {
+        active: next.active ?? "home",
+        pageView: next.pageView ?? "main",
+        mainSection: next.mainSection ?? "home",
+        returnToDashboard: next.returnToDashboard ?? false,
+        returnToCatalog: next.returnToCatalog ?? false,
+      };
+      lastHomepageHistorySnapshot.current = JSON.stringify(snapshot);
+      setActive(snapshot.active);
+      setPageView(snapshot.pageView);
+      setMainSection(snapshot.mainSection);
+      setReturnToDashboard(snapshot.returnToDashboard);
+      setReturnToCatalog(snapshot.returnToCatalog);
+      setError(null);
+      setStatusMsg(null);
+    }
+
+    window.addEventListener("popstate", restoreHomepageNavigation);
+    return () => window.removeEventListener("popstate", restoreHomepageNavigation);
+  }, []);
+
+  useEffect(() => {
+    const snapshot = { active, pageView, mainSection, returnToDashboard, returnToCatalog };
+    const serialized = JSON.stringify(snapshot);
+    if (lastHomepageHistorySnapshot.current === null) {
+      lastHomepageHistorySnapshot.current = serialized;
+      return;
+    }
+    if (lastHomepageHistorySnapshot.current === serialized) return;
+    window.history.pushState(
+      { ...(window.history.state ?? {}), hbiHomepageNavigation: snapshot },
+      "",
+    );
+    lastHomepageHistorySnapshot.current = serialized;
+  }, [active, pageView, mainSection, returnToDashboard, returnToCatalog]);
 
   const loadProducts = useCallback(async () => {
     setCatalogLoading(true);
@@ -106,11 +191,21 @@ export default function NewHomePage() {
   }, [loadProducts]);
 
   const loadSellableProducts = useCallback(async () => {
+    setSaleProductsLoading(true);
+    setSaleProductsError(null);
     try {
-      const data = await listProducts();
+      const adminToken = sessionStorage.getItem("hbi_admin_access_token");
+      if (!adminToken) throw new Error("برای دریافت کاتالوگ فروش، نشست مدیر لازم است.");
+      const data = await listSellableProducts(adminToken);
       setSellableProducts(Array.isArray(data) ? data : []);
-    } catch {
+      if (!Array.isArray(data) || data.length === 0) {
+        setSaleProductsError("محصول فعال، تأییدشده، دارای موجودی و قیمت فروش در دسترس نیست.");
+      }
+    } catch (err) {
       setSellableProducts([]);
+      setSaleProductsError(err instanceof Error ? err.message : "دریافت کاتالوگ فروش ناموفق بود.");
+    } finally {
+      setSaleProductsLoading(false);
     }
   }, []);
 
@@ -135,6 +230,42 @@ export default function NewHomePage() {
     if (active === "sales") void refreshSalesTotal();
   }, [active, refreshSalesTotal]);
 
+  const refreshDashboard = useCallback(async () => {
+    const adminToken = sessionStorage.getItem("hbi_admin_access_token");
+    if (!adminToken) {
+      setDashboardSales(null);
+      setDashboardInventory(null);
+      setDashboardLowStock(null);
+      setDashboardMovements(null);
+      setDashboardError("نشست مدیر موجود نیست؛ ابتدا وارد حساب مدیر شوید.");
+      return;
+    }
+
+    setDashboardLoading(true);
+    setDashboardError(null);
+    const results = await Promise.allSettled([
+      getSalesPeriod("today", adminToken),
+      getInventoryReport(adminToken),
+      getLowStockReport(5, adminToken),
+      getStockMovements(adminToken, { limit: 5 }),
+    ]);
+    let failed = 0;
+    if (results[0].status === "fulfilled") setDashboardSales(results[0].value);
+    else { setDashboardSales(null); failed += 1; }
+    if (results[1].status === "fulfilled") setDashboardInventory(results[1].value);
+    else { setDashboardInventory(null); failed += 1; }
+    if (results[2].status === "fulfilled") setDashboardLowStock(results[2].value);
+    else { setDashboardLowStock(null); failed += 1; }
+    if (results[3].status === "fulfilled") setDashboardMovements(results[3].value);
+    else { setDashboardMovements(null); failed += 1; }
+    setDashboardError(failed ? `${failed} بخش از خلاصه عملیاتی بارگذاری نشد؛ جزئیات را در گزارش‌ها بررسی کنید.` : null);
+    setDashboardLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (active === "home") void refreshDashboard();
+  }, [active, refreshDashboard]);
+
   const concernsText = useMemo(() => {
     const parts = [...concerns, ...skin.map((s) => `پوست ${s}`)];
     if (note.trim()) parts.push(note.trim());
@@ -146,24 +277,68 @@ export default function NewHomePage() {
   }
 
   async function searchPreviousCustomers() {
+    setError(null);
+    setStatusMsg(null);
+    const requestId = ++customerSearchRequestId.current;
     const query = customerSearch.trim();
     if (!query) {
       setCustomerSearchResults([]);
+      setCustomerSearchBusy(false);
+      return;
+    }
+    setCustomerSearchBusy(true);
+    try {
+      const operatorToken = await ensureProductSession();
+      if (!operatorToken) throw new Error("نشست جست‌وجوی مشتری در دسترس نیست.");
+      const found = await searchCustomers(query, operatorToken);
+      if (requestId === customerSearchRequestId.current) setCustomerSearchResults(Array.isArray(found) ? found : []);
+    } catch (err) {
+      if (requestId === customerSearchRequestId.current) {
+        setCustomerSearchResults([]);
+        setError(err instanceof Error ? err.message : String(err));
+      }
+    } finally {
+      if (requestId === customerSearchRequestId.current) setCustomerSearchBusy(false);
+    }
+  }
+
+  async function searchSaleCustomers() {
+    setStatusMsg(null);
+    const requestId = ++customerSearchRequestId.current;
+    const query = saleCustomerSearch.trim();
+    if (!query) {
+      setCustomerSearchResults([]);
+      setCustomerSearchBusy(false);
+      setError("برای اتصال طرف‌حساب، نام خانوادگی را وارد کنید.");
       return;
     }
     setError(null);
     setCustomerSearchBusy(true);
     try {
       const operatorToken = await ensureProductSession();
-      if (!operatorToken) throw new Error("نشست جست‌وجوی مشتری در دسترس نیست.");
+      if (!operatorToken) throw new Error("نشست مدیر برای جست‌وجوی مشتری در دسترس نیست.");
       const found = await searchCustomers(query, operatorToken);
-      setCustomerSearchResults(Array.isArray(found) ? found : []);
+      if (requestId === customerSearchRequestId.current) {
+        setCustomerSearchResults(Array.isArray(found) ? found : []);
+        if (!Array.isArray(found) || found.length === 0) setStatusMsg("مشتری مطابق جست‌وجو پیدا نشد؛ فروش مستقیم همچنان ممکن است.");
+      }
     } catch (err) {
-      setCustomerSearchResults([]);
-      setError(err instanceof Error ? err.message : String(err));
+      if (requestId === customerSearchRequestId.current) {
+        setCustomerSearchResults([]);
+        setError(err instanceof Error ? err.message : String(err));
+      }
     } finally {
-      setCustomerSearchBusy(false);
+      if (requestId === customerSearchRequestId.current) setCustomerSearchBusy(false);
     }
+  }
+
+  function chooseSaleCustomer(customer: CustomerSearchResult) {
+    setSaleCustomerId(customer.customer_id);
+    setSaleCustomerLabel(customer.family_name?.trim() || customer.customer_id);
+    setCustomerSearchResults([]);
+    setSaleCustomerSearch("");
+    setError(null);
+    setStatusMsg("طرف‌حساب فقط به این فاکتور متصل شد؛ مشاوره شروع نشد.");
   }
 
   async function selectPreviousCustomer(customer: CustomerSearchResult) {
@@ -179,7 +354,7 @@ export default function NewHomePage() {
       setToken(pair.access_token);
       setCustomerId(customer.customer_id);
       setCaseId(null);
-      setName(customer.name ?? "");
+      setName(customer.family_name ?? "");
       setMobile(customer.mobile ?? "");
       setConcerns(customer.concerns ? customer.concerns.split(",").map((x) => x.trim()).filter(Boolean) : []);
       setSkin(customer.skin_profile ? customer.skin_profile.split(",").map((x) => x.trim()).filter(Boolean) : []);
@@ -187,14 +362,14 @@ export default function NewHomePage() {
       setRecs([]);
       setRecDone(false);
       setShowAllRecommendations(false);
-      setSelectedRecommendationId(null);
       setSaleProductId("");
       setLastSale(null);
       const history = await listSalesByCustomer(customer.customer_id, pair.access_token);
       setPurchaseHistory(Array.isArray(history) ? history : []);
-      setStatusMsg(`مشتری قبلی انتخاب شد. ${history.length} خرید قبلی بارگذاری شد؛ مشکل امروز را ثبت کنید.`);
+      setStatusMsg(`مشتری انتخاب شد و ${history.length} خرید قبلی بارگذاری شد. برای شروع مشاوره، جداگانه وارد بخش مشاوره شوید.`);
       setCustomerSearchResults([]);
-      setActive("consult");
+      setActive("previous");
+      setPageView("content");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -203,8 +378,55 @@ export default function NewHomePage() {
   }
 
   function go(panel: Panel) {
+    // Customer search results are shared by the customer-history and optional
+    // sale-account selectors. Never carry matches from one context into the other.
+    if (panel === "sales" || panel === "previous") {
+      customerSearchRequestId.current += 1;
+      setCustomerSearchResults([]);
+      setCustomerSearchBusy(false);
+      setCustomerSearch("");
+      setSaleCustomerSearch("");
+    }
     setActive(panel);
+    setPageView("content");
     setError(null);
+    setStatusMsg(null);
+  }
+
+  function openMainSection(next: MainSection) {
+    setReturnToDashboard(false);
+    setReturnToCatalog(false);
+    setMainSection(next);
+    setError(null);
+    setStatusMsg(null);
+    if (next === "home") {
+      setActive("home");
+      setPageView("content");
+    } else {
+      setPageView("section");
+    }
+  }
+
+  function backToNavigation() {
+    setError(null);
+    if (returnToDashboard) {
+      setReturnToDashboard(false);
+      setActive("home");
+      setPageView("content");
+      return;
+    }
+    if (returnToCatalog) {
+      setReturnToCatalog(false);
+      setActive("catalog");
+      setPageView("content");
+      return;
+    }
+    setPageView(mainSection === "home" ? "main" : "section");
+  }
+
+  function logout() {
+    sessionStorage.clear();
+    navigate("/login", { replace: true });
   }
 
   async function ensureSession(displayName: string, concernsForGuest: string) {
@@ -246,8 +468,8 @@ export default function NewHomePage() {
   async function loadActiveCustomerProfile() {
     if (!token || !customerId) return;
     try {
-      const profile = (await getCustomerById(customerId, token)) as { name?: string; mobile?: string | null; concerns?: string | null; skin_profile?: string | null };
-      if (profile.name) setName(profile.name);
+      const profile = (await getCustomerById(customerId, token)) as { name?: string; family_name?: string | null; mobile?: string | null; concerns?: string | null; skin_profile?: string | null };
+      if (profile.family_name) setName(profile.family_name);
       if (profile.mobile) {
         setMobile(profile.mobile);
       }
@@ -301,13 +523,14 @@ export default function NewHomePage() {
   async function saveActiveProfile() {
     setError(null);
     setStatusMsg(null);
-    if (!name.trim()) return setError("نام الزامی است.");
+    if (!name.trim()) return setError("نام خانوادگی الزامی است.");
     if (!mobile.trim()) return setError("شماره موبایل الزامی است.");
     setProfileSaving(true);
     try {
       const currentToken = await ensureSession(name.trim(), concernsText);
       const intake = (await customerIntake({
         name: name.trim(),
+        family_name: name.trim(),
         mobile: mobile.trim() || undefined,
         concerns: concernsText || undefined,
         consent: 0,
@@ -321,7 +544,7 @@ export default function NewHomePage() {
         setCustomerId(resolvedId);
       }
       sessionStorage.setItem("hbi_concerns", concernsText);
-      setStatusMsg("پروفایل مشتری فعال ذخیره شد. همین مشتری در مشاوره، پرونده و فروش استفاده می‌شود.");
+      setStatusMsg("پروفایل مشتری فعال ذخیره شد. برای اتصال مشتری به فروش، او را جداگانه در فرم فروش انتخاب کنید.");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -342,23 +565,9 @@ export default function NewHomePage() {
     setNote("");
     setRecs([]);
     setRecDone(false);
-    setSelectedRecommendationId(null);
-    setSaleProductId("");
-    setLastSale(null);
     setPurchaseHistory([]);
     setStatusMsg("مشتری جدید آماده ثبت است. نشست محصولات/اپراتور دست‌نخورده باقی ماند.");
     setActive("profile");
-  }
-
-  function selectRecommendationForSale(r: RecommendationDTO) {
-    if ((r.eligibility_status ?? r.eligibility ?? "").trim().toUpperCase() !== "ELIGIBLE") {
-      setError("این مورد واجد شرایط پیشنهاد نهایی نیست و قابل انتخاب برای فروش از بخش پیشنهادها نیست.");
-      return;
-    }
-    setSaleProductId(r.product_id);
-    setSelectedRecommendationId(r.recommendation_id);
-    setStatusMsg(`پیشنهاد ${r.recommendation_id} برای فروش انتخاب شد.`);
-    setActive("sales");
   }
 
   async function runFullFlow(e: FormEvent) {
@@ -379,6 +588,7 @@ export default function NewHomePage() {
       const intake = (await customerIntake(
         {
           name: name.trim(),
+          family_name: name.trim(),
           mobile: mobile.trim() || undefined,
           concerns: concernsText,
           consent: 0,
@@ -433,14 +643,14 @@ export default function NewHomePage() {
       return;
     }
     let cancelled = false;
-    // Inventory sell-read requires Operator/Admin — not the customer JWT.
+    // Sale inventory reads use the Admin session, never a customer/pilot token.
     setSalePrice(null);
     setSaleFxRate(null);
-    void ensureProductSession()
-      .then(async (operatorToken) => {
-        if (cancelled || !operatorToken) throw new Error("operator session unavailable");
+    void Promise.resolve(sessionStorage.getItem("hbi_admin_access_token"))
+      .then(async (adminToken) => {
+        if (cancelled || !adminToken) throw new Error("برای دریافت قیمت و موجودی، نشست مدیر لازم است.");
         const [inv, fx] = await Promise.all([
-          getInventoryByProduct(saleProductId, operatorToken),
+          getInventoryByProduct(saleProductId, adminToken),
           getCurrentFx(),
         ]);
         if (fx.fx_rate_usd_to_irr == null) throw new Error("نرخ عملیاتی ارز در دسترس نیست؛ فروش متوقف شد.");
@@ -469,7 +679,7 @@ export default function NewHomePage() {
   async function onSaleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!customerId) return setError("برای ثبت فروش، مشتری را انتخاب کنید؛ ثبت مشاوره الزامی نیست.");
+    setStatusMsg(null);
     if (!sessionStorage.getItem("hbi_admin_access_token")) return setError("برای ثبت فروش ابتدا با حساب مدیر وارد شوید.");
     if (!saleProductId.trim()) return setError("محصول را انتخاب کنید.");
     if (saleQty < 1) return setError("تعداد نامعتبر است.");
@@ -485,18 +695,21 @@ export default function NewHomePage() {
       if (!adminToken) throw new Error("برای ثبت فروش ابتدا با حساب مدیر وارد شوید.");
       const sale = await createSale(
         {
-          customer_id: customerId,
-          items: [{ product_id: saleProductId.trim(), quantity: saleQty, ...(selectedRecommendationId ? { recommendation_id: selectedRecommendationId } : {}) }],
+          // Customer association is an explicit choice on this sale form, never session carry-over.
+          customer_id: saleCustomerId,
+          items: [{ product_id: saleProductId.trim(), quantity: saleQty }],
           fx_rate_usd_to_irr: currentFxRate,
         },
         adminToken
       );
       setLastSale(sale);
-      setSelectedRecommendationId(null);
       setSaleProductId("");
+      setSaleCustomerId(null);
+      setSaleCustomerLabel(null);
       setStatusMsg(`فروش ثبت شد: ${sale.sale_id ?? "OK"}`);
       await refreshSalesTotal();
       try {
+        if (!customerId || !token) return;
         const updatedHistory = await listSalesByCustomer(customerId, token);
         setPurchaseHistory(Array.isArray(updatedHistory) ? updatedHistory : []);
       } catch {
@@ -553,15 +766,6 @@ export default function NewHomePage() {
     if (score >= 0.5) return "متوسط";
     return "محدود";
   }
-  const nav: [Panel, string][] = [
-    ["consult", "مشاوره"],
-    ["previous", "مشتری قبلی / جست‌وجو"],
-    ["profile", "پروفایل"],
-    ["results", "پیشنهادها"],
-    ["sales", "فروش"],
-    ["about", "درباره HBI"],
-  ];
-
   return (
     <div className="home-root pro-home">
       <header className="pro-header">
@@ -570,62 +774,28 @@ export default function NewHomePage() {
             <span className="pro-brand-mark">HBI</span>
             <div>
               <div className="pro-brand-title">گالری مقصودی</div>
-              <div className="pro-brand-sub">هوش زیبایی و مراقبت · یک صفحه کامل</div>
+              <div className="pro-brand-sub">هوش زیبایی و مراقبت · فضای کاری مدیر</div>
             </div>
           </div>
-          <nav className="pro-nav" aria-label="بخش‌های صفحه">
-            {nav.map(([id, label]) => (
-              <button key={id} type="button" className={active === id ? "pro-nav-btn on" : "pro-nav-btn"} onClick={() => go(id)}>
-                {label}
+          <div className="pro-actions" style={{ alignItems: "center", justifyContent: "flex-end" }}>
+            {pageView !== "main" ? (
+              <button type="button" className="pro-btn-secondary" onClick={() => { setError(null); setReturnToDashboard(false); setReturnToCatalog(false); setPageView("main"); }}>منوی اصلی</button>
+            ) : null}
+            <button type="button" className="pro-btn-secondary" onClick={logout}>خروج از حساب مدیر</button>
+            {pageView === "content" && !(mainSection === "home" && active === "home" && !returnToDashboard) ? (
+              <button type="button" className="pro-btn-secondary" onClick={backToNavigation}>
+                {returnToDashboard ? "بازگشت به داشبورد" : returnToCatalog ? "بازگشت به فهرست محصولات" : mainSection === "home" ? "بازگشت به منوی اصلی" : "بازگشت به بخش"}
               </button>
-            ))}
-            <div className="pro-products-menu">
-              <button
-                type="button"
-                className={(["catalog", "review", "intake"] as Panel[]).includes(active) ? "pro-nav-btn on" : "pro-nav-btn"}
-                aria-haspopup="true"
-                aria-expanded={productsMenuOpen}
-                aria-controls="pro-products-submenu"
-                onClick={() => setProductsMenuOpen((open) => !open)}
-              >
-                محصولات <span aria-hidden="true">⌄</span>
-              </button>
-              {productsMenuOpen && (
-                <div id="pro-products-submenu" className="pro-products-submenu" role="group" aria-label="بخش‌های محصولات">
-                  {([
-                    ["catalog", "فهرست محصولات"],
-                    ["intake", "ورود محصول"],
-                    ["review", "بررسی و تأیید محصول"],
-                  ] as [Panel, string][]).map(([id, label]) => (
-                    <button
-                      key={id}
-                      type="button"
-                      className={active === id ? "pro-products-submenu-btn on" : "pro-products-submenu-btn"}
-                      onClick={() => {
-                        go(id);
-                        setProductsMenuOpen(false);
-                      }}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <Link to="/purchase" className="pro-nav-btn">
-              خرید
-            </Link>
-            <Link to="/accounting" className="pro-nav-btn">
-              حسابداری
-            </Link>
-          </nav>
+            ) : null}
+          </div>
         </div>
       </header>
 
       <main className="pro-main">
+        {pageView === "content" ? (
         <div className="pro-status-bar">
-          <span className={token ? "dot on" : "dot"} />
-          <span>{token ? "نشست فعال" : "نشست ندارد"}</span>
+          <span className={sessionStorage.getItem("hbi_admin_access_token") ? "dot on" : "dot"} />
+          <span>{sessionStorage.getItem("hbi_admin_access_token") ? "نشست مدیر فعال" : "نشست مدیر ندارد"}</span>
           <span className="sep">|</span>
           <span>مشتری: {customerId ?? "—"}</span>
           <span className="sep">|</span>
@@ -637,6 +807,7 @@ export default function NewHomePage() {
             </>
           ) : null}
         </div>
+        ) : null}
 
         {error ? (
           <div className="pro-alert" role="alert">
@@ -644,7 +815,162 @@ export default function NewHomePage() {
           </div>
         ) : null}
 
-        {active === "previous" && (
+        {pageView === "main" && (
+          <section className="pro-panel" aria-labelledby="main-menu-title">
+            <h1 id="main-menu-title">فضای کاری مدیر</h1>
+            <p className="pro-lead">یک حوزه را انتخاب کنید. زیرمنوها فقط پس از ورود به همان حوزه نمایش داده می‌شوند.</p>
+            <div className="pro-product-grid">
+              <article className="pro-product-card"><h2>خانه و داشبورد</h2><p className="pro-muted">نمای کلی عملیات و هشدارهای قابل اقدام.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("home")}>بازکردن داشبورد</button></article>
+              <article className="pro-product-card"><h2>مشتریان</h2><p className="pro-muted">پروفایل، جست‌وجو و سابقهٔ خرید مشتری.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("customers")}>ورود به مشتریان</button></article>
+              <article className="pro-product-card"><h2>مشاوره</h2><p className="pro-muted">ثبت مسئله، بررسی نیاز و مشاهده پیشنهادهای واجد شرایط.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("consultation")}>ورود به مشاوره</button></article>
+              <article className="pro-product-card"><h2>فروش</h2><p className="pro-muted">ثبت فروش؛ مشاوره پیش‌نیاز فروش مستقیم نیست.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("sales")}>ورود به فروش</button></article>
+              <article className="pro-product-card"><h2>مدیریت محصولات</h2><p className="pro-muted">فهرست، ورود اطلاعات و بررسی QA؛ مستقل از ورود فیزیکی موجودی.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("products")}>ورود به مدیریت محصولات</button></article>
+              <article className="pro-product-card"><h2>کالا و موجودی</h2><p className="pro-muted">مشاهده موجودی و گردش‌های انبار؛ جدا از مدیریت اطلاعات و تأیید محصول.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("inventory")}>ورود به کالا و موجودی</button></article>
+              <article className="pro-product-card"><h2>خرید</h2><p className="pro-muted">ثبت خرید و ورود فیزیکی موجودی.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("purchases")}>ورود به خرید</button></article>
+              <article className="pro-product-card"><h2>حسابداری و گزارش‌ها</h2><p className="pro-muted">گزارش فروش و مالی؛ گزارش موجودی و گردش کالا در بخش «کالا و موجودی» قرار دارد.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("reports")}>ورود به حسابداری و گزارش‌ها</button></article>
+            </div>
+          </section>
+        )}
+
+        {pageView === "section" && (
+          <section className="pro-panel" aria-labelledby="section-menu-title">
+            <div className="pro-section-head">
+              <h1 id="section-menu-title">{({
+                customers: "مشتریان", consultation: "مشاوره", sales: "فروش",
+                products: "مدیریت محصولات", inventory: "کالا و موجودی", purchases: "خرید",
+                reports: "حسابداری و گزارش‌ها", home: "خانه و داشبورد",
+              } as Record<MainSection, string>)[mainSection]}</h1>
+            </div>
+            <p className="pro-lead">فقط عملیات مربوط به این حوزه در این صفحه قرار دارد.</p>
+            <div className="pro-product-grid">
+              {mainSection === "customers" ? <>
+                <article className="pro-product-card"><h2>جست‌وجو و سابقه</h2><p className="pro-muted">یافتن مشتری و مشاهدهٔ سابقهٔ خرید.</p><button type="button" className="pro-btn-primary" onClick={() => go("previous")}>بازکردن جست‌وجوی مشتری</button></article>
+                <article className="pro-product-card"><h2>پروفایل مشتری</h2><p className="pro-muted">ثبت یا تکمیل اطلاعات مشتری.</p><button type="button" className="pro-btn-primary" onClick={() => go("profile")}>بازکردن پروفایل مشتری</button></article>
+              </> : null}
+              {mainSection === "consultation" ? <>
+                <article className="pro-product-card"><h2>مشاوره جدید</h2><p className="pro-muted">ثبت واقعیت مراجعه و مسئلهٔ مشتری.</p><button type="button" className="pro-btn-primary" onClick={() => go("consult")}>شروع مشاوره</button></article>
+                <article className="pro-product-card"><h2>نتایج مشاوره جاری</h2><p className="pro-muted">مشاهده نتایج تولیدشده در همین نشست؛ تاریخچه و ثبت تصمیم نهایی اپراتور در این مسیر هنوز در دسترس نیست.</p><button type="button" className="pro-btn-primary" onClick={() => go("results")}>مشاهده نتایج همین نشست</button></article>
+              </> : null}
+              {mainSection === "sales" ? <article className="pro-product-card"><h2>ثبت فروش مستقیم</h2><p className="pro-muted">ثبت فروش بدون الزام به مشاورهٔ قبلی؛ نمایش آخرین فروش پس از ثبت.</p><button type="button" className="pro-btn-primary" onClick={() => go("sales")}>بازکردن ثبت فروش</button></article> : null}
+              {mainSection === "products" ? <>
+                <article className="pro-product-card"><h2>فهرست کالاها</h2><p className="pro-muted">فهرست مدیریتی واحد برای مشاهدهٔ کالاها، ورود به پرونده و انتخاب محصول برای بررسی QA.</p><button type="button" className="pro-btn-primary" onClick={() => go("catalog")}>بازکردن فهرست کالاها</button></article>
+                <article className="pro-product-card"><h2>ورود و ویرایش محصول</h2><p className="pro-muted">ثبت مشخصات محصول؛ جدا از موجودی فیزیکی.</p><button type="button" className="pro-btn-primary" onClick={() => { setEditProduct(null); go("intake"); }}>ورود و ویرایش محصول</button></article>
+                <article className="pro-product-card"><h2>بررسی و تأیید QA</h2><p className="pro-muted">ابتدا محصول را از فهرست مدیریتی انتخاب کنید؛ پروندهٔ QA برای محصول مشخص باز می‌شود.</p><button type="button" className="pro-btn-primary" onClick={() => go("catalog")}>انتخاب محصول برای QA</button></article>
+              </> : null}
+              {mainSection === "inventory" ? <>
+                <article className="pro-product-card"><h2>موجودی کالا</h2><p className="pro-muted">موجودی قابل مشاهده و ارزش‌گذاری‌شده بر پایه آخرین قیمت خرید ثبت‌شده.</p><Link to="/inventory?section=inventory" className="pro-btn-primary">بازکردن گزارش موجودی</Link></article>
+                <article className="pro-product-card"><h2>کمبود موجودی</h2><p className="pro-muted">کالاهایی که مقدار ثبت‌شدهٔ موجودی آن‌ها به آستانهٔ هشدار رسیده است.</p><Link to="/inventory?section=low-stock" className="pro-btn-primary">بازکردن کمبود موجودی</Link></article>
+                <article className="pro-product-card"><h2>گردش کالا</h2><p className="pro-muted">بررسی گردش‌های ثبت‌شدهٔ ورود و خروج کالا.</p><Link to="/inventory?section=stock-flow" className="pro-btn-primary">بازکردن گردش کالا</Link></article>
+              </> : null}
+              {mainSection === "purchases" ? <article className="pro-product-card"><h2>خرید / ورود موجودی</h2><p className="pro-muted">ثبت خرید و ورود فیزیکی کالا.</p><Link to="/purchase" className="pro-btn-primary">بازکردن خرید و موجودی</Link></article> : null}
+              {mainSection === "reports" ? <>
+                <article className="pro-product-card"><h2>گزارش فروش</h2><p className="pro-muted">خلاصه فروش روز جاری.</p><Link to="/accounting?section=sales" className="pro-btn-primary">بازکردن گزارش فروش</Link></article>
+                <article className="pro-product-card"><h2>گزارش مالی</h2><p className="pro-muted">خلاصه گزارش مالی موجود.</p><Link to="/accounting?section=finance-report" className="pro-btn-primary">بازکردن گزارش مالی</Link></article>
+              </> : null}
+            </div>
+          </section>
+        )}
+
+        {pageView === "content" && active === "home" && (
+          <section className="pro-panel">
+            <h1>داشبورد HBI</h1>
+            <p className="pro-lead">میانبرهای عملیات در اولویت‌اند. خلاصه‌ها و هشدارهای زیر از APIهای مدیریتی خوانده می‌شوند؛ دادهٔ ناموجود به‌صورت عدد ساختگی نمایش داده نمی‌شود.</p>
+
+            <section aria-labelledby="dashboard-actions-title">
+              <h2 id="dashboard-actions-title">اقدام سریع</h2>
+              <div className="pro-product-grid">
+                <article className="pro-product-card">
+                  <h3>فروش مستقیم</h3>
+                  <p className="pro-muted">ثبت فروش، مستقل از پروندهٔ مشاوره.</p>
+                  <button type="button" className="pro-btn-primary" onClick={() => { setReturnToDashboard(true); go("sales"); }}>ثبت فروش</button>
+                </article>
+                <article className="pro-product-card">
+                  <h3>مشتریان</h3>
+                  <p className="pro-muted">جست‌وجو، ایجاد پروفایل و سابقهٔ خرید.</p>
+                  <div className="pro-actions">
+                    <button type="button" className="pro-btn-primary" onClick={() => { setReturnToDashboard(true); go("previous"); }}>جست‌وجوی مشتری</button>
+                    <button type="button" className="pro-btn-secondary" onClick={() => { setReturnToDashboard(true); startNewCustomer(); }}>مشتری جدید</button>
+                  </div>
+                </article>
+                <article className="pro-product-card">
+                  <h3>مشاوره</h3>
+                  <p className="pro-muted">ثبت مسئله، بررسی نیاز و مشاهده پیشنهادهای واجد شرایط.</p>
+                  <button type="button" className="pro-btn-primary" onClick={() => { setReturnToDashboard(true); go("consult"); }}>شروع مشاوره</button>
+                </article>
+              </div>
+            </section>
+
+            <section aria-labelledby="dashboard-summary-title">
+              <div className="pro-section-head">
+                <h2 id="dashboard-summary-title">خلاصهٔ عملیات</h2>
+                <button type="button" className="pro-btn-secondary" onClick={() => void refreshDashboard()} disabled={dashboardLoading}>
+                  {dashboardLoading ? "در حال دریافت…" : "نوسازی داده‌ها"}
+                </button>
+              </div>
+              {dashboardError && <p className="pro-error" role="status">{dashboardError}</p>}
+              <div className="pro-product-grid">
+                <article className="pro-product-card">
+                  <h3>فروش امروز</h3>
+                  <p className="pro-summary">{dashboardSales ? dashboardSales.sale_count.toLocaleString("fa-IR") : "—"} تراکنش</p>
+                  <p className="pro-muted">{dashboardSales ? dashboardSales.revenue_toman.toLocaleString("fa-IR") + " تومان درآمد ثبت‌شده" : "دادهٔ فروش در دسترس نیست."}</p>
+                  <Link to="/accounting?section=sales" className="pro-btn-secondary">گزارش فروش</Link>
+                </article>
+                <article className="pro-product-card">
+                  <h3>موجودی انبار</h3>
+                  <p className="pro-summary">{dashboardInventory ? dashboardInventory.length.toLocaleString("fa-IR") : "—"} ردیف موجودی</p>
+                  <p className="pro-muted">{dashboardInventory ? "بر اساس گزارش موجودی فعلی." : "دادهٔ موجودی در دسترس نیست."}</p>
+                  <Link to="/inventory?section=inventory" className="pro-btn-secondary">گزارش موجودی</Link>
+                </article>
+                <article className="pro-product-card">
+                  <h3>هشدار موجودی کم</h3>
+                  <p className="pro-summary">{dashboardLowStock ? dashboardLowStock.length.toLocaleString("fa-IR") : "—"} قلم</p>
+                  <p className="pro-muted">آستانهٔ هشدار: موجودی ثبت‌شده ≤ ۵؛ بر پایهٔ گزارش رسمی موجودی کم.</p>
+                  <Link to="/inventory?section=low-stock" className="pro-btn-secondary">کمبود موجودی</Link>
+                </article>
+              </div>
+            </section>
+
+            <section aria-labelledby="dashboard-alerts-title">
+              <h2 id="dashboard-alerts-title">موارد نیازمند توجه</h2>
+              <div className="pro-product-card">
+                {dashboardLowStock === null ? (
+                  <p className="pro-muted">هشدار موجودی کم قابل تأیید نیست؛ گزارش موجودی در دسترس نیست.</p>
+                ) : dashboardLowStock.length === 0 ? (
+                  <p className="pro-muted">طبق آستانهٔ ۵، موردی در گزارش موجودی کم ثبت نشده است.</p>
+                ) : (
+                  <>
+                    <p role="status">{dashboardLowStock.length.toLocaleString("fa-IR")} قلم با موجودی ≤ ۵ نیازمند بررسی است.</p>
+                    <Link to="/inventory?section=low-stock" className="pro-btn-primary">بازکردن کمبود موجودی</Link>
+                  </>
+                )}
+                <p className="pro-muted">وضعیت پذیرش و QA محصول در این داشبورد عددگذاری نشده؛ API مدیریتیِ تأییدشده برای خلاصهٔ چرخهٔ محصول هنوز احراز نشده است.</p>
+              </div>
+            </section>
+
+            <section aria-labelledby="dashboard-activity-title">
+              <h2 id="dashboard-activity-title">آخرین گردش‌های انبار</h2>
+              <div className="pro-product-card">
+                {dashboardMovements === null ? (
+                  <p className="pro-muted">گردش اخیر در دسترس نیست؛ گزارش گردش کالا را در بخش «کالا و موجودی» بررسی کنید.</p>
+                ) : dashboardMovements.length === 0 ? (
+                  <p className="pro-muted">گردشی برای نمایش ثبت نشده است.</p>
+                ) : (
+                  <ul className="pro-ol">
+                    {dashboardMovements.map((movement) => (
+                      <li key={movement.movement_id}>
+                        {movement.movement_type} · {movement.product_id} · تغییر {movement.quantity_delta.toLocaleString("fa-IR")} · موجودی پس از عملیات {movement.quantity_after.toLocaleString("fa-IR")}
+                        {movement.created_at ? ` · ${new Date(movement.created_at).toLocaleString("fa-IR")}` : ""}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <Link to="/inventory?section=stock-flow" className="pro-btn-secondary">گردش اخیر</Link>
+              </div>
+            </section>
+          </section>
+        )}
+
+        {pageView === "content" && active === "previous" && (
           <section className="pro-panel">
             <h1>مشتری قبلی / جست‌وجو</h1>
             <p className="pro-lead">مشتری را پیدا کنید، سابقه او را بارگذاری کنید و سپس مشکل امروز را در یک پرونده جدید ثبت کنید.</p>
@@ -653,8 +979,8 @@ export default function NewHomePage() {
                 className="pro-input"
                 value={customerSearch}
                 onChange={(e) => setCustomerSearch(e.target.value)}
-                placeholder="نام یا شماره موبایل مشتری…"
-                aria-label="جست‌وجوی مشتری قبلی با نام یا موبایل"
+                placeholder="نام خانوادگی یا شماره موبایل مشتری…"
+                aria-label="جست‌وجوی مشتری قبلی با نام خانوادگی یا موبایل"
               />
               <button type="submit" className="pro-btn-primary" disabled={customerSearchBusy}>
                 {customerSearchBusy ? "در حال جست‌وجو…" : "جست‌وجو"}
@@ -681,7 +1007,7 @@ export default function NewHomePage() {
               <div className="pro-product-grid" style={{ marginTop: "1rem" }}>
                 {customerSearchResults.map((customer) => (
                   <article key={customer.customer_id} className="pro-product-card">
-                    <h3>{customer.name}</h3>
+                    <h3>{customer.family_name ?? "نام خانوادگی ثبت نشده"}</h3>
                     <p className="pro-muted">{customer.mobile ?? "موبایل ثبت نشده"}</p>
                     <p className="pro-muted">{customer.concerns ?? "سابقه دغدغه ثبت نشده"}</p>
                     <button type="button" className="pro-btn-primary" onClick={() => void selectPreviousCustomer(customer)} disabled={busy}>
@@ -690,13 +1016,13 @@ export default function NewHomePage() {
                   </article>
                 ))}
               </div>
-            ) : customerSearch.trim() && !customerSearchBusy ? (
-              <div className="pro-empty"><strong>مشتری‌ای با این نام پیدا نشد.</strong></div>
+            ) : customerSearch.trim() && !customerSearchBusy && !error ? (
+              <div className="pro-empty" role="status"><strong>مشتری مطابق این جست‌وجو پیدا نشد.</strong></div>
             ) : null}
           </section>
         )}
 
-        {active === "consult" && (
+        {pageView === "content" && active === "consult" && (
           <section className="pro-panel">
             {purchaseHistory.length > 0 ? (
               <div className="pro-panel" style={{ marginBottom: "1rem" }}>
@@ -722,11 +1048,11 @@ export default function NewHomePage() {
                 <legend>۱) هویت</legend>
                 <div className="pro-grid-2">
                   <div>
-                    <label className="pro-label" htmlFor="name">نام *</label>
-                    <input id="name" className="pro-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="نام مشتری" />
+                    <label className="pro-label" htmlFor="name">نام خانوادگی *</label>
+                    <input id="name" className="pro-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="نام خانوادگی مشتری" />
                   </div>
                   <div>
-                    <label className="pro-label" htmlFor="mobile">موبایل</label>
+                    <label className="pro-label" htmlFor="mobile">موبایل *</label>
                     <input id="mobile" className="pro-input" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="09…" />
                   </div>
                 </div>
@@ -782,28 +1108,25 @@ export default function NewHomePage() {
                 <button type="submit" className="pro-btn-primary" disabled={busy}>
                   {busy ? "در حال اجرا…" : "ثبت مراجعه + دریافت پیشنهاد"}
                 </button>
-                <button type="button" className="pro-btn-secondary" onClick={() => go("catalog")}>
-                  محصولات
-                </button>
               </div>
             </form>
           </section>
         )}
 
-        {active === "profile" && (
+        {pageView === "content" && active === "profile" && (
           <section className="pro-panel">
             <div className="pro-panel-head">
               <div>
                 <h1>پروفایل مشتری</h1>
-                <p className="pro-lead">این مشتری فعال، مرجع مشترک مشاوره، پرونده، پیشنهاد و فروش است.</p>
+                <p className="pro-lead">این پروفایل برای مشاوره و پرونده فعال است؛ اتصال مشتری به فروش فقط با انتخاب صریح در فرم فروش انجام می‌شود.</p>
               </div>
               <button type="button" className="pro-btn-secondary" onClick={startNewCustomer}>مشتری جدید</button>
             </div>
             <fieldset className="pro-fieldset">
               <legend>اطلاعات مشتری فعال</legend>
               <div className="pro-grid-2">
-                <div><label className="pro-label" htmlFor="profile-name">نام *</label><input id="profile-name" className="pro-input" value={name} onChange={(e) => setName(e.target.value)} /></div>
-                <div><label className="pro-label" htmlFor="profile-mobile">موبایل</label><input id="profile-mobile" className="pro-input" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="09…" /></div>
+                <div><label className="pro-label" htmlFor="profile-name">نام خانوادگی *</label><input id="profile-name" className="pro-input" value={name} onChange={(e) => setName(e.target.value)} /></div>
+                <div><label className="pro-label" htmlFor="profile-mobile">موبایل *</label><input id="profile-mobile" className="pro-input" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="09…" /></div>
               </div>
             </fieldset>
             <dl className="pro-dl">
@@ -828,13 +1151,13 @@ export default function NewHomePage() {
               <button type="button" className="pro-btn-primary" disabled={profileSaving} onClick={() => void saveActiveProfile()}>
                 {profileSaving ? "در حال ذخیره…" : "ذخیره پروفایل مشتری"}
               </button>
-              <button type="button" className="pro-btn-secondary" onClick={() => go("consult")}>مشاوره همین مشتری</button>
+              <button type="button" className="pro-btn-secondary" disabled={!customerId || profileSaving} onClick={() => go("consult")}>{customerId ? "مشاوره همین مشتری" : "ابتدا مشتری را ذخیره کنید"}</button>
               <button type="button" className="pro-btn-secondary" onClick={clearSession}>مشتری جدید</button>
             </div>
           </section>
         )}
 
-        {active === "catalog" && (
+        {pageView === "content" && active === "catalog" && (
           <section className="pro-panel">
             <div className="pro-panel-head">
               <h1>محصولات</h1>
@@ -843,7 +1166,13 @@ export default function NewHomePage() {
               </button>
             </div>
             {catalogLoading && <p className="pro-muted">بارگذاری…</p>}
-            {catalogError && <div className="pro-alert">{catalogError}</div>}
+            {catalogError && <div className="pro-alert" role="alert">{catalogError}</div>}
+            {!catalogLoading && !catalogError && products.length === 0 ? (
+              <div className="pro-empty" role="status">
+                <strong>محصولی برای نمایش در فهرست مدیریتی وجود ندارد.</strong>
+                <p>فهرست خالی است؛ این موضوع به‌تنهایی به معنی خطای بارگذاری نیست.</p>
+              </div>
+            ) : null}
             <div className="pro-product-grid">
               {products.map((p) => (
                 <article key={p.product_id} className="pro-product-card">
@@ -859,6 +1188,7 @@ export default function NewHomePage() {
                       className="pro-btn-secondary"
                       onClick={() => {
                         setEditProduct(p);
+                        setReturnToCatalog(true);
                         go("intake");
                       }}
                     >
@@ -869,6 +1199,7 @@ export default function NewHomePage() {
                       className="pro-btn-primary"
                       onClick={() => {
                         sessionStorage.setItem("hbi_review_product_id", p.product_id);
+                        setReturnToCatalog(true);
                         go("review");
                       }}
                     >
@@ -881,7 +1212,7 @@ export default function NewHomePage() {
           </section>
         )}
 
-        {active === "review" && (
+        {pageView === "content" && active === "review" && (
           <ProductReviewPanel
             token={sessionStorage.getItem("hbi_po_access_token")}
             productId={sessionStorage.getItem("hbi_review_product_id")}
@@ -890,12 +1221,12 @@ export default function NewHomePage() {
           />
         )}
 
-        {active === "intake" && (
+        {pageView === "content" && active === "intake" && (
           <ProductIntakePanel
             token={token}
             onEnsureSession={ensureProductSession}
             editProduct={editProduct}
-            onCancelEdit={() => setEditProduct(null)}
+            onCancelEdit={() => { setEditProduct(null); setReturnToCatalog(false); go("catalog"); }}
             onRegistered={() => {
               setEditProduct(null);
               void loadProducts();
@@ -903,9 +1234,9 @@ export default function NewHomePage() {
           />
         )}
 
-        {active === "results" && (
+        {pageView === "content" && active === "results" && (
           <section className="pro-panel">
-            <h1>پیشنهادهای نهایی برای اپراتور</h1>
+            <h1>نتایج ارزیابی برای اپراتور</h1>
             {(() => {
               const eligibleRecs = recs.filter((r) => (r.eligibility_status ?? r.eligibility ?? "").trim().toUpperCase() === "ELIGIBLE");
               const rejectedRecs = recs.filter((r) => (r.eligibility_status ?? r.eligibility ?? "").trim().toUpperCase() !== "ELIGIBLE");
@@ -927,7 +1258,7 @@ export default function NewHomePage() {
                     <div>
                       <h3>{product?.product_name ?? r.product_id}</h3>
                       {product?.brand ? <p className="pro-muted">{product.brand}</p> : null}
-                      <p className="pro-lead">این محصول با نیاز ثبت‌شده شما برای ادامه بررسی مطابقت دارد.</p>
+                      <p className="pro-lead">طبق ارزیابی فعلی، این محصول با نیاز ثبت‌شده در این مشاوره سازگار تشخیص داده شده است.</p>
                       <div className="pro-tags">
                         <span className="pro-tag">تطابق با نیاز: {formatMatchLevel(r.need_match_score)}</span>
                         <span className="pro-tag">وضعیت پیشنهاد: {formatRecommendationStatus(r.eligibility_status ?? r.eligibility)}</span>
@@ -946,7 +1277,6 @@ export default function NewHomePage() {
                           {r.reasoning ? <div><dt>ReasoningEngine</dt><dd>{r.reasoning}</dd></div> : null}
                         </dl>
                       </details>
-                      <button type="button" className="pro-btn-primary" onClick={() => selectRecommendationForSale(r)}>انتخاب این پیشنهاد برای فروش</button>
                     </div>
                   </article>
                 );
@@ -984,39 +1314,17 @@ export default function NewHomePage() {
           </section>
         )}
 
-        {active === "sales" && (
+        {pageView === "content" && active === "sales" && (
           <section className="pro-panel" id="sales">
             <h1>ثبت فروش</h1>
-            <p className="pro-lead">ثبت فروش مستقل از مشاوره است. نشست مدیر و انتخاب مشتری لازم است؛ اتصال به مشاوره اختیاری است.</p>
-            {!customerId ? (
-              <div className="pro-empty">
-                <strong>مشتری فاکتور را انتخاب کنید؛ پروندهٔ مشاوره لازم نیست.</strong>
-                <div className="pro-form">
-                  <label className="pro-label" htmlFor="sale-customer-search">جست‌وجوی مشتری با نام یا شماره موبایل</label>
-                  <input id="sale-customer-search" className="pro-input" value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} placeholder="نام یا شماره موبایل" />
-                  <button type="button" className="pro-btn-primary" onClick={() => void searchPreviousCustomers()} disabled={customerSearchBusy}>{customerSearchBusy ? "در حال جست‌وجو…" : "جست‌وجوی مشتری"}</button>
-                  {customerSearchResults.map((customer) => <button key={customer.customer_id} type="button" className="pro-btn-secondary" onClick={() => { void (async () => { await selectPreviousCustomer(customer); setActive("sales"); })(); }}>{customer.name} · {customer.mobile ?? "بدون موبایل"} · {customer.customer_id}</button>)}
-                  <p className="pro-muted">برای مشتری جدید، ابتدا پروفایل مشتری را ثبت کنید؛ پروندهٔ مشاوره لازم نیست.</p>
-                  <button type="button" className="pro-btn-secondary" onClick={() => go("profile")}>ثبت پروفایل مشتری جدید</button>
-                </div>
-              </div>
-            ) : (
-              <form className="pro-form" onSubmit={onSaleSubmit}>
+            <p className="pro-lead">الگوی صندوق فروش: ابتدا کالا و مبلغ. مشتری اجباری نیست — فروش حضوری بدون طرف‌حساب مجاز است.</p>
+            <form className="pro-form" onSubmit={onSaleSubmit}>
                 <fieldset className="pro-fieldset">
-                  <legend>مشتری</legend>
-                  <p className="pro-muted">
-                    <code>{customerId}</code>
-                  </p>
-                  <p className="pro-muted">جمع فروش: {totalSales === null ? "—" : totalSales.toLocaleString("fa-IR")}</p>
-                </fieldset>
-                <fieldset className="pro-fieldset">
-                  <legend>اقلام</legend>
-                  <label className="pro-label" htmlFor="sale-product">
-                    محصول
-                  </label>
+                  <legend>اقلام فاکتور</legend>
+                  <label className="pro-label" htmlFor="sale-product">محصول</label>
+                  {saleProductsError ? <p className="pro-error" role="status">{saleProductsError}</p> : null}
                   <select id="sale-product" className="pro-input" value={saleProductId} onChange={(e) => {
                       setSaleProductId(e.target.value);
-                      setSelectedRecommendationId(null);
                     }}>
                     <option value="">— انتخاب از کاتالوگ —</option>
                     {sellableProducts.map((p) => (
@@ -1025,34 +1333,74 @@ export default function NewHomePage() {
                       </option>
                     ))}
                   </select>
-                  <label className="pro-label" htmlFor="sale-manual">
-                    یا product_id دستی
-                  </label>
-                  <input id="sale-manual" className="pro-input" value={saleProductId} onChange={(e) => {
-                      setSaleProductId(e.target.value);
-                      setSelectedRecommendationId(null);
-                    }} />
+                  <div className="pro-actions">
+                    <button type="button" className="pro-btn-secondary" onClick={() => void loadSellableProducts()} disabled={saleProductsLoading}>
+                      {saleProductsLoading ? "در حال بارگذاری کاتالوگ…" : "نوسازی کاتالوگ فروش"}
+                    </button>
+                  </div>
+                  {saleProductsLoading ? <p className="pro-muted" role="status">در حال دریافت کاتالوگ فروش…</p> : null}
+                  {!saleProductsLoading && sellableProducts.length === 0 && !saleProductsError ? (
+                    <p className="pro-muted" role="status">هنوز محصول قابل انتخابی در کاتالوگ فروش موجود نیست.</p>
+                  ) : null}
                   <div className="pro-grid-2">
                     <div>
-                      <label className="pro-label" htmlFor="sale-qty">
-                        تعداد
-                      </label>
+                      <label className="pro-label" htmlFor="sale-qty">تعداد</label>
                       <input id="sale-qty" className="pro-input" type="number" min={1} value={saleQty} onChange={(e) => setSaleQty(Number(e.target.value) || 1)} />
                     </div>
                     <div>
                       <span className="pro-label">قیمت واحد (تومان)</span>
                       <p className="pro-input" aria-live="polite">
-                        {salePrice == null ? "در حال دریافت…" : salePrice.toLocaleString("fa-IR")}
+                        {!saleProductId ? "پس از انتخاب محصول" : salePrice == null ? "در حال دریافت…" : salePrice.toLocaleString("fa-IR")}
                       </p>
                     </div>
                   </div>
                   <p className="pro-muted">
-                    موجودی قابل فروش: {saleStock == null ? "در حال دریافت…" : saleStock.toLocaleString("fa-IR")}
+                    موجودی قابل فروش: {!saleProductId ? "پس از انتخاب محصول" : saleStock == null ? "در حال دریافت…" : saleStock.toLocaleString("fa-IR")}
                   </p>
                   <p className="pro-summary">
                     مبلغ: <strong>{salePrice == null ? "—" : (saleQty * salePrice).toLocaleString("fa-IR")}</strong> تومان
                   </p>
                 </fieldset>
+
+                <fieldset className="pro-fieldset">
+                  <legend>طرف‌حساب (اختیاری)</legend>
+                  <p className="pro-muted">
+                    پیش‌فرض این فاکتور «فروش حضوری بدون مشتری» است. شماره موبایل فیلد فرم فروش نیست؛ هویت مشتری در بخش مشتریان مدیریت می‌شود.
+                  </p>
+                  {saleCustomerId ? (
+                    <div className="pro-actions">
+                      <p>متصل به: <strong>{saleCustomerLabel}</strong> <span className="pro-muted">({saleCustomerId})</span></p>
+                      <button
+                        type="button"
+                        className="pro-btn-secondary"
+                        onClick={() => { setSaleCustomerId(null); setSaleCustomerLabel(null); }}
+                      >
+                        فروش بدون طرف‌حساب
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <label className="pro-label" htmlFor="sale-customer-search">جست‌وجوی طرف‌حساب با نام خانوادگی</label>
+                      <input
+                        id="sale-customer-search"
+                        className="pro-input"
+                        value={saleCustomerSearch}
+                        onChange={(e) => setSaleCustomerSearch(e.target.value)}
+                        placeholder="نام خانوادگی…"
+                        autoComplete="off"
+                      />
+                      <button type="button" className="pro-btn-secondary" onClick={() => void searchSaleCustomers()} disabled={customerSearchBusy}>
+                        {customerSearchBusy ? "در حال جست‌وجو…" : "یافتن طرف‌حساب"}
+                      </button>
+                      {customerSearchResults.map((customer) => (
+                        <button key={customer.customer_id} type="button" className="pro-btn-secondary" onClick={() => chooseSaleCustomer(customer)}>
+                          {customer.family_name ?? "بدون نام خانوادگی"} · {customer.customer_id}
+                        </button>
+                      ))}
+                    </>
+                  )}
+                </fieldset>
+
                 <div className="pro-actions">
                   <button type="submit" className="pro-btn-primary" disabled={saleBusy}>
                     {saleBusy ? "در حال ثبت…" : "ثبت فروش"}
@@ -1061,8 +1409,8 @@ export default function NewHomePage() {
                     بروزرسانی جمع
                   </button>
                 </div>
-              </form>
-            )}
+                <p className="pro-muted">جمع فروش نشست: {totalSales === null ? "—" : totalSales.toLocaleString("fa-IR")}</p>
+            </form>
             {lastSale && (
               <div className="pro-rec-card" style={{ marginTop: "1rem" }}>
                 <div className="pro-rec-rank">✓</div>
@@ -1077,7 +1425,7 @@ export default function NewHomePage() {
           </section>
         )}
 
-        {active === "about" && (
+        {pageView === "content" && active === "about" && (
           <section className="pro-panel">
             <h1>مسیر HBI روی این صفحه</h1>
             <ol className="pro-ol">
@@ -1090,7 +1438,7 @@ export default function NewHomePage() {
           </section>
         )}
       </main>
-      <footer className="pro-footer">HBI · گالری مقصودی · مشاوره تا فروش در یک صفحه</footer>
+      <footer className="pro-footer">HBI · گالری مقصودی · فضای کاری مدیر</footer>
     </div>
   );
 }

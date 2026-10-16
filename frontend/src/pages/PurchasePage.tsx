@@ -126,7 +126,7 @@ export default function PurchasePage() {
           </div>
           <nav className="pro-nav" aria-label="بخش‌های خرید">
             <Link to="/" className="pro-nav-btn">خانه HBI</Link>
-            <Link to="/accounting" className="pro-nav-btn">حسابداری</Link>
+            <Link to="/inventory?section=inventory" className="pro-nav-btn">کالا و موجودی</Link>
           </nav>
         </div>
       </header>

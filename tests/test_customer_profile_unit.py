@@ -29,6 +29,7 @@ def test_intake_new_and_update_concerns(db):
     svc = CustomerService(db)
     c1 = svc.record_intake(
         name="سارا",
+        family_name="سارا",
         mobile="09129990001",
         concerns="آبرسان",
         consent=1,
@@ -38,11 +39,14 @@ def test_intake_new_and_update_concerns(db):
 
     c2 = svc.record_intake(
         name="سارا",
+        family_name="سارا",
         mobile="09129990001",
         concerns="ضدآفتاب, لک",
         consent=1,
     )
     assert c2.customer_id == c1.customer_id
+    assert c2.name == c1.name
+    assert c2.family_name == c1.family_name
     assert c2.concerns == "ضدآفتاب, لک"
 
 

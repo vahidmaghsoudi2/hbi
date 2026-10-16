@@ -21,6 +21,7 @@ class ProductDTO:
 class CustomerDTO:
     customer_id: str
     name: str
+    family_name: Optional[str] = None
     mobile: Optional[str] = None
     consent_to_store_data: int = 0
 
@@ -73,7 +74,7 @@ class SaleItemDTO:
 @dataclass
 class SaleDTO:
     sale_id: str
-    customer_id: str
+    customer_id: Optional[str]
     total_amount_toman: int
     items: Optional[List[SaleItemDTO]] = None
 

@@ -57,6 +57,11 @@ export function listProducts(): Promise<ProductDTO[]> {
   return request<ProductDTO[]>("/products/");
 }
 
+/** Admin sale picker — only active, QA-valid, identity-verified products with available stock. */
+export function listSellableProducts(adminToken: string): Promise<ProductDTO[]> {
+  return request<ProductDTO[]>("/products/sellable", {}, adminToken);
+}
+
 /** Dev/Pilot only */
 export function pilotToken(body: PilotTokenRequest): Promise<TokenPair> {
   return request<TokenPair>("/auth/pilot-token", {

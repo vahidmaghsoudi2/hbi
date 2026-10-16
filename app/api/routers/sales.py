@@ -16,7 +16,7 @@ router = APIRouter()
 
 
 class SaleCreateRequest(BaseModel):
-    customer_id: str
+    customer_id: Optional[str] = None
     items: List[Dict[str, Any]]
     fx_rate_usd_to_irr: float = Field(..., gt=0, description="IRR per 1 USD; required, never invented")
     idempotency_key: Optional[str] = Field(None, description="Optional durable sale idempotency key")
@@ -40,7 +40,7 @@ async def create_sale(
     db: Session = Depends(get_db),
     admin=Depends(require_any_role(ROLE_ADMIN)),
 ):
-    # V1 PO Contract: ADMIN owns financial mutations; body.customer_id is the buyer.
+    # Admin owns financial mutations; customer_id is optional for direct walk-in sales.
     facade = SaleFacade(db)
     try:
         sale = facade.create_sale(

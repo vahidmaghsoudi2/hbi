@@ -60,7 +60,7 @@ def _seed(session):
             brand="B",
             product_name="Boost",
             identity_status="VERIFIED",
-            qa_verdict="PENDING",
+            qa_verdict="VALID",
             status="ACTIVE",
             category_id="BOOST",
         )
@@ -71,7 +71,7 @@ def _seed(session):
             brand="B",
             product_name="Hair",
             identity_status="VERIFIED",
-            qa_verdict="PENDING",
+            qa_verdict="VALID",
             status="ACTIVE",
             category_id="HAIR",
         )

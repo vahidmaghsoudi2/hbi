@@ -77,7 +77,7 @@ def _bootstrap(session):
             brand="B",
             product_name="Item",
             identity_status="VERIFIED",
-            qa_verdict="PENDING",
+            qa_verdict="VALID",
             status="ACTIVE",
             category_id="BOOST",
         )
@@ -88,7 +88,7 @@ def _bootstrap(session):
             brand="B",
             product_name="HairItem",
             identity_status="VERIFIED",
-            qa_verdict="PENDING",
+            qa_verdict="VALID",
             status="ACTIVE",
             category_id="HAIR",
         )
@@ -258,7 +258,7 @@ def test_home_accounting_routes_static():
     home = (FRONTEND / "pages" / "NewHomePage.tsx").read_text(encoding="utf-8")
     assert 'path="/"' in app and 'path="/accounting"' in app
     assert app.count('path="/accounting"') == 1
-    assert 'to="/accounting"' in home and "حسابداری" in home
+    assert 'to="/accounting?section=sales"' in home and "حسابداری" in home
 
 
 def test_no_data_hbi_db_touched_by_this_suite():

@@ -26,6 +26,7 @@ _GUEST_RATE_MAX = 10
 
 class CustomerCreateRequest(BaseModel):
     name: str
+    family_name: Optional[str] = None
     mobile: Optional[str] = None
     consent: int = 0
 
@@ -56,8 +57,9 @@ class ProfileFactRevokeRequest(BaseModel):
 
 
 class IntakeRequest(BaseModel):
-    """ثبت سریع مراجعه گالری — نام، نگرانی امروز، موبایل اختیاری."""
+    """ثبت سریع مراجعه گالری — نام خانوادگی، نگرانی امروز، موبایل اختیاری."""
     name: str
+    family_name: Optional[str] = None
     mobile: Optional[str] = None
     concerns: Optional[str] = Field(
         default=None,
@@ -103,6 +105,7 @@ def _customer_public(c) -> Dict[str, Any]:
     return {
         "customer_id": c.customer_id,
         "name": c.name,
+        "family_name": getattr(c, "family_name", None),
         "mobile": c.mobile,
         "consent_to_store_data": c.consent_to_store_data,
         "concerns": getattr(c, "concerns", None),
@@ -151,14 +154,15 @@ async def register_customer(
 ):
     if data.mobile and data.mobile != customer_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Customer identity mismatch",
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Customer identity conflict",
         )
 
     facade = CustomerFacade(db)
     return _to_dict(
         facade.register(
             name=data.name,
+            family_name=data.family_name,
             mobile=data.mobile or customer_id,
             consent=data.consent,
         )
@@ -324,8 +328,8 @@ async def quick_intake(
         and mobile != customer_id
     ):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Customer identity mismatch",
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Customer identity conflict",
         )
 
     try:
@@ -333,9 +337,26 @@ async def quick_intake(
         if authenticated is not None:
             # Continue the same identity as the JWT (Home Front Door path).
             fields: Dict[str, Any] = {
-                "name": data.name,
                 "consent_to_store_data": data.consent,
             }
+            # Preserve the legacy display-name field for established customers.
+            # The new family_name field is authoritative for identity checks.
+            if authenticated.customer_id.startswith("CUST_GUEST_"):
+                fields["name"] = data.name
+            supplied_family = data.family_name.strip() if data.family_name and data.family_name.strip() else None
+            if mobile and not data.guest:
+                if not supplied_family:
+                    raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Customer identity conflict: family_name is required with mobile")
+                other_customer = svc.find_by_mobile(mobile)
+                if other_customer and other_customer.customer_id != authenticated.customer_id:
+                    raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Customer identity conflict: select the existing customer by mobile and family name; ownership is never transferred")
+                if not authenticated.customer_id.startswith("CUST_GUEST_"):
+                    stored_family = authenticated.family_name.strip() if authenticated.family_name else None
+                    if not stored_family or stored_family.casefold() != supplied_family.casefold():
+                        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Customer identity conflict: mobile and family_name must both match")
+                fields["family_name"] = supplied_family
+            elif supplied_family:
+                fields["family_name"] = supplied_family
             # A consultation is case-scoped input. Do not overwrite the
             # persistent customer profile here: Recommendation combines the
             # saved profile with today's consultation payload.
@@ -353,6 +374,7 @@ async def quick_intake(
             customer = svc.record_intake(
                 name=data.name,
                 mobile=None if data.guest else mobile,
+                family_name=data.family_name,
                 concerns=data.concerns,
                 consent=data.consent,
                 skin_profile=data.skin_profile,
@@ -389,6 +411,8 @@ async def quick_intake(
             },
         }
     except ValueError as e:
+        if "Customer identity conflict" in str(e):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
         raise HTTPException(status_code=422, detail=str(e))
 
 
@@ -415,17 +439,17 @@ async def get_recommendation_profile(
 
 @router.get("/search")
 async def search_customers_by_name_or_mobile(
-    q: str = Query(..., min_length=1, description="بخشی از نام یا شماره موبایل مشتری"),
+    q: str = Query(..., min_length=1, description="شماره موبایل یا بخشی از نام خانوادگی مشتری"),
     db: Session = Depends(get_db),
     _auth: str = Depends(get_current_customer_id),
 ) -> List[Dict[str, Any]]:
-    """جست‌وجوی سریع مشتری قبلی با نام یا شماره موبایل برای فروشنده گالری."""
+    """جست‌وجوی مشتری با شماره موبایل یا نام خانوادگی؛ نام کوچک شناسه نیست."""
     svc = CustomerService(db)
     query = q.strip()
     if _looks_like_mobile(query):
         found = svc.find_by_mobile(query)
         return [_customer_public(found)] if found else []
-    found = svc.find_by_name(query)
+    found = svc.find_by_family_name(query)
     return [_customer_public(c) for c in found[:20]]
 
 

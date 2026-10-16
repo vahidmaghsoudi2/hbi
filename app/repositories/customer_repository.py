@@ -13,5 +13,13 @@ class CustomerRepository(BaseRepository[Customer]):
     def find_by_name(self, name: str) -> List[Customer]:
         return self.db.query(Customer).filter(Customer.name.ilike(f"%{name}%")).all()
 
+    def find_by_family_name(self, family_name: str) -> List[Customer]:
+        return (
+            self.db.query(Customer)
+            .filter(Customer.family_name.ilike(f"%{family_name}%"))
+            .order_by(Customer.family_name, Customer.mobile)
+            .all()
+        )
+
     def get_with_cases(self, customer_id: str):
         return self.db.query(Customer).filter(Customer.customer_id == customer_id).first()
