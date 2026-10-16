@@ -306,12 +306,14 @@ export default function NewHomePage() {
     setActive(panel);
     setPageView("content");
     setError(null);
+    setStatusMsg(null);
   }
 
   function openMainSection(next: MainSection) {
     setReturnToDashboard(false);
     setMainSection(next);
     setError(null);
+    setStatusMsg(null);
     if (next === "home") {
       setActive("home");
       setPageView("content");
