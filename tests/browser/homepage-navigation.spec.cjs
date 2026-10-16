@@ -177,11 +177,11 @@ test("Dashboard quick actions stay limited to sale, customers, and consultation"
   await expect(page.getByRole("button", { name: "شروع مشاوره" })).toBeVisible();
   await page.getByRole("button", { name: "ثبت فروش" }).click();
   await expect(page.getByRole("heading", { name: "ثبت فروش", exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "بازگشت به بخش" }).click();
+  await page.getByRole("button", { name: "بازگشت به داشبورد" }).click();
   await expect(page.getByRole("heading", { name: "داشبورد HBI", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "شروع مشاوره" }).click();
   await expect(page.getByRole("heading", { name: "فرم مشاوره سریع" })).toBeVisible();
-  await page.getByRole("button", { name: "بازگشت به بخش" }).click();
+  await page.getByRole("button", { name: "بازگشت به داشبورد" }).click();
   await expect(page.getByRole("heading", { name: "داشبورد HBI", exact: true })).toBeVisible();
   // Product intake / purchase / QA are not dashboard quick actions.
   await expect(page.getByRole("button", { name: "ورود و ویرایش محصول" })).toHaveCount(0);
