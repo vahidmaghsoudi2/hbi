@@ -1,8 +1,21 @@
 #!/usr/bin/env python3
-"""Apply desk/POS feel to sales + dashboard panels and fix literal \\n bug."""
+# -*- coding: utf-8 -*-
+"""Apply desk/POS feel: CSS addon + sales + dashboard panels; fix literal \\n."""
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[1]
+
+# CSS
+css_path = root / "frontend/src/styles/home.css"
+addon_path = root / "scripts/desk_feel.css.addon"
+css = css_path.read_text(encoding="utf-8")
+if ".pro-desk" not in css:
+    addon = addon_path.read_text(encoding="utf-8")
+    css_path.write_text(css.rstrip() + "\n\n" + addon, encoding="utf-8")
+    print("CSS: desk styles added")
+else:
+    print("CSS: already present")
+
 page = root / "frontend/src/pages/NewHomePage.tsx"
 sales_frag = (root / "scripts/sales_desk_panel.fragment.tsx").read_text(encoding="utf-8")
 dash_frag = (root / "scripts/dashboard_desk_panel.fragment.tsx").read_text(encoding="utf-8")
