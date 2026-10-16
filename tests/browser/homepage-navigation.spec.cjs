@@ -206,6 +206,18 @@ test("Dashboard report shortcuts preserve their own report destinations", async 
   await expect(page.getByRole("heading", { name: "کمبود موجودی", exact: true })).toBeVisible();
 });
 
+test("A blank customer profile cannot claim to consult an existing customer", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-empty-profile-boundary-token");
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "ورود به مشتریان" }).click();
+  await page.getByRole("button", { name: "بازکردن پروفایل مشتری" }).click();
+  await expect(page.getByRole("heading", { name: "پروفایل مشتری", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "ابتدا مشتری را ذخیره کنید" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "ذخیره پروفایل مشتری" })).toBeEnabled();
+});
+
 test("Customer search stays in customers domain and does not auto-start consultation", async ({ page }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-customer-boundary-test-token");
