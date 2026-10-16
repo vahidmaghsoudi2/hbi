@@ -1,42 +1,23 @@
 # HBI Homepage — Completion Ledger and No-Repeat Rule
 
 **Mission:** HBI homepage/navigation completion, PR #363  
-**Owner:** PO / homepage implementation owner  
-**Source of truth:** GitHub repository; until merge, this ledger is an execution record on `feat/homepage-dashboard-stage2`, not a claim that `master` contains the changes.  
-**Current branch head at registration:** `dd5648cec489f5e56be293720157be87ae2b49dd`  
-**Current master at last verified check:** `335fd6e472dde72b9907366acaa04db28ebed943`  
+**Source of truth:** GitHub `master`; this ledger tracks the PR branch until merge.  
 **PR:** https://github.com/vahidmaghsoudi2/hbi/pull/363
 
-## Durable rule: do not repeat completed work
+## No-repeat rule
+Before homepage work, read this ledger and inspect only items marked OPEN/BLOCKED, failed checks, changed code after recorded evidence, or required post-merge verification. Do not re-audit or re-implement a VERIFIED item unless new evidence shows regression, relevant code changed, or the PO explicitly reopens it. Update this ledger whenever an item changes status.
 
-Before any homepage task, read this ledger and inspect only:
-1. items marked OPEN / BLOCKED;
-2. failed checks or new evidence;
-3. changes made after the recorded SHA;
-4. post-merge verification when PR #363 is merged.
+## Four tracked work items
 
-Do not re-audit or re-implement a VERIFIED item unless new evidence shows regression, the relevant code changed, or the PO explicitly reopens it. A chat summary alone is not evidence. Update this ledger in the same change that closes an item, with the commit SHA, test run URLs, and remaining blockers.
-
-## Four work items
-
-| ID | Work item | Recorded evidence | Status |
+| ID | Work item | Evidence | Status |
 |---|---|---|---|
-| HP-01 | Establish automated CI and browser evidence for the homepage work | Earlier green runs recorded in project context: CI https://github.com/actions/runs/38867266972 and browser proof https://github.com/actions/runs/38867267004. These are historical evidence only and must not be represented as checks for the current head. | VERIFIED at that historical checkpoint; current-head checks are tracked under HP-04 |
-| HP-02 | Remove the standalone catalog as a competing entry and route the obsolete `/catalog` URL to the homepage | Commit `e16cccfc0d338d4ea61cca6a8648bc15dc34241d`; CI https://github.com/actions/runs/38868660433; browser proof https://github.com/actions/runs/38868660269. | VERIFIED for that commit; do not repeat unless regression/new evidence |
-| HP-03 | Remove placeholder Settings from the homepage and place Admin logout in the fixed header; add browser assertion | Commit `dd5648cec489f5e56be293720157be87ae2b49dd`; test file `tests/browser/homepage-navigation.spec.cjs`. Exact-head checks were still running when this ledger was registered. | PARTIAL: implementation committed; exact-head checks are part of HP-04 |
-| HP-04 | Integrate PR #363 safely with `master`, resolve conflicts, and complete current-head verification | PR #363 was retargeted to `master`; GitHub reported `mergeable=false` / `mergeable_state=dirty`. Current head `dd5648cec489f5e56be293720157be87ae2b49dd`; base `335fd6e472dde72b9907366acaa04db28ebed943`. | BLOCKED: conflicts must be resolved and required CI/browser checks must pass. Do not merge while blocked. |
+| HP-01 | Establish CI and browser evidence for homepage work | Historical runs: https://github.com/actions/runs/38867266972 and https://github.com/actions/runs/38867267004. These are not evidence for the current reconciled head. | Historical checkpoint verified; exact-head checks required |
+| HP-02 | Remove standalone catalog entry and redirect obsolete `/catalog` route | Commit `e16cccfc0d338d4ea61cca6a8648bc15dc34241d`; CI https://github.com/actions/runs/38868660433; browser proof https://github.com/actions/runs/38868660269. | Verified at recorded commit; do not repeat without regression evidence |
+| HP-03 | Remove placeholder Settings and place Admin logout in fixed header | Original implementation commit `dd5648cec489f5e56be293720157be87ae2b49dd`; browser assertion in `tests/browser/homepage-navigation.spec.cjs`. | Implementation present; exact final-head checks required |
+| HP-04 | Reconcile PR with current master, verify checks, merge and post-merge verify | Master baseline at reconciliation: `335fd6e472dde72b9907366acaa04db28ebed943`. | OPEN until exact-head CI/browser checks pass, PR merges, and post-merge master is verified |
 
-## Merge and closure gate
-
-HP-04 can be marked VERIFIED only after all of the following are recorded:
-- conflict-free PR against current `master`;
-- required CI and browser proof green for the exact final PR head;
-- merge result and merge commit SHA;
-- post-merge verification against the resulting `master` SHA;
-- this ledger updated with evidence and no remaining homepage integration blocker.
-
-Until then, PR #363 is **open / draft / unmerged**, and `master` must not be described as containing the homepage branch changes.
+## Closure gate
+HP-04 is VERIFIED only when the PR is conflict-free against current master, required CI and browser proof pass on the exact final head, merge SHA is recorded, and post-merge verification against master is complete. Until then, do not describe the homepage work as merged or complete.
 
 ## Handoff
-
-Next action: continue HP-04 only. Do not restart HP-01, HP-02, or HP-03 from scratch. First identify the actual conflicting files and resolve them on the PR branch without overwriting unrelated `master` changes; then rerun exact-head checks and update this ledger.
+Continue HP-04 only. Do not restart HP-01, HP-02, or HP-03. Fix only newly evidenced blockers, then update this ledger with CI/browser run URLs and merge evidence.

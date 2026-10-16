@@ -58,7 +58,12 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
                 contraindications.update([c.strip() for c in claim.split(",") if c.strip()])
             elif ev.field in ("usage_instructions", "usage_instruction", "usage") and claim:
                 usage_instructions.update([u.strip() for u in claim.split(",") if u.strip()])
-            elif ev.field in ("manufacturer_claims", "manufacturer_claim") and claim:
+            elif (
+                ev.field in ("manufacturer_claims", "manufacturer_claim")
+                and claim
+                and (getattr(ev, "claim_type", None) or "").strip().upper() == "MANUFACTURER_CLAIM"
+            ):
+                # Only explicitly classified manufacturer claims may populate this destination.
                 manufacturer_claims.update([m.strip() for m in claim.split(",") if m.strip()])
             elif (
                 (ev.field or "").strip().lower() == "claim"

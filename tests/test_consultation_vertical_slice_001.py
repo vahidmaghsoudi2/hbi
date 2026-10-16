@@ -53,6 +53,7 @@ def client(monkeypatch):
     product.status = "ACTIVE"
     product.qa_verdict = "VALID"
     product.identity_status = "VERIFIED"
+    product.product_line = "SKIN"
     pk = session.query(ProductKnowledge).filter_by(
         product_id="ISDIN-FOTOUTRA100-50ML"
     ).one()

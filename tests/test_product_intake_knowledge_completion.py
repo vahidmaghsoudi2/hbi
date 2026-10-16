@@ -162,16 +162,25 @@ def test_bound_claim_alias_requires_manufacturer_claim_type(db, claim_type, expe
         assert knowledge.manufacturer_claims is None
 
 
-def test_manufacturer_claim_field_still_maps_without_claim_type_gate(db):
+@pytest.mark.parametrize(
+    "claim_type,expect_populated",
+    [("MANUFACTURER_CLAIM", True), ("FACT", False), ("INFERENCE", False)],
+)
+def test_manufacturer_claim_field_requires_explicit_manufacturer_claim_type(
+    db, claim_type, expect_populated
+):
     _product(db)
     _evidence(
         db,
         product_id="P-KC-001",
-        evidence_id="E-MFG-ALIAS",
+        evidence_id=f"E-MFG-ALIAS-{claim_type}",
         field="manufacturer_claim",
         claim="fragrance-free",
-        claim_type="FACT",
+        claim_type=claim_type,
     )
     knowledge = ProductKnowledgeService(db).update_from_evidence("P-KC-001")
-    assert knowledge.manufacturer_claims is not None
-    assert "fragrance-free" in knowledge.manufacturer_claims
+    if expect_populated:
+        assert knowledge.manufacturer_claims is not None
+        assert "fragrance-free" in knowledge.manufacturer_claims
+    else:
+        assert knowledge.manufacturer_claims is None

@@ -20,6 +20,8 @@ def _to_product_dto(p) -> ProductDTO:
         product_name=p.product_name,
         identity_status=p.identity_status,
         qa_verdict=p.qa_verdict,
+        status=getattr(p, "status", "DRAFT"),
+        product_line=getattr(p, "product_line", None),
         variant=p.variant,
         size_value=p.size_value,
         size_unit=p.size_unit
@@ -139,8 +141,8 @@ class CustomerFacade:
         try:
             customer = self.service.register_customer(
                 name=name,
-                mobile=mobile,
                 family_name=family_name,
+                mobile=mobile,
                 consent_to_store_data=consent
             )
             return _to_customer_dto(customer)
@@ -228,7 +230,7 @@ class SaleFacade:
             ]
             return SaleDTO(
                 sale_id=sale.sale_id,
-                customer_id=sale.customer_id,
+                customer_id=getattr(sale, "customer_id", None),
                 total_amount_toman=sale.total_amount_toman,
                 items=item_dtos
             )
@@ -325,8 +327,8 @@ class EvidenceFacade:
             field=conflict.get("field"),
             values=conflict.get("values", []),
             evidence_ids=conflict.get("evidence_ids", []),
-            severity="HIGH",
-            status="UNRESOLVED"
+            severity=conflict.get("severity", "HIGH"),
+            status=conflict.get("status", "UNRESOLVED")
         )
 
 

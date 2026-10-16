@@ -316,7 +316,7 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
             "claim": "hydration benefit",
             "source_type": "PEER_REVIEWED",
             "source_reference": "test://slice-evidence",
-            "claim_type": "BENEFIT",
+            "claim_type": "MANUFACTURER_CLAIM",
             "field": "claimed_benefits",
             "evidence_strength": "HIGH",
         },

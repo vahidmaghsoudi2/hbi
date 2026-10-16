@@ -34,6 +34,7 @@ def _product(db_session, product_id="G2-G4-001"):
         identity_status="VERIFIED",
         qa_verdict="VALID",
         status="ACTIVE",
+        product_line="SKIN",
     )
     db_session.add(product)
     db_session.commit()

@@ -9,6 +9,7 @@ from app.models.evidence import Evidence
 from app.repositories.evidence_repository import EvidenceRepository
 from app.services.base import BaseService
 from app.core.exceptions import ValidationError, ConflictError, NotFoundError
+from app.domain.claim_taxonomy import CLAIM_TYPES
 from app.services.evidence_mutation_log_service import EvidenceMutationLogService
 
 logger = logging.getLogger(__name__)
@@ -22,6 +23,10 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
         self.audit = EvidenceMutationLogService(db)
 
     def _validate_claim_boundary(self, claim_type: str, source_type: str) -> None:
+        if claim_type not in CLAIM_TYPES:
+            raise ValidationError(
+                f"Unsupported claim_type {claim_type!r}; allowed values: {sorted(CLAIM_TYPES)}"
+            )
         if claim_type == "FACT":
             allowed_sources = {"PEER_REVIEWED", "CLINICAL_TRIAL", "REGULATORY"}
             if source_type not in allowed_sources:
@@ -43,10 +48,13 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
             product_id, field, value
         )
 
-    def _log_conflict(self, product_id: str, field: str, values: List[str]) -> None:
+    def _log_conflict(
+        self, product_id: str, field: str, values: List[str],
+        severity: str = "HIGH", status: str = "UNRESOLVED",
+    ) -> None:
         logger.warning(
-            "CONFLICT detected: product_id=%s, field=%s, values=%s, severity=HIGH, status=UNRESOLVED",
-            product_id, field, values
+            "Evidence conflict/review group: product_id=%s, field=%s, values=%s, severity=%s, status=%s",
+            product_id, field, values, severity, status
         )
 
     def add_evidence(
@@ -66,7 +74,7 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
 
         data = dict(evidence_data)
         product_id = data["product_id"]
-        claim_type = (data.get("claim_type") or "UNKNOWN").upper()
+        claim_type = str(data.get("claim_type") or "UNKNOWN").strip().upper() or "UNKNOWN"
         source_type = data.get("source_type") or "UNKNOWN"
         self._validate_claim_boundary(claim_type, source_type)
 
@@ -85,7 +93,10 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
         evidence = self.repository.create(**data)
         conflicts = self.detect_conflicts(product_id)
         for conf in conflicts:
-            self._log_conflict(product_id, conf["field"], conf["values"])
+            self._log_conflict(
+                product_id, conf["field"], conf["values"],
+                conf.get("severity", "HIGH"), conf.get("status", "UNRESOLVED"),
+            )
             # A detected conflict is a pair/group state, not merely a flag on
             # the newest row. Every member must be blocked until explicit
             # resolution selects one claim.
@@ -162,6 +173,7 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
                 "value": ev.claim,
                 "claim_type": ev.claim_type,
                 "source_type": ev.source_type,
+                "source_reference": (ev.source_reference or "").strip(),
                 "date": ev.source_date,
             })
 
@@ -170,11 +182,33 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
             if len(entries) > 1:
                 unique_values = {entry["value"] for entry in entries}
                 if len(unique_values) > 1:
+                    # Distinct wording from the same source is ambiguous, not
+                    # proof of a factual contradiction. Keep the persisted
+                    # CONFLICT block fail-closed, but report it for review
+                    # rather than asserting HIGH / UNRESOLVED contradiction.
+                    normalized_references = [
+                        (entry.get("source_reference") or "").strip().rstrip("/").casefold()
+                        for entry in entries
+                    ]
+                    # Missing source references cannot establish source identity.
+                    same_source_group = (
+                        all(normalized_references)
+                        and len(set(normalized_references)) == 1
+                        and len({
+                            (
+                                (entry.get("source_type") or "").strip().upper(),
+                                (entry.get("claim_type") or "").strip().upper(),
+                            )
+                            for entry in entries
+                        }) == 1
+                    )
                     conflicts.append({
                         "field": field,
                         "values": [entry["value"] for entry in entries],
                         "evidence_ids": [entry["evidence_id"] for entry in entries],
                         "new_evidence_id": entries[-1]["evidence_id"],
+                        "severity": "REVIEW_REQUIRED" if same_source_group else "HIGH",
+                        "status": "NEEDS_REVIEW" if same_source_group else "UNRESOLVED",
                     })
         return conflicts
 

@@ -73,6 +73,10 @@ export interface ProductDTO {
   product_name: string;
   identity_status: string;
   qa_verdict: string;
+  /** Read-only lifecycle state returned by Product Review API. */
+  status: string;
+  /** Operator classification; null is preserved for legacy products. */
+  product_line?: string | null;
   variant?: string | null;
   size_value?: number | null;
   size_unit?: string | null;

@@ -9,6 +9,10 @@ class ProductDTO:
     product_name: str
     identity_status: str
     qa_verdict: str
+    # Governance read fields required by the authenticated Product Review UI.
+    # These are read-only DTO fields; write authority remains in transition APIs.
+    status: str
+    product_line: Optional[str] = None
     variant: Optional[str] = None
     size_value: Optional[float] = None
     size_unit: Optional[str] = None
@@ -70,7 +74,7 @@ class SaleItemDTO:
 @dataclass
 class SaleDTO:
     sale_id: str
-    customer_id: str
+    customer_id: Optional[str]
     total_amount_toman: int
     items: Optional[List[SaleItemDTO]] = None
 
