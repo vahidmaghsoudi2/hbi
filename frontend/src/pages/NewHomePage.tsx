@@ -241,7 +241,7 @@ export default function NewHomePage() {
     const query = saleCustomerSearch.trim();
     if (!query) {
       setCustomerSearchResults([]);
-      setError("برای جست‌وجوی مشتری، شماره موبایل یا نام خانوادگی را وارد کنید.");
+      setError("برای اتصال طرف‌حساب، نام خانوادگی را وارد کنید.");
       return;
     }
     setError(null);
@@ -262,11 +262,11 @@ export default function NewHomePage() {
 
   function chooseSaleCustomer(customer: CustomerSearchResult) {
     setSaleCustomerId(customer.customer_id);
-    setSaleCustomerLabel(`${customer.family_name ?? "نام خانوادگی ثبت نشده"} · ${customer.mobile ?? "بدون موبایل"}`);
+    setSaleCustomerLabel(customer.family_name?.trim() || customer.customer_id);
     setCustomerSearchResults([]);
     setSaleCustomerSearch("");
     setError(null);
-    setStatusMsg("مشتری فقط برای این فروش انتخاب شد؛ نشست مشاوره تغییر نکرد.");
+    setStatusMsg("طرف‌حساب فقط به این فاکتور متصل شد؛ مشاوره شروع نشد.");
   }
 
   async function selectPreviousCustomer(customer: CustomerSearchResult) {
@@ -1239,35 +1239,11 @@ export default function NewHomePage() {
         {pageView === "content" && active === "sales" && (
           <section className="pro-panel" id="sales">
             <h1>ثبت فروش</h1>
-            <p className="pro-lead">ثبت فروش مستقیم بدون مشاوره و بدون ثبت مشتری اجباری است. در صورت انتخاب مشتری، سابقهٔ خرید نیز به او متصل می‌شود.</p>
+            <p className="pro-lead">الگوی صندوق فروش: ابتدا کالا و مبلغ. مشتری اجباری نیست — فروش حضوری بدون طرف‌حساب مجاز است.</p>
             <form className="pro-form" onSubmit={onSaleSubmit}>
                 <fieldset className="pro-fieldset">
-                  <legend>مشتری (اختیاری)</legend>
-                  {saleCustomerId ? (
-                    <div className="pro-actions">
-                      <p className="pro-muted">مشتری انتخاب‌شده برای این فروش: <strong>{saleCustomerLabel}</strong> · <code>{saleCustomerId}</code></p>
-                      <button type="button" className="pro-btn-secondary" onClick={() => { setSaleCustomerId(null); setSaleCustomerLabel(null); }}>حذف مشتری از این فروش</button>
-                    </div>
-                  ) : (
-                    <>
-                      <label className="pro-label" htmlFor="sale-customer-search">جست‌وجوی مشتری با شماره موبایل یا نام خانوادگی</label>
-                      <input id="sale-customer-search" className="pro-input" value={saleCustomerSearch} onChange={(e) => setSaleCustomerSearch(e.target.value)} placeholder="شماره موبایل یا نام خانوادگی" />
-                      <button type="button" className="pro-btn-secondary" onClick={() => void searchSaleCustomers()} disabled={customerSearchBusy}>{customerSearchBusy ? "در حال جست‌وجو…" : "جست‌وجوی مشتری"}</button>
-                      {customerSearchResults.map((customer) => (
-                        <button key={customer.customer_id} type="button" className="pro-btn-secondary" onClick={() => chooseSaleCustomer(customer)}>
-                          {customer.family_name ?? "نام خانوادگی ثبت نشده"} · {customer.mobile ?? "بدون موبایل"} · {customer.customer_id}
-                        </button>
-                      ))}
-                      <p className="pro-muted">می‌توانید بدون انتخاب مشتری فروش را ثبت کنید. برای مشتری جدید هم ثبت مشاوره پیش‌نیاز نیست.</p>
-                    </>
-                  )}
-                  <p className="pro-muted">جمع فروش: {totalSales === null ? "—" : totalSales.toLocaleString("fa-IR")}</p>
-                </fieldset>
-                <fieldset className="pro-fieldset">
-                  <legend>اقلام</legend>
-                  <label className="pro-label" htmlFor="sale-product">
-                    محصول
-                  </label>
+                  <legend>اقلام فاکتور</legend>
+                  <label className="pro-label" htmlFor="sale-product">محصول</label>
                   {saleProductsError ? <p className="pro-error" role="status">{saleProductsError}</p> : null}
                   <select id="sale-product" className="pro-input" value={saleProductId} onChange={(e) => {
                       setSaleProductId(e.target.value);
@@ -1285,12 +1261,12 @@ export default function NewHomePage() {
                     </button>
                   </div>
                   {saleProductsLoading ? <p className="pro-muted" role="status">در حال دریافت کاتالوگ فروش…</p> : null}
-                  {!saleProductsLoading && sellableProducts.length === 0 && !saleProductsError ? <p className="pro-muted" role="status">هنوز محصول قابل انتخابی در کاتالوگ فروش موجود نیست.</p> : null}
+                  {!saleProductsLoading && sellableProducts.length === 0 && !saleProductsError ? (
+                    <p className="pro-muted" role="status">هنوز محصول قابل انتخابی در کاتالوگ فروش موجود نیست.</p>
+                  ) : null}
                   <div className="pro-grid-2">
                     <div>
-                      <label className="pro-label" htmlFor="sale-qty">
-                        تعداد
-                      </label>
+                      <label className="pro-label" htmlFor="sale-qty">تعداد</label>
                       <input id="sale-qty" className="pro-input" type="number" min={1} value={saleQty} onChange={(e) => setSaleQty(Number(e.target.value) || 1)} />
                     </div>
                     <div>
@@ -1307,6 +1283,46 @@ export default function NewHomePage() {
                     مبلغ: <strong>{salePrice == null ? "—" : (saleQty * salePrice).toLocaleString("fa-IR")}</strong> تومان
                   </p>
                 </fieldset>
+
+                <fieldset className="pro-fieldset">
+                  <legend>طرف‌حساب (اختیاری)</legend>
+                  <p className="pro-muted">
+                    پیش‌فرض این فاکتور «فروش حضوری بدون مشتری» است. شماره موبایل فیلد فرم فروش نیست؛ هویت مشتری در بخش مشتریان مدیریت می‌شود.
+                  </p>
+                  {saleCustomerId ? (
+                    <div className="pro-actions">
+                      <p>متصل به: <strong>{saleCustomerLabel}</strong> <span className="pro-muted">({saleCustomerId})</span></p>
+                      <button
+                        type="button"
+                        className="pro-btn-secondary"
+                        onClick={() => { setSaleCustomerId(null); setSaleCustomerLabel(null); }}
+                      >
+                        فروش بدون طرف‌حساب
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <label className="pro-label" htmlFor="sale-customer-search">جست‌وجوی طرف‌حساب با نام خانوادگی</label>
+                      <input
+                        id="sale-customer-search"
+                        className="pro-input"
+                        value={saleCustomerSearch}
+                        onChange={(e) => setSaleCustomerSearch(e.target.value)}
+                        placeholder="نام خانوادگی…"
+                        autoComplete="off"
+                      />
+                      <button type="button" className="pro-btn-secondary" onClick={() => void searchSaleCustomers()} disabled={customerSearchBusy}>
+                        {customerSearchBusy ? "در حال جست‌وجو…" : "یافتن طرف‌حساب"}
+                      </button>
+                      {customerSearchResults.map((customer) => (
+                        <button key={customer.customer_id} type="button" className="pro-btn-secondary" onClick={() => chooseSaleCustomer(customer)}>
+                          {customer.family_name ?? "بدون نام خانوادگی"} · {customer.customer_id}
+                        </button>
+                      ))}
+                    </>
+                  )}
+                </fieldset>
+
                 <div className="pro-actions">
                   <button type="submit" className="pro-btn-primary" disabled={saleBusy}>
                     {saleBusy ? "در حال ثبت…" : "ثبت فروش"}
@@ -1315,6 +1331,7 @@ export default function NewHomePage() {
                     بروزرسانی جمع
                   </button>
                 </div>
+                <p className="pro-muted">جمع فروش نشست: {totalSales === null ? "—" : totalSales.toLocaleString("fa-IR")}</p>
             </form>
             {lastSale && (
               <div className="pro-rec-card" style={{ marginTop: "1rem" }}>
