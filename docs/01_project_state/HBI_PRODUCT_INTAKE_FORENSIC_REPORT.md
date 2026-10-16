@@ -1,3 +1,11 @@
+> ## 🔴 HISTORICAL FORENSIC SNAPSHOT — “VERIFIED & CLOSED” IS SCOPE-LIMITED
+>
+> This report is dated 2026-08-30 and its “VERIFIED & CLOSED” status refers to the audit performed at that time. It does not certify that the complete current Product Intake lifecycle or real-product G8 pilot is closed. Later work introduced additional lifecycle, stock, research-draft, activation and recommendation-readback requirements.
+>
+> Preserve the findings as historical evidence. Reconfirm any claim against current master and the approved skin-specific execution contract v1.1 before treating it as current. G8 acceptance requires observed runtime evidence, not only repository inspection or automated tests.
+>
+> ---
+
 ﻿# HBI Product Intake Forensic Report
 
 **Date:** 2026-08-30  
