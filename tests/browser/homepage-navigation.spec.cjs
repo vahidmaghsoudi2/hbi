@@ -129,7 +129,7 @@ test("An in-flight customer search cannot repopulate another panel", async ({ pa
   });
   let releaseSearch;
   const holdSearch = new Promise((resolve) => { releaseSearch = resolve; });
-  await page.route("**/customers/search?*", async (route) => {
+  await page.route("**/customers/search**", async (route) => {
     await holdSearch;
     await route.fulfill({
       status: 200,
@@ -162,7 +162,7 @@ test("Customer search results do not leak into the optional sale-account picker"
     sessionStorage.setItem("hbi_admin_access_token", "homepage-search-boundary-test-token");
     sessionStorage.setItem("hbi_operator_access_token", "homepage-operator-search-test-token");
   });
-  await page.route("**/customers/search?*", (route) => route.fulfill({
+  await page.route("**/customers/search**", (route) => route.fulfill({
     status: 200,
     contentType: "application/json",
     body: JSON.stringify([{
