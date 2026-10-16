@@ -73,6 +73,28 @@ test("Homepage navigation keeps sales, inventory, and reports in their own desti
   await expect(page.getByRole("heading", { name: "فروش امروز", exact: true }).first()).toBeVisible();
 });
 
+test("Accounting errors stay within their own sales or finance report", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-accounting-error-boundary-token");
+  });
+  await page.route("**/reports/sales/period/today", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ sale_count: 2, revenue_toman: 1000, revenue_usd: 1 }),
+  }));
+  await page.route("**/reports/financial?*", (route) => route.fulfill({
+    status: 503,
+    contentType: "application/json",
+    body: JSON.stringify({ detail: "finance fixture unavailable" }),
+  }));
+  await page.goto("/accounting?section=sales");
+  await expect(page.getByRole("heading", { name: "فروش امروز", exact: true }).first()).toBeVisible();
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await page.getByRole("button", { name: "گزارش مالی" }).click();
+  await expect(page.getByRole("heading", { name: "گزارش مالی عملیاتی", exact: true })).toBeVisible();
+  await expect(page.getByRole("alert")).toContainText("دریافت گزارش مالی ناموفق بود.");
+});
+
 test("Inventory report errors stay local to the selected inventory section", async ({ page }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-inventory-error-boundary-token");
