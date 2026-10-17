@@ -19,7 +19,7 @@ This register retires stale and superseded material from the active decision pat
 5. Preserve conflicts and gaps as unresolved until a source-backed decision resolves them.
 6. Retiring a source from the active workflow does not mean its contents are false, confidential, or safely disposable.
 7. Keep the G8 status **BLOCKED / NOT VERIFIED** until isolation, secret redaction, negative tests, raw A1–A9 evidence, and cleanup are independently demonstrated.
-8. Historical direction on 2026-10-16 was to stop further recovery of the original 8-category / 92-item list and proceed with controlled retirement. The Product Owner's later direction on 2026-10-17 supersedes that point for the knowledge-bank planning work: review and revise the previously reported 92 items using existing records, including the current P01–P61 Skin Problem Space Map, without restarting discovery from zero or assuming these are the same list. Preserve provenance, record merges/removals/additions, and do not invent missing items. This review is now an explicit project step, not a claim that the exact original 92-item list is currently present as one canonical file.
+8. The Product Owner clarified on 2026-10-17 that the previously directed reduction of the initial inventory to the accepted 62-item result had already been completed. Do not reopen or repeat that reduction. Continue from the accepted 62-item result and recover its saved version from existing records if needed. Do not reintroduce the superseded detailed inventory in handoff summaries or AI task packets. This governs active working material; it does not claim that public Git history has been erased.
 
 ## Active references
 
