@@ -17,30 +17,26 @@
 
 `docs/01_project_control/PROJECT_RULES.md`
 
-**دستورالعمل عملیاتی و ارتباطی تیم (مکمل اجباری از 2026-09-09):**
+**پروتکل اجرایی واحد و اجباری (پس از ادغام به master):**
 
-`docs/01_project_control/HBI_TEAM_OPERATIONAL_COMMUNICATION_DIRECTIVE_V1.md`  
-**Document ID:** `HBI-TEAM-OPS-COM-001`
+`docs/01_project_control/HBI_AGENT_EXECUTION_PROTOCOL.md`
 
-شامل: قالب پاسخ تیمی، استقلال فکری، Circuit Breaker فشرده، فازهای F0–F7، و **سیاست دسترسی GitHub** (مخزن عمومی `vahidmaghsoudi2/hbi` — خواندن برای همه اعضا؛ نوشتن فقط با دستور PO به Grokها/Owner مجاز).
-
-عدم مطالعه قوانین پایه + دستورالعمل ارتباطی = عدم مجوز شروع کار.
+این سند مرجع واحد اجرای دستور، جلوگیری از تکرار کار، ثبت شواهد، راستی‌آزمایی مستقل، گزارش وضعیت و تحویل به عامل بعدی است. فایل‌های پروتکل اجرایی هم‌پوشان که در تغییر حاکمیتی مربوطه حذف شوند، دیگر مرجع فعال نیستند.
 
 ترتیب اجباری ورود:
 
-1. خواندن PROJECT_RULES.md
-2. خواندن HBI_TEAM_OPERATIONAL_COMMUNICATION_DIRECTIVE_V1.md
-3. شناسایی مأموریت / Unit
+1. خواندن PROJECT_RULES.md و AGENTS.md
+2. خواندن HBI_AGENT_EXECUTION_PROTOCOL.md
+3. شناسایی مأموریت / Unit و مرجع قراردادی حوزه
 4. خواندن Roadmap و Ledger مربوطه
-5. بررسی مستقیم origin/master
-6. ثبت Current SHA
-7. انجام Reality Audit
-8. شناسایی Existing / Partial / Missing / Unknown / Conflict
-9. سپس شروع اجرای کار
+5. بررسی مستقیم GitHub و ثبت SHA جاری
+6. انجام Reality Audit
+7. شناسایی Existing / Partial / Missing / Unknown / Conflict
+8. سپس شروع اجرای کار
 
 ---
 
-# 0.1 دسترسی GitHub (خلاصه — جزئیات در TEAM-OPS-COM-001)
+# 0.1 دسترسی GitHub
 
 - Repository: https://github.com/vahidmaghsoudi2/hbi (public)
 - همه اعضای تیم: دسترسی **خواندن** از ابتدا تا اکنون — ادعای عدم دسترسی خواندن پذیرفته نیست
@@ -262,7 +258,7 @@ Objective، Scope، Tests، Evidence، Decisions، Commit، Remote SHA، Ledger�
 # 33. MANDATORY ENTRY ACKNOWLEDGEMENT
 
 PROJECT_RULES READ: YES  
-TEAM-OPS-COM DIRECTIVE READ: YES  
+HBI_AGENT_EXECUTION_PROTOCOL READ: YES  
 SOURCE OF TRUTH: GitHub master  
 CURRENT SHA VERIFIED: YES  
 REALITY AUDIT REQUIRED: YES  
