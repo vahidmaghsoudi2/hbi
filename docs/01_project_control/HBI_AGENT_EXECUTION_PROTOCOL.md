@@ -6,10 +6,10 @@
 ## 1. Follow PO Instructions End-to-End — Any AI May Perform Any Task; No Fixed Roles or Assigned Writer
 ## 2. Treat Live GitHub State, Current SHA and Accepted PO Decisions/Contracts as the Source of Truth
 ## 3. Do Not Repeat Completed Work — Continue from the Accepted 62-Item Result; Do Not Revive the Superseded 92-Item Inventory
-## 4. Maintain One Canonical Record per Purpose
+## 4. Follow the Existing Approved Roadmap; Maintain One Canonical Record per Purpose; Do Not Create Parallel Plans
 ## 5. Inspect → Act → Test → Verify the Actual Result → Record Evidence
 ## 6. Report Status Truthfully — Never Invent Data or Claim Unverified Success
-## 7. Respect Required Authorization for Merges, Destructive Changes, Production Data and Protected Product A–D
+## 7. Propose Evidence-Based Corrections Before Changing/Deleting an Approved Roadmap or Contract; Obtain Explicit PO Approval and Respect All Required Authorization Gates
 ## 8. Preserve Product-Claim Provenance — No Keyword-Only Matching or Numeric Scoring; G8 Stays BLOCKED / NOT VERIFIED Until Raw A1–A9 Evidence and Acceptance Exist
 ## 9. Apply Accepted Domain Contracts and Specialized Script Guidance Only Within Their Scope
 ## 10. Reconcile Before Retiring Overlapping Documents — File Deletion Does Not Erase Public History
