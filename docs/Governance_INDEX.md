@@ -40,5 +40,5 @@ This is the canonical index for HBI governance, documentation, and evidence. It 
 1. Do not duplicate canonical documents — update them in-place and reference them from this index.
 2. Preserve .obsidian and ensure any renames update internal links.
 3. Use AGENTS.md for agent policy; do not bypass it.
-4. Independent Verification of work-product claims is governed by `HBI_INDEPENDENT_OUTPUT_VERIFICATION_POLICY.md` (IOV-001) — **ACTIVE policy**.
+4. Independent verification and truthful completion claims are governed by `docs/01_project_control/HBI_AGENT_EXECUTION_PROTOCOL.md` after merge. `03-Frameworks/HBI_SCRIPT_PROTOCOL.md` remains a subordinate, script-format-only convention.
 
