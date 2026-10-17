@@ -265,21 +265,21 @@ Find canonical record
 
 ## 14. Single-entry-point rule — anti-scatter control (2026-10-16)
 
-**The only intended entry point for Product Intake documentation is this registry.** PR #393 has been merged. The consolidated destinations listed below are the intended working locations; the prior pre-merge claim that old paths remain on `master` is historical and no longer current. Treat the table as a relocation map, not as permission for an unreviewed deletion. Before any further cleanup, verify each legacy path against current `master`, validate inbound links, and preserve the Git history/audit trail. Any remaining legacy copy must be handled in a reviewed, item-specific change.
+**Intended entry point:** this registry. PR #393 is merged. A targeted audit against `master` at tree `fc1f8f585f4f9d6cfa487a4709a24b57c3026d4b` confirmed that all six legacy paths in §14.1 return `404` and all six consolidated destinations exist with non-empty content. A targeted scan of the Product Intake governance, contract, roadmap, evidence, problem-map, and retirement documents found no active links to the six retired paths outside this registry's own historical relocation table. GitHub code search reported `incomplete_results=true`, so this is a documented targeted audit, not a claim of exhaustive repository-wide link-search coverage. Preserve this audit trail; do not delete history or claim confidentiality.
 
 ### 14.1 Canonical destination map and legacy paths
 
-| Document (preserve original filename) | Consolidated destination | Legacy path recorded in pre-merge audit (verify current status before cleanup) | Handling |
+| Document | Verified consolidated destination on `master` | Legacy path status on `master` | Link-audit result / handling |
 |---|---|---|---|
-| `SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md` | `docs/product-intake-knowledge-registry/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md` | `docs/architecture/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md` | Preserve approved contract text; remove old path only in an explicitly reviewed move/cleanup change after destination is verified |
-| `SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md` | `docs/product-intake-knowledge-registry/SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md` | `docs/architecture/SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md` | Keep DESIGN / NOT AUTHORIZED |
-| `PRODUCT_INTAKE_ROADMAP.md` | `docs/product-intake-knowledge-registry/PRODUCT_INTAKE_ROADMAP.md` | `docs/product-intake/PRODUCT_INTAKE_ROADMAP.md` | Canonical destination |
-| `PRODUCT_INTAKE_EXECUTION_LOG.md` | `docs/product-intake-knowledge-registry/PRODUCT_INTAKE_EXECUTION_LOG.md` | `docs/product-intake/PRODUCT_INTAKE_EXECUTION_LOG.md` | Preserve history; append facts, do not rewrite historical results |
-| `G8_ACCEPTANCE_EVIDENCE.md` | `docs/product-intake-knowledge-registry/G8_ACCEPTANCE_EVIDENCE.md` | `docs/product-intake/G8_ACCEPTANCE_EVIDENCE.md` | A1–A9 only from raw execution evidence; current G8 remains BLOCKED / NOT VERIFIED |
-| `ROADMAP_PRODUCT_INTAKE_G8.md` | `docs/product-intake-knowledge-registry/ROADMAP_PRODUCT_INTAKE_G8.md` | `docs/01_project_control/ROADMAP_PRODUCT_INTAKE_G8.md` | Operational roadmap destination |
+| `SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md` | `docs/product-intake-knowledge-registry/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md` | Absent (`404`) | Destination exists and is non-empty; no active inbound link found in targeted scan |
+| `SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md` | `docs/product-intake-knowledge-registry/SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md` | Absent (`404`) | Destination exists and is non-empty; retain DESIGN / NOT AUTHORIZED; no active inbound link found in targeted scan |
+| `PRODUCT_INTAKE_ROADMAP.md` | `docs/product-intake-knowledge-registry/PRODUCT_INTAKE_ROADMAP.md` | Absent (`404`) | Destination exists and is non-empty; no active inbound link found in targeted scan |
+| `PRODUCT_INTAKE_EXECUTION_LOG.md` | `docs/product-intake-knowledge-registry/PRODUCT_INTAKE_EXECUTION_LOG.md` | Absent (`404`) | Destination exists and is non-empty; preserve history; no active inbound link found in targeted scan |
+| `G8_ACCEPTANCE_EVIDENCE.md` | `docs/product-intake-knowledge-registry/G8_ACCEPTANCE_EVIDENCE.md` | Absent (`404`) | Destination exists and is non-empty; G8 remains BLOCKED / NOT VERIFIED; no active inbound link found in targeted scan |
+| `ROADMAP_PRODUCT_INTAKE_G8.md` | `docs/product-intake-knowledge-registry/ROADMAP_PRODUCT_INTAKE_G8.md` | Absent (`404`) | Destination exists and is non-empty; no active inbound link found in targeted scan |
 | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` | `docs/product-intake-knowledge-registry/SKIN_PROBLEM_SPACE_MAP_V0.1.md` | No equivalent master destination verified in this audit | Structural map only; preserve its version and source caveats |
 
-**Relocation status after PR #393:** the consolidated destinations listed above are the intended working locations. The original PR review recorded that legacy paths were removed on the PR #393 branch and destinations created/updated. Do not rely on the old pre-merge statement as current runtime fact. Before any additional cleanup, verify each legacy path and inbound link against the current base branch; preserve Git history and handle any remaining legacy copy in a reviewed, item-specific change. Do not delete legacy paths manually merely to enforce a single entry point.
+**Relocation audit result (master tree `fc1f8f585f4f9d6cfa487a4709a24b57c3026d4b`):** all six legacy paths above are absent and their six destinations exist with non-empty content. The targeted inbound-link scan covered the related Product Intake registry, roadmaps, execution log, G8 ledger, contracts, problem map, retirement register, and legacy project-control Product Intake documents; it found no active inbound references to the retired paths outside this table. The table's old paths are intentionally retained as historical audit data. GitHub code search was incomplete, so do not overstate this as exhaustive repo-wide proof. No file or Git history was deleted by this reconciliation.
 
 ### 14.2 Contract authority relationship — generic v1 vs skin execution v1.1
 
@@ -328,14 +328,14 @@ Historical issue/PR threads are preserved as provenance/audit evidence; do not c
 
 ### 14.5 What “centralized” means — acceptance criteria
 
-Before declaring consolidation complete, verify all of the following against the merged target branch:
+Target-branch checks completed for the six relocations in §14.1; the remaining criteria below distinguish verified documentation consolidation from G8 runtime acceptance:
 
 1. Every canonical document listed in §2 exists at its designated destination with the expected filename and non-empty content.
-2. Legacy duplicate paths listed in §14.1 are removed only after a byte/content and link audit; no approved contract is edited as part of the move.
+2. The six legacy paths listed in §14.1 are absent on `master`, their destinations exist and are non-empty, and the targeted inbound-link scan found no active links in the reviewed related documents. GitHub code search was incomplete; this is not an exhaustive repository-wide proof. No approved contract text was edited by this reconciliation.
 3. Every still-open/draft Problem Bank PR and its current accepted/rejected/superseded status is indexed here, not copied into an unauthorized second canonical version.
 4. The P16 discrepancy, P08/HBI relevance OPEN items, S01/S02 direct-artifact audit PARTIAL, and Customer Language Sources = 0 / Phase 2.1 BLOCKED are visible and not silently closed.
-5. Links resolve; no claim is made that a draft PR is merged, that the live Gallery inventory is complete, or that G8 ran.
+5. Links within the reviewed central registry package resolve by relative path; no claim is made that the live Gallery inventory is complete or that G8 ran.
 6. G8 stays **BLOCKED / NOT VERIFIED** until isolated-database preflight, real execution, A1–A9 raw evidence, cleanup, and independent review are documented.
 7. One source of truth per purpose: Issue #283 for operational tracking; this registry for navigation and evidence mapping; the approved contract for binding behavior; the execution log and A1–A9 ledger for runtime facts.
 
-Until those checks pass, status is **CONSOLIDATION IN PROGRESS — NOT YET SINGLE-LOCATION VERIFIED**.
+**Documentation relocation status:** six legacy paths absent, six consolidated destinations verified, and targeted inbound-link scan completed. **Residual limitation:** GitHub code search is incomplete, so repo-wide absence of every historical textual reference is not asserted. **G8 status remains BLOCKED / NOT VERIFIED** until its independent runtime acceptance criteria pass.
