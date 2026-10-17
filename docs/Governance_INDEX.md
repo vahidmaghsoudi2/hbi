@@ -10,7 +10,7 @@ This is the canonical index for HBI governance, documentation, and evidence. It 
 - .obsidian/ — Obsidian vault used by project (preserve internal links).
 
 ## Core project control (mandatory)
-- `docs/01_project_control/PROJECT_RULES.md` — Project-wide mandatory rules (NO ASSUMPTION, Reality Audit, Evidence, ONE OWNER, Frozen/Accepted, etc.).
+- `docs/01_project_control/PROJECT_RULES.md` — Project-wide rules (NO ASSUMPTION, evidence, frozen/accepted boundaries, and PO authority).
 - `docs/01_project_control/HBI_AGENT_EXECUTION_PROTOCOL.md` — **canonical cross-agent execution, evidence, and truthful-status protocol** (effective only after merge to master). It does not impose fixed AI roles, a mandatory handoff packet, or a mandatory independent-verifier role. It supersedes overlapping cross-agent process rules; do not consult retired protocol files as active instructions.
 - `docs/01_project_state/MISSION_OWNERSHIP_POLICY.md` — End-to-end mission ownership.
 - `docs/P4_PRODUCT_INTAKE_GOVERNANCE_CONTRACT_V1.md` — P4 Product Intake & Governance Contract.
@@ -40,5 +40,5 @@ This is the canonical index for HBI governance, documentation, and evidence. It 
 1. Do not duplicate canonical documents — update them in-place and reference them from this index.
 2. Preserve .obsidian and ensure any renames update internal links.
 3. Use AGENTS.md for agent policy; do not bypass it.
-4. Independent verification and truthful completion claims are governed by `docs/01_project_control/HBI_AGENT_EXECUTION_PROTOCOL.md` after merge. `03-Frameworks/HBI_SCRIPT_PROTOCOL.md` remains a subordinate, script-format-only convention.
+4. Truthful completion claims and evidence are governed by `docs/01_project_control/HBI_AGENT_EXECUTION_PROTOCOL.md` after merge. Independent review applies where a domain contract or acceptance gate requires it; no universal verifier role is imposed. `03-Frameworks/HBI_SCRIPT_PROTOCOL.md` remains a subordinate, script-format-only convention.
 
