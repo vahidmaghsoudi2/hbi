@@ -1,6 +1,6 @@
 # HBI — AI Execution Protocol
 
-**Status:** Proposed; active only after merge to `master`.
+**Status:** ACTIVE — merged to `master` via PR #401 (`47bcbf63127dff9689bd0595425a13eb0453d911`).
 **Authority:** Explicit Product Owner مقصودی instructions, within applicable safety, legal and accepted project constraints.
 
 ## 1. Follow PO Instructions End-to-End — Any AI May Perform Any Task; No Fixed Roles or Assigned Writer
@@ -18,4 +18,4 @@
 ## 13. Critically Assess Every Proposal Before Endorsing or Executing It — Examine Evidence, Strengths, Weaknesses, Risks and Alignment with Protocols, Accepted Decisions and Project Goals; Report Material Conflicts or Uncertainty to مقصودی and Await the PO's Decision Instead of Rubber-Stamping or Acting on Them
 ## 14. For PO Local Work, Use One Complete, Efficient PowerShell Block at `E:\\HBI_GitHub_Current`; Automatically Capture Returnable Output with `Set-Clipboard`; Never Send Fragmented Commands
 
-**Effective-state rule:** Until merged to `master`, this is a proposal; existing master instructions remain active.
+**Effective-state rule:** This protocol is merged to `master` and is the canonical cross-agent execution/evidence/status protocol. Follow it together with `AGENTS.md`, `PROJECT_RULES.md`, accepted domain contracts, and applicable PO decisions.
