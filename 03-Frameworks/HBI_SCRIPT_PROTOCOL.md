@@ -19,7 +19,7 @@ This file governs only script format and reporting convenience. It does not auth
 6. For repository-state work, report the local HEAD and fetch/inspect the current remote default-branch SHA before drawing conclusions. If network access or authentication prevents this, report that limitation rather than using a stale SHA as current.
 7. Never run `git reset --hard`, `git clean`, force-push, history rewrite, destructive deletion, or overwrite an existing file unless the PO explicitly authorized that exact action and the target has been inspected.
 8. If the working tree has changes, identify and preserve them. Do not silently stash, discard, restore, or overwrite them.
-9. When a user needs to return results to ChatGPT, a final concise report may be copied to the clipboard with `Set-Clipboard`; do not copy credentials, tokens, secrets, or private data.
+9. For PowerShell work intended for the PO to run locally and return output to ChatGPT, provide one complete, efficient, directly pasteable block (not fragmented commands), use `E:\\HBI_GitHub_Current` after verifying the path, and automatically copy the concise final output to the clipboard with `Set-Clipboard`. Never copy credentials, tokens, secrets, or private data.
 10. Never say a script was executed when only the text was drafted. Never report success based only on a script being generated.
 
 ## 3. Standard status
