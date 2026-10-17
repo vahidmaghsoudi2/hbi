@@ -5,7 +5,7 @@
 **Source of Truth:** GitHub `master`
 **Project:** HBI — Health & Beauty Intelligence
 **Effective Date:** 2026-09-02
-**Last Governance Update:** 2026-09-09 (Team Operational Directive pointer + prior rules retained)
+**Last Governance Update:** 2026-10-17 (AI execution protocol simplified per PO direction)
 
 ---
 
@@ -125,9 +125,9 @@ Owner مسئول Unit از صفر تا صد است (Rules → Reality → Scope 
 
 ---
 
-# 11. EXECUTION PACKAGE اجباری
+# 11. EXECUTION PACKAGE
 
-Unit جدید بدون Execution Package شروع نمی‌شود.
+No mandatory execution-package template; follow the PO's direct task instructions and inspect existing evidence.
 
 ---
 
@@ -199,11 +199,9 @@ Accounting V1، Product Master، و موارد اعلام‌شده محافظت�
 
 ---
 
-# 24. AI ROLE BOUNDARY & END-TO-END ACCOUNTABILITY
+# 24. AI EXECUTION AUTHORITY
 
-Roles = specialization only. Ownership = end-to-end. کمک دیگران مالکیت را منتقل نمی‌کند.
-
-AI بدون Authority: Business Decision نهایی، Approve محصول، silent Contract/Schema change، داده ساختگی — ممنوع.
+هر AI می‌تواند هر کار پژوهشی، طراحی، نوشتن، پیاده‌سازی، آزمون، بررسی و اصلاح را که PO دستور می‌دهد انجام دهد؛ نقش تخصصی ثابت یا مسئول نوشتن/تأیید از پیش تعیین‌شده وجود ندارد. تصمیم‌های کسب‌وکار و تأیید محصول تابع مجوز و Gate مصوب‌اند؛ داده‌سازی و تغییر بی‌اجازه ممنوع است.
 
 ---
 
@@ -213,9 +211,9 @@ PO مرجع نهایی Business است. نقش‌های تخصصی تیم (Integ
 
 ---
 
-# 26. FINAL REPORT STANDARD
+# 26. FINAL REPORT
 
-گزارش پایانی Unit باید MISSION، SHAها، REALITY، CHANGES، TESTS، EVIDENCE، OPEN، HANDOFF، NEXT ACTION داشته باشد.
+نتیجه واقعی، مسیر/SHA و شواهد لازم، موارد باز و اقدام بعدی را مختصر گزارش کنید؛ قالب ثابت اجباری نیست.
 
 ---
 
@@ -225,9 +223,9 @@ STOP + DOCUMENT + REPORT — نه GUESS + CONTINUE.
 
 ---
 
-# 28. CONTINUITY / HANDOFF
+# 28. CONTINUITY
 
-Roadmap، Ledger، Status، SHA، Decisions، Next Action باید نفر بعدی را بی‌نیاز از بازجویی کند.
+اطلاعات موجود در Repository را دوباره از PO نخواهید. بسته تحویل یا قالب handoff اجباری نیست؛ فقط اطلاعات لازم برای ادامه کار را ثبت کنید.
 
 ---
 
@@ -255,16 +253,9 @@ Objective، Scope، Tests، Evidence، Decisions، Commit، Remote SHA، Ledger�
 
 ---
 
-# 33. MANDATORY ENTRY ACKNOWLEDGEMENT
+# 33. ENTRY CHECK
 
-PROJECT_RULES READ: YES  
-HBI_AGENT_EXECUTION_PROTOCOL READ: YES  
-SOURCE OF TRUTH: GitHub master  
-CURRENT SHA VERIFIED: YES  
-REALITY AUDIT REQUIRED: YES  
-NO ASSUMPTION / NO INVENTED DATA: ACCEPTED  
-0→100 OWNERSHIP: ACCEPTED  
-EVIDENCE REQUIRED: ACCEPTED
+قبل از اقدام، قوانین مرتبط، وضعیت واقعی GitHub، SHA جاری و شواهد موجود را بررسی کنید؛ تأییدیه تشریفاتی یا قالب پاسخ اجباری نیست.
 
 ---
 
