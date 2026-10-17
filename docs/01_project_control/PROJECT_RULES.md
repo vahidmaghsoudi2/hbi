@@ -274,12 +274,11 @@ EVIDENCE REQUIRED: ACCEPTED
 
 ---
 
-# 35. RECORD — Team Operational Directive (2026-09-09)
+# 35. RECORD — Unified Agent Execution Protocol
 
-**Source:** PO مقصودی  
-**Document:** `HBI-TEAM-OPS-COM-001`  
-**Path:** `docs/01_project_control/HBI_TEAM_OPERATIONAL_COMMUNICATION_DIRECTIVE_V1.md`  
-**Effect:** مکمل ارتباطی/عملیاتی؛ جایگزین PROJECT_RULES نیست.
+**Source:** Explicit Product Owner direction, 2026-10-17.  
+**Canonical path:** `docs/01_project_control/HBI_AGENT_EXECUTION_PROTOCOL.md`  
+**Effect:** واحدسازی قواعد اجرای دستور، عدم تکرار، شواهد، راستی‌آزمایی مستقل، گزارش وضعیت و تحویل. پس از merge، پروتکل‌های اجرایی هم‌پوشان از درخت فعال حذف می‌شوند؛ قراردادهای تخصصی دامنه و راهنمای اسکریپت فقط در حوزه متمایز خود باقی می‌مانند.
 
 ---
 
