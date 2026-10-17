@@ -21,18 +21,9 @@
 
 `docs/01_project_control/HBI_AGENT_EXECUTION_PROTOCOL.md`
 
-این سند مرجع واحد اجرای دستور، جلوگیری از تکرار کار، ثبت شواهد، راستی‌آزمایی مستقل، گزارش وضعیت و تحویل به عامل بعدی است. فایل‌های پروتکل اجرایی هم‌پوشان که در تغییر حاکمیتی مربوطه حذف شوند، دیگر مرجع فعال نیستند.
+این سند مرجع اجرای دستور، جلوگیری از تکرار کار، ثبت شواهد و گزارش وضعیت است؛ نقش ثابت، بستهٔ تحویل اجباری یا نقش اجباری راستی‌آزمای مستقل ایجاد نمی‌کند. فایل‌های پروتکل اجرایی هم‌پوشان که در تغییر حاکمیتی مربوطه حذف شوند، دیگر مرجع فعال نیستند.
 
-ترتیب اجباری ورود:
-
-1. خواندن PROJECT_RULES.md و AGENTS.md
-2. خواندن HBI_AGENT_EXECUTION_PROTOCOL.md
-3. شناسایی مأموریت / Unit و مرجع قراردادی حوزه
-4. خواندن Roadmap و Ledger مربوطه
-5. بررسی مستقیم GitHub و ثبت SHA جاری
-6. انجام Reality Audit
-7. شناسایی Existing / Partial / Missing / Unknown / Conflict
-8. سپس شروع اجرای کار
+پیش از اقدام، وضعیت زندهٔ GitHub، تصمیم/قرارداد معتبر و شواهد مرتبط با همان کار را بررسی کنید. فقط اسناد و آزمون‌های مرتبط را بخوانید؛ از تشریفات یا تکرار بررسی‌های تکمیل‌شده پرهیز کنید.
 
 ---
 
@@ -119,9 +110,7 @@ Home Page و Gallery فعلی بخشی از Reality هستند؛ قبل از ت�
 
 # 10. قانون صفر تا صد / 0 → 100
 
-Owner مسئول Unit از صفر تا صد است (Rules → Reality → Scope → Implement/Document → Test → Evidence → Commit → Ledger → Handoff).
-
-**ONE TASK = ONE OWNER = END-TO-END ACCOUNTABILITY**
+هر AI می‌تواند هر کاری را که PO دستور می‌دهد از ابتدا تا پایان انجام دهد. نقش ثابت، نویسندهٔ ازپیش‌تعیین‌شده یا تقسیم اجباری کار وجود ندارد. آزمون، شواهد و ثبت تغییرات را متناسب با نوع و ریسک کار انجام دهید.
 
 ---
 
@@ -133,7 +122,7 @@ No mandatory execution-package template; follow the PO's direct task instruction
 
 # 12. قانون ردپا / TRACEABILITY
 
-REQUEST → WHY → OWNER → BASELINE → INSPECTION → DECISION → CHANGE → TEST → EVIDENCE → COMMIT → SHA → REMAINING → NEXT ACTION
+برای تغییرات معنادار، درخواست، مبنا، تغییر، آزمون/شواهد متناسب، SHA و موارد باقی‌مانده را قابل ردیابی نگه دارید؛ این فهرست قالب اجباری گزارش نیست.
 
 ---
 
@@ -176,13 +165,13 @@ REALITY → GAP → DECISION → CONTRACT → IMPLEMENTATION → TEST → EVIDEN
 
 # 20. GATE RULE
 
-وجود کد به‌تنهایی Complete نیست؛ Test، Evidence، Review، Commit، Ledger، Handoff لازم است.
+وجود کد به‌تنهایی اثبات تکمیل نیست؛ معیارهای پذیرش و آزمون/شواهد مرتبط با همان کار را بررسی کنید. قالب تحویل ثابت یا نقش اجباری بازبین ایجاد نکنید.
 
 ---
 
 # 21. PARALLEL EXECUTION
 
-فقط با Dependency و Owner مشخص برای Shared Contract/Schema.
+هماهنگی موازی را متناسب با وابستگی واقعی انجام دهید؛ نقش یا مسئول ثابت از پیش تعیین‌شده الزامی نیست.
 
 ---
 
@@ -243,13 +232,13 @@ MEMORY MAY GUIDE SEARCH. REPOSITORY MUST VERIFY REALITY.
 
 # 31. NO PREMATURE GREEN
 
-GREEN فقط با Scope، Tests، Evidence، Commit، Remote verify، Handoff، بدون Blocker.
+وضعیت تکمیل را فقط با معیارهای پذیرش و شواهد واقعی اعلام کنید؛ گزارش یا قالب تحویل تشریفاتی شرط عمومی نیست.
 
 ---
 
 # 32. DEFINITION OF DONE
 
-Objective، Scope، Tests، Evidence، Decisions، Commit، Remote SHA، Ledger، Handoff، Next action.
+معیار تکمیل تابع نوع کار و معیار پذیرش آن است؛ نتیجه و شواهد لازم را صادقانه ثبت کنید، بدون قالب تحویل اجباری.
 
 ---
 
@@ -269,7 +258,7 @@ Objective، Scope، Tests، Evidence، Decisions، Commit، Remote SHA، Ledger�
 
 **Source:** Explicit Product Owner direction, 2026-10-17.  
 **Canonical path:** `docs/01_project_control/HBI_AGENT_EXECUTION_PROTOCOL.md`  
-**Effect:** واحدسازی قواعد اجرای دستور، عدم تکرار، شواهد، راستی‌آزمایی مستقل، گزارش وضعیت و تحویل. پس از merge، پروتکل‌های اجرایی هم‌پوشان از درخت فعال حذف می‌شوند؛ قراردادهای تخصصی دامنه و راهنمای اسکریپت فقط در حوزه متمایز خود باقی می‌مانند.
+**Effect:** واحدسازی قواعد اجرای دستور، عدم تکرار، شواهد و گزارش صادقانهٔ وضعیت؛ بدون نقش ثابت یا بستهٔ تحویل اجباری. پس از merge، پروتکل‌های اجرایی هم‌پوشان از درخت فعال حذف می‌شوند؛ قراردادهای تخصصی دامنه و راهنمای اسکریپت فقط در حوزه متمایز خود باقی می‌مانند.
 
 ---
 
