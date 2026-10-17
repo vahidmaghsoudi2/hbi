@@ -2,7 +2,7 @@
 
 **Status:** EXECUTION REGISTRY — PO approved for consolidation work  
 **Scope:** Skin Product Intake / Product Intelligence / Problem–Need connection  
-**Baseline:** `335fd6e472dde72b9907366acaa04db28ebed943`  
+**Last verified against master:** `fc1f8f585f4f9d6cfa487a4709a24b57c3026d4b` (2026-10-16; historical verification point, not a claim that this SHA remains HEAD after later merges)  
 **Last reconciled:** 2026-10-16
 
 ## 1. Purpose
@@ -265,23 +265,33 @@ Find canonical record
 
 ## 14. Single-entry-point rule — anti-scatter control (2026-10-16)
 
-**The only intended entry point for Product Intake documentation is this registry.** The folder `docs/product-intake-knowledge-registry/` is the consolidated destination proposed by PR #393. Verified on the PR branch: all six legacy paths listed below are absent there, while the destination documents exist. On `master`, the old paths remain until PR #393 is accepted and merged; therefore repository-wide relocation is not yet complete.
+**Intended entry point:** this registry. PR #393 is merged. A targeted audit against `master` at tree `fc1f8f585f4f9d6cfa487a4709a24b57c3026d4b` confirmed that all six legacy paths in §14.1 return `404` and all six consolidated destinations exist with non-empty content. A targeted scan of the Product Intake governance, contract, roadmap, evidence, problem-map, and retirement documents found no active links to the six retired paths outside this registry's own historical relocation table. GitHub code search reported `incomplete_results=true`, so this is a documented targeted audit, not a claim of exhaustive repository-wide link-search coverage. Preserve this audit trail; do not delete history or claim confidentiality.
 
 ### 14.1 Canonical destination map and legacy paths
 
-| Document (preserve original filename) | Consolidated destination | Legacy path currently known on master | Handling |
+| Document | Verified consolidated destination on `master` | Legacy path status on `master` | Link-audit result / handling |
 |---|---|---|---|
-| `SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md` | `docs/product-intake-knowledge-registry/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md` | `docs/architecture/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md` | Preserve approved contract text; remove old path only in an explicitly reviewed move/cleanup change after destination is verified |
-| `SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md` | `docs/product-intake-knowledge-registry/SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md` | `docs/architecture/SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md` | Keep DESIGN / NOT AUTHORIZED |
-| `PRODUCT_INTAKE_ROADMAP.md` | `docs/product-intake-knowledge-registry/PRODUCT_INTAKE_ROADMAP.md` | `docs/product-intake/PRODUCT_INTAKE_ROADMAP.md` | Single canonical destination after merge |
-| `PRODUCT_INTAKE_EXECUTION_LOG.md` | `docs/product-intake-knowledge-registry/PRODUCT_INTAKE_EXECUTION_LOG.md` | `docs/product-intake/PRODUCT_INTAKE_EXECUTION_LOG.md` | Preserve history; append facts, do not rewrite historical results |
-| `G8_ACCEPTANCE_EVIDENCE.md` | `docs/product-intake-knowledge-registry/G8_ACCEPTANCE_EVIDENCE.md` | `docs/product-intake/G8_ACCEPTANCE_EVIDENCE.md` | A1–A9 only from raw execution evidence; current G8 remains BLOCKED / NOT VERIFIED |
-| `ROADMAP_PRODUCT_INTAKE_G8.md` | `docs/product-intake-knowledge-registry/ROADMAP_PRODUCT_INTAKE_G8.md` | `docs/01_project_control/ROADMAP_PRODUCT_INTAKE_G8.md` | One operational roadmap after merge |
+| `SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md` | `docs/product-intake-knowledge-registry/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md` | Absent (`404`) | Destination exists and is non-empty; no active inbound link found in targeted scan |
+| `SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md` | `docs/product-intake-knowledge-registry/SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md` | Absent (`404`) | Destination exists and is non-empty; retain DESIGN / NOT AUTHORIZED; no active inbound link found in targeted scan |
+| `PRODUCT_INTAKE_ROADMAP.md` | `docs/product-intake-knowledge-registry/PRODUCT_INTAKE_ROADMAP.md` | Absent (`404`) | Destination exists and is non-empty; no active inbound link found in targeted scan |
+| `PRODUCT_INTAKE_EXECUTION_LOG.md` | `docs/product-intake-knowledge-registry/PRODUCT_INTAKE_EXECUTION_LOG.md` | Absent (`404`) | Destination exists and is non-empty; preserve history; no active inbound link found in targeted scan |
+| `G8_ACCEPTANCE_EVIDENCE.md` | `docs/product-intake-knowledge-registry/G8_ACCEPTANCE_EVIDENCE.md` | Absent (`404`) | Destination exists and is non-empty; G8 remains BLOCKED / NOT VERIFIED; no active inbound link found in targeted scan |
+| `ROADMAP_PRODUCT_INTAKE_G8.md` | `docs/product-intake-knowledge-registry/ROADMAP_PRODUCT_INTAKE_G8.md` | Absent (`404`) | Destination exists and is non-empty; no active inbound link found in targeted scan |
 | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` | `docs/product-intake-knowledge-registry/SKIN_PROBLEM_SPACE_MAP_V0.1.md` | No equivalent master destination verified in this audit | Structural map only; preserve its version and source caveats |
 
-**Branch-level relocation status:** the six legacy paths above have been removed from the PR #393 branch; the original filenames now live at the listed consolidated destinations. The contract and G8 evidence files were byte-identical to their old copies. The roadmap, execution log, strategic baseline and execution-control roadmap contain path/baseline updates; their differences were inspected at line level, and destination versions retain the current consolidation paths/baseline. The old paths remain on `master` only because PR #393 is not merged. Do not manually delete them from `master` separately. Before merge, complete inbound-link validation and review the full PR diff; after merge, verify that each legacy path returns not found and each destination remains present. Git history remains the audit trail; it is not a second working location.
+**Relocation audit result (master tree `fc1f8f585f4f9d6cfa487a4709a24b57c3026d4b`):** all six legacy paths above are absent and their six destinations exist with non-empty content. The targeted inbound-link scan covered the related Product Intake registry, roadmaps, execution log, G8 ledger, contracts, problem map, retirement register, and legacy project-control Product Intake documents; it found no active inbound references to the retired paths outside this table. The table's old paths are intentionally retained as historical audit data. GitHub code search was incomplete, so do not overstate this as exhaustive repo-wide proof. No file or Git history was deleted by this reconciliation.
 
-### 14.2 Problem Bank / Problem Space source register
+### 14.2 Contract authority relationship — generic v1 vs skin execution v1.1
+
+The older `docs/01_project_control/product_intake/PRODUCT_INTAKE_CONTRACT_v1.md` is retained as a **historical design/acceptance record**, not a parallel current authority for skin-specific execution. Its recorded PO acceptance is tied to baseline `42cc77ec` and date 2026-09-07. The later `SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md` is the current PO-approved contract baseline for skin-product intake decisions and skin-specific requirements.
+
+Apply the documents by scope:
+- **P4 Product Intake Governance Contract** remains binding for the governed product lifecycle, roles, approval/activation transitions, and mutation/audit rules where applicable.
+- **Skin Product Intake Execution Contract v1.1** is the current authority for skin-product intake, safety/UNKNOWN requirements, claim taxonomy, and skin-specific eligibility boundaries.
+- **Generic Product Intake Contract v1** is historical context for its original design decisions. Do not use it to override v1.1 on skin-specific matters or to create a second approval/state machine.
+- If a concrete clause appears to conflict and cannot be resolved by this scope split, record the exact clauses and obtain PO adjudication in a reviewed change; do not silently delete or rewrite the historical contract.
+
+### 14.3 Problem Bank / Problem Space source register
 
 These artifacts remain separate open/draft PRs and are **not** silently absorbed or authorized by PR #393. This register is the sole navigation point until a separately approved consolidation decision says otherwise.
 
@@ -305,27 +315,27 @@ These artifacts remain separate open/draft PRs and are **not** silently absorbed
 
 **Do not misstate draft status as implementation or merge approval.** The current frozen Map V0.1 records P16 differently from the later correction/accepted audit. The later governance correction states P16 primary shelf is S03 and no cross-shelf relation; preserve the frozen Map unchanged and surface the discrepancy here. Relevant record: [Issue #293 correction comment](https://github.com/vahidmaghsoudi2/hbi/issues/293#issuecomment-5979025129). Also retain the management acceptance and pre-pilot audit trail: [acceptance with conditions](https://github.com/vahidmaghsoudi2/hbi/issues/293#issuecomment-5979222785), [pre-pilot readiness](https://github.com/vahidmaghsoudi2/hbi/issues/293#issuecomment-5982706812), [Customer Reality boundary](https://github.com/vahidmaghsoudi2/hbi/issues/293#issuecomment-5979521659), [L1/L2 evidence plan](https://github.com/vahidmaghsoudi2/hbi/issues/293#issuecomment-5979781170), [verified customer language = 0 / Phase 2.1 blocked](https://github.com/vahidmaghsoudi2/hbi/issues/293#issuecomment-5982622015).
 
-### 14.3 Consultation and lifecycle implementation references
+### 14.4 Consultation and lifecycle implementation references
 
 These are implementation/supporting references, not alternate Product Intake roadmaps:
 
 - Consultation framework / reality / vertical slice: Issues [#208](https://github.com/vahidmaghsoudi2/hbi/issues/208), [#209](https://github.com/vahidmaghsoudi2/hbi/issues/209), [#214](https://github.com/vahidmaghsoudi2/hbi/issues/214), [#221](https://github.com/vahidmaghsoudi2/hbi/issues/221), [#223](https://github.com/vahidmaghsoudi2/hbi/issues/223), [#225](https://github.com/vahidmaghsoudi2/hbi/issues/225); merged PR [#226](https://github.com/vahidmaghsoudi2/hbi/pull/226).
 - Customer response and outcomes: Issues [#232](https://github.com/vahidmaghsoudi2/hbi/issues/232), [#237](https://github.com/vahidmaghsoudi2/hbi/issues/237), [#249](https://github.com/vahidmaghsoudi2/hbi/issues/249), [#250](https://github.com/vahidmaghsoudi2/hbi/issues/250), [#252](https://github.com/vahidmaghsoudi2/hbi/issues/252), [#254](https://github.com/vahidmaghsoudi2/hbi/issues/254), [#255](https://github.com/vahidmaghsoudi2/hbi/issues/255); implementation PRs [#229](https://github.com/vahidmaghsoudi2/hbi/pull/229), [#233](https://github.com/vahidmaghsoudi2/hbi/pull/233), [#238](https://github.com/vahidmaghsoudi2/hbi/pull/238), [#246](https://github.com/vahidmaghsoudi2/hbi/pull/246), [#253](https://github.com/vahidmaghsoudi2/hbi/pull/253), [#259](https://github.com/vahidmaghsoudi2/hbi/pull/259).
 - Purchase-history / traceability boundary: merged PRs [#141](https://github.com/vahidmaghsoudi2/hbi/pull/141) and [#152](https://github.com/vahidmaghsoudi2/hbi/pull/152); PR [#143](https://github.com/vahidmaghsoudi2/hbi/pull/143) remains unmerged and must not be treated as integrated.
-- Recommendation/product-intake context: Issue [#37](https://github.com/vahidmaghsoudi2/hbi/issues/37) prohibits numeric weighting; Issue [#283](https://github.com/vahidmaghsoudi2/hbi/issues/283) is the operational tracker; PR [#393](https://github.com/vahidmaghsoudi2/hbi/pull/393) is the proposed consolidation path.
+- Recommendation/product-intake context: Issue [#37](https://github.com/vahidmaghsoudi2/hbi/issues/37) prohibits numeric weighting; Issue [#283](https://github.com/vahidmaghsoudi2/hbi/issues/283) is the operational tracker; merged PR [#393](https://github.com/vahidmaghsoudi2/hbi/pull/393) recorded the documentation consolidation change.
 
 Historical issue/PR threads are preserved as provenance/audit evidence; do not copy them into new competing roadmap documents. The registry records their role and links to the source.
 
-### 14.4 What “centralized” means — acceptance criteria
+### 14.5 What “centralized” means — acceptance criteria
 
-Before declaring consolidation complete, verify all of the following against the merged target branch:
+Target-branch checks completed for the six relocations in §14.1; the remaining criteria below distinguish verified documentation consolidation from G8 runtime acceptance:
 
 1. Every canonical document listed in §2 exists at its designated destination with the expected filename and non-empty content.
-2. Legacy duplicate paths listed in §14.1 are removed only after a byte/content and link audit; no approved contract is edited as part of the move.
+2. The six legacy paths listed in §14.1 are absent on `master`, their destinations exist and are non-empty, and the targeted inbound-link scan found no active links in the reviewed related documents. GitHub code search was incomplete; this is not an exhaustive repository-wide proof. No approved contract text was edited by this reconciliation.
 3. Every still-open/draft Problem Bank PR and its current accepted/rejected/superseded status is indexed here, not copied into an unauthorized second canonical version.
 4. The P16 discrepancy, P08/HBI relevance OPEN items, S01/S02 direct-artifact audit PARTIAL, and Customer Language Sources = 0 / Phase 2.1 BLOCKED are visible and not silently closed.
-5. Links resolve; no claim is made that a draft PR is merged, that the live Gallery inventory is complete, or that G8 ran.
+5. Links within the reviewed central registry package resolve by relative path; no claim is made that the live Gallery inventory is complete or that G8 ran.
 6. G8 stays **BLOCKED / NOT VERIFIED** until isolated-database preflight, real execution, A1–A9 raw evidence, cleanup, and independent review are documented.
 7. One source of truth per purpose: Issue #283 for operational tracking; this registry for navigation and evidence mapping; the approved contract for binding behavior; the execution log and A1–A9 ledger for runtime facts.
 
-Until those checks pass, status is **CONSOLIDATION IN PROGRESS — NOT YET SINGLE-LOCATION VERIFIED**.
+**Documentation relocation status:** six legacy paths absent, six consolidated destinations verified, and targeted inbound-link scan completed. **Residual limitation:** GitHub code search is incomplete, so repo-wide absence of every historical textual reference is not asserted. **G8 status remains BLOCKED / NOT VERIFIED** until its independent runtime acceptance criteria pass.
