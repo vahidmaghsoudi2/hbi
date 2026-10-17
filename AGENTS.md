@@ -4,7 +4,9 @@
 
 Purpose
 -------
-Provide a canonical, project-level policy that governs how AI agents may inspect, analyze, propose, and (when allowed) create artifacts in this repository. Preserve human authority for decisions and merges to master.
+Provide a project-level entry point for agent rules while preserving human authority for decisions and merges to master.
+
+**Canonical execution/evidence/handoff authority:** [`docs/01_project_control/HBI_AGENT_EXECUTION_PROTOCOL.md`](docs/01_project_control/HBI_AGENT_EXECUTION_PROTOCOL.md). Every agent MUST read and follow it before acting. If this file and the canonical protocol differ on execution, evidence, status claims, verification, handoff, repetition, or protocol retirement, the canonical protocol governs. This file remains the repository-specific permission and PR-policy summary; it is not a competing execution protocol.
 
 Principles (must be followed)
 -----------------------------
