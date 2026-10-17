@@ -11,7 +11,7 @@ This is the canonical index for HBI governance, documentation, and evidence. It 
 
 ## Core project control (mandatory)
 - `docs/01_project_control/PROJECT_RULES.md` — Project-wide mandatory rules (NO ASSUMPTION, Reality Audit, Evidence, ONE OWNER, Frozen/Accepted, etc.).
-- `docs/01_project_control/HBI_INDEPENDENT_OUTPUT_VERIFICATION_POLICY.md` — **Independent Output Verification & Trust Control (ACTIVE — PO ACCEPTED, 2026-09-16)** (DONE ≠ VERIFIED ≠ ACCEPTED ≠ MERGED; Independent Verifier; risk-based verification; operational trust). Complements PROJECT_RULES; does not replace them.
+- `docs/01_project_control/HBI_AGENT_EXECUTION_PROTOCOL.md` — **sole active cross-agent execution, evidence, independent verification, truthful-status, and handoff protocol** (effective only after its merge to master). It supersedes overlapping cross-agent process rules; do not consult retired protocol files as active instructions.
 - `docs/01_project_state/MISSION_OWNERSHIP_POLICY.md` — End-to-end mission ownership.
 - `docs/P4_PRODUCT_INTAKE_GOVERNANCE_CONTRACT_V1.md` — P4 Product Intake & Governance Contract.
 - `docs/P4_IMPLEMENTATION_GUIDE.md` — P4 implementation guidance.
