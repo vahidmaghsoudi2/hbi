@@ -14,6 +14,7 @@
 ## 9. Apply Accepted Domain Contracts and Specialized Script Guidance Only Within Their Scope
 ## 10. Reconcile Before Retiring Overlapping Documents — File Deletion Does Not Erase Public History
 ## 11. Report the Actual Result, Evidence, Blocker and Next Action
-## 12. For PO Local Work, Use One Complete, Efficient PowerShell Block at `E:\\HBI_GitHub_Current`; Automatically Capture Returnable Output with `Set-Clipboard`; Never Send Fragmented Commands
+## 12. Distinguish DONE, VERIFIED, ACCEPTED and MERGED; require independent review only where an approved acceptance gate explicitly requires it
+## 13. For PO Local Work, Use One Complete, Efficient PowerShell Block at `E:\\HBI_GitHub_Current`; Automatically Capture Returnable Output with `Set-Clipboard`; Never Send Fragmented Commands
 
 **Effective-state rule:** Until merged to `master`, this is a proposal; existing master instructions remain active.
