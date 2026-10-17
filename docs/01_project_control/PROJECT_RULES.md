@@ -5,7 +5,7 @@
 **Source of Truth:** GitHub `master`
 **Project:** HBI — Health & Beauty Intelligence
 **Effective Date:** 2026-09-02
-**Last Governance Update:** 2026-09-09 (Team Operational Directive pointer + prior rules retained)
+**Last Governance Update:** 2026-10-17 (AI execution protocol simplified per PO direction)
 
 ---
 
@@ -17,30 +17,17 @@
 
 `docs/01_project_control/PROJECT_RULES.md`
 
-**دستورالعمل عملیاتی و ارتباطی تیم (مکمل اجباری از 2026-09-09):**
+**پروتکل اجرایی واحد و اجباری (پس از ادغام به master):**
 
-`docs/01_project_control/HBI_TEAM_OPERATIONAL_COMMUNICATION_DIRECTIVE_V1.md`  
-**Document ID:** `HBI-TEAM-OPS-COM-001`
+`docs/01_project_control/HBI_AGENT_EXECUTION_PROTOCOL.md`
 
-شامل: قالب پاسخ تیمی، استقلال فکری، Circuit Breaker فشرده، فازهای F0–F7، و **سیاست دسترسی GitHub** (مخزن عمومی `vahidmaghsoudi2/hbi` — خواندن برای همه اعضا؛ نوشتن فقط با دستور PO به Grokها/Owner مجاز).
+این سند مرجع اجرای دستور، جلوگیری از تکرار کار، ثبت شواهد و گزارش وضعیت است؛ نقش ثابت، بستهٔ تحویل اجباری یا نقش اجباری راستی‌آزمای مستقل ایجاد نمی‌کند. فایل‌های پروتکل اجرایی هم‌پوشان که در تغییر حاکمیتی مربوطه حذف شوند، دیگر مرجع فعال نیستند.
 
-عدم مطالعه قوانین پایه + دستورالعمل ارتباطی = عدم مجوز شروع کار.
-
-ترتیب اجباری ورود:
-
-1. خواندن PROJECT_RULES.md
-2. خواندن HBI_TEAM_OPERATIONAL_COMMUNICATION_DIRECTIVE_V1.md
-3. شناسایی مأموریت / Unit
-4. خواندن Roadmap و Ledger مربوطه
-5. بررسی مستقیم origin/master
-6. ثبت Current SHA
-7. انجام Reality Audit
-8. شناسایی Existing / Partial / Missing / Unknown / Conflict
-9. سپس شروع اجرای کار
+پیش از اقدام، وضعیت زندهٔ GitHub، تصمیم/قرارداد معتبر و شواهد مرتبط با همان کار را بررسی کنید. فقط اسناد و آزمون‌های مرتبط را بخوانید؛ از تشریفات یا تکرار بررسی‌های تکمیل‌شده پرهیز کنید.
 
 ---
 
-# 0.1 دسترسی GitHub (خلاصه — جزئیات در TEAM-OPS-COM-001)
+# 0.1 دسترسی GitHub
 
 - Repository: https://github.com/vahidmaghsoudi2/hbi (public)
 - همه اعضای تیم: دسترسی **خواندن** از ابتدا تا اکنون — ادعای عدم دسترسی خواندن پذیرفته نیست
@@ -123,21 +110,19 @@ Home Page و Gallery فعلی بخشی از Reality هستند؛ قبل از ت�
 
 # 10. قانون صفر تا صد / 0 → 100
 
-Owner مسئول Unit از صفر تا صد است (Rules → Reality → Scope → Implement/Document → Test → Evidence → Commit → Ledger → Handoff).
-
-**ONE TASK = ONE OWNER = END-TO-END ACCOUNTABILITY**
+هر AI می‌تواند هر کاری را که PO دستور می‌دهد از ابتدا تا پایان انجام دهد. نقش ثابت، نویسندهٔ ازپیش‌تعیین‌شده یا تقسیم اجباری کار وجود ندارد. آزمون، شواهد و ثبت تغییرات را متناسب با نوع و ریسک کار انجام دهید.
 
 ---
 
-# 11. EXECUTION PACKAGE اجباری
+# 11. EXECUTION PACKAGE
 
-Unit جدید بدون Execution Package شروع نمی‌شود.
+No mandatory execution-package template; follow the PO's direct task instructions and inspect existing evidence.
 
 ---
 
 # 12. قانون ردپا / TRACEABILITY
 
-REQUEST → WHY → OWNER → BASELINE → INSPECTION → DECISION → CHANGE → TEST → EVIDENCE → COMMIT → SHA → REMAINING → NEXT ACTION
+برای تغییرات معنادار، درخواست، مبنا، تغییر، آزمون/شواهد متناسب، SHA و موارد باقی‌مانده را قابل ردیابی نگه دارید؛ این فهرست قالب اجباری گزارش نیست.
 
 ---
 
@@ -180,13 +165,13 @@ REALITY → GAP → DECISION → CONTRACT → IMPLEMENTATION → TEST → EVIDEN
 
 # 20. GATE RULE
 
-وجود کد به‌تنهایی Complete نیست؛ Test، Evidence، Review، Commit، Ledger، Handoff لازم است.
+وجود کد به‌تنهایی اثبات تکمیل نیست؛ معیارهای پذیرش و آزمون/شواهد مرتبط با همان کار را بررسی کنید. قالب تحویل ثابت یا نقش اجباری بازبین ایجاد نکنید.
 
 ---
 
 # 21. PARALLEL EXECUTION
 
-فقط با Dependency و Owner مشخص برای Shared Contract/Schema.
+هماهنگی موازی را متناسب با وابستگی واقعی انجام دهید؛ نقش یا مسئول ثابت از پیش تعیین‌شده الزامی نیست.
 
 ---
 
@@ -203,11 +188,9 @@ Accounting V1، Product Master، و موارد اعلام‌شده محافظت�
 
 ---
 
-# 24. AI ROLE BOUNDARY & END-TO-END ACCOUNTABILITY
+# 24. AI EXECUTION AUTHORITY
 
-Roles = specialization only. Ownership = end-to-end. کمک دیگران مالکیت را منتقل نمی‌کند.
-
-AI بدون Authority: Business Decision نهایی، Approve محصول، silent Contract/Schema change، داده ساختگی — ممنوع.
+هر AI می‌تواند هر کار پژوهشی، طراحی، نوشتن، پیاده‌سازی، آزمون، بررسی و اصلاح را که PO دستور می‌دهد انجام دهد؛ نقش تخصصی ثابت یا مسئول نوشتن/تأیید از پیش تعیین‌شده وجود ندارد. تصمیم‌های کسب‌وکار و تأیید محصول تابع مجوز و Gate مصوب‌اند؛ داده‌سازی و تغییر بی‌اجازه ممنوع است.
 
 ---
 
@@ -217,9 +200,9 @@ PO مرجع نهایی Business است. نقش‌های تخصصی تیم (Integ
 
 ---
 
-# 26. FINAL REPORT STANDARD
+# 26. FINAL REPORT
 
-گزارش پایانی Unit باید MISSION، SHAها، REALITY، CHANGES، TESTS، EVIDENCE، OPEN، HANDOFF، NEXT ACTION داشته باشد.
+نتیجه واقعی، مسیر/SHA و شواهد لازم، موارد باز و اقدام بعدی را مختصر گزارش کنید؛ قالب ثابت اجباری نیست.
 
 ---
 
@@ -229,9 +212,9 @@ STOP + DOCUMENT + REPORT — نه GUESS + CONTINUE.
 
 ---
 
-# 28. CONTINUITY / HANDOFF
+# 28. CONTINUITY
 
-Roadmap، Ledger، Status، SHA، Decisions، Next Action باید نفر بعدی را بی‌نیاز از بازجویی کند.
+اطلاعات موجود در Repository را دوباره از PO نخواهید. بسته تحویل یا قالب handoff اجباری نیست؛ فقط اطلاعات لازم برای ادامه کار را ثبت کنید.
 
 ---
 
@@ -249,26 +232,19 @@ MEMORY MAY GUIDE SEARCH. REPOSITORY MUST VERIFY REALITY.
 
 # 31. NO PREMATURE GREEN
 
-GREEN فقط با Scope، Tests، Evidence، Commit، Remote verify، Handoff، بدون Blocker.
+وضعیت تکمیل را فقط با معیارهای پذیرش و شواهد واقعی اعلام کنید؛ گزارش یا قالب تحویل تشریفاتی شرط عمومی نیست.
 
 ---
 
 # 32. DEFINITION OF DONE
 
-Objective، Scope، Tests، Evidence، Decisions، Commit، Remote SHA، Ledger، Handoff، Next action.
+معیار تکمیل تابع نوع کار و معیار پذیرش آن است؛ نتیجه و شواهد لازم را صادقانه ثبت کنید، بدون قالب تحویل اجباری.
 
 ---
 
-# 33. MANDATORY ENTRY ACKNOWLEDGEMENT
+# 33. ENTRY CHECK
 
-PROJECT_RULES READ: YES  
-TEAM-OPS-COM DIRECTIVE READ: YES  
-SOURCE OF TRUTH: GitHub master  
-CURRENT SHA VERIFIED: YES  
-REALITY AUDIT REQUIRED: YES  
-NO ASSUMPTION / NO INVENTED DATA: ACCEPTED  
-0→100 OWNERSHIP: ACCEPTED  
-EVIDENCE REQUIRED: ACCEPTED
+قبل از اقدام، قوانین مرتبط، وضعیت واقعی GitHub، SHA جاری و شواهد موجود را بررسی کنید؛ تأییدیه تشریفاتی یا قالب پاسخ اجباری نیست.
 
 ---
 
@@ -278,12 +254,11 @@ EVIDENCE REQUIRED: ACCEPTED
 
 ---
 
-# 35. RECORD — Team Operational Directive (2026-09-09)
+# 35. RECORD — Unified Agent Execution Protocol
 
-**Source:** PO مقصودی  
-**Document:** `HBI-TEAM-OPS-COM-001`  
-**Path:** `docs/01_project_control/HBI_TEAM_OPERATIONAL_COMMUNICATION_DIRECTIVE_V1.md`  
-**Effect:** مکمل ارتباطی/عملیاتی؛ جایگزین PROJECT_RULES نیست.
+**Source:** Explicit Product Owner direction, 2026-10-17.  
+**Canonical path:** `docs/01_project_control/HBI_AGENT_EXECUTION_PROTOCOL.md`  
+**Effect:** واحدسازی قواعد اجرای دستور، عدم تکرار، شواهد و گزارش صادقانهٔ وضعیت؛ بدون نقش ثابت یا بستهٔ تحویل اجباری. پس از merge، پروتکل‌های اجرایی هم‌پوشان از درخت فعال حذف می‌شوند؛ قراردادهای تخصصی دامنه و راهنمای اسکریپت فقط در حوزه متمایز خود باقی می‌مانند.
 
 ---
 
