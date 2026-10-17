@@ -118,6 +118,27 @@ This file is intended to be the sole active **cross-agent execution/evidence/han
 
 Deleting a file from the current tree does not erase prior public commits, forks, caches or copies. Do not claim otherwise. Do not rewrite merged Git history as part of routine retirement.
 
+## 11. Communication and handoff format
+
+Keep status messages concise, unified and forwardable. Do not split one operational update across multiple messages or paste long repository files when a stable GitHub path, section and SHA are sufficient.
+
+For a task handoff, use this header when it helps identify the recipient and origin:
+
+```text
+FROM:
+RECEIVED FROM:
+TO:
+SUBJECT:
+STATUS: FACT | CONTRACT | DESIGN PROPOSAL | OPEN DECISION | UNKNOWN | CONFLICT
+CURRENT SHA:
+EVIDENCE / PATH:
+BLOCKER:
+NEXT ACTION:
+TURN OWNER:
+```
+
+Classify claims accurately: a repository-observed fact is not the same as a PO-approved contract, a proposal, an open decision, an unknown, or a conflict. Never present a proposal as an accepted decision. Leave unavailable fields explicitly unknown rather than filling them with guesses.
+
 ## 11. Mandatory handoff format
 
 Every handoff to another agent or a new chat must include only:
