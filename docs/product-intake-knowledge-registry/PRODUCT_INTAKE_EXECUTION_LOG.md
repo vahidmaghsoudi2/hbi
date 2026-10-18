@@ -69,3 +69,16 @@ Required fields per runtime entry:
 - Finding recorded on [PR #369 discussion](https://github.com/vahidmaghsoudi2/hbi/pull/369#issuecomment-6187532736). GitHub rejected a formal `REQUEST_CHANGES` review because the connected account is the PR author; the comment records the review finding and required corrections.
 - Required before re-review: fail-closed evidence finalization before cleanup; preserve the isolated DB and mark failure if finalization fails; regression tests for both outcomes; reconcile with current master and rerun checks on the exact new head.
 - No runtime was started, no database or product data was changed, and no PR was merged. G8 remains **BLOCKED / NOT VERIFIED**.
+
+
+## Entry 2026-10-18 — Three-domain Phase 0 blocker audit
+
+- Audit baseline: merge commit `2a354aaf4762d932cc94750b88d5d331536f1a0d` (PR #404); current repository documents were read from `master` for this audit. This is the audit input SHA, not a claim that no later commit can exist.
+- Three-domain roadmap: registered on `master` through PR #404. A follow-up documentation correction is proposed to align the roadmap status with the merge and fix its binding-contract relative link.
+- Product Intake phase position remains: Phase 0 / SSOT placement COMPLETE; Phase 1 preparation BLOCKED; real operator pilot NOT STARTED; G8 **BLOCKED / NOT VERIFIED**.
+- Acceptance ledger: A1–A4 PARTIAL; A5–A8 NOT VERIFIED; A9 PARTIAL. CI and fixture/browser workflows remain supporting evidence, not real operator acceptance.
+- Skin Problem Space Map V0.1 is still DRAFT / structural mapping only. Problem Bank V1, Need Extraction, Need Acceptance, and Product Mapping remain NOT STARTED according to the artifact.
+- Binding contract verified at `docs/product-intake-knowledge-registry/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md`, status PO APPROVED — CONTRACT BASELINE. The roadmap's former relative link to `docs/architecture/` was incorrect; the follow-up PR corrects it.
+- PR #400 is currently OPEN / unmerged and remains a proposal, not an accepted contract or implementation authorization.
+- This audit did not establish a current, verified list of real product records and stock availability in the running system. Therefore no skin concern or product candidate is selected yet; this is the next evidence gap to resolve using existing repository/runtime evidence, without creating products or mutating any database.
+- No application was started; no database, stock, product record, schema, migration, scoring, or production data was changed during this audit.
