@@ -186,3 +186,55 @@ def test_pilot_po_token_grants_po_role_and_supports_governed_approve_boundary(ap
     denied = client.post("/api/v1/auth/pilot-po-token")
     assert denied.status_code == 403, denied.text
     assert "disabled in production" in denied.json()["detail"]
+
+
+
+def test_product_create_readback_zero_inventory_and_creation_audit(api_env):
+    """A new intake record must persist as draft, have zero stock, and be auditable."""
+    from app.models.inventory import Inventory
+    from app.models.product_mutation_log import ProductMutationLog
+
+    client, db = api_env
+    token_response = client.post("/api/v1/auth/pilot-operator-token")
+    assert token_response.status_code == 200, token_response.text
+    token = token_response.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+    product_id = "PILOT-READBACK-ZERO-STOCK-001"
+
+    created = client.post(
+        "/api/v1/products/",
+        headers=headers,
+        json={
+            "product_id": product_id,
+            "brand": "HBI Test",
+            "product_name": "Readback Zero Stock Test Product",
+            "product_line": "SKIN",
+            "variant": "clear",
+            "size_value": 50,
+            "size_unit": "ml",
+        },
+    )
+    assert created.status_code == 201, created.text
+    assert created.json()["status"] == "DRAFT"
+
+    readback = client.get(f"/api/v1/products/{product_id}")
+    assert readback.status_code == 200, readback.text
+    assert readback.json()["product_id"] == product_id
+    assert readback.json()["product_line"] == "SKIN"
+    assert readback.json()["status"] == "DRAFT"
+    assert readback.json()["identity_status"] == "NEEDS_REVIEW"
+    assert readback.json()["qa_verdict"] == "PENDING"
+
+    inventory = db.query(Inventory).filter_by(product_id=product_id).one()
+    assert inventory.quantity_available == 0
+    assert inventory.quantity_reserved == 0
+    assert inventory.stock_status == "OUT_OF_STOCK"
+
+    audit = (
+        db.query(ProductMutationLog)
+        .filter_by(target_id=product_id, action="CREATE")
+        .one_or_none()
+    )
+    assert audit is not None
+    assert audit.resulting_state == "DRAFT"
+    assert audit.actor_id
