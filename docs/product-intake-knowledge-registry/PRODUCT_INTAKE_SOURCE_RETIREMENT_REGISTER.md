@@ -19,7 +19,7 @@ This register retires stale and superseded material from the active decision pat
 5. Preserve conflicts and gaps as unresolved until a source-backed decision resolves them.
 6. Retiring a source from the active workflow does not mean its contents are false, confidential, or safely disposable.
 7. Keep the G8 status **BLOCKED / NOT VERIFIED** until isolation, secret redaction, negative tests, raw A1–A9 evidence, and cleanup are independently demonstrated.
-8. The Product Owner's 2026-10-16 direction is to stop further recovery of the original 8-category / 92-item list and proceed with controlled retirement using the currently gathered findings. Do not invent missing inventory items or keep recovery as a prerequisite for the retirement work.
+8. The Product Owner clarified on 2026-10-17 that the previously directed reduction of the initial inventory to the accepted 62-item result had already been completed. Do not reopen or repeat that reduction. Continue from the accepted 62-item result and recover its saved version from existing records if needed. Do not reintroduce the superseded detailed inventory in handoff summaries or AI task packets. This governs active working material; it does not claim that public Git history has been erased.
 
 ## Active references
 
