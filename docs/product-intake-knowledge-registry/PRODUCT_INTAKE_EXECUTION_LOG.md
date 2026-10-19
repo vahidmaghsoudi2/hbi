@@ -104,3 +104,12 @@ Required fields per runtime entry:
 - All four checks on this exact head completed successfully: `test`, `governance-tests`, `g8-isolated-pilot-smoke`, and `pilot-browser-proof`. See [workflow run 39306317881](https://github.com/vahidmaghsoudi2/hbi/actions/runs/39306317881) and the [Pilot Browser Proof run](https://github.com/vahidmaghsoudi2/hbi/actions/runs/39306317707).
 - This confirms the documentation PR's CI status only. It does not resolve G1 (accepted source list still NOT RECOVERED), publish the entry point to `master`, or verify G8. G8 remains **BLOCKED / NOT VERIFIED**.
 - The earlier bounded-review entry records the PR state and branch comparison at its own review point; this entry is the later live-state correction. Do not merge PR #409: Issue #410 explicitly prohibits merging while its independent red-team audit is being completed.
+
+
+## Entry 2026-10-19 — Red-team audit: source-recovery wording reconciled
+
+- During the independent stale-source/authority audit for Issue #410, a wording conflict was found between the retirement register's completion record and the consolidated reference: the register could be read as saying source recovery was no longer needed, while the consolidated reference correctly said the exact accepted artifact was still not recovered and must not be reconstructed.
+- Corrected the retirement-register completion wording: unrelated work may continue, but the exact accepted source must be recovered from existing records before claiming a complete canonical list or making dependent item-level decisions. The accepted refinement must not be repeated, and missing content must not be inferred.
+- This is a documentation-only clarification on PR #409's branch. It does not recover the missing source, certify the accepted list, change product/clinical content, authorize implementation, or change G8 status.
+- PR #409's previous head `b5379063353fe598e981ebfb11f249f5405662d5` had all four CI checks green. This new commit changes the head; re-check all four checks on the new exact SHA before closing the review.
+- The independent audit remains in progress. Do not merge any PR.
