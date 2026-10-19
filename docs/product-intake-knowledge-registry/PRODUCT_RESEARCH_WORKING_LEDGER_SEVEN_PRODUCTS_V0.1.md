@@ -165,3 +165,41 @@ This is a first-pass role map from the ingredient declarations already recorded 
 **Interpretation guardrail:** “Not established in this search screen” means the search did not verify an exact-product independent study. It is not a claim that no study exists. Do not transfer efficacy results between products merely because they share an ingredient, ingredient percentage, product category or marketing goal.
 
 **Next action from this pass:** Prioritize locating the original manufacturer reports for P1, P5, P6 and P7; then obtain current package/INCI evidence for the exact market/SKU before any catalog-ready knowledge extraction. No ProductKnowledge, QA, lifecycle or implementation status changes are authorized by this research update.
+
+
+### G. Original Clinical Evidence Verification — Pass 3 (four priority products)
+**Review date:** 2026-10-19  
+**Purpose:** Incorporate the Pass 3 evidence dossier and independently cross-check selected claims against publicly accessible primary/manufacturer pages. This is still a research artifact, not an approved ProductKnowledge record.
+
+#### G1. P1 — COSRX The 6 Peptide Skin Booster Serum
+- The current COSRX product page publicly states five quantitative outcomes (+162.5% deep moisture, +76.4% texture, +40.1% clarity, +24.5% radiance, +22.2% density) and attributes them to clinical trials of 20 subjects conducted by Dermacosmetic Skin Science Laboratory Co., Ltd from 2023-09-18 to 2023-10-31. It also reports 100% of participants reported smoother/more supple skin. Source: https://www.cosrx.com/collections/all/products/the-6-peptide-skin-booster-serum
+- Classification: **MANUFACTURER_CLAIM**. The public page does not expose the complete protocol/report, statistical analysis, control/blinding details, adverse-event table or raw data. “Independent laboratory” wording alone does not establish independence of sponsorship or study design.
+- Product-specific peer-reviewed publication or public trial registration: **NOT ESTABLISHED in the sources checked**. Do not substitute general peptide/niacinamide literature.
+
+#### G2. P5 — ISDIN FotoUltra 100 Active Unify SPF50+
+- The official ISDIN Spain page confirms the 22% spot-intensity and 15% spot-area claims for 31 people aged 35–65 with mild-to-moderate facial hyperpigmented spots after 28 and 84 days; the page labels this “Data on file, 2024.” It also labels blue-light hyperpigmentation testing and the 82% MMP statement as “Data on file, 2023,” with the latter explicitly based on skin explants. Source: https://www.isdin.com/es/p/fotoultra-active-unify-spf-50/1160
+- Classification: the 22%/15% figures remain **MANUFACTURER_CLAIM**; complete study design, control, measurement method and statistical analysis are not available on the public page. The MMP result is ex vivo and must not be described as an RCT or clinical outcome in humans.
+- A peer-reviewed, open-access randomized investigator-masked intra-individual study exists for **ISDIN FOTOULTRA 100 SPOT PREVENT**, not Active Unify: 20 participants with Fitzpatrick types IV–V, daily use for 20 days, ΔITA° primary endpoint at Day 22; registration ISRCTN11448711. The paper discloses ISDIN funding and ISDIN employee/consultant relationships among authors. Sources: https://pubmed.ncbi.nlm.nih.gov/41240206/ and https://doi.org/10.1007/s13555-025-01586-w
+- Hard boundary: this paper is relevant contextual evidence for a different named product/formula, not direct clinical proof for Active Unify. No transfer of its outcome to Active Unify is allowed without exact-formula equivalence evidence.
+
+#### G3. P6 — Clinique Even Better Clinical Radical Dark Spot Corrector + Interrupter
+- The official US product page confirms “39% visible reduction in dark spots in 12 weeks” based on clinical testing on 52 women after 12 weeks. It separately reports consumer testing on 536 women; current page claims include 84% saying skin looks more radiant and 93% saying skin feels soothed/calmer. Source: https://www.clinique.com/product/4034/68008/skincare/serum/even-better-clinicaltm-radical-dark-spot-corrector-interrupter
+- Classification: the 39% result is **MANUFACTURER_CLAIM**; the page does not disclose enough information to establish randomization, blinding, control, measurement instrument, or independent replication. Consumer-report outcomes must stay separate from clinical testing.
+- A separate manufacturer/retailer claim of 94% may appear in other campaign material, but the current official page checked here states 84% radiance and 93% soothed/calmer. Do not reconcile or replace one figure without the exact market, campaign date and source being captured.
+- The literature includes a letter/case report titled “Exogenous ochronosis associated with dimethoxytolyl propylresorcinol (UP302).” It is a limited safety signal, not a rate estimate and not proof that this finished Clinique product caused the event. Source: https://pubmed.ncbi.nlm.nih.gov/34031918/
+
+#### G4. P7 — Anua Azelaic Acid 10% + Hyaluron Redness Soothing Serum
+- The current official serum page identifies 10% azelaic acid and describes non-comedogenic/low-irritation testing, but the publicly displayed page does not provide a complete serum study protocol with n, control, objective endpoints and analysis. Source: https://anua.com/products/azelaic-acid-10-hyaluron-redness-soothing-serum
+- A separate Anua routine page repeats that 90% of participants agreed the appearance of red troubled spots improved; the full protocol is not published on that page. Source: https://pages.anua.com/solutions/redness-prone-routine-sensitive-skin
+- Important product-identity distinction: Anua's **Azelaic 10 Hyaluron Redness Soothing Pad** page reports a separate study by P&K Skin Research Center, 21 participants aged 20–59, 2025-01-20 to 2025-02-19. This is the pad, not the serum, and its sample size or results must not be attributed to the serum. Source: https://anua.com/products/azelaic-10-hyaluron-redness-soothing-pad
+- Classification for finished-serum efficacy: **MANUFACTURER_CLAIM / PARTIAL** where the specific claim is documented; independent product-specific clinical efficacy remains **UNKNOWN / NOT ESTABLISHED in the sources checked**.
+
+#### G5. Cross-product evidence decisions
+1. Keep each numeric efficacy statement linked to its exact product, market/version, source date and evidence type.
+2. Keep clinical investigator assessments, instrumental endpoints, consumer self-report, tolerability testing and ex vivo results as separate evidence classes.
+3. “Not established in the sources checked” is a bounded search conclusion, not proof of non-existence.
+4. Do not create a numeric confidence score from subjective labels such as Low or Low–Moderate unless HBI has an approved scoring rubric.
+5. Suggested provisional evidence fields for future schema mapping: `claim_type=MANUFACTURER_CLAIM`, `evidence_status=PARTIAL` where the manufacturer summary is public but protocol is incomplete; `UNKNOWN` for unverified product-specific clinical efficacy. These are research recommendations only, not writes to ProductKnowledge.
+6. Next action: request full reports/protocols from COSRX, ISDIN and Clinique; request the serum-specific tolerability/efficacy report from Anua; in parallel verify physical package, market, GTIN and current INCI before any catalog-ready extraction.
+
+**Governance:** This Pass 3 update does not authorize PR merge, product activation, QA approval, database/schema/API/UI changes or direct ProductKnowledge writes.
