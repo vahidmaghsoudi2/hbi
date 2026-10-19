@@ -136,7 +136,8 @@
 
 تعیین موعدها پس از روشن‌شدن ظرفیت و وابستگی‌های واقعی انجام شود؛ تاریخ ساختگی یا تعهد زمانی بدون مالک تعیین نشود.
 
-## 11. مراجع رسمی و مرز وضعیت
+- فهرست عملیاتی واحد کار بانک مشکلات پوستی: [SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md](SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) — نقطهٔ ورود تیم، قواعد ویرایش و شکاف‌های باقی‌مانده.
+
 
 - قرارداد تخصصی ورود محصول: [SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md](./SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md) — قرارداد مصوب و جاری در همین پوشه؛ این نقشه‌راه قرارداد را جایگزین نمی‌کند.
 - ثبت/رهگیری Product Intake: [Issue #283](https://github.com/vahidmaghsoudi2/hbi/issues/283).
