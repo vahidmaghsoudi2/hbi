@@ -4,6 +4,8 @@
 
 ---
 
+> Team entry point: [Skin Problem Bank Workspace Index](./SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md). This map remains a structural draft only.
+
 # HBI — SKIN PROBLEM SPACE MAP V0.1
 ## Official Red-Team Input Artifact
 
