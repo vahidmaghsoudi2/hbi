@@ -1,3 +1,9 @@
+> ⚠️ **HISTORICAL CONTRACT — DO NOT USE AS THE CURRENT SKIN PRODUCT INTAKE BASELINE**
+>
+> This is the older generic Product Intake Contract v1. Its authority relationship with the current skin-specific contract has not been fully reconciled. For current Skin Product Intake execution, start from [Skin Product Intake Execution Contract v1.1](../../product-intake-knowledge-registry/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md) and consult the [Source Retirement Register](../../product-intake-knowledge-registry/PRODUCT_INTAKE_SOURCE_RETIREMENT_REGISTER.md). Do not treat this older file as overriding v1.1; preserve it for historical traceability until reconciliation is formally completed.
+
+---
+
 # HBI — PRODUCT INTAKE CONTRACT v1
 
 **Contract ID:** HBI-PI-CONTRACT-001  
