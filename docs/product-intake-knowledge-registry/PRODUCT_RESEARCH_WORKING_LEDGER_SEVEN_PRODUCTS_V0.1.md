@@ -289,3 +289,15 @@ Thank you.
 - Priority 2: COSRX and Clinique full reports; Priority 3: Anua serum-specific report.
 - When replies arrive, add source/date, sender role (if provided), attachment/public link, product-version mapping, report access status and evidence limitations to this same ledger. Do not create a parallel tracker.
 - No ProductKnowledge write, QA approval, product activation, implementation change or PR merge is authorized by this pass.
+
+
+#### I5. Follow-up verification — ISDIN discrepancy is broader than tinted vs untinted
+A further check of official ISDIN pages found a third relevant presentation:
+- **Colombia, standard Active Unify SPF50+ (untinted):** official page states 22% reduction in spot intensity; study described as 30 subjects aged 35–68 over 12 weeks, evaluating “Active Unify Sin Color,” Data on File 2024. https://www.isdin.com/co/p/active-unify-spf-50/1160
+- **Colombia, Active Unify Color SPF50+:** official page states 22% reduction; 30 subjects aged 35–68 over 12 weeks, Data on File 2024. https://www.isdin.com/co/p/active-unify-color-spf-50/0131
+- **Spain, standard Active Unify SPF50+:** official page states both 22% intensity and 15% area reduction; 31 subjects aged 35–65, mild-to-moderate facial hyperpigmented spots, after 28 and 84 days, Data on File 2024. https://www.isdin.com/es/p/fotoultra-active-unify-spf-50/1160
+- **Spain, Active Unify Color SPF50+:** official page repeats the 31-subject, age 35–65, day 28/84 description for the 22% intensity and 15% area claims. https://www.isdin.com/es/p/active-unify-color-spf-50/0131
+
+**Interpretation:** The earlier hypothesis that the n=30 vs n=31 discrepancy may simply reflect tinted versus untinted variants is not supported as a complete explanation: the Colombian untinted page also reports n=30/ages 35–68/12 weeks, while Spanish standard and Color pages report n=31/ages 35–65/day 28 and 84. Public pages do not establish whether this is a distinct market-specific study, a localized claim error, a protocol revision or different reporting of a shared study. Keep all four page-level descriptions distinct pending the source report; do not collapse them into a single cohort or assert a cause.
+
+**Updated request to ISDIN:** Request the source report(s) behind both the Colombian n=30/35–68/12-week wording and the Spanish n=31/35–65/day-28-and-84 wording, and ask whether each report supports the standard and Color SKUs in each market. Request report IDs, protocol/version dates, GTINs, formulas, endpoints, enrolled/completed counts and visit schedule. This supersedes the narrower assumption that only the Color variant needs reconciliation.
