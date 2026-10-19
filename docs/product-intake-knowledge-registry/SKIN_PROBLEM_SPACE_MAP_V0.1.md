@@ -1,3 +1,9 @@
+> ⚠️ **STATUS NOTICE — DRAFT / NOT THE ACTIVE PROBLEM BANK**
+>
+> This file is a structural draft only. It is **not** the accepted refined list, a medically approved Problem Bank, a canonical Need Bank, or authorization to recommend products. Do not start new work from this file or treat its contents as accepted. Use the [Skin Problem Bank Consolidated Reference](./SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md) for the current status and entry points, and the [Source Retirement Register](./PRODUCT_INTAKE_SOURCE_RETIREMENT_REGISTER.md) for source authority and disposition. Preserve this draft for traceability; do not copy it into active working packets as an accepted list.
+
+---
+
 # HBI — SKIN PROBLEM SPACE MAP V0.1
 ## Official Red-Team Input Artifact
 
