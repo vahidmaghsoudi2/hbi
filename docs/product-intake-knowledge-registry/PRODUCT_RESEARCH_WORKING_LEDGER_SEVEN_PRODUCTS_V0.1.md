@@ -140,3 +140,28 @@ This is a first-pass role map from the ingredient declarations already recorded 
 - **P3 Garnier Australia:** The current official page describes the 200 ml gel cleanser as rinse-off, identifies “Vitamin Cg” as Ascorbyl Glucoside, and warns that ingredient lists are updated and the package is the current reference. This reinforces the need to verify the physical label before locking an INCI snapshot. Source: https://www.garnier.com.au/about-our-brands/skin-active/garnier-skin-active-vitamin-c-brightening-gel-cleanser-200ml
 
 **Status:** These findings refine provenance and search leads only. They do not establish independent efficacy for any exact finished product and do not change the approval status of the ledger.
+
+
+### F. Exact-finished-product study screen — pass 2
+**Reviewed:** 2026-10-19  
+**Method:** Targeted web-index searches combining each exact product name with clinical study/trial/PubMed terms. This is a screening pass, not a systematic review; indexing and naming differences can hide relevant reports.
+
+| Product | Search-screen result | Handling decision |
+|---|---|---|
+| P1 COSRX The 6 Peptide Skin Booster Serum | Search results surfaced the manufacturer's own n=20 claim and unrelated peptide research, but no independently published study of this exact finished product was established. | Keep manufacturer claim separate; continue seeking protocol/report and exact-SKU publications. |
+| P2 Neutrogena Clear & Defend 2% Salicylic Acid Face Wash, UK 200 ml | A PubMed result involving a different skincare regimen and a Neutrogena 2% salicylic-acid cleanser surfaced. It did not establish that the tested cleanser was this exact UK Clear & Defend SKU. | Exclude from product-specific efficacy evidence; ingredient/class similarity is not product identity. |
+| P3 Garnier Vitamin C Brightening Gel Cleanser, Australia 200 ml | No independent exact-finished-product study was established in this search screen. | Do not substitute vitamin C ingredient studies for evidence of this rinse-off formula. |
+| P4 SKIN1004 Hyalu-Cica Water-Fit Sun Serum SPF50+ PA++++, Korean/international | Search results surfaced brand-published summaries for moisture/SPF testing, but no independent peer-reviewed exact-SKU study was established. | Keep brand test summaries in manufacturer-evidence tier; retain separate US SKU dossier. |
+| P5 ISDIN FotoUltra 100 Active Unify SPF50+ | The manufacturer-reported 31-subject evaluation and “Data on file, 2024” reference remain leads; no accessible independent exact-product paper was established in this screen. | Request/locate underlying report; do not infer design features absent from the public summary. |
+| P6 Clinique Even Better Clinical Radical Dark Spot Corrector + Interrupter, 100 ml | Search results surfaced an independent-looking dark-spot study of a different product (SkinMedica Dark Spot Tx), not this Clinique serum. | Explicitly exclude the SkinMedica study from Clinique product-specific evidence. Clinique's 52-woman result remains a manufacturer-reported claim pending full protocol. |
+| P7 Anua Azelaic Acid 10% + Hyaluron Redness Soothing Serum, 30 ml | Search results surfaced a 2026 study of a different anhydrous concentrate combining retinal 0.1% with azelaic acid 10%, not the Anua serum. | Explicitly exclude it from Anua product-specific evidence; shared azelaic-acid percentage does not establish formula equivalence. |
+
+**Representative exclusion/source checks**
+- A PubMed record on a niacinamide-containing moisturizer and a Neutrogena salicylic-acid cleanser involved a different study regimen; it is not proof for the exact Clear & Defend UK SKU: https://pubmed.ncbi.nlm.nih.gov/31461548/
+- A 2026 split-face study concerns a distinct anhydrous retinal/azelaic-acid concentrate, not Anua's multi-ingredient serum: https://pubmed.ncbi.nlm.nih.gov/42572367/
+- A 12-week dark-spot study concerns SkinMedica Dark Spot Tx, not Clinique Even Better Clinical: https://pmc.ncbi.nlm.nih.gov/articles/PMC10544009/
+- A peptide study on Medipep-6PN is not a study of the COSRX six-peptide booster: https://pmc.ncbi.nlm.nih.gov/articles/PMC12940413/
+
+**Interpretation guardrail:** “Not established in this search screen” means the search did not verify an exact-product independent study. It is not a claim that no study exists. Do not transfer efficacy results between products merely because they share an ingredient, ingredient percentage, product category or marketing goal.
+
+**Next action from this pass:** Prioritize locating the original manufacturer reports for P1, P5, P6 and P7; then obtain current package/INCI evidence for the exact market/SKU before any catalog-ready knowledge extraction. No ProductKnowledge, QA, lifecycle or implementation status changes are authorized by this research update.
