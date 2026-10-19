@@ -176,3 +176,26 @@
 این سند فقط یک نقطهٔ ورود تجمیعی برای وضعیت و منابع بانک مشکلات است. آن را به داشبورد موازی برای G8، وضعیت runtime، Product Intake یا Recommendation تبدیل نکنید. برای آن حوزه‌ها از مراجع جاری ثبت‌شده در [نقشه‌راه سه حوزه](ROADMAP_THREE_DOMAINS.md)، [رجیستری دانش](PRODUCT_INTAKE_EVIDENCE_KNOWLEDGE_REGISTRY.md) و [ثبت کنترل‌شدهٔ منابع](PRODUCT_INTAKE_SOURCE_RETIREMENT_REGISTER.md) استفاده کنید.
 
 **اصل پایانی:** تصمیم پذیرفته‌شده را حفظ کن؛ نسخهٔ اصلی را بازیابی کن؛ وضعیت جاری را از مرجع فعال بخوان؛ فقط شکاف اثبات‌شده را پیگیری کن؛ تاریخچه را با وضعیت جاری اشتباه نگیر.
+
+
+## 9. PO decision — bounded structural review of P01/P02 (2026-10-20)
+
+**Decision status:** PO-confirmed for this bounded structural pilot; this does not accept a canonical Problem Bank item or provide medical validation.
+
+### P01 — Dry skin / Xerosis
+- Working record status: `Scoped`, ready for structural review; the operational definition remains explicitly **proposed**, not a verified statement from Map V0.1.
+- Operational disposition: `Deferred` for now. `Ordinary-care candidate` is not approved by this decision.
+- Customer language, medical validation, and any safety/referral thresholds remain unknown unless separately supported by direct evidence.
+
+### P02 — Dehydration / impaired moisture retention
+- Status: `Identified + Linked` to P01; not independently Scoped and not Accepted.
+- Map V0.1 classifies P02 as a manifestation/related presentation and records `MERGE/RELATED TO P01`; B01 says no independent Need distinction is established.
+- Decision: retain option C — Merge-candidate pending human/PO review. Do not merge operationally, delete the ID, or claim a separate accepted Problem.
+- Independent operational status remains undetermined. No standalone `Ordinary-care candidate` status is authorized for P02.
+
+### Open questions for the structural review
+1. Is the proposed P01 boundary acceptable as a working definition?
+2. Should P02 remain a separately tracked linked record, or only be displayed under P01? No separate-counting rule is inferred.
+3. What evidence, if any, would justify an independent operational definition for P02?
+
+**Source boundary:** These decisions use Map V0.1 and the PO-confirmed review of the P01/P02 working records. Map placement is not medical validation, Need acceptance, treatment authorization, or product mapping. The missing accepted 62-item artifact (G1) remains a separate blocker; this bounded P01/P02 review does not reconstruct or replace it. No other shelf, P05, Need, Product, application, DB, Schema/API, or G8 state is changed.
