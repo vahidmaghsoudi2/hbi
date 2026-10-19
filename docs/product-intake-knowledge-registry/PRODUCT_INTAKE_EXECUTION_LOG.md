@@ -96,3 +96,11 @@ Required fields per runtime entry:
 - **G4 outcome:** key current entry points and two prominent stale-source boundaries were inspected. Global consistency across every historical draft remains outside this bounded check.
 - No application, DB, schema, API, product record, clinical content, or G8 state was changed. G8 remains **BLOCKED / NOT VERIFIED**.
 - **Disposition:** PR #409 is a documentation/navigation publication package only. It may publish the safeguards and the explicit G1 blocker; it must not be represented as delivery of the missing accepted list or as clinical approval.
+
+
+## Entry 2026-10-19 — PR #409 latest-head CI confirmation
+
+- Rechecked live PR #409 after the workspace-index synchronization commit. The current head is `a4af038136e60e3c099bee5217d0ae98a4b68b6f`; PR state is OPEN, ready for review (not draft), and unmerged.
+- All four checks on this exact head completed successfully: `test`, `governance-tests`, `g8-isolated-pilot-smoke`, and `pilot-browser-proof`. See [workflow run 39306317881](https://github.com/vahidmaghsoudi2/hbi/actions/runs/39306317881) and the [Pilot Browser Proof run](https://github.com/vahidmaghsoudi2/hbi/actions/runs/39306317707).
+- This confirms the documentation PR's CI status only. It does not resolve G1 (accepted source list still NOT RECOVERED), publish the entry point to `master`, or verify G8. G8 remains **BLOCKED / NOT VERIFIED**.
+- The earlier bounded-review entry records the PR state and branch comparison at its own review point; this entry is the later live-state correction. Do not merge PR #409: Issue #410 explicitly prohibits merging while its independent red-team audit is being completed.
