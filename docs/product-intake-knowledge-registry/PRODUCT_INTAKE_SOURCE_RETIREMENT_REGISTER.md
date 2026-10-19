@@ -23,6 +23,9 @@ This register retires stale and superseded material from the active decision pat
 
 ## Active references
 
+- [Skin Problem Bank Workspace Index](./SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) — team entry point for the current workstream, editing rules, and unresolved gaps; active after PR #409 merges.
+
+
 - [Issue #396 — source audit and retirement tracker](https://github.com/vahidmaghsoudi2/hbi/issues/396)
 - [Skin Problem Bank Consolidated Reference](./SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md) — ACTIVE WORKING ENTRY POINT after PR #409 merges; navigation/status only, not clinical acceptance or a reconstructed accepted list.
 - [Skin Product Intake Execution Contract v1.1](./SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md) — approved execution baseline.
