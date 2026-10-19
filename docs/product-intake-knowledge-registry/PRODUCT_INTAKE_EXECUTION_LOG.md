@@ -113,3 +113,15 @@ Required fields per runtime entry:
 - This is a documentation-only clarification on PR #409's branch. It does not recover the missing source, certify the accepted list, change product/clinical content, authorize implementation, or change G8 status.
 - PR #409's previous head `b5379063353fe598e981ebfb11f249f5405662d5` had all four CI checks green. This new commit changes the head; re-check all four checks on the new exact SHA before closing the review.
 - The independent audit remains in progress. Do not merge any PR.
+
+
+## Entry 2026-10-20 — PO-confirmed P01/P02 structural decision
+
+- PO explicitly approved the bounded decisions for the P01/P02 working-record review.
+- **P01:** status `Scoped` for structural review only; its operational definition remains proposed, not sourced verbatim from Map V0.1. Operational disposition is `Deferred`; `Ordinary-care candidate` is not approved.
+- **P02:** `Identified + Linked` to P01; not independently Scoped or Accepted. Keep option C, `Merge-candidate pending human/PO review`, consistent with Map V0.1 §4 and B01 in §6. No operational merge, ID deletion, or separate accepted Problem is authorized.
+- P02's independent operational status remains undetermined. No standalone ordinary-care status, customer wording, medical validation, or safety/referral threshold was inferred.
+- Human review questions remain explicit: P01 boundary; P02 as linked separate record versus display under P01; whether P02 has a defensible independent operational definition. No separate-counting rule is assumed.
+- The decision is recorded in `SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md` on the PR #409 working branch. It is a documentation/structural decision only and does not accept clinical content, establish a Need, map products, or authorize implementation.
+- G1 remains separate: the exact accepted refined 62-item artifact remains NOT RECOVERED in the reviewed scope. This work does not reconstruct or replace it. No application, DB, Schema/API, product, or G8 state changed.
+- PR #409 remains unmerged; no merge action was taken. Re-run required checks on the new head and respect Issue #410's no-merge constraint.
