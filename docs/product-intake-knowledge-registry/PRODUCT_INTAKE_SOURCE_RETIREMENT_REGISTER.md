@@ -80,5 +80,5 @@ This register retires stale and superseded material from the active decision pat
 ## Completion record
 
 - 2026-10-16 — PO selected controlled retirement without confidentiality claims.
-- 2026-10-16 — Further recovery of the original 8-category / 92-item list is no longer a prerequisite; current known gaps remain explicitly unresolved rather than fabricated.
+- 2026-10-16 — Recovery of the accepted refined source is not a prerequisite for unrelated work to continue, but its exact contents must be recovered from existing records before claiming a complete canonical list or making item-level decisions that depend on it. Do not repeat the refinement or reconstruct missing content; keep the exact-content gap explicit until the source is recovered.
 - Follow-up: update Issue #396 to point to this register and treat its original-inventory recovery checklist as superseded by this PO direction.
