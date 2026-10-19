@@ -301,3 +301,18 @@ A further check of official ISDIN pages found a third relevant presentation:
 **Interpretation:** The earlier hypothesis that the n=30 vs n=31 discrepancy may simply reflect tinted versus untinted variants is not supported as a complete explanation: the Colombian untinted page also reports n=30/ages 35–68/12 weeks, while Spanish standard and Color pages report n=31/ages 35–65/day 28 and 84. Public pages do not establish whether this is a distinct market-specific study, a localized claim error, a protocol revision or different reporting of a shared study. Keep all four page-level descriptions distinct pending the source report; do not collapse them into a single cohort or assert a cause.
 
 **Updated request to ISDIN:** Request the source report(s) behind both the Colombian n=30/35–68/12-week wording and the Spanish n=31/35–65/day-28-and-84 wording, and ask whether each report supports the standard and Color SKUs in each market. Request report IDs, protocol/version dates, GTINs, formulas, endpoints, enrolled/completed counts and visit schedule. This supersedes the narrower assumption that only the Color variant needs reconciliation.
+
+
+#### I6. New public primary-source lead — EADV 2024 abstract for an ISDIN DP-Complex sunscreen
+A targeted search found an EADV Congress 2024 scientific abstract titled **“Clinical evaluation of the depigmentant effect of a new facial suncare formulation with DP-Complex and very high UV protection in subjects with hyperpigmentation”** (Abstract 4411). Public source: https://eadv.org/wp-content/uploads/scientific-abstracts/EADV-congress-2024/Pigmentary-disorders.pdf
+
+The indexed abstract reports:
+- Authors: Sonia Aladren, Javier Bustos, Alessandro De Luca and Monica Foyaca; affiliations are ISDIN, Innovation and Development, Barcelona.
+- 30 women, ages 36–64, Fitzpatrick II–IV, mild/moderate facial hyperpigmented spots; topical fluid used at least twice daily for 12 weeks.
+- Assessments at baseline, day 28 and day 84; investigator assessments included modified MASI, IGA and GAIS; Mexameter measured melanin index; VISIA evaluated spot number/area.
+- Reported results include mMASI change −12.15% and IGA photodamage −8.3% at day 28; IGA hyperpigmentation −7.2% at day 84; spot-area melanin index −10.8% at day 28 and −22.1% at day 84; VISIA UV count −10.3% and brown spots −10.5% at day 84. It reports 30 participants' subjective improvement and good tolerability.
+- The abstract does not establish a randomized or controlled design; authors are manufacturer-affiliated. Treat as **manufacturer-affiliated conference abstract**, not independent replication or a complete study report.
+
+**Identity crosswalk remains unresolved:** This abstract's n=30, female-only sample and 12-week schedule resembles the Colombian public claim more than the Spanish n=31/day-28-and-84 description, but its age range (36–64), phototypes (II–IV), product description (“new facial suncare formulation with DP-Complex”) and endpoints do not exactly match the Colombian page's stated ages 35–68. It is a plausible source lead, **not verified as the same study or exact marketed SKU**. Do not combine the abstract's results with the Active Unify product claims until ISDIN confirms report ID, tested formula, market/GTIN and correspondence to the web-page claim.
+
+**ISDIN request update:** specifically ask whether EADV 2024 abstract 4411 corresponds to the Data-on-File 2024 reports used on Colombian and Spanish pages; request the full report and explain the n/age/endpoint differences. Keep the abstract as a separate cited evidence record until that mapping is documented.
