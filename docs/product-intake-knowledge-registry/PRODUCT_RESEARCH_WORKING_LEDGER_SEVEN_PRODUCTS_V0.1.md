@@ -203,3 +203,44 @@ This is a first-pass role map from the ingredient declarations already recorded 
 6. Next action: request full reports/protocols from COSRX, ISDIN and Clinique; request the serum-specific tolerability/efficacy report from Anua; in parallel verify physical package, market, GTIN and current INCI before any catalog-ready extraction.
 
 **Governance:** This Pass 3 update does not authorize PR merge, product activation, QA approval, database/schema/API/UI changes or direct ProductKnowledge writes.
+
+
+### H. Pass 4 — source discrepancies and request-ready evidence gaps
+**Reviewed:** 2026-10-19  
+**Purpose:** Capture new source-level details and prevent market/formula/endpoint conflation. This pass does not claim access to confidential manufacturer reports.
+
+#### H1. COSRX — marketing summary is still the only publicly inspectable study summary located
+The current official product page repeats the five numeric outcomes, n=20, and the 2023-09-18 to 2023-10-31 test window, naming Dermacosmetic Skin Science Laboratory Co., Ltd. The full protocol/report was not exposed in the page reviewed. Source: https://www.cosrx.com/collections/all/products/the-6-peptide-skin-booster-serum  
+**Open request:** ask for the final report and protocol, endpoint definitions/units, baseline and post-treatment values, analysis plan, missing-data handling, adverse events, ethics/consent information, funding/sponsor and investigator independence.
+
+#### H2. ISDIN — a distinct market/product variant gives a different study description
+A Colombian official ISDIN page for **FotoUltra 100 Active Unify Color SPF50+** states a 22% reduction in solar spots, but attributes it to a study of **30 subjects aged 35–68 over 12 weeks** and labels it “ISDIN, Data on File, 2024.” Source: https://www.isdin.mom/co/p/active-unify-color-spf-50/0131  
+This differs from the standard Active Unify description previously recorded (31 subjects aged 35–65; assessment at days 28 and 84). Do not treat these as the same cohort or the same SKU until the product name, country, tint/color, formula, protocol and endpoint definition are reconciled. This may be a market/variant distinction or a separate presentation of evidence; the public pages alone do not resolve it. The 82% MMP statement remains ex vivo skin-explant evidence, not a human clinical endpoint.
+
+**Open request:** request both referenced 2024 data-on-file reports and ask ISDIN to map each report to GTIN, market, tinted/untinted SKU, formula/version, sample size, visit schedule and endpoint.
+
+#### H3. Clinique — separate endpoints and study populations
+The current official US page states 39% visible dark-spot reduction after 12 weeks based on clinical testing on 52 women. It separately reports consumer testing on 536 women for 84% radiance and 93% soothed/calmer, and other consumer outcomes at 28 days with distinct denominators (533 and 433). Source: https://www.clinique.com/product/4034/68008/skincare/serum/even-better-clinicaltm-radical-dark-spot-corrector-interrupter  
+A retailer page also repeats a separate claim that redness from irritation was reduced after 150 minutes in clinical testing on 26 people versus an untreated control; the exact official market/campaign source and protocol for that endpoint still need to be captured before elevating it to a confirmed dossier claim. Source: https://www.macys.com/shop/product/clinique-even-better-clinical-radical-dark-spot-corrector-interrupter-serum-1-oz.?ID=10516332  
+**Open request:** request full reports for both the 52-person/12-week dark-spot endpoint and 26-person/150-minute redness endpoint. Keep the latter as a separate, lower-provenance source lead until official product-page substantiation and methods are obtained.
+
+#### H4. Anua — serum claim and pad study must remain separate
+The official Anua serum page confirms the brand's 10% azelaic-acid positioning, but does not expose a complete product-specific clinical report with sample size, control, objective endpoint and statistical analysis. Source: https://anua.com/products/azelaic-acid-10-hyaluron-redness-soothing-serum  
+The brand's routine page repeats that 90% of participants agreed the appearance of red troubled spots improved, but does not provide the full protocol. Source: https://pages.anua.com/solutions/redness-prone-routine-sensitive-skin  
+A separate official page for **Azelaic 10 Hyaluron Redness Soothing Pad** gives a different product and a P&K Skin Research Center study description (21 participants, ages 20–59, 2025-01-20 to 2025-02-19). Source: https://anua.com/products/azelaic-10-hyaluron-redness-soothing-pad  
+**Hard boundary:** do not transfer the pad's sample size, study period or outcome to the serum.  
+**Open request:** ask Anua for the serum-specific protocol/report and a clear statement of the tested SKU, formulation, test site, participant count, comparator, objective/subjective endpoints and adverse events.
+
+#### H5. Standardized evidence-request checklist
+For each manufacturer request, ask for:
+1. Exact product name, GTIN, country/market, formula version and tested package/INCI.
+2. Full final report plus protocol and any amendments.
+3. Study design, comparator/control, randomization and blinding.
+4. Sample size enrolled/completed, inclusion/exclusion criteria, demographics and attrition.
+5. Endpoint definitions, instrument/model, units, baseline/follow-up values and analysis methods.
+6. Statistical plan, confidence intervals/p-values where applicable, multiplicity handling and missing-data handling.
+7. Adverse events/tolerability findings and ethics/consent information.
+8. Sponsor, laboratory, investigators, funding and conflict-of-interest declarations.
+9. Whether a public publication or registry record exists and permission to cite the report accurately.
+
+**Current disposition:** Public manufacturer summaries are recorded as manufacturer claims; no confidential report is presumed to have been obtained. These requests are a research task only and do not authorize ProductKnowledge entry, QA approval, product activation, code changes or PR merge.
