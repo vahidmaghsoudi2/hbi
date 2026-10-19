@@ -130,3 +130,13 @@ This is a first-pass role map from the ingredient declarations already recorded 
 4. Verify package-specific directions, warnings, market and GTIN when a real package/catalog image is supplied.
 5. Do not convert any research-ledger statement directly into ProductKnowledge or product activation. Follow Issue #406's gates and existing Intake/QA governance.
 
+
+
+### E. Supplementary source check — manufacturer-held study documentation
+**Reviewed:** 2026-10-19
+
+- **P5 ISDIN Active Unify:** An additional official ISDIN Chile page identifies its 31-subject evaluation of facial hyperpigmentation (ages 35–65; assessment after 28 and 84 days) as **“Data on file, 2024.”** This is useful provenance for the manufacturer's reported data, but the underlying report is not exposed on that page for independent appraisal. Do not treat the label “clinical” or “data on file” as proof of randomization, blinding, control design, peer review or independent replication. Source: https://www.isdin.com/cl/p/active-unify-spf-50/1160
+- **P7 Anua Azelaic Acid 10% + Hyaluron Serum:** The brand-owned routine page repeats the 90% participant-agreement claim for the exact serum, but does not publish the complete protocol. A separate retail listing describes a 4-week consumer self-assessment involving 22 participants aged 20–59 and attributes the claims to P&K Skin Research Center; because this is a secondary retail source, it is a lead for locating the original report, not a substitute for it. Do not conflate consumer agreement with objective clinical improvement. Sources: https://pages.anua.com/solutions/redness-prone-routine-sensitive-skin and https://vitaliaina.com/products/azelaic-acid-10-hyaluron-serum
+- **P3 Garnier Australia:** The current official page describes the 200 ml gel cleanser as rinse-off, identifies “Vitamin Cg” as Ascorbyl Glucoside, and warns that ingredient lists are updated and the package is the current reference. This reinforces the need to verify the physical label before locking an INCI snapshot. Source: https://www.garnier.com.au/about-our-brands/skin-active/garnier-skin-active-vitamin-c-brightening-gel-cleanser-200ml
+
+**Status:** These findings refine provenance and search leads only. They do not establish independent efficacy for any exact finished product and do not change the approval status of the ledger.
