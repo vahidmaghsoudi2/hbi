@@ -69,3 +69,16 @@ Required fields per runtime entry:
 - Finding recorded on [PR #369 discussion](https://github.com/vahidmaghsoudi2/hbi/pull/369#issuecomment-6187532736). GitHub rejected a formal `REQUEST_CHANGES` review because the connected account is the PR author; the comment records the review finding and required corrections.
 - Required before re-review: fail-closed evidence finalization before cleanup; preserve the isolated DB and mark failure if finalization fails; regression tests for both outcomes; reconcile with current master and rerun checks on the exact new head.
 - No runtime was started, no database or product data was changed, and no PR was merged. G8 remains **BLOCKED / NOT VERIFIED**.
+
+
+## Entry 2026-10-19 — Skin Problem Bank workspace index and closure gaps
+
+- Added `SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md` on the PR #409 branch as the operational entry point for this workstream.
+- The index defines the six requested reference/work-package headings, editing boundaries, future update routing, acceptance criteria, and gaps G1–G5.
+- Linked `SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md` back to the workspace index.
+- Updated PR #409 description to include the index, review scope, and remaining blockers.
+- Verified PR #409 remains OPEN / DRAFT / UNMERGED; current branch comparison reports 13 commits ahead and 0 behind `master`, with 6 changed files.
+- **G1 remains OPEN:** PR #407 confirms the Product Owner's direction to continue from the previously accepted refined result and recover its saved version from existing records; the PR #407 change itself does not contain the full accepted list. Do not recreate the list from summaries or reopen the refinement.
+- **G2 remains OPEN:** the entry point and stale-source notices are not active on `master` until PR #409 is reviewed and merged.
+- **G3–G5 remain OPEN:** complete and record navigation/authority acceptance checks, reconcile any remaining entry-path contradictions, and keep status records synchronized.
+- No application, database, schema, API, product, clinical, or G8 state was changed.
