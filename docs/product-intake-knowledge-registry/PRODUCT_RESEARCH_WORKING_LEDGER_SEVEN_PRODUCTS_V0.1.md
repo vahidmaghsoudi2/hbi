@@ -84,3 +84,49 @@ This is an initial continuity snapshot, not a claim of exhaustive global searchi
 
 ## Handoff rule
 At the start of a new conversation, retrieve this file and current Issue #406 first. Continue from the open research queue. Do not repeat completed findings unless correcting a contradiction, source change or version mismatch. This ledger is research only and does not itself approve or populate ProductKnowledge.
+
+
+---
+
+## Research pass 1 — ingredient-role boundaries and study-protocol follow-up
+**Reviewed:** 2026-10-19  
+**Status:** source review; no ProductKnowledge approval or implementation authorization.
+
+### A. Ingredient-role mapping — conservative, label-level only
+
+This is a first-pass role map from the ingredient declarations already recorded above. It is not a complete INCI audit and does not infer concentrations, clinical effectiveness, safety for a particular person, or a regulatory approval.
+
+| Product | Ingredient groups visible in the recorded label/source | Defensible interpretation | Boundary / unresolved point |
+|---|---|---|---|
+| P1 COSRX 6 Peptide Booster | Peptides; niacinamide; humectants | Formula includes peptide ingredients and water-binding/supporting ingredients. | Individual peptide concentrations, mechanism at this formula's use level, and product-specific independent efficacy remain UNKNOWN. |
+| P2 Neutrogena UK 2% SA Wash | Declared 2% salicylic acid; surfactants; glycerin; panthenol; tocopherol; fragrance | Salicylic acid is the declared highlighted ingredient; surfactants perform cleansing, while glycerin is commonly used as a humectant. | Rinse-off exposure and the exact study protocol limit what can be inferred from general ingredient evidence. Manufacturer says 97% noticed fewer new spots in 4 weeks (n=34, clinical grading); this is not a 97% cure rate. |
+| P3 Garnier Australia Vitamin C Cleanser | Ascorbyl Glucoside; salicylic acid; surfactants; glycerin; panthenol; fragrance components | Cleansing system plus listed vitamin-C derivative and supporting humectant ingredients. | Ascorbyl Glucoside must not be relabelled as pure L-ascorbic acid; concentration and exact-product brightening evidence are not established. Fragrance constituents are a possible relevance for susceptible users, not proof that every user will react. |
+| P4 SKIN1004 international SPF50+ PA++++ | Four chemical UV filters listed on the international formula; glycerin, niacinamide, Centella asiatica and multiple hyaluronate forms | UV filters are the protection system; other listed ingredients serve formulation/skin-conditioning roles. | Confirm the actual market label before use. The US SPF50 UV SKU has different filters and is not interchangeable with the international formula. Manufacturer-controlled formula reports do not establish independent clinical efficacy. |
+| P5 ISDIN Active Unify SPF50+ | Sunscreen filters plus marketed brightening/spot-care ingredients, depending on market formula | UV protection and appearance-of-spot claims must be treated as distinct endpoints. | Market-specific INCI and the original protocol behind the reported 22% spot-intensity and 15% spot-area changes remain open. |
+| P6 Clinique Even Better Clinical Radical Dark Spot Corrector + Interrupter | Ascorbyl Glucoside, Dimethoxytolyl Propylresorcinol, salicylic acid, supporting base ingredients | Product contains listed ingredients associated with cosmetic tone/spot-care positioning. | Do not infer active concentrations or a medical melasma indication. The 52-person clinical result and 533-person consumer test are separate data sets/endpoints. |
+| P7 Anua Azelaic Acid 10% + Hyaluron Serum | Manufacturer-declared 10% azelaic acid; niacinamide, panthenol, betaine salicylate, humectants, centella components, squalane, zinc PCA, ceramide NP | Manufacturer-declared azelaic acid concentration is distinct from the roles of supporting ingredients. | Manufacturer recommends gradual introduction. The 90% agreement result is a manufacturer-reported outcome; the full protocol, control, endpoints and analysis remain unavailable in the public page reviewed. Do not transfer evidence from the separate pad. |
+
+### B. Source interpretation rules confirmed
+
+1. The European Commission's CosIng page describes its database as an informative ingredient/reference resource and explicitly states that inclusion in CosIng does not itself mean an ingredient is approved for use or determine its regulatory status. Source: https://single-market-economy.ec.europa.eu/sectors/cosmetics/cosmetic-ingredient-database_en
+2. FDA distinguishes sunscreen active ingredients, which protect against UV rays, from inactive ingredients used in the formulation. This is especially relevant to maintaining separate dossiers for the US OTC SKIN1004 SPF50 UV product and the Korean/international SPF50+ PA++++ product. Sources: https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun and https://www.fda.gov/drugs/understanding-over-counter-medicines/questions-and-answers-fdas-regulatory-actions-over-counter-sunscreen
+3. Ingredient presence or general ingredient-level evidence is not proof that the finished product achieves a claimed result. A rinse-off cleanser, a leave-on serum and a sunscreen are different exposure/formulation contexts.
+4. A manufacturer's clinical or consumer result is recorded as a manufacturer-reported claim unless the full protocol/report or a suitable independent publication is available and reviewed. Do not promote a study to “RCT,” “independent,” or “peer-reviewed” without evidence supporting that classification.
+
+### C. Protocol and independent-evidence search disposition
+
+- COSRX: official page continues to disclose n=20 and a 2023 test window, but the full protocol, control, instruments and statistical analysis were not available in the reviewed page. Exact-product independent evidence remains NOT ESTABLISHED in this pass.
+- Neutrogena UK: official page confirms the 200 ml UK product, declared 2% salicylic acid and the n=34/4-week clinical-grading statement. Full protocol and independent exact-SKU evidence remain NOT ESTABLISHED in this pass. The page says the product and ingredients may change; package label verification remains necessary.
+- SKIN1004: an official brand information page reports a dry-environment moisture test on 20 adults and a separate SPF measurement on 10 subjects for the Korean/international product. These are manufacturer-published test summaries, not independent peer-reviewed confirmation. The US formula is explicitly separate. Source: https://info.skin1004.com/guide/moisturizing-sunscreen-that-wont-leave-skin-feeling-tight
+- Anua: a current brand page repeats the 90% participant-agreement statement for the exact serum, but the complete protocol is not presented on the page reviewed. Source: https://pages.anua.com/solutions/redness-prone-routine-sensitive-skin
+- ISDIN and Clinique: the public manufacturer claims already recorded in their dossiers remain insufficient to establish randomization, blinding, control design or independent replication. Original reports/protocols are still open research items.
+- Across this pass, an exact-product independent peer-reviewed trial was NOT ESTABLISHED from the sources checked. This is a bounded search result, not proof that no such study exists.
+
+### D. Next queue — priority order
+
+1. Seek primary protocols/reports for COSRX, ISDIN, Clinique and Anua; capture study sponsor, design, control, population, endpoints, instruments, duration, analysis and conflicts of interest where available.
+2. Seek independent exact-finished-product studies for all seven, preserving exact market, size, formula/version and dates. Record negative search outcomes as “not found in sources checked,” never as proof of absence.
+3. Complete the ingredient-role map from current official INCI/package labels, and use a suitable authoritative reference for each role. Keep uncertain functions UNKNOWN rather than guessing from marketing language.
+4. Verify package-specific directions, warnings, market and GTIN when a real package/catalog image is supplied.
+5. Do not convert any research-ledger statement directly into ProductKnowledge or product activation. Follow Issue #406's gates and existing Intake/QA governance.
+
