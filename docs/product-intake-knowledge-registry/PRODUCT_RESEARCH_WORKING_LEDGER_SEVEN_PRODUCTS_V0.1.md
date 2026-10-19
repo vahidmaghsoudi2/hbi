@@ -316,3 +316,50 @@ The indexed abstract reports:
 **Identity crosswalk remains unresolved:** This abstract's n=30, female-only sample and 12-week schedule resembles the Colombian public claim more than the Spanish n=31/day-28-and-84 description, but its age range (36–64), phototypes (II–IV), product description (“new facial suncare formulation with DP-Complex”) and endpoints do not exactly match the Colombian page's stated ages 35–68. It is a plausible source lead, **not verified as the same study or exact marketed SKU**. Do not combine the abstract's results with the Active Unify product claims until ISDIN confirms report ID, tested formula, market/GTIN and correspondence to the web-page claim.
 
 **ISDIN request update:** specifically ask whether EADV 2024 abstract 4411 corresponds to the Data-on-File 2024 reports used on Colombian and Spanish pages; request the full report and explain the n/age/endpoint differences. Keep the abstract as a separate cited evidence record until that mapping is documented.
+
+
+---
+
+## Pass 6 — bounded public-source sweep (2026-10-19)
+
+**Purpose:** Capture only material new source details found in the final bounded sweep. This is a grouped addendum, not a change to the roadmap or an approval of product claims.
+
+### P4 — SKIN1004 Hyalu-Cica Water-Fit Sun Serum: expanded manufacturer test detail
+
+New official SKIN1004 source pages provide additional test-method detail for the Korean/international Water-Fit Sun Serum. The brand reports:
+- In-vivo SPF test: SPF 50.5 ± 7.1, n=10, back-area test site.
+- In-vivo UVA protection factor (PFA): 16.56 ± 2.69, n=10; a PPD-method UVA protection factor of 17.3 is also reported for 10 adult volunteers (skin types II–III, ages 22–60).
+- In-vitro ISO 24443 test: critical wavelength 376.0 nm and UVA-PF 14.9 ± 0.4, n=4 plates.
+- Separate 100-hour hydration test: Corneometer mean 42.38 A.U. before use, 71.32 A.U. immediately after application, and 45.73 A.U. at 100 hours, n=20 adults aged 20–60.
+- Dry-environment hydration test: 47.45 A.U. baseline, 80.52 A.U. after application, 79.21 A.U. after dry-environment exposure, n=20.
+
+Sources:
+- https://info.skin1004.com/guide/non-comedogenic-sunscreen-for-dry-acne-prone-skin-2
+- https://info.skin1004.com/guide/moisturizing-sunscreen-that-wont-leave-skin-feeling-tight
+
+**Evidence status:** Manufacturer-published test summaries. They improve transparency about endpoints and sample sizes but are not independent peer-reviewed replication. Do not transfer these results to the distinct U.S. Water-Fit Sun Serum UV SKU. Obtain the full reports and tested formula/market identification if stronger substantiation is needed.
+
+### P7 — Anua Azelaic Acid 10% + Hyaluron Redness Soothing Serum: additional secondary-source detail
+
+A retailer page attributes a four-week consumer self-assessment to 22 participants aged 20–59 and reports 100% agreement on suitability for acne-prone skin, 90% agreement on reduced redness, and 90% agreement that red troubled spots looked improved. It also displays a separate P&K Skin Research Center test dated 2024-09-19 to 2024-10-21, n=20 adults aged 20–59, and a “troubled spot area improved by 108.6%” result.
+
+Source:
+- https://vitaliaina.com/products/azelaic-acid-10-hyaluron-serum
+
+**Evidence status:** Secondary retail source, not the original P&K report. The 20-person instrumental/clinical test and 22-person consumer self-assessment appear to be distinct cohorts or endpoints; do not combine their sample sizes or outcomes. Request the serum-specific original report, endpoint definitions, baseline/post values, analysis and formula/GTIN confirmation. Do not transfer evidence from the separately marketed pad.
+
+### P5 — ISDIN Active Unify: older EADV 2013 poster citation lead
+
+Some current ISDIN market pages cite an older EADV 2013 poster: “Efficacy of a new topical formulation in melasma patients,” attributed to Trullas C. et al. A secondary dermatology commentary describes a related EADV 2013 poster record as “Axillary hyperpigmentation – Efficacy of a new topical formulation in melasma patients,” P1443, and reports 33 women aged 31–68 with MASI, physician global assessment, photographs and Mexameter measurements. The commentary notes author affiliations with ISDIN/EVIC/ISDIN Innovation and discusses measurement limitations.
+
+Sources:
+- https://www.isdin.com/es-AR/producto/foto-ultra-isdin/active-unify-fusion-fluid-spf-50
+- https://www.globale-dermatologie.com/en/quoi-de-neuf-pour-traiter-le-melsma-chloasma-masque-de-grossesse.html
+
+**Evidence status:** Historical, manufacturer-associated conference-poster lead; the original poster/full report was not located in this sweep. The reported axillary hyperpigmentation population and “new topical formulation” do not establish identity with the current facial Active Unify commercial SKU or with the 2024 Data-on-File studies. Do not use as direct proof for the current SKU. Add this as a specific question in the ISDIN request only if the company can identify the poster/formula crosswalk.
+
+### Cross-product conclusion from Pass 6
+
+This sweep did not establish a publicly available, complete independent finished-product clinical report for any of the seven exact commercial SKUs. It did improve the traceability of manufacturer-reported testing for P4, add a secondary-source lead for P7, and identify a historical formulation-identity lead for P5. Manufacturer claims remain manufacturer claims until their source reports and tested-product identity are verified.
+
+**Next action:** No further ledger edit for routine searches. Continue with the already-prepared prioritized manufacturer evidence requests (ISDIN first; COSRX and Clinique next; Anua after), and update this same ledger only when replies or materially decisive new evidence arrive. Keep Issue #406 as the roadmap source of truth; this ledger remains subordinate research continuity only.
