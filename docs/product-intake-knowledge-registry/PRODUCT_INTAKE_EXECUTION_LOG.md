@@ -82,3 +82,17 @@ Required fields per runtime entry:
 - **G2 remains OPEN:** the entry point and stale-source notices are not active on `master` until PR #409 is reviewed and merged.
 - **G3–G5 remain OPEN:** complete and record navigation/authority acceptance checks, reconcile any remaining entry-path contradictions, and keep status records synchronized.
 - No application, database, schema, API, product, clinical, or G8 state was changed.
+
+
+## Entry 2026-10-19 — Final bounded navigation acceptance review for PR #409
+
+- Reviewed the live PR #409 metadata and exact head at the time of review: `0f60e091d401be7949200bdcd024d6ca2e12b94e`; PR remained OPEN / DRAFT / UNMERGED before this finalization step.
+- Checked the recursive Git tree at that head: all six workspace-index destinations and the skin-specific execution contract are present under `docs/product-intake-knowledge-registry/`; the already-scoped legacy contract file is also present.
+- **PASS:** `SKIN_PROBLEM_SPACE_MAP_V0.1.md` begins with a prominent DRAFT / NOT THE ACTIVE PROBLEM BANK warning and points to the consolidated reference and retirement register.
+- **PASS:** the legacy generic contract begins with a historical-contract warning and points to contract v1.1 plus the retirement register.
+- **PASS:** the workspace index distinguishes the six roles and explicitly says PR #409 is a change package, not a file.
+- **G1 bounded recovery result:** the current `master` recursive file tree contains no standalone accepted-list artifact. The merged PR #407 records the PO direction to continue from the accepted 62-item result but its changed files do not include the full list. The consolidated reference independently records that the full source text was not located. Therefore the canonical content remains **NOT RECOVERED**. This is now formally recorded as a separate content blocker; no content was reconstructed from the P01–P61 map, summaries, or draft shelves.
+- **G3 outcome:** the scoped navigation/content checks above passed. This is not a claim that every historical issue/PR redirect has been exhaustively validated; no full-repository redirect audit is represented as complete.
+- **G4 outcome:** key current entry points and two prominent stale-source boundaries were inspected. Global consistency across every historical draft remains outside this bounded check.
+- No application, DB, schema, API, product record, clinical content, or G8 state was changed. G8 remains **BLOCKED / NOT VERIFIED**.
+- **Disposition:** PR #409 is a documentation/navigation publication package only. It may publish the safeguards and the explicit G1 blocker; it must not be represented as delivery of the missing accepted list or as clinical approval.
