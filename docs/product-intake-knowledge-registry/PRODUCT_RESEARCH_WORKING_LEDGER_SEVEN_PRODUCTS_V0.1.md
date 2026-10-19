@@ -244,3 +244,48 @@ For each manufacturer request, ask for:
 9. Whether a public publication or registry record exists and permission to cite the report accurately.
 
 **Current disposition:** Public manufacturer summaries are recorded as manufacturer claims; no confidential report is presumed to have been obtained. These requests are a research task only and do not authorize ProductKnowledge entry, QA approval, product activation, code changes or PR merge.
+
+
+### I. Pass 5 — manufacturer evidence-request routing and ready-to-send request
+**Reviewed:** 2026-10-19  
+**Purpose:** Convert the existing evidence gaps into an actionable outreach step without repeating the prior evidence review. Contact routes below were located on official brand pages; no request has been sent by this project.
+
+#### I1. Official contact routes located
+- **ISDIN Colombia:** official contact form, with profile options including consumer, healthcare professional and other: https://www.isdin.com/co/contact_us. The official page lists +57 601 307 4279, Monday–Friday 09:00–18:00. Use the form and identify the request as a research/documentation inquiry, not an adverse-event report. Source checked: https://www.isdin.com/co/contact_us
+- **COSRX:** official product inquiry page: https://www.cosrx.com/pages/product-inquiry. Official global customer-service email listed on the brand's store/contact information: global@cosrx.co.kr. Source checked: https://www.cosrx.com/pages/stores?q=uEq
+- **Clinique US:** official product/ingredient customer-care page: https://www.clinique.com/pages/general-info. It directs product/ingredient questions to Consumer Care at 1-866-707-2100 or through Contact Us / Beauty-Product Advice. Source checked: https://www.clinique.com/pages/general-info
+- **Anua US:** official contact form and email help@anua.us: https://anua.com/pages/contact. Source checked: https://anua.com/pages/contact
+
+**Routing limitation:** These are consumer/product-support channels, not confirmed scientific-affairs or medical-information contacts. Ask them to route the inquiry to the clinical research, regulatory, or scientific documentation team. Do not assume they will disclose confidential reports.
+
+#### I2. Ready-to-send English request — common body
+**Subject:** Request for substantiation and study documentation for [exact product name / market / size]
+
+Hello Product Support / Scientific Documentation Team,
+
+I am conducting a product-evidence review and would appreciate your help locating the documentation supporting the published study or efficacy statements for **[exact product name, market, size, and variant]**.
+
+Could you please route this inquiry to the appropriate clinical research, regulatory, or scientific documentation team and provide, where shareable:
+1. The full final study report and protocol (including amendments), or a public publication/registry reference.
+2. The exact tested product identity: market/country, size, GTIN, formula/version and tested INCI.
+3. Study design, comparator/control, randomization/blinding, enrolled and completed participant counts, population, duration and assessment schedule.
+4. Endpoint definitions, measurement instruments and units, baseline/follow-up values, statistical methods and uncertainty estimates.
+5. Adverse-event/tolerability summary, sponsor/funding, investigator/laboratory details and conflicts of interest.
+6. Confirmation of which public product-page claim(s) are supported by this report, and whether the tested formula matches the currently marketed version.
+
+If the full report cannot be shared, a study synopsis containing the above information or a public reference would still be useful. Please identify any details that cannot be disclosed rather than leaving them ambiguous.
+
+Thank you.
+
+#### I3. Product-specific inserts — preserve the unresolved distinctions
+- **ISDIN:** “Please provide the two source reports labelled Data on File, 2024: (a) standard Active Unify SPF50+ described as n=31, ages 35–65, assessments at days 28 and 84; and (b) Active Unify Color SPF50+ described on the Colombian page as n=30, ages 35–68, over 12 weeks. Please map each report separately to GTIN, market, tinted/untinted SKU, formula/version, protocol, endpoint definition and visit schedule. We are not assuming these are the same cohort.” Public routing page: https://www.isdin.com/co/contact_us
+- **COSRX:** “Please provide the report behind the published n=20 evaluation dated 2023-09-18 to 2023-10-31 by Dermacosmetic Skin Science Laboratory Co., Ltd., including the definitions and units for deep moisture, texture, clarity, radiance and density, plus baseline/follow-up results and study methods.” Product inquiry: https://www.cosrx.com/pages/product-inquiry
+- **Clinique:** “Please provide the substantiation/report for the 39% visible dark-spot reduction claim after 12 weeks (clinical testing, n=52 women). Separately, please confirm whether an official report exists for the retailer-reported 150-minute redness endpoint (n=26 vs untreated control); do not combine the two endpoints.” Contact route: https://www.clinique.com/pages/general-info
+- **Anua:** “Please provide the serum-specific report behind the statement that 90% of participants agreed the appearance of red troubled spots improved. Please confirm the tested product was the 30 ml Azelaic Acid 10% + Hyaluron Redness Soothing Serum, not the separate pad product, and supply participant count, study period, comparator, endpoint, analysis and tolerability details.” Contact route: https://anua.com/pages/contact
+
+#### I4. Execution status and next action
+- Status: **REQUEST TEXT PREPARED; NOT SENT.** This ledger does not have an authenticated outbound-email/contact-form action, so no contact is claimed.
+- Priority 1: ISDIN discrepancy request, because two official market pages describe materially different sample/age/visit details under the 2024 data-on-file reference.
+- Priority 2: COSRX and Clinique full reports; Priority 3: Anua serum-specific report.
+- When replies arrive, add source/date, sender role (if provided), attachment/public link, product-version mapping, report access status and evidence limitations to this same ledger. Do not create a parallel tracker.
+- No ProductKnowledge write, QA approval, product activation, implementation change or PR merge is authorized by this pass.
