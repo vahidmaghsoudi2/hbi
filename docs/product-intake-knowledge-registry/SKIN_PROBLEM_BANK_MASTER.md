@@ -290,60 +290,63 @@
 
 ## پیوست C — قواعد کار پوشه
 
-محتوای `SKIN_PROBLEM_BANK_WORKSPACE_RULES.md` از شاخهٔ کاری پیشین، برای اینکه قواعد هم در همین مرجع باشند، در این بخش حفظ شده است.
+محتوای قواعد کار قبلی در این بخش به فارسی روان بازنویسی شده است. نام فایل و اصطلاح‌های فنی انگلیسی فقط جایی حفظ شده‌اند که برای ردیابی در GitHub یا جلوگیری از ابهام لازم باشند.
 
----
+# بانک مشکلات پوستی — قواعد کار پوشه
 
-# Skin Problem Bank — Workspace Rules
+**وضعیت:** قواعد فعال برای کار جاری  
+**دامنه:** فقط کار دانشی و مرجع‌سازی مربوط به مشکلات پوستی در پروژهٔ HBI.
 
-**Status:** ACTIVE WORKING RULES  
-**Scope:** HBI skin-problem knowledge work only.
+## ۱. محل واحد کار
 
-## 1. Single working location
-
-All working files created for the Skin Problem Bank must live in:
+تمام فایل‌های کاری جدید مربوط به بانک مشکلات پوستی باید در این مسیر قرار گیرند:
 
 `docs/product-intake-knowledge-registry/`
 
-Do not create workstream files for this unit elsewhere in the repository. Existing historical files outside this folder are read-only source material unless a separately authorized task explicitly says otherwise.
+برای این واحد کاری، فایل‌های جدید را در بخش‌های دیگر مخزن نسازید. فایل‌های تاریخی موجود در مسیرهای دیگر، فقط منبع مطالعه و سابقه‌اند و نباید ویرایش شوند؛ مگر اینکه مأموریتی جداگانه و صریح چنین اجازه‌ای بدهد.
 
-## 2. One source of working truth
+## ۲. یک مرجع واحد برای کار جاری
 
-Use the workspace index and consolidated reference in this folder as the navigation point when they are available on the working branch. Record substantive findings, source citations, decisions, unresolved questions, and next actions in files in this folder. Do not let PR descriptions, Issue comments, chat summaries, or external notes become a parallel content source.
+هنگامی که در شاخهٔ کاری موجود باشند، از فهرست عملیاتی و مرجع تجمیعی همین پوشه برای یافتن اطلاعات استفاده کنید. یافته‌های مهم، ارجاع به منابع، تصمیم‌ها، پرسش‌های حل‌نشده و اقدام بعدی باید در فایل‌های همین پوشه ثبت شوند. توضیحات PRها، کامنت‌های Issueها، خلاصه‌های گفتگو یا یادداشت‌های بیرونی نباید به مرجع محتوایی موازی تبدیل شوند.
 
-PRs and Issues remain GitHub workflow mechanisms. When they contain decisions or useful evidence, copy the durable result and its link into the relevant file in this folder.
+PRها و Issueها ابزارهای مدیریت کار در GitHub هستند. اگر تصمیم یا مدرک مفیدی در آن‌ها ثبت شد، نتیجهٔ ماندگار و پیوند دقیق آن را در فایل مرتبط همین پوشه وارد کنید.
 
-## 3. File discipline
+## ۳. انضباط فایل‌ها و محتوا
 
-- Prefer editing the appropriate existing file over creating another file.
-- Create a new file only when it has a distinct, necessary purpose; keep it in this folder.
-- Keep a clear distinction between evidence, interpretation, proposal, and accepted decision.
-- Mark unsupported or unrecovered information `UNKNOWN`; do not reconstruct the accepted Problem Bank list from summaries or structural maps.
-- Do not duplicate content across files. Use links between files in this folder when needed.
+- تا جای ممکن، فایل مناسب و موجود را اصلاح کنید؛ فایل دیگری نسازید.
+- فقط زمانی فایل جدید ایجاد کنید که هدفی مشخص، ضروری و متفاوت داشته باشد؛ آن فایل نیز باید در همین پوشه باشد.
+- مدرک، تفسیر، پیشنهاد و تصمیم پذیرفته‌شده را از یکدیگر جدا نگه دارید.
+- اطلاعات پشتیبانی‌نشده یا بازیابی‌نشده را با برچسب `UNKNOWN` (نامعلوم) مشخص کنید. فهرست پذیرفته‌شدهٔ بانک مشکلات را از روی خلاصه‌ها یا نقشه‌های ساختاری بازسازی نکنید.
+- محتوا را بین چند فایل تکرار نکنید. در صورت نیاز، بین فایل‌های همین پوشه پیوند بدهید.
 
-## 4. Work boundary
+## ۴. مرز کار
 
-This unit covers skin-problem intake and reference knowledge. Product registration/gallery implementation and the future evidence-based problem-to-product relationship layer are separate workstreams. Do not implement product matching, product recommendations, code, database, schema, API, or G8 changes as part of this unit unless explicitly authorized.
+این واحد کاری، دریافت اطلاعات مشکلات پوستی و دانش مرجع مربوط به آن را پوشش می‌دهد. ثبت محصولات و پیاده‌سازی گالری، و نیز لایهٔ آیندهٔ ارتباط مبتنی بر شواهد میان مشکل پوستی و محصول، جریان‌های کاری جداگانه‌اند.
 
-## 5. Review and release discipline
+مگر با مجوز صریح، در این واحد تطبیق محصول، پیشنهاد محصول، تغییر کد، پایگاه داده، ساختار داده، رابط برنامه‌نویسی کاربردی (API) یا تغییرات G8 اجرا نکنید.
 
-Draft candidates are not canonical entries until the required source and human review establish acceptance. Public sources support only the claims they actually make; manufacturer claims are not scientific evidence. Do not use numerical product scores or unsupported confidence values.
+## ۵. بازبینی و انتشار
 
-Keep PRs unmerged unless explicitly authorized. A successful documentation CI run does not mean the Problem Bank is complete, the original accepted list has been recovered, or G8 is verified.
+موارد پیشنهادی تا زمانی که منابع لازم و بازبینی انسانی، پذیرش آن‌ها را ثابت نکرده باشند، ورودی‌های مرجع و قطعی محسوب نمی‌شوند. منابع عمومی فقط همان ادعاهایی را پشتیبانی می‌کنند که واقعاً در آن‌ها آمده است؛ ادعای سازنده به‌خودی‌خود مدرک علمی مستقل نیست.
 
-## 6. Current known blocker
+از امتیاز عددی محصولات یا مقدارهای اطمینانِ بدون پشتوانه استفاده نکنید.
 
-The exact original accepted/refined Problem Bank list has not yet been recovered. Its contents and membership remain `UNKNOWN` until the original artifact is located and verified. Continue bounded evidence preparation for clearly labeled provisional candidates without claiming they are accepted items.
+هیچ PRی را بدون اجازهٔ صریح ادغام نکنید. موفقیت آزمون‌های خودکار مستندات (CI) به این معنی نیست که بانک مشکلات کامل شده، فهرست اصلی پذیرفته‌شده بازیابی شده یا وضعیت G8 تأیید شده است.
 
+## ۶. مانع شناخته‌شدهٔ فعلی
+
+نسخهٔ اصلی و دقیق فهرست پذیرفته‌شده و پالایش‌شدهٔ بانک مشکلات هنوز بازیابی نشده است. تا زمانی که سند اصلی پیدا و صحت آن بررسی نشود، محتوای دقیق و عضویت موارد در آن فهرست با وضعیت `UNKNOWN` (نامعلوم) ثبت می‌ماند.
+
+می‌توان برای موارد موقت و به‌روشنی برچسب‌خورده، آماده‌سازی شواهد را ادامه داد؛ اما نباید ادعا شود که این موارد جزو فهرست پذیرفته‌شده هستند.
 
 ---
 
-## ثبت تصمیمات جدید و وضعیت
+## ثبت تصمیم‌های جدید و وضعیت
 
 از این پس هر تصمیم تازه، اصلاح معتبر، منبع، اختلاف یا اقدام بعدی باید در همین بخش ثبت شود. از ساختن فایل کاری موازی خودداری شود.
 
 | تاریخ | نوع ثبت | شرح | منبع/وضعیت |
 |---|---|---|---|
 | 2026-10-19 | تصمیم مرجع | این فایل با شناسهٔ ثابت `HBI-SKIN-PROBLEM-BANK-MASTER-001` نقطهٔ واحد کار این واحد است. | ثبت‌شده روی شاخهٔ کاری؛ ادغام‌نشده |
-| 2026-10-19 | فهرست ۶۲ مورد | سابقهٔ ۹۲→۶۲ تأیید شده؛ متن کامل موردبه‌مورد هنوز در محتوای بازیابی‌شده حاضر نیست. فهرست ساختگی یا جایگزین ساخته نمی‌شود. | [Issue #293 comment 6242411614](https://github.com/vahidmaghsoudi2/hbi/issues/293#issuecomment-6242411614) |
-| 2026-10-19 | PR #409 | محتوای مرجع تجمیعی، فهرست عملیاتی و قواعد کار در همین فایل کپی شده‌اند. | [PR #409](https://github.com/vahidmaghsoudi2/hbi/pull/409)؛ اصل PR ادغام‌نشده است |
+| 2026-10-19 | فهرست ۶۲ مورد | سابقهٔ کاهش ۹۲ مورد به ۶۲ مورد تأیید شده است؛ متن کامل موردبه‌مورد در محتوای بازیابی‌شده وجود ندارد. فهرست ساختگی یا جایگزین ساخته نمی‌شود. | [کامنت Issue #293](https://github.com/vahidmaghsoudi2/hbi/issues/293#issuecomment-6242411614) |
+| 2026-10-19 | PR #409 | محتوای مرجع تجمیعی، فهرست عملیاتی و قواعد کار در همین فایل گردآوری شده‌اند. | [PR #409](https://github.com/vahidmaghsoudi2/hbi/pull/409)؛ خود PR ادغام‌نشده است |
