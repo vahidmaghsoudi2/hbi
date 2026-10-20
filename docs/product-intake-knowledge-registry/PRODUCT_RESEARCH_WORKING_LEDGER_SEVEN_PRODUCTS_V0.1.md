@@ -407,3 +407,55 @@ Some prior conversational summaries used shortened descriptions of product claim
 - Do not block routine dossier work on every unresolved study discrepancy. Record the exact reported variants and proceed with the supported facts; reserve deeper follow-up for evidence that materially changes product identity, claim meaning, safety/warnings or acceptance.
 - The next decisive action remains the already-prepared manufacturer evidence requests (ISDIN first; COSRX and Clinique next; Anua after). **REQUEST TEXT PREPARED; NOT SENT.** No outbound request is claimed.
 - Keep Issue #406 as the sole roadmap and this existing PR #411 ledger as subordinate research continuity. No new Issue/PR, code/schema/API/UI/database/test change, ProductKnowledge write, QA approval, activation or merge is included in this pass.
+
+---
+
+## Pass 8 — proposed per-field acceptance matrix for PO review (2026-10-20)
+
+**Purpose:** Convert the seven-dossier review into a small, reviewable proposal for field-level acceptance. This is a proposal for PO decision, not an approved product profile, not an executable acceptance contract, and not authorization to implement or populate ProductKnowledge.
+
+### A. Repository search disposition
+
+A focused read-only GitHub code search for an authoritative ProductKnowledge profile / required-field / field-acceptance matrix returned no matching files. This is consistent with the existing Issue #406 audit disposition: the authoritative profile, required fields per profile, and acceptance criteria per field have **not been established** in the reviewed repository evidence. Search results are bounded; they do not prove that no relevant artifact exists anywhere outside the inspected repository/index.
+
+**Decision boundary:** Do not infer mandatory fields from the current nullable ProductKnowledge columns, Product Intake/G8 contracts, or these seven example products. The proposal below must be explicitly approved or revised by the PO before it can become an executable acceptance mapping.
+
+### B. Proposed field groups and minimum acceptance checks
+
+| Field group | Candidate fields / content | Minimum acceptance check proposed for PO review | If evidence is missing or mismatched |
+|---|---|---|---|
+| Product identity | Brand; product name; dosage/form/type where relevant; market/country; variant/formula/version; nominal pack size; GTIN/barcode when present | Values must identify one target SKU/version within a declared market scope. Package or authoritative version-specific source must support the identity. Name similarity alone is insufficient. | Keep identity PARTIAL; GTIN may remain UNKNOWN if not present/observed. Do not merge variants. |
+| Ingredient declaration | Full INCI / ingredient list; declared active ingredient and concentration, if explicitly stated | Cite a current package label or official source applicable to the exact market/version. Preserve source wording; do not infer undeclared concentrations or equate ingredient derivatives without support. | Field remains UNKNOWN or PARTIAL; do not fill by inference from another market/version. |
+| Directions and warnings | Directions for use; precautions; warnings; relevant package statements | Preserve wording and market/version applicability from the exact label or authoritative source. Distinguish a secondary summary from label-level evidence. | Mark not verified for the target package; do not silently substitute directions from a similar SKU. |
+| Manufacturer claims | Benefit, performance, appearance, or usage claims | Attribute explicitly to the manufacturer and retain the exact endpoint, population, duration and numerical result when published. Do not relabel a marketing/consumer statement as independent evidence or medical treatment efficacy. | Claim may be recorded as a sourced manufacturer claim with limitations; it does not satisfy an independent-efficacy requirement. |
+| Study/test supporting a claim | Sponsor, tested product/version, study type, sample size/population, duration, comparator/control, endpoint, measurement method, result, analysis, conflicts of interest, report/source | Each available item must be source-backed. Study identity must be linked to the exact tested product before attributing results to a specific commercial SKU. Do not infer randomization, blinding, control, peer review, or independence. | Record only the confirmed study details; unresolved design fields remain UNKNOWN. Keep conflicting reports separate until reconciled. |
+| Independent finished-product evidence | Independent study/publication and its link to exact product/formula | Evidence must evaluate the exact finished product or clearly explain limits on applicability. Ingredient-level research is contextual only. | Use NOT ESTABLISHED IN SOURCES CHECKED, not “no evidence exists”; do not infer finished-product efficacy from ingredients alone. |
+| Source provenance | Source URL/title/publisher; source type; market/version; publication or update date if available; retrieval date; exact supported field/claim; limitations | Every accepted factual value/claim must be traceable to a source whose scope matches the field. Manufacturer, retailer, regulator, primary study and independent publication must remain distinguishable. | Field does not pass acceptance until adequate provenance is recorded. |
+| Conflicts and review state | Conflicting values; scope of conflict; review disposition; reviewer/decision record when applicable | Conflicts must be explicit and scoped to the affected field/version. Resolve only with evidence or an authorized decision; do not invent a reconciliation. | A blocking unresolved conflict prevents SUPPORTED for the affected profile scope; use CONFLICT only when the conflict is actually established and material. |
+
+### C. Proposed profile-level status rule — not yet executable
+
+Subject to PO approval and an agreed profile definition:
+
+- **NULL:** not assessed or legacy value not yet adjudicated.
+- **UNKNOWN:** assessed, but acceptable evidence for the relevant field/scope is not established.
+- **PARTIAL:** some, but not all, required fields in the approved profile pass their field-level checks.
+- **SUPPORTED:** every required field in the approved profile passes its accepted check, provenance is adequate, and no material blocking conflict remains for the defined market/version.
+- **CONFLICT:** an established, unresolved material conflict blocks acceptance for the defined profile scope.
+
+These statuses describe evidence/coverage only. They are not safety certification, regulatory approval, a clinical efficacy verdict, or a probability. Optional fields and the exact required-field set cannot be determined until the PO approves the profile(s).
+
+### D. PO decisions required before implementation
+
+1. Approve or revise the product-profile set and define each profile's intended scope.
+2. Select the required fields for each profile; distinguish required, conditional and optional fields.
+3. Approve the field-level acceptance checks and what source classes are acceptable for each field.
+4. Define when a conflict is material/blocking and who may resolve it.
+5. Confirm whether exact market/variant/pack identity is a prerequisite for product-level SUPPORTED.
+6. Only after these decisions, map the approved matrix to ProductKnowledge fields and separately authorize any implementation.
+
+### E. Seven-dossier application (research only)
+
+The current seven dossiers do not yet pass a unique gallery-package identity lock: no actual gallery package/GTIN crosswalk has been supplied. Their names, markets and nominal sizes identify research targets, not proof of the identity of a physical gallery item. Keep the existing dossier-specific limits and source records in Pass 7. Do not mark any of the seven SUPPORTED or write them to ProductKnowledge based on this proposal.
+
+**Disposition:** Proposed matrix for PO review; executable acceptance mapping remains **BLOCKED / NOT SPECIFIED** until approved. Gate 0 remains **PARTIAL**. No code, schema, API, UI, migration, database, test, ProductKnowledge, QA, or activation change is included. No new Issue or PR is created.
