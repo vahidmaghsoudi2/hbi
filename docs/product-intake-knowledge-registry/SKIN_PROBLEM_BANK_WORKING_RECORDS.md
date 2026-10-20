@@ -1,6 +1,7 @@
 # HBI — رکوردهای کاری بانک مشکلات پوستی (خوشهٔ خشکی)
 
 **شناسه:** HBI-SKIN-PROBLEM-BANK-WORKING-RECORDS  
+**ناوبری مرجع:** [فهرست عملیاتی](SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) ← [مرجع تجمیعی](SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md) ← همین رکوردهای کاری؛ برای مرزهای ساختاری به [نقشهٔ پیش‌نویس (DRAFT / NOT THE ACTIVE PROBLEM BANK)](SKIN_PROBLEM_SPACE_MAP_V0.1.md) مراجعه کنید.  
 **وضعیت:** WORKING / PO-CONFIRMED برای خوشهٔ S01 پایلوت (P01+P02+P07+P05)؛ P06 فقط Clinical Anchor  
 **پوشه:** `docs/product-intake-knowledge-registry/` (فقط همین حوزه)  
 **تاریخ تأییدهای PO:** 2026-10-20  
