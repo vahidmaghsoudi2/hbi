@@ -23,7 +23,11 @@ This register retires stale and superseded material from the active decision pat
 
 ## Active references
 
+- [Skin Problem Bank Workspace Index](./SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) — team entry point for the current workstream, editing rules, and unresolved gaps; active after PR #409 merges.
+
+
 - [Issue #396 — source audit and retirement tracker](https://github.com/vahidmaghsoudi2/hbi/issues/396)
+- [Skin Problem Bank Consolidated Reference](./SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md) — ACTIVE WORKING ENTRY POINT after PR #409 merges; navigation/status only, not clinical acceptance or a reconstructed accepted list.
 - [Skin Product Intake Execution Contract v1.1](./SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md) — approved execution baseline.
 - [Skin Product Intake Strategic Baseline v0.1](./SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md) — strategy reference; retain its draft/version status.
 - [Product Intake Evidence Knowledge Registry](./PRODUCT_INTAKE_EVIDENCE_KNOWLEDGE_REGISTRY.md) — evidence and knowledge registry.
@@ -38,6 +42,7 @@ This register retires stale and superseded material from the active decision pat
 | Skin Product Intake Execution Contract v1.1 | ACTIVE AUTHORITY | Preserve; do not replace with historical summaries. |
 | Strategic Baseline v0.1 | ACTIVE REFERENCE / VERSIONED | Preserve status/version; do not imply it is an implementation acceptance record. |
 | Evidence Knowledge Registry | ACTIVE REFERENCE | Preserve unknown/empty distinctions, provenance, conflicts, and evidence status. |
+| Skin Problem Bank Consolidated Reference | ACTIVE WORKING ENTRY POINT after PR #409 merges | Start here for Problem Bank status/navigation; not clinical acceptance or a reconstructed accepted list. |
 | Skin Problem Space Map P01–P61 | DRAFT / UNACCEPTED | Keep visible as a draft; retain known cross-shelf conflicts and missing customer-language evidence. |
 | Product A–D records and ISDIN evidence ledger | HISTORICAL PRODUCT RECORDS / EVIDENCE INCOMPLETE | Preserve both records and ledger; do not infer current stock or complete INCI. |
 | Product-intake mission, governance reconciliation, live project ledger, master roadmap, forensic report, Mission A audit | HISTORICAL / RECONCILIATION SOURCE | Stop using these as parallel active status dashboards. Preserve unique decisions and date-specific history; link back to this register and Issue #396. |
@@ -75,5 +80,5 @@ This register retires stale and superseded material from the active decision pat
 ## Completion record
 
 - 2026-10-16 — PO selected controlled retirement without confidentiality claims.
-- 2026-10-16 — Further recovery of the original 8-category / 92-item list is no longer a prerequisite; current known gaps remain explicitly unresolved rather than fabricated.
+- 2026-10-16 — Recovery of the accepted refined source is not a prerequisite for unrelated work to continue, but its exact contents must be recovered from existing records before claiming a complete canonical list or making item-level decisions that depend on it. Do not repeat the refinement or reconstruct missing content; keep the exact-content gap explicit until the source is recovered.
 - Follow-up: update Issue #396 to point to this register and treat its original-inventory recovery checklist as superseded by this PO direction.

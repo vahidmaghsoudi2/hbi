@@ -1,7 +1,8 @@
 # Product Intake Execution Log
 
 **Current status:** Phase 0 / SSOT placement = COMPLETE; isolated pilot preparation = BLOCKED pending proven isolation and evidence capture; G8 = **BLOCKED / NOT VERIFIED**.  
-**Current verified master SHA (2026-10-16):** `335fd6e472dde72b9907366acaa04db28ebed943` (includes PR #369 and the subsequent G8 smoke-evidence finalization fix). Historical entries retain the SHA that was verified at their original timestamps.
+**Historical master SHA verified on 2026-10-16:** `335fd6e472dde72b9907366acaa04db28ebed943` (included PR #369 and the subsequent G8 smoke-evidence finalization fix).  
+**Live master SHA last checked on 2026-10-20:** `624811fae2112213b8c4c8c59d2ff1011e343e94` (includes merged PR #414). Historical entries retain the SHA that was verified at their original timestamps; this line is a dated observation, not a substitute for checking GitHub before later work.
 **Governing tracker:** [Issue #283](https://github.com/vahidmaghsoudi2/hbi/issues/283)  
 **Roadmap:** [PRODUCT_INTAKE_ROADMAP.md](PRODUCT_INTAKE_ROADMAP.md)  
 **Acceptance ledger:** [G8_ACCEPTANCE_EVIDENCE.md](G8_ACCEPTANCE_EVIDENCE.md)  
@@ -69,3 +70,59 @@ Required fields per runtime entry:
 - Finding recorded on [PR #369 discussion](https://github.com/vahidmaghsoudi2/hbi/pull/369#issuecomment-6187532736). GitHub rejected a formal `REQUEST_CHANGES` review because the connected account is the PR author; the comment records the review finding and required corrections.
 - Required before re-review: fail-closed evidence finalization before cleanup; preserve the isolated DB and mark failure if finalization fails; regression tests for both outcomes; reconcile with current master and rerun checks on the exact new head.
 - No runtime was started, no database or product data was changed, and no PR was merged. G8 remains **BLOCKED / NOT VERIFIED**.
+
+
+## Entry 2026-10-19 — Skin Problem Bank workspace index and closure gaps
+
+- Added `SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md` on the PR #409 branch as the operational entry point for this workstream.
+- The index defines the six requested reference/work-package headings, editing boundaries, future update routing, acceptance criteria, and gaps G1–G5.
+- Linked `SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md` back to the workspace index.
+- Updated PR #409 description to include the index, review scope, and remaining blockers.
+- Verified PR #409 remains OPEN / DRAFT / UNMERGED; current branch comparison reports 13 commits ahead and 0 behind `master`, with 6 changed files.
+- **G1 remains OPEN:** PR #407 confirms the Product Owner's direction to continue from the previously accepted refined result and recover its saved version from existing records; the PR #407 change itself does not contain the full accepted list. Do not recreate the list from summaries or reopen the refinement.
+- **G2 remains OPEN:** the entry point and stale-source notices are not active on `master` until PR #409 is reviewed and merged.
+- **G3–G5 remain OPEN:** complete and record navigation/authority acceptance checks, reconcile any remaining entry-path contradictions, and keep status records synchronized.
+- No application, database, schema, API, product, clinical, or G8 state was changed.
+
+
+## Entry 2026-10-19 — Final bounded navigation acceptance review for PR #409
+
+- Reviewed the live PR #409 metadata and exact head at the time of review: `0f60e091d401be7949200bdcd024d6ca2e12b94e`; PR remained OPEN / DRAFT / UNMERGED before this finalization step.
+- Checked the recursive Git tree at that head: all six workspace-index destinations and the skin-specific execution contract are present under `docs/product-intake-knowledge-registry/`; the already-scoped legacy contract file is also present.
+- **PASS:** `SKIN_PROBLEM_SPACE_MAP_V0.1.md` begins with a prominent DRAFT / NOT THE ACTIVE PROBLEM BANK warning and points to the consolidated reference and retirement register.
+- **PASS:** the legacy generic contract begins with a historical-contract warning and points to contract v1.1 plus the retirement register.
+- **PASS:** the workspace index distinguishes the six roles and explicitly says PR #409 is a change package, not a file.
+- **G1 bounded recovery result:** the current `master` recursive file tree contains no standalone accepted-list artifact. The merged PR #407 records the PO direction to continue from the accepted 62-item result but its changed files do not include the full list. The consolidated reference independently records that the full source text was not located. Therefore the canonical content remains **NOT RECOVERED**. This is now formally recorded as a separate content blocker; no content was reconstructed from the P01–P61 map, summaries, or draft shelves.
+- **G3 outcome:** the scoped navigation/content checks above passed. This is not a claim that every historical issue/PR redirect has been exhaustively validated; no full-repository redirect audit is represented as complete.
+- **G4 outcome:** key current entry points and two prominent stale-source boundaries were inspected. Global consistency across every historical draft remains outside this bounded check.
+- No application, DB, schema, API, product record, clinical content, or G8 state was changed. G8 remains **BLOCKED / NOT VERIFIED**.
+- **Disposition:** PR #409 is a documentation/navigation publication package only. It may publish the safeguards and the explicit G1 blocker; it must not be represented as delivery of the missing accepted list or as clinical approval.
+
+
+## Entry 2026-10-19 — PR #409 latest-head CI confirmation
+
+- Rechecked live PR #409 after the workspace-index synchronization commit. The current head is `a4af038136e60e3c099bee5217d0ae98a4b68b6f`; PR state is OPEN, ready for review (not draft), and unmerged.
+- All four checks on this exact head completed successfully: `test`, `governance-tests`, `g8-isolated-pilot-smoke`, and `pilot-browser-proof`. See [workflow run 39306317881](https://github.com/vahidmaghsoudi2/hbi/actions/runs/39306317881) and the [Pilot Browser Proof run](https://github.com/vahidmaghsoudi2/hbi/actions/runs/39306317707).
+- This confirms the documentation PR's CI status only. It does not resolve G1 (accepted source list still NOT RECOVERED), publish the entry point to `master`, or verify G8. G8 remains **BLOCKED / NOT VERIFIED**.
+- The earlier bounded-review entry records the PR state and branch comparison at its own review point; this entry is the later live-state correction. Do not merge PR #409: Issue #410 explicitly prohibits merging while its independent red-team audit is being completed.
+
+
+## Entry 2026-10-19 — Red-team audit: source-recovery wording reconciled
+
+- During the independent stale-source/authority audit for Issue #410, a wording conflict was found between the retirement register's completion record and the consolidated reference: the register could be read as saying source recovery was no longer needed, while the consolidated reference correctly said the exact accepted artifact was still not recovered and must not be reconstructed.
+- Corrected the retirement-register completion wording: unrelated work may continue, but the exact accepted source must be recovered from existing records before claiming a complete canonical list or making dependent item-level decisions. The accepted refinement must not be repeated, and missing content must not be inferred.
+- This is a documentation-only clarification on PR #409's branch. It does not recover the missing source, certify the accepted list, change product/clinical content, authorize implementation, or change G8 status.
+- PR #409's previous head `b5379063353fe598e981ebfb11f249f5405662d5` had all four CI checks green. This new commit changes the head; re-check all four checks on the new exact SHA before closing the review.
+- The independent audit remains in progress. Do not merge any PR.
+
+
+## Entry 2026-10-20 — PO-confirmed P01/P02 structural decision
+
+- PO explicitly approved the bounded decisions for the P01/P02 working-record review.
+- **P01:** status `Scoped` for structural review only; its operational definition remains proposed, not sourced verbatim from Map V0.1. Operational disposition is `Deferred`; `Ordinary-care candidate` is not approved.
+- **P02:** `Identified + Linked` to P01; not independently Scoped or Accepted. Keep option C, `Merge-candidate pending human/PO review`, consistent with Map V0.1 §4 and B01 in §6. No operational merge, ID deletion, or separate accepted Problem is authorized.
+- P02's independent operational status remains undetermined. No standalone ordinary-care status, customer wording, medical validation, or safety/referral threshold was inferred.
+- Human review questions remain explicit: P01 boundary; P02 as linked separate record versus display under P01; whether P02 has a defensible independent operational definition. No separate-counting rule is assumed.
+- The decision is recorded in `SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md` on the PR #409 working branch. It is a documentation/structural decision only and does not accept clinical content, establish a Need, map products, or authorize implementation.
+- G1 remains separate: the exact accepted refined 62-item artifact remains NOT RECOVERED in the reviewed scope. This work does not reconstruct or replace it. No application, DB, Schema/API, product, or G8 state changed.
+- PR #409 remains unmerged; no merge action was taken. Re-run required checks on the new head and respect Issue #410's no-merge constraint.

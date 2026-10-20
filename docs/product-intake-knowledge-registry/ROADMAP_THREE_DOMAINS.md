@@ -136,10 +136,12 @@
 
 تعیین موعدها پس از روشن‌شدن ظرفیت و وابستگی‌های واقعی انجام شود؛ تاریخ ساختگی یا تعهد زمانی بدون مالک تعیین نشود.
 
-## 11. مراجع رسمی و مرز وضعیت
+- فهرست عملیاتی واحد کار بانک مشکلات پوستی: [SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md](SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) — نقطهٔ ورود تیم، قواعد ویرایش و شکاف‌های باقی‌مانده.
 
-- قرارداد تخصصی ورود محصول: [SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md](../architecture/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md) — در صورت وجود مسیر دیگری در GitHub، مسیر زنده را بررسی و اصلاح کنید؛ این نقشه‌راه قرارداد را جایگزین نمی‌کند.
+
+- قرارداد تخصصی ورود محصول: [SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md](./SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md) — قرارداد مصوب و جاری در همین پوشه؛ این نقشه‌راه قرارداد را جایگزین نمی‌کند.
 - ثبت/رهگیری Product Intake: [Issue #283](https://github.com/vahidmaghsoudi2/hbi/issues/283).
+- نقطهٔ ورود بانک مشکلات پوستی: [SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md](SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md) — پس از ادغام PR #409 مرجع کاری برای وضعیت، سلسله‌مراتب و شکاف‌های معلوم است؛ جایگزین فهرست پذیرفته‌شده یا تأیید بالینی نیست.
 - فضای مسئله پوستی: [SKIN_PROBLEM_SPACE_MAP_V0.1.md](SKIN_PROBLEM_SPACE_MAP_V0.1.md) — نقشهٔ ساختاری است، نه پذیرش نیاز یا تأیید پزشکی.
 - پیشنهادهای مدیریتی: [PR #400](https://github.com/vahidmaghsoudi2/hbi/pull/400) — تا زمانی که وضعیت آن در GitHub تأیید نشود، محتوای آن را صرفاً پیشنهاد تلقی کنید.
 - پروتکل اجرایی اعضا/AI: [HBI_AGENT_EXECUTION_PROTOCOL.md](../01_project_control/HBI_AGENT_EXECUTION_PROTOCOL.md).
