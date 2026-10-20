@@ -140,6 +140,27 @@
 
 ---
 
+## رکورد P06 — Irritant dermatitis
+
+| فیلد | محتوا |
+|------|--------|
+| ID نقشه | P06 |
+| نام کاری | درماتیت تحریکی (Irritant dermatitis) |
+| تعریف عملیاتی | **UNKNOWN / نیازمند بازبینی.** Map تعریف عملیاتی تفصیلی ارائه نمی‌کند؛ این خلأ به‌عنوان UNKNOWN حفظ می‌شود. |
+| داخل دامنه | Clinical Condition / inflammatory presentation با مسیر ساختاری S01→S05، مطابق Map. |
+| خارج از دامنه | فروکاستن به خشکی سادهٔ P01؛ تلقی به‌عنوان Need پذیرفته‌شده؛ Ordinary-care candidate یا مجوز درمان. |
+| نوع واحد | Clinical Condition / inflammatory presentation — **VERIFIED در Map**؛ Clinical Anchor |
+| رابطه با نقشه | S01→S05 Clinical Anchor — طبق Map؛ از P01 متمایز می‌ماند و به خشکی ساده فروکاسته نمی‌شود. |
+| وضعیت تکمیل و پذیرش | **Identified** — ثبت ساختاری؛ **Accepted = خیر**. این ثبت به‌خودی‌خود تأیید PO یا اعتبارسنجی پزشکی نیست. |
+| وضعیت عملیاتی | **Clinical-anchor only** — نه Ordinary-care candidate. |
+| ایمنی / ارجاع | **UNKNOWN** — Map برای P06 آستانهٔ اختصاصی ایمنی/ارجاع تعیین نکرده است. |
+| شواهد / منشأ | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4، بخش S01: `P06 Irritant dermatitis — Clinical Condition/inflammatory presentation — S01→S05 — Clinical Anchor`. |
+| زبان مشتری | **UNKNOWN** |
+| UNKNOWN / GAP | تعریف عملیاتی؛ زبان مشتری؛ رابطهٔ عملیاتی دقیق با فرایند گالری؛ آستانهٔ ایمنی/ارجاع؛ شواهد بالینی مستقل |
+| یادداشت بازبینی | ثبت ساختاری P06 بر اساس Map؛ هیچ وضعیت Accepted یا Ordinary-care برای آن ادعا نمی‌شود. |
+
+---
+
 ## روابط خوشه (بدون ادغام خاموش)
 
 | ID | نقش نسبت به P01 | وضعیت |
@@ -148,7 +169,7 @@
 | P02 | Related / Merge-candidate | Identified + Linked — **PO-confirmed** |
 | P07 | Child / Related | Identified + Linked — **PO-confirmed** |
 | P05 | Related مستقل هم‌قفسه | Identified/Scoped — **PO-confirmed مرز** |
-| P06 | Clinical Anchor | فروکاستن به خشکی ساده ممنوع |
+| P06 | Clinical Condition / inflammatory presentation؛ S01→S05 Clinical Anchor | Identified؛ Accepted نیست؛ عملیاتی Clinical-anchor only؛ مستقل از P01 |
 
 ---
 
@@ -158,6 +179,7 @@
 |--------|--------|
 | قالب حداقلی | تثبیت |
 | P01+P02+P07+P05 | **PO-confirmed** (هیچ‌کدام Accepted نهایی نیستند) |
+| P06 | **ثبت ساختاری انجام شد** طبق Map؛ Identified؛ Accepted نیست؛ عملیاتی Clinical-anchor only |
 | پایلوت ساختاری S01 | **مرزها بسته** |
 | سایر shelfها | باز نشوند تا دستور PO |
 | Need / Product / G8 | خارج از دامنه |
