@@ -126,3 +126,13 @@ Required fields per runtime entry:
 - The decision is recorded in `SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md` on the PR #409 working branch. It is a documentation/structural decision only and does not accept clinical content, establish a Need, map products, or authorize implementation.
 - G1 remains separate: the exact accepted refined 62-item artifact remains NOT RECOVERED in the reviewed scope. This work does not reconstruct or replace it. No application, DB, Schema/API, product, or G8 state changed.
 - PR #409 remains unmerged; no merge action was taken. Re-run required checks on the new head and respect Issue #410's no-merge constraint.
+
+
+## Entry 2026-10-20 — PR #409 merged and post-merge status reconciliation
+
+- PO approved PR #409 and it was merged to `master` using squash merge at `afe909c5cc902b3bfc588b65ec490919be007885`.
+- Independent red-team audit Issue #410 is closed as completed; its final bounded report is recorded at https://github.com/vahidmaghsoudi2/hbi/issues/410#issuecomment-6284790534.
+- Post-merge readback confirmed the workspace index and working-record navigation files are present on `master`. This readback also found that some status text in the workspace index still described PR #409 as unmerged; a bounded follow-up correction is being prepared rather than leaving the operational entry point stale.
+- G1 remains NOT RECOVERED: the exact accepted refined list is still not available in the reviewed canonical source. Do not reconstruct it from summaries or the structural map.
+- G8 remains BLOCKED / NOT VERIFIED. The PR's successful CI does not establish real-pilot A1–A9 evidence or authorize product recommendations.
+- No application, database, schema, API, product records, clinical content, or G8 state was changed by the merge.
