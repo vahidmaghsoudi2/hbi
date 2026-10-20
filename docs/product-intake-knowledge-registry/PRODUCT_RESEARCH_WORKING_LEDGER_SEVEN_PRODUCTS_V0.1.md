@@ -433,17 +433,17 @@ A focused read-only GitHub code search for an authoritative ProductKnowledge pro
 | Source provenance | Source URL/title/publisher; source type; market/version; publication or update date if available; retrieval date; exact supported field/claim; limitations | Every accepted factual value/claim must be traceable to a source whose scope matches the field. Manufacturer, retailer, regulator, primary study and independent publication must remain distinguishable. | Field does not pass acceptance until adequate provenance is recorded. |
 | Conflicts and review state | Conflicting values; scope of conflict; review disposition; reviewer/decision record when applicable | Conflicts must be explicit and scoped to the affected field/version. Resolve only with evidence or an authorized decision; do not invent a reconciliation. | A blocking unresolved conflict prevents SUPPORTED for the affected profile scope; use CONFLICT only when the conflict is actually established and material. |
 
-### C. Proposed profile-level status rule — not yet executable
+### C. Approved status semantics; profile-level mapping still not executable
 
-Subject to PO approval and an agreed profile definition:
+The Product Owner has already approved the status meanings in the decision recorded at https://github.com/vahidmaghsoudi2/hbi/pull/411#issuecomment-6277900118. That decision is semantic approval, not implementation authorization.
 
-- **NULL:** not assessed or legacy value not yet adjudicated.
-- **UNKNOWN:** assessed, but acceptable evidence for the relevant field/scope is not established.
-- **PARTIAL:** some, but not all, required fields in the approved profile pass their field-level checks.
-- **SUPPORTED:** every required field in the approved profile passes its accepted check, provenance is adequate, and no material blocking conflict remains for the defined market/version.
-- **CONFLICT:** an established, unresolved material conflict blocks acceptance for the defined profile scope.
+- **NULL:** not assessed, or a legacy record whose status has not yet been adjudicated.
+- **UNKNOWN:** assessed, but no acceptable/usable evidence exists within the applicable scope.
+- **PARTIAL:** some required fields are covered, but not all.
+- **SUPPORTED:** all required fields in the defined profile/scope meet their acceptance criteria, with no blocking unresolved conflict.
+- **CONFLICT:** an unresolved blocking conflict affects the applicable scope.
 
-These statuses describe evidence/coverage only. They are not safety certification, regulatory approval, a clinical efficacy verdict, or a probability. Optional fields and the exact required-field set cannot be determined until the PO approves the profile(s).
+These statuses describe evidence/coverage only. They are not safety certification, regulatory approval, a clinical efficacy verdict, or probability values. The approved meanings do not define which profile applies, which fields are required for that profile, or the field-level acceptance/source rules. Those details remain open in the matrix below; implementation remains unauthorized until the applicable matrix is approved and a separate implementation authorization is recorded.
 
 ### D. PO decisions required before implementation
 
