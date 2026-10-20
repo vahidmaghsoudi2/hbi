@@ -1,1 +1,1 @@
-RESTORE_PENDING
+file:///tmp/final_panel.tsx
