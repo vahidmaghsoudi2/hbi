@@ -459,3 +459,16 @@ These statuses describe evidence/coverage only. They are not safety certificatio
 The current seven dossiers do not yet pass a unique gallery-package identity lock: no actual gallery package/GTIN crosswalk has been supplied. Their names, markets and nominal sizes identify research targets, not proof of the identity of a physical gallery item. Keep the existing dossier-specific limits and source records in Pass 7. Do not mark any of the seven SUPPORTED or write them to ProductKnowledge based on this proposal.
 
 **Disposition:** Proposed matrix for PO review; executable acceptance mapping remains **BLOCKED / NOT SPECIFIED** until approved. Gate 0 remains **PARTIAL**. No code, schema, API, UI, migration, database, test, ProductKnowledge, QA, or activation change is included. No new Issue or PR is created.
+
+
+---
+
+## Pass 9 — bounded ProductKnowledge rebuild safeguard (2026-10-20)
+
+**Implementation change:** `ProductKnowledgeService.update_from_evidence()` now explicitly clears `evidence_status` during every rebuild. A rebuild filters pending and conflicting evidence and replaces the current field values; carrying forward a previously assigned status could therefore leave a stale status attached to a changed evidence set. Until the PO-approved profile/required-field matrix is executable, the rebuild leaves status NULL rather than deriving SUPPORTED/PARTIAL/UNKNOWN/CONFLICT from an unapproved mapping.
+
+**Regression test added:** `tests/test_product_knowledge_service_rebuild.py` checks that a rebuild with no eligible evidence clears stale knowledge fields, refs, confidence and `evidence_status`, and does not consume pending or conflicting claims.
+
+**Validation status:** The code and regression test were committed to this existing research branch. A workflow-run lookup for the test commit returned no runs; therefore this change is **not yet reported as CI-passed**, and the test has not been represented as executed locally. Verify the PR workflow result before considering this safeguard validated.
+
+**Scope boundary:** This does not implement the full status mapping, approve a profile matrix, lock the seven physical product identities, or authorize ProductKnowledge writes for the seven research dossiers. Those remain separate gates. No schema/API/database migration or new Issue/PR was created.
