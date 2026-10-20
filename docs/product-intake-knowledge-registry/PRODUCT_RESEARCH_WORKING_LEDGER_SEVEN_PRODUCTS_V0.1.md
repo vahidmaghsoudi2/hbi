@@ -363,3 +363,47 @@ Sources:
 This sweep did not establish a publicly available, complete independent finished-product clinical report for any of the seven exact commercial SKUs. It did improve the traceability of manufacturer-reported testing for P4, add a secondary-source lead for P7, and identify a historical formulation-identity lead for P5. Manufacturer claims remain manufacturer claims until their source reports and tested-product identity are verified.
 
 **Next action:** No further ledger edit for routine searches. Continue with the already-prepared prioritized manufacturer evidence requests (ISDIN first; COSRX and Clinique next; Anua after), and update this same ledger only when replies or materially decisive new evidence arrive. Keep Issue #406 as the roadmap source of truth; this ledger remains subordinate research continuity only.
+
+---
+
+## Pass 7 — seven-dossier readiness and identity-lock consolidation (2026-10-20)
+
+**Purpose:** Consolidate the current dossier state into one operational view, based on sources already recorded in this ledger and the subsequent dossier review. This is not a new evidence search, not a ProductKnowledge approval, and not authorization to change application behavior.
+
+### A. Cross-product identity and evidence matrix
+
+| ID | Target dossier / market | Source basis currently recorded | Identity lock | Main unresolved items | Evidence interpretation |
+|---|---|---|---|---|---|
+| P1 | COSRX The 6 Peptide Skin Booster Serum, 150 ml | Official COSRX product page; manufacturer-reported n=20 evaluation (2023-09-18 to 2023-10-31); systematic-review context is not product-specific | PARTIAL — name/size identified as target, but actual package, GTIN and formula version not supplied | Original study protocol/report; current package INCI; exact-product independent study; peptide concentrations | Study outcomes remain manufacturer-reported; ingredient/systematic-review context does not establish efficacy of this serum |
+| P2 | Neutrogena Clear & Defend 2% Salicylic Acid Face Wash, 200 ml, UK | Official UK product page; manufacturer reports n=34 and 97% noticed fewer new spots after four weeks | PARTIAL — UK target variant specified; actual package/GTIN and current label not supplied | Original study report and comparator/design; package INCI and warnings; exact-SKU independent evidence | The 97% figure is not a 97% cure rate and must remain attributed to the manufacturer |
+| P3 | Garnier Vitamin C Brightening Gel Cleanser, 200 ml, Australia | Official Garnier Australia page and declared INCI | PARTIAL — Australia target and size specified; actual package/GTIN and current label not supplied | Package INCI/warnings; exact-product brightening evidence; concentration of Ascorbyl Glucoside | Ascorbyl Glucoside must not be relabelled as pure L-ascorbic acid; rinse-off evidence cannot automatically be transferred from leave-on products |
+| P4 | SKIN1004 Madagascar Centella Hyalu-Cica Water-Fit Sun Serum SPF50+ PA++++, Korean/international | Official international/UK page and official brand test summaries | PARTIAL — target formula family and market scope identified; actual package/GTIN not supplied | Exact label/market confirmation; full test reports; independent exact-product evidence | Keep the US “Water-Fit Sun Serum UV” SKU separate; official brand summaries are manufacturer-published, not independent replication |
+| P5 | ISDIN FotoUltra 100 Active Unify SPF50+ | Official Colombia and Spain pages for standard and Color variants; EADV 2024 abstract 4411 is a separate manufacturer-affiliated lead | PARTIAL — multiple market/variant pages identified; no exact gallery package/GTIN crosswalk | Full Data-on-File report(s); mapping of n=30/ages 35–68/12 weeks vs n=31/ages 35–65/days 28 and 84; tested formula and SKU mapping | Keep all page-level descriptions distinct. Do not infer a common cohort, explain the discrepancy by tint status, or equate abstract 4411 with the commercial SKU without confirmation |
+| P6 | Clinique Even Better Clinical Radical Dark Spot Corrector + Interrupter, 100 ml | Official Clinique product page; 39% visible dark-spot reduction claim after 12 weeks in clinical testing, n=52 women; separate consumer testing n=533 | PARTIAL — target name/size specified; actual package/GTIN and market-specific INCI not supplied | Original clinical report/protocol; exact 100 ml-market INCI; independent exact-formula studies | The n=52 clinical result and n=533 consumer test are separate datasets/endpoints and must never be combined |
+| P7 | Anua Azelaic Acid 10% + Hyaluron Redness Soothing Serum, 30 ml | Official Anua product page; manufacturer 90% participant-agreement statement; secondary retailer reports separate 22-person consumer and 20-person P&K test details | PARTIAL — target serum identified by name/size, but actual package/GTIN and formula version not supplied | Original serum-specific report; endpoint definitions and underlying values; current package INCI/warnings; independent exact-product evidence | Do not combine the 22- and 20-person reports or transfer results from the separate azelaic-acid pad |
+
+### B. Profile field disposition
+
+For all seven dossiers, use the following working disposition until an actual package or authoritative version-specific source resolves it:
+
+- **Name / brand / target market / nominal size:** recorded as the intended research target, not proof that a gallery item has been uniquely identified.
+- **GTIN / barcode / actual package revision:** UNKNOWN until observed on the gallery sample or documented by a version-specific authoritative source.
+- **INCI / concentrations:** use only the source or label that matches the market and formula. Do not infer undeclared concentrations.
+- **Directions / warnings:** retain the exact wording and market scope of the cited label; do not promote a secondary summary into a package-level fact.
+- **Manufacturer efficacy claims:** record with attribution, population, duration and endpoint where available. Do not relabel as independent evidence, RCT, cure, treatment indication or guaranteed outcome without supporting documentation.
+- **Independent finished-product efficacy:** NOT ESTABLISHED in the bounded sources currently recorded. This means not established from sources checked, not proof that no study exists.
+- **ProductKnowledge / QA / activation:** none of these dossiers is approved, written to ProductKnowledge, or activated by this research pass.
+
+### C. Correction and consistency control
+
+A prior conversational summary associated Clinique’s 39% clinical result with the 533-person consumer-test sample. That association is incorrect. The ledger’s existing distinction is retained: **n=52 for the 39% clinical-testing claim; n=533 for separate consumer testing.** Do not merge their endpoints or sample sizes.
+
+Some prior conversational summaries used shortened descriptions of product claims and tests. Where they differ from the more specific source notes in this ledger, this ledger’s product-, market- and study-specific distinctions govern. The summaries are not new source evidence.
+
+### D. Completion decision and next action
+
+- Seven research dossiers exist; all seven remain **PARTIAL for identity lock** because no actual gallery package/GTIN crosswalk has been supplied.
+- Research summaries are useful for review but do not satisfy Gate 2 by themselves: package identity, per-field provenance, warnings, and study limitations must remain auditable.
+- Do not block routine dossier work on every unresolved study discrepancy. Record the exact reported variants and proceed with the supported facts; reserve deeper follow-up for evidence that materially changes product identity, claim meaning, safety/warnings or acceptance.
+- The next decisive action remains the already-prepared manufacturer evidence requests (ISDIN first; COSRX and Clinique next; Anua after). **REQUEST TEXT PREPARED; NOT SENT.** No outbound request is claimed.
+- Keep Issue #406 as the sole roadmap and this existing PR #411 ledger as subordinate research continuity. No new Issue/PR, code/schema/API/UI/database/test change, ProductKnowledge write, QA approval, activation or merge is included in this pass.
