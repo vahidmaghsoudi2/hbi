@@ -1,8 +1,8 @@
-# HBI — رکوردهای کاری بانک مشکلات پوستی (S01 بسته؛ S02 در حال کار ساختاری)
+# HBI — رکوردهای کاری بانک مشکلات پوستی (S01 بسته؛ S02 ثبت ساختاری؛ S03 در حال کار ساختاری)
 
 **شناسه:** HBI-SKIN-PROBLEM-BANK-WORKING-RECORDS  
 **ناوبری مرجع:** [فهرست عملیاتی](SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) ← [مرجع تجمیعی](SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md) ← همین رکوردهای کاری؛ برای مرزهای ساختاری به [نقشهٔ پیش‌نویس (DRAFT / NOT THE ACTIVE PROBLEM BANK)](SKIN_PROBLEM_SPACE_MAP_V0.1.md) مراجعه کنید.  
-**وضعیت:** **S01 STRUCTURALLY CLOSED; S02 STRUCTURAL WORK IN PROGRESS** (2026-10-22) — S01 فقط از نظر مرز/ارجاع بسته است؛ S02 فقط ثبت کاری ساختاری است؛ **هیچ مورد جدیدی Accepted پزشکی/بانک نهایی نیست**  
+**وضعیت:** **S01 STRUCTURALLY CLOSED; S02 STRUCTURAL REGISTERED; S03 STRUCTURAL WORK IN PROGRESS** (2026-10-22) — S01 فقط از نظر مرز/ارجاع بسته است؛ S02 ثبت ساختاری شده؛ S03 بستهٔ کاری ساختاری است؛ **هیچ مورد جدیدی Accepted پزشکی/بانک نهایی نیست**  
 **پوشه:** `docs/product-intake-knowledge-registry/` (فقط همین حوزه)  
 **تاریخ تأییدهای PO (مرزها):** 2026-10-20  
 **تاریخ بستن ساختاری پایلوت:** 2026-10-22  
@@ -196,7 +196,7 @@
 
 ---
 
-## S02 — Oil / Sebum / Follicular Balance (در حال کار ساختاری؛ نه Accepted)
+## S02 — Oil / Sebum / Follicular Balance (ثبت ساختاری؛ نه Accepted)
 
 ### جدول خلاصهٔ S02
 
@@ -254,6 +254,211 @@
 
 ---
 
+## S03 — Acne / Follicular / Pore Presentation (در حال کار ساختاری؛ نه Accepted)
+
+### جدول خلاصهٔ S03
+
+| ID | نام Map | نوع واحد | رابطه با Map | پذیرش | عملیاتی | UNKNOWNهای اصلی |
+|----|---------|----------|--------------|--------|----------|-----------------|
+| P08 | Acne | Problem / Clinical presentation | S03 — Mapped; parent of P09–P12; relation to P13 is Cross-Shelf only as mapped | Identified — Accepted=خیر | Undetermined | تعریف عملیاتی؛ دامنه و مرز؛ زبان مشتری؛ ایمنی/ارجاع؛ تناسب عملیاتی HBI |
+| P09 | Blackheads/open comedones | Manifestation/subtype | Child/Related to P08 — Linked; not merged | Identified+Linked — Accepted=خیر | Undetermined | تعریف عملیاتی؛ رابطهٔ دقیق subtype؛ زبان مشتری؛ ایمنی/ارجاع |
+| P10 | Whiteheads/closed comedones | Manifestation/subtype | Child/Related to P08 — Linked; not merged | Identified+Linked — Accepted=خیر | Undetermined | تعریف عملیاتی؛ رابطهٔ دقیق subtype؛ زبان مشتری؛ ایمنی/ارجاع |
+| P11 | Inflammatory acne lesions | Manifestation/subtype | Child/Related to P08 — Linked; not merged | Identified+Linked — Accepted=خیر | Undetermined | تعریف عملیاتی؛ مرز subtype؛ زبان مشتری؛ ایمنی/ارجاع |
+| P12 | Nodular/cystic acne | Severity/clinical subtype | P08 — Clinical/Severity Anchor | Identified+Linked — Accepted=خیر | Clinical-anchor only | تعریف عملیاتی؛ مرز شدت/لنگر بالینی؛ زبان مشتری؛ ایمنی/ارجاع |
+| P13 | Acne aftermath/discoloration | Sequela/post-inflammatory presentation | P08→S04 — Related/Cross-Shelf; relation recorded only, S04 not opened | Identified+Linked — Accepted=خیر | Undetermined | مرز با S04؛ تعریف دقیق؛ زبان مشتری؛ ایمنی/ارجاع |
+| P14 | Folliculitis | Clinical Condition/follicular presentation | S03 — Clinical Anchor; HBI relevance unresolved | Identified — Accepted=خیر | Clinical-anchor only | HBI relevance unresolved؛ تعریف عملیاتی؛ زبان مشتری؛ ایمنی/ارجاع |
+| P15 | Pseudofolliculitis/razor bumps | Problem/follicular presentation | S03 — Mapped | Identified — Accepted=خیر | Undetermined | تعریف عملیاتی؛ مرز با P14؛ زبان مشتری؛ ایمنی/ارجاع |
+| P16 | Sebaceous hyperplasia | Clinical Condition/lesion presentation | Map lists in S03 text block, but path is S02→S07 — Clinical Anchor; HBI relevance unresolved | Identified — Accepted=خیر | Clinical-anchor only | Map shelf/path discrepancy; HBI relevance unresolved; definition; language; safety/referral |
+
+### رکورد P08 — Acne
+
+| فیلد | محتوا |
+|------|--------|
+| ID نقشه | P08 |
+| نام کاری | آکنه / Acne |
+| تعریف عملیاتی | **UNKNOWN / نیازمند بازبینی ساختاری.** Map نام و جایگاه را ثبت می‌کند؛ تعریف عملیاتی تفصیلی در Map ارائه نشده است. |
+| داخل دامنه | Problem/Clinical presentation در S03 طبق Map V0.1 §4. |
+| خارج از دامنه | تشخیص پزشکی؛ تعریف بالینی افزوده؛ Need؛ Product؛ توصیه یا درمان. |
+| نوع واحد | Problem / Clinical presentation — **VERIFIED در Map** |
+| رابطه با نقشه | S03 — Mapped؛ والد ساختاری P09–P12 طبق Map/Boundary Register؛ رابطهٔ P13 فقط Cross-Shelf به S04 طبق Map. |
+| وضعیت تکمیل و پذیرش | **Identified** — **Accepted = خیر** |
+| وضعیت عملیاتی | **Undetermined** |
+| ایمنی / ارجاع | **UNKNOWN** — آستانهٔ اختصاصی از این Map استنتاج نمی‌شود. |
+| شواهد / منشأ | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S03 و §6 B02. |
+| زبان مشتری | **UNKNOWN** |
+| UNKNOWN / GAP | تعریف عملیاتی؛ granularity نهایی؛ زبان مشتری؛ ایمنی/ارجاع؛ تناسب عملیاتی HBI. |
+| یادداشت بازبینی | فقط ثبت ساختاری؛ Map placement ≠ medical validation ≠ Need acceptance. |
+
+### رکورد P09 — Blackheads / open comedones
+
+| فیلد | محتوا |
+|------|--------|
+| ID نقشه | P09 |
+| نام کاری | Blackheads / open comedones |
+| تعریف عملیاتی | **UNKNOWN / نیازمند بازبینی.** فقط نوع و رابطهٔ Map ثبت می‌شود. |
+| داخل دامنه | Manifestation/subtype مرتبط با P08 طبق Map. |
+| خارج از دامنه | تبدیل به Problem مستقل یا Need؛ ادغام یا حذف شناسه؛ تعریف پزشکی افزوده. |
+| نوع واحد | Manifestation/subtype — **VERIFIED در Map** |
+| رابطه با نقشه | Child/Related to P08 — **Identified+Linked**؛ مستقل‌سازی یا ادغام انجام نشده است. |
+| وضعیت تکمیل و پذیرش | **Identified+Linked** — **Accepted = خیر** |
+| وضعیت عملیاتی | **Undetermined** |
+| ایمنی / ارجاع | **UNKNOWN** |
+| شواهد / منشأ | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S03 و §6 B02. |
+| زبان مشتری | **UNKNOWN** |
+| UNKNOWN / GAP | تعریف عملیاتی؛ جزئیات رابطه با P08؛ زبان مشتری؛ ایمنی/ارجاع. |
+| یادداشت بازبینی | شناسه حفظ شده؛ Child/Related به معنای ادغام نیست. |
+
+### رکورد P10 — Whiteheads / closed comedones
+
+| فیلد | محتوا |
+|------|--------|
+| ID نقشه | P10 |
+| نام کاری | Whiteheads / closed comedones |
+| تعریف عملیاتی | **UNKNOWN / نیازمند بازبینی.** فقط نوع و رابطهٔ Map ثبت می‌شود. |
+| داخل دامنه | Manifestation/subtype مرتبط با P08 طبق Map. |
+| خارج از دامنه | تبدیل به Problem مستقل یا Need؛ ادغام یا حذف شناسه؛ تعریف پزشکی افزوده. |
+| نوع واحد | Manifestation/subtype — **VERIFIED در Map** |
+| رابطه با نقشه | Child/Related to P08 — **Identified+Linked**؛ مستقل‌سازی یا ادغام انجام نشده است. |
+| وضعیت تکمیل و پذیرش | **Identified+Linked** — **Accepted = خیر** |
+| وضعیت عملیاتی | **Undetermined** |
+| ایمنی / ارجاع | **UNKNOWN** |
+| شواهد / منشأ | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S03 و §6 B02. |
+| زبان مشتری | **UNKNOWN** |
+| UNKNOWN / GAP | تعریف عملیاتی؛ جزئیات رابطه با P08؛ زبان مشتری؛ ایمنی/ارجاع. |
+| یادداشت بازبینی | شناسه حفظ شده؛ Child/Related به معنای ادغام نیست. |
+
+### رکورد P11 — Inflammatory acne lesions
+
+| فیلد | محتوا |
+|------|--------|
+| ID نقشه | P11 |
+| نام کاری | Inflammatory acne lesions |
+| تعریف عملیاتی | **UNKNOWN / نیازمند بازبینی.** فقط نوع و رابطهٔ Map ثبت می‌شود. |
+| داخل دامنه | Manifestation/subtype مرتبط با P08 طبق Map. |
+| خارج از دامنه | تبدیل به Problem مستقل یا Need؛ ادغام یا حذف شناسه؛ تعریف پزشکی افزوده. |
+| نوع واحد | Manifestation/subtype — **VERIFIED در Map** |
+| رابطه با نقشه | Child/Related to P08 — **Identified+Linked**؛ مستقل‌سازی یا ادغام انجام نشده است. |
+| وضعیت تکمیل و پذیرش | **Identified+Linked** — **Accepted = خیر** |
+| وضعیت عملیاتی | **Undetermined** |
+| ایمنی / ارجاع | **UNKNOWN** |
+| شواهد / منشأ | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S03 و §6 B02. |
+| زبان مشتری | **UNKNOWN** |
+| UNKNOWN / GAP | تعریف عملیاتی؛ مرز دقیق subtype؛ زبان مشتری؛ ایمنی/ارجاع. |
+| یادداشت بازبینی | شناسه حفظ شده؛ Child/Related به معنای ادغام نیست. |
+
+### رکورد P12 — Nodular / cystic acne
+
+| فیلد | محتوا |
+|------|--------|
+| ID نقشه | P12 |
+| نام کاری | Nodular / cystic acne |
+| تعریف عملیاتی | **UNKNOWN / نیازمند بازبینی.** Map آن را Severity/clinical subtype و Clinical/Severity Anchor می‌نامد؛ تعریف تفصیلی افزوده نمی‌شود. |
+| داخل دامنه | Severity/clinical subtype مرتبط با P08 طبق Map. |
+| خارج از دامنه | تبدیل به Ordinary-care candidate؛ تعریف شدت پزشکی؛ Need؛ Product؛ درمان یا تشخیص. |
+| نوع واحد | Severity/clinical subtype — **VERIFIED در Map**؛ Clinical/Severity Anchor |
+| رابطه با نقشه | P08 — Clinical/Severity Anchor؛ شناسه مستقل حفظ می‌شود. |
+| وضعیت تکمیل و پذیرش | **Identified+Linked** — **Accepted = خیر** |
+| وضعیت عملیاتی | **Clinical-anchor only** |
+| ایمنی / ارجاع | **UNKNOWN** — این ثبت به‌تنهایی آستانه یا پروتکل ارجاع تعریف نمی‌کند. |
+| شواهد / منشأ | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S03 و §6 B02. |
+| زبان مشتری | **UNKNOWN** |
+| UNKNOWN / GAP | تعریف عملیاتی؛ مرز شدت؛ زبان مشتری؛ ایمنی/ارجاع؛ رابطهٔ دقیق با گیت‌های عملیاتی HBI. |
+| یادداشت بازبینی | Clinical/Severity Anchor طبق Map؛ Ordinary-care صریحاً تعیین نشده است. |
+
+### رکورد P13 — Acne aftermath / discoloration
+
+| فیلد | محتوا |
+|------|--------|
+| ID نقشه | P13 |
+| نام کاری | Acne aftermath / discoloration |
+| تعریف عملیاتی | **UNKNOWN / نیازمند بازبینی.** Map آن را Sequela/post-inflammatory presentation و Cross-Shelf معرفی می‌کند؛ تعریف افزوده نمی‌شود. |
+| داخل دامنه | ثبت رابطهٔ P08→S04 به‌عنوان Related/Cross-Shelf؛ فقط رابطه ثبت می‌شود. |
+| خارج از دامنه | بازکردن یا تکمیل S04؛ تکمیل موضوع رنگ‌دانه؛ تعریف بالینی؛ Need؛ Product. |
+| نوع واحد | Sequela/post-inflammatory presentation — **VERIFIED در Map** |
+| رابطه با نقشه | P08→S04 — Related/Cross-Shelf؛ بدون بازکردن S04. |
+| وضعیت تکمیل و پذیرش | **Identified+Linked** — **Accepted = خیر** |
+| وضعیت عملیاتی | **Undetermined** |
+| ایمنی / ارجاع | **UNKNOWN** |
+| شواهد / منشأ | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S03 و §5 Cross-Shelf Relationships. |
+| زبان مشتری | **UNKNOWN** |
+| UNKNOWN / GAP | تعریف و مرز دقیق؛ مقصد/مفهوم S04 خارج از این بسته؛ زبان مشتری؛ ایمنی/ارجاع. |
+| یادداشت بازبینی | رابطهٔ Cross-Shelf فقط ثبت شد؛ S04 شروع نشده است. |
+
+### رکورد P14 — Folliculitis
+
+| فیلد | محتوا |
+|------|--------|
+| ID نقشه | P14 |
+| نام کاری | Folliculitis |
+| تعریف عملیاتی | **UNKNOWN / نیازمند بازبینی.** Map فقط نوع و جایگاه ساختاری را تعیین می‌کند. |
+| داخل دامنه | Clinical Condition/follicular presentation؛ Clinical Anchor در S03 طبق Map. |
+| خارج از دامنه | تعریف تشخیصی افزوده؛ فرض تناسب HBI؛ Need؛ Product؛ توصیه یا درمان. |
+| نوع واحد | Clinical Condition/follicular presentation — **VERIFIED در Map**؛ Clinical Anchor |
+| رابطه با نقشه | S03 — Clinical Anchor؛ **HBI relevance unresolved**. |
+| وضعیت تکمیل و پذیرش | **Identified** — **Accepted = خیر** |
+| وضعیت عملیاتی | **Clinical-anchor only** |
+| ایمنی / ارجاع | **UNKNOWN** |
+| شواهد / منشأ | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S03. |
+| زبان مشتری | **UNKNOWN** |
+| UNKNOWN / GAP | HBI relevance unresolved؛ تعریف عملیاتی؛ زبان مشتری؛ ایمنی/ارجاع؛ شواهد اختصاصی. |
+| یادداشت بازبینی | Anchor ثبت شده؛ HBI relevance حل نشده است. |
+
+### رکورد P15 — Pseudofolliculitis / razor bumps
+
+| فیلد | محتوا |
+|------|--------|
+| ID نقشه | P15 |
+| نام کاری | Pseudofolliculitis / razor bumps |
+| تعریف عملیاتی | **UNKNOWN / نیازمند بازبینی.** Map نام و جایگاه را ثبت می‌کند؛ تعریف تفصیلی افزوده نمی‌شود. |
+| داخل دامنه | Problem/follicular presentation در S03 طبق Map. |
+| خارج از دامنه | فرض هم‌ارزی با P14؛ تعریف پزشکی افزوده؛ Need؛ Product؛ توصیه یا درمان. |
+| نوع واحد | Problem/follicular presentation — **VERIFIED در Map** |
+| رابطه با نقشه | S03 — Mapped؛ رابطهٔ صریح با P14 در Map مشخص نشده: **UNKNOWN**. |
+| وضعیت تکمیل و پذیرش | **Identified** — **Accepted = خیر** |
+| وضعیت عملیاتی | **Undetermined** |
+| ایمنی / ارجاع | **UNKNOWN** |
+| شواهد / منشأ | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S03. |
+| زبان مشتری | **UNKNOWN** |
+| UNKNOWN / GAP | تعریف عملیاتی؛ رابطه با P14؛ زبان مشتری؛ ایمنی/ارجاع؛ تناسب عملیاتی HBI. |
+| یادداشت بازبینی | مستقل از P14 نگه داشته شد؛ هیچ رابطهٔ جدیدی استنباط نشده است. |
+
+### رکورد P16 — Sebaceous hyperplasia
+
+| فیلد | محتوا |
+|------|--------|
+| ID نقشه | P16 |
+| نام کاری | Sebaceous hyperplasia |
+| تعریف عملیاتی | **UNKNOWN / نیازمند بازبینی.** Map فقط Clinical Condition/lesion presentation و جایگاه/مسیر را ثبت می‌کند. |
+| داخل دامنه | ثبت در این بسته طبق دستور PO؛ Map آن را در بلوک متنی S03 آورده، اما مسیر صریح آن **S02→S07** است. |
+| خارج از دامنه | انتقال به S03 بدون پشتوانه؛ تغییر مسیر S02→S07؛ بازکردن S02/S07؛ تعریف پزشکی؛ Need؛ Product. |
+| نوع واحد | Clinical Condition/lesion presentation — **VERIFIED در Map**؛ Clinical Anchor |
+| رابطه با نقشه | مسیر Map: **S02→S07** — Clinical Anchor؛ **HBI relevance unresolved**. قرارگیری در بلوک متنی S03 با مسیر صریح Map متفاوت است؛ تعارض/ابهام حفظ می‌شود. |
+| وضعیت تکمیل و پذیرش | **Identified** — **Accepted = خیر** |
+| وضعیت عملیاتی | **Clinical-anchor only** |
+| ایمنی / ارجاع | **UNKNOWN** |
+| شواهد / منشأ | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4، خط P16 در بلوک S03؛ مسیر صریح S02→S07. |
+| زبان مشتری | **UNKNOWN** |
+| UNKNOWN / GAP | اختلاف بلوک متنی/مسیر قفسه؛ HBI relevance unresolved؛ تعریف عملیاتی؛ زبان مشتری؛ ایمنی/ارجاع. |
+| یادداشت بازبینی | در بستهٔ اجرایی S03 ثبت شده چون دستور PO صریحاً خواسته؛ مسیر Map تغییر داده نشده و P16 به S02 بازگردانده نشده است. |
+
+### روابط خوشهٔ S03 (بدون ادغام خاموش)
+
+| ID | رابطهٔ صریح در Map | وضعیت ثبت کاری |
+|----|--------------------|-----------------|
+| P08 | S03 — Mapped; parent context for P09–P12 per Map/Boundary Register | Problem/Clinical presentation؛ والد ساختاری |
+| P09 | Child/Related to P08 | Identified+Linked؛ شناسه حفظ شده |
+| P10 | Child/Related to P08 | Identified+Linked؛ شناسه حفظ شده |
+| P11 | Child/Related to P08 | Identified+Linked؛ شناسه حفظ شده |
+| P12 | P08 — Clinical/Severity Anchor | Identified+Linked؛ Clinical-anchor only |
+| P13 | P08→S04 — Related/Cross-Shelf | فقط رابطه ثبت شد؛ S04 باز نشده |
+| P14 | S03 — Clinical Anchor/HBI relevance unresolved | Clinical-anchor only؛ relevance unresolved |
+| P15 | S03 — Mapped | رابطهٔ خاص با P14 UNKNOWN |
+| P16 | Map path S02→S07; Clinical Anchor/HBI relevance unresolved | در این بسته طبق دستور؛ مسیر Map تغییر نکرده |
+
+هیچ ادغام یا حذف شناسه انجام نشده است. روابطی که Map صریحاً مشخص نکرده، **UNKNOWN** باقی می‌مانند.
+
+---
+
 ## روابط خوشه (بدون ادغام خاموش)
 
 | ID | نقش نسبت به P01 | وضعیت |
@@ -274,9 +479,10 @@
 | P01+P02+P07+P05 | **PO-confirmed** (هیچ‌کدام Accepted نهایی نیستند) |
 | P06 | **ثبت ساختاری**؛ Identified؛ Clinical-anchor only |
 | پایلوت ساختاری S01 | **CLOSED** (ساختاری/ارجاعی — نه پزشکی)
-| قفسهٔ S02 | **در حال کار ساختاری**؛ P03/P04؛ نه Accepted |
+| قفسهٔ S02 | **ثبت ساختاری شده**؛ P03/P04؛ نه Accepted |
 | G1 / G8 | خارج از دامنهٔ این Closure |
-| S03–S10 | باز نشده‌اند؛ نیازمند دستور صریح PO |
+| قفسهٔ S03 | **در حال کار ساختاری**؛ P08–P16؛ نه Accepted |
+| S04–S10 | باز نشده‌اند؛ نیازمند دستور صریح PO |
 | Need / Product | خارج از دامنه |
 
 ---
