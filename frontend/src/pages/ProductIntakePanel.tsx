@@ -26,11 +26,11 @@ type Props = {
 
 /** Product Line V1 — operator classification only; never inferred from text/category/AI. */
 const PRODUCT_LINE_OPTIONS = [
-  { value: "SKIN", label: "پوست (SKIN)" },
-  { value: "HAIR", label: "مو (HAIR)" },
-  { value: "BEAUTY", label: "زیبایی (BEAUTY)" },
-  { value: "TOOLS", label: "ابزار (TOOLS)" },
-  { value: "OTHER", label: "عطر و ادکلن (OTHER)" },
+  { value: "SKIN", label: "پوست" },
+  { value: "HAIR", label: "مو (شامل رنگ مو)" },
+  { value: "BEAUTY", label: "زیبایی / آرایشی" },
+  { value: "TOOLS", label: "ابزار" },
+  { value: "OTHER", label: "عطر و ادکلن" },
 ] as const;
 
 type Draft = {
@@ -535,7 +535,7 @@ export default function ProductIntakePanel({
       return;
     }
     if (!editing && !draft.product_line.trim()) {
-      setErr("انتخاب لاین محصول (پوست / مو / زیبایی / ابزار / عطر و ادکلن) الزامی است.");
+      setErr("انتخاب لاین محصول (پوست / مو (شامل رنگ مو) / زیبایی / آرایشی / ابزار / عطر و ادکلن) الزامی است.");
       return;
     }
     setBusy(true);
