@@ -1,8 +1,8 @@
-# HBI — رکوردهای کاری بانک مشکلات پوستی (خوشهٔ خشکی / S01)
+# HBI — رکوردهای کاری بانک مشکلات پوستی (S01 بسته؛ S02 در حال کار ساختاری)
 
 **شناسه:** HBI-SKIN-PROBLEM-BANK-WORKING-RECORDS  
 **ناوبری مرجع:** [فهرست عملیاتی](SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) ← [مرجع تجمیعی](SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md) ← همین رکوردهای کاری؛ برای مرزهای ساختاری به [نقشهٔ پیش‌نویس (DRAFT / NOT THE ACTIVE PROBLEM BANK)](SKIN_PROBLEM_SPACE_MAP_V0.1.md) مراجعه کنید.  
-**وضعیت:** **S01 PILOT STRUCTURALLY CLOSED** (2026-10-22) — مرزها و ارجاعات بسته؛ **هیچ موردی Accepted پزشکی/بانک نهایی نیست**  
+**وضعیت:** **S01 STRUCTURALLY CLOSED; S02 STRUCTURAL WORK IN PROGRESS** (2026-10-22) — S01 فقط از نظر مرز/ارجاع بسته است؛ S02 فقط ثبت کاری ساختاری است؛ **هیچ مورد جدیدی Accepted پزشکی/بانک نهایی نیست**  
 **پوشه:** `docs/product-intake-knowledge-registry/` (فقط همین حوزه)  
 **تاریخ تأییدهای PO (مرزها):** 2026-10-20  
 **تاریخ بستن ساختاری پایلوت:** 2026-10-22  
@@ -36,7 +36,7 @@
 | G8 | **BLOCKED / NOT VERIFIED** |
 | Need extraction | شروع نشده |
 | Problem↔Product | شروع نشده |
-| S02–S10 | باز نشده تا دستور صریح PO |
+| S03–S10 | در این بسته باز نشده‌اند؛ S03 صریحاً خارج از دامنه است |
 | زبان مشتری / آستانه‌های ایمنی قطعی | عمدتاً UNKNOWN |
 
 ### قواعد قفل‌شده پس از Closure
@@ -44,7 +44,7 @@
 1. تصمیم‌های PO برای P01/P02/P05/P07 بدون مدرک جدید و تأیید صریح PO تغییر نمی‌کنند.
 2. P06 به خشکی ساده فروکاسته نمی‌شود.
 3. Map placement ≠ medical validation ≠ Accepted.
-4. shelf بعدی فقط پس از بازبینی و تأیید این PR توسط PO.
+4. S01 بستهٔ ساختاری است؛ S02 فقط پس از بازبینی و تأیید PO بسته می‌شود.
 
 ---
 
@@ -196,6 +196,64 @@
 
 ---
 
+## S02 — Oil / Sebum / Follicular Balance (در حال کار ساختاری؛ نه Accepted)
+
+### جدول خلاصهٔ S02
+
+| ID | نام Map | نوع واحد | رابطه با Map | پذیرش | عملیاتی | UNKNOWNهای اصلی |
+|----|---------|----------|--------------|--------|----------|-----------------|
+| P03 | Oily skin / Seborrhoea | Problem / presentation — VERIFIED در Map | S02 — Mapped؛ رابطهٔ اختصاصی با Pهای دیگر UNKNOWN | Identified — Accepted=خیر | Undetermined | تعریف عملیاتی؛ مرز oiliness/seborrhoea؛ روابط دیگر؛ ایمنی/ارجاع؛ زبان مشتری |
+| P04 | Combination skin | State Descriptor — VERIFIED در Map | S02 — Descriptor؛ صریحاً «نه Problem مستقل»؛ رابطهٔ بیشتر UNKNOWN | Identified — Accepted=خیر | Undetermined | تعریف توصیفی دقیق؛ نسبت با P03؛ زبان مشتری؛ ایمنی/ارجاع؛ اینکه در مدل کاری چه استفادهٔ مجازی دارد |
+
+### رکورد P03 — Oily skin / Seborrhoea
+
+| فیلد | محتوا |
+|------|--------|
+| ID نقشه | P03 |
+| نام کاری | چربی پوست / Oily skin / Seborrhoea |
+| تعریف عملیاتی | **UNKNOWN / نیازمند بازبینی ساختاری.** Map نام و جایگاه را ثبت می‌کند اما تعریف عملیاتی تفصیلی ارائه نمی‌کند. |
+| داخل دامنه | Problem/presentation در قفسهٔ S02 — Oil / Sebum / Follicular Balance، مطابق Map V0.1 §2 و §4. |
+| خارج از دامنه | تشخیص پزشکی؛ ادعای رابطه با Pهای دیگر بدون ذکر صریح Map؛ Need؛ Product؛ توصیه یا درمان. |
+| نوع واحد | Problem / presentation — **VERIFIED در Map** |
+| رابطه با نقشه | S02 — Mapped؛ رابطهٔ اختصاصی با سایر Pها در Map برای P03 ذکر نشده: **UNKNOWN** |
+| وضعیت تکمیل و پذیرش | **Identified** — **Accepted = خیر** |
+| وضعیت عملیاتی | **Undetermined** |
+| ایمنی / ارجاع | **UNKNOWN** |
+| شواهد / منشأ | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §2 (S02) و §4 (S02: P03 Oily skin/Seborrhoea — Problem/presentation — S02 — Mapped). |
+| زبان مشتری | **UNKNOWN** |
+| UNKNOWN / GAP | تعریف عملیاتی؛ مرز میان oiliness و seborrhoea؛ رابطهٔ دقیق با P04 یا سایر Pها؛ زبان مشتری؛ ایمنی/ارجاع؛ تناسب عملیاتی HBI. |
+| یادداشت بازبینی | ثبت ساختاری از Map؛ هیچ پذیرش پزشکی یا Need/‌Product استنباط نشده است. |
+
+### رکورد P04 — Combination skin
+
+| فیلد | محتوا |
+|------|--------|
+| ID نقشه | P04 |
+| نام کاری | پوست مختلط / Combination skin |
+| تعریف عملیاتی | **UNKNOWN / نیازمند بازبینی ساختاری.** Map آن را State Descriptor می‌نامد و تصریح می‌کند که به‌طور خودکار Problem مستقل نیست؛ تعریف عملیاتی دقیق ارائه نشده است. |
+| داخل دامنه | ثبت به‌عنوان State Descriptor در قفسهٔ S02، با حفظ قید «Descriptor, not independent Problem». |
+| خارج از دامنه | تبدیل خودکار به Problem مستقل؛ فرض رابطهٔ قطعی با P03؛ Need؛ Product؛ توصیه یا درمان. |
+| نوع واحد | **State Descriptor — VERIFIED در Map** |
+| رابطه با نقشه | S02 — Descriptor, not independent Problem؛ رابطهٔ صریح‌تر با P03 یا سایر Pها: **UNKNOWN** |
+| وضعیت تکمیل و پذیرش | **Identified** — **Accepted = خیر** |
+| وضعیت عملیاتی | **Undetermined** |
+| ایمنی / ارجاع | **UNKNOWN** |
+| شواهد / منشأ | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §2 (S02: Combination skin is not automatically an independent Problem) و §4 (P04 State Descriptor — S02 — Descriptor, not independent Problem). |
+| زبان مشتری | **UNKNOWN** |
+| UNKNOWN / GAP | تعریف توصیفی دقیق؛ رابطه با P03؛ زبان مشتری؛ ایمنی/ارجاع؛ اینکه آیا و چگونه این descriptor در کارکردهای بعدی مجاز است. |
+| یادداشت بازبینی | ثبت ساختاری به‌عنوان descriptor؛ به‌عنوان Problem مستقل یا Need پذیرفته نشده است. |
+
+### روابط خوشهٔ S02
+
+| ID | رابطهٔ صریح در Map | وضعیت ثبت کاری |
+|----|--------------------|-----------------|
+| P03 | S02 — Mapped | Problem/presentation؛ رابطهٔ بیشتر UNKNOWN |
+| P04 | S02 — State Descriptor؛ not independent Problem | Descriptor؛ رابطهٔ بیشتر UNKNOWN |
+
+هیچ رابطهٔ P03↔P04 به‌صورت قطعی در Map تصریح نشده؛ بنابراین ارتباط مستقیم میان آن‌ها **UNKNOWN** است. این بخش هیچ ادغام یا پیوند تازه‌ای را ایجاد نمی‌کند.
+
+---
+
 ## روابط خوشه (بدون ادغام خاموش)
 
 | ID | نقش نسبت به P01 | وضعیت |
@@ -215,9 +273,10 @@
 | قالب حداقلی | تثبیت |
 | P01+P02+P07+P05 | **PO-confirmed** (هیچ‌کدام Accepted نهایی نیستند) |
 | P06 | **ثبت ساختاری**؛ Identified؛ Clinical-anchor only |
-| پایلوت ساختاری S01 | **CLOSED** (ساختاری/ارجاعی — نه پزشکی) |
+| پایلوت ساختاری S01 | **CLOSED** (ساختاری/ارجاعی — نه پزشکی)
+| قفسهٔ S02 | **در حال کار ساختاری**؛ P03/P04؛ نه Accepted |
 | G1 / G8 | خارج از دامنهٔ این Closure |
-| سایر shelfها | باز نشوند تا بازبینی این Closure و دستور PO |
+| S03–S10 | باز نشده‌اند؛ نیازمند دستور صریح PO |
 | Need / Product | خارج از دامنه |
 
 ---

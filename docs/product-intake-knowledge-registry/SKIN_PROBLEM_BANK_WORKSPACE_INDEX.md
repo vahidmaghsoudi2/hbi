@@ -13,7 +13,10 @@
 | نقشهٔ ساختاری | [SKIN_PROBLEM_SPACE_MAP_V0.1.md](SKIN_PROBLEM_SPACE_MAP_V0.1.md) — DRAFT / NOT THE ACTIVE PROBLEM BANK |
 | G1 (فهرست ۶۲) | NOT RECOVERED — خارج از دامنهٔ پایلوت S01 |
 | G8 | BLOCKED / NOT VERIFIED |
-| shelf بعدی (S02/S03/…) | فقط پس از تأیید PO روی Closure S01 |
+| S01 | **CLOSED** ساختاری/ارجاعی — نه پذیرش پزشکی |
+| S02 | **در حال کار ساختاری** — P03/P04 در [Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md)؛ نه Accepted؛ منتظر بازبینی PO |
+| S03 | در این نوبت شروع نشده |
+
 
 ## 1. اسناد مرجع این حوزه در GitHub
 
