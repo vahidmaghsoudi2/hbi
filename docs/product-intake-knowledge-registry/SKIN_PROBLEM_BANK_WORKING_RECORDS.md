@@ -1,18 +1,54 @@
-# HBI — رکوردهای کاری بانک مشکلات پوستی (خوشهٔ خشکی)
+# HBI — رکوردهای کاری بانک مشکلات پوستی (خوشهٔ خشکی / S01)
 
 **شناسه:** HBI-SKIN-PROBLEM-BANK-WORKING-RECORDS  
 **ناوبری مرجع:** [فهرست عملیاتی](SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) ← [مرجع تجمیعی](SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md) ← همین رکوردهای کاری؛ برای مرزهای ساختاری به [نقشهٔ پیش‌نویس (DRAFT / NOT THE ACTIVE PROBLEM BANK)](SKIN_PROBLEM_SPACE_MAP_V0.1.md) مراجعه کنید.  
-**وضعیت:** WORKING / PO-CONFIRMED برای خوشهٔ S01 پایلوت (P01+P02+P07+P05)؛ P06 فقط Clinical Anchor  
+**وضعیت:** **S01 PILOT STRUCTURALLY CLOSED** (2026-10-22) — مرزها و ارجاعات بسته؛ **هیچ موردی Accepted پزشکی/بانک نهایی نیست**  
 **پوشه:** `docs/product-intake-knowledge-registry/` (فقط همین حوزه)  
-**تاریخ تأییدهای PO:** 2026-10-20  
+**تاریخ تأییدهای PO (مرزها):** 2026-10-20  
+**تاریخ بستن ساختاری پایلوت:** 2026-10-22  
 **مالک تصمیم:** مقصودی (PO)  
 **مبنای ساختاری:** `SKIN_PROBLEM_SPACE_MAP_V0.1.md` (master)  
-**مرجع ادغام:** PR #413 (merged)  
+**مراجع ادغام مرتبط:** PR #413، #414، #409 (merged)  
 **محدودیت:** این سند Problem Bank V1 نهایی، Need، Product link، یا تأیید پزشکی نیست.
 
 ---
 
-## تصمیم‌های تأییدشدهٔ PO (۲۰۲۶-۱۰-۲۰)
+## S01 Pilot Closure — بستن ساختاری (نه پذیرش پزشکی)
+
+**معنای Closure:** خوشهٔ S01 از نظر **ساختار، مرز، ارجاع و وضعیت کاری** قابل ارجاع و بسته است.  
+**معنای غیر از Closure:** پذیرش پزشکی، بانک نهایی، Need، Ordinary-care قطعی، یا مجوز توصیهٔ محصول.
+
+### جدول وضعیت نهایی پایلوت S01
+
+| ID | نام کاری | نوع واحد (Map) | رابطه | پذیرش | عملیاتی | PO |
+|----|----------|----------------|--------|--------|----------|-----|
+| P01 | Dry skin / Xerosis | Problem / Clinical presentation | Primary | Scoped — Accepted=خیر | Deferred | confirmed |
+| P02 | Dehydration / impaired moisture retention | Manifestation / related | Merge-candidate → Linked to P01 | Identified+Linked — Accepted=خیر | Undetermined | confirmed |
+| P07 | Fissuring / cracking | Manifestation | Child/Related to P01 | Identified+Linked — Accepted=خیر | Undetermined | confirmed |
+| P05 | Sensitive skin | Problem/presentation | Related مستقل هم‌قفسه | Identified/Scoped — Accepted=خیر | Undetermined | confirmed مرز |
+| P06 | Irritant dermatitis | Clinical Condition; Clinical Anchor | S01→S05؛ متمایز از P01 | Identified — Accepted=خیر | Clinical-anchor only | ثبت ساختاری |
+
+### آنچه عمداً خارج از این Closure است
+
+| موضوع | وضعیت |
+|--------|--------|
+| G1 — فهرست پذیرفته‌شدهٔ ۶۲ موردی | **NOT RECOVERED** — خارج از دامنهٔ پایلوت S01؛ بازسازی ممنوع |
+| G8 | **BLOCKED / NOT VERIFIED** |
+| Need extraction | شروع نشده |
+| Problem↔Product | شروع نشده |
+| S02–S10 | باز نشده تا دستور صریح PO |
+| زبان مشتری / آستانه‌های ایمنی قطعی | عمدتاً UNKNOWN |
+
+### قواعد قفل‌شده پس از Closure
+
+1. تصمیم‌های PO برای P01/P02/P05/P07 بدون مدرک جدید و تأیید صریح PO تغییر نمی‌کنند.
+2. P06 به خشکی ساده فروکاسته نمی‌شود.
+3. Map placement ≠ medical validation ≠ Accepted.
+4. shelf بعدی فقط پس از بازبینی و تأیید این PR توسط PO.
+
+---
+
+## تصمیم‌های تأییدشدهٔ PO (۲۰۲۶-۱۰-۲۰) — بدون تغییر
 
 1. **P01:** تعریف فعلی با برچسب «پیشنهادی» برای بازبینی ساختاری پذیرفته شد؛ **نه پذیرش نهایی** (`Accepted` نیست).
 2. **P02:** رکورد جداگانهٔ **Identified + Linked** باقی بماند؛ **ادغام یا حذف شناسه انجام نشود**.
@@ -20,8 +56,6 @@
 4. **P07:** Identified + Linked به P01؛ ادغام نشود؛ Accepted نیست.
 5. **P05:** Problem/presentation متمایز در S01؛ Related مستقل هم‌قفسه با P01؛ **ادغام با P01 ممنوع**؛ Accepted نیست؛ عملیاتی Undetermined؛ زبان مشتری و آستانهٔ ایمنی UNKNOWN مگر شاهد مخزن.
 6. **محل نگهداری:** فقط `docs/product-intake-knowledge-registry/` — بدون انتقال یا تکثیر مرجع متعارف.
-
-**گام بعدی پس از P01+P02:** P07 و P05 انجام و تأیید شد.
 
 ---
 
@@ -180,10 +214,11 @@
 |--------|--------|
 | قالب حداقلی | تثبیت |
 | P01+P02+P07+P05 | **PO-confirmed** (هیچ‌کدام Accepted نهایی نیستند) |
-| P06 | **ثبت ساختاری انجام شد** طبق Map؛ Identified؛ Accepted نیست؛ عملیاتی Clinical-anchor only |
-| پایلوت ساختاری S01 | **مرزها بسته** |
-| سایر shelfها | باز نشوند تا دستور PO |
-| Need / Product / G8 | خارج از دامنه |
+| P06 | **ثبت ساختاری**؛ Identified؛ Clinical-anchor only |
+| پایلوت ساختاری S01 | **CLOSED** (ساختاری/ارجاعی — نه پزشکی) |
+| G1 / G8 | خارج از دامنهٔ این Closure |
+| سایر shelfها | باز نشوند تا بازبینی این Closure و دستور PO |
+| Need / Product | خارج از دامنه |
 
 ---
 
