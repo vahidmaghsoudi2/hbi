@@ -17,9 +17,6 @@
 | S02 | **در حال کار ساختاری** — P03/P04 در [Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md)؛ نه Accepted؛ منتظر بازبینی PO |
 | S03 | در این نوبت شروع نشده |
 
-## وضعیت S02 — در حال کار ساختاری
-
-رکوردهای P03 و P04 فقط در [Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md) ثبت می‌شوند؛ نه Accepted، نه Need، نه Product و نه G8. S03 شروع نشده است.
 
 ## 1. اسناد مرجع این حوزه در GitHub
 
