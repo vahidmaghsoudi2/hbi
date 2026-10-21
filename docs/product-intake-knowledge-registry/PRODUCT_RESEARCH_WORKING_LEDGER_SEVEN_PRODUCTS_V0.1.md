@@ -472,3 +472,26 @@ The current seven dossiers do not yet pass a unique gallery-package identity loc
 **Validation status:** The code and regression test were committed to this existing research branch. A workflow-run lookup for the test commit returned no runs; therefore this change is **not yet reported as CI-passed**, and the test has not been represented as executed locally. Verify the PR workflow result before considering this safeguard validated.
 
 **Scope boundary:** This does not implement the full status mapping, approve a profile matrix, lock the seven physical product identities, or authorize ProductKnowledge writes for the seven research dossiers. Those remain separate gates. No schema/API/database migration or new Issue/PR was created.
+
+
+---
+
+## Pass 10 — CI validation of bounded rebuild safeguard (2026-10-21)
+
+**Validation result: PASS on the tested commit.** The three GitHub Actions workflows associated with implementation/ledger commit `a235f9d9b58798e6f29cdfaea7a5404ab2a82655` completed successfully:
+
+- HBI CI #1662: https://github.com/vahidmaghsoudi2/hbi/actions/runs/39477476595
+  - Python application/test compilation: success
+  - G8 regression bundle: success
+  - Strict-coverage test suite: success
+  - Frontend build: success
+  - Governance test suite: success
+  - Isolated pilot smoke: success
+- HBI Pilot Browser Proof #475: https://github.com/vahidmaghsoudi2/hbi/actions/runs/39477476548
+  - Real-browser proof: success
+- HBI Auto Tasks #215: https://github.com/vahidmaghsoudi2/hbi/actions/runs/39477476435
+  - PyCompile and pytest + coverage: success
+
+This validates the committed regression test and the repository checks executed by these workflows for that commit. It does **not** mean the full Product Knowledge project or status mapping is complete, and it does not prove that any of the seven researched products is a verified physical gallery item.
+
+**Current disposition:** The stale-status clearing safeguard is CI-validated. The profile/required-field acceptance matrix remains suspended pending PO approval; full `evidence_status` mapping remains unauthorized until that decision and a separate implementation authorization are recorded. P1–P7 remain PARTIAL for physical identity lock pending package photos or a reliable GTIN-to-formula/market crosswalk. PR #411 remains open and unmerged; no merge, rebase, schema/API/database migration, ProductKnowledge population for the seven dossiers, or manufacturer outreach is authorized by this pass.
