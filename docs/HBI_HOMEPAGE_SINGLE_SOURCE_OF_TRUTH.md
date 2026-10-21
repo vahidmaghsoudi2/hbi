@@ -6,7 +6,8 @@
 **Baseline:** `master @ de936cd6bf1e487fbcb4dfbed23a263f9eec6a84`  
 **Authoritative implementation:** `frontend/src/pages/NewHomePage.tsx` at route `/` (protected by AdminGate)  
 **Merged homepage integration:** [PR #363](https://github.com/vahidmaghsoudi2/hbi/pull/363), merge commit `0463044d7b49b4847b70d388766484fce5504392`  
-**Consolidation / outstanding targeted repair:** existing branch `fix/homepage-single-source-of-truth` and PR #395 are being reconciled on top of current `master`; PR #395 was closed unmerged and must be re-opened only after the branch contains a master-based, narrowly scoped commit.
+**Single active workstream:** [PR #395](https://github.com/vahidmaghsoudi2/hbi/pull/395), branch `fix/homepage-single-source-of-truth`, reconciled head `ade16a886a02a303dfc5870a9d2051bec0792e8e` (OPEN / DRAFT, not merged).  
+**Governance pointer:** [Issue #352](https://github.com/vahidmaghsoudi2/hbi/issues/352). It points here; it is not a second execution ledger. All current homepage execution status, prior-work inventory, evidence links, blockers, and next actions belong in this file and this PR only.
 
 ## 1. Non-negotiable operating rules
 
@@ -86,6 +87,23 @@ The following were inspected and their useful current decisions have been reconc
 
 GitHub issue/PR history cannot be erased without destroying audit traceability. Historical records may remain visible, but they must point to this single active document and must not be treated as competing plans.
 
+### Historical homepage work inventory (discovered and reconciled 2026-10-21)
+
+This is the index of earlier homepage-related work discovered through repository Issue/PR search. The historical GitHub records remain the audit trail; their old instructions are not current work plans. Use the completion ledger above for current status and only reopen an item for regression, changed code, new evidence, or explicit PO direction.
+
+- **Original single-page / pilot UI lineage:** PRs [#4](https://github.com/vahidmaghsoudi2/hbi/pull/4), [#8](https://github.com/vahidmaghsoudi2/hbi/pull/8), [#9](https://github.com/vahidmaghsoudi2/hbi/pull/9), [#10](https://github.com/vahidmaghsoudi2/hbi/pull/10). Historical foundations; not a reason to restore obsolete layouts.
+- **Home sales, customer reuse, pricing, FX, and frontend CI:** PRs [#132](https://github.com/vahidmaghsoudi2/hbi/pull/132), [#133](https://github.com/vahidmaghsoudi2/hbi/pull/133), [#134](https://github.com/vahidmaghsoudi2/hbi/pull/134), [#135](https://github.com/vahidmaghsoudi2/hbi/pull/135), [#136](https://github.com/vahidmaghsoudi2/hbi/pull/136), [#143](https://github.com/vahidmaghsoudi2/hbi/pull/143), [#152](https://github.com/vahidmaghsoudi2/hbi/pull/152), [#156](https://github.com/vahidmaghsoudi2/hbi/pull/156), [#176](https://github.com/vahidmaghsoudi2/hbi/pull/176), [#177](https://github.com/vahidmaghsoudi2/hbi/pull/177), [#207](https://github.com/vahidmaghsoudi2/hbi/pull/207). Historical functional changes and evidence; verify current code before relying on any old branch-level claims.
+- **Product Intake and product entry from Home:** PR [#256](https://github.com/vahidmaghsoudi2/hbi/pull/256) (Draft semantics), [#282](https://github.com/vahidmaghsoudi2/hbi/pull/282) (Product Line V1, adjacent product governance), [#361](https://github.com/vahidmaghsoudi2/hbi/pull/361) (Products menu), [#363](https://github.com/vahidmaghsoudi2/hbi/pull/363) (merged Home/Products menu and API-backed dashboard), and [#375](https://github.com/vahidmaghsoudi2/hbi/pull/375) (local-session workflow, adjacent local-launch behavior). The New Home Page entry-point handoff and its verification are recorded in Issue #352 comments; do not repeat completed menu click-through checks.
+- **Dashboard/navigation proposals superseded by merged PR #363:** [#328](https://github.com/vahidmaghsoudi2/hbi/pull/328) (public landing page is distinct from operational dashboard), [#330](https://github.com/vahidmaghsoudi2/hbi/pull/330) (sales/returns UI), [#339](https://github.com/vahidmaghsoudi2/hbi/pull/339), [#341](https://github.com/vahidmaghsoudi2/hbi/pull/341), [#343](https://github.com/vahidmaghsoudi2/hbi/pull/343) (temporary CI validation only), [#346](https://github.com/vahidmaghsoudi2/hbi/pull/346), [#347](https://github.com/vahidmaghsoudi2/hbi/pull/347), [#354](https://github.com/vahidmaghsoudi2/hbi/pull/354), [#362](https://github.com/vahidmaghsoudi2/hbi/pull/362). Treat as historical evidence or superseded proposals, not parallel active work.
+- **Approved dashboard/navigation integration:** [PR #363](https://github.com/vahidmaghsoudi2/hbi/pull/363) merged on 2026-10-16; merge commit `0463044d7b49b4847b70d388766484fce5504392`. It is the actual merged implementation baseline, not a currently active branch.
+- **Superseded direct-sale/customer requirement:** [PR #344](https://github.com/vahidmaghsoudi2/hbi/pull/344) conflicts with the approved rule that both customer and consultation are optional. Do not restore mandatory buyer-name or guest-customer creation.
+- **Stale Sales customer-search repair:** [PR #392](https://github.com/vahidmaghsoudi2/hbi/pull/392) is superseded; its targeted state-isolation repair was ported to the current-master-based PR #395. Do not continue the stale branch.
+- **Completion-ledger consolidation:** [PR #394](https://github.com/vahidmaghsoudi2/hbi/pull/394) is historical evidence for the prior completion ledger and post-PR-363 checks. Its useful records are incorporated into HP-01 through HP-04 above.
+- **Current single active integration:** [PR #395](https://github.com/vahidmaghsoudi2/hbi/pull/395) is the only active homepage integration/ledger PR. It contains the single source-of-truth file, the narrowly scoped HP-05 fix, and its regression test. Current exact-head workflow status must be read from GitHub, not inferred from older PR results.
+- **Older mission anchors:** Issues [#175](https://github.com/vahidmaghsoudi2/hbi/issues/175), [#290](https://github.com/vahidmaghsoudi2/hbi/issues/290), and this governance pointer [#352](https://github.com/vahidmaghsoudi2/hbi/issues/352) are historical/product-decision references. Do not resurrect old phase plans from their comments; current execution belongs here.
+
+**Coverage note:** this inventory captures the homepage-specific and closely coupled Home/Product Intake PRs returned by the repository searches. It does not claim that every unrelated feature PR touching a shared component is a homepage project. The actual source code on current `master` remains the authority for runtime behavior.
+
 ## 7. No-repeat execution protocol
 
 Before taking any homepage action:
@@ -96,4 +114,4 @@ Before taking any homepage action:
 5. Do not create another homepage branch, checklist, audit document, or roadmap.
 6. Do not merge or modify `master` until the exact-head checks pass and the Product Owner explicitly authorizes the merge.
 
-**Next action (2026-10-21):** the HP-05 state-isolation fix and focused regression test have been re-applied to current `master` without reverting unrelated master changes. Run the focused test and the repository's required CI/browser proof on the exact reconciled head; keep the PR Draft until checks pass. HP-07's schema/service contract is verified, with endpoint-level runtime left explicitly unclaimed. No generic menu re-audit.
+**Next action (2026-10-21):** first poll exact-head HBI CI, Auto Tasks, and Pilot Browser Proof for `ade16a886a02a303dfc5870a9d2051bec0792e8e`; inspect and repair failures in this same PR only. Then continue the already requested homepage product-entry/identification workflow: camera/photo/file/barcode input, read-only Product Master matching, and unmatched products routed to the official Product Intake lifecycle. Do not create another homepage tracker, issue, PR, branch, or ledger. Keep PR #395 Draft until exact-head checks pass and the Product Owner explicitly authorizes merge.
