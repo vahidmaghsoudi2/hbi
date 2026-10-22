@@ -117,6 +117,34 @@ def _write_valid_raw_http_artifact(evidence_dir: Path) -> Path:
     return artifact_path
 
 
+def test_evidence_root_refuses_symlink(tmp_path: Path) -> None:
+    runner = _load_runner_module()
+    temp_root = tmp_path / "temp"
+    temp_root.mkdir()
+    redirected = tmp_path / "redirected-evidence"
+    redirected.mkdir()
+    evidence_root = temp_root / "hbi-g8-pilot-evidence"
+    try:
+        evidence_root.symlink_to(redirected, target_is_directory=True)
+    except (OSError, NotImplementedError) as exc:
+        pytest.skip(f"directory symlinks are unavailable in this environment: {exc}")
+
+    with pytest.raises(RuntimeError, match="must not be a symlink"):
+        runner._ensure_safe_evidence_root(temp_root)
+    assert list(redirected.iterdir()) == []
+
+
+def test_evidence_root_is_created_inside_temp_root(tmp_path: Path) -> None:
+    runner = _load_runner_module()
+    temp_root = tmp_path / "temp"
+    temp_root.mkdir()
+
+    evidence_root = runner._ensure_safe_evidence_root(temp_root)
+
+    assert evidence_root.is_dir()
+    assert evidence_root.resolve().parent == temp_root.resolve()
+
+
 def test_successful_finalization_preserves_readback_manifest_then_allows_cleanup(tmp_path: Path) -> None:
     runner = _load_runner_module()
     session_dir, evidence_dir, db_path, api_log = _make_session(tmp_path)
