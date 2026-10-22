@@ -398,6 +398,8 @@ export default function ProductIntakePanel({
     if (key === "barcode_gtin") {
       setGtinLookupResult(null);
       setGtinLookupValue("");
+      setMsg(null);
+      setErr(null);
     }
     if (identityKeys.includes(key)) {
       clearDuplicateState();
