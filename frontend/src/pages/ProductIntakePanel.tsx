@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   checkDuplicate,
+  identifyProductByGtin,
   createProduct,
   createResearchDraft,
   getProductEvidence,
@@ -10,6 +11,7 @@ import {
 } from "../api/client";
 import type {
   DuplicateCheckResponse,
+  GtinLookupResponse,
   EvidenceDTO,
   ProductCreateRequest,
   ProductDTO,
@@ -269,6 +271,9 @@ export default function ProductIntakePanel({
   const [initialProductLine, setInitialProductLine] = useState("");
   const [busy, setBusy] = useState(false);
   const [dupBusy, setDupBusy] = useState(false);
+  const [gtinLookupBusy, setGtinLookupBusy] = useState(false);
+  const [gtinLookupResult, setGtinLookupResult] = useState<GtinLookupResponse | null>(null);
+  const [gtinLookupValue, setGtinLookupValue] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [dupResult, setDupResult] = useState<DuplicateCheckResponse | null>(null);
@@ -390,8 +395,46 @@ export default function ProductIntakePanel({
       "packaging_version",
     ];
     setDraft((prev) => ({ ...prev, [key]: value }));
+    if (key === "barcode_gtin") {
+      setGtinLookupResult(null);
+      setGtinLookupValue("");
+    }
     if (identityKeys.includes(key)) {
       clearDuplicateState();
+    }
+  }
+
+  async function runGtinLookup() {
+    setErr(null);
+    setMsg(null);
+    const gtin = draft.barcode_gtin.trim();
+    if (!gtin) {
+      setErr("ابتدا بارکد / GTIN را وارد کنید.");
+      return;
+    }
+    setGtinLookupBusy(true);
+    try {
+      const activeToken = (await onEnsureSession?.()) ?? token;
+      if (!activeToken) {
+        setErr("برای جست‌وجوی GTIN، نشست اپراتور فعال لازم است.");
+        return;
+      }
+      const result = await identifyProductByGtin(gtin, activeToken);
+      setGtinLookupResult(result);
+      setGtinLookupValue(gtin);
+      if (result.result === "MATCH" && result.product) {
+        setMsg(`این GTIN به محصول موجود «${result.product.brand} / ${result.product.product_name}» با شناسه ${result.product.product_id} متصل است. رکورد جدید نسازید؛ از محصول موجود استفاده کنید.`);
+      } else if (result.result === "NO_MATCH") {
+        setMsg("محصولی با این GTIN دقیق پیدا نشد. می‌توانید در همین مسیر رسمی Intake ادامه دهید؛ پیش از ثبت Draft، بررسی تکراری بودن همچنان الزامی است.");
+      } else {
+        setErr("GTIN نامعتبر است. فقط رقم‌های GTIN با طول مجاز وارد کنید.");
+      }
+    } catch (e) {
+      setGtinLookupResult(null);
+      setGtinLookupValue("");
+      setErr(e instanceof Error ? e.message : String(e));
+    } finally {
+      setGtinLookupBusy(false);
     }
   }
 
@@ -755,6 +798,32 @@ export default function ProductIntakePanel({
               onChange={(e) => setField("barcode_gtin", e.target.value)}
               placeholder="اختیاری"
             />
+            <button
+              type="button"
+              className="pro-btn-secondary"
+              style={{ marginTop: "0.5rem" }}
+              disabled={gtinLookupBusy || !draft.barcode_gtin.trim()}
+              onClick={() => void runGtinLookup()}
+            >
+              {gtinLookupBusy ? "در حال جست‌وجو…" : "جست‌وجوی دقیق در Product Master"}
+            </button>
+            {gtinLookupResult && gtinLookupValue === draft.barcode_gtin.trim() && (
+              <div className="pro-status-msg" role="status" aria-live="polite" style={{ marginTop: "0.5rem" }}>
+                {gtinLookupResult.result === "MATCH" && gtinLookupResult.product ? (
+                  <>
+                    <strong>محصول موجود پیدا شد</strong>
+                    <div>{gtinLookupResult.product.brand} / {gtinLookupResult.product.product_name}</div>
+                    <div>شناسه: {gtinLookupResult.product.product_id}</div>
+                    <div>وضعیت: {gtinLookupResult.product.status} · هویت: {gtinLookupResult.product.identity_status} · QA: {gtinLookupResult.product.qa_verdict}</div>
+                    <div>این جست‌وجو فقط‌خواندنی است و محصول را ایجاد یا وضعیت آن را تغییر نمی‌دهد.</div>
+                  </>
+                ) : gtinLookupResult.result === "NO_MATCH" ? (
+                  <div>تطبیق دقیق پیدا نشد. در همین فرم Intake ادامه دهید و قبل از ثبت، DuplicateCheck را اجرا کنید.</div>
+                ) : (
+                  <div>قالب GTIN نامعتبر است؛ هیچ رکوردی تغییر نکرده است.</div>
+                )}
+              </div>
+            )}
           </div>
           <div>
             <label className="pro-label">منطقه بازار</label>
