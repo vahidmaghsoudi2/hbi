@@ -1,8 +1,8 @@
-# HBI — رکوردهای کاری بانک مشکلات پوستی (S01 بسته؛ S02/S03 ثبت ساختاری؛ S04 در حال کار ساختاری)
+# HBI — رکوردهای کاری بانک مشکلات پوستی (S01 بسته؛ S02–S04 ثبت ساختاری؛ S05 در حال کار ساختاری)
 
 **شناسه:** HBI-SKIN-PROBLEM-BANK-WORKING-RECORDS  
 **ناوبری مرجع:** [فهرست عملیاتی](SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) ← [مرجع تجمیعی](SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md) ← همین رکوردهای کاری؛ برای مرزهای ساختاری به [نقشهٔ پیش‌نویس (DRAFT / NOT THE ACTIVE PROBLEM BANK)](SKIN_PROBLEM_SPACE_MAP_V0.1.md) مراجعه کنید.  
-**وضعیت:** **S01 STRUCTURALLY CLOSED; S02/S03 STRUCTURAL REGISTERED; S04 STRUCTURAL WORK IN PROGRESS** (2026-10-22) — S01 فقط از نظر مرز/ارجاع بسته است؛ S02 و S03 ثبت ساختاری شده‌اند؛ S04 بستهٔ کاری ساختاری جاری است؛ **هیچ مورد جدیدی Accepted پزشکی/بانک نهایی نیست**  
+**وضعیت:** **S01 STRUCTURALLY CLOSED; S02–S04 STRUCTURAL REGISTERED; S05 STRUCTURAL WORK IN PROGRESS** (2026-10-22) — S01 فقط از نظر مرز/ارجاع بسته است؛ S02 تا S04 ثبت ساختاری شده‌اند؛ S05 بستهٔ کاری ساختاری جاری است؛ **هیچ مورد جدیدی Accepted پزشکی/بانک نهایی نیست**  
 **پوشه:** `docs/product-intake-knowledge-registry/` (فقط همین حوزه)  
 **تاریخ تأییدهای PO (مرزها):** 2026-10-20  
 **تاریخ بستن ساختاری پایلوت:** 2026-10-22  
@@ -624,6 +624,242 @@
 هیچ رابطه‌ای فراتر از Map استنباط نشده است. P17 با P18/P19 ادغام نشده؛ P20 و P21 یکی نشده‌اند؛ P22 Context و P23 Parked باقی مانده‌اند. S09 تکمیل یا باز نشده است.
 
 
+## S05 — Redness / Inflammation / Rash (structural in progress; not Accepted)
+
+### S05 summary
+
+| ID | Map unit type | Relationship | Acceptance | Operational | Main UNKNOWN |
+|---|---|---|---|---|---|
+| P24 Persistent redness | Problem/presentation | S05 — Mapped; parent of P25/P26 only as Map | Identified — Accepted=No | Undetermined | Definition/boundary; evidence; customer language; safety |
+| P25 Flushing | Symptom/manifestation | P24/S05 — Related/Signal | Identified+Linked — Accepted=No | Undetermined | Signal meaning/threshold; definition; customer language |
+| P26 Rosacea | Clinical Condition | P24/S05 — Clinical Anchor | Identified+Linked — Accepted=No | Clinical-anchor only | HBI relevance; evidence; referral boundary |
+| P27 Eczema/Dermatitis | Clinical Condition/presentation | S05 — Clinical Anchor; parent of P28/P29 only as Map | Identified — Accepted=No | Clinical-anchor only | Family boundary; definition; evidence; customer language |
+| P28 Atopic dermatitis | Clinical Condition | P27/S05 — Clinical Anchor | Identified+Linked — Accepted=No | Clinical-anchor only | Boundary with P27; HBI relevance; evidence |
+| P29 Allergic contact dermatitis | Clinical Condition | P27/S05 — Clinical Anchor | Identified+Linked — Accepted=No | Clinical-anchor only | Boundary with P27; HBI relevance; evidence |
+| P30 Seborrhoeic dermatitis | Clinical Condition | S05↔S02 — Clinical Anchor; cross-shelf only | Identified+Linked — Accepted=No | Clinical-anchor only | Exact S02 relation/ownership; HBI relevance; evidence |
+| P31 Psoriasis | Clinical Condition | S05 — Clinical/Referral-sensitive | Identified — Accepted=No | Clinical-anchor only | Referral threshold; HBI relevance; evidence |
+| P32 Hives/Urticaria | Clinical Condition/acute presentation | S05 — Safety/Referral-sensitive | Identified — Accepted=No | Safety-referral only | Safety/referral threshold and protocol; evidence |
+| P33 Unspecified rash | Presenting Problem/unresolved manifestation | S05 — Mapped; unresolved | Identified — Accepted=No | Undetermined | Definition/boundary; relation to diagnoses; evidence |
+
+### Record P24 — Persistent redness
+
+| Field | Value |
+|---|---|
+| Map ID | P24 |
+| Working name | Persistent redness |
+| Operational definition | UNKNOWN; structural placement only, no added clinical definition. |
+| In scope | As listed in live Map §4 / S05. |
+| Out of scope | Diagnosis, treatment, Need, Product, and unsupported medical claims. |
+| Unit type | Problem/presentation — Map-listed |
+| Map relationship | S05 — Mapped; parent of P25/P26 only as Map |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Undetermined |
+| Safety / referral | UNKNOWN unless explicitly classified above in Map. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S05. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Definition/boundary; evidence; customer language; safety. |
+| Review note | Structural registration only; Map placement ≠ medical validation ≠ Accepted. |
+
+
+### Record P25 — Flushing
+
+| Field | Value |
+|---|---|
+| Map ID | P25 |
+| Working name | Flushing |
+| Operational definition | UNKNOWN; structural placement only, no added clinical definition. |
+| In scope | As listed in live Map §4 / S05. |
+| Out of scope | Diagnosis, treatment, Need, Product, and unsupported medical claims. |
+| Unit type | Symptom/manifestation — Map-listed |
+| Map relationship | P24/S05 — Related/Signal |
+| Completion / acceptance | Identified+Linked — Accepted = No |
+| Operational status | Undetermined |
+| Safety / referral | UNKNOWN unless explicitly classified above in Map. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S05. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Signal meaning/threshold; definition; customer language. |
+| Review note | Structural registration only; Map placement ≠ medical validation ≠ Accepted. |
+
+
+### Record P26 — Rosacea
+
+| Field | Value |
+|---|---|
+| Map ID | P26 |
+| Working name | Rosacea |
+| Operational definition | UNKNOWN; structural placement only, no added clinical definition. |
+| In scope | As listed in live Map §4 / S05. |
+| Out of scope | Diagnosis, treatment, Need, Product, and unsupported medical claims. |
+| Unit type | Clinical Condition — Map-listed |
+| Map relationship | P24/S05 — Clinical Anchor |
+| Completion / acceptance | Identified+Linked — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | UNKNOWN unless explicitly classified above in Map. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S05. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | HBI relevance; evidence; referral boundary. |
+| Review note | Structural registration only; Map placement ≠ medical validation ≠ Accepted. |
+
+
+### Record P27 — Eczema/Dermatitis
+
+| Field | Value |
+|---|---|
+| Map ID | P27 |
+| Working name | Eczema/Dermatitis |
+| Operational definition | UNKNOWN; structural placement only, no added clinical definition. |
+| In scope | As listed in live Map §4 / S05. |
+| Out of scope | Diagnosis, treatment, Need, Product, and unsupported medical claims. |
+| Unit type | Clinical Condition/presentation — Map-listed |
+| Map relationship | S05 — Clinical Anchor; parent of P28/P29 only as Map |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | UNKNOWN unless explicitly classified above in Map. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S05. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Family boundary; definition; evidence; customer language. |
+| Review note | Structural registration only; Map placement ≠ medical validation ≠ Accepted. |
+
+
+### Record P28 — Atopic dermatitis
+
+| Field | Value |
+|---|---|
+| Map ID | P28 |
+| Working name | Atopic dermatitis |
+| Operational definition | UNKNOWN; structural placement only, no added clinical definition. |
+| In scope | As listed in live Map §4 / S05. |
+| Out of scope | Diagnosis, treatment, Need, Product, and unsupported medical claims. |
+| Unit type | Clinical Condition — Map-listed |
+| Map relationship | P27/S05 — Clinical Anchor |
+| Completion / acceptance | Identified+Linked — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | UNKNOWN unless explicitly classified above in Map. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S05. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Boundary with P27; HBI relevance; evidence. |
+| Review note | Structural registration only; Map placement ≠ medical validation ≠ Accepted. |
+
+
+### Record P29 — Allergic contact dermatitis
+
+| Field | Value |
+|---|---|
+| Map ID | P29 |
+| Working name | Allergic contact dermatitis |
+| Operational definition | UNKNOWN; structural placement only, no added clinical definition. |
+| In scope | As listed in live Map §4 / S05. |
+| Out of scope | Diagnosis, treatment, Need, Product, and unsupported medical claims. |
+| Unit type | Clinical Condition — Map-listed |
+| Map relationship | P27/S05 — Clinical Anchor |
+| Completion / acceptance | Identified+Linked — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | UNKNOWN unless explicitly classified above in Map. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S05. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Boundary with P27; HBI relevance; evidence. |
+| Review note | Structural registration only; Map placement ≠ medical validation ≠ Accepted. |
+
+
+### Record P30 — Seborrhoeic dermatitis
+
+| Field | Value |
+|---|---|
+| Map ID | P30 |
+| Working name | Seborrhoeic dermatitis |
+| Operational definition | UNKNOWN; structural placement only, no added clinical definition. |
+| In scope | As listed in live Map §4 / S05. |
+| Out of scope | Diagnosis, treatment, Need, Product, and unsupported medical claims. |
+| Unit type | Clinical Condition — Map-listed |
+| Map relationship | S05↔S02 — Clinical Anchor; cross-shelf only |
+| Completion / acceptance | Identified+Linked — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | UNKNOWN unless explicitly classified above in Map. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S05 and §5 Cross-Shelf Relationships. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Exact S02 relation/ownership; HBI relevance; evidence. |
+| Review note | Structural registration only; Map placement ≠ medical validation ≠ Accepted. |
+
+
+### Record P31 — Psoriasis
+
+| Field | Value |
+|---|---|
+| Map ID | P31 |
+| Working name | Psoriasis |
+| Operational definition | UNKNOWN; structural placement only, no added clinical definition. |
+| In scope | As listed in live Map §4 / S05. |
+| Out of scope | Diagnosis, treatment, Need, Product, and unsupported medical claims. |
+| Unit type | Clinical Condition — Map-listed |
+| Map relationship | S05 — Clinical/Referral-sensitive |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | Referral-sensitive per Map; threshold UNKNOWN. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S05. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Referral threshold; HBI relevance; evidence. |
+| Review note | Structural registration only; Map placement ≠ medical validation ≠ Accepted. |
+
+
+### Record P32 — Hives/Urticaria
+
+| Field | Value |
+|---|---|
+| Map ID | P32 |
+| Working name | Hives/Urticaria |
+| Operational definition | UNKNOWN; structural placement only, no added clinical definition. |
+| In scope | As listed in live Map §4 / S05. |
+| Out of scope | Diagnosis, treatment, Need, Product, and unsupported medical claims. |
+| Unit type | Clinical Condition/acute presentation — Map-listed |
+| Map relationship | S05 — Safety/Referral-sensitive |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Safety/Referral-sensitive per Map; protocol/threshold UNKNOWN. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S05. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Safety/referral threshold and protocol; evidence. |
+| Review note | Structural registration only; Map placement ≠ medical validation ≠ Accepted. |
+
+
+### Record P33 — Unspecified rash
+
+| Field | Value |
+|---|---|
+| Map ID | P33 |
+| Working name | Unspecified rash |
+| Operational definition | UNKNOWN; structural placement only, no added clinical definition. |
+| In scope | As listed in live Map §4 / S05. |
+| Out of scope | Diagnosis, treatment, Need, Product, and unsupported medical claims. |
+| Unit type | Presenting Problem/unresolved manifestation — Map-listed |
+| Map relationship | S05 — Mapped; unresolved |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Undetermined |
+| Safety / referral | UNKNOWN unless explicitly classified above in Map. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S05. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Definition/boundary; relation to diagnoses; evidence. |
+| Review note | Structural registration only; Map placement ≠ medical validation ≠ Accepted. |
+
+
+### S05 relationships (no silent merging)
+
+| ID | Map relationship | Working disposition |
+|---|---|---|
+| P24 | S05 — Mapped | Problem/presentation; structural parent of P25/P26 only as mapped |
+| P25 | P24/S05 — Related/Signal | Identified+Linked; separate manifestation |
+| P26 | P24/S05 — Clinical Anchor | Identified+Linked; Clinical-anchor only |
+| P27 | S05 — Clinical Anchor | Structural parent of P28/P29 only as mapped; separate records |
+| P28 | P27/S05 — Clinical Anchor | Identified+Linked; Clinical-anchor only |
+| P29 | P27/S05 — Clinical Anchor | Identified+Linked; Clinical-anchor only |
+| P30 | S05↔S02 — Clinical Anchor | Cross-shelf reference only; S02 unchanged |
+| P31 | S05 — Clinical/Referral-sensitive | Clinical-anchor only; referral threshold UNKNOWN |
+| P32 | S05 — Safety/Referral-sensitive | Safety-referral only; protocol UNKNOWN |
+| P33 | S05 — Mapped | Unresolved presentation; no diagnosis inferred |
+| P06 | S01→S05 — Clinical Anchor | Reference only; existing S01 record not rewritten |
+
+No relation beyond the live Map is inferred. P24/P25/P26 remain separate; P27/P28/P29 remain separate; P30 does not reopen S02; P31/P32 are not Ordinary-care; P33 remains unresolved. S02 is not expanded or rewritten.
+
+
 ## روابط خوشه (بدون ادغام خاموش)
 
 | ID | نقش نسبت به P01 | وضعیت |
@@ -647,7 +883,7 @@
 | قفسهٔ S02 | **ثبت ساختاری شده**؛ P03/P04؛ نه Accepted |
 | G1 / G8 | خارج از دامنهٔ این Closure |
 | قفسهٔ S03 | **ثبت ساختاری شده**؛ P08–P16؛ نه Accepted |
-| قفسهٔ S04 | **در حال کار ساختاری**؛ P17–P23؛ نه Accepted |
+| قفسهٔ S04 | **ثبت ساختاری شده**؛ P17–P23؛ نه Accepted |
 | قفسهٔ S04 | **در حال کار ساختاری**؛ P17–P23؛ نه Accepted |
 | S05–S10 | باز نشده‌اند؛ نیازمند دستور صریح PO |
 | Need / Product | خارج از دامنه |
