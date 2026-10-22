@@ -21,7 +21,8 @@
 | S06 | **ثبت ساختاری شده** — P34–P42 در [Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md)؛ نه Accepted؛ قفسهٔ Clinical/Safety؛ P39 فقط ارجاع متقاطع S06↔S08؛ S08 باز نشده. |
 | S07 | **ثبت ساختاری شده** — P43–P47 در [Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md)؛ نه Accepted؛ P43/P44 boundary open؛ P46/P47 فقط ارجاع S07↔S08؛ P16 فقط ارجاع S02→S07. |
 | S08 | **ثبت ساختاری شده** — P48–P50 و P53–P56؛ خوشهٔ Safety/Referral طبق Map §6 B06؛ نه Accepted و نه Ordinary-care؛ P39/P46/P47 فقط ارجاع متقاطع؛ P51/P52 در S09 می‌مانند. |
-| S09 | **در حال کار ساختاری** — P51 (Context؛ locked disposition؛ NOT ACCEPTED / NOT ELIGIBLE for V1 Need / no automatic safety flag) و P52 (Clinical/Safety-sensitive؛ S09↔S08)؛ P22 فقط ارجاع S09↔S04 به رکورد موجود؛ نه Accepted/Need/Product. |
+| S09 | **ثبت ساختاری شده** — P51 (Context؛ locked disposition؛ NOT ACCEPTED / NOT ELIGIBLE for V1 Need / no automatic safety flag) و P52 (Clinical/Safety-sensitive؛ S09↔S08)؛ P22 فقط ارجاع S09↔S04 به رکورد موجود؛ نه Accepted/Need/Product. |
+| S10 | **ثبت ساختاری شده** — P57–P61 طبق Map زنده؛ Clinical/Referral-sensitive، Clinical Anchor و Context؛ نه Accepted/Need/Product. |
 
 
 ## 1. اسناد مرجع این حوزه در GitHub
@@ -92,4 +93,13 @@
 - [ ] G1 با بازیابی artifact اصلی یا ماندن پارک‌شدهٔ رسمی.
 - [ ] انتخاب shelf بعدی فقط با دستور PO پس از بازبینی Closure.
 
-**وضعیت ناوبری:** کنترل‌های مرجع روی master فعال‌اند؛ S01 ساختاری بسته، S02 تا S08 ثبت ساختاری شده‌اند و S09 در حال کار ساختاری است. S10 باز نشده است. G1 همچنان `NOT RECOVERED` و G8 همچنان `BLOCKED / NOT VERIFIED` هستند.
+**وضعیت ناوبری:** کنترل‌های مرجع روی master فعال‌اند؛ S01 ساختاری بسته و S02 تا S10 ثبت ساختاری شده‌اند. عبور ساختاری Map از S01 تا S10 کامل شد؛ Accepted/Need/Product شروع نشده است. G1 همچنان `NOT RECOVERED` و G8 همچنان `BLOCKED / NOT VERIFIED` هستند.
+
+
+## S10 — آخرین قفسهٔ Map
+
+- **وضعیت:** ثبت ساختاری شده؛ P57–P61 مطابق شناسه‌ها و برچسب‌های Map زنده در Working Records ثبت شده‌اند؛ هیچ‌کدام Accepted یا Need نیستند.
+- **مرز:** Clinical/Referral-sensitive و Clinical Anchor فقط نقش ساختاری‌اند؛ Ordinary-care یا Product استنتاج نشده است. P61 رابطهٔ S09↔S10 را صرفاً طبق Map حفظ می‌کند.
+- **محدودیت:** G1 = NOT RECOVERED؛ G8 = BLOCKED / NOT VERIFIED. Draftهای #304/#412/#416 مرجع SSOT نیستند.
+
+**عبور ساختاری Map از S01 تا S10 کامل شد؛ Accepted/Need/Product شروع نشده است.** این عبارت فقط تکمیل ثبت ساختاری قفسه‌ها را اعلام می‌کند، نه پذیرش پزشکی یا تکمیل بانک نهایی.
