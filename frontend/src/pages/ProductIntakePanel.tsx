@@ -799,6 +799,7 @@ export default function ProductIntakePanel({
               value={draft.barcode_gtin}
               onChange={(e) => setField("barcode_gtin", e.target.value)}
               placeholder="اختیاری"
+              disabled={gtinLookupBusy}
             />
             <button
               type="button"
