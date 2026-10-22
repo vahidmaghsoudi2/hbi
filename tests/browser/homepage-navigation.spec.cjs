@@ -440,6 +440,7 @@ test("Product Intake performs read-only exact GTIN lookup and keeps unmatched it
   await expect(page.getByText(/جست‌وجو فقط‌خواندنی است/)).toBeVisible();
 
   await gtinInput.fill("0000000000000");
+  await expect(page.getByText(/این GTIN به محصول موجود/)).toHaveCount(0);
   await page.getByRole("button", { name: "جست‌وجوی دقیق در Product Master" }).click();
   await expect(page.getByText(/تطبیق دقیق پیدا نشد/)).toBeVisible();
   await expect(page.getByRole("button", { name: "بررسی تکراری بودن" })).toBeVisible();
