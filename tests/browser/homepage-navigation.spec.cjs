@@ -375,6 +375,82 @@ test("Product menu has one canonical list plus intake and QA actions", async ({ 
   await expect(page.getByRole("heading", { name: "مدیریت محصولات", exact: true })).toBeVisible();
 });
 
+test("Product Intake performs read-only exact GTIN lookup and keeps unmatched items in Intake", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-gtin-lookup-test-token");
+    sessionStorage.setItem("hbi_operator_access_token", "homepage-gtin-lookup-operator-token");
+  });
+
+  const lookupCalls = [];
+  const mutationCalls = [];
+  await page.route("**/products/by-gtin/**", async (route) => {
+    const gtin = decodeURIComponent(route.request().url().split("/products/by-gtin/")[1] || "");
+    lookupCalls.push({ method: route.request().method(), gtin });
+    if (gtin === "0123456789012") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          result: "MATCH",
+          reason: "EXACT_MATCH",
+          product: {
+            product_id: "PROD-GTIN-EXISTING",
+            brand: "Test Brand",
+            product_name: "Existing Sunscreen",
+            variant: null,
+            size_value: 50,
+            size_unit: "ml",
+            barcode_gtin: "0123456789012",
+            product_line: "SKINCARE",
+            status: "ACTIVE",
+            identity_status: "VERIFIED",
+            qa_verdict: "PASS"
+          }
+        })
+      });
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        result: "NO_MATCH",
+        reason: "GTIN_NOT_FOUND",
+        product: null,
+        intake_hint: "OFFICIAL_PRODUCT_INTAKE"
+      })
+    });
+  });
+  page.on("request", request => {
+    if (request.method() !== "GET" && /\/products(?:\/|\?|$)/.test(new URL(request.url()).pathname)) {
+      mutationCalls.push({ method: request.method(), url: request.url() });
+    }
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "ورود به مدیریت محصولات" }).click();
+  await page.getByRole("button", { name: "ورود و ویرایش محصول" }).click();
+
+  const gtinInput = page.getByText("بارکد / GTIN", { exact: true }).locator("..").locator("input");
+  await expect(gtinInput).toBeVisible();
+  await gtinInput.fill("0123456789012");
+  await page.getByRole("button", { name: "جست‌وجوی دقیق در Product Master" }).click();
+  await expect(page.getByText("محصول موجود پیدا شد", { exact: true })).toBeVisible();
+  await expect(page.getByText("PROD-GTIN-EXISTING", { exact: true })).toBeVisible();
+  await expect(page.getByText(/جست‌وجو فقط‌خواندنی است/)).toBeVisible();
+
+  await gtinInput.fill("0000000000000");
+  await page.getByRole("button", { name: "جست‌وجوی دقیق در Product Master" }).click();
+  await expect(page.getByText(/تطبیق دقیق پیدا نشد/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "بررسی تکراری بودن" })).toBeVisible();
+
+  expect(lookupCalls).toEqual([
+    { method: "GET", gtin: "0123456789012" },
+    { method: "GET", gtin: "0000000000000" }
+  ]);
+  expect(mutationCalls).toEqual([]);
+});
+
 test("Obsolete standalone catalog URL redirects to the homepage", async ({ page }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-obsolete-catalog-route-test-token");
