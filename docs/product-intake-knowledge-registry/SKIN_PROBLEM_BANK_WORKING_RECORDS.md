@@ -1,8 +1,8 @@
-# HBI — رکوردهای کاری بانک مشکلات پوستی (S01 بسته؛ S02–S06 ثبت ساختاری؛ S07 در حال کار ساختاری)
+# HBI — رکوردهای کاری بانک مشکلات پوستی (S01 بسته؛ S02–S07 ثبت ساختاری؛ S08 در حال کار ساختاری)
 
 **شناسه:** HBI-SKIN-PROBLEM-BANK-WORKING-RECORDS  
 **ناوبری مرجع:** [فهرست عملیاتی](SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) ← [مرجع تجمیعی](SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md) ← همین رکوردهای کاری؛ برای مرزهای ساختاری به [نقشهٔ پیش‌نویس (DRAFT / NOT THE ACTIVE PROBLEM BANK)](SKIN_PROBLEM_SPACE_MAP_V0.1.md) مراجعه کنید.  
-**وضعیت:** **S01 STRUCTURALLY CLOSED; S02–S06 STRUCTURAL REGISTERED; S07 STRUCTURAL WORK IN PROGRESS** (2026-10-22) — S01 فقط از نظر مرز/ارجاع بسته است؛ S02 تا S06 ثبت ساختاری شده‌اند؛ S07 بستهٔ کاری ساختاری جاری است؛ **هیچ مورد جدیدی Accepted پزشکی/بانک نهایی نیست**  
+**وضعیت:** **S01 STRUCTURALLY CLOSED; S02–S07 STRUCTURAL REGISTERED; S08 STRUCTURAL WORK IN PROGRESS** (2026-10-22) — S01 فقط از نظر مرز/ارجاع بسته است؛ S02 تا S07 ثبت ساختاری شده‌اند؛ S08 بستهٔ کاری ساختاری جاری است؛ **هیچ مورد جدیدی Accepted پزشکی/بانک نهایی نیست**  
 **پوشه:** `docs/product-intake-knowledge-registry/` (فقط همین حوزه)  
 **تاریخ تأییدهای PO (مرزها):** 2026-10-20  
 **تاریخ بستن ساختاری پایلوت:** 2026-10-22  
@@ -1186,7 +1186,174 @@ No relationship beyond the live Map is inferred. Presence in S06 does not imply 
 | P47 | S07↔S08 — Clinical Anchor | Identified+Linked; cross-shelf reference only; S08 unchanged |
 | P16 | S02→S07 — Clinical Anchor/HBI relevance unresolved | Reference-only from prior S03 record; do not rewrite P16 or reopen S02/S03 |
 
-No relationship beyond the live Map is inferred. “Diagnostic lesions are not converted into Ordinary Care Needs.” No S07 record is Accepted or assigned Ordinary-care suitability. P46/P47 record only the explicit S07↔S08 reference; S08 is not opened or completed.
+No relationship beyond the live Map is inferred. “Diagnostic lesions are not converted into Ordinary Care Needs.” No S07 record is Accepted or assigned Ordinary-care suitability. P46/P47 record only the explicit S07↔S08 reference; S08 is now structurally registered in the package below.
+
+## S08 — Lesions / Growths / Change (structural in progress; not Accepted)
+
+**Scope:** S08 items explicitly listed in the live Map §4 only. Safety-oriented cluster under Map §6 B06; not an Ordinary Care cluster. No diagnosis, treatment, Need, or Product inference.
+
+### S08 summary
+
+| ID | Working name | Map type | Map relationship | Acceptance | Operational status | UNKNOWN / GAP |
+|---|---|---|---|---|---|---|
+| P48 | Moles / nevi | Lesion / clinical anchor | S08 — Safety-aware Clinical Anchor | Identified — Accepted = No | Clinical-anchor only | Operational boundary, evidence, customer language, and any further relationship UNKNOWN |
+| P49 | Changing mole | Safety / Referral Signal | Child/Related to P48; P48/S08 | Identified+Linked — Accepted = No | Safety-referral only | Exact signal boundary, evidence, customer language, and any thresholds UNKNOWN |
+| P50 | New/growing skin lesion | Safety / Referral Signal | S08 | Identified — Accepted = No | Safety-referral only | Exact signal boundary, evidence, customer language, and any thresholds UNKNOWN |
+| P53 | Suspicious skin-cancer lesion | Safety / Referral Signal | S08 | Identified — Accepted = No | Safety-referral only | Exact signal boundary, evidence, customer language, and any thresholds UNKNOWN |
+| P54 | Suspicious melanoma lesion | Safety / Referral Signal | S08 | Identified — Accepted = No | Safety-referral only | Exact signal boundary, evidence, customer language, and any thresholds UNKNOWN |
+| P55 | Bleeding / non-healing lesion | Safety / Referral Signal | S08 | Identified — Accepted = No | Safety-referral only | Exact signal boundary, evidence, customer language, and any thresholds UNKNOWN |
+| P56 | Rapid change in lesion size / shape / color | Safety / Referral Signal | S08 | Identified — Accepted = No | Safety-referral only | Exact signal boundary, evidence, customer language, and any thresholds UNKNOWN |
+
+### Record P48 — Moles / nevi
+
+| Field | Value |
+|---|---|
+| Map ID | P48 |
+| Working name | Moles / nevi |
+| Operational definition | UNKNOWN; structural lesion/clinical-anchor placement only. |
+| In scope | S08 Safety-aware Clinical Anchor, as explicitly mapped. |
+| Out of scope | Diagnosis, treatment, Need, Product, acceptance, or Ordinary-care suitability. |
+| Unit type | Lesion / clinical anchor — Map-listed |
+| Map relationship | S08 — Safety-aware Clinical Anchor |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | Safety-aware anchor per Map; not converted into an individual Safety/Referral Signal by inference. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §3, §4 S08, and §6 B06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Evidence, operational boundary, customer language, and any further relationship remain UNKNOWN. |
+| Review note | Safety-oriented cluster; not an Ordinary Care cluster. No clinical conclusion or treatment is inferred. |
+
+### Record P49 — Changing mole
+
+| Field | Value |
+|---|---|
+| Map ID | P49 |
+| Working name | Changing mole |
+| Operational definition | UNKNOWN; Map-listed Safety/Referral Signal only. |
+| In scope | Child/Related safety signal to P48 within S08. |
+| Out of scope | Diagnosis, risk threshold, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Safety / Referral Signal — Map-listed |
+| Map relationship | P48/S08 — Child/Related; Safety/Referral |
+| Completion / acceptance | Identified+Linked — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Safety/Referral Signal per Map; no threshold or clinical interpretation added. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S08 and §6 B06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Exact signal boundary, evidence, customer language, and any thresholds remain UNKNOWN. |
+| Review note | Not an Ordinary-care candidate; no diagnosis or treatment inferred. |
+
+### Record P50 — New/growing skin lesion
+
+| Field | Value |
+|---|---|
+| Map ID | P50 |
+| Working name | New/growing skin lesion |
+| Operational definition | UNKNOWN; Map-listed Safety/Referral Signal only. |
+| In scope | S08 Safety/Referral Signal. |
+| Out of scope | Diagnosis, risk threshold, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Safety / Referral Signal — Map-listed |
+| Map relationship | S08 — Safety/Referral |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Safety/Referral Signal per Map; no threshold or clinical interpretation added. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S08 and §6 B06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Exact signal boundary, evidence, customer language, and any thresholds remain UNKNOWN. |
+| Review note | Not an Ordinary-care candidate; no diagnosis or treatment inferred. |
+
+### Record P53 — Suspicious skin-cancer lesion
+
+| Field | Value |
+|---|---|
+| Map ID | P53 |
+| Working name | Suspicious skin-cancer lesion |
+| Operational definition | UNKNOWN; Map-listed Safety/Referral Signal only. |
+| In scope | S08 Safety/Referral Signal. |
+| Out of scope | Cancer diagnosis, risk threshold, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Safety / Referral Signal — Map-listed |
+| Map relationship | S08 — Safety/Referral |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Safety/Referral Signal per Map; no diagnosis or threshold added. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S08 and §6 B06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Exact signal boundary, evidence, customer language, and any thresholds remain UNKNOWN. |
+| Review note | No cancer diagnosis or treatment conclusion is inferred; not an Ordinary-care candidate. |
+
+### Record P54 — Suspicious melanoma lesion
+
+| Field | Value |
+|---|---|
+| Map ID | P54 |
+| Working name | Suspicious melanoma lesion |
+| Operational definition | UNKNOWN; Map-listed Safety/Referral Signal only. |
+| In scope | S08 Safety/Referral Signal. |
+| Out of scope | Melanoma diagnosis, risk threshold, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Safety / Referral Signal — Map-listed |
+| Map relationship | S08 — Safety/Referral |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Safety/Referral Signal per Map; no diagnosis or threshold added. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S08 and §6 B06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Exact signal boundary, evidence, customer language, and any thresholds remain UNKNOWN. |
+| Review note | No melanoma diagnosis or treatment conclusion is inferred; not an Ordinary-care candidate. |
+
+### Record P55 — Bleeding / non-healing lesion
+
+| Field | Value |
+|---|---|
+| Map ID | P55 |
+| Working name | Bleeding / non-healing lesion |
+| Operational definition | UNKNOWN; Map-listed Safety/Referral Signal only. |
+| In scope | S08 Safety/Referral Signal. |
+| Out of scope | Diagnosis, risk threshold, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Safety / Referral Signal — Map-listed |
+| Map relationship | S08 — Safety/Referral |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Safety/Referral Signal per Map; no threshold or clinical interpretation added. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S08 and §6 B06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Exact signal boundary, evidence, customer language, and any thresholds remain UNKNOWN. |
+| Review note | Not an Ordinary-care candidate; no diagnosis or treatment inferred. |
+
+### Record P56 — Rapid change in lesion size / shape / color
+
+| Field | Value |
+|---|---|
+| Map ID | P56 |
+| Working name | Rapid change in lesion size / shape / color |
+| Operational definition | UNKNOWN; Map-listed Safety/Referral Signal only. |
+| In scope | S08 Safety/Referral Signal. |
+| Out of scope | Diagnosis, risk threshold, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Safety / Referral Signal — Map-listed |
+| Map relationship | S08 — Safety/Referral |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Safety/Referral Signal per Map; no threshold or clinical interpretation added. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S08 and §6 B06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Exact signal boundary, evidence, customer language, and any thresholds remain UNKNOWN. |
+| Review note | Not an Ordinary-care candidate; no diagnosis or treatment inferred. |
+
+### S08 relationships (Anchor / Safety Signal / Cross-Shelf; no silent merging)
+
+| ID | Relationship class | Map relationship | Working disposition |
+|---|---|---|---|
+| P48 | Anchor | S08 — Safety-aware Clinical Anchor | Identified; Clinical-anchor only; Accepted = No |
+| P49 | Safety Signal | Child/Related to P48; P48/S08 | Identified+Linked; Safety-referral only; Accepted = No |
+| P50 | Safety Signal | S08 | Identified; Safety-referral only; Accepted = No |
+| P53 | Safety Signal | S08 | Identified; Safety-referral only; Accepted = No |
+| P54 | Safety Signal | S08 | Identified; Safety-referral only; Accepted = No |
+| P55 | Safety Signal | S08 | Identified; Safety-referral only; Accepted = No |
+| P56 | Safety Signal | S08 | Identified; Safety-referral only; Accepted = No |
+| P39 | Cross-Shelf | S06↔S08 — Clinical Anchor | Reference-only; existing P39 record unchanged |
+| P46 | Cross-Shelf | S07↔S08 — Clinical Anchor | Reference-only; existing P46 record unchanged |
+| P47 | Cross-Shelf | S07↔S08 — Clinical Anchor | Reference-only; existing P47 record unchanged |
+| P51/P52 | Out of S08 scope | Map §4 places both under S09 | Not added to S08; no S09 shelf opened |
+
+Map §6 B06 explicitly defines this as a Safety-oriented cluster, not an Ordinary Care cluster. No S08 record is Accepted or an Ordinary-care candidate. P39/P46/P47 are reference-only; their existing records are not rewritten. P51/P52 remain under S09 per the live Map. No S09/S10 work is opened.
 
 ## روابط خوشه (بدون ادغام خاموش)
 
@@ -1213,7 +1380,7 @@ No relationship beyond the live Map is inferred. “Diagnostic lesions are not c
 | قفسهٔ S03 | **ثبت ساختاری شده**؛ P08–P16؛ نه Accepted |
 | قفسهٔ S04 | **ثبت ساختاری شده**؛ P17–P23؛ نه Accepted |
 | قفسهٔ S04 | **ثبت ساختاری شده**؛ P17–P23؛ نه Accepted |
-| S06 | **ثبت ساختاری شده**؛ P24–P42 در بسته‌های S05/S06؛ نه Accepted |\n| S07 | **در حال کار ساختاری**؛ P43–P47؛ نه Accepted |\n| S08 به بعد | باز نشده‌اند؛ نیازمند دستور صریح PO |
+| S06 | **ثبت ساختاری شده**؛ P24–P42 در بسته‌های S05/S06؛ نه Accepted |\n| S07 | **ثبت ساختاری شده**؛ P43–P47؛ نه Accepted |\n| S08 | **در حال کار ساختاری**؛ P48–P50 و P53–P56؛ خوشهٔ Safety/Referral؛ نه Accepted |\n| S09–S10 | باز نشده‌اند؛ خارج از این بسته |
 | Need / Product | خارج از دامنه |
 
 ---
