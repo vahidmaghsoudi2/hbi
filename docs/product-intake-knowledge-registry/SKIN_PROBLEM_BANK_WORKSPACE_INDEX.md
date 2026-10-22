@@ -16,7 +16,8 @@
 | S01 | **CLOSED** ساختاری/ارجاعی — نه پذیرش پزشکی |
 | S02 | **در حال کار ساختاری** — P03/P04 در [Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md)؛ نه Accepted؛ منتظر بازبینی PO |
 | S03 | **ثبت ساختاری شده** — P08–P16 در [Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md)؛ نه Accepted؛ P13 فقط رابطهٔ Cross-Shelf به S04؛ P16 با مسیر Map برابر S02→S07 و ابهام ثبت‌شده. |
-| S04 | **در حال کار ساختاری** — P17–P23 در [Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md)؛ نه Accepted؛ P22 Context با ارجاع به S09؛ P23 Parked/Evidence Boundary با مرز S04↔S09؛ S09 باز نشده. |
+| S04 | **ثبت ساختاری شده** — P17–P23 در [Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md)؛ نه Accepted؛ P22 Context با ارجاع به S09؛ P23 Parked/Evidence Boundary با مرز S04↔S09؛ S09 باز نشده. |
+| S05 | **در حال کار ساختاری** — P24–P33 در [Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md)؛ نه Accepted؛ P06 فقط ارجاع S01→S05؛ P30 رابطهٔ S05↔S02 بدون بازنویسی S02؛ P31/P32 مرزهای Clinical/Referral/Safety را حفظ می‌کنند. |
 
 
 ## 1. اسناد مرجع این حوزه در GitHub
@@ -87,4 +88,4 @@
 - [ ] G1 با بازیابی artifact اصلی یا ماندن پارک‌شدهٔ رسمی.
 - [ ] انتخاب shelf بعدی فقط با دستور PO پس از بازبینی Closure.
 
-**وضعیت ناوبری:** کنترل‌های مرجع روی master فعال‌اند؛ S01 ساختاری بسته، S02 و S03 ثبت ساختاری شده‌اند و S04 در حال کار ساختاری است. G1 و G8 همچنان `NOT RECOVERED` و `BLOCKED / NOT VERIFIED` هستند.
+**وضعیت ناوبری:** کنترل‌های مرجع روی master فعال‌اند؛ S01 ساختاری بسته، S02 تا S04 ثبت ساختاری شده‌اند و S05 در حال کار ساختاری است. G1 و G8 همچنان `NOT RECOVERED` و `BLOCKED / NOT VERIFIED` هستند.
