@@ -25,6 +25,7 @@ import type {
   MutationLogDTO,
   DuplicateCheckRequest,
   DuplicateCheckResponse,
+  GtinLookupResponse,
   DuplicateCheckOperatorDecisionRequest,
   DuplicateCheckOperatorDecisionResponse,
   ResearchAssertionRequest,
