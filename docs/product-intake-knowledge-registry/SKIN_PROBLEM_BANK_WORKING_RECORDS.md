@@ -1380,7 +1380,10 @@ Map §6 B06 explicitly defines this as a Safety-oriented cluster, not an Ordinar
 | قفسهٔ S03 | **ثبت ساختاری شده**؛ P08–P16؛ نه Accepted |
 | قفسهٔ S04 | **ثبت ساختاری شده**؛ P17–P23؛ نه Accepted |
 | قفسهٔ S04 | **ثبت ساختاری شده**؛ P17–P23؛ نه Accepted |
-| S06 | **ثبت ساختاری شده**؛ P24–P42 در بسته‌های S05/S06؛ نه Accepted |\n| S07 | **ثبت ساختاری شده**؛ P43–P47؛ نه Accepted |\n| S08 | **در حال کار ساختاری**؛ P48–P50 و P53–P56؛ خوشهٔ Safety/Referral؛ نه Accepted |\n| S09–S10 | باز نشده‌اند؛ خارج از این بسته |
+| S06 | **ثبت ساختاری شده**؛ P24–P42 در بسته‌های S05/S06؛ نه Accepted |
+| S07 | **ثبت ساختاری شده**؛ P43–P47؛ نه Accepted |
+| S08 | **در حال کار ساختاری**؛ P48–P50 و P53–P56؛ خوشهٔ Safety/Referral؛ نه Accepted |
+| S09–S10 | باز نشده‌اند؛ خارج از این بسته |
 | Need / Product | خارج از دامنه |
 
 ---
