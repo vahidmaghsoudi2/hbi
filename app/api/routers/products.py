@@ -99,6 +99,22 @@ async def list_sellable_products(
     ]
 
 
+@router.get("/by-gtin/{gtin}")
+async def identify_product_by_gtin(
+    gtin: str,
+    db: Session = Depends(get_db),
+    auth=Depends(require_any_role(ROLE_EDITOR, ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
+):
+    """WP-1 read-only exact GTIN lookup in Product Master.
+
+    Unique match returns product summary. Unknown/invalid does not create a
+    product, change QA/lifecycle, or mutate inventory. Unknown codes are
+    intended to be routed to official Product Intake by the client.
+    """
+    _subject_id, _roles = auth  # auth gate only; lookup is not actor-mutating
+    return ProductService(db).identify_by_gtin(gtin)
+
+
 @router.get("/{product_id}")
 async def get_product(product_id: str, db: Session = Depends(get_db)):
     product = ProductFacade(db).get_by_id(product_id)
