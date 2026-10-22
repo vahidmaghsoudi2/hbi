@@ -1,8 +1,8 @@
-# HBI — رکوردهای کاری بانک مشکلات پوستی (S01 بسته؛ S02–S05 ثبت ساختاری؛ S06 در حال کار ساختاری)
+# HBI — رکوردهای کاری بانک مشکلات پوستی (S01 بسته؛ S02–S06 ثبت ساختاری؛ S07 در حال کار ساختاری)
 
 **شناسه:** HBI-SKIN-PROBLEM-BANK-WORKING-RECORDS  
 **ناوبری مرجع:** [فهرست عملیاتی](SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) ← [مرجع تجمیعی](SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md) ← همین رکوردهای کاری؛ برای مرزهای ساختاری به [نقشهٔ پیش‌نویس (DRAFT / NOT THE ACTIVE PROBLEM BANK)](SKIN_PROBLEM_SPACE_MAP_V0.1.md) مراجعه کنید.  
-**وضعیت:** **S01 STRUCTURALLY CLOSED; S02–S05 STRUCTURAL REGISTERED; S06 STRUCTURAL WORK IN PROGRESS** (2026-10-22) — S01 فقط از نظر مرز/ارجاع بسته است؛ S02 تا S05 ثبت ساختاری شده‌اند؛ S06 بستهٔ کاری ساختاری جاری است؛ **هیچ مورد جدیدی Accepted پزشکی/بانک نهایی نیست**  
+**وضعیت:** **S01 STRUCTURALLY CLOSED; S02–S06 STRUCTURAL REGISTERED; S07 STRUCTURAL WORK IN PROGRESS** (2026-10-22) — S01 فقط از نظر مرز/ارجاع بسته است؛ S02 تا S06 ثبت ساختاری شده‌اند؛ S07 بستهٔ کاری ساختاری جاری است؛ **هیچ مورد جدیدی Accepted پزشکی/بانک نهایی نیست**  
 **پوشه:** `docs/product-intake-knowledge-registry/` (فقط همین حوزه)  
 **تاریخ تأییدهای PO (مرزها):** 2026-10-20  
 **تاریخ بستن ساختاری پایلوت:** 2026-10-22  
@@ -1066,6 +1066,128 @@ No relation beyond the live Map is inferred. P24/P25/P26 remain separate; P27/P2
 No relationship beyond the live Map is inferred. Presence in S06 does not imply Ordinary Care suitability. P35 remains distinct from P34; P40 from P36; P38 from P37. P39 records only the S06↔S08 relationship; S08 is not opened or completed.
 
 
+## S07 — Texture / Keratinization / Surface Growth (structural in progress; not Accepted)
+
+**Map boundary:** Map §3 states: “Diagnostic lesions are not converted into Ordinary Care Needs.” P43 has an open boundary; P44 has a clinical/structural boundary open. P46/P47 retain only the Map's S07↔S08 cross-shelf reference. Presence in S07 does not establish Ordinary-care suitability.
+
+### S07 summary
+
+| ID | Map unit type | Relationship | Acceptance | Operational | Main UNKNOWN |
+|---|---|---|---|---|---|
+| P43 | Problem/presentation | S07 — Mapped; boundary open | Identified — Accepted=No | Undetermined | Boundary, evidence, customer language, HBI operational relevance |
+| P44 | Clinical/structural presentation | S07 — Clinical Anchor; boundary open | Identified — Accepted=No | Clinical-anchor only | Clinical/structural boundary, evidence, customer language |
+| P45 | Clinical Condition/presentation | S07 — Clinical Anchor | Identified — Accepted=No | Clinical-anchor only | Operational boundary, evidence, customer language |
+| P46 | Clinical Condition/lesion | S07↔S08 — Clinical Anchor; cross-shelf only | Identified+Linked — Accepted=No | Clinical-anchor only | S08 relationship/ownership, evidence, customer language |
+| P47 | Lesion/benign growth presentation | S07↔S08 — Clinical Anchor; cross-shelf only | Identified+Linked — Accepted=No | Clinical-anchor only | S08 relationship/ownership, evidence, customer language |
+
+### Record P43 — Uneven skin texture
+
+| Field | Value |
+|---|---|
+| Map ID | P43 |
+| Working name | Uneven skin texture |
+| Operational definition | UNKNOWN; structural placement only. |
+| In scope | S07 Problem/presentation; Mapped; boundary open. |
+| Out of scope | Closing the boundary by inference; diagnosis, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Problem/presentation — Map-listed |
+| Map relationship | S07 — Mapped; boundary open |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Undetermined |
+| Safety / referral | UNKNOWN; not assigned by inference. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §3 and §4 S07. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Boundary is explicitly open; evidence, customer language, operational relevance, and any referral boundary remain UNKNOWN. |
+| Review note | “Diagnostic lesions are not converted into Ordinary Care Needs.” No Ordinary-care candidate is created. |
+
+### Record P44 — Hyperkeratosis
+
+| Field | Value |
+|---|---|
+| Map ID | P44 |
+| Working name | Hyperkeratosis |
+| Operational definition | UNKNOWN; clinical/structural presentation only. |
+| In scope | S07 Clinical Anchor; boundary open. |
+| Out of scope | Closing the boundary by inference; diagnosis, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Clinical/structural presentation — Map-listed |
+| Map relationship | S07 — Clinical Anchor; boundary open |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | UNKNOWN; not assigned by inference. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §3 and §4 S07. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Clinical/structural boundary explicitly open; evidence, customer language, and operational boundary remain UNKNOWN. |
+| Review note | No Ordinary-care candidate is created; diagnostic lesions are not converted into Ordinary Care Needs. |
+
+### Record P45 — Keratosis pilaris
+
+| Field | Value |
+|---|---|
+| Map ID | P45 |
+| Working name | Keratosis pilaris |
+| Operational definition | UNKNOWN; structural placement only. |
+| In scope | S07 Clinical Anchor. |
+| Out of scope | Diagnosis, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Clinical Condition/presentation — Map-listed |
+| Map relationship | S07 — Clinical Anchor |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | UNKNOWN; not assigned by inference. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §3 and §4 S07. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Operational boundary, evidence, customer language, and any referral relationship remain UNKNOWN. |
+| Review note | No Ordinary-care candidate is created; diagnostic lesions are not converted into Ordinary Care Needs. |
+
+### Record P46 — Seborrhoeic keratosis
+
+| Field | Value |
+|---|---|
+| Map ID | P46 |
+| Working name | Seborrhoeic keratosis |
+| Operational definition | UNKNOWN; structural lesion placement only. |
+| In scope | S07 Clinical Anchor and the Map-listed S07↔S08 cross-shelf relationship only. |
+| Out of scope | Opening/completing S08; diagnosis, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Clinical Condition/lesion — Map-listed |
+| Map relationship | S07↔S08 — Clinical Anchor; cross-shelf reference only |
+| Completion / acceptance | Identified+Linked — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | UNKNOWN; not assigned by inference. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §3, §4 S07, and Map cross-shelf reference. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Exact S08 relationship/ownership, evidence, customer language, and operational boundary remain UNKNOWN. |
+| Review note | S08 is not opened or completed; no Ordinary-care candidate is created. |
+
+### Record P47 — Skin tags
+
+| Field | Value |
+|---|---|
+| Map ID | P47 |
+| Working name | Skin tags |
+| Operational definition | UNKNOWN; structural lesion/benign-growth presentation only. |
+| In scope | S07 Clinical Anchor and the Map-listed S07↔S08 cross-shelf relationship only. |
+| Out of scope | Opening/completing S08; diagnosis, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Lesion/benign growth presentation — Map-listed |
+| Map relationship | S07↔S08 — Clinical Anchor; cross-shelf reference only |
+| Completion / acceptance | Identified+Linked — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | UNKNOWN; not assigned by inference. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §3, §4 S07, and Map cross-shelf reference. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Exact S08 relationship/ownership, evidence, customer language, and operational boundary remain UNKNOWN. |
+| Review note | S08 is not opened or completed; no Ordinary-care candidate is created. |
+
+### S07 relationships (no silent merging)
+
+| ID | Map relationship | Working disposition |
+|---|---|---|
+| P43 | S07 — Mapped; boundary open | Identified; Undetermined; boundary remains UNKNOWN/open |
+| P44 | S07 — Clinical Anchor; boundary open | Identified; Clinical-anchor only; boundary remains UNKNOWN/open |
+| P45 | S07 — Clinical Anchor | Identified; Clinical-anchor only |
+| P46 | S07↔S08 — Clinical Anchor | Identified+Linked; cross-shelf reference only; S08 unchanged |
+| P47 | S07↔S08 — Clinical Anchor | Identified+Linked; cross-shelf reference only; S08 unchanged |
+| P16 | S02→S07 — Clinical Anchor/HBI relevance unresolved | Reference-only from prior S03 record; do not rewrite P16 or reopen S02/S03 |
+
+No relationship beyond the live Map is inferred. “Diagnostic lesions are not converted into Ordinary Care Needs.” No S07 record is Accepted or assigned Ordinary-care suitability. P46/P47 record only the explicit S07↔S08 reference; S08 is not opened or completed.
+
 ## روابط خوشه (بدون ادغام خاموش)
 
 | ID | نقش نسبت به P01 | وضعیت |
@@ -1090,8 +1212,8 @@ No relationship beyond the live Map is inferred. Presence in S06 does not imply 
 | G1 / G8 | خارج از دامنهٔ این Closure |
 | قفسهٔ S03 | **ثبت ساختاری شده**؛ P08–P16؛ نه Accepted |
 | قفسهٔ S04 | **ثبت ساختاری شده**؛ P17–P23؛ نه Accepted |
-| قفسهٔ S04 | **در حال کار ساختاری**؛ P17–P23؛ نه Accepted |
-| S05–S10 | باز نشده‌اند؛ نیازمند دستور صریح PO |
+| قفسهٔ S04 | **ثبت ساختاری شده**؛ P17–P23؛ نه Accepted |
+| S06 | **ثبت ساختاری شده**؛ P24–P42 در بسته‌های S05/S06؛ نه Accepted |\n| S07 | **در حال کار ساختاری**؛ P43–P47؛ نه Accepted |\n| S08 به بعد | باز نشده‌اند؛ نیازمند دستور صریح PO |
 | Need / Product | خارج از دامنه |
 
 ---
