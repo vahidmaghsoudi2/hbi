@@ -436,7 +436,7 @@ test("Product Intake performs read-only exact GTIN lookup and keeps unmatched it
   await gtinInput.fill("0123456789012");
   await page.getByRole("button", { name: "جست‌وجوی دقیق در Product Master" }).click();
   await expect(page.getByText("محصول موجود پیدا شد", { exact: true })).toBeVisible();
-  await expect(page.getByText(/PROD-GTIN-EXISTING/)).toBeVisible();
+  await expect(page.getByText("شناسه: PROD-GTIN-EXISTING", { exact: true })).toBeVisible();
   await expect(page.getByText(/جست‌وجو فقط‌خواندنی است/)).toBeVisible();
 
   await gtinInput.fill("0000000000000");
