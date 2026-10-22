@@ -25,6 +25,7 @@ A criterion is PASS only when raw evidence is linked, tied to an exact SHA/envir
 - [HBI CI run 38315913219](https://github.com/vahidmaghsoudi2/hbi/actions/runs/38315913219): successful test run on the PR #355 test head.
 - [Pilot Browser Proof run 38315913216](https://github.com/vahidmaghsoudi2/hbi/actions/runs/38315913216): fixture/browser workflow, not end-to-end real product acceptance.
 - [PR #364](https://github.com/vahidmaghsoudi2/hbi/pull/364): merged on 2026-10-13 at `7d962720a60c1291b8c21360dff0cc95b6fc0d1a`; SSOT placement is complete, but the merge and green workflows do not prove G8.
+- [PR #432](https://github.com/vahidmaghsoudi2/hbi/pull/432): proposes refusing a symlinked G8 evidence root, with regression tests for symlink refusal and normal in-root creation. At the 2026-10-22 status check, PR #432 was **OPEN / NOT MERGED**, head `5bf1eafbe91730e31c58f4bc20c5d620c265e86f`. The change is a supporting filesystem-safety hardening proposal only; it is not proof of a real pilot and does not change A1–A9 acceptance status. A merge authorization or successful CI must not be recorded as a completed merge unless GitHub confirms `merged=true`.
 
 ## Acceptance rule
 
