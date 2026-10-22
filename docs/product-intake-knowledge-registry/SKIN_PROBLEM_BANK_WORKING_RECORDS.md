@@ -1443,8 +1443,9 @@ No relationship beyond the live Map is inferred. P51's locked disposition is not
 | قفسهٔ S04 | **ثبت ساختاری شده**؛ P17–P23؛ نه Accepted |
 | S06 | **ثبت ساختاری شده**؛ P24–P42 در بسته‌های S05/S06؛ نه Accepted |
 | S07 | **ثبت ساختاری شده**؛ P43–P47؛ نه Accepted |
-| S08 | **در حال کار ساختاری**؛ P48–P50 و P53–P56؛ خوشهٔ Safety/Referral؛ نه Accepted |
-| S09–S10 | باز نشده‌اند؛ خارج از این بسته |
+| S08 | **ثبت ساختاری شده**؛ P48–P50 و P53–P56؛ خوشهٔ Safety/Referral؛ نه Accepted |
+| S09 | **در حال کار ساختاری**؛ P51 و P52؛ P22 فقط ارجاع متقاطع به S04؛ نه Accepted/Need |
+| S10 | باز نشده؛ خارج از این بسته |
 | Need / Product | خارج از دامنه |
 
 ---
