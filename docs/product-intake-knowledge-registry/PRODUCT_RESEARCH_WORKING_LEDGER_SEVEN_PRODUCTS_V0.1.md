@@ -495,3 +495,21 @@ The current seven dossiers do not yet pass a unique gallery-package identity loc
 This validates the committed regression test and the repository checks executed by these workflows for that commit. It does **not** mean the full Product Knowledge project or status mapping is complete, and it does not prove that any of the seven researched products is a verified physical gallery item.
 
 **Current disposition:** The stale-status clearing safeguard is CI-validated. The profile/required-field acceptance matrix remains suspended pending PO approval; full `evidence_status` mapping remains unauthorized until that decision and a separate implementation authorization are recorded. P1–P7 remain PARTIAL for physical identity lock pending package photos or a reliable GTIN-to-formula/market crosswalk. PR #411 remains open and unmerged; no merge, rebase, schema/API/database migration, ProductKnowledge population for the seven dossiers, or manufacturer outreach is authorized by this pass.
+
+
+---
+
+## Pass 11 — PO matrix approval and current gate correction (2026-10-22)
+
+**Live-source reconciliation:** Product Owner approval of the Pass 8 profile / required-field / source / field-acceptance matrix is recorded in [Issue #406 comment 6324481621](https://github.com/vahidmaghsoudi2/hbi/issues/406#issuecomment-6324481621). The earlier Pass 10 statement that this matrix is still awaiting PO approval is historical to its 2026-10-21 recording time and is superseded for current status by that explicit approval. Pass 8 remains the approved matrix basis; this note does not silently change its contents.
+
+**Current gate disposition:**
+- **Matrix approval:** APPROVED for the next planning gate.
+- **Full `evidence_status` mapping / application behavior:** NOT AUTHORIZED. A separate, explicit implementation authorization with scope is still required before implementation or ProductKnowledge writes.
+- **P1–P7 physical identity lock:** PARTIAL. Obtain actual package photos and/or a reliable GTIN-to-exact-formula-and-market crosswalk before treating a gallery item as uniquely identified.
+- **Evidence requests to manufacturers:** PREPARED, NOT SENT. No outbound request is authorized by this status correction.
+- **PR #411:** remains the sole working ledger and is open/unmerged.
+
+**Current verified baseline:** branch `docs/product-research-ledger-seven-products-20261019`, head `7319d36f8e97bcb010337c9508abfd280cb5c052`. The three Pass 10 documentation workflows on this SHA completed successfully: [HBI CI #1663](https://github.com/vahidmaghsoudi2/hbi/actions/runs/39659682415), [Pilot Browser Proof #476](https://github.com/vahidmaghsoudi2/hbi/actions/runs/39659682435), and [Auto Tasks #216](https://github.com/vahidmaghsoudi2/hbi/actions/runs/39659682409).
+
+**Next action:** collect physical package/GTIN evidence for P1–P7, preserving each product's market/formula boundaries. Do not implement the full status mapping or write product rows until separate scoped implementation authorization is recorded. Keep the SKIN1004 Korean/international and US variants separate; keep Clinique n=52 clinical testing distinct from n=533 consumer testing; keep Anua serum and pad evidence separate; retain the unresolved ISDIN source discrepancies without guessing. No new Issue/PR, merge, rebase, force-push, schema/API/database change, or manufacturer outreach is part of this pass.
