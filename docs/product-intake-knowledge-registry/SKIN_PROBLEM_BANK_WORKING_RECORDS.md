@@ -1,8 +1,8 @@
-# HBI — رکوردهای کاری بانک مشکلات پوستی (S01 بسته؛ S02–S04 ثبت ساختاری؛ S05 در حال کار ساختاری)
+# HBI — رکوردهای کاری بانک مشکلات پوستی (S01 بسته؛ S02–S05 ثبت ساختاری؛ S06 در حال کار ساختاری)
 
 **شناسه:** HBI-SKIN-PROBLEM-BANK-WORKING-RECORDS  
 **ناوبری مرجع:** [فهرست عملیاتی](SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) ← [مرجع تجمیعی](SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md) ← همین رکوردهای کاری؛ برای مرزهای ساختاری به [نقشهٔ پیش‌نویس (DRAFT / NOT THE ACTIVE PROBLEM BANK)](SKIN_PROBLEM_SPACE_MAP_V0.1.md) مراجعه کنید.  
-**وضعیت:** **S01 STRUCTURALLY CLOSED; S02–S04 STRUCTURAL REGISTERED; S05 STRUCTURAL WORK IN PROGRESS** (2026-10-22) — S01 فقط از نظر مرز/ارجاع بسته است؛ S02 تا S04 ثبت ساختاری شده‌اند؛ S05 بستهٔ کاری ساختاری جاری است؛ **هیچ مورد جدیدی Accepted پزشکی/بانک نهایی نیست**  
+**وضعیت:** **S01 STRUCTURALLY CLOSED; S02–S05 STRUCTURAL REGISTERED; S06 STRUCTURAL WORK IN PROGRESS** (2026-10-22) — S01 فقط از نظر مرز/ارجاع بسته است؛ S02 تا S05 ثبت ساختاری شده‌اند؛ S06 بستهٔ کاری ساختاری جاری است؛ **هیچ مورد جدیدی Accepted پزشکی/بانک نهایی نیست**  
 **پوشه:** `docs/product-intake-knowledge-registry/` (فقط همین حوزه)  
 **تاریخ تأییدهای PO (مرزها):** 2026-10-20  
 **تاریخ بستن ساختاری پایلوت:** 2026-10-22  
@@ -858,6 +858,212 @@
 | P06 | S01→S05 — Clinical Anchor | Reference only; existing S01 record not rewritten |
 
 No relation beyond the live Map is inferred. P24/P25/P26 remain separate; P27/P28/P29 remain separate; P30 does not reopen S02; P31/P32 are not Ordinary-care; P33 remains unresolved. S02 is not expanded or rewritten.
+
+
+## S06 — Infection / Infestation (structural in progress; not Accepted)
+
+**Map boundary:** Map §3 says presence in S06 does not imply Ordinary Care suitability. All entries below are structural registrations only. No record is Accepted, no Ordinary-care candidate is created, and no diagnosis, treatment, Need, or Product is inferred.
+
+### S06 summary
+
+| ID | Map unit type | Relationship | Acceptance | Operational | Main UNKNOWN |
+|---|---|---|---|---|---|
+| P34 | Clinical Condition | S06 — Clinical/Safety-sensitive; structural parent of P35 only as Map | Identified — Accepted=No | Safety-referral only | Operational definition; evidence; customer language; referral boundary |
+| P35 | Clinical subtype/manifestation | Child/Related to P34 only as Map | Identified+Linked — Accepted=No | Clinical-anchor only | Exact subtype/manifestation boundary; evidence; customer language |
+| P36 | Clinical Condition | S06 — Clinical/Safety-sensitive; structural parent of P40 only as Map | Identified — Accepted=No | Safety-referral only | Operational definition; evidence; customer language; safety/referral boundary |
+| P37 | Clinical Condition | S06 — Clinical/Safety-sensitive; structural parent of P38 only as Map | Identified — Accepted=No | Safety-referral only | Operational definition; evidence; customer language; safety/referral boundary |
+| P38 | Clinical Condition | P37/S06 — Clinical/Safety-sensitive | Identified+Linked — Accepted=No | Safety-referral only | Boundary with P37; evidence; customer language; referral boundary |
+| P39 | Clinical Condition/lesion presentation | S06↔S08 — Clinical Anchor; cross-shelf reference only | Identified+Linked — Accepted=No | Clinical-anchor only | Exact S08 relationship/ownership; evidence; customer language |
+| P40 | Clinical Condition | P36/S06 — Clinical/Safety-sensitive | Identified+Linked — Accepted=No | Safety-referral only | Boundary with P36; evidence; customer language; referral boundary |
+| P41 | Clinical Condition/infestation | S06 — Clinical/Safety-sensitive | Identified — Accepted=No | Safety-referral only | Operational definition; evidence; customer language; safety/referral boundary |
+| P42 | Clinical Condition | S06 — Clinical/Referral-sensitive | Identified — Accepted=No | Clinical-anchor only | Referral threshold; evidence; customer language; HBI boundary |
+
+### Record P34 — Dermatophytosis/fungal infection
+
+| Field | Value |
+|---|---|
+| Map ID | P34 |
+| Working name | Dermatophytosis/fungal infection |
+| Operational definition | UNKNOWN; structural placement only, no added clinical definition. |
+| In scope | S06 entry as listed in live Map §4. |
+| Out of scope | Diagnosis, treatment, Need, Product, Ordinary-care suitability, and unsupported medical claims. |
+| Unit type | Clinical Condition — Map-listed |
+| Map relationship | S06 — Clinical/Safety-sensitive; structural parent of P35 only as Map |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Clinical/Safety-sensitive per Map; protocol/threshold UNKNOWN. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §3 and §4 S06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Definition; evidence; customer language; referral boundary. |
+| Review note | Presence in S06 does not imply Ordinary Care suitability. |
+
+### Record P35 — Tinea/ringworm
+
+| Field | Value |
+|---|---|
+| Map ID | P35 |
+| Working name | Tinea/ringworm |
+| Operational definition | UNKNOWN; structural subtype/manifestation placement only. |
+| In scope | Child/Related relationship to P34 only as explicitly listed in Map. |
+| Out of scope | Merging into P34, diagnosis, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Clinical subtype/manifestation — Map-listed |
+| Map relationship | Child/Related to P34 |
+| Completion / acceptance | Identified+Linked — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | Exact safety/referral handling UNKNOWN; no Ordinary-care suitability inferred. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Subtype/manifestation boundary; evidence; customer language; operational/referral boundary. |
+| Review note | Separate ID retained; no silent merge with P34. |
+
+### Record P36 — Bacterial skin infection
+
+| Field | Value |
+|---|---|
+| Map ID | P36 |
+| Working name | Bacterial skin infection |
+| Operational definition | UNKNOWN; structural placement only, no added clinical definition. |
+| In scope | S06 entry as listed in live Map §4. |
+| Out of scope | Diagnosis, treatment, Need, Product, Ordinary-care suitability, and unsupported medical claims. |
+| Unit type | Clinical Condition — Map-listed |
+| Map relationship | S06 — Clinical/Safety-sensitive; structural parent of P40 only as Map |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Clinical/Safety-sensitive per Map; protocol/threshold UNKNOWN. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §3 and §4 S06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Definition; evidence; customer language; safety/referral boundary. |
+| Review note | Presence in S06 does not imply Ordinary Care suitability. |
+
+### Record P37 — Viral skin infection
+
+| Field | Value |
+|---|---|
+| Map ID | P37 |
+| Working name | Viral skin infection |
+| Operational definition | UNKNOWN; structural placement only, no added clinical definition. |
+| In scope | S06 entry as listed in live Map §4. |
+| Out of scope | Diagnosis, treatment, Need, Product, Ordinary-care suitability, and unsupported medical claims. |
+| Unit type | Clinical Condition — Map-listed |
+| Map relationship | S06 — Clinical/Safety-sensitive; structural parent of P38 only as Map |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Clinical/Safety-sensitive per Map; protocol/threshold UNKNOWN. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §3 and §4 S06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Definition; evidence; customer language; safety/referral boundary. |
+| Review note | Presence in S06 does not imply Ordinary Care suitability. |
+
+### Record P38 — Cutaneous herpes simplex
+
+| Field | Value |
+|---|---|
+| Map ID | P38 |
+| Working name | Cutaneous herpes simplex |
+| Operational definition | UNKNOWN; structural placement only, no added clinical definition. |
+| In scope | S06 entry and P37 relationship as listed in live Map §4. |
+| Out of scope | Diagnosis, treatment, Need, Product, Ordinary-care suitability, and unsupported medical claims. |
+| Unit type | Clinical Condition — Map-listed |
+| Map relationship | P37/S06 — Clinical/Safety-sensitive |
+| Completion / acceptance | Identified+Linked — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Clinical/Safety-sensitive per Map; protocol/threshold UNKNOWN. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §3 and §4 S06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Boundary with P37; evidence; customer language; safety/referral boundary. |
+| Review note | Separate ID retained; relationship does not authorize merging with P37. |
+
+### Record P39 — Warts
+
+| Field | Value |
+|---|---|
+| Map ID | P39 |
+| Working name | Warts |
+| Operational definition | UNKNOWN; structural lesion-presentation placement only. |
+| In scope | S06↔S08 cross-shelf relationship as explicitly listed in Map. |
+| Out of scope | Opening/completing S08, diagnosis, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Clinical Condition/lesion presentation — Map-listed |
+| Map relationship | S06↔S08 — Clinical Anchor; cross-shelf reference only |
+| Completion / acceptance | Identified+Linked — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | Specific boundary UNKNOWN; no Ordinary-care suitability inferred. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S06 and cross-shelf reference, where listed. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Exact S08 relationship/ownership; evidence; customer language; operational boundary. |
+| Review note | S08 is not opened or completed by this record. |
+
+### Record P40 — Impetigo
+
+| Field | Value |
+|---|---|
+| Map ID | P40 |
+| Working name | Impetigo |
+| Operational definition | UNKNOWN; structural placement only, no added clinical definition. |
+| In scope | S06 entry and P36 relationship as listed in live Map §4. |
+| Out of scope | Diagnosis, treatment, Need, Product, Ordinary-care suitability, and unsupported medical claims. |
+| Unit type | Clinical Condition — Map-listed |
+| Map relationship | P36/S06 — Clinical/Safety-sensitive |
+| Completion / acceptance | Identified+Linked — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Clinical/Safety-sensitive per Map; protocol/threshold UNKNOWN. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §3 and §4 S06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Boundary with P36; evidence; customer language; safety/referral boundary. |
+| Review note | Separate ID retained; no silent merge with P36. |
+
+### Record P41 — Scabies
+
+| Field | Value |
+|---|---|
+| Map ID | P41 |
+| Working name | Scabies |
+| Operational definition | UNKNOWN; structural placement only, no added clinical definition. |
+| In scope | S06 entry as listed in live Map §4. |
+| Out of scope | Diagnosis, treatment, Need, Product, Ordinary-care suitability, and unsupported medical claims. |
+| Unit type | Clinical Condition/infestation — Map-listed |
+| Map relationship | S06 — Clinical/Safety-sensitive |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Clinical/Safety-sensitive per Map; protocol/threshold UNKNOWN. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §3 and §4 S06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Definition; evidence; customer language; safety/referral boundary. |
+| Review note | Presence in S06 does not imply Ordinary Care suitability. |
+
+### Record P42 — Shingles
+
+| Field | Value |
+|---|---|
+| Map ID | P42 |
+| Working name | Shingles |
+| Operational definition | UNKNOWN; structural placement only, no added clinical definition. |
+| In scope | S06 entry as listed in live Map §4. |
+| Out of scope | Diagnosis, treatment, Need, Product, Ordinary-care suitability, and unsupported medical claims. |
+| Unit type | Clinical Condition — Map-listed |
+| Map relationship | S06 — Clinical/Referral-sensitive |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | Referral-sensitive per Map; threshold/protocol UNKNOWN. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Referral threshold; evidence; customer language; HBI boundary. |
+| Review note | Presence in S06 does not imply Ordinary Care suitability. |
+
+### S06 relationships (no silent merging)
+
+| ID | Map relationship | Working disposition |
+|---|---|---|
+| P34 | S06 — Clinical/Safety-sensitive | Safety-referral only; structural parent of P35 only as Map |
+| P35 | P34 — Child/Related | Separate Identified+Linked record; Clinical-anchor only |
+| P36 | S06 — Clinical/Safety-sensitive | Safety-referral only; structural parent of P40 only as Map |
+| P37 | S06 — Clinical/Safety-sensitive | Safety-referral only; structural parent of P38 only as Map |
+| P38 | P37/S06 — Clinical/Safety-sensitive | Safety-referral only; separate Identified+Linked record |
+| P39 | S06↔S08 — Clinical Anchor | Cross-shelf reference only; S08 unchanged |
+| P40 | P36/S06 — Clinical/Safety-sensitive | Safety-referral only; separate Identified+Linked record |
+| P41 | S06 — Clinical/Safety-sensitive | Safety-referral only |
+| P42 | S06 — Clinical/Referral-sensitive | Clinical-anchor only; referral threshold UNKNOWN |
+
+No relationship beyond the live Map is inferred. Presence in S06 does not imply Ordinary Care suitability. P35 remains distinct from P34; P40 from P36; P38 from P37. P39 records only the S06↔S08 relationship; S08 is not opened or completed.
 
 
 ## روابط خوشه (بدون ادغام خاموش)
