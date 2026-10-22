@@ -29,7 +29,6 @@
 
 **نقطهٔ ورود فعلی این واحد کار:** همین فهرست عملیاتی و سپس [مرجع تجمیعی بانک مشکلات پوستی](SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md).
 
-**راهنمای تکمیلیِ سوابق و منابع:** [ثبت منابع و آثار کار روی مشکلات پوستی](SKIN_PROBLEM_SOURCE_ARTIFACT_REGISTER.md) — فقط فهرست راهنما/ردیابی سوابق است؛ جایگزین این فهرست، مرجع تجمیعی یا رکوردهای کاری نیست و مرجع مستقل ایجاد نمی‌کند.
 
 **رکوردهای کاری پایلوت:** [SKIN_PROBLEM_BANK_WORKING_RECORDS.md](SKIN_PROBLEM_BANK_WORKING_RECORDS.md).
 
