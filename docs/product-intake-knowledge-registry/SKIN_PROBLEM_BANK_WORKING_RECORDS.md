@@ -1,8 +1,8 @@
-# HBI — رکوردهای کاری بانک مشکلات پوستی (S01 بسته؛ S02–S07 ثبت ساختاری؛ S08 در حال کار ساختاری)
+# HBI — رکوردهای کاری بانک مشکلات پوستی (S01 بسته؛ S02–S08 ثبت ساختاری؛ S09 در حال کار ساختاری)
 
 **شناسه:** HBI-SKIN-PROBLEM-BANK-WORKING-RECORDS  
 **ناوبری مرجع:** [فهرست عملیاتی](SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) ← [مرجع تجمیعی](SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md) ← همین رکوردهای کاری؛ برای مرزهای ساختاری به [نقشهٔ پیش‌نویس (DRAFT / NOT THE ACTIVE PROBLEM BANK)](SKIN_PROBLEM_SPACE_MAP_V0.1.md) مراجعه کنید.  
-**وضعیت:** **S01 STRUCTURALLY CLOSED; S02–S07 STRUCTURAL REGISTERED; S08 STRUCTURAL WORK IN PROGRESS** (2026-10-22) — S01 فقط از نظر مرز/ارجاع بسته است؛ S02 تا S07 ثبت ساختاری شده‌اند؛ S08 بستهٔ کاری ساختاری جاری است؛ **هیچ مورد جدیدی Accepted پزشکی/بانک نهایی نیست**  
+**وضعیت:** **S01 STRUCTURALLY CLOSED; S02–S08 STRUCTURAL REGISTERED; S09 STRUCTURAL WORK IN PROGRESS** (2026-10-22) — S01 فقط از نظر مرز/ارجاع بسته است؛ S02 تا S08 ثبت ساختاری شده‌اند؛ S09 بستهٔ کاری ساختاری جاری است؛ **هیچ مورد جدیدی Accepted پزشکی/بانک نهایی نیست**  
 **پوشه:** `docs/product-intake-knowledge-registry/` (فقط همین حوزه)  
 **تاریخ تأییدهای PO (مرزها):** 2026-10-20  
 **تاریخ بستن ساختاری پایلوت:** 2026-10-22  
@@ -1355,6 +1355,67 @@ No relationship beyond the live Map is inferred. “Diagnostic lesions are not c
 
 Map §6 B06 explicitly defines this as a Safety-oriented cluster, not an Ordinary Care cluster. No S08 record is Accepted or an Ordinary-care candidate. P39/P46/P47 are reference-only; their existing records are not rewritten. P51/P52 remain under S09 per the live Map. No S09/S10 work is opened.
 
+## S09 — Sun / UV-Related Change (structural in progress; not Accepted)
+
+**Scope:** S09 items explicitly listed in live Map §4 only. Context is not automatically Need or diagnosis. P51's locked disposition is preserved verbatim in meaning; P22 remains an existing S04 record and is referenced here only.
+
+### S09 summary
+
+| ID | Working name | Map type | Map relationship | Acceptance | Operational status | UNKNOWN / GAP |
+|---|---|---|---|---|---|---|
+| P51 | Chronic UV damage | Context / Discovery Problem | S09 — DISCOVERY CONTEXT; NOT NEED-LEVEL | NOT ACCEPTED; locked disposition retained | Out of scope for Need-level handling; not an Ordinary-care candidate; no automatic Safety/Referral flag | Customer language, evidence, operational boundary, and any non-locked relationship UNKNOWN |
+| P52 | Actinic keratosis | Clinical / Safety-sensitive lesion | S09↔S08 — Safety/Referral | Identified — Accepted = No | Safety-referral only | Clinical boundary, evidence, customer language, and exact cross-shelf relation details UNKNOWN |
+| P22 | Sun-related pigmentation | Context / presentation | S09↔S04 — Related/Context | Existing S04 record unchanged; reference only | Context/reference only; no new operational status assigned | Any relationship beyond the Map's Related/Context label UNKNOWN |
+
+### Record P51 — Chronic UV damage
+
+| Field | Value |
+|---|---|
+| Map ID | P51 |
+| Working name | Chronic UV damage |
+| Operational definition | UNKNOWN beyond the locked Map disposition: Discovery Problem / Context; Context, not Need-level. |
+| In scope | Discovery context only, per Map §4 and the locked P51 disposition. |
+| Out of scope | Need-level handling, diagnosis, Ordinary-care candidacy, automatic Safety/Referral flag, Product inference, or acceptance. |
+| Unit type | Context / Discovery Problem — Map-listed |
+| Map relationship | S09 — DISCOVERY CONTEXT; NOT NEED-LEVEL |
+| Completion / acceptance | NOT ACCEPTED; locked disposition retained |
+| Operational status | Out of scope for Need-level handling; no automatic Safety/Referral flag |
+| Safety / referral | NO automatic flag, per locked disposition. No further signal inferred. |
+| Need eligibility | V1 Need Eligibility = NOT ELIGIBLE, per locked disposition; not newly inferred. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S09 and P51 locked disposition; §6 B07. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Evidence, customer language, operational boundary, and any relation not explicitly stated in the Map remain UNKNOWN. |
+| Review note | Context is not automatically Need or diagnosis. P51 is not an Accepted Need and must not be treated as one. |
+
+### Record P52 — Actinic keratosis
+
+| Field | Value |
+|---|---|
+| Map ID | P52 |
+| Working name | Actinic keratosis |
+| Operational definition | UNKNOWN; structural Clinical/Safety-sensitive lesion placement only. |
+| In scope | S09↔S08 cross-shelf Clinical/Safety-sensitive reference as explicitly mapped. |
+| Out of scope | Diagnosis confirmation, treatment, Need, Product, acceptance, or Ordinary-care suitability. |
+| Unit type | Clinical / Safety-sensitive lesion — Map-listed |
+| Map relationship | S09↔S08 — Safety/Referral |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Safety/Referral disposition per Map; no threshold or clinical interpretation added. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S09 and §5 Cross-Shelf Relationships. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Clinical boundary, evidence, customer language, and exact relation details remain UNKNOWN. |
+| Review note | No diagnosis, treatment, Need, Product, or Ordinary-care conclusion is inferred. S08 is not reopened or rewritten. |
+
+### S09 relationships (Context / Clinical-Safety / Cross-Shelf; no rewriting)
+
+| ID | Relationship class | Map relationship | Working disposition |
+|---|---|---|---|
+| P51 | Context / Discovery | S09 — DISCOVERY CONTEXT; NOT NEED-LEVEL | Locked: V1 Need Eligibility = NOT ELIGIBLE; Safety/Referral = NO automatic flag; Acceptance = NOT ACCEPTED |
+| P52 | Clinical / Safety-sensitive | S09↔S08 — Safety/Referral | Identified; Safety-referral only; Accepted = No; existing S08 records untouched |
+| P22 | Cross-Shelf / Context | S09↔S04 — Related/Context | Reference-only; existing S04 P22 record is not rewritten |
+
+No relationship beyond the live Map is inferred. P51's locked disposition is not altered. P22 is included here only as a cross-shelf reference; the S04 record is not changed. S08 is not reopened. S10 is not opened.
+
 ## روابط خوشه (بدون ادغام خاموش)
 
 | ID | نقش نسبت به P01 | وضعیت |
@@ -1382,8 +1443,9 @@ Map §6 B06 explicitly defines this as a Safety-oriented cluster, not an Ordinar
 | قفسهٔ S04 | **ثبت ساختاری شده**؛ P17–P23؛ نه Accepted |
 | S06 | **ثبت ساختاری شده**؛ P24–P42 در بسته‌های S05/S06؛ نه Accepted |
 | S07 | **ثبت ساختاری شده**؛ P43–P47؛ نه Accepted |
-| S08 | **در حال کار ساختاری**؛ P48–P50 و P53–P56؛ خوشهٔ Safety/Referral؛ نه Accepted |
-| S09–S10 | باز نشده‌اند؛ خارج از این بسته |
+| S08 | **ثبت ساختاری شده**؛ P48–P50 و P53–P56؛ خوشهٔ Safety/Referral؛ نه Accepted |
+| S09 | **در حال کار ساختاری**؛ P51 و P52؛ P22 فقط ارجاع متقاطع به S04؛ نه Accepted/Need |
+| S10 | باز نشده؛ خارج از این بسته |
 | Need / Product | خارج از دامنه |
 
 ---
