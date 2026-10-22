@@ -201,3 +201,16 @@
 3. What evidence, if any, would justify an independent operational definition for P02?
 
 **Source boundary:** These decisions use Map V0.1 and the PO-confirmed review of the P01/P02 working records. Map placement is not medical validation, Need acceptance, treatment authorization, or product mapping. The missing accepted 62-item artifact (G1) remains a separate blocker; this bounded P01/P02 review does not reconstruct or replace it. No other shelf, P05, Need, Product, application, DB, Schema/API, or G8 state is changed.
+
+## ثبت یافته‌های بررسی منابع — 2026-10-22
+
+این بخش در همین مرجع تجمیعی ثبت می‌شود؛ سند موازیِ فهرست منابع ایجاد نمی‌شود.
+
+- **مرجع ساختاری فعال:** همین مرجع تجمیعی، [فهرست عملیاتی](SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) و [رکوردهای کاری](SKIN_PROBLEM_BANK_WORKING_RECORDS.md) در مسیر `docs/product-intake-knowledge-registry/` هستند. [PR #409](https://github.com/vahidmaghsoudi2/hbi/pull/409) ساختار ناوبری را تثبیت کرده و [Issue #410](https://github.com/vahidmaghsoudi2/hbi/issues/410) ممیزی همان تغییر است.
+- **ردیاب حاکمیتی:** [Issue #403](https://github.com/vahidmaghsoudi2/hbi/issues/403) برای نقشهٔ راه و وضعیت فاز است؛ جایگزین این مرجع، فهرست عملیاتی یا رکوردهای کاری نیست.
+- **سوابق تصمیم ساختاری S01:** [PR #413](https://github.com/vahidmaghsoudi2/hbi/pull/413)، [PR #414](https://github.com/vahidmaghsoudi2/hbi/pull/414) و [PR #419](https://github.com/vahidmaghsoudi2/hbi/pull/419) برای سابقه و ممیزی‌اند؛ وضعیت ادغام/اعتبار هرکدام باید از GitHub زنده خوانده شود و سابقهٔ PR به‌تنهایی پذیرش پزشکی نیست.
+- **بازبینی اسناد:** [PR #430](https://github.com/vahidmaghsoudi2/hbi/pull/430) سابقهٔ ممیزی اسناد است؛ [PR #412](https://github.com/vahidmaghsoudi2/hbi/pull/412)، [PR #416](https://github.com/vahidmaghsoudi2/hbi/pull/416) و [PR #417](https://github.com/vahidmaghsoudi2/hbi/pull/417) صرفاً سوابق مرتبط برای بررسی وضعیت زنده‌اند، نه مرجع جایگزین.
+- **حدود بازیابی:** جست‌وجوی فهرست خام حدود ۹۰ موردی بنا بر دستور مالک پروژه متوقف است و نباید از سر گرفته شود. نسخهٔ کامل فهرست پالایش‌شدهٔ ۶۲ موردی نیز در مسیر فعال `master` تأیید نشده است؛ محتوای آن حدس زده یا از Map بازسازی نمی‌شود.
+- **مرزهای لازم‌الحفظ:** P01 = خشکی پوست/Xerosis، Scoped و Deferred، نه Accepted. P07 = ترک/شکاف پوست، مرتبط با P01 اما با شناسهٔ مستقل؛ ادغام P01/P07 ممنوع. P02 فقط Linked به P01؛ P05 مستقل و Related؛ P06 همچنان Clinical Anchor است.
+
+**اقدام نگهداری:** یافته‌های این بررسی در همین مرجع تجمیعی ثبت می‌شوند. فهرست عملیاتی فقط ناوبری می‌کند و رکوردهای کاری محل جزئیات رکوردها و روابط باقی می‌مانند. هیچ فایل موازی برای تکرار این یافته‌ها مرجعیت پیدا نمی‌کند.
