@@ -315,6 +315,18 @@ export function checkDuplicate(
   );
 }
 
+/** GET /api/v1/products/by-gtin/{gtin} — read-only exact Product Master lookup. */
+export function identifyProductByGtin(
+  gtin: string,
+  token: string
+): Promise<GtinLookupResponse> {
+  return request<GtinLookupResponse>(
+    `/products/by-gtin/${encodeURIComponent(gtin)}`,
+    {},
+    token
+  );
+}
+
 /** POST /api/v1/products/duplicate-check/audit/{check_id}/decision */
 export function recordDuplicateDecision(
   checkId: string,
