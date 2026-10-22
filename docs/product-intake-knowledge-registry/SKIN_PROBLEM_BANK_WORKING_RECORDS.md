@@ -1,8 +1,8 @@
-# HBI — رکوردهای کاری بانک مشکلات پوستی (S01 بسته؛ S02 ثبت ساختاری؛ S03 در حال کار ساختاری)
+# HBI — رکوردهای کاری بانک مشکلات پوستی (S01 بسته؛ S02/S03 ثبت ساختاری؛ S04 در حال کار ساختاری)
 
 **شناسه:** HBI-SKIN-PROBLEM-BANK-WORKING-RECORDS  
 **ناوبری مرجع:** [فهرست عملیاتی](SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) ← [مرجع تجمیعی](SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md) ← همین رکوردهای کاری؛ برای مرزهای ساختاری به [نقشهٔ پیش‌نویس (DRAFT / NOT THE ACTIVE PROBLEM BANK)](SKIN_PROBLEM_SPACE_MAP_V0.1.md) مراجعه کنید.  
-**وضعیت:** **S01 STRUCTURALLY CLOSED; S02 STRUCTURAL REGISTERED; S03 STRUCTURAL WORK IN PROGRESS** (2026-10-22) — S01 فقط از نظر مرز/ارجاع بسته است؛ S02 ثبت ساختاری شده؛ S03 بستهٔ کاری ساختاری است؛ **هیچ مورد جدیدی Accepted پزشکی/بانک نهایی نیست**  
+**وضعیت:** **S01 STRUCTURALLY CLOSED; S02/S03 STRUCTURAL REGISTERED; S04 STRUCTURAL WORK IN PROGRESS** (2026-10-22) — S01 فقط از نظر مرز/ارجاع بسته است؛ S02 و S03 ثبت ساختاری شده‌اند؛ S04 بستهٔ کاری ساختاری جاری است؛ **هیچ مورد جدیدی Accepted پزشکی/بانک نهایی نیست**  
 **پوشه:** `docs/product-intake-knowledge-registry/` (فقط همین حوزه)  
 **تاریخ تأییدهای PO (مرزها):** 2026-10-20  
 **تاریخ بستن ساختاری پایلوت:** 2026-10-22  
@@ -459,6 +459,171 @@
 
 ---
 
+
+## S04 — Pigmentation / Color (در حال کار ساختاری؛ نه Accepted)
+
+### جدول خلاصهٔ S04
+
+| ID | نام Map | نوع واحد | رابطه با Map | پذیرش | عملیاتی | UNKNOWNهای اصلی |
+|----|---------|----------|--------------|--------|----------|-----------------|
+| P17 | Hyperpigmentation / dark spots | Problem/presentation — VERIFIED در Map | S04 — Mapped؛ والد ساختاری P18/P19 در حد Map | Identified — Accepted=خیر | Undetermined | تعریف عملیاتی؛ مرز خانواده؛ زبان مشتری؛ شواهد/ایمنی |
+| P18 | Melasma | Clinical Condition — VERIFIED در Map | P17/S04 — Clinical Anchor؛ Linked به P17 در حد Map | Identified+Linked — Accepted=خیر | Clinical-anchor only | تعریف عملیاتی؛ HBI relevance؛ زبان مشتری؛ شواهد/ارجاع |
+| P19 | Post-inflammatory hyperpigmentation | Sequela/pigmentation presentation — VERIFIED در Map | P17/S04 — Related/Sequela؛ Linked به P17؛ ادغام نشده | Identified+Linked — Accepted=خیر | Undetermined | تعریف/مرز؛ رابطهٔ دقیق با P17؛ زبان مشتری؛ شواهد |
+| P20 | Hypopigmentation | Problem/presentation — VERIFIED در Map | S04 — Mapped؛ evidence boundary retained | Identified — Accepted=خیر | Undetermined | evidence boundary؛ تعریف عملیاتی؛ زبان مشتری؛ شواهد مستقل |
+| P21 | Vitiligo | Clinical Condition — VERIFIED در Map | S04 — Clinical/Referral-sensitive | Identified — Accepted=خیر | Clinical-anchor only | مرز referral؛ HBI relevance؛ تعریف/شواهد؛ زبان مشتری |
+| P22 | Sun-related pigmentation | Context/pigmentation presentation — VERIFIED در Map | P17/S09 — Related/Context؛ S09 صرفاً مرجع رابطه | Identified+Linked — Accepted=خیر | Undetermined | مرز Context با Problem؛ رابطهٔ دقیق؛ زبان مشتری؛ شواهد |
+| P23 | Poikiloderma | Clinical Condition/UV-associated presentation — VERIFIED در Map | S04↔S09 — Parked/Evidence Boundary | Deferred — Accepted=خیر | Undetermined | evidence boundary؛ دلیل/معیار بازگشایی؛ HBI relevance؛ زبان مشتری |
+| P13 | Acne aftermath/discoloration (ارجاع از S03) | Sequela/post-inflammatory presentation | P08→S04 — Related/Cross-Shelf؛ رکورد S03 موجود است | بدون تغییر در این بسته | بدون تغییر در این بسته | فقط ارجاع مرزی؛ S03 بازنویسی نشده |
+
+### رکورد P17 — Hyperpigmentation / dark spots
+
+| فیلد | محتوا |
+|------|--------|
+| ID نقشه | P17 |
+| نام کاری | Hyperpigmentation / dark spots |
+| تعریف عملیاتی | **UNKNOWN / نیازمند بازبینی ساختاری.** فقط جایگاه Problem/presentation از Map ثبت می‌شود. |
+| داخل دامنه | Problem/presentation در S04 طبق Map V0.1 §4. |
+| خارج از دامنه | تشخیص پزشکی؛ تعریف یا زیرگروه افزوده؛ Need؛ Product؛ توصیه یا درمان. |
+| نوع واحد | Problem/presentation — VERIFIED در Map |
+| رابطه با نقشه | S04 — Mapped؛ والد ساختاری P18/P19 فقط در حد Map؛ ادغام ممنوع. |
+| وضعیت تکمیل و پذیرش | Identified — Accepted = خیر |
+| وضعیت عملیاتی | Undetermined |
+| ایمنی / ارجاع | UNKNOWN |
+| شواهد / منشأ | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S04؛ §6 B03. |
+| زبان مشتری | UNKNOWN |
+| UNKNOWN / GAP | تعریف عملیاتی؛ مرز خانواده؛ زبان مشتری؛ شواهد مستقل؛ آستانهٔ ایمنی/ارجاع. |
+| یادداشت بازبینی | ثبت ساختاری؛ Map placement ≠ medical validation ≠ Accepted. |
+
+### رکورد P18 — Melasma
+
+| فیلد | محتوا |
+|------|--------|
+| ID نقشه | P18 |
+| نام کاری | Melasma |
+| تعریف عملیاتی | **UNKNOWN / نیازمند بازبینی.** Map نوع Clinical Condition و جایگاه Clinical Anchor را تعیین می‌کند؛ تعریف تفصیلی افزوده نمی‌شود. |
+| داخل دامنه | Clinical Condition مرتبط با P17/S04 طبق Map. |
+| خارج از دامنه | تشخیص؛ تعریف بالینی افزوده؛ Ordinary-care؛ Need؛ Product؛ درمان. |
+| نوع واحد | Clinical Condition — VERIFIED در Map؛ Clinical Anchor |
+| رابطه با نقشه | P17/S04 — Clinical Anchor؛ Linked به P17 فقط در حد رابطهٔ Map. |
+| وضعیت تکمیل و پذیرش | Identified+Linked — Accepted = خیر |
+| وضعیت عملیاتی | Clinical-anchor only |
+| ایمنی / ارجاع | UNKNOWN؛ جزئیات referral از Map استنتاج نمی‌شود. |
+| شواهد / منشأ | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S04. |
+| زبان مشتری | UNKNOWN |
+| UNKNOWN / GAP | تعریف عملیاتی؛ HBI relevance؛ زبان مشتری؛ شواهد مستقل؛ مرز/آستانهٔ ارجاع. |
+| یادداشت بازبینی | Clinical Anchor است؛ Ordinary-care candidate نیست. |
+
+### رکورد P19 — Post-inflammatory hyperpigmentation
+
+| فیلد | محتوا |
+|------|--------|
+| ID نقشه | P19 |
+| نام کاری | Post-inflammatory hyperpigmentation |
+| تعریف عملیاتی | **UNKNOWN / نیازمند بازبینی.** Map آن را Sequela/pigmentation presentation معرفی می‌کند؛ تعریف افزوده نمی‌شود. |
+| داخل دامنه | Sequela مرتبط با P17/S04 طبق Map. |
+| خارج از دامنه | ادغام با P17؛ تعریف پزشکی افزوده؛ Need؛ Product؛ درمان. |
+| نوع واحد | Sequela/pigmentation presentation — VERIFIED در Map |
+| رابطه با نقشه | P17/S04 — Related/Sequela؛ Identified+Linked؛ شناسه حفظ می‌شود و ادغام نمی‌شود. |
+| وضعیت تکمیل و پذیرش | Identified+Linked — Accepted = خیر |
+| وضعیت عملیاتی | Undetermined |
+| ایمنی / ارجاع | UNKNOWN |
+| شواهد / منشأ | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S04 و §6 B03. |
+| زبان مشتری | UNKNOWN |
+| UNKNOWN / GAP | تعریف و مرز دقیق؛ رابطهٔ دقیق با P17؛ زبان مشتری؛ شواهد مستقل؛ ایمنی/ارجاع. |
+| یادداشت بازبینی | Sequela/Related باقی می‌ماند؛ به Problem مستقل یا Accepted تبدیل نشده است. |
+
+### رکورد P20 — Hypopigmentation
+
+| فیلد | محتوا |
+|------|--------|
+| ID نقشه | P20 |
+| نام کاری | Hypopigmentation |
+| تعریف عملیاتی | **UNKNOWN / evidence boundary retained.** Map جایگاه Problem/presentation را می‌دهد؛ مرز شواهد باید حفظ شود. |
+| داخل دامنه | Problem/presentation در S04 طبق Map، با حفظ evidence boundary. |
+| خارج از دامنه | ادعای شواهد/سبب‌شناسی بدون منبع؛ ادغام با P21؛ Need؛ Product؛ درمان. |
+| نوع واحد | Problem/presentation — VERIFIED در Map |
+| رابطه با نقشه | S04 — Mapped; evidence boundary retained. |
+| وضعیت تکمیل و پذیرش | Identified — Accepted = خیر |
+| وضعیت عملیاتی | Undetermined |
+| ایمنی / ارجاع | UNKNOWN |
+| شواهد / منشأ | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S04. |
+| زبان مشتری | UNKNOWN |
+| UNKNOWN / GAP | **Evidence boundary retained**؛ تعریف عملیاتی؛ شواهد مستقل؛ زبان مشتری؛ رابطه با P21 نامذکور و UNKNOWN. |
+| یادداشت بازبینی | هیچ توضیح یا رابطهٔ بالینی خارج از Map ساخته نشده است. |
+
+### رکورد P21 — Vitiligo
+
+| فیلد | محتوا |
+|------|--------|
+| ID نقشه | P21 |
+| نام کاری | Vitiligo |
+| تعریف عملیاتی | **UNKNOWN / نیازمند بازبینی.** Map آن را Clinical Condition و Clinical/Referral-sensitive مشخص می‌کند؛ تعریف افزوده نمی‌شود. |
+| داخل دامنه | Clinical Condition در S04 طبق Map، با حفظ حساسیت ارجاع. |
+| خارج از دامنه | Ordinary-care؛ تشخیص؛ تعریف پزشکی افزوده؛ Need؛ Product؛ درمان. |
+| نوع واحد | Clinical Condition — VERIFIED در Map؛ Clinical/Referral-sensitive |
+| رابطه با نقشه | S04 — Clinical/Referral-sensitive. |
+| وضعیت تکمیل و پذیرش | Identified — Accepted = خیر |
+| وضعیت عملیاتی | Clinical-anchor only |
+| ایمنی / ارجاع | Referral-sensitive طبق Map؛ جزئیات آستانه/پروتکل UNKNOWN. |
+| شواهد / منشأ | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S04. |
+| زبان مشتری | UNKNOWN |
+| UNKNOWN / GAP | تعریف عملیاتی؛ مرز referral؛ HBI relevance؛ زبان مشتری؛ شواهد/آستانه‌های ارجاع. |
+| یادداشت بازبینی | Clinical/Referral-sensitive؛ Ordinary-care نیست و Accepted نشده است. |
+
+### رکورد P22 — Sun-related pigmentation
+
+| فیلد | محتوا |
+|------|--------|
+| ID نقشه | P22 |
+| نام کاری | Sun-related pigmentation |
+| تعریف عملیاتی | **UNKNOWN / Context only as mapped.** Map جایگاه Context/pigmentation presentation را تعیین می‌کند. |
+| داخل دامنه | رابطهٔ Context در P17/S09؛ فقط ثبت مرز و ارجاع ساختاری. |
+| خارج از دامنه | تبدیل Context به Problem مستقل/Need؛ بازکردن یا تکمیل S09؛ ادعای علیت یا درمان. |
+| نوع واحد | Context/pigmentation presentation — VERIFIED در Map |
+| رابطه با نقشه | P17/S09 — Related/Context؛ رابطهٔ S09 ثبت می‌شود اما S09 باز نمی‌شود. |
+| وضعیت تکمیل و پذیرش | Identified+Linked — Accepted = خیر |
+| وضعیت عملیاتی | Undetermined |
+| ایمنی / ارجاع | UNKNOWN |
+| شواهد / منشأ | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S04 و §5 Cross-Shelf Relationships. |
+| زبان مشتری | UNKNOWN |
+| UNKNOWN / GAP | مرز Context با Problem؛ رابطهٔ دقیق با P17؛ جزئیات S09 خارج از دامنه؛ زبان مشتری؛ شواهد. |
+| یادداشت بازبینی | Context ≠ Accepted Problem/Need؛ S09 باز نشده است. |
+
+### رکورد P23 — Poikiloderma
+
+| فیلد | محتوا |
+|------|--------|
+| ID نقشه | P23 |
+| نام کاری | Poikiloderma |
+| تعریف عملیاتی | **UNKNOWN / Parked — Evidence Boundary.** هیچ تعریف یا ادعای شواهدی فراتر از Map افزوده نمی‌شود. |
+| داخل دامنه | ثبت وضعیت Parked/Evidence Boundary و رابطهٔ S04↔S09 طبق Map. |
+| خارج از دامنه | تکمیل بالینی؛ ادعای شواهد؛ بازکردن S09؛ Need؛ Product؛ تبدیل به Ordinary-care. |
+| نوع واحد | Clinical Condition/UV-associated presentation — VERIFIED در Map |
+| رابطه با نقشه | S04↔S09 — Parked/Evidence Boundary؛ S09 باز نمی‌شود. |
+| وضعیت تکمیل و پذیرش | Deferred — Accepted = خیر |
+| وضعیت عملیاتی | Undetermined |
+| ایمنی / ارجاع | UNKNOWN؛ هیچ آستانه‌ای از Map استنتاج نمی‌شود. |
+| شواهد / منشأ | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S04. |
+| زبان مشتری | UNKNOWN |
+| UNKNOWN / GAP | Evidence boundary؛ معیار/شرط بازگشایی؛ HBI relevance؛ زبان مشتری؛ شواهد مستقل. |
+| یادداشت بازبینی | Parked/Deferred؛ نه Accepted و نه Ordinary-care. |
+
+### روابط S04 (بدون ادغام خاموش)
+
+| ID | رابطهٔ صریح در Map | وضعیت ثبت کاری |
+|----|--------------------|-----------------|
+| P17 | S04 — Mapped | Problem/presentation؛ والد ساختاری P18/P19 در حد Map |
+| P18 | P17/S04 — Clinical Anchor | Identified+Linked؛ Clinical-anchor only |
+| P19 | P17/S04 — Related/Sequela | Identified+Linked؛ شناسه حفظ شده؛ ادغام نشده |
+| P20 | S04 — Mapped; evidence boundary retained | Identified؛ boundary در UNKNOWN/GAP حفظ شد |
+| P21 | S04 — Clinical/Referral-sensitive | Identified؛ Clinical-anchor only؛ آستانهٔ referral UNKNOWN |
+| P22 | P17/S09 — Related/Context | Context ثبت شد؛ S09 باز نشده |
+| P23 | S04↔S09 — Parked/Evidence Boundary | Deferred؛ S09 باز نشده |
+| P13 | P08→S04 — Related/Cross-Shelf | فقط ارجاع؛ رکورد S03 بدون تغییر |
+
+هیچ رابطه‌ای فراتر از Map استنباط نشده است. P17 با P18/P19 ادغام نشده؛ P20 و P21 یکی نشده‌اند؛ P22 Context و P23 Parked باقی مانده‌اند. S09 تکمیل یا باز نشده است.
+
+
 ## روابط خوشه (بدون ادغام خاموش)
 
 | ID | نقش نسبت به P01 | وضعیت |
@@ -481,8 +646,10 @@
 | پایلوت ساختاری S01 | **CLOSED** (ساختاری/ارجاعی — نه پزشکی)
 | قفسهٔ S02 | **ثبت ساختاری شده**؛ P03/P04؛ نه Accepted |
 | G1 / G8 | خارج از دامنهٔ این Closure |
-| قفسهٔ S03 | **در حال کار ساختاری**؛ P08–P16؛ نه Accepted |
-| S04–S10 | باز نشده‌اند؛ نیازمند دستور صریح PO |
+| قفسهٔ S03 | **ثبت ساختاری شده**؛ P08–P16؛ نه Accepted |
+| قفسهٔ S04 | **در حال کار ساختاری**؛ P17–P23؛ نه Accepted |
+| قفسهٔ S04 | **در حال کار ساختاری**؛ P17–P23؛ نه Accepted |
+| S05–S10 | باز نشده‌اند؛ نیازمند دستور صریح PO |
 | Need / Product | خارج از دامنه |
 
 ---
