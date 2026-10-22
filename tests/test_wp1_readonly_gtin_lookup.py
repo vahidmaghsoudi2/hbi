@@ -74,7 +74,10 @@ def _seed_product(db, *, product_id: str, gtin: str, status="DRAFT", qa="PENDING
         quantity_reserved=0,
         stock_status="OUT_OF_STOCK",
     )
+    # Persist the referenced Product before inserting Inventory. The ORM models
+    # do not define an Inventory -> Product relationship for unit-of-work ordering.
     db.add(p)
+    db.flush()
     db.add(inv)
     db.commit()
     return p
