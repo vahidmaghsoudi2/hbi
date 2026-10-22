@@ -23,6 +23,15 @@ class ProductRepository(BaseRepository[Product]):
     def update_governance_privileged(self, id: str, **kwargs) -> Optional[Product]:
         return super().update(id, **kwargs)
 
+    def find_by_barcode_gtin(self, barcode_gtin: str) -> Optional[Product]:
+        """Exact Product Master match on stored barcode_gtin (unique column). Read-only."""
+        if barcode_gtin is None:
+            return None
+        value = str(barcode_gtin).strip()
+        if not value:
+            return None
+        return self.db.query(Product).filter(Product.barcode_gtin == value).first()
+
     def find_by_brand(self, brand: str) -> List[Product]:
         return self.db.query(Product).filter(Product.brand.ilike(f"%{brand}%")).all()
 

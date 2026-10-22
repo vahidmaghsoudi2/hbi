@@ -46,6 +46,47 @@ class ProductService(BaseService[Product, ProductRepository]):
         """Return all products for authorized operational catalog views."""
         return self.repository.list_all()
 
+    def identify_by_gtin(self, barcode_gtin: str) -> dict:
+        """WP-1: read-only exact GTIN identification against Product Master.
+
+        Does not create Product, write DuplicateCheckAudit, change lifecycle/QA,
+        or mutate inventory. Returns MATCH | NO_MATCH | INVALID only.
+        """
+        if barcode_gtin is None:
+            return {"result": "INVALID", "reason": "EMPTY_GTIN", "product": None}
+        value = str(barcode_gtin).strip()
+        if not value:
+            return {"result": "INVALID", "reason": "EMPTY_GTIN", "product": None}
+        # Basic character check: GTIN digits only (8–14). Reject other tokens without DB write.
+        if not value.isdigit() or not (8 <= len(value) <= 14):
+            return {"result": "INVALID", "reason": "MALFORMED_GTIN", "product": None}
+
+        product = self.repository.find_by_barcode_gtin(value)
+        if product is None:
+            return {
+                "result": "NO_MATCH",
+                "reason": "GTIN_NOT_IN_PRODUCT_MASTER",
+                "product": None,
+                "intake_hint": "Route operator to official Product Intake; do not auto-create.",
+            }
+        return {
+            "result": "MATCH",
+            "reason": "EXACT_BARCODE",
+            "product": {
+                "product_id": product.product_id,
+                "brand": product.brand,
+                "product_name": product.product_name,
+                "variant": product.variant,
+                "size_value": product.size_value,
+                "size_unit": product.size_unit,
+                "barcode_gtin": product.barcode_gtin,
+                "product_line": product.product_line,
+                "status": product.status,
+                "identity_status": product.identity_status,
+                "qa_verdict": product.qa_verdict,
+            },
+        }
+
     def update(self, id: str, **kwargs) -> Optional[Product]:
         blocked = set(kwargs.keys()) & PRODUCT_GOVERNANCE_KEYS
         if blocked:
