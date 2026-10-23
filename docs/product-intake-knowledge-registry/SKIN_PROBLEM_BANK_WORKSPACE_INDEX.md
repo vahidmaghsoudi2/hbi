@@ -10,7 +10,7 @@
 |------|--------|
 | پایلوت ساختاری S01 | **CLOSED** — مرز و ارجاع؛ نه پذیرش پزشکی |
 | رکوردهای کاری | [SKIN_PROBLEM_BANK_WORKING_RECORDS.md](SKIN_PROBLEM_BANK_WORKING_RECORDS.md) — P01, P02, P05, P06, P07 |
-| نقشهٔ ساختاری | [SKIN_PROBLEM_SPACE_MAP_V0.1.md](SKIN_PROBLEM_SPACE_MAP_V0.1.md) — DRAFT / NOT THE ACTIVE PROBLEM BANK |
+| فهرست مرجع مشکلات پوستی | [SKIN_PROBLEM_SPACE_MAP_V0.1.md](SKIN_PROBLEM_SPACE_MAP_V0.1.md) — مرجع تعیین‌شده توسط PO؛ بدون ادعای اعتبارسنجی پزشکی/Need/Product |
 | G1 (تعیین مرجع فهرست مشکلات پوستی) | CLOSED — Map P01–P61 طبق تصمیم PO فهرست مرجع است |
 | G8 | BLOCKED / NOT VERIFIED |
 | S01 | **CLOSED** ساختاری/ارجاعی — نه پذیرش پزشکی |
@@ -94,7 +94,7 @@
 - [x] G1 با تصمیم PO برای استفاده از Map P01–P61 به‌عنوان فهرست مرجع بسته شد.
 - [ ] انتخاب shelf بعدی فقط با دستور PO پس از بازبینی Closure.
 
-**وضعیت ناوبری:** کنترل‌های مرجع روی master فعال‌اند؛ S01 ساختاری بسته و S02 تا S10 ثبت ساختاری شده‌اند. عبور ساختاری Map از S01 تا S10 کامل شد؛ Accepted/Need/Product شروع نشده است. G1 طبق تصمیم PO بسته است؛ G8 همچنان `BLOCKED / NOT VERIFIED` است.
+**وضعیت ناوبری:** کنترل‌های مرجع روی master فعال‌اند؛ S01 ساختاری بسته و S02 تا S10 ثبت ساختاری شده‌اند. عبور ساختاری Map از S01 تا S10 کامل شد؛ Map فهرست مرجع مشکلات پوستی است، اما Accepted Need/Product از آن استنتاج نمی‌شود. G1 طبق تصمیم PO بسته است؛ G8 همچنان `BLOCKED / NOT VERIFIED` است.
 
 
 ## S10 — آخرین قفسهٔ Map
