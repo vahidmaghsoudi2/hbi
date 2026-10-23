@@ -19,7 +19,7 @@ This register retires stale and superseded material from the active decision pat
 5. Preserve conflicts and gaps as unresolved until a source-backed decision resolves them.
 6. Retiring a source from the active workflow does not mean its contents are false, confidential, or safely disposable.
 7. Keep the G8 status **BLOCKED / NOT VERIFIED** until isolation, secret redaction, negative tests, raw A1–A9 evidence, and cleanup are independently demonstrated.
-8. Historical note (2026-10-17): the owner had previously directed continuation from an accepted 62-item result and prohibited repeating its reduction. The current PO decision (2026-10-22) designates the existing P01–P61 Map as the operational reference Skin Problem List and closes the parallel-list selection question. Do not reopen count-based reconciliation or maintain a parallel list. The Map designation does not imply medical validation, Need acceptance, treatment authorization, or product-recommendation permission. Historical public records remain for traceability.
+8. Current owner direction (2026-10-23): the sole operational Skin Problem List is P01–P61 in SKIN_PROBLEM_SPACE_MAP_V0.1.md. Do not use, reproduce, reconstruct, or pursue any alternative count-based list or historical candidate set. All work must stay within P01–P61. This designation does not imply medical validation, Need acceptance, treatment authorization, or product-recommendation permission.
 
 ## Active references
 
