@@ -156,3 +156,41 @@ The repository has enough existing primitives for a governed workflow: Product M
 5. Acceptance for stock receipt must separately prove quantity and a STOCK_IN movement are persisted for the same Product/Inventory identity, with an explicit FX input and no duplicate stock-in side effects.
 6. All homepage-related outcomes remain in this ledger and PR #395. No parallel homepage tracker, issue, PR, branch, or ledger is authorized.
 
+
+
+## 10. Homepage navigation and smart skincare intake — route/field audit (2026-10-23)
+
+**Sources checked on current `master`:** `frontend/src/pages/NewHomePage.tsx`, `frontend/src/App.tsx`, `frontend/src/pages/ProductIntakePanel.tsx`, `frontend/src/pages/PurchasePage.tsx`, `app/models/product.py`, `app/models/product_knowledge.py`, `app/services/product_knowledge_service.py`, and `app/api/routers/inventory.py`.
+
+### Navigation reality
+
+| Homepage section / action | Current behavior | Status |
+|---|---|---|
+| Customers → search/history and profile | Internal panel actions route to the existing customer search/profile views | PRESENT in source; browser click-through not re-run in this audit |
+| Consultation → new consultation and current-session results | Internal panel actions open existing consultation/results views; UI explicitly says full history/final operator decision is not available from the current-session results path | PRESENT with a documented limitation |
+| Sales → direct sale | Opens the existing direct-sale panel; no consultation prerequisite is stated | PRESENT in source |
+| Product Management → product list | Opens the internal managed catalog panel | PRESENT in source |
+| Product Management → intake/edit | Opens the existing Product Intake panel | PRESENT in source |
+| Product Management → QA | Routes to the managed catalog for the operator to select a product; it is not a separate direct QA screen | PRESENT, indirect selection by design |
+| Products & Inventory → inventory / low stock / stock movement | Links to `/inventory?section=inventory`, `/inventory?section=low-stock`, and `/inventory?section=stock-flow`; `App.tsx` defines the protected `/inventory` route | PRESENT in source |
+| Purchasing → physical Stock-In | Links to `/purchase`; `App.tsx` defines the protected route and `PurchasePage.tsx` calls the Stock-In API | PRESENT in source |
+| Accounting → sales and finance reports | Links to `/accounting?section=sales` and `/accounting?section=finance-report`; protected route exists | PRESENT in source |
+
+**Navigation decision:** the requested top-level areas and submenus already exist in code. Do not create a second menu or parallel pages. Source presence is not a browser proof; the menu routes have not been claimed as runtime-tested by this audit.
+
+### Smart skincare registration: what is actually wired
+
+- The button “تکمیل هوشمند اطلاعات” invokes `completeFromIntro()`, a deterministic text/regex extractor. It is not web research, evidence validation, image recognition, or barcode decoding.
+- Current Product identity model stores `brand`, `product_name`, `variant`, `size_value/unit`, `barcode_gtin`, `market_region`, `country_of_origin`, `packaging_version`, `identity_status/confidence/source_refs`, QA fields, category and product line.
+- The current intake Draft/UI does not expose the complete model contract: `country_of_origin` is absent from the Draft shape; model-level identity provenance fields are not editable intake fields; `ProductKnowledge` fields are not all part of the basic identity form. Confirm the precise field mapping and retrieval APIs before proposing additions.
+- `ProductKnowledge` has columns for ingredients, ingredient roles, claimed benefits, known use cases, contraindications, usage instructions, manufacturer claims, evidence refs/status and confidence. `ProductKnowledgeService.update_from_evidence()` rebuilds only from QA-approved/verified, non-conflicting Evidence; current mapper covers a bounded field set.
+- `PurchasePage.tsx` loads manageable existing products and the current operational FX rate; blocks Stock-In if no FX rate is available; validates positive integer quantity and nonnegative USD unit purchase price; submits to the admin-only `POST /inventory/stock-in` contract, which requires an explicit positive FX rate. Backend records a `STOCK_IN` movement. Product identification/enrichment must never call this path automatically.
+- Exact GTIN lookup remains read-only in merged PR #429. UI follow-through PR #431 is still a separate open/unmerged change and is not assumed available on `master`; camera scan and image barcode extraction remain out of the implemented path.
+
+### Actionable gaps and gate
+
+1. **No new menu construction needed.** First run a focused browser smoke test for each submenu target and record results separately from source-level existence.
+2. Complete the field-to-UI/API/model/test matrix for the missing product identity fields and the ProductKnowledge/evidence lifecycle, including read-after-write retrieval.
+3. Keep product identity, evidence/QA approval, and physical Stock-In as three separate transitions. A successful intake save must not increase quantity; only a successful Stock-In must persist both the inventory increment and its matching movement.
+4. Do not add schema/API/UI automation or image recognition before the Work Package is explicitly authorized under #402/#403 and the relevant acceptance tests are specified.
+5. Continue recording homepage findings here in this PR #395 ledger only. PR #395 remains Draft/unmerged pending exact-head verification and explicit Product Owner authorization.
