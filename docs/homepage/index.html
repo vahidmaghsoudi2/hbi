@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>شبیه‌ساز منوی هوم‌پیج HBI</title>
+<style>
+:root{color-scheme:light;--ink:#172033;--muted:#5d687c;--line:#dce2eb;--surface:#fff;--wash:#f4f6fa;--accent:#174ea6;--warn:#fff4d7}
+*{box-sizing:border-box}body{margin:0;background:var(--wash);color:var(--ink);font:16px/1.7 system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif}
+header{background:#10243e;color:white;padding:22px max(18px,calc((100% - 1100px)/2))}
+header h1{margin:0 0 4px;font-size:1.5rem}header p{margin:0;color:#d6e1f3}
+main{max-width:1100px;margin:24px auto;padding:0 16px}
+.notice{background:var(--warn);border:1px solid #e7cf8c;padding:12px 14px;border-radius:12px;margin-bottom:16px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+button,.button{border:1px solid #c7d0df;background:white;color:var(--ink);padding:8px 12px;border-radius:9px;cursor:pointer;font:inherit}
+button.primary{background:var(--accent);border-color:var(--accent);color:white}button.danger{color:#9b1c1c;border-color:#e5b9b9}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #8ab4f8;outline-offset:2px}
+.layout{display:grid;grid-template-columns:minmax(250px,0.85fr) minmax(0,1.5fr);gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
+.panel h2{margin:0 0 12px;font-size:1.1rem}.muted{color:var(--muted);font-size:.92rem}
+.menu-list{display:grid;gap:8px}.menu-card{border:1px solid var(--line);border-radius:11px;padding:10px 12px;background:white;text-align:right;width:100%}.menu-card.active{border-color:var(--accent);box-shadow:0 0 0 2px #dce8ff}.menu-card strong{display:block}.menu-card small{color:var(--muted)}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.row .grow{flex:1;min-width:150px}
+.sub-list{display:grid;gap:8px;margin-top:12px}.sub-card{border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;align-items:center;gap:8px}.sub-card span{flex:1}
+input,textarea{width:100%;border:1px solid #c7d0df;border-radius:8px;padding:9px;font:inherit;background:white;color:var(--ink)}label{display:block;font-weight:600;margin:10px 0 5px}
+form{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}.form-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.status{min-height:1.5em;color:var(--muted);margin-top:10px}
+.badge{font-size:.75rem;background:#edf2fa;border-radius:999px;padding:2px 8px;color:#33445f}
+footer{margin:18px 0;color:var(--muted);font-size:.88rem}
+@media(max-width:760px){.layout{grid-template-columns:1fr}header h1{font-size:1.25rem}}
+</style>
+</head>
+<body>
+<header>
+  <h1>HBI · شبیه‌ساز منوی هوم‌پیج</h1>
+  <p>پیش‌نمایش ساختار منوها و زیرمنوها با امکان افزودن، ویرایش، حذف و خروجی گرفتن</p>
+</header>
+<main>
+  <div class="notice"><strong>مهم:</strong> این فقط نمونهٔ مستنداتی است؛ منوی برنامهٔ اصلی یا داده‌های عملیاتی را تغییر نمی‌دهد. تغییرها ابتدا در همین مرورگر ذخیره می‌شوند. برای ثبت دائمی در مخزن، خروجی JSON را بررسی و از طریق Pull Request جایگزین <code>menu-structure.json</code> کنید.</div>
+  <div class="toolbar">
+    <button class="primary" id="addMenu">+ افزودن منوی اصلی</button>
+    <button id="exportJson">دریافت خروجی JSON</button>
+    <button id="reset">بازگشت به نسخهٔ ثبت‌شده</button>
+    <label class="button" for="importFile" style="margin:0;cursor:pointer">ورود JSON</label>
+    <input id="importFile" type="file" accept="application/json,.json" hidden>
+  </div>
+  <div class="layout">
+    <section class="panel">
+      <h2>منوهای اصلی <span class="badge" id="menuCount"></span></h2>
+      <p class="muted">برای مشاهده و مدیریت زیرمنوها، یک منو را انتخاب کنید.</p>
+      <div class="menu-list" id="menuList"><p>در حال بارگذاری ساختار…</p></div>
+    </section>
+    <section class="panel">
+      <div class="row">
+        <h2 class="grow" id="detailTitle">جزئیات منو</h2>
+        <button id="editMenu">ویرایش منو</button>
+        <button class="danger" id="deleteMenu">حذف منو</button>
+      </div>
+      <p class="muted" id="detailDescription"></p>
+      <div class="row"><h2 class="grow">زیرمنوها</h2><button class="primary" id="addSubmenu">+ افزودن زیرمنو</button></div>
+      <div class="sub-list" id="submenuList"></div>
+      <form id="editor" hidden>
+        <h2 id="formTitle">ویرایش</h2>
+        <label for="itemLabel">نام</label><input id="itemLabel" required maxlength="120">
+        <label for="itemDescription">توضیح (اختیاری)</label><textarea id="itemDescription" rows="2" maxlength="500"></textarea>
+        <div class="form-actions"><button class="primary" type="submit">ذخیره در پیش‌نویس</button><button type="button" id="cancelEdit">انصراف</button></div>
+      </form>
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+    </section>
+  </div>
+  <footer>مرجع ساختار اولیه: <code>frontend/src/pages/NewHomePage.tsx</code> و ممیزی <code>docs/HOMEPAGE_IA_AUDIT_STAGE2.md</code>. موارد ثبت‌شده با برچسب «مشاهده‌شده» از ساختار فعلی استخراج شده‌اند؛ این پیش‌نمایش به‌معنای تأیید تغییرات محصولی نیست.</footer>
+</main>
+<script>
+(() => {
+  const DATA_URL = "./menu-structure.json";
+  // Embedded fallback lets the same prototype render in static preview services.
+  // Keep this snapshot synchronized with menu-structure.json when menu data changes.
+  const EMBEDDED_DATA = {"schema_version":1,"title":"HBI | شبیه‌ساز منوی هوم‌پیج","source":{"observed_file":"frontend/src/pages/NewHomePage.tsx","observed_ref":"master","observed_commit":"856922bfcd6616a7049a046cfc6c8741e95845fd","supporting_audit":"docs/HOMEPAGE_IA_AUDIT_STAGE2.md"},"notice":"این ساختار برای مستندسازی و شبیه‌سازی است و به‌تنهایی منوی برنامهٔ عملیاتی را تغییر نمی‌دهد.","menus":[{"id":"home","label":"خانه و داشبورد","status":"observed","description":"نمای کلی عملیات و هشدارهای قابل اقدام.","submenus":[{"id":"home-summary","label":"خلاصهٔ عملیات","status":"observed"},{"id":"home-attention","label":"موارد نیازمند توجه","status":"observed"},{"id":"home-stock-movements","label":"آخرین گردش‌های انبار","status":"observed"},{"id":"home-quick-actions","label":"اقدام سریع: فروش مستقیم، مشتریان، مشاوره","status":"observed"}]},{"id":"customers","label":"مشتریان","status":"observed","description":"پروفایل، جست‌وجو و سابقهٔ خرید مشتری.","submenus":[{"id":"customer-search","label":"جست‌وجو و سابقه","status":"observed"},{"id":"customer-profile","label":"پروفایل مشتری","status":"observed"}]},{"id":"consultation","label":"مشاوره","status":"observed","description":"ثبت مسئله، بررسی نیاز و مشاهدهٔ پیشنهادهای واجد شرایط.","submenus":[{"id":"consultation-new","label":"مشاوره جدید","status":"observed"},{"id":"consultation-results","label":"نتایج مشاوره جاری","status":"observed"}]},{"id":"sales","label":"فروش","status":"observed","description":"ثبت فروش؛ مشاوره پیش‌نیاز فروش مستقیم نیست.","submenus":[{"id":"sales-direct","label":"ثبت فروش مستقیم","status":"observed"}]},{"id":"products","label":"مدیریت محصولات","status":"observed","description":"فهرست، ورود اطلاعات و بررسی QA؛ مستقل از ورود فیزیکی موجودی.","submenus":[{"id":"products-list","label":"فهرست کالاها","status":"observed"},{"id":"products-intake","label":"ورود و ویرایش محصول","status":"observed"},{"id":"products-qa","label":"بررسی و تأیید QA","status":"observed"}]},{"id":"inventory","label":"کالا و موجودی","status":"observed","description":"مشاهدهٔ موجودی و گردش‌های انبار؛ جدا از مدیریت اطلاعات و تأیید محصول.","submenus":[{"id":"inventory-stock","label":"موجودی کالا","status":"observed"},{"id":"inventory-low-stock","label":"کمبود موجودی","status":"observed"},{"id":"inventory-movements","label":"گردش کالا","status":"observed"}]},{"id":"purchases","label":"خرید","status":"observed","description":"ثبت خرید و ورود فیزیکی موجودی.","submenus":[{"id":"purchase-stock-in","label":"خرید / ورود موجودی","status":"observed"}]},{"id":"reports","label":"حسابداری و گزارش‌ها","status":"observed","description":"گزارش فروش و مالی؛ گزارش موجودی و گردش کالا در بخش «کالا و موجودی» قرار دارد.","submenus":[{"id":"report-sales","label":"گزارش فروش","status":"observed"},{"id":"report-finance","label":"گزارش مالی","status":"observed"}]}],"top_actions":[{"id":"top-main-menu","label":"منوی اصلی","status":"observed"},{"id":"top-logout","label":"خروج از حساب مدیر","status":"observed"}],"not_currently_in_main_menu":[{"id":"settings","label":"تنظیمات","note":"در ممیزی IA قبلی پیشنهاد/ذکر شده، اما در هشت کارت منوی اصلی فعلی NewHomePage دیده نمی‌شود؛ تا تأیید و مشاهدهٔ کد، منوی فعال محسوب نشود."}]};
+  const STORAGE_KEY = "hbi-homepage-menu-prototype-v1";
+  const $ = (id) => document.getElementById(id);
+  let baseline = null, data = null, selectedId = null, editorMode = null;
+  const uid = (prefix) => prefix + "-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,7);
+  const esc = (value) => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const selected = () => data?.menus.find(m => m.id === selectedId) || null;
+  function say(message){ $("status").textContent = message; }
+  function saveLocal(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); say("پیش‌نویس در همین مرورگر ذخیره شد؛ هنوز در GitHub ثبت نشده است."); } catch { say("ذخیرهٔ محلی در دسترس نیست؛ خروجی JSON بگیرید."); } }
+  function render(){
+    const list = $("menuList");
+    $("menuCount").textContent = String(data.menus.length);
+    if (!data.menus.some(m => m.id === selectedId)) selectedId = data.menus[0]?.id ?? null;
+    list.innerHTML = data.menus.map(m => '<button class="menu-card '+(m.id===selectedId?'active':'')+'" data-menu="'+esc(m.id)+'"><strong>'+esc(m.label)+'</strong><small>'+m.submenus.length+' زیرمنو</small></button>').join("");
+    list.querySelectorAll("[data-menu]").forEach(b => b.addEventListener("click", () => { selectedId=b.dataset.menu; closeEditor(); render(); }));
+    const m = selected();
+    $("detailTitle").textContent = m ? m.label : "منویی انتخاب نشده";
+    $("detailDescription").textContent = m ? (m.description || "توضیحی ثبت نشده است.") : "برای شروع یک منو اضافه کنید.";
+    ["editMenu","deleteMenu","addSubmenu"].forEach(id => $(id).disabled = !m);
+    $("submenuList").innerHTML = m ? (m.submenus.length ? m.submenus.map(s => '<div class="sub-card"><span>'+esc(s.label)+'</span><button data-edit-sub="'+esc(s.id)+'">ویرایش</button><button class="danger" data-delete-sub="'+esc(s.id)+'">حذف</button></div>').join("") : '<p class="muted">هنوز زیرمنویی ثبت نشده است.</p>') : "";
+    $("submenuList").querySelectorAll("[data-edit-sub]").forEach(b => b.addEventListener("click", () => openEditor("edit-sub", b.dataset.editSub)));
+    $("submenuList").querySelectorAll("[data-delete-sub]").forEach(b => b.addEventListener("click", () => {
+      const current=selected(); const sub=current?.submenus.find(s=>s.id===b.dataset.deleteSub); if(!sub)return;
+      if(confirm("زیرمنوی «"+sub.label+"» حذف شود؟")){current.submenus=current.submenus.filter(s=>s.id!==sub.id);saveLocal();render();}
+    }));
+  }
+  function closeEditor(){ $("editor").hidden=true; editorMode=null; }
+  function openEditor(mode, id=null){
+    editorMode={mode,id}; const m=selected(); let item=null;
+    if(mode==="edit-menu") item=m;
+    if(mode==="edit-sub") item=m?.submenus.find(s=>s.id===id);
+    $("formTitle").textContent=({ "add-menu":"افزودن منوی اصلی","edit-menu":"ویرایش منوی اصلی","add-sub":"افزودن زیرمنو","edit-sub":"ویرایش زیرمنو"})[mode];
+    $("itemLabel").value=item?.label||""; $("itemDescription").value=item?.description||"";
+    $("editor").hidden=false; $("itemLabel").focus();
+  }
+  $("editor").addEventListener("submit",e=>{
+    e.preventDefault(); const label=$("itemLabel").value.trim(); if(!label)return;
+    const description=$("itemDescription").value.trim();
+    const {mode,id}=editorMode;
+    if(mode==="add-menu"){const m={id:uid("menu"),label,description,status:"proposed",submenus:[]};data.menus.push(m);selectedId=m.id;}
+    if(mode==="edit-menu"){const m=selected();m.label=label;m.description=description;}
+    if(mode==="add-sub"){selected().submenus.push({id:uid("sub"),label,description,status:"proposed"});}
+    if(mode==="edit-sub"){const s=selected().submenus.find(x=>x.id===id);s.label=label;s.description=description;}
+    closeEditor();saveLocal();render();
+  });
+  $("cancelEdit").addEventListener("click",closeEditor);
+  $("addMenu").addEventListener("click",()=>openEditor("add-menu"));
+  $("editMenu").addEventListener("click",()=>openEditor("edit-menu"));
+  $("addSubmenu").addEventListener("click",()=>openEditor("add-sub"));
+  $("deleteMenu").addEventListener("click",()=>{const m=selected();if(!m)return;if(confirm("منوی «"+m.label+"» و همهٔ زیرمنوهایش حذف شود؟")){data.menus=data.menus.filter(x=>x.id!==m.id);selectedId=data.menus[0]?.id??null;saveLocal();render();}});
+  $("exportJson").addEventListener("click",()=>{const blob=new Blob([JSON.stringify(data,null,2)+"\n"],{type:"application/json;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="menu-structure.json";a.click();URL.revokeObjectURL(url);say("خروجی JSON آماده شد. برای ثبت پایدار، فایل را بازبینی و از طریق PR در مخزن ثبت کنید.");});
+  $("reset").addEventListener("click",()=>{if(!confirm("همهٔ تغییرات پیش‌نویس این مرورگر کنار گذاشته و نسخهٔ ثبت‌شده دوباره بارگذاری شود؟"))return;localStorage.removeItem(STORAGE_KEY);data=structuredClone(baseline);selectedId=data.menus[0]?.id??null;render();closeEditor();say("نسخهٔ ثبت‌شده بارگذاری شد.");});
+  $("importFile").addEventListener("change",async e=>{const file=e.target.files?.[0];if(!file)return;try{const parsed=JSON.parse(await file.text());if(!Array.isArray(parsed.menus)||!parsed.menus.every(m=>typeof m.label==="string"&&Array.isArray(m.submenus)))throw new Error("ساختار فایل معتبر نیست.");data=parsed;selectedId=data.menus[0]?.id??null;saveLocal();render();say("JSON وارد شد و به‌عنوان پیش‌نویس محلی بارگذاری شد.");}catch(err){say("ورود ناموفق: "+(err?.message||"فایل نامعتبر است."));}finally{e.target.value="";}});
+  async function init(){
+    let sourceMessage="ساختار ثبت‌شده از menu-structure.json بارگذاری شد.";
+    try{
+      const response=await fetch(DATA_URL,{cache:"no-store"});
+      if(!response.ok)throw new Error("بارگذاری JSON ناموفق بود: "+response.status);
+      baseline=await response.json();
+    }catch{
+      baseline=structuredClone(EMBEDDED_DATA);
+      sourceMessage="پیش‌نمایش از نسخهٔ تعبیه‌شدهٔ ساختار منو بارگذاری شد.";
+    }
+    let local=null;
+    try{local=localStorage.getItem(STORAGE_KEY);}catch{}
+    try{data=local?JSON.parse(local):structuredClone(baseline);}catch{data=structuredClone(baseline);}
+    if(!Array.isArray(data.menus))data=structuredClone(baseline);
+    selectedId=data.menus[0]?.id??null;render();
+    say(local?"پیش‌نویس ذخیره‌شدهٔ همین مرورگر بارگذاری شد.":sourceMessage);
+  }
+  init();
+})();
+</script>
+</body>
+</html>
