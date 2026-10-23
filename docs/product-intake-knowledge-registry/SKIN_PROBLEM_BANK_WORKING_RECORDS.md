@@ -1,13 +1,13 @@
 # HBI — رکوردهای کاری بانک مشکلات پوستی (S01 بسته؛ S02–S09 ثبت ساختاری؛ S10 در حال کار ساختاری)
 
 **شناسه:** HBI-SKIN-PROBLEM-BANK-WORKING-RECORDS  
-**ناوبری مرجع:** [فهرست عملیاتی](SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) ← [مرجع تجمیعی](SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md) ← همین رکوردهای کاری؛ برای مرزهای ساختاری به [نقشهٔ پیش‌نویس (DRAFT / NOT THE ACTIVE PROBLEM BANK)](SKIN_PROBLEM_SPACE_MAP_V0.1.md) مراجعه کنید.  
+**ناوبری مرجع:** [فهرست عملیاتی](SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) ← [مرجع تجمیعی](SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md) ← همین رکوردهای کاری؛ برای مرزهای ساختاری به [نقشهٔ مرجع مشکلات پوستی P01–P61 (مرجع عملیاتی؛ بدون پذیرش پزشکی)](SKIN_PROBLEM_SPACE_MAP_V0.1.md) مراجعه کنید.  
 **وضعیت:** **S01 STRUCTURALLY CLOSED; S02–S09 STRUCTURAL REGISTERED; S10 STRUCTURAL WORK IN PROGRESS** (2026-10-22) — S01 فقط از نظر مرز/ارجاع بسته است؛ S02 تا S09 ثبت ساختاری شده‌اند؛ S10 بستهٔ کاری ساختاری جاری و آخرین قفسهٔ Map است؛ **هیچ مورد جدیدی Accepted پزشکی/بانک نهایی نیست**  
 **پوشه:** `docs/product-intake-knowledge-registry/` (فقط همین حوزه)  
 **تاریخ تأییدهای PO (مرزها):** 2026-10-20  
 **تاریخ بستن ساختاری پایلوت:** 2026-10-22  
 **مالک تصمیم:** مقصودی (PO)  
-**مبنای ساختاری:** `SKIN_PROBLEM_SPACE_MAP_V0.1.md` (master)  
+**مرجع فهرست مشکلات پوستی:** `SKIN_PROBLEM_SPACE_MAP_V0.1.md`؛ نقشهٔ P01–P61 طبق تصمیم PO مرجع عملیاتی فهرست است، بدون ادعای پذیرش پزشکی، Need یا مجوز توصیهٔ محصول.  
 **مراجع ادغام مرتبط:** PR #413، #414، #409 (merged)  
 **محدودیت:** این سند Problem Bank V1 نهایی، Need، Product link، یا تأیید پزشکی نیست.
 
@@ -32,7 +32,7 @@
 
 | موضوع | وضعیت |
 |--------|--------|
-| G1 — فهرست پذیرفته‌شدهٔ ۶۲ موردی | **NOT RECOVERED** — خارج از دامنهٔ پایلوت S01؛ بازسازی ممنوع |
+| G1 — انتخاب مرجع فهرست مشکلات پوستی | **CLOSED BY PO DECISION** — نقشهٔ P01–P61 مرجع فهرست است؛ جست‌وجو/بازسازی فهرست موازی ۶۲ موردی متوقف است. این تصمیم به معنی پذیرش پزشکی، Need یا مجوز پیشنهاد محصول نیست. |
 | G8 | **BLOCKED / NOT VERIFIED** |
 | Need extraction | شروع نشده |
 | Problem↔Product | شروع نشده |
