@@ -235,3 +235,32 @@ Use them to trace provenance only. Where an older record differs from current `m
 - No application code, API, schema, database, production menu, or product lifecycle behavior is authorized by this documentation reconciliation.
 - Keep HP-05 and HP-07 as the only targeted follow-ups already defined in this ledger; do not turn the menu documentation into a broad navigation rewrite.
 - Keep all current homepage execution status, blockers, evidence, and handoff updates in this single ledger and PR #395. Do not create a parallel homepage issue, PR, branch, roadmap, or status register.
+
+## 11. Product Intake GTIN lookup — cross-reference and evidence boundary (2026-10-23)
+
+This section links the homepage ledger to the existing Product Intake work. It does not move authority, duplicate the implementation plan, or claim that the open UI PR is deployed.
+
+### Canonical implementation references
+
+- [Issue #403](https://github.com/vahidmaghsoudi2/hbi/issues/403) is the overarching roadmap; [Issue #398](https://github.com/vahidmaghsoudi2/hbi/issues/398) governs the Product Intake WP-1 authorization.
+- [PR #429](https://github.com/vahidmaghsoudi2/hbi/pull/429) is **MERGED** and supplies the backend exact-GTIN lookup as a read-only Product Master query. Its contract returns `MATCH`, `NO_MATCH`, or `INVALID`; it does not create a Product or mutate lifecycle, QA, Inventory, or StockMovement.
+- [PR #431](https://github.com/vahidmaghsoudi2/hbi/pull/431) is **OPEN / NOT MERGED**. It carries the frontend action in the existing Product Intake panel. For `NO_MATCH`, the operator stays in the official intake flow and must pass the existing DuplicateCheck-before-create gate. Camera/OCR/image barcode extraction is explicitly out of scope.
+- The production homepage source remains `frontend/src/pages/NewHomePage.tsx` on `master`; `docs/homepage/menu-structure.json` is only the documentation prototype's menu data.
+
+### Exact-head evidence checked
+
+Current PR #431 head: `fbb4c9123733a89fd1f1e5a9f944326564e8bf27`.
+
+- [HBI CI run 39830344096](https://github.com/vahidmaghsoudi2/hbi/actions/runs/39830344096): **success**, run metadata confirms the exact head above.
+- [HBI Auto Tasks run 39830344095](https://github.com/vahidmaghsoudi2/hbi/actions/runs/39830344095): **success**, exact head confirmed.
+- [HBI Pilot Browser Proof run 39830344082](https://github.com/vahidmaghsoudi2/hbi/actions/runs/39830344082): **success**, exact head confirmed.
+
+These results supersede stale PR-body wording that names a different SHA for the checks. They establish successful workflows on the current PR #431 head only. They do **not** mean PR #431 is merged, that the change is present on `master`, or that every homepage operator path has passed.
+
+### Checklist and merge boundary
+
+- Keep `docs/homepage/USER_PATH_CHECKLIST.md` rows A1–E2 at **NOT RUN** until each applicable operator path has direct evidence linked in that checklist. A successful PR-specific browser workflow must not be generalized to every row.
+- The GTIN lookup UI remains pending on PR #431; do not describe it as a currently available production homepage capability.
+- No merge, new Issue/PR/branch, production-menu edit, schema/API expansion, or Product Master/Inventory mutation is authorized by this reconciliation.
+- Before merging this ledger PR, reconcile its branch with current `master`: the live comparison shows the PR #395 branch is **22 commits ahead and 4 behind**, with a diverged history. Do not merge on the basis of green checks alone; re-review the complete diff and retain explicit Product Owner merge authorization.
+
