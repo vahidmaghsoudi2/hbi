@@ -4,12 +4,13 @@
 
 ## Start here
 
-- **[Open the menu prototype](index.html)** — visual menu/submenu simulator with add, edit, delete, import and JSON export.
+- **[View interactive menu preview](https://htmlpreview.github.io/?https://github.com/vahidmaghsoudi2/hbi/blob/docs/homepage-operational-folder-20261023/docs/homepage/index.html)** — opens the prototype in a static preview service.
+- **[Open prototype source](index.html)** — HTML source stored in this repository.
 - **[Canonical observed menu structure](menu-structure.json)** — editable source data used by the prototype.
 - [Operational roadmap](ROADMAP.md) — completion stages and evidence gates.
 - [User-path checklist](USER_PATH_CHECKLIST.md) — observed user paths and test evidence slots.
 
-> The prototype edits only a browser-local draft. To persist changes in the repository, export the JSON, review it, then submit the revised `menu-structure.json` through a Pull Request. The prototype does not write to GitHub automatically.
+> The prototype edits only a browser-local draft. To persist changes in the repository, export the JSON, review it, then submit the revised `menu-structure.json` through a Pull Request. The prototype does not write to GitHub automatically. The interactive preview uses a third-party static preview service and is not GitHub Pages or a production deployment. `menu-structure.json` remains the canonical menu data; the embedded fallback in `index.html` must be refreshed whenever that JSON changes.
 
 ## Authority map
 
