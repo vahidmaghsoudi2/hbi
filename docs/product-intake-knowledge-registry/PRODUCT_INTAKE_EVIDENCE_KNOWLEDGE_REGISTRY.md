@@ -240,7 +240,7 @@ Numbuzin 50 Peptides؛ identity، provenance، claim taxonomy، Evidence→Produ
 | Item | Status |
 |---|---|
 | New Home product menu | IMPLEMENTED |
-| Product Intake UI | IMPLEMENTED |
+| Base Product Intake UI | IMPLEMENTED; GTIN lookup UI pending PR #431 |
 | DuplicateCheck | IMPLEMENTED |
 | Evidence / ProductKnowledge governance | IMPLEMENTED |
 | Research Draft orchestration | IMPLEMENTED |
@@ -339,3 +339,51 @@ Target-branch checks completed for the six relocations in §14.1; the remaining 
 7. One source of truth per purpose: Issue #283 for operational tracking; this registry for navigation and evidence mapping; the approved contract for binding behavior; the execution log and A1–A9 ledger for runtime facts.
 
 **Documentation relocation status:** six legacy paths absent, six consolidated destinations verified, and targeted inbound-link scan completed. **Residual limitation:** GitHub code search is incomplete, so repo-wide absence of every historical textual reference is not asserted. **G8 status remains BLOCKED / NOT VERIFIED** until its independent runtime acceptance criteria pass.
+
+## 15. Product Intake / Gallery registration — current operational record (2026-10-23)
+
+**Purpose:** concise operational handoff for product registration. This is recorded inside the established registry, not a new parallel knowledge document. The approved contract remains binding; Issue #283 remains the operational G8 tracker; Issue #398 governs Gallery/barcode WP-1.
+
+### 15.1 Canonical references and verified status
+
+- **Binding Skin contract:** [SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md](./SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md). The P4 governance contract remains binding for lifecycle, roles, approval/activation, and mutation/audit rules where applicable.
+- **Operational tracker:** [Issue #283](https://github.com/vahidmaghsoudi2/hbi/issues/283). **A1–A9 ledger:** [G8_ACCEPTANCE_EVIDENCE.md](./G8_ACCEPTANCE_EVIDENCE.md). **Phase plan:** [PRODUCT_INTAKE_ROADMAP.md](./PRODUCT_INTAKE_ROADMAP.md). **Dated execution log:** [PRODUCT_INTAKE_EXECUTION_LOG.md](./PRODUCT_INTAKE_EXECUTION_LOG.md).
+- **Gallery/barcode scope:** [Issue #398](https://github.com/vahidmaghsoudi2/hbi/issues/398).
+- **Backend exact-GTIN lookup:** [PR #429](https://github.com/vahidmaghsoudi2/hbi/pull/429), **MERGED** at `6ade29194929ae4ec61acc0b524bc582c9c75c85`.
+- **UI connection:** [PR #431](https://github.com/vahidmaghsoudi2/hbi/pull/431), **OPEN / NOT MERGED**; observed head `fbb4c9123733a89fd1f1e5a9f944326564e8bf27`. HBI CI, HBI Auto Tasks and HBI Pilot Browser Proof all succeeded on that exact head. This is evidence for the PR branch only; it does not mean the UI change is on `master`, the PR is merged, or the complete real-product lifecycle passed.
+- **Reconciliation scope:** targeted live check on 2026-10-23; observed `master` SHA at start `ff38abac2ff1184c3fda168403a6a96a38d0a0ab`. This is not a claim that every historical statement in this registry was re-audited.
+
+### 15.2 Operator flow and input-method boundary
+
+1. Existing base navigation: **New Home → Products → Product Intake**. The base intake form and DuplicateCheck exist in the repository.
+2. Merged route: `GET /api/v1/products/by-gtin/{gtin}`, protected for Editor / QA / PO / Admin. It is a read-only exact-GTIN query returning `MATCH`, `NO_MATCH`, or `INVALID`; a unique match returns a Product summary only.
+3. The operator-facing UI action calling this route is in open PR #431, not yet merged to `master`. On that PR branch, `MATCH` displays the existing Product Master summary; changing GTIN clears stale results; `NO_MATCH` keeps the operator in official Intake and exposes the DuplicateCheck path; `INVALID` or request errors show an error without creating or mutating a record.
+4. Lookup is not registration. It does not create Product, call/write DuplicateCheck audit, change `status`, `qa_verdict` or `identity_status`, or mutate Inventory/StockMovement. `NO_MATCH` is not permission to create; official creation must retain DuplicateCheck-before-create.
+5. WP-1 covers a **manual exact-GTIN lookup action**. A physical scanner that types a code into the field is not proof of separately integrated scanner support. Camera, OCR, JPG/PNG image barcode extraction and webcam intake are **NOT IMPLEMENTED / OUT OF SCOPE for WP-1**; do not advertise them as working.
+6. Product registration, QA/review/approval/activation, and physical stock-in are separate workflows. Product creation does not add stock. No fabricated inventory, auto-activation, or automatic recommendation eligibility is permitted.
+
+### 15.3 Required product-registration controls
+
+- Operator explicitly selects `product_line` (for Skin, `SKIN`); do not infer it from product name, category, or AI.
+- Establish identity, variant/formulation, market, size and GTIN from authoritative packaging/manufacturer evidence where available. Similar names do not prove the same formulation or market. Unresolved identity remains `UNKNOWN` or `CONFLICT`; do not merge uncertain matches.
+- Run the official DuplicateCheck before creation. Persist and read back the initial lifecycle state; no premature transition.
+- Every research assertion must retain source provenance and use approved V1 claim types: `FACT`, `MANUFACTURER_CLAIM`, `EVIDENCE`, `INFERENCE`, `UNKNOWN`, `CONFLICT`. Marketing text is not independent efficacy evidence. AI cannot turn inference into fact or approve/activate a product.
+- Product dossier groups: identity/deduplication; INCI/composition; manufacturer statements; evidence-backed claims with source/version/applicability; intended use and compatibility; safety/cautions/exclusions; provenance, reviewer/governance state, unknowns/conflicts and readback. See §3B and §7 above. This dossier does not authorize schema or eligibility-field changes.
+- Follow the governed lifecycle: `INTRODUCE → DUPLICATE → RESEARCH → EVIDENCE → SAFETY → VALIDATE → REVIEW → APPROVE → ACTIVATE → PRODUCT MASTER → RECOMMENDATION-READY`. Approval/activation requires the contract prerequisites and authorized role. Stock receipt remains separate.
+
+### 15.4 Acceptance status and actual gaps
+
+- **G8 = BLOCKED / NOT VERIFIED.** Current A1–A9 ledger: A1–A4 PARTIAL; A5–A8 NOT VERIFIED; A9 PARTIAL. CI, unit tests, fixtures and a stubbed UI lookup scenario are supporting evidence, not real operator-pilot acceptance.
+- No verified complete live Gallery inventory or current real-product database readback is established by this document package. A test candidate is not proof of an existing Gallery product; historical Product A–D references are not current inventory proof.
+- A full operator session, safety/permission-denial evidence, authorized approval/activation readback, downstream recommendation readback, and independent disposable-environment cleanup/production-isolation proof have not been accepted for G8.
+- Automated external research/enrichment is **NOT IMPLEMENTED / NOT VERIFIED**. Research Draft orchestration alone does not prove live web research, automatic source collection, or approved ProductKnowledge generation.
+
+### 15.5 Next execution sequence
+
+1. Review PR #431 against its exact current head and base; verify exact-head checks/browser evidence and obtain explicit Product Owner merge authorization before merge. Green workflows are not merge authorization.
+2. After an authorized merge, verify the merged SHA on `master`, rerun applicable checks against that SHA, and confirm the operator UI path in the target environment. Any path without direct evidence stays `NOT RUN`.
+3. Separately prepare the approved disposable G8 environment. Do not create/seed product data or run the pilot until isolation, evidence capture and cleanup are verified. Capture raw A1–A9 artifacts tied to exact SHA/environment and obtain independent review.
+4. Keep G8 blocked until every required criterion passes. Do not change production data, schema, lifecycle, inventory, scoring, or recommendation gates to force acceptance.
+
+**Change boundary:** this record is documentation-only. It authorizes no PR merge, production UI/API/schema/DB change, Product creation, stock receipt, approval/activation, or G8 PASS.
+
