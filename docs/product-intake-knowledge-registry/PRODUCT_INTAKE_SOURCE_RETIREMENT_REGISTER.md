@@ -19,7 +19,7 @@ This register retires stale and superseded material from the active decision pat
 5. Preserve conflicts and gaps as unresolved until a source-backed decision resolves them.
 6. Retiring a source from the active workflow does not mean its contents are false, confidential, or safely disposable.
 7. Keep the G8 status **BLOCKED / NOT VERIFIED** until isolation, secret redaction, negative tests, raw A1–A9 evidence, and cleanup are independently demonstrated.
-8. The Product Owner clarified on 2026-10-17 that the previously directed reduction of the initial inventory to the accepted 62-item result had already been completed. Do not reopen or repeat that reduction. Continue from the accepted 62-item result and recover its saved version from existing records if needed. Do not reintroduce the superseded detailed inventory in handoff summaries or AI task packets. This governs active working material; it does not claim that public Git history has been erased.
+8. Historical note (2026-10-17): the owner had previously directed continuation from an accepted 62-item result and prohibited repeating its reduction. The current PO decision (2026-10-22) designates the existing P01–P61 Map as the operational reference Skin Problem List and closes the parallel-list selection question. Do not reopen count-based reconciliation or maintain a parallel list. The Map designation does not imply medical validation, Need acceptance, treatment authorization, or product-recommendation permission. Historical public records remain for traceability.
 
 ## Active references
 
@@ -31,7 +31,7 @@ This register retires stale and superseded material from the active decision pat
 - [Skin Product Intake Execution Contract v1.1](./SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md) — approved execution baseline.
 - [Skin Product Intake Strategic Baseline v0.1](./SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md) — strategy reference; retain its draft/version status.
 - [Product Intake Evidence Knowledge Registry](./PRODUCT_INTAKE_EVIDENCE_KNOWLEDGE_REGISTRY.md) — evidence and knowledge registry.
-- [Skin Problem Space Map v0.1](./SKIN_PROBLEM_SPACE_MAP_V0.1.md) — DRAFT taxonomy only; not a final Problem Bank, diagnosis, or authorization to recommend products.
+- [Skin Problem Space Map v0.1](./SKIN_PROBLEM_SPACE_MAP_V0.1.md) — owner-designated operational reference Skin Problem List P01–P61; not medical validation, Need acceptance, diagnosis, or authorization to recommend products.
 - [Issue #283](https://github.com/vahidmaghsoudi2/hbi/issues/283) — G8 execution tracker; refresh stale baseline references in a reviewed docs update.
 - [Issue #37](https://github.com/vahidmaghsoudi2/hbi/issues/37) — weighting remains unapproved; no numeric weighting or percentages.
 
@@ -43,7 +43,7 @@ This register retires stale and superseded material from the active decision pat
 | Strategic Baseline v0.1 | ACTIVE REFERENCE / VERSIONED | Preserve status/version; do not imply it is an implementation acceptance record. |
 | Evidence Knowledge Registry | ACTIVE REFERENCE | Preserve unknown/empty distinctions, provenance, conflicts, and evidence status. |
 | Skin Problem Bank Consolidated Reference | ACTIVE WORKING ENTRY POINT after PR #409 merges | Start here for Problem Bank status/navigation; not clinical acceptance or a reconstructed accepted list. |
-| Skin Problem Space Map P01–P61 | DRAFT / UNACCEPTED | Keep visible as a draft; retain known cross-shelf conflicts and missing customer-language evidence. |
+| Skin Problem Space Map P01–P61 | OWNER-DESIGNATED REFERENCE LIST (OPERATIONAL) | Use as the reference list; preserve recorded item labels/relationships and UNKNOWN/GAPs. This is not medical validation, Need acceptance, or product-recommendation permission. |
 | Product A–D records and ISDIN evidence ledger | HISTORICAL PRODUCT RECORDS / EVIDENCE INCOMPLETE | Preserve both records and ledger; do not infer current stock or complete INCI. |
 | Product-intake mission, governance reconciliation, live project ledger, master roadmap, forensic report, Mission A audit | HISTORICAL / RECONCILIATION SOURCE | Stop using these as parallel active status dashboards. Preserve unique decisions and date-specific history; link back to this register and Issue #396. |
 | Older generic Product Intake Contract v1 | HISTORICAL / AUTHORITY RELATIONSHIP NEEDS CLARIFICATION | Preserve until its unique rules are reconciled against the current contract. |

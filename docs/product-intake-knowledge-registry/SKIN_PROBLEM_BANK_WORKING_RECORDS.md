@@ -1536,7 +1536,7 @@ No relationship beyond the live Map is inferred. P51's locked disposition is not
 | P60 | Systemic-associated presentation | S10 — Clinical Anchor | Identified; Clinical-anchor only; Accepted = No |
 | P61 | Symptom / cross-shelf context | S09↔S10 — Clinical/Context relationship | Identified; retain Context relation; Accepted = No |
 
-No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care candidate or Need. P61's S09↔S10 relationship is recorded without reopening or rewriting S09. G1 remains NOT RECOVERED; G8 remains BLOCKED / NOT VERIFIED.
+No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care candidate or Need. P61's S09↔S10 relationship is recorded without reopening or rewriting S09. G1 is CLOSED BY PO DECISION (Map P01–P61 is the reference list); G8 remains BLOCKED / NOT VERIFIED.
 
 ### Structural traversal completion
 
