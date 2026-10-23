@@ -91,7 +91,7 @@ P01 Dry skin/Xerosis — Problem/Clinical presentation — S01 — Mapped
 P02 Dehydration/impaired moisture retention — Manifestation/related presentation — P01 — MERGE/RELATED TO P01  
 P05 Sensitive skin — Problem/presentation — S01 — Mapped  
 P06 Irritant dermatitis — Clinical Condition/inflammatory presentation — S01→S05 — Clinical Anchor  
-P07 Fissuring/cracking — Manifestation — P01/S01 — Manifestation, not separate Need
+P07 Fissuring/cracking — Manifestation — S01; relation to P01 UNKNOWN pending direct evidence — Manifestation, not separate Need
 
 ### S02
 P03 Oily skin/Seborrhoea — Problem/presentation — S02 — Mapped  
