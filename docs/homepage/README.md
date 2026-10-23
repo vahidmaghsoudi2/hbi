@@ -19,14 +19,14 @@
 | **[Issue #406](https://github.com/vahidmaghsoudi2/hbi/issues/406) body** | Sole authority for product decisions, permissions, Gates, and the official index of related IDs for Product Characteristics / homepage policy |
 | **`docs/homepage/`** | Homepage menu map, prototype, operational docs and user-path evidence |
 | **[PR #411](https://github.com/vahidmaghsoudi2/hbi/pull/411)** and its research files | Technical evidence and Product Knowledge research workbook |
-| **Problem Space / PR #433 / P01–P61** | Out of scope for this homepage workstream |
+| **Problem Space / PR #433 / P01–P61** | Content remains in its specialist registry; the «دانش پوست» submenu only links to the existing authoritative records |
 
 ### Rules that prevent another source-of-truth problem
 
 1. Do not record new Product Owner decisions in this folder. Decisions and permissions belong in Issue **#406**; link to them here.
 2. Do not create a second decision/status register.
 3. Historical Issues/comments remain in GitHub; this hub links to them rather than pretending to move their history.
-4. Menu labels marked `observed` are derived from `frontend/src/pages/NewHomePage.tsx` on the recorded master snapshot. The prototype is an editable proposal surface, not proof that an added menu exists in production.
+4. Menu labels marked `observed` are derived from `frontend/src/pages/NewHomePage.tsx` on the recorded master snapshot. `proposed_menus` is a separate, PO-approved structure proposal and is not an active production menu. The prototype is not proof that an added menu exists in production.
 5. No file here authorizes production code, schema, API, database, product creation, QA, or activation changes.
 
 ## Observed main menu
@@ -43,6 +43,14 @@ The current `NewHomePage.tsx` snapshot shows eight main menu cards:
 8. حسابداری و گزارش‌ها
 
 The prototype also identifies the top actions separately. «تنظیمات» is not treated as an active main-menu card because it is not present among those eight cards in the inspected source snapshot.
+
+## Proposed encyclopedia menu — structure approved, implementation not done
+
+The `proposed_menus` array in [`menu-structure.json`](menu-structure.json) records the «دانشنامه» menu separately from the eight `observed` production menus. Its seven submenus have explicit readiness states and destinations. Only «دانش پوست» points to an existing specialist reference: [`SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md`](../product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md). It does not duplicate the P01–P61 list or replace the Consolidated Reference / Skin Problem Map. The other six destinations are marked `no-page-yet`; no empty or invented links are presented as ready.
+
+Two boundaries are explicit: «دانش مو» covers general hair/scalp knowledge, while «رنگ مو» covers coloring and care of color-treated hair. The knowledge category «سایر» is not the product-line value `OTHER`.
+
+This is approval of menu structure only. It does not authorize merging production UI code or claim that any submenu is ready for operational use.
 
 ## Existing records (linked, not moved)
 

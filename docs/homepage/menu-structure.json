@@ -92,6 +92,65 @@
       ]
     }
   ],
+  "proposed_menus": [
+    {
+      "id": "encyclopedia",
+      "label": "دانشنامه",
+      "status": "po-approved-structure",
+      "description": "ساختار پیشنهادی مورد تأیید اولیهٔ مالک محصول؛ هنوز منوی فعال برنامه نیست و وضعیت هر مقصد جداگانه مشخص می‌شود.",
+      "submenus": [
+        {
+          "id": "encyclopedia-skin",
+          "label": "دانش پوست",
+          "status": "reference-available-no-dedicated-page",
+          "docs_path": "docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md",
+          "description": "ارجاع به مراجع رسمی موجود؛ بدون کپی‌کردن فهرست مشکلات پوستی یا ساخت مرجع موازی."
+        },
+        {
+          "id": "encyclopedia-hair",
+          "label": "دانش مو",
+          "status": "no-page-yet",
+          "docs_path": null,
+          "description": "دانش ساختار و مراقبت مو و پوست سر؛ رنگ‌آمیزی و نگهداری رنگ مو در زیرمنوی مستقل «رنگ مو» قرار می‌گیرد."
+        },
+        {
+          "id": "encyclopedia-perfume",
+          "label": "دانش ادکلن",
+          "status": "no-page-yet",
+          "docs_path": null,
+          "description": "مرجع دانشی عطر و ادکلن؛ هنوز مقصد اختصاصی تأییدشده‌ای ثبت نشده است."
+        },
+        {
+          "id": "encyclopedia-hair-color",
+          "label": "رنگ مو",
+          "status": "no-page-yet",
+          "docs_path": null,
+          "description": "رنگ‌آمیزی، انتخاب رنگ و نگهداری موی رنگ‌شده؛ متمایز از دانش عمومی مراقبت مو."
+        },
+        {
+          "id": "encyclopedia-makeup",
+          "label": "آرایش",
+          "status": "no-page-yet",
+          "docs_path": null,
+          "description": "مرجع دانشی آرایش؛ هنوز مقصد اختصاصی تأییدشده‌ای ثبت نشده است."
+        },
+        {
+          "id": "encyclopedia-tools",
+          "label": "ابزار",
+          "status": "no-page-yet",
+          "docs_path": null,
+          "description": "دانش و راهنمای ابزارهای مرتبط؛ هنوز مقصد اختصاصی تأییدشده‌ای ثبت نشده است."
+        },
+        {
+          "id": "encyclopedia-other",
+          "label": "سایر",
+          "status": "no-page-yet",
+          "docs_path": null,
+          "description": "دستهٔ تکمیلی در دانشنامه؛ با مقدار OTHER در طبقه‌بندی خط محصول یکی نیست."
+        }
+      ]
+    }
+  ],
   "top_actions": [
     {"id": "top-main-menu", "label": "منوی اصلی", "status": "observed"},
     {"id": "top-logout", "label": "خروج از حساب مدیر", "status": "observed"}
