@@ -84,6 +84,9 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
             "usage_instructions": ", ".join(usage_instructions) if usage_instructions else None,
             "manufacturer_claims": ", ".join(manufacturer_claims) if manufacturer_claims else None,
             "evidence_refs": ", ".join(evidence_refs) if evidence_refs else None,
+            # Status cannot be carried forward after rebuilding against a changed evidence set.
+            # Until the approved profile matrix is executable, leave it unassessed rather than stale.
+            "evidence_status": None,
             "knowledge_confidence": self._calculate_confidence_from_evidences(approved),
         }
 
