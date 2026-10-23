@@ -53,7 +53,7 @@ const CONSULTATION_LINES = [{ id: "SKIN", label: "پوست" }] as const;
 const INITIAL_RECOMMENDATION_LIMIT = 5;
 
 type Panel = "home" | "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about";
-type MainSection = "home" | "customers" | "consultation" | "sales" | "products" | "inventory" | "purchases" | "reports";
+type MainSection = "home" | "customers" | "consultation" | "sales" | "products" | "inventory" | "purchases" | "reports" | "encyclopedia";
 type PageView = "main" | "section" | "content";
 
 export default function NewHomePage() {
@@ -828,6 +828,7 @@ export default function NewHomePage() {
               <article className="pro-product-card"><h2>کالا و موجودی</h2><p className="pro-muted">مشاهده موجودی و گردش‌های انبار؛ جدا از مدیریت اطلاعات و تأیید محصول.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("inventory")}>ورود به کالا و موجودی</button></article>
               <article className="pro-product-card"><h2>خرید</h2><p className="pro-muted">ثبت خرید و ورود فیزیکی موجودی.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("purchases")}>ورود به خرید</button></article>
               <article className="pro-product-card"><h2>حسابداری و گزارش‌ها</h2><p className="pro-muted">گزارش فروش و مالی؛ گزارش موجودی و گردش کالا در بخش «کالا و موجودی» قرار دارد.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("reports")}>ورود به حسابداری و گزارش‌ها</button></article>
+              <article className="pro-product-card"><h2>دانشنامه</h2><p className="pro-muted">دسترسی مرکزی به دانش پوست، مو، ادکلن، رنگ مو، آرایش، ابزار و سایر موضوعات.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("encyclopedia")}>ورود به دانشنامه</button></article>
             </div>
           </section>
         )}
@@ -838,7 +839,7 @@ export default function NewHomePage() {
               <h1 id="section-menu-title">{({
                 customers: "مشتریان", consultation: "مشاوره", sales: "فروش",
                 products: "مدیریت محصولات", inventory: "کالا و موجودی", purchases: "خرید",
-                reports: "حسابداری و گزارش‌ها", home: "خانه و داشبورد",
+                reports: "حسابداری و گزارش‌ها", home: "خانه و داشبورد", encyclopedia: "دانشنامه",
               } as Record<MainSection, string>)[mainSection]}</h1>
             </div>
             <p className="pro-lead">فقط عملیات مربوط به این حوزه در این صفحه قرار دارد.</p>
@@ -866,6 +867,15 @@ export default function NewHomePage() {
               {mainSection === "reports" ? <>
                 <article className="pro-product-card"><h2>گزارش فروش</h2><p className="pro-muted">خلاصه فروش روز جاری.</p><Link to="/accounting?section=sales" className="pro-btn-primary">بازکردن گزارش فروش</Link></article>
                 <article className="pro-product-card"><h2>گزارش مالی</h2><p className="pro-muted">خلاصه گزارش مالی موجود.</p><Link to="/accounting?section=finance-report" className="pro-btn-primary">بازکردن گزارش مالی</Link></article>
+              </> : null}
+              {mainSection === "encyclopedia" ? <>
+                <article className="pro-product-card"><h2>دانش پوست</h2><p className="pro-muted">مرجع مرکزی موجود برای مسائل پوستی؛ بدون ایجاد فهرست موازی.</p><a href="https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md" target="_blank" rel="noreferrer" className="pro-btn-primary">بازکردن مرجع دانش پوست</a></article>
+                <article className="pro-product-card"><h2>دانش مو</h2><p className="pro-muted">صفحهٔ مستقل دانش مو هنوز آماده نیست.</p><button type="button" className="pro-btn-secondary" disabled>هنوز صفحه ندارد</button></article>
+                <article className="pro-product-card"><h2>دانش ادکلن</h2><p className="pro-muted">صفحهٔ دانش ادکلن هنوز آماده نیست.</p><button type="button" className="pro-btn-secondary" disabled>هنوز صفحه ندارد</button></article>
+                <article className="pro-product-card"><h2>رنگ مو</h2><p className="pro-muted">موضوع رنگ مو از دانش عمومی مو جدا نگه داشته می‌شود؛ صفحه هنوز آماده نیست.</p><button type="button" className="pro-btn-secondary" disabled>هنوز صفحه ندارد</button></article>
+                <article className="pro-product-card"><h2>آرایش</h2><p className="pro-muted">صفحهٔ دانش آرایش هنوز آماده نیست.</p><button type="button" className="pro-btn-secondary" disabled>هنوز صفحه ندارد</button></article>
+                <article className="pro-product-card"><h2>ابزار</h2><p className="pro-muted">صفحهٔ دانش ابزار هنوز آماده نیست.</p><button type="button" className="pro-btn-secondary" disabled>هنوز صفحه ندارد</button></article>
+                <article className="pro-product-card"><h2>سایر</h2><p className="pro-muted">موضوعات دانشنامه‌ای خارج از دسته‌های بالا؛ این مورد با نوع محصول OTHER یکی نیست.</p><button type="button" className="pro-btn-secondary" disabled>هنوز صفحه ندارد</button></article>
               </> : null}
             </div>
           </section>
