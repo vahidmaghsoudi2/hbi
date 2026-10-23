@@ -24,7 +24,7 @@
 |----|----------|----------------|--------|--------|----------|-----|
 | P01 | Dry skin / Xerosis | Problem / Clinical presentation | Primary | Scoped — Accepted=خیر | Deferred | confirmed |
 | P02 | Dehydration / impaired moisture retention | Manifestation / related | Merge-candidate → Linked to P01 | Identified+Linked — Accepted=خیر | Undetermined | confirmed |
-| P07 | Fissuring / cracking | Manifestation | Child/Related to P01 | Identified+Linked — Accepted=خیر | Undetermined | confirmed |
+| P07 | Fissuring / cracking | Manifestation | Independent; relation to P01 UNKNOWN pending direct evidence | Identified — Accepted=خیر | Undetermined | confirmed |
 | P05 | Sensitive skin | Problem/presentation | Related مستقل هم‌قفسه | Identified/Scoped — Accepted=خیر | Undetermined | confirmed مرز |
 | P06 | Irritant dermatitis | Clinical Condition; Clinical Anchor | S01→S05؛ متمایز از P01 | Identified — Accepted=خیر | Clinical-anchor only | ثبت ساختاری |
 
@@ -53,7 +53,7 @@
 1. **P01:** تعریف فعلی با برچسب «پیشنهادی» برای بازبینی ساختاری پذیرفته شد؛ **نه پذیرش نهایی** (`Accepted` نیست).
 2. **P02:** رکورد جداگانهٔ **Identified + Linked** باقی بماند؛ **ادغام یا حذف شناسه انجام نشود**.
 3. **وضعیت عملیاتی P01:** فعلاً **Deferred** بماند تا `Ordinary-care candidate` بدون پشتوانهٔ کافی قطعی نشود.
-4. **P07:** Identified + Linked به P01؛ ادغام نشود؛ Accepted نیست.
+4. **P07:** رکورد مستقل با شناسهٔ مستقل بماند؛ رابطه با P01 برابر **UNKNOWN** است تا شاهد مستقیم ثبت شود؛ ادغام نشود؛ Accepted نیست. هر ثبت پیشینِ Child/Related به P01 در این مورد superseded است.
 5. **P05:** Problem/presentation متمایز در S01؛ Related مستقل هم‌قفسه با P01؛ **ادغام با P01 ممنوع**؛ Accepted نیست؛ عملیاتی Undetermined؛ زبان مشتری و آستانهٔ ایمنی UNKNOWN مگر شاهد مخزن.
 6. **محل نگهداری:** فقط `docs/product-intake-knowledge-registry/` — بدون انتقال یا تکثیر مرجع متعارف.
 
@@ -140,17 +140,17 @@
 | ID نقشه | P07 |
 | نام کاری | ترک / شکاف پوست (Fissuring / cracking) |
 | تعریف عملیاتی | **UNKNOWN / نیازمند بازبینی.** |
-| داخل دامنه | تظاهر مرتبط با P01 طبق Map. |
+| داخل دامنه | ترک / شکاف پوست به‌عنوان رکورد مستقل در S01؛ رابطه با P01 **UNKNOWN** است تا شاهد مستقیم ثبت شود. |
 | خارج از دامنه | Need جدا؛ حذف شناسه؛ Product. |
 | نوع واحد | Manifestation — **VERIFIED در Map** |
-| رابطه با نقشه | Child / Related به P01 — **VERIFIED** |
+| رابطه با نقشه | **Independent record**؛ رابطه با P01: **UNKNOWN / NOT VERIFIED**؛ فقط با شاهد مستقیم قابل تغییر است. |
 | وضعیت تکمیل و پذیرش | **Identified + Linked** — **Accepted = خیر** |
 | وضعیت عملیاتی | **Undetermined** |
 | ایمنی / ارجاع | **UNKNOWN / پیشنهاد احتیاطی نیازمند بازبینی** |
 | شواهد / منشأ | Map V0.1 §S01 P07. |
 | زبان مشتری | **UNKNOWN** |
 | UNKNOWN / GAP | شدت؛ مرز با زخم؛ زبان مشتری؛ آستانهٔ ارجاع |
-| یادداشت بازبینی | تصمیم PO: Linked تأیید شد. |
+| یادداشت بازبینی | تصمیم جاری PO: P07 مستقل از P01؛ هر رابطهٔ Child/Related قبلی بدون شاهد مستقیم تأییدشده نیست. |
 
 ---
 
@@ -1549,7 +1549,7 @@ No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care
 |----|------------------|--------|
 | P01 | Primary | Scoped؛ Deferred — **PO-confirmed** |
 | P02 | Related / Merge-candidate | Identified + Linked — **PO-confirmed** |
-| P07 | Child / Related | Identified + Linked — **PO-confirmed** |
+| P07 | مستقل از P01؛ رابطهٔ P01: UNKNOWN / NOT VERIFIED | Identified؛ Accepted نیست — **PO-confirmed** |
 | P05 | Related مستقل هم‌قفسه | Identified/Scoped — **PO-confirmed مرز** |
 | P06 | Clinical Condition / inflammatory presentation؛ S01→S05 Clinical Anchor | Identified؛ Accepted نیست؛ عملیاتی Clinical-anchor only؛ مستقل از P01 |
 
@@ -1560,7 +1560,7 @@ No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care
 | مرحله | وضعیت |
 |--------|--------|
 | قالب حداقلی | تثبیت |
-| P01+P02+P07+P05 | **PO-confirmed** (هیچ‌کدام Accepted نهایی نیستند) |
+| مرزهای P01، P02، P07 و P05 | **PO-confirmed**؛ این گروه‌بندی رابطهٔ P07 با P01 را تأیید نمی‌کند؛ هیچ‌کدام Accepted نهایی نیستند |
 | P06 | **ثبت ساختاری**؛ Identified؛ Clinical-anchor only |
 | پایلوت ساختاری S01 | **CLOSED** (ساختاری/ارجاعی — نه پزشکی)
 | قفسهٔ S02 | **ثبت ساختاری شده**؛ P03/P04؛ نه Accepted |
