@@ -2,8 +2,8 @@
 
 > **Authority:** This is the only active homepage specification, work ledger, and no-repeat control. After this consolidation PR is merged, all homepage work must use this document. Issue [#352](https://github.com/vahidmaghsoudi2/hbi/issues/352) is the pointer/decision history, not a second execution plan. Older homepage documents and PRs are historical records only and must not be used to start or repeat work.
 
-**Last reconciled:** 2026-10-22
-**Baseline:** `master @ 8b29ea2de702a4e3ec9b015989ea92b412b9e61f`
+**Last reconciled:** 2026-10-23
+**Current documentation baseline checked:** `master @ ff38abac2ff1184c3fda168403a6a96a38d0a0ab` (2026-10-23). PR #395 is still a separate unmerged branch and must be reconciled/reviewed before merge.
 **Authoritative implementation:** `frontend/src/pages/NewHomePage.tsx` at route `/` (protected by AdminGate)
 **Merged homepage integration:** [PR #363](https://github.com/vahidmaghsoudi2/hbi/pull/363), merge commit `0463044d7b49b4847b70d388766484fce5504392`
 **Single active workstream:** [PR #395](https://github.com/vahidmaghsoudi2/hbi/pull/395), branch `fix/homepage-single-source-of-truth` (OPEN / DRAFT, not merged). The current commit SHA is read from the PR itself so this ledger cannot become stale each time it is updated.
@@ -194,3 +194,44 @@ The repository has enough existing primitives for a governed workflow: Product M
 3. Keep product identity, evidence/QA approval, and physical Stock-In as three separate transitions. A successful intake save must not increase quantity; only a successful Stock-In must persist both the inventory increment and its matching movement.
 4. Do not add schema/API/UI automation or image recognition before the Work Package is explicitly authorized under #402/#403 and the relevant acceptance tests are specified.
 5. Continue recording homepage findings here in this PR #395 ledger only. PR #395 remains Draft/unmerged pending exact-head verification and explicit Product Owner authorization.
+
+
+## 9. Current GitHub homepage documentation reconciliation (2026-10-23)
+
+This section incorporates the newer homepage documentation already present on `master` without creating a second execution ledger. The current operational source of truth and no-repeat ledger remains this file in PR #395 until the Product Owner changes that governance decision.
+
+### Current documentation locations
+
+- [Central index](https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/00-index/INDEX.md) is navigation only, not a decision or execution ledger.
+- [Homepage documentation hub](https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/homepage/README.md) documents the menu map, prototype, authority boundaries, and links to existing records.
+- [Observed menu JSON](https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/homepage/menu-structure.json) is the canonical data for the **documentation prototype only**. It is not the production menu source.
+- [Editable static prototype](https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/homepage/index.html) stores browser-local drafts and exports JSON; it does not write to GitHub or change production.
+- [Documentation roadmap](https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/homepage/ROADMAP.md) and [user-path checklist](https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/homepage/USER_PATH_CHECKLIST.md) are support artifacts for the documentation prototype and evidence capture. They do not replace this ledger or authorize implementation.
+- PR [#436](https://github.com/vahidmaghsoudi2/hbi/pull/436) merged the documentation/prototype folder; that merge is **not** a production homepage UI change.
+- PR [#437](https://github.com/vahidmaghsoudi2/hbi/pull/437) established the central index. PR [#438](https://github.com/vahidmaghsoudi2/hbi/pull/438) proposes a correction to stale index status references and remains a separate documentation-only PR; its status must be checked live before any merge claim.
+
+### Observed menu and non-negotiable interpretation
+
+The prototype JSON records eight observed main-menu cards: خانه و داشبورد، مشتریان، مشاوره، فروش، مدیریت محصولات، کالا و موجودی، خرید، حسابداری و گزارش‌ها. The admin logout is recorded separately as a top action. Settings is **not** an observed main-menu card in the captured `NewHomePage.tsx` snapshot and must not be invented as an active destination.
+
+Treat `menu-structure.json` as a menu-documentation proposal surface, not as runtime evidence. The production implementation remains `frontend/src/pages/NewHomePage.tsx` on `master`; only inspection or tests against a pinned current code revision can establish live behavior. The current master baseline recorded above does not include the HP-05 Sales customer-search isolation patch carried by PR #395.
+
+### How prior homepage records are handled
+
+The following files remain accessible historical/context records and are linked from the homepage README; do not copy their full contents into another document or restart completed audits from them:
+
+- `docs/HOMEPAGE_COMPLETION_LEDGER.md` — prior completion evidence and no-repeat history.
+- `docs/HOMEPAGE_IA_AUDIT_STAGE2.md` — source-level navigation and placement findings, some of which describe older snapshots.
+- `docs/HBI_HOME_OPERATIONAL_ROADMAP.md` — earlier phased operational roadmap.
+- `docs/HBI_HOME_PAGE_ARCHITECTURE_DECISION.md` — earlier architecture decision record.
+- `docs/HOME_FRONTEND_BACKEND_CONNECTIONS.md` — older frontend/backend endpoint snapshot.
+
+Use them to trace provenance only. Where an older record differs from current `master`, record the exact code SHA and newer evidence before treating the old statement as current. Do not infer current route behavior, API connectivity, browser acceptance, or Windows runtime acceptance from an old audit or from the documentation prototype.
+
+### Evidence boundary and next action
+
+- Production implementation status: determined from current `master` code, not from prototype labels or roadmap checkboxes.
+- Browser/user-path acceptance in `USER_PATH_CHECKLIST.md`: remains **NOT RUN** unless each item has a dated observation, screenshot, CI/run URL, or other direct evidence.
+- No application code, API, schema, database, production menu, or product lifecycle behavior is authorized by this documentation reconciliation.
+- Keep HP-05 and HP-07 as the only targeted follow-ups already defined in this ledger; do not turn the menu documentation into a broad navigation rewrite.
+- Keep all current homepage execution status, blockers, evidence, and handoff updates in this single ledger and PR #395. Do not create a parallel homepage issue, PR, branch, roadmap, or status register.
