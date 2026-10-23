@@ -39,6 +39,10 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
         evidence_refs = []
 
         approved: List[Evidence] = []
+        has_unresolved_conflict = any(
+            (getattr(ev, "conflict_status", None) or "NONE").strip().upper() == "CONFLICT"
+            for ev in evidences
+        )
         for ev in evidences:
             qa = (getattr(ev, "qa_status", None) or "").strip().upper()
             conflict = (getattr(ev, "conflict_status", None) or "NONE").strip().upper()
@@ -85,6 +89,14 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
             "manufacturer_claims": ", ".join(manufacturer_claims) if manufacturer_claims else None,
             "evidence_refs": ", ".join(evidence_refs) if evidence_refs else None,
             "knowledge_confidence": self._calculate_confidence_from_evidences(approved),
+            # Conservative aggregate status: QA approval is not independent proof of efficacy.
+            # SUPPORTED is deliberately not inferred automatically without a contract-defined
+            # evidence sufficiency rule. Any unresolved conflict takes precedence.
+            "evidence_status": (
+                "CONFLICT" if has_unresolved_conflict
+                else "UNKNOWN" if not approved
+                else "PARTIAL"
+            ),
         }
 
         updated = self.repository.update_knowledge(product_id, **update_data)
