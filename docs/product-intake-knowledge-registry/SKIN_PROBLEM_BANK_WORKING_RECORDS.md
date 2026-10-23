@@ -144,7 +144,7 @@
 | خارج از دامنه | Need جدا؛ حذف شناسه؛ Product. |
 | نوع واحد | Manifestation — **VERIFIED در Map** |
 | رابطه با نقشه | **Independent record**؛ رابطه با P01: **UNKNOWN / NOT VERIFIED**؛ فقط با شاهد مستقیم قابل تغییر است. |
-| وضعیت تکمیل و پذیرش | **Identified + Linked** — **Accepted = خیر** |
+| وضعیت تکمیل و پذیرش | **Identified** — **Accepted = خیر**؛ هیچ رابطه‌ای با P01 تأیید نشده است |
 | وضعیت عملیاتی | **Undetermined** |
 | ایمنی / ارجاع | **UNKNOWN / پیشنهاد احتیاطی نیازمند بازبینی** |
 | شواهد / منشأ | Map V0.1 §S01 P07. |
