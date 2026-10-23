@@ -2,7 +2,7 @@
 
 > **نقطهٔ ورود عملیاتی تیم:** [SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md](SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) — فهرست شش مرجع/بسته، قواعد ثبت تغییرات و شکاف‌های باقی‌مانده. این فهرست جایگزین محتوای این مرجع یا منابع تخصصی نمی‌شود.
 
-> **رکوردهای کاری فعلی:** [SKIN_PROBLEM_BANK_WORKING_RECORDS.md](SKIN_PROBLEM_BANK_WORKING_RECORDS.md) — رکوردهای کاری P01–P06؛ وضعیت کاری/ساختاری آن‌ها به‌خودی‌خود به معنی پذیرش فهرست ۶۲ موردی، اعتبارسنجی پزشکی یا مجوز پیشنهاد محصول نیست. P06 فقط Clinical Anchor است.
+> **رکوردهای کاری فعلی:** [SKIN_PROBLEM_BANK_WORKING_RECORDS.md](SKIN_PROBLEM_BANK_WORKING_RECORDS.md) — رکوردهای کاری P01–P07؛ وضعیت کاری/ساختاری آن‌ها به‌خودی‌خود به معنی پذیرش فهرست ۶۲ موردی، اعتبارسنجی پزشکی یا مجوز پیشنهاد محصول نیست. P06 فقط Clinical Anchor است.
 
 **شناسه:** HBI-SKIN-PROBLEM-BANK-CONSOLIDATED-REFERENCE  
 **وضعیت:** مرجع تجمیعی کاری؛ باید با تصمیم‌های PO و وضعیت زندهٔ GitHub به‌روز بماند.  
