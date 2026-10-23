@@ -1,19 +1,19 @@
-> ⚠️ **STATUS NOTICE — DRAFT / NOT THE ACTIVE PROBLEM BANK**
+> **STATUS NOTICE — OWNER-DESIGNATED SKIN PROBLEM LIST**
 >
-> This file is a structural draft only. It is **not** the accepted refined list, a medically approved Problem Bank, a canonical Need Bank, or authorization to recommend products. Do not start new work from this file or treat its contents as accepted. Use the [Skin Problem Bank Consolidated Reference](./SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md) for the current status and entry points, and the [Source Retirement Register](./PRODUCT_INTAKE_SOURCE_RETIREMENT_REGISTER.md) for source authority and disposition. Preserve this draft for traceability; do not copy it into active working packets as an accepted list.
+> By the project owner's current decision, this P01–P61 Map is the reference Skin Problem List for HBI. Use this Map as the list; do not maintain or search for a parallel count-based list. The designation establishes the operational reference only; it does **not** imply medical validation, Need acceptance, treatment authorization, or product-recommendation permission. Use the [Skin Problem Bank Consolidated Reference](./SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md) for current decisions and the [Source Retirement Register](./PRODUCT_INTAKE_SOURCE_RETIREMENT_REGISTER.md) for source authority and disposition.
 
 ---
 
-> Team entry point: [Skin Problem Bank Workspace Index](./SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md). This map remains a structural draft only.
+> Team entry point: [Skin Problem Bank Workspace Index](./SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md). This Map is the owner-designated reference Skin Problem List; its structural and clinical labels remain as recorded.
 
 # HBI — SKIN PROBLEM SPACE MAP V0.1
 ## Official Red-Team Input Artifact
 
 **Mission:** Skin Problem Space Mapping  
 **Scope:** SKIN  
-**Status:** DRAFT / V0.1  
+**Status:** OWNER-DESIGNATED REFERENCE LIST / STRUCTURAL MAP V0.1  
 **Purpose:** Structural mapping of existing P01–P61 discovery stock  
-**Not included:** Problem Bank V1, Need Extraction, Need Acceptance, Product, Recommendation, Implementation
+**Not authorized by this list:** medical validation, Need acceptance, Product mapping, Recommendation, Implementation
 
 ## 1. Problem Unit Definition
 
