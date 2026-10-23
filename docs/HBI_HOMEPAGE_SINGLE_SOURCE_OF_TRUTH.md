@@ -262,5 +262,5 @@ These results supersede stale PR-body wording that names a different SHA for the
 - Keep `docs/homepage/USER_PATH_CHECKLIST.md` rows A1–E2 at **NOT RUN** until each applicable operator path has direct evidence linked in that checklist. A successful PR-specific browser workflow must not be generalized to every row.
 - The GTIN lookup UI remains pending on PR #431; do not describe it as a currently available production homepage capability.
 - No merge, new Issue/PR/branch, production-menu edit, schema/API expansion, or Product Master/Inventory mutation is authorized by this reconciliation.
-- Before merging this ledger PR, reconcile its branch with current `master`: the live comparison shows the PR #395 branch is **22 commits ahead and 4 behind**, with a diverged history. Do not merge on the basis of green checks alone; re-review the complete diff and retain explicit Product Owner merge authorization.
+- Before merging this ledger PR, reconcile its branch with current `master`: the live comparison shows the PR #395 branch is **23 commits ahead and 4 behind**, with a diverged history. Do not merge on the basis of green checks alone; re-review the complete diff and retain explicit Product Owner merge authorization.
 
