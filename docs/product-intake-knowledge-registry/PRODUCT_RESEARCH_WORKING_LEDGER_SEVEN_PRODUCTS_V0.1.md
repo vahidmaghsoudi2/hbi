@@ -671,3 +671,49 @@ Grok's independent challenge is incorporated as constraints for the next researc
 6. The next evidence action is to obtain package photos/official labels and complete reports for ISDIN Active Unify and Anua serum, plus full protocols for COSRX, Neutrogena and Clinique. Until then, all seven remain **NO / NOT AUTHORIZED** for consultation-engine recommendation based on this matrix.
 
 No code, schema, API, UI, database, ProductKnowledge record, or approved Product↔Problem relationship was changed by this pass.
+
+---
+## Research pass 6 — exact official-page follow-up and correction register (2026-10-24)
+
+**Continuity rule:** This pass is appended after Research pass 5. Passes 1–5 and all earlier sections remain preserved verbatim. This pass does not replace the earlier record; where it finds a better source, it explicitly corrects the earlier *search disposition* while retaining the historical fact that the source was not found during Pass 5.
+
+### 6.1 P7 — Anua Azelaic Acid 10 Hyaluron Redness Soothing Serum
+
+**Official exact-product page now verified:** https://anua.com/products/azelaic-acid-10-hyaluron-redness-soothing-serum
+
+The current official product page identifies the serum, states a 10% azelaic-acid formulation, lists the ingredient declaration, describes redness/blemish/oil-control/hydration positioning, and gives gradual-use directions (start 1–2 times weekly and increase as tolerated). It labels the testing results “Non-comedogenic, Low-Irritation.” The page does **not** disclose a full study protocol, sample size, comparator, validated endpoints, statistical analysis, or the underlying report for those labels.
+
+Official brand routine page: https://pages.anua.com/solutions/redness-prone-routine-sensitive-skin reports that 90% of participants agreed that the appearance of red troubled spots improved, and attributes the statement to a 2026 Anua US clinical study. The public summary still does not disclose enough methodology to independently assess the result.
+
+**Correction to Pass 5:** Pass 5's wording that an official product page had not been verified was accurate for that retrieval pass but is superseded as a *current retrieval status* by this Pass 6 source check. The correct current status is: exact-product official page and manufacturer claim FOUND; complete protocol/report NOT VERIFIED. Keep manufacturer_claim_only for the 90% statement, and do not promote it to independent efficacy evidence.
+
+The official separate-pad page describes a different product and its own study (21 participants, 2025-01-20 to 2025-02-19): https://anua.com/products/azelaic-10-hyaluron-redness-soothing-pad. That study remains explicitly NON-TRANSFERABLE to the serum.
+
+**Disposition:** P7 formula/brand claim is source-backed at official-page level; physical package, market/GTIN and current package-to-page match remain UNVERIFIED until a package/label is available. No P08/P13/P19/P24 relationship is approved. Ingredient-level azelaic-acid evidence and the pad study do not prove this serum's finished-product efficacy.
+
+### 6.2 P5 — ISDIN FotoUltra 100 Active Unify SPF50+
+
+**Official UK exact-product page verified:** https://www.isdin.com/en-GB/product/foto-ultra-isdin/active-unify-spf-50
+
+The page identifies FotoUltra 100 Active Unify SPF 50+, 50 ml, and claims it clarifies/unifies skin tone and helps reduce and prevent sun-caused pigmentation spots, with visible results after one month. It lists a formula including niacinamide, UV filters, phenylethyl resorcinol, panthenol, tocopheryl acetate and other supporting ingredients, and gives directions including morning/midday application and reapplication every two hours.
+
+**Evidence boundary:** This source supports an official market-specific identity/INCI/marketing-claim record. It does not provide the original protocol or verify the previously recorded 31-subject, 22% spot-intensity and 15% spot-area results. Do not attach those figures to this UK page unless the source/report establishes the same market, tested SKU and formula version.
+
+**Disposition:** P17 remains manufacturer_claim_only + candidate_only as a claim-led research lead, not an approved relationship. P19 remains not_linked unless exact-version evidence explicitly covers post-inflammatory hyperpigmentation. P18 melasma is not a default match. The identity gate remains BLOCKED until the conflicting market/study descriptions are mapped to the tested package, market, formula/version and report. Do not infer tinted/untinted equivalence.
+
+### 6.3 Source and evidence classification rules reaffirmed
+
+- An official page can verify what the manufacturer currently lists or claims; it does not independently validate clinical efficacy.
+- A page-level INCI is not proof that the physical package in the target market has the same current formula. Preserve package/market/version uncertainty.
+- A manufacturer-reported percentage without the underlying methods remains manufacturer_claim_only.
+- Do not transfer results between different formats (serum versus pad), SKUs, market formulas, or populations/endpoints.
+- All P1–P7 consultation-engine eligibility remains **NO / NOT AUTHORIZED**. No Product↔Problem relation is accepted or upgraded by this pass.
+
+### 6.4 Updated next actions
+
+1. P5 ISDIN: reconcile the official UK page and any study summary against the exact tested market/SKU/GTIN/formula; retrieve the original report/protocol before attaching numerical outcomes.
+2. P7 Anua: retain the now-verified official serum page and the separate official 90% claim page; request the complete serum study report/protocol. Keep the pad study in the non-transferable category.
+3. P1 COSRX, P2 Neutrogena and P6 Clinique: continue seeking complete protocols/reports; preserve existing official-page findings as manufacturer claims.
+4. P1–P7 identity gate: obtain current package/label evidence where possible. Until then, do not mark product identity LOCKED or use this research matrix for recommendations.
+
+**Change scope:** append-only documentation/research. No ProductKnowledge record, approved Product↔Problem relation, Map/Working Records status, code, schema, API, UI, database, workflow, or product lifecycle was changed. No merge authorization is implied.
