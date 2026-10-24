@@ -75,6 +75,23 @@ def _wait_for_raw_http_capture(raw_http_dir: Path, timeout: float = 5.0) -> bool
     return False
 
 
+def _ensure_safe_evidence_root(temp_root: Path) -> Path:
+    """Create/use only the expected evidence root, refusing symlink redirection."""
+    canonical_temp_root = temp_root.resolve()
+    evidence_root = canonical_temp_root / "hbi-g8-pilot-evidence"
+    if evidence_root.is_symlink():
+        raise RuntimeError(f"evidence root must not be a symlink: {evidence_root}")
+    evidence_root.mkdir(parents=True, exist_ok=True)
+    # Re-check after mkdir; a redirected parent must never be accepted as the
+    # evidence destination. This is defense in depth, not protection against all
+    # concurrent filesystem changes.
+    if evidence_root.is_symlink() or evidence_root.resolve().parent != canonical_temp_root:
+        raise RuntimeError(f"evidence root resolved outside the temporary root: {evidence_root}")
+    if not evidence_root.is_dir():
+        raise RuntimeError(f"evidence root is not a directory: {evidence_root}")
+    return evidence_root
+
+
 def _code_sha() -> str:
     """Return the actual clean checkout HEAD; never trust an environment override."""
     configured = os.getenv("G8_CODE_SHA", "").strip()
@@ -355,8 +372,11 @@ def main() -> int:
     session_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     started_at_utc = _utc_now()
     session_dir = pilot_root / f"live-{session_id}"
-    evidence_root = temp_root / "hbi-g8-pilot-evidence"
-    evidence_root.mkdir(parents=True, exist_ok=True)
+    try:
+        evidence_root = _ensure_safe_evidence_root(temp_root)
+    except (OSError, RuntimeError) as exc:
+        print(f"REFUSED: unsafe evidence root ({type(exc).__name__}: {exc})", flush=True)
+        return 2
     evidence_dir = evidence_root / session_id
     log_path = evidence_dir / "api.log"
 
