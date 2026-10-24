@@ -513,3 +513,50 @@ This validates the committed regression test and the repository checks executed 
 **Current verified baseline:** branch `docs/product-research-ledger-seven-products-20261019`, head `7319d36f8e97bcb010337c9508abfd280cb5c052`. The three Pass 10 documentation workflows on this SHA completed successfully: [HBI CI #1663](https://github.com/vahidmaghsoudi2/hbi/actions/runs/39659682415), [Pilot Browser Proof #476](https://github.com/vahidmaghsoudi2/hbi/actions/runs/39659682435), and [Auto Tasks #216](https://github.com/vahidmaghsoudi2/hbi/actions/runs/39659682409).
 
 **Next action:** collect physical package/GTIN evidence for P1–P7, preserving each product's market/formula boundaries. Do not implement the full status mapping or write product rows until separate scoped implementation authorization is recorded. Keep the SKIN1004 Korean/international and US variants separate; keep Clinique n=52 clinical testing distinct from n=533 consumer testing; keep Anua serum and pad evidence separate; retain the unresolved ISDIN source discrepancies without guessing. No new Issue/PR, merge, rebase, force-push, schema/API/database change, or manufacturer outreach is part of this pass.
+
+
+---
+
+## Research pass 2 — common skin-concern coverage matrix (V1)
+**Purpose:** Turn the seven ingredient dossiers into one consistent first-pass view of common skin concerns. This is a research crosswalk, not a final product recommendation, clinical claim, approved ProductKnowledge record, or implementation authorization.
+
+### V1 common concern groups
+
+- **C1 — Acne/oil/congestion:** oily appearance, comedones and acne-prone skin. These are related but not interchangeable outcomes.
+- **C2 — Dryness/dehydration/barrier comfort:** tightness, roughness and moisture retention; hydration claims do not establish barrier repair.
+- **C3 — Sensitivity/redness/irritation:** tolerability and visible redness. Cosmetic soothing is not a diagnosis or treatment claim for rosacea, eczema or other disease.
+- **C4 — Dark spots/post-inflammatory hyperpigmentation/uneven tone:** distinguish spot appearance from diagnosis-specific treatment.
+- **C5 — UV protection and sun-related worsening:** protection must be tied to the exact sunscreen formula/market and label directions.
+- **C6 — Texture/fine lines/dull appearance:** cosmetic appearance outcomes, not proof of structural or long-term clinical change.
+
+### Product-to-concern research matrix
+
+| Product | Ingredient/formula basis already recorded | Candidate concern groups for V1 review | Current evidence interpretation | Limitation / next check |
+|---|---|---|---|---|
+| P1 COSRX 6 Peptide Booster | Peptides, niacinamide and humectant/supporting ingredients listed by manufacturer | C2, C4, C6 | Manufacturer reports moisture, texture, clarity, radiance and density outcomes in n=20; independent exact-formula efficacy is NOT ESTABLISHED in reviewed sources. | Retrieve full protocol; do not infer peptide concentrations or transfer evidence from unrelated peptide products. |
+| P2 Neutrogena Clear & Defend UK 2% Salicylic Acid Wash | Manufacturer-declared 2% salicylic acid; surfactants, glycerin, panthenol and fragrance | C1; monitor C2/C3 for tolerability | Salicylic acid provides a plausible ingredient-level rationale for acne/congestion; manufacturer reports fewer new spots in n=34, but full protocol and independent exact-SKU evidence remain NOT ESTABLISHED. | Verify current package INCI/warnings. Rinse-off exposure and frequency affect interpretation; do not label the 97% statement as a cure rate. |
+| P3 Garnier Vitamin C Brightening Gel Cleanser, Australia | Ascorbyl Glucoside, salicylic acid, surfactants, glycerin, panthenol and fragrance components | Cleansing as a supporting function; C4 and C1 remain exploratory | Listed ingredients justify investigation, not a finished-product brightening or acne conclusion. | Verify current package formula; do not equate Ascorbyl Glucoside with pure L-ascorbic acid or transfer leave-on serum evidence to a rinse-off cleanser. |
+| P4 SKIN1004 Hyalu-Cica Water-Fit Sun Serum, Korean/international dossier | International formula's UV filters plus humectant/skin-conditioning ingredients as recorded in the dossier | C5, C2; C4 only as prevention of UV-related worsening, not spot treatment | Sunscreen function is the primary rationale; hydration/soothing outcomes are manufacturer claims unless independently supported. | Keep US SPF50 drug-label SKU separate. Confirm actual market label and directions; do not treat sunscreen as a standalone treatment for existing pigmentation. |
+| P5 ISDIN FotoUltra 100 Active Unify SPF50+ | Sunscreen filters and marketed spot-care ingredients; exact formula depends on market | C5, C4 | Manufacturer reports spot-intensity and spot-area changes in n=31; full protocol and independent replication are NOT ESTABLISHED in reviewed sources. | Pin all ingredient and performance claims to a specific market/version; obtain original report if available. |
+| P6 Clinique Even Better Clinical Radical Dark Spot Corrector + Interrupter | Ascorbyl Glucoside, Dimethoxytolyl Propylresorcinol and salicylic acid listed in dossier | C4; C6 as a secondary appearance outcome only if source supports it | Manufacturer reports a 12-week dark-spot result in 52 women; separate consumer test must remain a separate data set. | Exact active concentrations and full protocol remain UNKNOWN from sources reviewed; do not infer treatment efficacy for melasma or all pigmentation disorders. |
+| P7 Anua Azelaic Acid 10% + Hyaluron Serum | Manufacturer-declared 10% azelaic acid; niacinamide, betaine salicylate, panthenol, humectants and supporting ingredients | C1, C4 (post-inflammatory marks), C2; C3 only with explicit tolerability caveat | Ingredient-level context supports investigating acne and post-inflammatory marks; the manufacturer's 90% agreement result lacks a full public protocol in reviewed sources. | Verify current market INCI/warnings. Do not infer suitability for every redness-prone user or transfer evidence from the separate pad. |
+
+### Coverage and relationship rules
+
+1. The groups above are a **research taxonomy**, not replacements for the canonical skin-problem list P01–P61.
+2. Do not assign official problem IDs from memory or name similarity. Before linking a product to a problem record, inspect the canonical map and confirm that the exact problem concept and its current status permit this relationship.
+3. A candidate group in the table means “investigate this relationship,” not “the product is suitable,” “the product treats this condition,” or “the relationship is approved.”
+4. Ingredient-level rationale, manufacturer claim, independent finished-product evidence and a final product–problem relationship must remain distinguishable.
+5. A concern is not “covered” merely because a product row mentions it. Coverage requires a source-backed relation, version match, limitation statement and appropriate review state.
+6. The first release may honestly leave a concern uncovered or UNKNOWN. Do not manufacture coverage to make the matrix look complete.
+
+### Review requested from Grok — independent challenge pass
+
+Please review this matrix against the seven dossiers and the actual official skin-problem map, without changing code, schema, UI, database, product lifecycle or the Product Intake contract. Return findings only in the existing PR #411 discussion:
+- flag any ingredient/market/version mismatch;
+- challenge every product–concern candidate that overstates ingredient-level evidence as finished-product efficacy;
+- identify the exact canonical P01–P61 problem IDs only where the map supports the concept and status;
+- mark unsupported links as UNKNOWN / NOT VERIFIED rather than guessing;
+- prioritize the smallest corrections needed for a defensible V1 covering common skin concerns.
+
+No new Issue/PR, no implementation, and no claim of product registration or acceptance is authorized by this review request.
