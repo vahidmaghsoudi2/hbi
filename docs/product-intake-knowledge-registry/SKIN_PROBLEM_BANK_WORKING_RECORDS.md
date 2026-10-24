@@ -1,8 +1,8 @@
-# HBI — رکوردهای کاری بانک مشکلات پوستی (S01 بسته؛ S02–S05 ثبت ساختاری؛ S06 در حال کار ساختاری)
+# HBI — رکوردهای کاری بانک مشکلات پوستی (S01 بسته؛ S02–S09 ثبت ساختاری؛ S10 در حال کار ساختاری)
 
 **شناسه:** HBI-SKIN-PROBLEM-BANK-WORKING-RECORDS  
 **ناوبری مرجع:** [فهرست عملیاتی](SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) ← [مرجع تجمیعی](SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md) ← همین رکوردهای کاری؛ برای مرزهای ساختاری به [نقشهٔ پیش‌نویس (DRAFT / NOT THE ACTIVE PROBLEM BANK)](SKIN_PROBLEM_SPACE_MAP_V0.1.md) مراجعه کنید.  
-**وضعیت:** **S01 STRUCTURALLY CLOSED; S02–S05 STRUCTURAL REGISTERED; S06 STRUCTURAL WORK IN PROGRESS** (2026-10-22) — S01 فقط از نظر مرز/ارجاع بسته است؛ S02 تا S05 ثبت ساختاری شده‌اند؛ S06 بستهٔ کاری ساختاری جاری است؛ **هیچ مورد جدیدی Accepted پزشکی/بانک نهایی نیست**  
+**وضعیت:** **S01 STRUCTURALLY CLOSED; S02–S09 STRUCTURAL REGISTERED; S10 STRUCTURAL WORK IN PROGRESS** (2026-10-22) — S01 فقط از نظر مرز/ارجاع بسته است؛ S02 تا S09 ثبت ساختاری شده‌اند؛ S10 بستهٔ کاری ساختاری جاری و آخرین قفسهٔ Map است؛ **هیچ مورد جدیدی Accepted پزشکی/بانک نهایی نیست**  
 **پوشه:** `docs/product-intake-knowledge-registry/` (فقط همین حوزه)  
 **تاریخ تأییدهای PO (مرزها):** 2026-10-20  
 **تاریخ بستن ساختاری پایلوت:** 2026-10-22  
@@ -1066,6 +1066,483 @@ No relation beyond the live Map is inferred. P24/P25/P26 remain separate; P27/P2
 No relationship beyond the live Map is inferred. Presence in S06 does not imply Ordinary Care suitability. P35 remains distinct from P34; P40 from P36; P38 from P37. P39 records only the S06↔S08 relationship; S08 is not opened or completed.
 
 
+## S07 — Texture / Keratinization / Surface Growth (structural in progress; not Accepted)
+
+**Map boundary:** Map §3 states: “Diagnostic lesions are not converted into Ordinary Care Needs.” P43 has an open boundary; P44 has a clinical/structural boundary open. P46/P47 retain only the Map's S07↔S08 cross-shelf reference. Presence in S07 does not establish Ordinary-care suitability.
+
+### S07 summary
+
+| ID | Map unit type | Relationship | Acceptance | Operational | Main UNKNOWN |
+|---|---|---|---|---|---|
+| P43 | Problem/presentation | S07 — Mapped; boundary open | Identified — Accepted=No | Undetermined | Boundary, evidence, customer language, HBI operational relevance |
+| P44 | Clinical/structural presentation | S07 — Clinical Anchor; boundary open | Identified — Accepted=No | Clinical-anchor only | Clinical/structural boundary, evidence, customer language |
+| P45 | Clinical Condition/presentation | S07 — Clinical Anchor | Identified — Accepted=No | Clinical-anchor only | Operational boundary, evidence, customer language |
+| P46 | Clinical Condition/lesion | S07↔S08 — Clinical Anchor; cross-shelf only | Identified+Linked — Accepted=No | Clinical-anchor only | S08 relationship/ownership, evidence, customer language |
+| P47 | Lesion/benign growth presentation | S07↔S08 — Clinical Anchor; cross-shelf only | Identified+Linked — Accepted=No | Clinical-anchor only | S08 relationship/ownership, evidence, customer language |
+
+### Record P43 — Uneven skin texture
+
+| Field | Value |
+|---|---|
+| Map ID | P43 |
+| Working name | Uneven skin texture |
+| Operational definition | UNKNOWN; structural placement only. |
+| In scope | S07 Problem/presentation; Mapped; boundary open. |
+| Out of scope | Closing the boundary by inference; diagnosis, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Problem/presentation — Map-listed |
+| Map relationship | S07 — Mapped; boundary open |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Undetermined |
+| Safety / referral | UNKNOWN; not assigned by inference. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §3 and §4 S07. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Boundary is explicitly open; evidence, customer language, operational relevance, and any referral boundary remain UNKNOWN. |
+| Review note | “Diagnostic lesions are not converted into Ordinary Care Needs.” No Ordinary-care candidate is created. |
+
+### Record P44 — Hyperkeratosis
+
+| Field | Value |
+|---|---|
+| Map ID | P44 |
+| Working name | Hyperkeratosis |
+| Operational definition | UNKNOWN; clinical/structural presentation only. |
+| In scope | S07 Clinical Anchor; boundary open. |
+| Out of scope | Closing the boundary by inference; diagnosis, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Clinical/structural presentation — Map-listed |
+| Map relationship | S07 — Clinical Anchor; boundary open |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | UNKNOWN; not assigned by inference. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §3 and §4 S07. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Clinical/structural boundary explicitly open; evidence, customer language, and operational boundary remain UNKNOWN. |
+| Review note | No Ordinary-care candidate is created; diagnostic lesions are not converted into Ordinary Care Needs. |
+
+### Record P45 — Keratosis pilaris
+
+| Field | Value |
+|---|---|
+| Map ID | P45 |
+| Working name | Keratosis pilaris |
+| Operational definition | UNKNOWN; structural placement only. |
+| In scope | S07 Clinical Anchor. |
+| Out of scope | Diagnosis, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Clinical Condition/presentation — Map-listed |
+| Map relationship | S07 — Clinical Anchor |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | UNKNOWN; not assigned by inference. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §3 and §4 S07. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Operational boundary, evidence, customer language, and any referral relationship remain UNKNOWN. |
+| Review note | No Ordinary-care candidate is created; diagnostic lesions are not converted into Ordinary Care Needs. |
+
+### Record P46 — Seborrhoeic keratosis
+
+| Field | Value |
+|---|---|
+| Map ID | P46 |
+| Working name | Seborrhoeic keratosis |
+| Operational definition | UNKNOWN; structural lesion placement only. |
+| In scope | S07 Clinical Anchor and the Map-listed S07↔S08 cross-shelf relationship only. |
+| Out of scope | Opening/completing S08; diagnosis, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Clinical Condition/lesion — Map-listed |
+| Map relationship | S07↔S08 — Clinical Anchor; cross-shelf reference only |
+| Completion / acceptance | Identified+Linked — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | UNKNOWN; not assigned by inference. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §3, §4 S07, and Map cross-shelf reference. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Exact S08 relationship/ownership, evidence, customer language, and operational boundary remain UNKNOWN. |
+| Review note | S08 is not opened or completed; no Ordinary-care candidate is created. |
+
+### Record P47 — Skin tags
+
+| Field | Value |
+|---|---|
+| Map ID | P47 |
+| Working name | Skin tags |
+| Operational definition | UNKNOWN; structural lesion/benign-growth presentation only. |
+| In scope | S07 Clinical Anchor and the Map-listed S07↔S08 cross-shelf relationship only. |
+| Out of scope | Opening/completing S08; diagnosis, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Lesion/benign growth presentation — Map-listed |
+| Map relationship | S07↔S08 — Clinical Anchor; cross-shelf reference only |
+| Completion / acceptance | Identified+Linked — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | UNKNOWN; not assigned by inference. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §3, §4 S07, and Map cross-shelf reference. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Exact S08 relationship/ownership, evidence, customer language, and operational boundary remain UNKNOWN. |
+| Review note | S08 is not opened or completed; no Ordinary-care candidate is created. |
+
+### S07 relationships (no silent merging)
+
+| ID | Map relationship | Working disposition |
+|---|---|---|
+| P43 | S07 — Mapped; boundary open | Identified; Undetermined; boundary remains UNKNOWN/open |
+| P44 | S07 — Clinical Anchor; boundary open | Identified; Clinical-anchor only; boundary remains UNKNOWN/open |
+| P45 | S07 — Clinical Anchor | Identified; Clinical-anchor only |
+| P46 | S07↔S08 — Clinical Anchor | Identified+Linked; cross-shelf reference only; S08 unchanged |
+| P47 | S07↔S08 — Clinical Anchor | Identified+Linked; cross-shelf reference only; S08 unchanged |
+| P16 | S02→S07 — Clinical Anchor/HBI relevance unresolved | Reference-only from prior S03 record; do not rewrite P16 or reopen S02/S03 |
+
+No relationship beyond the live Map is inferred. “Diagnostic lesions are not converted into Ordinary Care Needs.” No S07 record is Accepted or assigned Ordinary-care suitability. P46/P47 record only the explicit S07↔S08 reference; S08 is now structurally registered in the package below.
+
+## S08 — Lesions / Growths / Change (structural in progress; not Accepted)
+
+**Scope:** S08 items explicitly listed in the live Map §4 only. Safety-oriented cluster under Map §6 B06; not an Ordinary Care cluster. No diagnosis, treatment, Need, or Product inference.
+
+### S08 summary
+
+| ID | Working name | Map type | Map relationship | Acceptance | Operational status | UNKNOWN / GAP |
+|---|---|---|---|---|---|---|
+| P48 | Moles / nevi | Lesion / clinical anchor | S08 — Safety-aware Clinical Anchor | Identified — Accepted = No | Clinical-anchor only | Operational boundary, evidence, customer language, and any further relationship UNKNOWN |
+| P49 | Changing mole | Safety / Referral Signal | Child/Related to P48; P48/S08 | Identified+Linked — Accepted = No | Safety-referral only | Exact signal boundary, evidence, customer language, and any thresholds UNKNOWN |
+| P50 | New/growing skin lesion | Safety / Referral Signal | S08 | Identified — Accepted = No | Safety-referral only | Exact signal boundary, evidence, customer language, and any thresholds UNKNOWN |
+| P53 | Suspicious skin-cancer lesion | Safety / Referral Signal | S08 | Identified — Accepted = No | Safety-referral only | Exact signal boundary, evidence, customer language, and any thresholds UNKNOWN |
+| P54 | Suspicious melanoma lesion | Safety / Referral Signal | S08 | Identified — Accepted = No | Safety-referral only | Exact signal boundary, evidence, customer language, and any thresholds UNKNOWN |
+| P55 | Bleeding / non-healing lesion | Safety / Referral Signal | S08 | Identified — Accepted = No | Safety-referral only | Exact signal boundary, evidence, customer language, and any thresholds UNKNOWN |
+| P56 | Rapid change in lesion size / shape / color | Safety / Referral Signal | S08 | Identified — Accepted = No | Safety-referral only | Exact signal boundary, evidence, customer language, and any thresholds UNKNOWN |
+
+### Record P48 — Moles / nevi
+
+| Field | Value |
+|---|---|
+| Map ID | P48 |
+| Working name | Moles / nevi |
+| Operational definition | UNKNOWN; structural lesion/clinical-anchor placement only. |
+| In scope | S08 Safety-aware Clinical Anchor, as explicitly mapped. |
+| Out of scope | Diagnosis, treatment, Need, Product, acceptance, or Ordinary-care suitability. |
+| Unit type | Lesion / clinical anchor — Map-listed |
+| Map relationship | S08 — Safety-aware Clinical Anchor |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | Safety-aware anchor per Map; not converted into an individual Safety/Referral Signal by inference. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §3, §4 S08, and §6 B06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Evidence, operational boundary, customer language, and any further relationship remain UNKNOWN. |
+| Review note | Safety-oriented cluster; not an Ordinary Care cluster. No clinical conclusion or treatment is inferred. |
+
+### Record P49 — Changing mole
+
+| Field | Value |
+|---|---|
+| Map ID | P49 |
+| Working name | Changing mole |
+| Operational definition | UNKNOWN; Map-listed Safety/Referral Signal only. |
+| In scope | Child/Related safety signal to P48 within S08. |
+| Out of scope | Diagnosis, risk threshold, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Safety / Referral Signal — Map-listed |
+| Map relationship | P48/S08 — Child/Related; Safety/Referral |
+| Completion / acceptance | Identified+Linked — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Safety/Referral Signal per Map; no threshold or clinical interpretation added. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S08 and §6 B06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Exact signal boundary, evidence, customer language, and any thresholds remain UNKNOWN. |
+| Review note | Not an Ordinary-care candidate; no diagnosis or treatment inferred. |
+
+### Record P50 — New/growing skin lesion
+
+| Field | Value |
+|---|---|
+| Map ID | P50 |
+| Working name | New/growing skin lesion |
+| Operational definition | UNKNOWN; Map-listed Safety/Referral Signal only. |
+| In scope | S08 Safety/Referral Signal. |
+| Out of scope | Diagnosis, risk threshold, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Safety / Referral Signal — Map-listed |
+| Map relationship | S08 — Safety/Referral |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Safety/Referral Signal per Map; no threshold or clinical interpretation added. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S08 and §6 B06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Exact signal boundary, evidence, customer language, and any thresholds remain UNKNOWN. |
+| Review note | Not an Ordinary-care candidate; no diagnosis or treatment inferred. |
+
+### Record P53 — Suspicious skin-cancer lesion
+
+| Field | Value |
+|---|---|
+| Map ID | P53 |
+| Working name | Suspicious skin-cancer lesion |
+| Operational definition | UNKNOWN; Map-listed Safety/Referral Signal only. |
+| In scope | S08 Safety/Referral Signal. |
+| Out of scope | Cancer diagnosis, risk threshold, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Safety / Referral Signal — Map-listed |
+| Map relationship | S08 — Safety/Referral |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Safety/Referral Signal per Map; no diagnosis or threshold added. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S08 and §6 B06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Exact signal boundary, evidence, customer language, and any thresholds remain UNKNOWN. |
+| Review note | No cancer diagnosis or treatment conclusion is inferred; not an Ordinary-care candidate. |
+
+### Record P54 — Suspicious melanoma lesion
+
+| Field | Value |
+|---|---|
+| Map ID | P54 |
+| Working name | Suspicious melanoma lesion |
+| Operational definition | UNKNOWN; Map-listed Safety/Referral Signal only. |
+| In scope | S08 Safety/Referral Signal. |
+| Out of scope | Melanoma diagnosis, risk threshold, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Safety / Referral Signal — Map-listed |
+| Map relationship | S08 — Safety/Referral |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Safety/Referral Signal per Map; no diagnosis or threshold added. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S08 and §6 B06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Exact signal boundary, evidence, customer language, and any thresholds remain UNKNOWN. |
+| Review note | No melanoma diagnosis or treatment conclusion is inferred; not an Ordinary-care candidate. |
+
+### Record P55 — Bleeding / non-healing lesion
+
+| Field | Value |
+|---|---|
+| Map ID | P55 |
+| Working name | Bleeding / non-healing lesion |
+| Operational definition | UNKNOWN; Map-listed Safety/Referral Signal only. |
+| In scope | S08 Safety/Referral Signal. |
+| Out of scope | Diagnosis, risk threshold, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Safety / Referral Signal — Map-listed |
+| Map relationship | S08 — Safety/Referral |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Safety/Referral Signal per Map; no threshold or clinical interpretation added. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S08 and §6 B06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Exact signal boundary, evidence, customer language, and any thresholds remain UNKNOWN. |
+| Review note | Not an Ordinary-care candidate; no diagnosis or treatment inferred. |
+
+### Record P56 — Rapid change in lesion size / shape / color
+
+| Field | Value |
+|---|---|
+| Map ID | P56 |
+| Working name | Rapid change in lesion size / shape / color |
+| Operational definition | UNKNOWN; Map-listed Safety/Referral Signal only. |
+| In scope | S08 Safety/Referral Signal. |
+| Out of scope | Diagnosis, risk threshold, treatment, Need, Product, or Ordinary-care suitability. |
+| Unit type | Safety / Referral Signal — Map-listed |
+| Map relationship | S08 — Safety/Referral |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Safety/Referral Signal per Map; no threshold or clinical interpretation added. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S08 and §6 B06. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Exact signal boundary, evidence, customer language, and any thresholds remain UNKNOWN. |
+| Review note | Not an Ordinary-care candidate; no diagnosis or treatment inferred. |
+
+### S08 relationships (Anchor / Safety Signal / Cross-Shelf; no silent merging)
+
+| ID | Relationship class | Map relationship | Working disposition |
+|---|---|---|---|
+| P48 | Anchor | S08 — Safety-aware Clinical Anchor | Identified; Clinical-anchor only; Accepted = No |
+| P49 | Safety Signal | Child/Related to P48; P48/S08 | Identified+Linked; Safety-referral only; Accepted = No |
+| P50 | Safety Signal | S08 | Identified; Safety-referral only; Accepted = No |
+| P53 | Safety Signal | S08 | Identified; Safety-referral only; Accepted = No |
+| P54 | Safety Signal | S08 | Identified; Safety-referral only; Accepted = No |
+| P55 | Safety Signal | S08 | Identified; Safety-referral only; Accepted = No |
+| P56 | Safety Signal | S08 | Identified; Safety-referral only; Accepted = No |
+| P39 | Cross-Shelf | S06↔S08 — Clinical Anchor | Reference-only; existing P39 record unchanged |
+| P46 | Cross-Shelf | S07↔S08 — Clinical Anchor | Reference-only; existing P46 record unchanged |
+| P47 | Cross-Shelf | S07↔S08 — Clinical Anchor | Reference-only; existing P47 record unchanged |
+| P51/P52 | Out of S08 scope | Map §4 places both under S09 | Not added to S08; no S09 shelf opened |
+
+Map §6 B06 explicitly defines this as a Safety-oriented cluster, not an Ordinary Care cluster. No S08 record is Accepted or an Ordinary-care candidate. P39/P46/P47 are reference-only; their existing records are not rewritten. P51/P52 remain under S09 per the live Map. No S09/S10 work is opened.
+
+## S09 — Sun / UV-Related Change (structural in progress; not Accepted)
+
+**Scope:** S09 items explicitly listed in live Map §4 only. Context is not automatically Need or diagnosis. P51's locked disposition is preserved verbatim in meaning; P22 remains an existing S04 record and is referenced here only.
+
+### S09 summary
+
+| ID | Working name | Map type | Map relationship | Acceptance | Operational status | UNKNOWN / GAP |
+|---|---|---|---|---|---|---|
+| P51 | Chronic UV damage | Context / Discovery Problem | S09 — DISCOVERY CONTEXT; NOT NEED-LEVEL | NOT ACCEPTED; locked disposition retained | Out of scope for Need-level handling; not an Ordinary-care candidate; no automatic Safety/Referral flag | Customer language, evidence, operational boundary, and any non-locked relationship UNKNOWN |
+| P52 | Actinic keratosis | Clinical / Safety-sensitive lesion | S09↔S08 — Safety/Referral | Identified — Accepted = No | Safety-referral only | Clinical boundary, evidence, customer language, and exact cross-shelf relation details UNKNOWN |
+| P22 | Sun-related pigmentation | Context / presentation | S09↔S04 — Related/Context | Existing S04 record unchanged; reference only | Context/reference only; no new operational status assigned | Any relationship beyond the Map's Related/Context label UNKNOWN |
+
+### Record P51 — Chronic UV damage
+
+| Field | Value |
+|---|---|
+| Map ID | P51 |
+| Working name | Chronic UV damage |
+| Operational definition | UNKNOWN beyond the locked Map disposition: Discovery Problem / Context; Context, not Need-level. |
+| In scope | Discovery context only, per Map §4 and the locked P51 disposition. |
+| Out of scope | Need-level handling, diagnosis, Ordinary-care candidacy, automatic Safety/Referral flag, Product inference, or acceptance. |
+| Unit type | Context / Discovery Problem — Map-listed |
+| Map relationship | S09 — DISCOVERY CONTEXT; NOT NEED-LEVEL |
+| Completion / acceptance | NOT ACCEPTED; locked disposition retained |
+| Operational status | Out of scope for Need-level handling; no automatic Safety/Referral flag |
+| Safety / referral | NO automatic flag, per locked disposition. No further signal inferred. |
+| Need eligibility | V1 Need Eligibility = NOT ELIGIBLE, per locked disposition; not newly inferred. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S09 and P51 locked disposition; §6 B07. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Evidence, customer language, operational boundary, and any relation not explicitly stated in the Map remain UNKNOWN. |
+| Review note | Context is not automatically Need or diagnosis. P51 is not an Accepted Need and must not be treated as one. |
+
+### Record P52 — Actinic keratosis
+
+| Field | Value |
+|---|---|
+| Map ID | P52 |
+| Working name | Actinic keratosis |
+| Operational definition | UNKNOWN; structural Clinical/Safety-sensitive lesion placement only. |
+| In scope | S09↔S08 cross-shelf Clinical/Safety-sensitive reference as explicitly mapped. |
+| Out of scope | Diagnosis confirmation, treatment, Need, Product, acceptance, or Ordinary-care suitability. |
+| Unit type | Clinical / Safety-sensitive lesion — Map-listed |
+| Map relationship | S09↔S08 — Safety/Referral |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Safety-referral only |
+| Safety / referral | Safety/Referral disposition per Map; no threshold or clinical interpretation added. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 S09 and §5 Cross-Shelf Relationships. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Clinical boundary, evidence, customer language, and exact relation details remain UNKNOWN. |
+| Review note | No diagnosis, treatment, Need, Product, or Ordinary-care conclusion is inferred. S08 is not reopened or rewritten. |
+
+### S09 relationships (Context / Clinical-Safety / Cross-Shelf; no rewriting)
+
+| ID | Relationship class | Map relationship | Working disposition |
+|---|---|---|---|
+| P51 | Context / Discovery | S09 — DISCOVERY CONTEXT; NOT NEED-LEVEL | Locked: V1 Need Eligibility = NOT ELIGIBLE; Safety/Referral = NO automatic flag; Acceptance = NOT ACCEPTED |
+| P52 | Clinical / Safety-sensitive | S09↔S08 — Safety/Referral | Identified; Safety-referral only; Accepted = No; existing S08 records untouched |
+| P22 | Cross-Shelf / Context | S09↔S04 — Related/Context | Reference-only; existing S04 P22 record is not rewritten |
+
+No relationship beyond the live Map is inferred. P51's locked disposition is not altered. P22 is included here only as a cross-shelf reference; the S04 record is not changed. S08 is not reopened. S10 is not opened.
+
+
+## S10 — Systemic / Autoimmune / Clinically Significant Skin Presentation (structural in progress; not Accepted)
+
+**Scope and source:** Only the five S10 entries explicitly present in the live `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 are registered below. The live Map's labels take precedence over the stale expected-name list in the work instruction. Map §6 B08 is not present in the fetched live Map; therefore its wording is not independently attributed as a live Map section. The Map's S10 description in §2 and §4 is preserved without medical expansion.
+
+### S10 summary
+
+| ID | Working name (live Map §4) | Map type | Map relationship | Acceptance | Operational status | UNKNOWN / GAP |
+|---|---|---|---|---|---|---|
+| P57 | Autoimmune/autoinflammatory skin disease | Clinical Domain/Condition Family | S10 — Clinical Anchor/broad | Identified — Accepted = No | Clinical-anchor only; broad family, no diagnosis or retail-need inference | Family boundary, evidence, customer language, and operational relevance UNKNOWN |
+| P58 | Cutaneous lupus | Clinical Condition | P57/S10 — Clinical/Referral-sensitive | Identified — Accepted = No | Clinical-anchor only / referral-sensitive; no Ordinary-care or product handling | Clinical boundary, evidence, customer language, and exact referral workflow UNKNOWN |
+| P59 | Adult-onset dermatomyositis with skin findings | Clinical Condition | P57/S10 — Clinical/Referral-sensitive | Identified — Accepted = No | Clinical-anchor only / referral-sensitive; no Ordinary-care or product handling | Clinical boundary, evidence, customer language, and exact referral workflow UNKNOWN |
+| P60 | Acanthosis nigricans/systemic-associated skin changes | Clinical/systemic-associated presentation | S10 — Clinical Anchor | Identified — Accepted = No | Clinical-anchor only; presenting/systemic association not a confirmed diagnosis or Need | Boundary, evidence, customer language, and operational relevance UNKNOWN |
+| P61 | Photosensitivity | Symptom/clinical presentation | S09↔S10 — Clinical/Context relationship | Identified — Accepted = No | Clinical-anchor only; Context relationship retained, no automatic referral or retail-need inference | Meaning/boundary, evidence, customer language, and relationship details UNKNOWN |
+
+### Record P57 — Autoimmune/autoinflammatory skin disease
+
+| Field | Value |
+|---|---|
+| Map ID | P57 |
+| Working name | Autoimmune/autoinflammatory skin disease |
+| Operational definition | UNKNOWN beyond the live Map's broad Clinical Domain/Condition Family label. |
+| In scope | Broad clinical anchor for the S10 family only. |
+| Out of scope | Specific diagnosis, treatment, Need, Product, acceptance, or Ordinary-care suitability. |
+| Unit type | Clinical Domain/Condition Family — Map-listed |
+| Map relationship | S10 — Clinical Anchor/broad |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | No additional signal or workflow inferred beyond the Map's clinical-anchor placement. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §2 and §4. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Family boundary, evidence, customer language, and operational relevance remain UNKNOWN. |
+| Review note | Broad family is not itself a confirmed diagnosis, Accepted Need, or retail need. |
+
+### Record P58 — Cutaneous lupus
+
+| Field | Value |
+|---|---|
+| Map ID | P58 |
+| Working name | Cutaneous lupus |
+| Operational definition | UNKNOWN; live Map lists a Clinical Condition only. |
+| In scope | S10 clinical/referral-sensitive anchor as mapped. |
+| Out of scope | Diagnosis confirmation, treatment, Need, Product, acceptance, or Ordinary-care suitability. |
+| Unit type | Clinical Condition — Map-listed |
+| Map relationship | P57/S10 — Clinical/Referral-sensitive |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Clinical-anchor only / referral-sensitive |
+| Safety / referral | Referral-sensitive per Map; no threshold or clinical workflow invented. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Clinical boundary, evidence, customer language, and exact referral workflow remain UNKNOWN. |
+| Review note | Not an Ordinary-care candidate, Accepted Need, or product recommendation basis. |
+
+### Record P59 — Adult-onset dermatomyositis with skin findings
+
+| Field | Value |
+|---|---|
+| Map ID | P59 |
+| Working name | Adult-onset dermatomyositis with skin findings |
+| Operational definition | UNKNOWN; live Map lists a Clinical Condition only. |
+| In scope | S10 clinical/referral-sensitive anchor as mapped. |
+| Out of scope | Diagnosis confirmation, treatment, Need, Product, acceptance, or Ordinary-care suitability. |
+| Unit type | Clinical Condition — Map-listed |
+| Map relationship | P57/S10 — Clinical/Referral-sensitive |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Clinical-anchor only / referral-sensitive |
+| Safety / referral | Referral-sensitive per Map; no threshold or clinical workflow invented. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Clinical boundary, evidence, customer language, and exact referral workflow remain UNKNOWN. |
+| Review note | Not an Ordinary-care candidate, Accepted Need, or product recommendation basis. |
+
+### Record P60 — Acanthosis nigricans/systemic-associated skin changes
+
+| Field | Value |
+|---|---|
+| Map ID | P60 |
+| Working name | Acanthosis nigricans/systemic-associated skin changes |
+| Operational definition | UNKNOWN; live Map lists a clinical/systemic-associated presentation. |
+| In scope | Presenting/systemic-associated clinical anchor as mapped. |
+| Out of scope | Systemic diagnosis, causation, treatment, Need, Product, acceptance, or Ordinary-care suitability. |
+| Unit type | Clinical/systemic-associated presentation — Map-listed |
+| Map relationship | S10 — Clinical Anchor |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Clinical-anchor only |
+| Safety / referral | No additional signal or workflow inferred beyond the Map's clinical-anchor placement. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Presentation boundary, evidence, customer language, and operational relevance remain UNKNOWN. |
+| Review note | A systemic association is not a confirmed diagnosis or an HBI Need. |
+
+### Record P61 — Photosensitivity
+
+| Field | Value |
+|---|---|
+| Map ID | P61 |
+| Working name | Photosensitivity |
+| Operational definition | UNKNOWN; live Map lists a symptom/clinical presentation. |
+| In scope | S09↔S10 Clinical/Context relationship as explicitly mapped. |
+| Out of scope | Etiology, diagnosis, automatic referral, Need, Product, acceptance, or Ordinary-care suitability. |
+| Unit type | Symptom/clinical presentation — Map-listed |
+| Map relationship | S09↔S10 — Clinical/Context relationship |
+| Completion / acceptance | Identified — Accepted = No |
+| Operational status | Clinical-anchor only; Context relationship retained |
+| Safety / referral | No automatic signal inferred; exact handling remains UNKNOWN. |
+| Evidence / provenance | `SKIN_PROBLEM_SPACE_MAP_V0.1.md` §4 and §5. |
+| Customer language | UNKNOWN |
+| UNKNOWN / GAP | Meaning/boundary, evidence, customer language, and exact relationship details remain UNKNOWN. |
+| Review note | The cross-shelf relationship is retained without rewriting S09 or asserting an unstated relationship. |
+
+### S10 relationships (clinical anchors / context; no silent merging)
+
+| ID | Relationship class | Map relationship | Working disposition |
+|---|---|---|---|
+| P57 | Broad clinical family anchor | S10 — Clinical Anchor/broad | Identified; Clinical-anchor only; Accepted = No |
+| P58 | Clinical / Referral-sensitive | P57/S10 | Identified; clinical-anchor/referral-sensitive only; Accepted = No |
+| P59 | Clinical / Referral-sensitive | P57/S10 | Identified; clinical-anchor/referral-sensitive only; Accepted = No |
+| P60 | Systemic-associated presentation | S10 — Clinical Anchor | Identified; Clinical-anchor only; Accepted = No |
+| P61 | Symptom / cross-shelf context | S09↔S10 — Clinical/Context relationship | Identified; retain Context relation; Accepted = No |
+
+No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care candidate or Need. P61's S09↔S10 relationship is recorded without reopening or rewriting S09. G1 remains NOT RECOVERED; G8 remains BLOCKED / NOT VERIFIED.
+
+### Structural traversal completion
+
+**عبور ساختاری Map از S01 تا S10 کامل شد؛ Accepted/Need/Product شروع نشده است.** This means the structural shelf traversal and registration are complete only; it does not mean medical validation, final Problem Bank acceptance, Need extraction, Product mapping, or implementation is complete. No S11 is opened.
+
+
 ## روابط خوشه (بدون ادغام خاموش)
 
 | ID | نقش نسبت به P01 | وضعیت |
@@ -1090,8 +1567,13 @@ No relationship beyond the live Map is inferred. Presence in S06 does not imply 
 | G1 / G8 | خارج از دامنهٔ این Closure |
 | قفسهٔ S03 | **ثبت ساختاری شده**؛ P08–P16؛ نه Accepted |
 | قفسهٔ S04 | **ثبت ساختاری شده**؛ P17–P23؛ نه Accepted |
-| قفسهٔ S04 | **در حال کار ساختاری**؛ P17–P23؛ نه Accepted |
-| S05–S10 | باز نشده‌اند؛ نیازمند دستور صریح PO |
+| قفسهٔ S04 | **ثبت ساختاری شده**؛ P17–P23؛ نه Accepted |
+| S06 | **ثبت ساختاری شده**؛ P24–P42 در بسته‌های S05/S06؛ نه Accepted |
+| S07 | **ثبت ساختاری شده**؛ P43–P47؛ نه Accepted |
+| S08 | **ثبت ساختاری شده**؛ P48–P50 و P53–P56؛ خوشهٔ Safety/Referral؛ نه Accepted |
+| S09 | **ثبت ساختاری شده**؛ P51 و P52؛ P22 فقط ارجاع متقاطع به S04؛ نه Accepted/Need |
+| S10 | **در حال کار ساختاری**؛ P57–P61 طبق Map زنده؛ نه Accepted/Need/Product |
+| S10 | **ثبت ساختاری شده**؛ P57–P61 طبق Map زنده؛ نه Accepted/Need/Product |
 | Need / Product | خارج از دامنه |
 
 ---
