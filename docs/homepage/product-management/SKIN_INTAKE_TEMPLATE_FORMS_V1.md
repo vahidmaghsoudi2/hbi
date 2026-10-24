@@ -1,6 +1,6 @@
 # Skin product intake — fixed template forms (V1)
 
-**Status:** DRAFT specification for implementation planning  
+**Status:** P0 specification approved by PO; awaiting merge of PR #449  
 **Date:** 2026-10-24  
 **Canonical location:** `docs/homepage/product-management/` (homepage menu: مدیریت محصولات → ورود و ویرایش محصول)  
 **Authority:** Product decisions / Gates remain in [Issue #406](https://github.com/vahidmaghsoudi2/hbi/issues/406). This file is the operational field map for skin intake templates.  
@@ -177,16 +177,16 @@ product_line = SKIN          ← existing mandatory line (operator selects; not 
 - [x] Shared + per-template boxes named
 - [x] Smart-fill safety rules stated
 - [x] Canonical path under `docs/homepage/product-management/`
-- [ ] PO approval recorded in Issue #406 (pending)
-- [ ] P1 UI implementation authorized separately
+- [x] PO approval recorded in Issue #406 and PR #449
+- [x] P1 UI skeleton authorized separately, effective only after P0 merge
 
 ## 9. Open decisions for Product Owner
 
-1. Confirm merge of آبرسان + مرطوب‌کننده into `HYDRATING_MOISTURIZER`.
-2. Confirm template list above.
-3. Whether template payload in V1 may live in notes/JSON without migration, or requires schema.
-4. When official links from `stated_skin_goals` → P01–P61 may begin.
+1. **Resolved:** merge آبرسان + مرطوب‌کننده into `HYDRATING_MOISTURIZER`.
+2. **Resolved:** the nine templates above are the complete initial V1 list; additions require explicit revision.
+3. **Deferred:** template payload storage/schema is outside P1; P1 must use the existing intake form without schema/API/database changes. Revisit only under a separate explicit gate if the existing form cannot support the approved UI skeleton.
+4. **Deferred:** links from `stated_skin_goals` → P01–P61 are not authorized by P1 and require a separate PO decision under Issue #406.
 
 ---
 
-*End of V1 specification. Implementation starts only after PO approval of this map and an explicit P1 authorization.*
+*End of V1 specification. P0 is PO-approved. P1 is limited to the UI skeleton and may start only after PR #449 is merged; P2–P4 remain unauthorized.*
