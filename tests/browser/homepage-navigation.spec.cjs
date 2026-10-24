@@ -384,7 +384,7 @@ test("Researched P4 starter pre-fills a SKIN draft without guessing market ident
   const productMutations = [];
   page.on("request", (request) => {
     const pathname = new URL(request.url()).pathname;
-    if (request.method() !== "GET" && /\\/products(?:\\/|$)/.test(pathname)) {
+    if (request.method() !== "GET" && (pathname === "/products" || pathname.startsWith("/products/"))) {
       productMutations.push({ method: request.method(), pathname });
     }
   });
