@@ -2,11 +2,11 @@
 
 > **Authority:** This is the only active homepage specification, work ledger, and no-repeat control. After this consolidation PR is merged, all homepage work must use this document. Issue [#352](https://github.com/vahidmaghsoudi2/hbi/issues/352) is the pointer/decision history, not a second execution plan. Older homepage documents and PRs are historical records only and must not be used to start or repeat work.
 
-**Last reconciled:** 2026-10-22  
-**Baseline:** `master @ 8b29ea2de702a4e3ec9b015989ea92b412b9e61f`  
-**Authoritative implementation:** `frontend/src/pages/NewHomePage.tsx` at route `/` (protected by AdminGate)  
-**Merged homepage integration:** [PR #363](https://github.com/vahidmaghsoudi2/hbi/pull/363), merge commit `0463044d7b49b4847b70d388766484fce5504392`  
-**Single active workstream:** [PR #395](https://github.com/vahidmaghsoudi2/hbi/pull/395), branch `fix/homepage-single-source-of-truth` (OPEN / DRAFT, not merged). The current commit SHA is read from the PR itself so this ledger cannot become stale each time it is updated.  
+**Last reconciled:** 2026-10-22
+**Baseline:** `master @ 8b29ea2de702a4e3ec9b015989ea92b412b9e61f`
+**Authoritative implementation:** `frontend/src/pages/NewHomePage.tsx` at route `/` (protected by AdminGate)
+**Merged homepage integration:** [PR #363](https://github.com/vahidmaghsoudi2/hbi/pull/363), merge commit `0463044d7b49b4847b70d388766484fce5504392`
+**Single active workstream:** [PR #395](https://github.com/vahidmaghsoudi2/hbi/pull/395), branch `fix/homepage-single-source-of-truth` (OPEN / DRAFT, not merged). The current commit SHA is read from the PR itself so this ledger cannot become stale each time it is updated.
 **Governance pointer:** [Issue #352](https://github.com/vahidmaghsoudi2/hbi/issues/352). It points here; it is not a second execution ledger. All current homepage execution status, prior-work inventory, evidence links, blockers, and next actions belong in this file and this PR only.
 
 ## 1. Non-negotiable operating rules
