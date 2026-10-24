@@ -964,3 +964,94 @@ For each claim or study, record: source URL; source class (manufacturer, primary
 Continue in this same ledger with source-by-source protocol retrieval for the highest-value open leads: P2→P08, P1→P02/P43, P6→P13/P19, P5→P17/P22, and P7→P24. Each paper/report must first pass exact-product, market/formula and endpoint matching. In parallel, use the existing Map/Working Records definitions as the only canonical structural baseline. Do not ask for or assume package photos as a prerequisite to web research; do not claim package identity is verified without them or equivalent direct label/GTIN evidence.
 
 **Change scope:** append-only research documentation. Passes 1–9 remain unchanged. No product records were created and no Product↔Problem relation was approved.
+
+
+---
+## Research pass 11 — primary-source protocol retrieval and claim-boundary audit (2026-10-24)
+
+**Purpose:** pursue the highest-value protocol leads identified in Pass 10 using public official product pages and searches for the underlying methods/reports. This is a source-retrieval audit, not an efficacy approval. No missing protocol is inferred from a marketing summary.
+
+### 11.1 Source-by-source findings
+
+#### P1 — COSRX The 6 Peptide Skin Booster Serum
+
+**Official source:** https://www.cosrx.com/collections/all/products/the-6-peptide-skin-booster-serum  
+**Additional official page:** https://www.cosrx.com/collections/dermskincare-guide
+
+The official product page attributes five outcomes to a trial of 20 subjects conducted by Dermacosmetic Skin Science Laboratory Co., Ltd from 2023-09-18 to 2023-10-31: deep moisture +162.5%, texture +76.4%, clarity +40.1%, radiance +24.5%, density +22.2%. The additional official brand page also states after four weeks: texture +76.41%, density +22.22%, moisture/radiance +162.5%, blackheads decreased 21.95%, and excess sebum decreased 29.48%.
+
+**Retrieval result:** the reviewed official pages do not provide a complete study report, sample characteristics beyond n=20, detailed endpoint definitions, measurement instruments, comparator/control, analysis plan or uncertainty estimates. A search did not establish a publicly accessible primary protocol/report. The extra blackhead/sebum figures are an important official claim lead, but cannot be assigned to P09/P08 as approved evidence without knowing exact measures and study conditions.
+
+**Disposition:** retain `manufacturer_claim_only` and `candidate_only` for P02/P43, and add P08/P09 as **claim-led retrieval candidates only** for the newly located blackhead/sebum claims. Do not link to P10/P11/P12; no subtype-specific evidence located. Non-comedogenic/irritation tests remain safety/compatibility claims, not proof of acne treatment.
+
+#### P2 — Neutrogena Clear & Defend 2% Salicylic Acid Face Wash (UK)
+
+**Official source:** https://www.neutrogena.co.uk/skincare/cleansers-washes/clear-and-defend-daily-wash  
+**Retail corroboration (not independent evidence):** https://www.boots.com/neutrogena-/neutrogena-washes-and-exfoliators/neutrogena-clear-defend-facial-wash-10233110
+
+The official page reports “97% noticed less new spots in 4 weeks” with “clinical grading, 34 subjects,” and lists 2% salicylic acid. It also warns that product and ingredients may change. Boots repeats substantially the same claim and sample note.
+
+**Retrieval result:** no public full protocol/report located. The wording does not specify baseline lesion counts, whether “new spots” means all acne lesions or a defined subtype, comparator, assessor blinding, statistical method or confidence intervals. The retail repetition is not an independent replication.
+
+**Disposition:** P08 remains `candidate_only` / `manufacturer_claim_only`; no P09/P10/P11/P12 relation. Require the primary report or sufficient protocol metadata and target-label match.
+
+#### P6 — Clinique Even Better Clinical Radical Dark Spot Corrector + Interrupter
+
+**Official source:** https://www.clinique.com/product/4034/68008/skincare/serum/even-better-clinicaltm-radical-dark-spot-corrector-interrupter
+
+The official page separates multiple cohorts/outcomes: clinical testing of 52 women after 12 weeks with a reported 39% visible dark-spot reduction; consumer testing of 536 women after 7 days (84% more radiant, 93% soothed/calmer); consumer testing of 533 women after 28 days (90% brighter, 89% more even, 81% look of dark spots including sun spots reduced); and a separate consumer test of 433 women after 28 days (83% said the look of acne marks was reduced).
+
+**Retrieval result:** the product page does not supply the complete protocols for these cohorts, control/comparator details, definition of “acne marks,” objective vs subjective assessment methods or analysis plan. The 433-person acne-mark consumer endpoint must not be merged with the 52-person clinical dark-spot endpoint.
+
+**Disposition:** P17 remains claim-led candidate only. P13/P19 remain unlinked; the acne-mark consumer result is a protocol-retrieval lead, not evidence that the cohort had canonical PIH. P18 melasma remains unlinked by default.
+
+#### P5 — ISDIN FotoUltra 100 Active Unify SPF50+ 50 ml
+
+**Official UK source:** https://www.isdin.com/en-GB/product/foto-ultra-isdin/active-unify-spf-50  
+**Official family page distinguishing variants:** https://www.isdin.com/en-GB/products/foto-ultra-isdin  
+**Official Spot Prevent page (different product):** https://www.isdin.com/en-GB/product/foto-ultra-isdin/spot-prevent-color-spf-50
+
+The official Active Unify page describes SPF50+, 50 ml, and claims it helps reduce and prevent pigmentation spots caused by the sun, with visible results after one month and best results after three months. A retailer page repeats figures of 22% reduction in sun-spot intensity and 15% reduction in area, but the reviewed official Active Unify page does not expose the full study report or enough protocol metadata to verify those figures for the exact target SKU. Official Spot Prevent pages disclose separate tests for Spot Prevent; those are not transferable to Active Unify.
+
+**Retrieval result:** no exact-SKU primary protocol/report for the 22%/15% figures was verified in this pass. Do not treat retail summaries as a primary study, and do not substitute a Spot Prevent paper or its subjects/outcomes.
+
+**Disposition:** P17/P22 remain manufacturer-claim-led candidates only; P19 remains `not_linked`. Keep Active Unify separate from Spot Prevent. The sun-caused pigmentation claim does not establish a PIH endpoint.
+
+#### P7 — Anua Azelaic Acid 10 Hyaluron Redness Soothing Serum
+
+**Official serum source:** https://pages.anua.com/products/azelaic-acid-10-hyaluron-redness-soothing-serum  
+**Official routine page:** https://pages.anua.com/solutions/redness-prone-routine-sensitive-skin  
+**Official pad page, explicitly a different product:** https://anua.com/products/azelaic-10-hyaluron-redness-soothing-pad
+
+The official routine page, dated 2026-06-04, says 90% of participants agreed the appearance of red troubled spots improved in a clinical study of the **serum**. The page identifies 10% azelaic acid and sodium hyaluronate, but does not provide the study sample size, duration, comparator, validated endpoint, measurement method or full report.
+
+The official **pad** page separately reports a clinical study at P&K Skin Research Center, 2025-01-20 to 2025-02-19, n=21 aged 20–59, concerning non-comedogenic suitability, redness/soothing of acne trouble areas and irritation from external physical stimulation. This protocol belongs to the pad and must not be transferred to the serum. The pad page's statement that redness is due to dryness and not associated with disease is a further boundary, not a rosacea treatment claim.
+
+**Disposition:** serum P24 remains a `manufacturer_claim_only` / `candidate_only` lead with protocol details unknown. P26 remains `not_linked`; general redness language does not establish rosacea-specific efficacy. Pad evidence is explicitly excluded from the serum dossier.
+
+### 11.2 Retrieval summary
+
+| Product | Strongest source found this pass | Protocol availability | Evidence label / disposition |
+|---|---|---|---|
+| P1 COSRX | Official product page + official brand guide | Full report not public/verified | Manufacturer claims; new P08/P09 leads only; P02/P43 candidates only |
+| P2 Neutrogena UK | Official UK product page; Boots repeats claim | n=34 and 4-week wording only; full protocol unavailable | P08 candidate only; no subtype link |
+| P6 Clinique | Official product page with separate cohorts | Cohort sizes/durations/claim percentages shown; full methods unavailable | P17 candidate; P13/P19 unlinked |
+| P5 ISDIN Active Unify | Official Active Unify page; retailer repeats 22%/15% figures | Exact-SKU primary report not verified | P17/P22 claim-led candidates; P19 unlinked; Spot Prevent excluded |
+| P7 Anua serum | Official serum/routine page | 90% claim visible; sample/protocol details unavailable | P24 claim-led candidate; P26 unlinked; pad protocol excluded |
+
+### 11.3 Evidence quality and governance decision
+
+- This pass found additional public official claims, not a sufficient basis to approve any Product↔Problem relation.
+- Manufacturer-hosted figures remain manufacturer claims unless the underlying report/protocol can be independently inspected and matched to the exact SKU, market and endpoint.
+- Retailer repetition does not count as independent evidence.
+- Ingredient lists, non-comedogenic labels, consumer-perception percentages and sunscreen positioning are not interchangeable with validated clinical endpoints.
+- Product identity and target physical package/market/GTIN remain **NOT VERIFIED** for P1–P7.
+- Approved Product↔Problem relations: **NONE**.
+- Consultation-engine authorization: **NO / NOT AUTHORIZED** for P1–P7.
+- No operational product records, ProductKnowledge rows, code, schema, API, UI, database or canonical Map/Working Records statuses were changed. Passes 1–10 remain unchanged.
+
+### 11.4 Next action
+
+Continue retrieval of primary reports or technical dossiers, prioritizing: (1) COSRX 2023 Dermacosmetic Skin Science Laboratory report including the blackhead/sebum endpoints; (2) Neutrogena UK 34-subject clinical grading protocol; (3) Clinique's distinct 52-, 536-, 533- and 433-person protocols; (4) ISDIN Active Unify-specific substantiation for the 22%/15% figures; and (5) Anua serum-specific protocol behind the 90% redness claim. If a report is not publicly accessible, record it as unavailable and keep the relation unlinked; do not fill gaps by inference.
+
+**Change scope:** append-only research documentation. No implementation, operational product entry, accepted relation or merge authorization.
