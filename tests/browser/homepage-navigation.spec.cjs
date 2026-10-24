@@ -375,6 +375,37 @@ test("Product menu has one canonical list plus intake and QA actions", async ({ 
   await expect(page.getByRole("heading", { name: "مدیریت محصولات", exact: true })).toBeVisible();
 });
 
+test("Researched P4 starter pre-fills a SKIN draft without guessing market identity or creating a record", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-p4-starter-test-token");
+    sessionStorage.setItem("hbi_operator_access_token", "homepage-p4-starter-operator-token");
+  });
+
+  const productMutations = [];
+  page.on("request", (request) => {
+    const pathname = new URL(request.url()).pathname;
+    if (request.method() !== "GET" && /\\/products(?:\\/|$)/.test(pathname)) {
+      productMutations.push({ method: request.method(), pathname });
+    }
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "ورود به مدیریت محصولات" }).click();
+  await page.getByRole("button", { name: "ورود و ویرایش محصول" }).click();
+  await page.getByRole("button", { name: "بارگذاری پیش‌نویس پژوهشی P4 · SKIN1004" }).click();
+
+  const field = (label) => page.locator("label").filter({ hasText: label }).first().locator("..").locator("input");
+  await expect(field("product_id")).toHaveValue("SKIN1004-HYALUCICA-SUN-SERUM-50ML");
+  await expect(field("برند")).toHaveValue("SKIN1004");
+  await expect(field("نام محصول")).toHaveValue("Madagascar Centella Hyalu-Cica Water-Fit Sun Serum");
+  await expect(page.locator("#product-line-select")).toHaveValue("SKIN");
+  await expect(field("منطقه بازار")).toHaveValue("");
+  await expect(field("variant")).toHaveValue("");
+  await expect(page.getByText(/بازار کره‌ای\/بین‌المللی و آمریکا یکسان فرض نمی‌شوند/)).toBeVisible();
+  await expect(page.getByText(/این کار هنوز هیچ رکوردی ایجاد نکرده است/)).toBeVisible();
+  expect(productMutations).toEqual([]);
+});
+
 test("Obsolete standalone catalog URL redirects to the homepage", async ({ page }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-obsolete-catalog-route-test-token");
