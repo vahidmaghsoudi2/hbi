@@ -905,3 +905,62 @@ Disposition: exact official serum source and page-level INCI are found; physical
 5. Continue append-only in this same ledger as Research pass 10; do not create a parallel file or identifier.
 
 **Change scope:** public-source research and documentation only. No code, schema, API, UI, database, ProductKnowledge row, operational product record, accepted Map/Working Records status or approved Product↔Problem relation changed. PR merge is not authorized by this pass.
+
+
+---
+## Research pass 10 — canonical Map and Working Records crosswalk (2026-10-24)
+
+**Scope:** Read-only crosswalk against the owner-designated P01–P61 Map on `master` and the current Working Records. This pass clarifies canonical unit boundaries; it does not medically validate the Map, accept a Need, approve Product↔Problem relations, or authorize product recommendations.
+
+### 10.1 Canonical sources read
+
+1. `docs/product-intake-knowledge-registry/SKIN_PROBLEM_SPACE_MAP_V0.1.md` on `master`, blob SHA `c57ce7edbcee513dcb60b735ce91b98de22d8aa2`.
+2. `docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKING_RECORDS.md` on `master`, blob SHA `30bb058b46462fc125ed80c2c471d2e6394bc38a`.
+3. `docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md` and `SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md` were also checked for current governance/navigation state.
+
+The Map itself states that its P01–P61 designation is the owner's structural reference list only: Map placement is not medical validation, Need acceptance, treatment authorization, or product mapping. Working Records likewise mark the relevant records Identified / Identified+Linked, Accepted = No, and operational status Undetermined or Clinical-anchor only. Definitions below reproduce the Map's structural labels; they are not new clinical definitions.
+
+### 10.2 Canonical ID definitions and evidence crosswalk
+
+| Canonical ID | Map-defined unit and boundary | Product dossier evidence currently available | Pass 10 disposition / missing proof |
+|---|---|---|---|
+| **P02** | Dehydration / impaired moisture retention; S01 manifestation/related presentation, recorded as MERGE/RELATED TO P01. Working Records preserve P02 as Identified+Linked to P01, not merged/deleted, Accepted = No; standalone operational status undetermined. | P1 COSRX has manufacturer-reported moisture result (+162.5% deep moisture, n=20); P2/P3 cleanser hydration/supporting ingredients and P4 hydration positioning are not direct proof of this canonical presentation. No exact protocol/endpoint definition or target-package match established. | **NOT LINKED.** P1's broad moisture result is a research lead only; it does not establish improvement in impaired moisture retention as defined for P02. Need endpoint definition, method, duration, exact SKU/formula and suitable comparison; preserve P02/P01 governance boundary. |
+| **P08** | Acne; S03 Problem/Clinical presentation and parent of P09–P12. P09/P10/P11 are subtype/manifestation records; P12 is a severity/clinical subtype. No independent Need determination. | P2 Neutrogena UK wash: manufacturer-reported “97% noticed less new spots in 4 weeks,” clinical grading n=34, declared 2% salicylic acid; full protocol unavailable. P7 Anua serum has manufacturer non-comedogenic/low-irritation labels and a 90% redness-related claim, not proof of acne improvement. P3 cleanser ingredient presence alone is insufficient. | **CANDIDATE ONLY / manufacturer_claim_only for P2 claim.** Need exact product protocol, definition of “new spots,” baseline/comparator and analysis; confirm target market/package. Do not infer P09/P10/P11/P12-specific efficacy from general acne wording. |
+| **P13** | Acne aftermath/discoloration; S03→S04 sequela/post-inflammatory presentation, Related/Cross-Shelf. Working Records explicitly say S04 is not opened by this cross-reference. | P6 Clinique has a separate consumer-reported outcome that acne marks looked reduced (n=433, 28 days); public page does not provide enough detail to establish lesion classification, comparator, blinding, measurement or relation to canonical P13. P2's “new spots” claim is not an aftermath endpoint. | **RESEARCH CANDIDATE ONLY; not linked.** Obtain the original study/protocol and match what “acne marks” means to P13; distinguish post-inflammatory discoloration from active acne and from P17/P19. No S04 scope expansion is implied. |
+| **P17** | Hyperpigmentation/dark spots; S04 Problem/presentation, with P18/P19 as structurally related but distinct units. | P5 ISDIN Active Unify and P6 Clinique have manufacturer-reported dark-spot/tone claims. P6 reports clinical n=52/12-week 39% visible dark-spot reduction, plus separate consumer datasets. P1's clarity/radiance claims are not equivalent to a defined hyperpigmentation endpoint. Exact protocols and target package matches remain unverified. | **CANDIDATE ONLY / manufacturer_claim_only for applicable claims; no approved link.** Require exact-SKU study endpoint, protocol, market/formula match and clear lesion/pigmentation definition. Do not merge P17 with P18 or P19. |
+| **P19** | Post-inflammatory hyperpigmentation; P17/S04 sequela/pigmentation presentation, Related/Sequela, linked to P17 but not merged. Working Records keep operational definition and evidence UNKNOWN. | P6 consumer-reported “acne marks” outcome (n=433, 28 days) is a potential lead only; the public claim does not prove that participants had PIH as defined by P19. P5's sun-caused spots claim does not establish PIH. P3 brightening marketing is not an exact PIH endpoint. | **NOT LINKED.** Exact PIH-specific population/endpoint and original protocol required. A consumer perception about acne marks cannot be promoted to controlled clinical proof of canonical P19. |
+| **P22** | Sun-related pigmentation; P17/S09 Context/pigmentation presentation, Related/Context. Context is not automatically an independent Problem or Need; S09 is not reopened by the relation. | P4 international SKIN1004 SPF50+ PA++++ and its distinct US formula have manufacturer UV-protection positioning; P5 ISDIN Active Unify SPF50+ has manufacturer claims about reducing/preventing sun-caused spots. For P5, the located peer-reviewed Spot Prevent study is a different product and is excluded. Exact target package and Active Unify protocol are unverified. | **CONTEXT CANDIDATE ONLY; no treatment link.** Sunscreen protection/prevention context is not proof of treatment for existing pigmentation or P17/P19. Keep P4 formulas separate; require exact-market label/protection evidence and exact-SKU evidence for any spot-reduction claim. |
+| **P24** | Persistent redness; S05 Problem/presentation, parent of P25/P26 only as Map. P25 flushing is a symptom/manifestation; P26 rosacea is a distinct Clinical Condition/Clinical Anchor. | P7 Anua serum's manufacturer claim says 90% agreed red-troubled spots looked improved; full protocol, validated endpoint, comparator and analysis not located. P4's soothing positioning is not a persistent-redness endpoint. | **CANDIDATE ONLY / manufacturer_claim_only for P7 claim; no approved link.** Need direct endpoint for persistent redness, time course, population, protocol and exact product/market match. Do not infer P26 rosacea treatment. |
+| **P26** | Rosacea; Clinical Condition and Clinical Anchor linked structurally to P24/S05. Not an ordinary-care approval or product-treatment permission. | No reviewed P1–P7 source establishes an exact-SKU, rosacea-specific clinical endpoint. P7's general redness claim and ingredient list are insufficient. | **NOT LINKED.** Requires rosacea-specific evidence, appropriate clinical oversight and explicit governance; do not infer diagnosis or treatment from redness positioning. |
+| **P43** | Uneven skin texture; S07 Problem/presentation, mapped with boundary open. Working Records preserve the open boundary and do not establish acceptance or a complete operational definition. | P1 COSRX manufacturer reports +76.4% texture result in 20 subjects, but full protocol/measurement definition unavailable. P3 glow/brightening marketing and other product texture/finish language do not establish the canonical P43 endpoint. | **CANDIDATE ONLY / manufacturer_claim_only for P1 claim; no approved link.** Obtain endpoint definition, measurement method, comparator/statistics and exact SKU/market match; confirm the measured “texture” matches P43 rather than hydration, radiance or cosmetic finish. |
+
+### 10.3 Product-level crosswalk summary
+
+- **P1 COSRX:** P02 and P43 are narrow research leads only (manufacturer-reported moisture/texture results); no accepted relation.
+- **P2 Neutrogena UK:** P08 is a claim-led research candidate only; no P09/P10/P11/P12 subtype-specific relation.
+- **P3 Garnier Australia:** no canonical product relation supported by the reviewed page-level ingredient/marketing information; target market/package identity is still unverified.
+- **P4 SKIN1004:** P22 prevention/context only; no claim that it treats existing hyperpigmentation. International/Korean and US formulas remain separate.
+- **P5 ISDIN Active Unify:** P17/P22 claim-led leads only; the Spot Prevent paper is excluded as a different product; P19 is not linked.
+- **P6 Clinique:** P17 claim-led lead; P13/P19 acne-mark outcome is a lead for protocol retrieval only, not proof of canonical PIH.
+- **P7 Anua serum:** P24 general redness claim is a research lead only; no P26 rosacea relation. Evidence for the separate pad is non-transferable.
+
+### 10.4 Evidence register fields required for each future source
+
+For each claim or study, record: source URL; source class (manufacturer, primary publication, independent secondary source, retail corroboration); exact product name, market, volume, formula/version and SKU/GTIN if known; verbatim claim or bounded paraphrase; study population/sample; duration; endpoint definition; measurement method; comparator/control; protocol/report availability; statistical analysis; sponsor/conflicts where disclosed; limitations/version mismatch; canonical candidate ID; evidence label (`manufacturer_claim_only`, `candidate_only`, `not_linked`, `UNKNOWN`, or later approved state only after governance); reviewer/date; review state.
+
+### 10.5 Gate outcome
+
+- Canonical Map/Working Records reviewed for all nine requested IDs: **PASS for structural crosswalk**.
+- Medical validation or acceptance of the Map's units: **NOT CLAIMED**.
+- Exact physical target package/market/GTIN verified for P1–P7: **NOT VERIFIED**.
+- Full exact-SKU protocols verified for the cited claims: **NOT VERIFIED**.
+- Approved Product↔Problem relationships: **NONE**.
+- Product recommendation / consultation-engine authorization for P1–P7: **NO / NOT AUTHORIZED**.
+- Code, schema, API, UI, database, operational product records, ProductKnowledge rows and Map/Working Records statuses changed: **NO**.
+- PR merge authorization: **NOT GRANTED**.
+
+### 10.6 Next action
+
+Continue in this same ledger with source-by-source protocol retrieval for the highest-value open leads: P2→P08, P1→P02/P43, P6→P13/P19, P5→P17/P22, and P7→P24. Each paper/report must first pass exact-product, market/formula and endpoint matching. In parallel, use the existing Map/Working Records definitions as the only canonical structural baseline. Do not ask for or assume package photos as a prerequisite to web research; do not claim package identity is verified without them or equivalent direct label/GTIN evidence.
+
+**Change scope:** append-only research documentation. Passes 1–9 remain unchanged. No product records were created and no Product↔Problem relation was approved.
