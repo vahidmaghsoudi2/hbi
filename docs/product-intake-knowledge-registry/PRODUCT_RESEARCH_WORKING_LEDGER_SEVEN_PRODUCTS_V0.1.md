@@ -798,3 +798,110 @@ The previous passes established official-page claims for several products, but a
 The next evidence input should be the current front/back package-label photos for the seven actual target products (especially P3 market/GTIN, P4 market split, P5 tested-version identity, and P7 serum-versus-pad identity). Use those to create a package-to-source comparison within this same ledger, recording only visible/legible fields and marking unreadable fields UNKNOWN. In parallel, continue requests for the exact primary reports for P1, P2, P5, P6 and P7. Do not pause preservation of existing findings while waiting for new evidence.
 
 **Change scope:** research ledger only. No code, schema, API, UI, database, ProductKnowledge row, operational product record, Map/Working Records acceptance status, or approved Product↔Problem relation was changed. This pass does not authorize PR merge or implementation.
+
+
+---
+## Research pass 9 — expanded public-web source retrieval and evidence corrections (2026-10-24)
+
+**Continuity rule:** Appended after Pass 8 in the same ledger. Passes 1–8 are retained. This pass uses public web sources, including official manufacturer pages and a primary research paper where relevant; it does not require physical package photographs to continue. Search-result availability is not treated as proof that a physical package matches a webpage.
+
+### 9.1 New source-level findings and corrections
+
+#### P1 — COSRX The 6 Peptide Skin Booster Serum (150 ml)
+
+Official product page rechecked: https://www.cosrx.com/collections/all/products/the-6-peptide-skin-booster-serum
+
+The current official page explicitly labels the product “Original,” shows 150 ml and 50 ml variants, lists the ingredient declaration, and reports the five outcomes from 20 subjects (deep moisture +162.5%, texture +76.4%, clarity +40.1%, radiance +24.5%, density +22.2%) for a test dated 2023-09-18 to 2023-10-31. It also makes broad product-positioning statements about pores/sebum, fine lines, texture, tone, hydration and suitability for acne-prone skin.
+
+**Evidence correction:** These are still manufacturer-published statements. The page's use of “independent skin science testing” identifies a named testing laboratory but does not provide the full protocol, raw data, comparator, measurement method, endpoint definitions or statistical analysis. “Uneven tone,” “clarity,” “radiance” and “texture” must not be treated as interchangeable with canonical P17 hyperpigmentation or P43 without exact definition/endpoint review. The non-comedogenic/irritation-test wording is not proof that the product treats acne.
+
+Disposition: manufacturer_claim_only for the reported endpoints; P02/P43 remain research candidates only where the endpoint matches the canonical definition; P17 remains not_linked pending direct endpoint validation.
+
+#### P2 — Neutrogena Clear & Defend 2% Salicylic Acid Face Wash, UK
+
+Official manufacturer page: https://www.neutrogena.co.uk/skincare/cleansers-washes/clear-and-defend-daily-wash
+Retail corroboration (not a primary clinical source): https://www.boots.com/neutrogena-/neutrogena-washes-and-exfoliators/neutrogena-clear-defend-facial-wash-10233110
+
+The manufacturer page reports “97% noticed less new spots in 4 weeks” with clinical grading in 34 subjects, lists 2% salicylic acid and an INCI, and warns that product/ingredients may change. Boots' listing also describes 2% salicylic acid and the same n=34/97% claim. The retail listing corroborates how the product is marketed but does not supply the original protocol or independently verify the claim.
+
+Disposition: no change to the gate. The numerical claim remains manufacturer_claim_only; P08 remains candidate_only; P09/P10 remain not_linked without specific open-/closed-comedone endpoints. Do not treat retail repetition of a manufacturer claim as independent evidence.
+
+#### P3 — Garnier Vitamin C Brightening Gel Cleanser, Australia
+
+Official manufacturer page: https://www.garnier.com.au/about-our-brands/skin-active/garnier-skin-active-vitamin-c-brightening-gel-cleanser-200ml
+Retail corroboration: https://www.coles.com.au/product/garnier-vitamin-c-brightening-gel-cleanser-200ml-5940375
+
+The official page identifies the 200 ml rinse-off product, describes Vitamin Cg (ascorbyl glucoside) and citrus extract, and lists the page-level INCI including sodium laureth sulfate, coco-betaine, glycerin, ascorbyl glucoside, panthenol, salicylic acid, fragrance and fragrance allergens. Both official and retail pages carry substantially similar product-positioning/ingredient information; the official page warns that ingredient lists change and the package should be checked.
+
+**Boundary:** Marketing claims about glow/brightening and the presence of salicylic acid do not establish a finished-product endpoint for acne, open/closed comedones or a defined hyperpigmentation concept. The Australian market page is a source, not proof that the user-targeted SKU is the Australian formula.
+
+Disposition: P08/P09/P10/P17 remain not_linked until exact target-market identity and direct finished-product evidence justify a specific relationship.
+
+#### P4 — SKIN1004 Hyalu-Cica Water-Fit Sun Serum, international vs US formula
+
+Official international page: https://www.skin1004.com/products/hyalu-cica-water-fit-sun-serum-spf50-pa?country=BE&variant=45493174337782
+Official US page: https://www.skin1004.com/products/hyalu-cica-water-fit-sun-serum-uv?variant=50346297852150
+Additional US product details published on the brand's information site: https://info.skin1004.com/products/skin1004-hyalu-cica-water-fit-sun-serum-uv
+
+The international page states SPF50+ PA++++ and lists filters including Diethylamino Hydroxybenzoyl Hexyl Benzoate, Ethylhexyl Triazone, Methylene Bis-Benzotriazolyl Tetramethylbutylphenol and Diethylhexyl Butamido Triazone. The US product page explicitly identifies a separate sunscreen drug product with active filters avobenzone 2.7%, homosalate 13.6%, octisalate 4.5% and octocrylene 9%. The brand's US product-information page gives SKU USSKS001 and GTIN 8809913832805 for the US item; those identifiers apply to that US listing only and must not be copied into the international dossier.
+
+Disposition: this strengthens the documented market split but does not identify the actual target package. Keep the two formulas separate. P22 remains a prevention/context candidate only; do not infer treatment of existing P17 pigmentation. Hydration/soothing claims remain manufacturer positioning unless linked to a relevant exact-version endpoint.
+
+#### P5 — ISDIN FotoUltra 100 Active Unify SPF50+
+
+Official UK product page: https://www.isdin.com/en-GB/product/foto-ultra-isdin/active-unify-spf-50
+Official UK product family page: https://www.isdin.com/en-GB/products/foto-ultra-isdin
+Potentially confusing but explicitly different product study: https://pmc.ncbi.nlm.nih.gov/articles/PMC12872947/
+
+The official UK page confirms the name “FotoUltra 100 Active Unify SPF 50+,” 50 ml, page-level composition, use directions and manufacturer claims about clarifying/unifying skin tone and reducing/preventing sun-caused pigmentation spots. The official product-family page separately lists Active Unify and Spot Prevent as distinct products.
+
+The located peer-reviewed randomized study concerns **FOTOULTRA 100 SPOT PREVENT**, not Active Unify. It is therefore not evidence for the Active Unify dossier, even though both are ISDIN sunscreens and may share some broad ingredients/marketing territory.
+
+Disposition: the exact-SKU study protocol behind the earlier 31-subject / 22% spot-intensity / 15% spot-area figures remains UNKNOWN / NOT VERIFIED for Active Unify. P17 remains manufacturer_claim_only + candidate_only; P19 remains not_linked absent an exact-SKU PIH endpoint; P18 melasma is not a default match. The product identity/study correspondence gate remains blocked.
+
+#### P6 — Clinique Even Better Clinical Radical Dark Spot Corrector + Interrupter
+
+Official product page: https://www.clinique.com/product/4034/68008/skincare/serum/even-better-clinicaltm-radical-dark-spot-corrector-interrupter
+
+The official page contains several distinct manufacturer-reported datasets:
+- Clinical testing on 52 women after 12 weeks: 39% visible reduction in dark spots.
+- Consumer testing on 536 women: 84% said skin looked more radiant and 93% said skin felt soothed/calmer.
+- Separate consumer testing on 533 women after 28 days: 90% said skin looked brighter, 89% said skin looked more even, and 81% said the look of dark spots including sun spots was reduced.
+- Separate consumer testing on 433 women after 28 days: 83% said the look of acne marks was reduced.
+
+**Correction to the previous summary:** The page does include a consumer-reported acne-mark outcome (n=433). It is not the same as the clinical n=52 dark-spot test, and it is not, by itself, a controlled clinical demonstration of a canonical P19 post-inflammatory-hyperpigmentation endpoint. The public page does not disclose enough protocol detail to establish lesion classification, comparator, blinding, instrument or statistical analysis for these consumer outcomes.
+
+Disposition: keep all datasets distinct and labelled manufacturer_claim_only. The acne-mark consumer result may be recorded as a research lead for review, but P19 remains not_linked until the canonical P19 definition and endpoint population are explicitly matched. P17 remains claim-led candidate only; P18 melasma is not a default match.
+
+#### P7 — Anua Azelaic Acid 10 Hyaluron Redness Soothing Serum
+
+Official US product page: https://pages.anua.com/products/azelaic-acid-10-hyaluron-redness-soothing-serum
+Official global product page: https://anua.com/products/azelaic-acid-10-hyaluron-redness-soothing-serum
+Official routine/claim page: https://pages.anua.com/solutions/redness-prone-routine-sensitive-skin
+
+The official US page provides the serum ingredient declaration, use directions, and “Non-comedogenic, Low-Irritation” testing labels. The exact-product page identifies 10% azelaic acid and includes ingredients such as panthenol, betaine salicylate, glycerin, allantoin, niacinamide, centella-derived ingredients, zinc PCA and ceramide NP. The official routine page's 90% red-troubled-spot statement remains a manufacturer claim; full study protocol, sample size, comparator, validated endpoint and analysis were not located in the public summary reviewed here.
+
+**Important formula/claim caution:** Anua product pages and market-specific pages may differ in naming and presentation. Do not assume every regional page, package or formula is identical without a market/version match. The separate azelaic-acid pad's study remains non-transferable to the serum.
+
+Disposition: exact official serum source and page-level INCI are found; physical package/market match and full protocol remain unverified. Keep the 90% result manufacturer_claim_only. Do not approve P08/P13/P19/P24 links or infer rosacea treatment from general redness positioning.
+
+### 9.2 Consolidated evidence-state update
+
+| Gate | Current state after Pass 9 |
+|---|---|
+| Official product source page | Located for P1–P7 at least for the market/version stated in each cited URL |
+| Physical target package / market / GTIN matched to source | NOT VERIFIED for all P1–P7 in this workflow |
+| Full original protocol verified for the exact target SKU | NOT VERIFIED for P1, P2, P5, P6 and P7; no relevant direct efficacy protocol verified for P3/P4 in this pass |
+| Manufacturer claims separated from independent evidence | YES; retailer repetition is not counted as independent evidence |
+| Approved Product↔Problem relation | NONE |
+| Consultation-engine authorization from this matrix | **NO / NOT AUTHORIZED for P1–P7** |
+
+### 9.3 Next research work (no package-photo dependency)
+
+1. Compare the canonical definitions for P02, P08, P13, P17, P19, P22, P24, P26 and P43 in the existing Map/Working Records before any candidate is converted into a relation; preserve the documented governance boundary.
+2. Search for primary reports/publications matching the exact claims and exact SKUs for COSRX, Neutrogena, Active Unify, Clinique and Anua. For any paper found, first check whether it actually tests the same finished product, market formula and endpoint; exclude mismatched SKUs (including Spot Prevent versus Active Unify).
+3. Build a source-evidence register for every claim with fields: exact source URL, source type, exact product/version, claim verbatim or concise paraphrase, population/sample size, duration, endpoint, protocol availability, conflicts/limitations, evidence label, canonical candidate ID, and review state.
+4. Keep the identity uncertainty explicit. The absence of package photos does not block web research, but it does block claiming that a specific physical package/GTIN has been verified.
+5. Continue append-only in this same ledger as Research pass 10; do not create a parallel file or identifier.
+
+**Change scope:** public-source research and documentation only. No code, schema, API, UI, database, ProductKnowledge row, operational product record, accepted Map/Working Records status or approved Product↔Problem relation changed. PR merge is not authorized by this pass.
