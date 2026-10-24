@@ -584,3 +584,60 @@ No new Issue/PR, no implementation, and no claim of product registration or acce
 - The Map's structural designation is not medical validation; current working records also state that Product mapping has not started. Respect that boundary.
 - Before creating any final relationship, confirm the exact product version, the relevant claim/evidence, the problem unit's current disposition in the Map and Working Records, and the authorized Product Intake relationship contract.
 - If no exact canonical concept fits, record “no direct map match / gap” rather than inventing a new ID or broadening a clinical condition.
+
+
+---
+
+## Research pass 4 — Grok red-team dispositions and recommendation gate
+**Input:** Independent Grok critique supplied for the V1 matrix and canonical P01–P61 crosswalk. This section records the critique as a research disposition; it does not accept any Problem, create a Product↔Problem relation, authorize recommendations, or approve PR merge.
+
+### Mandatory labels for every candidate cell
+
+- `candidate_only` — concept may fit the Map, but product/version-specific evidence is not yet sufficient for a verified relationship.
+- `manufacturer_claim_only` — support currently rests on an identified manufacturer claim/endpoint; do not describe it as independently established efficacy.
+- `not_linked` — do not create a Product↔Problem link unless exact-SKU evidence and the canonical boundary are verified.
+- `UNKNOWN / NOT VERIFIED` — formula, endpoint, protocol, or relevant source remains unresolved.
+
+**Recommendation gate:** For P1–P7, “Is the consultation engine authorized to recommend this product for this problem based on this research matrix?” = **NO / NOT AUTHORIZED**. The matrix is not an approved recommendation input. No Problem ID is accepted as a Need by this document. This gate can only be reconsidered through the existing HBI governance/PO path after exact-version identity, evidence QA, canonical boundary review, and the authorized relationship contract are satisfied.
+
+### Corrected candidate dispositions
+
+| Product | Problem ID / concept | V1 disposition | Required condition before any approved link |
+|---|---|---|---|
+| P1 COSRX 6 Peptide Booster | P02 dehydration / moisture retention | `candidate_only` | Same-SKU hydration endpoint or adequate direct product evidence; verify P02 boundary/working-record disposition. |
+| P1 COSRX | P17 hyperpigmentation | `not_linked` | Do not link from peptides/niacinamide alone; require the exact product study to measure the relevant dark-spot outcome and verify Map boundary. |
+| P1 COSRX | P43 uneven texture | `candidate_only` only if wording matches the Map definition | Inspect the P43 definition and same-SKU endpoint; do not force-match texture, fine lines, radiance or density as equivalent concepts. Otherwise `not_linked`. |
+| P2 Neutrogena UK 2% SA wash | P08 acne | `manufacturer_claim_only` + `candidate_only` | Verify exact current UK SKU/INCI, manufacturer endpoint and study protocol; rinse-off limitations must remain explicit. No recommendation authorization. |
+| P2 Neutrogena | P03 oily skin; P09 open comedones; P10 closed comedones | `not_linked` until exact claims/endpoints support each concept | Do not infer P09/P10 from the general word “acne.” Never infer P11/P12 from a broad acne claim. |
+| P3 Garnier Vitamin C cleanser | P03, P08, P09, P10, P17 | `not_linked` | Current rationale is ingredient/category-level and insufficient for an official product link. Verify exact market formula and direct finished-product endpoint first. |
+| P4 SKIN1004 international/Korean sunscreen | P22 sun-related pigmentation/UV context | `candidate_only` for prevention/context, not spot treatment | Verify exact market SKU, filters and label directions. Keep US version separate. |
+| P4 SKIN1004 | P17 existing hyperpigmentation; P02 hydration | `not_linked` unless same-version evidence directly supports the specific endpoint | Sunscreen use alone does not prove treatment of existing pigmentation; hydration requires same-version evidence. |
+| P5 ISDIN Active Unify | P17 hyperpigmentation/dark spots | `manufacturer_claim_only` + `candidate_only` | Retrieve full report/protocol and verify exact market formula; preserve reported percentages as manufacturer claims unless independently established. |
+| P5 ISDIN | P19 post-inflammatory hyperpigmentation | `not_linked` until population and endpoint explicitly cover PIH | Do not infer PIH from a general dark-spot outcome. P18 melasma is not to be linked absent explicit evidence for that exact SKU and valid clinical boundary. |
+| P5 ISDIN | P22 sun-related pigmentation/UV context | `candidate_only` as context/prevention | Must not imply treatment of chronic UV damage or use P51 as an accepted Need; P51 is context/not Need-level. |
+| P6 Clinique Dark Spot Corrector | P17 hyperpigmentation/dark spots | `manufacturer_claim_only` + `candidate_only` | Retrieve full protocol and endpoint; keep n=52 study separate from n=533 consumer-test data. |
+| P6 Clinique | P19 PIH | `not_linked` unless the same-SKU study explicitly covers PIH | Do not infer a PIH relationship from a generic dark-spot claim. P18 melasma is not a default match or treatment claim. |
+| P7 Anua 10% azelaic acid serum | P08 acne; P13 acne aftermath; P19 PIH | `candidate_only` at most; otherwise `not_linked` pending same-serum evidence | General azelaic-acid literature is ingredient-level, not finished-serum proof. Do not transfer the separate pad study to the serum. |
+| P7 Anua | redness / P24 persistent redness; P26 rosacea | `not_linked` for recommendation; tolerability may be researched separately | Redness, irritation and rosacea are not interchangeable. Do not imply rosacea treatment or general suitability for all redness-prone users. |
+
+### Evidence retrieval queue (same exact product/version)
+
+1. **P1 COSRX:** obtain complete manufacturer protocol for reported n=20 test; confirm endpoints, duration, formula version and whether hydration/texture/dark spots were measured. Do not infer active concentrations.
+2. **P2 Neutrogena:** capture current UK package/INCI and warnings for the 2% salicylic-acid wash; retrieve protocol behind the n=34 new-spots statement. Do not label a promotional percentage as cure rate.
+3. **P3 Garnier:** confirm exact market/product packaging and current INCI; until a direct finished-product endpoint is available, leave brightening/acne links unlinked.
+4. **P4 SKIN1004:** establish which exact Korean/international SKU is the dossier target; retain a separate US SKU dossier. Verify sunscreen label and only record hydration/soothing claims when supported for the target version.
+5. **P5 ISDIN:** request the full report behind the n=31 spot-intensity/area results, including population, endpoint definitions, duration, version/market and protocol.
+6. **P6 Clinique:** request the complete report for the 12-week n=52 result; separately record the n=533 consumer test, with distinct methodology and claims.
+7. **P7 Anua:** confirm current serum packaging/INCI and warnings; request the full protocol behind the 90% agreement result. Keep evidence about the separate pad strictly separate.
+
+### Canonical Map / Working Records boundary
+
+The Map and Working Records are structural references, not medical validation or recommendation permission. The Working Records state that Problem Bank V1, Need extraction/acceptance, and Product mapping have not started; all listed P items remain Accepted=No / Undetermined where recorded. Therefore:
+- No Product↔Problem relationship is approved by this pass.
+- No product recommendation is authorized by this pass.
+- Do not change Problem acceptance or status to make product research appear complete.
+- If the exact concept is absent or the boundary is unresolved, record `not_linked` / `UNKNOWN`, not a new P ID.
+
+### Review outcome
+
+Grok's independent challenge is incorporated as constraints for the next research pass. It is not an approval to merge this PR or a claim that the evidence retrieval queue is complete. No code, schema, API, UI, database or operational product record is changed by this documentation update.
