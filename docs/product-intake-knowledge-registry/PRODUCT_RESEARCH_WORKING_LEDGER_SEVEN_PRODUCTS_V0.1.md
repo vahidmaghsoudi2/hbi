@@ -717,3 +717,41 @@ The page identifies FotoUltra 100 Active Unify SPF 50+, 50 ml, and claims it cla
 4. P1–P7 identity gate: obtain current package/label evidence where possible. Until then, do not mark product identity LOCKED or use this research matrix for recommendations.
 
 **Change scope:** append-only documentation/research. No ProductKnowledge record, approved Product↔Problem relation, Map/Working Records status, code, schema, API, UI, database, workflow, or product lifecycle was changed. No merge authorization is implied.
+
+---
+## Research pass 7 — protocol retrieval follow-up for P1, P2 and P6 (2026-10-24)
+
+**Continuity:** Appended after Pass 6. No earlier pass or product dossier is replaced. Search scope was limited to publicly indexed official pages and exact-phrase/protocol searches; absence from these results is not proof that a report does not exist.
+
+### 7.1 P1 COSRX — original study protocol remains unavailable in reviewed public sources
+
+Official product page rechecked: https://www.cosrx.com/collections/all/products/the-6-peptide-skin-booster-serum
+
+The page repeats the five numerical outcomes (+162.5% deep moisture, +76.4% texture, +40.1% clarity, +24.5% radiance, +22.2% density), says the testing involved 20 subjects, and names Dermacosmetic Skin Science Laboratory Co., Ltd with a 2023-09-18 to 2023-10-31 study window. No full protocol, baseline/absolute values, control/comparator, measurement instruments, statistical plan or complete report was located in this bounded retrieval.
+
+**Disposition:** Keep all five outcomes as manufacturer-reported claims only. They do not establish P17 pigmentation efficacy or independently validated effects. A texture claim must not automatically be mapped to P43 without checking that canonical definition and the exact endpoint.
+
+### 7.2 P2 Neutrogena UK Clear & Defend 2% Salicylic Acid Face Wash — exact protocol remains unavailable
+
+Official UK product page: https://www.neutrogena.co.uk/skincare/cleansers-washes/clear-and-defend-daily-wash
+
+The official page continues to state 2% salicylic acid and “97% noticed less new spots in 4 weeks” based on clinical grading of 34 subjects. Exact-phrase searches did not locate the underlying study report or a peer-reviewed publication that clearly matches this exact UK rinse-off SKU, market and claim. The page itself does not expose sufficient protocol details to establish the comparator, baseline, lesion-specific endpoint definitions, statistical analysis or independent replication.
+
+**Disposition:** Keep the 97% figure as manufacturer_claim_only, not a cure rate. P08 may remain a research candidate only; P09/P10 remain not_linked without direct open-/closed-comedone endpoints. Do not infer P11/P12 from generic “acne” language.
+
+### 7.3 P6 Clinique Even Better Clinical Radical Dark Spot Corrector + Interrupter — endpoints confirmed; full protocol not found
+
+Official product page rechecked: https://www.clinique.com/product/4034/68008/skincare/serum/even-better-clinicaltm-radical-dark-spot-corrector-interrupter
+
+The page states that clinical testing on 52 women after 12 weeks showed a 39% visible reduction in dark spots. It separately reports consumer testing on 536 women, including 84% saying skin looked more radiant and 93% saying skin felt soothed/calmer. The page does not disclose the full clinical protocol, control group, randomization/blinding, instrument, prespecified endpoint, analysis or a PIH-/melasma-specific result.
+
+**Disposition:** Keep the n=52 clinical claim and n=536 consumer results as separate manufacturer-reported datasets. Do not describe the clinical study as an RCT or independent study without documentation. P17 remains claim-led candidate only; P19 remains not_linked unless exact-product evidence explicitly measures PIH; P18 melasma is not a default match.
+
+### 7.4 Consolidated outcome and next action
+
+- For P1, P2 and P6, official pages confirm the existence of manufacturer claims but the full original protocols/reports were NOT VERIFIED in this bounded search.
+- A public product page or consumer-test percentage does not independently validate a clinical effect.
+- Continue requesting the reports from manufacturers; if a report is later found, append a new numbered pass with the exact report URL, version/market, method, population, comparator, endpoint, analysis and limitations. Do not overwrite this search history.
+- All P1–P7 consultation-engine recommendation status remains **NO / NOT AUTHORIZED**. No product-problem relation is approved.
+
+**Change scope:** research documentation only; no Map/Working Records status, ProductKnowledge, code, schema, API, UI, database, workflow or product lifecycle change.
