@@ -560,3 +560,27 @@ Please review this matrix against the seven dossiers and the actual official ski
 - prioritize the smallest corrections needed for a defensible V1 covering common skin concerns.
 
 No new Issue/PR, no implementation, and no claim of product registration or acceptance is authorized by this review request.
+
+
+---
+
+## Research pass 3 — cautious crosswalk to canonical P01–P61 IDs
+**Source checked:** `SKIN_PROBLEM_SPACE_MAP_V0.1.md` on `master`, blob `c57ce7edbcee513dcb60b735ce91b98de22d8aa2`. The map explicitly says its designation does not imply medical validation, Need acceptance, treatment authorization, product mapping or recommendation permission.
+
+| Product | Canonical concepts to investigate | Boundary |
+|---|---|---|
+| P1 COSRX | P02 dehydration/impaired moisture retention; P43 uneven skin texture; P17 hyperpigmentation only if a separate source supports that exact outcome | P43 boundary is open; fine lines/radiance do not have a directly equivalent dedicated ID in this map. Do not force-match them. |
+| P2 Neutrogena UK wash | P03 oily skin/seborrhoea; P08 acne; P09 open comedones; P10 closed comedones | Ingredient-level salicylic-acid rationale is not a confirmed product relationship; P11 inflammatory lesions and P12 nodular/cystic acne must not be inferred from the broad word “acne.” |
+| P3 Garnier cleanser | P03 oily skin and P08/P09/P10 only as exploratory concepts for review | Current record is a rinse-off cleanser; the listed ingredients do not establish efficacy against these specific problem units. Leave links unapproved until product-specific evidence and exact formula are checked. |
+| P4 SKIN1004 international sunscreen | P22 sun-related pigmentation; P17 dark spots only as a distinct pigmentation presentation; P02 dehydration only if the hydration claim is supported for this version | P22 is a context/presentation relation. Sunscreen is relevant to UV protection/prevention, not proof of treatment for existing pigmentation. Keep US SKU separate. |
+| P5 ISDIN Active Unify | P17 hyperpigmentation/dark spots; P19 post-inflammatory hyperpigmentation only if source supports this subtype; P22 sun-related pigmentation | Manufacturer-reported spot outcomes remain manufacturer claims until protocol and independent evidence are reviewed. P51 chronic UV damage is context/not Need-level and must not be used to imply treatment of chronic damage. |
+| P6 Clinique Dark Spot Corrector | P17 hyperpigmentation/dark spots; P19 post-inflammatory hyperpigmentation only if supported by the exact claim/evidence | Do not map to P18 melasma as a treatment claim; the map labels P18 a Clinical Condition/Clinical Anchor. Cosmetic dark-spot claims do not authorize disease-treatment advice. |
+| P7 Anua Azelaic Acid 10% serum | P08 acne; P13 acne aftermath/discoloration; P19 post-inflammatory hyperpigmentation; P03 oily skin only if supported; P24 persistent redness only as an exploratory tolerability/appearance question | P13 is a cross-shelf sequela and P19 a pigmentation sequela. The presence of azelaic acid does not establish effectiveness of this serum for every subtype. P24 must not be treated as rosacea treatment; P26 is a Clinical Condition. |
+
+### Crosswalk disposition
+
+- These are **candidate ID references for research**, not approved Problem↔Product relationships.
+- No P01–P61 item is marked Accepted or made eligible for recommendation by this crosswalk.
+- The Map's structural designation is not medical validation; current working records also state that Product mapping has not started. Respect that boundary.
+- Before creating any final relationship, confirm the exact product version, the relevant claim/evidence, the problem unit's current disposition in the Map and Working Records, and the authorized Product Intake relationship contract.
+- If no exact canonical concept fits, record “no direct map match / gap” rather than inventing a new ID or broadening a clinical condition.
