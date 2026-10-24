@@ -10,6 +10,8 @@
 |------|--------|
 | پایلوت ساختاری S01 | **CLOSED** — مرز و ارجاع؛ نه پذیرش پزشکی |
 | رکوردهای کاری | [SKIN_PROBLEM_BANK_WORKING_RECORDS.md](SKIN_PROBLEM_BANK_WORKING_RECORDS.md) — P01, P02, P05, P06, P07 |
+| ارزیابی آمادگی مشاوره و صف بازبینی انسانی S01 | [بخش S01 در Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md#s01--ارزیابی-آمادگی-مشاوره-و-صف-بازبینی-انسانی-اسنادی-نه-accepted) — ارزیابی اسنادی؛ نه Accepted؛ وضعیت‌های Accepted/Need/Product/G8 تغییر نمی‌کنند. |
+
 | فهرست مرجع مشکلات پوستی | [SKIN_PROBLEM_SPACE_MAP_V0.1.md](SKIN_PROBLEM_SPACE_MAP_V0.1.md) — مرجع تعیین‌شده توسط PO؛ بدون ادعای اعتبارسنجی پزشکی/Need/Product |
 | G1 (تعیین مرجع فهرست مشکلات پوستی) | CLOSED — Map P01–P61 طبق تصمیم PO فهرست مرجع است |
 | G8 | BLOCKED / NOT VERIFIED |
