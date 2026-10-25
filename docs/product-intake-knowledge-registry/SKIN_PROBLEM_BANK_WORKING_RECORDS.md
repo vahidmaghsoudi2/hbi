@@ -1942,3 +1942,21 @@ No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care
 - برای P44، تعریف اصطلاح پزشکی قابل ردیابی است، اما برای تبدیل آن به Need یا تعیین اقدام مشاوره‌ای HBI کافی نیست.
 - هر دو مورد همچنان **NOT ASSESSED** برای آمادگی مشاوره‌اند؛ وضعیت‌ها به Accepted یا consultation-ready ارتقا نمی‌یابند.
 - Map و روابط آن تغییر نمی‌کنند. این ثبت صرفاً منبع‌یابی مقدماتی است و G8 همچنان **BLOCKED / NOT VERIFIED** می‌ماند.
+
+
+---
+
+## S04 — بازبینی هدفمندِ کفایت منابع برای P17 و P20
+
+**تاریخ:** 2026-10-25. **وضعیت:** بازبینی مقدماتیِ صفحات مرجع عمومی/تخصصی؛ نه پذیرش evidence، نه بازبینی بالینی مستقل، و نه مجوز توصیهٔ محصول.
+
+| ID | منبع نامزد و آنچه پشتیبانی می‌کند | محدودیت و حکم |
+|---|---|---|
+| P17 — Hyperpigmentation / dark spots | [DermNet — Skin pigmentation problems](https://dermnetnz.org/topics/skin-pigmentation-problems) و [DermNet — Pigmentation disorders](https://dermnetnz.org/topics/pigmentation-disorders) تفکیک کلی hyperpigmentation، hypopigmentation و depigmentation و تنوع علل تغییر رنگدانه را شرح می‌دهند. [Merck Manual Professional — Hyperpigmentation](https://www.merckmanuals.com/professional/dermatologic-disorders/pigmentation-disorders/hyperpigmentation) تأکید می‌کند که افزایش رنگدانه می‌تواند موضعی یا منتشر باشد و علل متفاوت، از جمله التهاب، داروها، برخی وضعیت‌های سیستمیک و ضایعات مهم، در افتراق مطرح‌اند. | «Dark spots» به‌تنهایی تشخیص یا Need بالینی یکپارچه نیست. این صفحات تعریف عملیاتی پذیرفته‌شدهٔ HBI، مرز مصوب با P18/P19، تشخیص فردی یا اثربخشی محصول را ثابت نمی‌کنند. P17 فقط والد ساختاری P18/P19 طبق Map می‌ماند؛ P18 و P19 ادغام نمی‌شوند. P17 همچنان NOT ASSESSED و UNKNOWN / INSUFFICIENT برای آمادگی مشاوره است. |
+| P20 — Hypopigmentation | [DermNet — Skin pigmentation problems](https://dermnetnz.org/topics/skin-pigmentation-problems) تفاوت کاهش رنگدانه با depigmentation کامل را توضیح می‌دهد و مثال‌هایی از علل گوناگون لکه‌های روشن را فهرست می‌کند. [American Academy of Dermatology — Treating light spots in brown or black skin](https://www.aad.org/public/everyday-care/skin-care-secrets/routine/treat-light-spots) نیز اشاره می‌کند که لکه‌های روشن می‌توانند علت‌های مختلف داشته باشند، از جمله التهاب/آسیب، محصولات یا داروهای موضعی و وضعیت‌های پوستی. | «Hypopigmentation» یک توصیف/یافتهٔ گسترده است؛ به‌تنهایی علت را مشخص نمی‌کند و نباید با vitiligo (P21) یکی شود. منابع نامزد مرز عملیاتی HBI، مسیر ارجاع مصوب، تشخیص فردی یا مجوز توصیهٔ محصول را تعیین نمی‌کنند. P20 همچنان evidence boundary retained، NOT ASSESSED و UNKNOWN / INSUFFICIENT باقی می‌ماند. |
+
+### حکم این بازبینی
+- منابع نشان می‌دهند که هر دو عنوان به خانواده‌ای از تغییرات رنگدانه اشاره می‌کنند و نباید بدون مرزبندی، علت یا تشخیص از روی رنگ ظاهری استنتاج شود.
+- مرزهای عملیاتی HBI برای P17 و P20، زبان مشتری، معیار ارجاع و تصمیم بازبین انسانی هنوز مستند نشده‌اند؛ بنابراین هیچ‌کدام Accepted یا consultation-ready نمی‌شوند.
+- روابط Map حفظ می‌شوند: P17 والد ساختاری P18/P19 است؛ P19 به‌عنوان sequela جدا می‌ماند؛ P20 با P21 ادغام نمی‌شود.
+- این ثبت صرفاً source review مقدماتی است. هیچ ادعای اثربخشی محصول یا توصیهٔ درمانی اضافه نشده است؛ G8 همچنان **BLOCKED / NOT VERIFIED** می‌ماند.
