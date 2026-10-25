@@ -17,8 +17,7 @@
 | G8 | BLOCKED / NOT VERIFIED |
 | S01 | **CLOSED** ساختاری/ارجاعی — نه پذیرش پزشکی |
 | S02 | **در حال کار ساختاری** — P03/P04 نه Accepted؛ [ارزیابی آمادگی مشاوره و صف بازبینی انسانی S02](SKIN_PROBLEM_BANK_WORKING_RECORDS.md#s02--ارزیابی-آمادگی-مشاوره-و-صف-بازبینی-انسانی-اسنادی-نه-accepted) در Working Records |
-| S03 | **ثبت ساختاری شده؛ نه Accepted** — [ارزیابی آمادگی مشاوره و صف بازبینی انسانی S03](SKIN_PROBLEM_BANK_WORKING_RECORDS.md#s03--ارزیابی-آمادگی-مشاوره-و-صف-بازبینی-انسانی-اسنادی-نه-accepted) در Working Records؛ P13 فقط structural Cross-Shelf به S04؛ P16 مسیر Map S02→S07 حفظ شده است. |
-| S03 | **ثبت ساختاری شده** — P08–P16 در [Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md)؛ نه Accepted؛ P13 فقط رابطهٔ Cross-Shelf به S04؛ P16 با مسیر Map برابر S02→S07 و ابهام ثبت‌شده. |
+| S03 | **ثبت ساختاری شده + ارزیابی آمادگی مشاوره (اسنادی؛ نه Accepted)** — [بخش S03 در Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md#s03--ارزیابی-آمادگی-مشاوره-و-صف-بازبینی-انسانی-اسنادی-نه-accepted)؛ P08–P16؛ P13 فقط Cross-Shelf به S04؛ P16 مسیر Map برابر S02→S07؛ هیچ `consultation_ready` ثبت نشده است. |
 | S04 | **ثبت ساختاری شده** — P17–P23 در [Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md)؛ نه Accepted؛ P22 Context با ارجاع به S09؛ P23 Parked/Evidence Boundary با مرز S04↔S09؛ S09 باز نشده. |
 | S05 | **در حال کار ساختاری** — P24–P33 در [Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md)؛ نه Accepted؛ P06 فقط ارجاع S01→S05؛ P30 رابطهٔ S05↔S02 بدون بازنویسی S02؛ P31/P32 مرزهای Clinical/Referral/Safety را حفظ می‌کنند. |
 | S06 | **ثبت ساختاری شده** — P34–P42 در [Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md)؛ نه Accepted؛ قفسهٔ Clinical/Safety؛ P39 فقط ارجاع متقاطع S06↔S08؛ S08 باز نشده. |
