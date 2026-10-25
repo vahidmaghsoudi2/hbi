@@ -34,15 +34,15 @@ const PRODUCT_LINE_OPTIONS = [
 ] as const;
 
 const SKIN_TEMPLATES = [
-  ["HYDRATING_MOISTURIZER", "آبرسان / مرطوب‌کننده", "بافت؛ حس پوستی؛ روز/شب؛ ادعای آبرسانی"],
-  ["SUNSCREEN", "ضدآفتاب", "SPF؛ PA/UVA؛ نوع فیلتر؛ مقاومت در برابر آب؛ رنگی/بی‌رنگ؛ صورت/بدن"],
-  ["BRIGHTENING_SPOT", "روشن‌کننده / ضدلک", "هدف اعلام‌شده؛ مواد فعال؛ بازه زمانی ادعا؛ اعداد فقط با منبع"],
-  ["MICELLAR", "میسلار واتر", "پاک‌کنندگی آرایش؛ نیاز به آبکشی؛ مناسب اطراف چشم طبق برچسب"],
-  ["TONER", "تونر", "نقش اعلام‌شده؛ الکل طبق فرمول اعلام‌شده"],
-  ["CLEANSING_GEL", "ژل شستشو", "آبکشی‌شونده؛ تمرکز اعلام‌شده؛ تناوب مصرف"],
-  ["ANTI_ACNE", "ضدجوش", "تمرکز اعلام‌شده؛ مواد فعال؛ ماندگار/آبکشی"],
-  ["EXFOLIANT", "لایه‌بردار", "نوع؛ اسیدها یا ذرات اعلام‌شده؛ تناوب؛ هشدار تحریک"],
-  ["OTHER_SKIN", "سایر (پوست)", "دلیل انتخاب سایر؛ یادداشت ساخت‌یافته اپراتور"],
+  ["HYDRATING_MOISTURIZER", "آبرسان / مرطوب‌کننده", ["بافت", "حس پوستی اعلام‌شده", "روز / شب / هر دو", "ادعای آبرسانی یا حفظ رطوبت (متن + منبع)"]],
+  ["SUNSCREEN", "ضدآفتاب", ["SPF", "PA / ادعای UVA", "نوع فیلتر", "مقاومت در برابر آب", "رنگی / بی‌رنگ", "صورت / بدن"]],
+  ["BRIGHTENING_SPOT", "روشن‌کننده / ضدلک", ["هدف اعلام‌شده", "مواد فعال اعلام‌شده", "بازه زمانی ادعای سازنده", "اعداد ادعای سازنده (فقط با منبع)"]],
+  ["MICELLAR", "میسلار واتر", ["پاک‌کنندگی آرایش", "نیاز به آبکشی", "مناسب اطراف چشم طبق برچسب"]],
+  ["TONER", "تونر", ["نقش اعلام‌شده", "الکل طبق فرمول اعلام‌شده"]],
+  ["CLEANSING_GEL", "ژل شستشو", ["آبکشی‌شونده", "تمرکز اعلام‌شده", "تناوب مصرف طبق برچسب"]],
+  ["ANTI_ACNE", "ضدجوش", ["تمرکز اعلام‌شده", "مواد فعال اعلام‌شده", "ماندگار / آبکشی"]],
+  ["EXFOLIANT", "لایه‌بردار", ["نوع لایه‌بردار", "اسیدها یا ذرات اعلام‌شده", "تناوب مصرف", "هشدار تحریک از برچسب"]],
+  ["OTHER_SKIN", "سایر (پوست)", ["چرا در قالب‌های بالا جا نگرفت", "یادداشت ساخت‌یافته اپراتور"]],
 ] as const;
 const SKIN_SHARED_BOXES = ["منبع / لینک / برچسب", "نوع منبع", "منطقه بازار (با شاهد)", "اهداف پوستی اعلام‌شده", "هشدارها و محدودیت‌ها", "روش مصرف", "ترکیبات کلیدی اعلام‌شده", "سایر / اضافات"] as const;
 
@@ -806,7 +806,7 @@ export default function ProductIntakePanel({
           <div className="pro-grid-2">
             {SKIN_SHARED_BOXES.map((label) => <div key={label}><label className="pro-label">{label}</label><input className="pro-input" value="" placeholder="در این مرحله غیرفعال است" disabled readOnly /></div>)}
           </div>
-          {skinTemplate && <><h3>باکس‌های اختصاصی: {SKIN_TEMPLATES.find(([value]) => value === skinTemplate)?.[1]}</h3><div className="pro-grid-2"><div><label className="pro-label">فیلدهای این قالب</label><input className="pro-input" value={SKIN_TEMPLATES.find(([value]) => value === skinTemplate)?.[2] ?? ""} disabled readOnly /></div></div></>}
+          {skinTemplate && <><h3>باکس‌های اختصاصی: {SKIN_TEMPLATES.find(([value]) => value === skinTemplate)?.[1]}</h3><div className="pro-grid-2">{(SKIN_TEMPLATES.find(([value]) => value === skinTemplate)?.[2] ?? []).map((label) => <div key={label}><label className="pro-label">{label}</label><input className="pro-input" value="" placeholder="در این مرحله غیرفعال است" disabled readOnly /></div>)}</div></>}
         </fieldset>
       )}
 
