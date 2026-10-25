@@ -1814,3 +1814,39 @@ No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care
 برای طرح هر شناسه جهت تصمیم بعدی، تعریف و مرز قابل ردیابی، نوع واحد و رابطه روشن، شواهد معتبر، زبان مشتریِ مستند یا UNKNOWN صریح، ملاحظات ایمنی/ارجاع بازبینی‌شده و تصمیم بازبین انسانی لازم است. این معیار به‌تنهایی پذیرش ایجاد نمی‌کند؛ Accepted، Need و مجوز توصیهٔ محصول تصمیم‌ها و شواهد جداگانه می‌خواهند.
 
 **نتیجه:** پوشش اسنادی و صف اقدام S04–S10 در این ماتریس ثبت شد؛ آمادگی مشاوره یا پذیرش پزشکی برای هیچ شناسه‌ای اعلام نشده است. G8 همچنان BLOCKED / NOT VERIFIED است.
+
+
+### دفتر شروعِ ردیابی منابع برای بازبینی انسانی S04–S10
+
+این‌ها **منابع نامزد برای شروع بررسی** هستند، نه شواهد پذیرفته‌شدهٔ HBI، نه جایگزین بازبینی بالینی، و نه پشتیبانی از ادعای اثربخشی هیچ محصولی. صفحهٔ مرجع عمومی ممکن است چندین وضعیت متفاوت را پوشش دهد؛ بنابراین هر ادعای خاص باید به بخش دقیق منبع، نوع ادعا، محدودیت، تاریخ دسترسی و شناسهٔ Problem وصل شود. اگر منبع برای یک شناسه کافی نیست، وضعیت آن UNKNOWN می‌ماند.
+
+| قفسه/شناسه‌های مرتبط | منبع نامزد | استفادهٔ محدود در بازبینی | آنچه این منبع به‌تنهایی ثابت نمی‌کند |
+|---|---|---|---|
+| S04: P17, P19, P20, P22, P23 | [DermNet — Pigmentation disorders](https://dermnetnz.org/topics/pigmentation-disorders) | جهت‌یابی افتراقی برای تغییرات رنگدانه؛ پیدا کردن مرزهای احتمالی میان presentationها | تعریف عملیاتی پذیرفته‌شدهٔ HBI، Need، تشخیص فرد یا اثربخشی محصول |
+| S04: P19 | [DermNet — Postinflammatory hyperpigmentation](https://dermnetnz.org/topics/postinflammatory-hyperpigmentation) | منبع آغازین تخصصی برای مفهوم PIH و تمایز آن از تغییرات رنگدانهٔ دیگر | پذیرش P19، توصیهٔ محصول، یا تعمیم اثر یک ماده به محصول نهایی |
+| S04: P18 | [American Academy of Dermatology — Melasma treatment](https://www.aad.org/public/diseases/a-z/melasma-treatment) | اطلاعات عمومی متخصصان دربارهٔ melasma و مدیریت آن؛ برای بازبینی مرز ادعاها | مجوز خودکار برای توصیهٔ OTC یا ادعای اثربخشی هر محصول دارای مادهٔ مشابه |
+| S04: P21 | [DermNet — Vitiligo](https://dermnetnz.org/topics/vitiligo) | منبع تخصصی آغازین برای مرز و ویژگی‌های کلی vitiligo | تشخیص، پذیرش Need یا مجوز مراقبت معمول |
+| S05: P24–P33 | [American Academy of Dermatology — Diseases and conditions](https://www.aad.org/public/diseases) | درگاه متخصص‌محور برای یافتن صفحات اختصاصی rosacea، eczema، psoriasis و سایر وضعیت‌ها | شواهد دقیق برای تمام P24–P33؛ صفحهٔ اختصاصی هر ادعا همچنان لازم است |
+| S05: P24, P25, P26 | [DermNet — Rosacea](https://dermnetnz.org/topics/rosacea) | مرجع آغازین برای rosacea و هم‌پوشانی احتمالی با flushing/قرمزی | این‌که هر قرمزی یا flushing، rosacea است یا باید به محصول خاصی پاسخ دهد |
+| S06: P34–P42 | [DermNet — Cutaneous infections](https://dermnetnz.org/cme/dermatopathology/cutaneous-infections) | نمای کلی تخصصی از عفونت‌های باکتریایی، قارچی، ویروسی و برخی آلودگی‌های انگلی | پروتکل ارجاع HBI، تشخیص از روی خوداظهاری یا مناسب‌بودن محصولات آرایشی |
+| S06: P40 | [DermNet — Impetigo](https://dermnetnz.org/topics/impetigo) | صفحهٔ تخصصی برای شناخت دامنهٔ موضوع impetigo و یافتن منابع بالینی مرتبط | تصمیم درمانی برای فرد یا مجوز محصول غیرپزشکی |
+| S06: P41 | [DermNet — Scabies](https://dermnetnz.org/topics/scabies) | صفحهٔ تخصصی برای شناخت دامنهٔ scabies و تفاوت‌های بالینی | تشخیص از روی متن مشتری یا جایگزینی ارزیابی حرفه‌ای |
+| S08: P48–P50, P53–P56 | [NHS — Moles](https://www.nhs.uk/conditions/moles/); [NHS — Melanoma symptoms](https://www.nhs.uk/conditions/melanoma-skin-cancer/symptoms/); [NHS — Non-melanoma skin cancer symptoms](https://www.nhs.uk/conditions/non-melanoma-skin-cancer/symptoms/) | منابع عمومی سلامت برای بازبینی زبان ایمنی و این‌که تغییرات ضایعه نیازمند ارزیابی پزشکی‌اند | الگوریتم تشخیصی، تشخیص خودکار AI یا تعیین آستانهٔ HBI بدون پروتکل مصوب |
+| S09: P51, P52؛ مرزهای مرتبط با S08 | [NHS — Actinic keratoses](https://www.nhs.uk/conditions/actinic-keratoses); [NHS — Sunscreen and sun safety](https://www.nhs.uk/live-well/seasonal-health/sunscreen-and-sun-safety/) | اطلاعات عمومی دربارهٔ ضایعات مرتبط با UV و حفاظت در برابر آفتاب | تغییر وضعیت قفل‌شدهٔ P51 یا تبدیل آن به Need/سیگنال خودکار ارجاع |
+| S10: P58, P61 | [DermNet — Skin signs of rheumatic disease](https://dermnetnz.org/topics/skin-signs-of-rheumatic-disease); [DermNet — Photosensitivity](https://dermnetnz.org/topics/photosensitivity) | منابع تخصصی آغازین برای رابطهٔ برخی تظاهرات پوستی با lupus و photosensitivity | تشخیص بیماری سیستمیک، رابطهٔ علّی در فرد یا آستانهٔ ارجاع خودکار HBI |
+| S10: P60 | [DermNet — Acanthosis nigricans](https://dermnetnz.org/topics/acanthosis-nigricans) | منبع تخصصی آغازین برای ماهیت systemic-associated این presentation و مرزهای نیازمند احتیاط | تشخیص بیماری زمینه‌ای یا تصمیم درمانی/محصول برای فرد |
+| S07: P46, P47؛ فقط برای cross-reference | [DermNet — Seborrhoeic keratosis](https://dermnetnz.org/topics/seborrhoeic-keratosis); [DermNet — Skin tags](https://dermnetnz.org/topics/skin-tag) | بررسی مقدماتی دو موضوع مرتبط با ضایعات/رشدهای سطحی و تفاوت احتمالی با موارد مشابه | این‌که تشخیص ظاهری بدون ارزیابی کافی است یا هر ضایعه‌ای برای حذف زیبایی مناسب است |
+
+#### ثبت نتیجهٔ منبع برای هر ادعا — قالب الزامی
+
+برای هر منبعی که واقعاً در بازبینی یک Problem استفاده می‌شود، رکورد ادعا باید حداقل شامل این موارد باشد:
+
+- Problem ID و نام دقیق ادعا؛
+- URL پایدار و عنوان/نهاد منتشرکننده؛ تاریخ دسترسی و تاریخ بازبینی/انتشار اگر موجود است؛
+- نوع ادعا: تعریف/مرز، نشانهٔ ایمنی، ارجاع، اطلاعات عمومی، یا ادعای اثربخشی؛
+- عبارت یا بخش دقیق منبع که ادعا را پشتیبانی می‌کند؛
+- محدودیت: چه چیزی را پشتیبانی نمی‌کند؛
+- وضعیت: candidate / reviewed / conflicting / insufficient / accepted by authorized reviewer؛
+- نام/نقش بازبین و تاریخ تصمیم.
+
+**گیت مهم:** منابع بالا به‌عنوان نقطهٔ شروع تحقیق ثبت شده‌اند، نه این‌که تمام ۴۵ شناسه با آن‌ها اعتبارسنجی شده باشند. هنوز هیچ شناسه‌ای به‌واسطهٔ افزودن این فهرست، Accepted یا consultation-ready نمی‌شود. منابع مربوط به یک بیماری نیز اثربخشی محصول نهایی را ثابت نمی‌کنند.
