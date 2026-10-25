@@ -433,3 +433,77 @@ A plausible mechanism or the presence of an ingredient is not proof that the fin
 - [ ] Candidate skin-need relationships include a specific basis and never auto-link to P01–P61.
 - [ ] Existing DuplicateCheck, research-draft, Evidence QA, Product QA, and lifecycle controls remain authoritative.
 - [ ] Completing this specification does not authorize schema/API/DB changes, smart-fill, evidence verification, product registration, QA approval, activation, or recommendation behavior.
+
+
+#### 5.4.1 Detailed field contract — `MICELLAR`
+
+This is a conceptual contract for review, not a claim that every candidate attribute exists in Product, ProductKnowledge, Evidence, DTO, API, or database storage. Use the existing identity, source provenance, research-draft, Evidence, DuplicateCheck, and QA workflows. Micellar water is a product format, not proof of suitability for every skin type or every eye area.
+
+| Concept / candidate key | Meaning and semantic class | Source / provenance requirement | Validation and UNKNOWN/CONFLICT behavior | Consultation relevance |
+|---|---|---|---|---|
+| Exact product identity, market, variant, and version | Product/package identity facts | Exact package or manufacturer source for the specific regional SKU | Similar names, bottle designs, and retailer listings do not prove identical formula; unknown remains unknown | Prevents transferring ingredient and tolerability claims across versions |
+| Size, GTIN, packaging version | Package identity facts | Package label, barcode, dated package image, or exact SKU source | Never fabricate defaults; distinguish packaging refresh from formula change only when evidence supports it | Duplicate and version control |
+| Full INCI | Label fact about the formula | Complete package ingredient list or exact manufacturer source for the same market/version | Mark partial lists as partial; do not reconstruct from a sibling product; preserve source conflicts | Supports ingredient review, not finished-product performance claims |
+| Key ingredients / `key_ingredients` | Source-reported subset | Exact package/manufacturer source | Keep distinct from full INCI; do not infer concentration or function solely from marketing emphasis | Research prioritization only |
+| Makeup-removal claim / `makeup_removal` | Manufacturer claim or documented test result | Exact label/manufacturer wording; product-specific test if efficacy is asserted | Distinguish face makeup, long-wear makeup, and water-resistant makeup only where source specifies; do not infer universal removal ability from “micellar” | Helps characterize the stated cleansing purpose |
+| Cleansing performance | Manufacturer claim or product-specific evidence | Exact claim source; any study/test tied to the exact product and stated soil/makeup type | Ingredient mechanism or product category alone does not prove removal efficiency; missing method and endpoint remain unknown | Evidence must match the type of material and outcome claimed |
+| Rinse requirement / `rinse_required` | Label instruction | Exact product label or manufacturer directions for the same version | Values distinguish explicitly rinse, explicitly no-rinse, and not stated; do not infer from category or retailer routine advice | Avoids contradicting product-specific instructions |
+| Eye-area use / `eye_area` | Label claim/instruction | Exact package/manufacturer source, including any stated restrictions | Record “suitable for eye area” only when stated; absence of a warning does not prove eye-area suitability; preserve contact-lens or irritation cautions only when sourced | Relevant to use-area review, not a guarantee against irritation |
+| Face/lip/eye or other application areas | Label instruction | Exact directions and warnings | Record only stated areas; do not extend face-use directions to lips or eyes by analogy | Keeps intended use precise |
+| Skin-type and sensitivity claims | Manufacturer claim or separately labelled evidence assessment | Exact source; product-specific tolerability evidence where claimed | “Sensitive skin”, “gentle”, “hypoallergenic”, or “non-irritating” are not universal guarantees; absence of claim is not evidence of unsuitability | Prompts review, does not guarantee individual tolerance |
+| Fragrance, alcohol, and other ingredient presence | Formula fact based on INCI | Full INCI for exact version; use careful ingredient identity matching | Do not claim “alcohol-free”, “fragrance-free”, or absence of an ingredient from a partial list; distinguish ingredient names and chemical classes accurately | May inform user-specific review, but presence alone does not establish irritation |
+| Post-use instructions and frequency | Label instruction | Exact product directions | Capture frequency, amount, cotton-pad/application method, rinse/leave-on, and follow-up cleansing only if stated; no invented routine | Maintains label fidelity |
+| Warnings and restrictions | Label fact and/or separately sourced limitation | Exact label/manufacturer source; independent guidance needs its own credible source | “Not stated” is not “none”; do not invent contraindications or blanket safety claims | Risk screening only; not formal safety clearance |
+| Finished-product evidence | Product-specific evidence | Study/report tied to exact formula/version and the claim being evaluated | Capture design, test conditions, sample/population, comparator, endpoint, method, results and limitations when available; manufacturer summary remains attributed if full report unavailable | Supports only the measured cleansing/tolerability outcome |
+| Ingredient-level evidence | Evidence about a named ingredient or mechanism | Reliable technical/scientific source, with ingredient form and context where relevant | Do not treat ingredient evidence as proof of finished-product makeup removal, eye safety, or tolerability | Research context only |
+| Evidence record / existing `Evidence` | Claim-evidence assertion and review state | Reuse current source type/reference, claim, field, claim type, market and date fields where available | Keep source capture, appraisal, conflict status, and QA separate; no auto-verification | Allows review of each material claim |
+| Product-level `evidence_status` | Aggregate status only if separately approved | Must follow approved semantics and a reproducible derivation rule | This template does not define or set it; preserve unresolved UNKNOWN/CONFLICT semantics and known implementation gaps | Must not imply Product QA, safety clearance, activation, or recommendation eligibility |
+| Candidate relationship to a skin need | Proposed relationship concept | Specific product feature, evidence/claim reference, confirmed canonical need identifier, and authorized relationship mechanism | Free-text goals remain candidates; no automatic P01–P61 mapping | Research lead only, not diagnosis or individualized recommendation |
+
+#### 5.4.2 Claim and evidence boundaries for micellar water
+
+For material claims about makeup removal, cleansing, residue, eye-area use, or skin tolerability, record or explicitly mark unknown:
+
+1. The exact claim wording and the exact product/market/version.
+2. The type of material tested or claimed to be removed, such as ordinary makeup versus long-wear or water-resistant makeup, when stated.
+3. Whether the source is package wording, manufacturer marketing, a product-specific test, ingredient-level research, consumer feedback, or an independent study.
+4. Test conditions and method, sample/population, comparator, endpoint, and results where reported.
+5. Whether the evidence matches the exact use claim. A general cleansing test does not automatically establish eye-area suitability or performance on every makeup type.
+6. Relevant limitations, missing protocol details, contradictory sources, and the current review state.
+
+The word “micellar” does not itself establish rinse-free use, complete makeup removal, hypoallergenicity, non-comedogenicity, or suitability for sensitive skin. Do not turn a product category or an ingredient mechanism into a verified finished-product outcome.
+
+#### 5.4.3 Ingredient and terminology safeguards
+
+- Keep full INCI, selected key ingredients, manufacturer-highlighted ingredients, and independently interpreted ingredient roles separate.
+- Do not infer concentration, formula completeness, or ingredient absence from a partial list or product-family page.
+- Record “rinse-free”, “eye-safe”, “sensitive skin”, “hypoallergenic”, “fragrance-free”, and “non-comedogenic” only with exact source wording and scope; none is self-validating proof of universal suitability.
+- Do not treat “contains micelles” or the presence of a surfactant as proof of a specific makeup-removal result or low irritation.
+- Do not invent application frequency, whether a second cleanse is required, or instructions for contact-lens users. Preserve actual label directions and keep external guidance separately sourced.
+- Individual tolerance may vary; a marketing claim does not guarantee absence of irritation or allergic reaction.
+
+#### 5.4.4 UNKNOWN, CONFLICT, and acceptance behavior
+
+- Missing market/version, full INCI, rinse requirement, application area, makeup type, test method, performance result, or warning data remains unknown rather than being filled from a similar product.
+- If package, manufacturer, retailer, and research sources disagree, preserve each source-bound assertion and flag the relevant item as conflicted under the existing workflow.
+- “Not stated” must remain distinct from “no”, “not required”, “fragrance-free”, “alcohol-free”, or “safe for eyes”.
+- If only selected ingredients are published, do not label them full INCI.
+- If only a marketing summary is accessible, attribute it to the manufacturer and note that the underlying test could not be appraised.
+- Testimonials and uncontrolled demonstrations must not be promoted to controlled product-specific evidence.
+- Any future smart-fill, if separately authorized, may create only source-linked suggestions for human review. It must not auto-verify Evidence, pass Product QA, activate a product, clear a safety concern, or make the product recommendation-eligible.
+
+#### 5.4.5 Template-specific acceptance criteria
+
+- [ ] Exact product identity, market, variant, and version are recorded or explicitly unknown.
+- [ ] Full INCI is distinguished from selected key ingredients.
+- [ ] Makeup-removal claims preserve the exact makeup type and scope stated by the source.
+- [ ] Rinse requirement and application areas come from the exact label/manufacturer source; unknown remains distinct from no.
+- [ ] Eye-area and sensitive-skin claims are not treated as universal safety guarantees.
+- [ ] Ingredient presence is not used alone to prove performance, non-irritation, or finished-product efficacy.
+- [ ] Evidence distinguishes finished-product testing from ingredient-level evidence, marketing, and testimonials.
+- [ ] Study/test methods, conditions, endpoints, results, and limitations are captured where reported.
+- [ ] UNKNOWN and CONFLICT remain visible and are not silently converted into trusted values.
+- [ ] Warnings and usage directions remain source-bound; “not stated” is not “none”.
+- [ ] Candidate skin-need relationships never auto-link to P01–P61.
+- [ ] Existing DuplicateCheck, research-draft, Evidence QA, Product QA, and lifecycle controls remain authoritative.
+- [ ] This documentation does not authorize schema/API/DB changes, smart-fill, evidence verification, operational product registration, QA approval, activation, or recommendation behavior.
