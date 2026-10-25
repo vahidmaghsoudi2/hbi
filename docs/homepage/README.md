@@ -43,7 +43,7 @@ The current `NewHomePage.tsx` snapshot shows nine main menu cards:
 8. حسابداری و گزارش‌ها
 9. دانشنامه
 
-The prototype also identifies the top actions separately. «تنظیمات» is not treated as an active main-menu card because it is not present among those eight cards in the inspected source snapshot.
+The prototype also identifies the top actions separately. «تنظیمات» is not treated as an active main-menu card because it is not present among those nine cards in the inspected source snapshot.
 
 ## Active encyclopedia menu — implementation and source-of-truth boundaries
 
