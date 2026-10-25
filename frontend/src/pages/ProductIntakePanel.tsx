@@ -436,6 +436,7 @@ export default function ProductIntakePanel({
   }
 
   useEffect(() => {
+    setSkinBoxValues({});
     if (editProduct?.product_id) {
       const next = fromProduct(editProduct);
       setDraft(next);
@@ -975,6 +976,31 @@ export default function ProductIntakePanel({
           <p className="pro-lead" role="note">
             هر assertion فقط با claim، نوع منبع و مرجع منبع ارسال می‌شود. وضعیت QA=PENDING و evidence_status=UNKNOWN باقی می‌ماند؛ تأیید یا فعال‌سازی از این مسیر انجام نمی‌شود.
           </p>
+          <div style={{ marginTop: "0.75rem" }}>
+            <div className="pro-actions">
+              <strong>شواهد ذخیره‌شده: {researchRows.length}</strong>
+              <button type="button" className="pro-btn-secondary" disabled={researchBusy} onClick={() => void loadResearch("TEST-P1C-001")}>
+                بازخوانی شواهد
+              </button>
+            </div>
+            {researchRows.length === 0 ? (
+              <p className="pro-lead">هنوز شاهدی برای این محصول آزمایشی بازخوانی نشده است.</p>
+            ) : (
+              <ul>
+                {researchRows.map((item) => (
+                  <li key={item.evidence_id} style={{ marginBottom: "0.5rem" }}>
+                    <strong>{item.claim || "—"}</strong>
+                    <div className="pro-lead" style={{ fontSize: "0.85rem" }}>
+                      فیلد: {String(item.field || "—")} · منبع: {item.source_type || "—"} / {item.source_reference || "—"}
+                    </div>
+                    <div className="pro-lead" style={{ fontSize: "0.85rem" }}>
+                      QA: {String(item.qa_status || "PENDING")} · evidence_status: {String(item.evidence_status || "UNKNOWN")} · conflict: {String(item.conflict_status || "NONE")}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </fieldset>
       )}
 
