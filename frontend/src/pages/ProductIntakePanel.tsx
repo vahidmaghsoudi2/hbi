@@ -33,6 +33,19 @@ const PRODUCT_LINE_OPTIONS = [
   { value: "OTHER", label: "متفرقه (OTHER)" },
 ] as const;
 
+const SKIN_TEMPLATES = [
+  ["HYDRATING_MOISTURIZER", "آبرسان / مرطوب‌کننده", "بافت؛ حس پوستی؛ روز/شب؛ ادعای آبرسانی"],
+  ["SUNSCREEN", "ضدآفتاب", "SPF؛ PA/UVA؛ نوع فیلتر؛ مقاومت در برابر آب؛ رنگی/بی‌رنگ؛ صورت/بدن"],
+  ["BRIGHTENING_SPOT", "روشن‌کننده / ضدلک", "هدف اعلام‌شده؛ مواد فعال؛ بازه زمانی ادعا؛ اعداد فقط با منبع"],
+  ["MICELLAR", "میسلار واتر", "پاک‌کنندگی آرایش؛ نیاز به آبکشی؛ مناسب اطراف چشم طبق برچسب"],
+  ["TONER", "تونر", "نقش اعلام‌شده؛ الکل طبق فرمول اعلام‌شده"],
+  ["CLEANSING_GEL", "ژل شستشو", "آبکشی‌شونده؛ تمرکز اعلام‌شده؛ تناوب مصرف"],
+  ["ANTI_ACNE", "ضدجوش", "تمرکز اعلام‌شده؛ مواد فعال؛ ماندگار/آبکشی"],
+  ["EXFOLIANT", "لایه‌بردار", "نوع؛ اسیدها یا ذرات اعلام‌شده؛ تناوب؛ هشدار تحریک"],
+  ["OTHER_SKIN", "سایر (پوست)", "دلیل انتخاب سایر؛ یادداشت ساخت‌یافته اپراتور"],
+] as const;
+const SKIN_SHARED_BOXES = ["منبع / لینک / برچسب", "نوع منبع", "منطقه بازار (با شاهد)", "اهداف پوستی اعلام‌شده", "هشدارها و محدودیت‌ها", "روش مصرف", "ترکیبات کلیدی اعلام‌شده", "سایر / اضافات"] as const;
+
 type Draft = {
   product_id: string;
   brand: string;
@@ -265,6 +278,7 @@ export default function ProductIntakePanel({
 }: Props) {
   const [intro, setIntro] = useState("");
   const [draft, setDraft] = useState<Draft>(EMPTY);
+  const [skinTemplate, setSkinTemplate] = useState<string>("");
   /** Baseline product_line at Edit entry — used so unchanged line is omitted from PATCH. */
   const [initialProductLine, setInitialProductLine] = useState("");
   const [busy, setBusy] = useState(false);
@@ -699,7 +713,7 @@ export default function ProductIntakePanel({
               id="product-line-select"
               className="pro-input"
               value={draft.product_line}
-              onChange={(e) => setField("product_line", e.target.value)}
+              onChange={(e) => { setField("product_line", e.target.value); if (e.target.value !== "SKIN") setSkinTemplate(""); }}
               required={!editing}
             >
               <option value="">— انتخاب لاین —</option>
@@ -779,9 +793,26 @@ export default function ProductIntakePanel({
         </div>
       </fieldset>
 
+      {draft.product_line === "SKIN" && (
+        <fieldset className="pro-fieldset" style={{ marginTop: "1rem" }}>
+          <legend>۳) قالب ثابت محصول پوست (V1)</legend>
+          <p className="pro-lead">اسکلت P1 است: انتخاب قالب محلی است؛ باکس‌ها خالی و غیرفعال‌اند، ذخیره نمی‌شوند و به API ارسال نمی‌شوند. اطلاعات ساختگی یا تأیید خودکار ایجاد نمی‌شود.</p>
+          <label className="pro-label" htmlFor="skin-template">قالب محصول پوست</label>
+          <select id="skin-template" className="pro-input" value={skinTemplate} onChange={(e) => setSkinTemplate(e.target.value)}>
+            <option value="">— انتخاب قالب —</option>
+            {SKIN_TEMPLATES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select>
+          <h3>باکس‌های مشترک</h3>
+          <div className="pro-grid-2">
+            {SKIN_SHARED_BOXES.map((label) => <div key={label}><label className="pro-label">{label}</label><input className="pro-input" value="" placeholder="در این مرحله غیرفعال است" disabled readOnly /></div>)}
+          </div>
+          {skinTemplate && <><h3>باکس‌های اختصاصی: {SKIN_TEMPLATES.find(([value]) => value === skinTemplate)?.[1]}</h3><div className="pro-grid-2"><div><label className="pro-label">فیلدهای این قالب</label><input className="pro-input" value={SKIN_TEMPLATES.find(([value]) => value === skinTemplate)?.[2] ?? ""} disabled readOnly /></div></div></>}
+        </fieldset>
+      )}
+
       {!editing && (
         <fieldset className="pro-fieldset" style={{ marginTop: "1rem" }}>
-          <legend>۳) بررسی تکراری (DuplicateCheck)</legend>
+          <legend>۴) بررسی تکراری (DuplicateCheck)</legend>
           <p className="pro-lead" style={{ fontSize: "0.9rem" }}>
             قبل از ثبت Draft، مشخصات هویتی باید از مسیر رسمی Backend بررسی شوند. تغییر هر فیلد هویتی، نتیجه قبلی را بی‌اعتبار می‌کند.
           </p>
