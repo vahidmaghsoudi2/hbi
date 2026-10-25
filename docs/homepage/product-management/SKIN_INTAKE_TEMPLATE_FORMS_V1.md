@@ -183,6 +183,85 @@ No automatic P01–P61 mapping is permitted. A relationship candidate is not a d
 | `tint` | رنگی / بی‌رنگ / نامشخص |
 | `face_body` | صورت / بدن / هر دو |
 
+
+
+#### 5.2.1 Detailed field contract — `SUNSCREEN`
+
+This is a **conceptual contract for review**, not a claim that each candidate field exists in Product, ProductKnowledge, Evidence, the API, or the database. The existing identity, evidence, draft, duplicate-check, and QA paths remain authoritative. Sunscreen claims are market- and test-method-dependent; a label from one jurisdiction must not be interpreted as a universal regulatory guarantee.
+
+| Concept / candidate key | Meaning and semantic class | Source / provenance | Validation and unknown/conflict behavior | Consultation relevance |
+|---|---|---|---|---|
+| Brand and exact product name | Product identity fact | Exact package or manufacturer page | Preserve exact wording and version; similar name does not prove same formula | Identifies the product being assessed |
+| Market / regional version | Identity and regulatory context | Package, region-specific manufacturer page, or verified SKU | Unknown remains unknown; preserve regional variants separately | Determines which claims, labels, and rules apply |
+| Variant / tint / shade | Identity and version fact | Package and exact SKU | Record only a verified tint/shade/variant; do not infer from product photos alone | Tint, shade, and formula may affect use and identity |
+| Size / GTIN / packaging version | Identity and package facts | Package label, barcode scan, dated packaging evidence | Never fabricate defaults; distinguish old packaging from a changed formula | Duplicate and version control |
+| Full INCI / UV filters | Label fact | Full package ingredient list or exact manufacturer source for the same market/version | Distinguish full INCI from selected filters; do not infer filter concentration from ingredient order | Supports ingredient and version review, not proof of protection level |
+| SPF value / `spf_value` | Labelled test-related claim | Exact package/manufacturer source, with market and version | Preserve stated value and context; never calculate SPF from ingredients or infer it from another version | Describes labelled UVB-related protection under the applicable test/label system, not every aspect of protection |
+| UVA claim / `pa_rating` or equivalent | Label claim, exact scheme required | Package/manufacturer source; capture the actual notation (e.g. PA grade, UVA logo, or other regional wording) | Do not convert between schemes unless a validated rule and evidence are documented; missing UVA information stays unknown | UVA information is distinct from SPF |
+| Broad-spectrum claim | Manufacturer/regulatory label claim | Exact regional label and source | Record only if explicitly stated and identify market/test scheme where available; do not infer from SPF or PA alone | Helps characterize the stated protection scope |
+| Water-resistance claim / `water_resistance` | Label/test claim | Exact label and regional manufacturer source; retain stated duration/test wording | Values should distinguish not stated, not water-resistant, and a stated tested duration where the local system uses one; never translate “waterproof” marketing into validated resistance | Important for use context; does not mean protection is permanent or unaffected by towel drying |
+| UV-filter type / `filter_type` | Classification/inference based on disclosed filters | Full INCI plus a reliable filter reference if classification is needed | Prefer “organic filters”, “inorganic filters”, “mixed”, or “unknown” when supported; “chemical/physical” wording may be ambiguous and must not imply safety ranking | Helps explain formulation, not determine suitability or safety by itself |
+| Tint / `tint` | Identity/appearance fact | Package or manufacturer source | Values: tinted, untinted, unknown; shade-specific variants remain distinct | May affect cosmetic preference and visible-light claims only when those claims are evidenced |
+| Face/body / `face_body` | Intended-use claim | Exact label or manufacturer instructions | Face, body, both, other, unknown; no inference from packaging size alone | Helps match the labelled use to the intended application area |
+| Application amount and method | Manufacturer instruction | Exact package or manufacturer directions | Capture amount, coverage, application timing and reapplication frequency only as stated; no invented universal product-specific directions | Protection depends on use consistent with directions and tested conditions |
+| Reapplication instruction | Manufacturer instruction / regional label direction | Exact regional label | Preserve exact instruction and context; do not replace it with a guessed interval | Relevant to practical use and maintaining labelled protection |
+| Warnings / restrictions | Source-bound label facts | Exact package or regional manufacturer source | “Not stated” is not “no warning”; preserve age, eye-contact, damaged-skin, or other instructions only when present | Risk screening; not an automatic safety clearance |
+| Claim about sensitive skin, acne, pregnancy, children, or non-comedogenicity | Manufacturer claim unless independently supported | Exact claim source and applicable market/version | Keep as a claim; identify the exact population or condition and the evidence basis; do not infer from “mineral” or “fragrance-free” alone | May prompt further review, but does not establish individual suitability |
+| Product-specific protection study / test report | Evidence | Report, method, exact tested formula, market/version and source | Capture method/standard, sample/population where relevant, endpoint, date, limitations and access status; pending review stays pending | Helps assess a specific protection claim within the tested scope |
+| Evidence about an individual filter | Ingredient-level evidence | Scientific source for that filter and the question studied | Do not treat as proof of the finished sunscreen's SPF/UVA performance, photostability, water resistance, or tolerability | Research context only |
+| Evidence status / confidence | Existing Evidence and ProductKnowledge concepts | Existing review process and traceable source records | Do not create new enums or infer product QA, safety clearance, activation, or recommendation eligibility from this field | Context for reviewer, not an approval signal |
+| Candidate relation to skin need | Proposed relationship concept | Specific claim/evidence plus canonical need identifier, if the existing relation path is confirmed | No automatic P01–P61 mapping; preserve basis, limitation, conflict and review state | Supports structured review, not diagnosis or guaranteed suitability |
+
+#### 5.2.2 Sunscreen-specific evidence rules
+
+For every material claim about SPF, UVA protection, broad-spectrum coverage, water resistance, photostability, or suitability for a particular population, record or explicitly mark unknown:
+
+1. **Exact identity:** product, market, variant, packaging/formula version and the source to which the claim applies.
+2. **Exact claim:** label wording and notation, not a paraphrase that drops qualifiers.
+3. **Test basis:** method or standard when available, test date/report reference, endpoint, and whether the evidence applies to the finished product or only to an ingredient.
+4. **Scope and limitations:** stated water-resistance duration where relevant, conditions tested, population or use conditions where reported, and missing protocol details.
+5. **Regional context:** label conventions and claims can differ by market; retain the original notation and do not silently convert between regulatory schemes.
+6. **Review state:** distinguish source capture from evidence appraisal and from formal QA.
+
+SPF and UVA claims describe different aspects of protection. An SPF number alone must not be used to infer a particular UVA rating. A UVA mark or PA grade must not be inferred from SPF. Water resistance must not be inferred from a product being marketed as a sunscreen, and “waterproof” or “all-day protection” must not be treated as a validated test result unless the applicable source and test basis substantiate that exact claim.
+
+The presence or absence of a particular UV filter in an ingredient list does not, by itself, establish the finished product's SPF, UVA protection, stability, water resistance, or suitability for an individual. Do not derive a protection rating from filter names, ingredient order, product category, or a similar product's testing.
+
+#### 5.2.3 Market and terminology safeguards
+
+- Store the original market-specific claim and notation. Any normalized value must retain a reference to the original statement and the approved conversion rule.
+- Do not assume the same brand name means identical UV filters, formula, test result, label, or legal claim across regions.
+- Do not treat “mineral/physical” as synonymous with safer, gentler, more effective, or suitable for sensitive skin. These are separate claims requiring their own basis.
+- Do not treat “chemical/organic filter” as a safety judgement. Record filter identity and evaluate any specific safety claim separately.
+- “Fragrance-free”, “non-comedogenic”, “for sensitive skin”, “reef-safe”, and similar terms remain source claims unless a defined evidence review supports a narrower conclusion. Do not silently upgrade marketing terms into verified facts.
+- Do not invent universal age restrictions or pregnancy advice. Preserve label directions and escalate questions that require individualized clinical or regulatory interpretation.
+
+#### 5.2.4 Unknown, conflict, and acceptance behavior
+
+- Missing SPF, UVA notation, water-resistance information, full INCI, market, test method, or report details remain unknown; do not copy values from a similarly named product.
+- If package and manufacturer page disagree, retain both source-bound assertions and mark the relevant claim/fact conflicted under the existing review process.
+- If only selected filters are shown in a marketing summary, do not label them as a complete INCI list.
+- If a manufacturer reports a test result but the full report is unavailable, record the result as manufacturer-reported and note that independent appraisal of the protocol is incomplete.
+- A missing water-resistance statement must not be normalized to “not water-resistant” unless the applicable label/system and source support that conclusion.
+- No smart-fill or extraction workflow may auto-verify evidence, approve Product QA, activate the product, clear a safety concern, or make a product recommendation-eligible.
+
+#### 5.2.5 Template-specific acceptance criteria
+
+- [ ] Exact product identity, market and variant are recorded or explicitly unknown.
+- [ ] SPF is stored only as a source-bound claim for the exact product/version.
+- [ ] UVA notation is captured as originally stated; no unapproved conversion between PA, UVA logo, or other schemes occurs.
+- [ ] Broad-spectrum and water-resistance claims are separate from SPF and from each other.
+- [ ] Water-resistance duration and wording are retained when stated; missing data is not silently interpreted as a negative claim.
+- [ ] Full INCI and selected UV filters are distinguishable.
+- [ ] Ingredient-level evidence is not treated as proof of finished-product protection performance.
+- [ ] Test method, exact tested product/version, scope, limitations and source status are recorded or explicitly unknown.
+- [ ] Market-specific labels and formulas are not merged solely because the product names match.
+- [ ] Sensitive-skin, acne, pregnancy, child-use, non-comedogenicity, and similar claims are not automatically verified.
+- [ ] Candidate skin-need relationships have a specific evidence basis and never auto-link to P01–P61.
+- [ ] Existing DuplicateCheck, research-draft, Evidence QA, Product QA, and lifecycle controls remain authoritative.
+- [ ] This specification does not authorize schema/API/DB changes, smart-fill, product registration, QA approval, activation, or recommendation behavior.
+
+
 ### 5.3 `BRIGHTENING_SPOT`
 | Box ID | Label |
 |---|---|
