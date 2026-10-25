@@ -1710,18 +1710,17 @@ No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care
 | قالب حداقلی | تثبیت |
 | مرزهای P01، P02، P07 و P05 | **PO-confirmed**؛ این گروه‌بندی رابطهٔ P07 با P01 را تأیید نمی‌کند؛ هیچ‌کدام Accepted نهایی نیستند |
 | P06 | **ثبت ساختاری**؛ Identified؛ Clinical-anchor only |
-| پایلوت ساختاری S01 | **CLOSED** (ساختاری/ارجاعی — نه پزشکی)
+| پایلوت ساختاری S01 | **CLOSED** (ساختاری/ارجاعی — نه پزشکی) |
 | قفسهٔ S02 | **ثبت ساختاری شده**؛ P03/P04؛ نه Accepted |
 | G1 / G8 | خارج از دامنهٔ این Closure |
 | قفسهٔ S03 | **ثبت ساختاری شده**؛ P08–P16؛ نه Accepted |
 | قفسهٔ S04 | **ثبت ساختاری شده**؛ P17–P23؛ نه Accepted |
-| قفسهٔ S04 | **ثبت ساختاری شده**؛ P17–P23؛ نه Accepted |
-| S06 | **ثبت ساختاری شده**؛ P24–P42 در بسته‌های S05/S06؛ نه Accepted |
-| S07 | **ثبت ساختاری شده**؛ P43–P47؛ نه Accepted |
-| S08 | **ثبت ساختاری شده**؛ P48–P50 و P53–P56؛ خوشهٔ Safety/Referral؛ نه Accepted |
-| S09 | **ثبت ساختاری شده**؛ P51 و P52؛ P22 فقط ارجاع متقاطع به S04؛ نه Accepted/Need |
-| S10 | **در حال کار ساختاری**؛ P57–P61 طبق Map زنده؛ نه Accepted/Need/Product |
-| S10 | **ثبت ساختاری شده**؛ P57–P61 طبق Map زنده؛ نه Accepted/Need/Product |
+| قفسهٔ S05 | **ثبت ساختاری شده**؛ P24–P33؛ نه Accepted |
+| قفسهٔ S06 | **ثبت ساختاری شده**؛ P34–P42؛ نه Accepted |
+| قفسهٔ S07 | **ثبت ساختاری شده**؛ P43–P47؛ نه Accepted |
+| قفسهٔ S08 | **ثبت ساختاری شده**؛ P48–P50 و P53–P56؛ خوشهٔ Safety/Referral؛ نه Accepted |
+| قفسهٔ S09 | **ثبت ساختاری شده**؛ P51 و P52؛ P22 فقط ارجاع متقاطع به S04؛ نه Accepted/Need |
+| قفسهٔ S10 | **ثبت ساختاری شده**؛ P57–P61 طبق Map زنده؛ نه Accepted/Need/Product |
 | Need / Product | خارج از دامنه |
 
 ---
@@ -1732,3 +1731,314 @@ No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care
 - کامنت Issue جایگزین این سند نیست.
 - Accepted یا وضعیت عملیاتی قطعی فقط با تصمیم صریح PO.
 - انتقال پوشه یا تکثیر مرجع متعارف ممنوع.
+
+
+---
+
+## S04–S10 — پوشش یکپارچهٔ آمادگی مشاوره و اقدام بعدی (اسنادی؛ نه Accepted)
+
+**تاریخ ثبت:** 2026-10-25  **مبنای مرجع:** SKIN_PROBLEM_SPACE_MAP_V0.1.md و جدول‌های S04–S10 در همین سند.  **هدف:** پوشش صریح شناسه‌های یکتای P17–P61 در محدودهٔ S04–S10، بدون ایجاد فهرست موازی.  **ماهیت:** بررسی اسنادی و تعیین صف اقدام؛ نه اعتبارسنجی پزشکی، بازبینی بالینی مستقل، پذیرش Need یا مجوز توصیهٔ محصول.
+
+### حکم کلی
+
+- هیچ‌یک از شناسه‌های S04–S10 با این ثبت، Accepted یا consultation_ready نمی‌شود.
+- NOT ASSESSED یعنی ارزیابی اختصاصی آمادگی مشاوره هنوز مستند نشده؛ به معنی رد پزشکی یا نبود اهمیت نیست.
+- P22 فقط یک‌بار به‌عنوان شناسه یکتا حساب می‌شود؛ در S09 صرفاً ارجاع به رکورد S04 است.
+- P51 از وضعیت قفل‌شدهٔ Map پیروی می‌کند و خارج از Need-level باقی می‌ماند.
+- نوع واحد، رابطه و مرزهای جدول‌های قبلی حفظ شده‌اند؛ هیچ تعریف بالینی، آستانه ایمنی یا زبان مشتری جدیدی ساخته نشده است.
+
+### جدول پوشش S04–S10
+
+| قفسه | ID | نام کاری طبق رکورد موجود | مرز عملیاتی ثبت‌شده | آمادگی مشاوره در این بررسی | اقدام بعدی مشخص |
+|---|---|---|---|---|---|
+| S04 | P17 | Hyperpigmentation / dark spots | Problem/presentation; Map parent of P18/P19 only | NOT ASSESSED؛ نه آماده | تعریف و مرز خانواده، شواهد، زبان مشتری و ایمنی |
+| S04 | P18 | Melasma | Clinical Anchor; linked to P17 per Map | NOT ASSESSED؛ Clinical-anchor only | منبع معتبر، مرز بالینی و حدود ارجاع |
+| S04 | P19 | Post-inflammatory hyperpigmentation | Sequela/pigmentation presentation; related to P17, not merged | NOT ASSESSED؛ نه آماده | مرز presentation/sequela و شواهد |
+| S04 | P20 | Hypopigmentation | Problem/presentation; evidence boundary retained | NOT ASSESSED؛ نه آماده | مرز و شواهد مستقل |
+| S04 | P21 | Vitiligo | Clinical/Referral-sensitive; Clinical-anchor only | NOT ASSESSED؛ Clinical-anchor only | حدود نقش و ارجاع معتبر |
+| S04 | P22 | Sun-related pigmentation | Context/presentation; cross-reference S04↔S09; S04 record owns it | NOT ASSESSED؛ نه آماده | مرز Context با Problem؛ بدون رکورد تکراری |
+| S04 | P23 | Poikiloderma | Parked / Evidence Boundary; Deferred | NOT ASSESSED؛ Deferred | معیار و شاهد معتبر برای بازگشایی |
+| S05 | P24 | Persistent redness | Problem/presentation; Map parent of P25/P26 only | NOT ASSESSED؛ نه آماده | تعریف/مرز، شواهد، زبان مشتری و ایمنی |
+| S05 | P25 | Flushing | Symptom/manifestation; Related/Signal to P24 | NOT ASSESSED؛ نه آماده | معنی سیگنال؛ هر آستانه فقط با منبع معتبر |
+| S05 | P26 | Rosacea | Clinical Anchor | NOT ASSESSED؛ Clinical-anchor only | حدود بالینی و ارجاع معتبر |
+| S05 | P27 | Eczema/Dermatitis | Clinical Anchor; Map parent of P28/P29 only | NOT ASSESSED؛ Clinical-anchor only | مرز خانواده، شواهد و زبان مشتری |
+| S05 | P28 | Atopic dermatitis | Clinical Anchor; related to P27 | NOT ASSESSED؛ Clinical-anchor only | مرز با P27 و منبع معتبر؛ عدم ادغام |
+| S05 | P29 | Allergic contact dermatitis | Clinical Anchor; related to P27 | NOT ASSESSED؛ Clinical-anchor only | مرز با P27 و منبع معتبر؛ عدم ادغام |
+| S05 | P30 | Seborrhoeic dermatitis | Clinical Anchor; cross-shelf S05↔S02 | NOT ASSESSED؛ Clinical-anchor only | رابطه/مالکیت cross-shelf؛ S02 بازنویسی نشود |
+| S05 | P31 | Psoriasis | Clinical/Referral-sensitive; Clinical-anchor only | NOT ASSESSED؛ Clinical-anchor only | مرز ارجاع و شواهد معتبر |
+| S05 | P32 | Hives/Urticaria | Safety/Referral-sensitive; Safety-referral only | NOT ASSESSED؛ Safety-referral only | پروتکل/آستانه ایمنی معتبر؛ بدون حدس |
+| S05 | P33 | Unspecified rash | Unresolved presenting problem/manifestation | NOT ASSESSED؛ نه آماده | مرز ثبت و وضعیت unresolved؛ بدون استنتاج تشخیص |
+| S06 | P34 | Dermatophytosis/fungal infection | Clinical/Safety-sensitive; Safety-referral only | NOT ASSESSED؛ Safety-referral only | تعریف، شواهد و حدود ارجاع |
+| S06 | P35 | Tinea/ringworm | Clinical subtype/manifestation; child/related to P34 per Map | NOT ASSESSED؛ Clinical-anchor only | مرز subtype/manifestation؛ بدون ادغام خودکار |
+| S06 | P36 | Bacterial skin infection | Clinical/Safety-sensitive; Safety-referral only | NOT ASSESSED؛ Safety-referral only | شواهد و مرز ایمنی/ارجاع |
+| S06 | P37 | Viral skin infection | Clinical/Safety-sensitive; Safety-referral only | NOT ASSESSED؛ Safety-referral only | شواهد و مرز ایمنی/ارجاع |
+| S06 | P38 | Cutaneous herpes simplex | Clinical/Safety-sensitive; related to P37 | NOT ASSESSED؛ Safety-referral only | مرز با P37 و مسیر ارجاع معتبر |
+| S06 | P39 | Warts | Clinical Anchor; cross-reference S06↔S08 | NOT ASSESSED؛ Clinical-anchor only | رابطه/مالکیت S08 فقط cross-reference؛ شواهد/حدود نقش |
+| S06 | P40 | Impetigo | Clinical/Safety-sensitive; related to P36 | NOT ASSESSED؛ Safety-referral only | مرز با P36 و حدود ارجاع |
+| S06 | P41 | Scabies | Clinical/Safety-sensitive; Safety-referral only | NOT ASSESSED؛ Safety-referral only | تعریف، شواهد و مرز ایمنی/ارجاع |
+| S06 | P42 | Shingles | Clinical/Referral-sensitive; Clinical-anchor only | NOT ASSESSED؛ Clinical-anchor only | حدود ارجاع و ارتباط با دامنه HBI |
+| S07 | P43 | Uneven skin texture | Problem/presentation; boundary open | NOT ASSESSED؛ نه آماده | مرز باز، شواهد و ارتباط عملیاتی |
+| S07 | P44 | Hyperkeratosis | Clinical/structural presentation; boundary open | NOT ASSESSED؛ Clinical-anchor only | مرز بالینی/ساختاری و شواهد |
+| S07 | P45 | Keratosis pilaris | Clinical Anchor | NOT ASSESSED؛ Clinical-anchor only | تعریف/مرز و شواهد مستقل |
+| S07 | P46 | Seborrhoeic keratosis | Clinical Anchor; cross-reference S07↔S08 | NOT ASSESSED؛ Clinical-anchor only | حفظ cross-reference؛ مرز/شواهد؛ بدون استنتاج تشخیص |
+| S07 | P47 | Skin tags | Clinical Anchor; cross-reference S07↔S08 | NOT ASSESSED؛ Clinical-anchor only | حفظ cross-reference؛ مرز/شواهد؛ عدم ادغام خاموش |
+| S08 | P48 | Moles/nevi | Safety-aware Clinical Anchor | NOT ASSESSED؛ Clinical-anchor only | مرز نقش و شواهد؛ بدون مسیر معمول محصول |
+| S08 | P49 | Changing mole | Safety/Referral Signal; related to P48 | NOT ASSESSED؛ Safety-referral only | حد و مسیر ارجاع فقط با پروتکل معتبر |
+| S08 | P50 | New/growing skin lesion | Safety/Referral Signal | NOT ASSESSED؛ Safety-referral only | تعریف سیگنال و مسیر ارجاع معتبر |
+| S08 | P53 | Suspicious skin-cancer lesion | Safety/Referral Signal | NOT ASSESSED؛ Safety-referral only | حفظ مرز ارجاع؛ بدون تشخیص/محصول |
+| S08 | P54 | Suspicious melanoma lesion | Safety/Referral Signal | NOT ASSESSED؛ Safety-referral only | حفظ مرز ارجاع؛ بدون تشخیص/محصول |
+| S08 | P55 | Bleeding/non-healing lesion | Safety/Referral Signal | NOT ASSESSED؛ Safety-referral only | تعریف و مسیر ارجاع معتبر؛ بدون حدس آستانه |
+| S08 | P56 | Rapid change in lesion size/shape/color | Safety/Referral Signal | NOT ASSESSED؛ Safety-referral only | تعریف سیگنال و مسیر ارجاع معتبر |
+| S09 | P51 | Chronic UV damage | Context/Discovery Problem; locked, NOT NEED-LEVEL | NOT ELIGIBLE for V1 Need؛ NOT ACCEPTED | قفل حفظ شود؛ NOT ELIGIBLE for V1 Need؛ no automatic safety flag |
+| S09 | P52 | Actinic keratosis | Clinical/Safety-sensitive lesion; cross-shelf S09↔S08 | NOT ASSESSED؛ Safety-referral only | مرز بالینی/ارجاع و رابطه متقاطع با منبع معتبر |
+| S10 | P57 | Autoimmune/autoinflammatory skin disease | Broad Clinical Domain/Condition Family; Clinical Anchor | NOT ASSESSED؛ Clinical-anchor only | مرز خانواده، شواهد و ارتباط عملیاتی |
+| S10 | P58 | Cutaneous lupus | Clinical/Referral-sensitive | NOT ASSESSED؛ Clinical-anchor only | مرز بالینی و مسیر ارجاع معتبر |
+| S10 | P59 | Adult-onset dermatomyositis with skin findings | Clinical/Referral-sensitive | NOT ASSESSED؛ Clinical-anchor only | مرز بالینی و مسیر ارجاع معتبر |
+| S10 | P60 | Acanthosis nigricans/systemic-associated skin changes | Clinical/systemic-associated presentation; Clinical Anchor | NOT ASSESSED؛ Clinical-anchor only | عدم تبدیل ارتباط سیستمی به تشخیص/Need؛ مرز و شواهد |
+| S10 | P61 | Photosensitivity | Symptom/clinical presentation; cross-shelf S09↔S10 | NOT ASSESSED؛ Clinical-anchor only | معنی، مرز و رابطه Context با شواهد؛ بدون ارجاع خودکار |
+
+
+### صف اقدام به ترتیب قفسه‌ها
+
+1. **S04:** P17/P19/P20 برای تعریف و مرز؛ سپس موارد Clinical Anchor و P23 فقط با معیار مستند بازگشایی. P22 در نقش Context و در رکورد S04 بماند.
+2. **S05:** ابتدا مرز presentation/signal در P24/P25/P33؛ P32 فقط با پروتکل ایمنی معتبر؛ سایر موارد Clinical Anchor تا روشن‌شدن شواهد/ارجاع خارج از توصیهٔ معمول بمانند.
+3. **S06:** روابط P34↔P35، P36↔P40 و P37↔P38 بدون ادغام خودکار بررسی شوند؛ همه در محدودهٔ Clinical/Safety باقی بمانند.
+4. **S07:** ابتدا مرزهای باز P43/P44؛ سپس P45 و cross-referenceهای P46/P47.
+5. **S08:** بررسی فقط برای کفایت تعریف سیگنال و منبع ارجاع؛ این قفسه به مسیر Ordinary Care تبدیل نمی‌شود.
+6. **S09:** P51 قفل و خارج از Need-level؛ P52 در مسیر Clinical/Safety؛ P22 فقط cross-reference به رکورد S04.
+7. **S10:** هر پنج مورد در مسیر Clinical Anchor/Referral-sensitive بمانند تا منبع معتبر، حدود نقش و مرز ارجاع مستند شود.
+
+### معیار خروج از صف
+
+برای طرح هر شناسه جهت تصمیم بعدی، تعریف و مرز قابل ردیابی، نوع واحد و رابطه روشن، شواهد معتبر، زبان مشتریِ مستند یا UNKNOWN صریح، ملاحظات ایمنی/ارجاع بازبینی‌شده و تصمیم بازبین انسانی لازم است. این معیار به‌تنهایی پذیرش ایجاد نمی‌کند؛ Accepted، Need و مجوز توصیهٔ محصول تصمیم‌ها و شواهد جداگانه می‌خواهند.
+
+**نتیجه:** پوشش اسنادی و صف اقدام S04–S10 در این ماتریس ثبت شد؛ آمادگی مشاوره یا پذیرش پزشکی برای هیچ شناسه‌ای اعلام نشده است. G8 همچنان BLOCKED / NOT VERIFIED است.
+
+
+### دفتر شروعِ ردیابی منابع برای بازبینی انسانی S04–S10
+
+این‌ها **منابع نامزد برای شروع بررسی** هستند، نه شواهد پذیرفته‌شدهٔ HBI، نه جایگزین بازبینی بالینی، و نه پشتیبانی از ادعای اثربخشی هیچ محصولی. صفحهٔ مرجع عمومی ممکن است چندین وضعیت متفاوت را پوشش دهد؛ بنابراین هر ادعای خاص باید به بخش دقیق منبع، نوع ادعا، محدودیت، تاریخ دسترسی و شناسهٔ Problem وصل شود. اگر منبع برای یک شناسه کافی نیست، وضعیت آن UNKNOWN می‌ماند.
+
+| قفسه/شناسه‌های مرتبط | منبع نامزد | استفادهٔ محدود در بازبینی | آنچه این منبع به‌تنهایی ثابت نمی‌کند |
+|---|---|---|---|
+| S04: P17, P19, P20, P22, P23 | [DermNet — Pigmentation disorders](https://dermnetnz.org/topics/pigmentation-disorders) | جهت‌یابی افتراقی برای تغییرات رنگدانه؛ پیدا کردن مرزهای احتمالی میان presentationها | تعریف عملیاتی پذیرفته‌شدهٔ HBI، Need، تشخیص فرد یا اثربخشی محصول |
+| S04: P17, P20 | [DermNet — Skin pigmentation problems](https://dermnetnz.org/topics/skin-pigmentation-problems) | منبع مقدماتی برای تمایز کلی hyperpigmentation، hypopigmentation و depigmentation؛ برای بررسی تعریف/مرز P17 و P20 | تعریف عملیاتی HBI، علت تغییر رنگ در فرد، تشخیص، پذیرش Problem یا اثربخشی محصول |
+| S04: P19 | [DermNet — Postinflammatory hyperpigmentation](https://dermnetnz.org/topics/postinflammatory-hyperpigmentation) | منبع آغازین تخصصی برای مفهوم PIH و تمایز آن از تغییرات رنگدانهٔ دیگر | پذیرش P19، توصیهٔ محصول، یا تعمیم اثر یک ماده به محصول نهایی |
+| S04: P18 | [American Academy of Dermatology — Melasma treatment](https://www.aad.org/public/diseases/a-z/melasma-treatment) | اطلاعات عمومی متخصصان دربارهٔ melasma و مدیریت آن؛ برای بازبینی مرز ادعاها | مجوز خودکار برای توصیهٔ OTC یا ادعای اثربخشی هر محصول دارای مادهٔ مشابه |
+| S04: P21 | [DermNet — Vitiligo](https://dermnetnz.org/topics/vitiligo) | منبع تخصصی آغازین برای مرز و ویژگی‌های کلی vitiligo | تشخیص، پذیرش Need یا مجوز مراقبت معمول |
+| S05: P24–P33 | [American Academy of Dermatology — Diseases and conditions](https://www.aad.org/public/diseases) | درگاه متخصص‌محور برای یافتن صفحات اختصاصی rosacea، eczema، psoriasis و سایر وضعیت‌ها | شواهد دقیق برای تمام P24–P33؛ صفحهٔ اختصاصی هر ادعا همچنان لازم است |
+| S05: P24, P25, P26 | [DermNet — Rosacea](https://dermnetnz.org/topics/rosacea) | مرجع آغازین برای rosacea و هم‌پوشانی احتمالی با flushing/قرمزی | این‌که هر قرمزی یا flushing، rosacea است یا باید به محصول خاصی پاسخ دهد |
+| S06: P34–P42 | [DermNet — Cutaneous infections](https://dermnetnz.org/topics/skin-infections) | نمای کلی تخصصی از عفونت‌های باکتریایی، قارچی، ویروسی و برخی آلودگی‌های انگلی | پروتکل ارجاع HBI، تشخیص از روی خوداظهاری یا مناسب‌بودن محصولات آرایشی |
+| S06: P40 | [DermNet — Impetigo](https://dermnetnz.org/topics/impetigo) | صفحهٔ تخصصی برای شناخت دامنهٔ موضوع impetigo و یافتن منابع بالینی مرتبط | تصمیم درمانی برای فرد یا مجوز محصول غیرپزشکی |
+| S06: P41 | [DermNet — Scabies](https://dermnetnz.org/topics/scabies) | صفحهٔ تخصصی برای شناخت دامنهٔ scabies و تفاوت‌های بالینی | تشخیص از روی متن مشتری یا جایگزینی ارزیابی حرفه‌ای |
+| S08: P48–P50, P53–P56 | [NHS — Moles](https://www.nhs.uk/conditions/moles/); [NHS — Melanoma symptoms](https://www.nhs.uk/conditions/melanoma-skin-cancer/symptoms/); [NHS — Non-melanoma skin cancer symptoms](https://www.nhs.uk/conditions/non-melanoma-skin-cancer/symptoms/) | منابع عمومی سلامت برای بازبینی زبان ایمنی و این‌که تغییرات ضایعه نیازمند ارزیابی پزشکی‌اند | الگوریتم تشخیصی، تشخیص خودکار AI یا تعیین آستانهٔ HBI بدون پروتکل مصوب |
+| S09: P51, P52؛ مرزهای مرتبط با S08 | [NHS — Actinic keratoses](https://www.nhs.uk/conditions/actinic-keratoses); [NHS — Sunscreen and sun safety](https://www.nhs.uk/live-well/seasonal-health/sunscreen-and-sun-safety/) | اطلاعات عمومی دربارهٔ ضایعات مرتبط با UV و حفاظت در برابر آفتاب | تغییر وضعیت قفل‌شدهٔ P51 یا تبدیل آن به Need/سیگنال خودکار ارجاع |
+| S10: P58, P61 | [DermNet — Skin signs of rheumatic disease](https://dermnetnz.org/topics/skin-signs-of-rheumatic-disease); [DermNet — Photosensitivity](https://dermnetnz.org/topics/photosensitivity) | منابع تخصصی آغازین برای رابطهٔ برخی تظاهرات پوستی با lupus و photosensitivity | تشخیص بیماری سیستمیک، رابطهٔ علّی در فرد یا آستانهٔ ارجاع خودکار HBI |
+| S10: P60 | [DermNet — Acanthosis nigricans](https://dermnetnz.org/topics/acanthosis-nigricans) | منبع تخصصی آغازین برای ماهیت systemic-associated این presentation و مرزهای نیازمند احتیاط | تشخیص بیماری زمینه‌ای یا تصمیم درمانی/محصول برای فرد |
+| S07: P46, P47؛ فقط برای cross-reference | [DermNet — Seborrhoeic keratosis](https://dermnetnz.org/topics/seborrhoeic-keratosis); [DermNet — Skin tags](https://dermnetnz.org/topics/skin-tag) | بررسی مقدماتی دو موضوع مرتبط با ضایعات/رشدهای سطحی و تفاوت احتمالی با موارد مشابه | این‌که تشخیص ظاهری بدون ارزیابی کافی است یا هر ضایعه‌ای برای حذف زیبایی مناسب است |
+
+#### ثبت نتیجهٔ منبع برای هر ادعا — قالب الزامی
+
+برای هر منبعی که واقعاً در بازبینی یک Problem استفاده می‌شود، رکورد ادعا باید حداقل شامل این موارد باشد:
+
+- Problem ID و نام دقیق ادعا؛
+- URL پایدار و عنوان/نهاد منتشرکننده؛ تاریخ دسترسی و تاریخ بازبینی/انتشار اگر موجود است؛
+- نوع ادعا: تعریف/مرز، نشانهٔ ایمنی، ارجاع، اطلاعات عمومی، یا ادعای اثربخشی؛
+- عبارت یا بخش دقیق منبع که ادعا را پشتیبانی می‌کند؛
+- محدودیت: چه چیزی را پشتیبانی نمی‌کند؛
+- وضعیت: candidate / reviewed / conflicting / insufficient / accepted by authorized reviewer؛
+- نام/نقش بازبین و تاریخ تصمیم.
+
+**گیت مهم:** منابع بالا به‌عنوان نقطهٔ شروع تحقیق ثبت شده‌اند، نه این‌که تمام ۴۵ شناسه با آن‌ها اعتبارسنجی شده باشند. هنوز هیچ شناسه‌ای به‌واسطهٔ افزودن این فهرست، Accepted یا consultation-ready نمی‌شود. منابع مربوط به یک بیماری نیز اثربخشی محصول نهایی را ثابت نمی‌کنند.
+
+ 
+#### تکمیل پوشش منابع نامزد برای مواردی که صفحهٔ اختصاصی‌شان پیدا شد
+
+| شناسه | منبع نامزد | محدودیت کاربرد |
+|---|---|---|
+| P28 | [DermNet — Atopic dermatitis](https://dermnetnz.org/topics/atopic-dermatitis) | برای بررسی مرز مفهومی؛ نه پذیرش P28 یا توصیهٔ محصول |
+| P29 | [DermNet — Allergic contact dermatitis](https://dermnetnz.org/topics/allergic-contact-dermatitis) | برای بررسی مفهوم و روش‌های ارزیابی تخصصی؛ نه تشخیص خوداظهاری |
+| P27–P29, P33 | [DermNet — Guidelines for the diagnosis and assessment of eczema](https://dermnetnz.org/topics/guidelines-for-the-diagnosis-and-assessment-of-eczema) | منبع افتراقی/مرزبندی؛ به‌تنهایی taxonomy یا وضعیت HBI را تعیین نمی‌کند |
+| P34–P42 | [DermNet — Skin infections](https://dermnetnz.org/topics/skin-infections); [DermNet — Bacterial skin infections](https://dermnetnz.org/topics/bacterial-skin-infections) | منابع آغازین دسته‌ای؛ هر وضعیت خاص باید منبع اختصاصی و مرز ایمنی خود را داشته باشد |
+| P44 | [NCI — Definition of hyperkeratosis](https://www.cancer.gov/publications/dictionaries/cancer-terms/def/hyperkeratosis); [NCBI Bookshelf — Hyperkeratosis](https://www.ncbi.nlm.nih.gov/books/NBK562206/) | فقط تعریف عمومیِ ضخیم‌شدن لایهٔ شاخی و علل متنوع را پشتیبانی می‌کند؛ مرز بالینی/ساختاری HBI، customer language، operational relevance یا suitability را تعیین نمی‌کند. وضعیت P44 همچنان UNKNOWN / INSUFFICIENT و Clinical-anchor only است |
+| P45 | [DermNet — Keratosis pilaris](https://dermnetnz.org/topics/keratosis-pilaris) | فقط منبع نامزد برای بررسی P45؛ پذیرش یا آمادگی مشاوره را ثابت نمی‌کند. برای P43 منبع اختصاصیِ کافی در این دفتر ثبت نشده و خلأ آن باز می‌ماند |
+| P46 | [DermNet — Seborrhoeic keratosis](https://dermnetnz.org/topics/seborrhoeic-keratosis) | مرجع عمومی ضایعه؛ افتراق از بدخیمی یا تصمیم دربارهٔ ضایعهٔ فردی نیازمند ارزیابی حرفه‌ای است |
+| P47 | [DermNet — Skin tags](https://dermnetnz.org/topics/skin-tag) | مرجع عمومی؛ شبیه‌بودن ظاهری ضایعات مجوز تشخیص یا اقدام نیست |
+| P58, P61 | [DermNet — Skin signs of rheumatic disease](https://dermnetnz.org/topics/skin-signs-of-rheumatic-disease); [DermNet — Photosensitivity](https://dermnetnz.org/topics/photosensitivity) | برای زمینهٔ بالینی و رابطه‌های احتمالی؛ نه تشخیص بیماری سیستمیک یا مسیر ارجاع خودکار |
+| P59 | [DermNet — Adult-onset dermatomyositis](https://dermnetnz.org/topics/adult-onset-dermatomyositis) | منبع تخصصی آغازین برای ماهیت بالینی و سیستمیک؛ P59 همچنان Clinical/Referral-sensitive باقی می‌ماند |
+| P60 | [DermNet — Acanthosis nigricans](https://dermnetnz.org/topics/acanthosis-nigricans) | مرجع تخصصی برای بررسی ارتباط‌های زمینه‌ای؛ نه تشخیص بیماری زمینه‌ای در مشتری |
+
+**نتیجهٔ تکمیلی:** اکنون برای P44 دو منبع تعریف‌محور قابل ردیابی ثبت شده است؛ آن‌ها صرفاً معنای عمومی hyperkeratosis و گستردگی علل آن را پشتیبانی می‌کنند و خلأ مرز بالینی/ساختاری HBI را نمی‌بندند. برای P43 هنوز منبع اختصاصیِ کافی ثبت نشده است. بنابراین وضعیت evidence برای هر دو شناسه UNKNOWN / INSUFFICIENT باقی می‌ماند. این منبع‌یابی مقدماتی است؛ هیچ صفحهٔ آموزشی به‌تنهایی جایگزین مرور ادعای دقیق و تصمیم بازبین مجاز نمی‌شود.
+
+
+#### تکمیل دومِ نقشهٔ منابع نامزد — صفحات اختصاصی بیشتر
+
+| شناسه | منبع نامزد | محدودیت کاربرد |
+|---|---|---|
+| P23 | [DermNet — Poikiloderma of Civatte](https://dermnetnz.org/topics/poikiloderma-of-civatte) | فقط برای بررسی یک وضعیت مشخص با نام مشابه؛ P23 در Map همچنان Parked/Deferred است و این منبع به‌تنهایی مجوز بازگشایی نمی‌دهد |
+| P25 | [DermNet — Facial rashes](https://dermnetnz.org/topics/facial-rashes) | منبع مقدماتی برای مفهوم flushing و افتراق‌های احتمالی؛ نه معیار عملیاتی HBI |
+| P30 | [DermNet — Seborrhoeic dermatitis](https://dermnetnz.org/topics/seborrhoeic-dermatitis) | منبع موضوعی؛ رابطهٔ ساختاری S05↔S02 همچنان فقط طبق Map حفظ می‌شود |
+| P31 | [DermNet — Guidelines for the treatment of psoriasis](https://dermnetnz.org/topics/guidelines-for-the-treatment-of-psoriasis) | منبع بالینی عمومی؛ نه مجوز توصیهٔ محصول یا پذیرش Need |
+| P32 | [DermNet — Urticaria overview](https://dermnetnz.org/topics/urticaria-an-overview) | منبع موضوعی؛ پروتکل ایمنی/ارجاع HBI باید جداگانه و مجاز تعیین شود |
+| P35 | [DermNet — Tinea corporis](https://dermnetnz.org/topics/tinea-corporis) | فقط صفحهٔ اختصاصی یکی از تظاهرات tinea؛ تعمیم به تمام موارد P34/P35 بدون بررسی ممنوع |
+| P36, P40 | [DermNet — Bacterial skin infections](https://dermnetnz.org/topics/bacterial-skin-infections); [DermNet — Impetigo](https://dermnetnz.org/topics/impetigo) | اطلاعات عمومی؛ تشخیص فردی یا تصمیم درمانی از آن استنتاج نمی‌شود |
+| P37–P39 | [DermNet — Viral skin infections](https://dermnetnz.org/topics/viral-skin-infections); [DermNet — Viral warts](https://dermnetnz.org/topics/viral-wart) | صفحات دسته‌ای و اختصاصی warts؛ هر ادعای مربوط به herpes simplex باید منبع اختصاصی جدا داشته باشد |
+| P42 | [DermNet — Herpes zoster (shingles)](https://dermnetnz.org/topics/herpes-zoster) | منبع اختصاصی برای موضوع shingles؛ P42 همچنان در مسیر Clinical/Referral-sensitive است |
+
+**خلأهای صریح باقی‌مانده:** P17/P20 هنوز به تعریف عملیاتی HBI و مرزهای مصوب نیاز دارند؛ P24 و P33 به معیارهای تفکیک/ثبت نیاز دارند؛ P34/P37/P38/P41 به صفحات اختصاصی و مرزهای ارجاع مناسب خود نیاز دارند؛ P43/P44 همچنان بدون منبع/مرز عملیاتی کافی‌اند؛ P49/P50/P53–P56 نیازمند تصمیم انسانی و پروتکل ارجاع مجاز هستند؛ P57 یک خانوادهٔ بالینی گسترده است و نباید به‌عنوان یک تشخیص واحد استفاده شود. این‌ها در وضعیت UNKNOWN / INSUFFICIENT باقی می‌مانند.
+
+
+---
+
+## S05–S06 — ثبت منابع نامزد برای بازبینی انسانی (P32، P34–P42)
+**تاریخ:** 2026-10-25. **وضعیت:** منابع نامزد؛ نه evidence پذیرفته‌شده، نه پذیرش پزشکی، نه مجوز توصیهٔ محصول.
+
+| ID | منابع نامزد | نتیجهٔ محدود بازبینی و شکاف |
+|---|---|---|
+| P32 — Hives/Urticaria | [NHS](https://www.nhs.uk/conditions/hives/); [AAD](https://www.aad.org/public/diseases/a-z/hives-overview) | برای شرح عمومی و متن ایمنی نامزدند؛ تشخیص یا پروتکل HBI هنوز تأیید نشده است. |
+| P34 — Dermatophytosis/fungal infection | [DermNet: Skin infections](https://dermnetnz.org/topics/skin-infections); [WHO: Ringworm](https://www.who.int/news-room/fact-sheets/detail/ringworm-%28tinea%29) | DermNet دسته‌ای است و WHO بیشتر به tinea/ringworm مربوط است؛ پوشش جامع P34 ثابت نشده است. |
+| P35 — Tinea/ringworm | [NHS](https://www.nhs.uk/conditions/ringworm/); [WHO](https://www.who.int/news-room/fact-sheets/detail/ringworm-%28tinea%29) | منابع موضوعی؛ ظاهر به‌تنهایی تشخیص فردی را ثابت نمی‌کند. رابطهٔ P35↔P34 طبق Map حفظ شود. |
+| P36 — Bacterial skin infection | [DermNet](https://dermnetnz.org/topics/bacterial-skin-infections); [NHS: Cellulitis](https://www.nhs.uk/conditions/cellulitis/) | cellulitis فقط نمونه‌ای اختصاصی است و نمایندهٔ کل خانوادهٔ P36 نیست. |
+| P37 — Viral skin infection | [DermNet](https://dermnetnz.org/topics/viral-skin-infections) | خانواده‌ای از وضعیت‌های مختلف است، نه تشخیص واحد؛ تعریف/مرز HBI همچنان نیازمند بازبینی است. |
+| P38 — Cutaneous herpes simplex | [NHS: Cold sores](https://www.nhs.uk/conditions/cold-sores/); [DermNet](https://dermnetnz.org/topics/viral-skin-infections) | صفحهٔ cold sores تمام تظاهرات HSV را پوشش نمی‌دهد. رابطهٔ P38↔P37 طبق Map حفظ شود. |
+| P39 — Warts | [DermNet: Viral wart](https://dermnetnz.org/topics/viral-wart) | منبع نامزد برای زگیل ویروسی؛ تشخیص خودکار یا رد ضایعات مشابه را ثابت نمی‌کند. Cross-reference با S08 حفظ شود. |
+| P40 — Impetigo | [NHS](https://www.nhs.uk/conditions/impetigo/); [NICE NG153](https://www.nice.org.uk/guidance/ng153/chapter/Recommendations) | منابع موضوعی؛ ضایعات می‌توانند شبیه وضعیت‌های دیگر باشند. رابطهٔ P40↔P36 حفظ شود. |
+| P41 — Scabies | [NHS](https://www.nhs.uk/conditions/Scabies/) | منبع عمومی برای علائم و انتقال؛ تشخیص از روی متن/تصویر به HBI نسبت داده نمی‌شود. |
+| P42 — Shingles | [NHS](https://www.nhs.uk/conditions/shingles/); [WHO](https://www.who.int/news-room/fact-sheets/detail/shingles-%28herpes-zoster%29) | منبع نامزد برای شناخت موضوع و علائم مهم؛ P42 همچنان Clinical/Referral-sensitive باقی بماند. |
+
+**قفل تصمیم:** P32 و P34–P42 به Accepted، Need، Ordinary-care candidate، consultation-ready یا مجوز توصیهٔ محصول ارتقا نمی‌یابند. هیچ رابطه‌ای در Map تغییر نمی‌کند؛ P35↔P34، P36↔P40 و P37↔P38 بدون ادغام خودکار حفظ می‌شوند. همهٔ منابع candidate هستند تا بازبین مجاز ادعای دقیق، محدودیت و تصمیم را ثبت کند. G8 همچنان **BLOCKED / NOT VERIFIED** است.
+
+
+## S06 — بازبینی هدفمندِ کفایت منابع برای P34، P37، P38 و P41
+**تاریخ:** 2026-10-25. **وضعیت:** بررسی محدودِ منابع نامزد؛ هیچ منبعی با این ثبت به evidence پذیرفته‌شده تبدیل نمی‌شود.
+
+| ID | منبع نامزد و آنچه پشتیبانی می‌کند | محدودیت و حکم |
+|---|---|---|
+| P34 — Dermatophytosis/fungal infection | [CDC — Clinical Overview of Ringworm](https://www.cdc.gov/ringworm/hcp/clinical-overview/) و [WHO — Ringworm (tinea)](https://www.who.int/news-room/fact-sheets/detail/ringworm-%28tinea%29) اطلاعاتی دربارهٔ dermatophyte/tinea، محل‌های درگیر و این‌که بعضی ضایعات با وضعیت‌های دیگر اشتباه می‌شوند ارائه می‌کنند. | این صفحات عمدتاً ringworm/tinea و برخی عفونت‌های ناخن را پوشش می‌دهند؛ برای عنوان گستردهٔ P34 تعریف جامع و مرز عملیاتی HBI کافی نیستند. P34 همچنان Clinical/Safety-sensitive و Safety-referral only؛ تعریف/پروتکل HBI UNKNOWN / INSUFFICIENT باقی می‌ماند. |
+| P37 — Viral skin infection | [DermNet — Viral skin infections](https://dermnetnz.org/topics/viral-skin-infections) طیف متنوعی از عفونت‌های ویروسی پوست و مخاط را فهرست می‌کند، از جمله HSV، زونا، molluscum و warts. | این منبع دامنهٔ گستردهٔ خانواده را نشان می‌دهد، نه یک تشخیص واحد یا مسیر مشترک عملیاتی/ارجاع. P37 همچنان Clinical/Safety-sensitive و Safety-referral only؛ هیچ زیرنوعی با این خانواده ادغام نمی‌شود. |
+| P38 — Cutaneous herpes simplex | [DermNet — Herpes simplex](https://dermnetnz.org/topics/herpes-simplex) منبع اختصاصی‌تری است و توضیح می‌دهد که HSV می‌تواند در محل‌های مخاطی/پوستی گوناگون ظاهر شود و در صورت تردید بالینی ممکن است تأیید آزمایشگاهی لازم باشد. [NHS — Cold sores](https://www.nhs.uk/conditions/cold-sores/) فقط یکی از تظاهرات را پوشش می‌دهد. | صفحهٔ DermNet منبع نامزد برای شناخت دامنه است؛ تشخیص فرد از روی عکس/متن، شدت یا مسیر HBI را تعیین نمی‌کند. P38 با P37 مرتبط می‌ماند، بدون ادغام خودکار؛ Clinical/Safety-sensitive و Safety-referral only حفظ شود. |
+| P41 — Scabies | [CDC — About Scabies](https://www.cdc.gov/scabies/about/) علائم و انتقال را شرح می‌دهد و ارزیابی حرفه‌ای را برای تشخیص/درمان توصیه می‌کند؛ [CDC — Clinical Care of Scabies](https://www.cdc.gov/scabies/hcp/clinical-care/index.html) نشان می‌دهد درمان به ارزیابی و داروهای اختصاصی نیاز دارد و محصولات OTC تأییدشده برای درمان scabies نیستند. [WHO — Scabies](https://www.who.int/news-room/fact-sheets/detail/scabies) منبع عمومی تکمیلی است. | منابع برای تعیین مرز حرفه‌ای و ردِ برداشت «مراقبت آرایشی/محصول معمول» مفیدند، اما پروتکل اجرایی HBI را به‌تنهایی تعریف نمی‌کنند. P41 همچنان Clinical/Safety-sensitive و Safety-referral only؛ بدون تشخیص یا توصیهٔ محصول از روی متن/تصویر. |
+
+### حکم این بازبینی
+- این منابع **candidate source** باقی می‌مانند؛ هیچ‌یک در این ثبت accepted evidence نیست.
+- خلأ P34 (دامنهٔ گسترده‌تر از tinea)، P37 (خانوادهٔ ناهمگون) و پروتکل HBI برای P38/P41 حل‌شده تلقی نمی‌شود.
+- روابط Map، از جمله P35↔P34 و P38↔P37، تغییر نمی‌کنند؛ هیچ وضعیت Accepted، Need، consultation-ready یا مجوز توصیهٔ محصول ایجاد نمی‌شود.
+- این تغییر صرفاً مستندسازی است؛ G8 همچنان **BLOCKED / NOT VERIFIED** می‌ماند.
+
+
+---
+
+## S07 — بازبینی هدفمندِ کفایت منابع برای P43 و P44
+
+**تاریخ:** 2026-10-25. **وضعیت:** بررسی مقدماتی منابع عمومی/تخصصی؛ نه بازبینی بالینی مستقل، نه پذیرش evidence و نه مجوز توصیهٔ محصول.
+
+| ID | منبع نامزد و آنچه پشتیبانی می‌کند | محدودیت و حکم |
+|---|---|---|
+| P43 — Uneven skin texture | [MSD Manual Professional — Evaluation of the Dermatologic Patient](https://www.msdmanuals.com/professional/dermatologic-disorders/approach-to-the-dermatologic-patient/evaluation-of-the-dermatologic-patient) و [Description of Skin Lesions](https://www.msdmanuals.com/professional/dermatologic-disorders/approach-to-the-dermatologic-patient/description-of-skin-lesions) برای توصیف حرفه‌ای برخی تفاوت‌های بافت/سطح ضایعات و ضرورت ارزیابی ضایعه مفیدند. | این صفحات تعریف عملیاتی مستقلی برای «uneven skin texture» به‌عنوان یک Need واحد HBI ارائه نمی‌کنند؛ این عبارت ممکن است توصیف ظاهری چند وضعیت متفاوت باشد. P43 همچنان boundary open و UNKNOWN / INSUFFICIENT است؛ نامزد منبع به معنی حل مرز یا پذیرش نیست. |
+| P44 — Hyperkeratosis | [NCBI Bookshelf — Hyperkeratosis (StatPearls)](https://www.ncbi.nlm.nih.gov/books/NBK562206/) تعریف عمومی افزایش ضخامت لایهٔ شاخی را توضیح می‌دهد و تأکید دارد که این یافته در وضعیت‌های گوناگون دیده می‌شود؛ [NCI Dictionary — Hyperkeratosis](https://www.cancer.gov/publications/dictionaries/cancer-terms/def/hyperkeratosis) تعریف عمومی تکمیلی ارائه می‌کند. | تعریف اصطلاح، یک تشخیص واحد یا مرز عملیاتی HBI نمی‌سازد. علت، محل، وضعیت همراه و نیاز به ارزیابی می‌توانند متفاوت باشند. P44 همچنان Clinical-anchor only، boundary open و UNKNOWN / INSUFFICIENT است؛ هیچ توصیهٔ محصول یا تشخیص از روی متن/تصویر استنتاج نمی‌شود. |
+
+### حکم این بازبینی
+- برای P43، منابع نامزد فقط به توصیف تفاوت‌های سطح/بافت کمک می‌کنند؛ خلأ تعریف و مرز اختصاصی HBI حل نشده است.
+- برای P44، تعریف اصطلاح پزشکی قابل ردیابی است، اما برای تبدیل آن به Need یا تعیین اقدام مشاوره‌ای HBI کافی نیست.
+- هر دو مورد همچنان **NOT ASSESSED** برای آمادگی مشاوره‌اند؛ وضعیت‌ها به Accepted یا consultation-ready ارتقا نمی‌یابند.
+- Map و روابط آن تغییر نمی‌کنند. این ثبت صرفاً منبع‌یابی مقدماتی است و G8 همچنان **BLOCKED / NOT VERIFIED** می‌ماند.
+
+
+---
+
+## S04 — بازبینی هدفمندِ کفایت منابع برای P17 و P20
+
+**تاریخ:** 2026-10-25. **وضعیت:** بازبینی مقدماتیِ صفحات مرجع عمومی/تخصصی؛ نه پذیرش evidence، نه بازبینی بالینی مستقل، و نه مجوز توصیهٔ محصول.
+
+| ID | منبع نامزد و آنچه پشتیبانی می‌کند | محدودیت و حکم |
+|---|---|---|
+| P17 — Hyperpigmentation / dark spots | [DermNet — Skin pigmentation problems](https://dermnetnz.org/topics/skin-pigmentation-problems) و [DermNet — Pigmentation disorders](https://dermnetnz.org/topics/pigmentation-disorders) تفکیک کلی hyperpigmentation، hypopigmentation و depigmentation و تنوع علل تغییر رنگدانه را شرح می‌دهند. [Merck Manual Professional — Hyperpigmentation](https://www.merckmanuals.com/professional/dermatologic-disorders/pigmentation-disorders/hyperpigmentation) تأکید می‌کند که افزایش رنگدانه می‌تواند موضعی یا منتشر باشد و علل متفاوت، از جمله التهاب، داروها، برخی وضعیت‌های سیستمیک و ضایعات مهم، در افتراق مطرح‌اند. | «Dark spots» به‌تنهایی تشخیص یا Need بالینی یکپارچه نیست. این صفحات تعریف عملیاتی پذیرفته‌شدهٔ HBI، مرز مصوب با P18/P19، تشخیص فردی یا اثربخشی محصول را ثابت نمی‌کنند. P17 فقط والد ساختاری P18/P19 طبق Map می‌ماند؛ P18 و P19 ادغام نمی‌شوند. P17 همچنان NOT ASSESSED و UNKNOWN / INSUFFICIENT برای آمادگی مشاوره است. |
+| P20 — Hypopigmentation | [DermNet — Skin pigmentation problems](https://dermnetnz.org/topics/skin-pigmentation-problems) تفاوت کاهش رنگدانه با depigmentation کامل را توضیح می‌دهد و مثال‌هایی از علل گوناگون لکه‌های روشن را فهرست می‌کند. [American Academy of Dermatology — Treating light spots in brown or black skin](https://www.aad.org/public/everyday-care/skin-care-secrets/routine/treat-light-spots) نیز اشاره می‌کند که لکه‌های روشن می‌توانند علت‌های مختلف داشته باشند، از جمله التهاب/آسیب، محصولات یا داروهای موضعی و وضعیت‌های پوستی. | «Hypopigmentation» یک توصیف/یافتهٔ گسترده است؛ به‌تنهایی علت را مشخص نمی‌کند و نباید با vitiligo (P21) یکی شود. منابع نامزد مرز عملیاتی HBI، مسیر ارجاع مصوب، تشخیص فردی یا مجوز توصیهٔ محصول را تعیین نمی‌کنند. P20 همچنان evidence boundary retained، NOT ASSESSED و UNKNOWN / INSUFFICIENT باقی می‌ماند. |
+
+### حکم این بازبینی
+- منابع نشان می‌دهند که هر دو عنوان به خانواده‌ای از تغییرات رنگدانه اشاره می‌کنند و نباید بدون مرزبندی، علت یا تشخیص از روی رنگ ظاهری استنتاج شود.
+- مرزهای عملیاتی HBI برای P17 و P20، زبان مشتری، معیار ارجاع و تصمیم بازبین انسانی هنوز مستند نشده‌اند؛ بنابراین هیچ‌کدام Accepted یا consultation-ready نمی‌شوند.
+- روابط Map حفظ می‌شوند: P17 والد ساختاری P18/P19 است؛ P19 به‌عنوان sequela جدا می‌ماند؛ P20 با P21 ادغام نمی‌شود.
+- این ثبت صرفاً source review مقدماتی است. هیچ ادعای اثربخشی محصول یا توصیهٔ درمانی اضافه نشده است؛ G8 همچنان **BLOCKED / NOT VERIFIED** می‌ماند.
+
+
+---
+
+## S05 — بازبینی هدفمندِ کفایت منابع برای P24 و P33
+
+**تاریخ:** 2026-10-25. **وضعیت:** بررسی مقدماتی منابع عمومی/تخصصی؛ نه پروتکل ایمنی مصوب، نه پذیرش evidence، و نه مجوز توصیهٔ محصول.
+
+| ID | منبع نامزد و آنچه پشتیبانی می‌کند | محدودیت و حکم |
+|---|---|---|
+| P24 — Persistent redness | [DermNet — Facial rashes](https://dermnetnz.org/topics/facial-rashes) طیف گسترده‌ای از تظاهرات صورت و افتراق‌های احتمالی را فهرست می‌کند؛ [DermNet — Rosacea](https://dermnetnz.org/topics/rosacea) قرمزی پایدار مرکزی صورت را یکی از ویژگی‌های rosacea معرفی می‌کند و تشخیص را بالینی می‌داند. | قرمزی پایدار، به‌ویژه خارج از تعریف محدودِ قرمزی مرکزی صورت، به‌تنهایی rosacea یا یک علت واحد را ثابت نمی‌کند. منابع اینجا برای نشان‌دادن هم‌پوشانی و ضرورت مرزبندی‌اند؛ تعریف عملیاتی HBI، زبان مشتری، آستانهٔ ایمنی یا مجوز محصول را تعیین نمی‌کنند. P24 همچنان Problem/presentation و NOT ASSESSED؛ وضعیت UNKNOWN / INSUFFICIENT حفظ می‌شود. |
+| P33 — Unspecified rash | [American Academy of Dermatology — Rash 101: When to Seek Medical Treatment](https://www.aad.org/public/everyday-care/itchy-skin/rash/rash-101) برای زبان عمومی دربارهٔ علائم هشدار و نیاز احتمالی به ارزیابی پزشکی منبع نامزد است؛ [DermNet — Facial rashes](https://dermnetnz.org/topics/facial-rashes) نشان می‌دهد که ظاهرهای مشابه می‌توانند افتراق‌های متعدد داشته باشند و تشخیص ممکن است دشوار باشد. | این منابع به‌تنهایی پروتکل ارجاع HBI یا یک فهرست کامل و اعتبارسنجی‌شده از هشدارها نمی‌سازند. P33 باید «تظاهر ثبت‌نشده/نامشخص» باقی بماند؛ از آن تشخیص، علت یا انتخاب محصول استنتاج نمی‌شود. هر تصمیم ایمنی اجرایی نیازمند پروتکل مصوب جداگانه است. P33 همچنان unresolved presentation و NOT ASSESSED؛ وضعیت UNKNOWN / INSUFFICIENT حفظ می‌شود. |
+
+### حکم این بازبینی
+- P24 و P33 هر دو عنوان‌های ارائه/تظاهرند و نباید به تشخیص خودکار تبدیل شوند.
+- قرمزی پایدار به‌تنهایی برای تعیین rosacea کافی نیست؛ P26 جدا و طبق Map به‌عنوان Clinical Anchor باقی می‌ماند.
+- منابع AAD برای زبان عمومی هشدار نامزدند، نه جایگزین پروتکل ارجاع HBI. آستانهٔ جدیدی در این ثبت تعریف نشده است.
+- هیچ‌یک Accepted، consultation-ready یا مجاز برای توصیهٔ محصول نشده‌اند؛ روابط Map تغییر نمی‌کنند و G8 همچنان **BLOCKED / NOT VERIFIED** است.
+
+
+---
+
+## S08 — بازبینی هدفمندِ کفایت منابع برای P49 و P50
+
+**تاریخ:** 2026-10-25. **وضعیت:** بازبینی مقدماتی منابع سلامت عمومی برای تعریف مرز سیگنال؛ نه پروتکل ارجاع مصوب، نه پذیرش evidence، نه تشخیص و نه مجوز توصیهٔ محصول.
+
+| ID | منبع نامزد و آنچه پشتیبانی می‌کند | محدودیت و حکم |
+|---|---|---|
+| P49 — Changing mole | [NHS — Moles](https://www.nhs.uk/conditions/moles/) و [NHS — Symptoms of melanoma skin cancer](https://www.nhs.uk/conditions/melanoma-skin-cancer/symptoms/) تغییر اندازه، شکل یا رنگ خال و برخی تغییرات همراه را از دلایلی می‌دانند که باید توسط پزشک بررسی شوند. این منابع برای بازبینی زبان عمومی سیگنال و حفظ مرز ارجاع نامزدند. | تغییر خال یک سیگنال برای ارزیابی است، نه تشخیص سرطان؛ منابع عمومی جایگزین ارزیابی حرفه‌ای یا پروتکل عملیاتی HBI نیستند. معیار اختصاصی HBI، نحوهٔ ثبت مشتری، آستانه‌ها و مسیر اجرایی ارجاع هنوز تأیید نشده‌اند. P49 طبق Map به P48 مرتبط می‌ماند؛ Safety-referral only و UNKNOWN / INSUFFICIENT حفظ می‌شود. |
+| P50 — New/growing skin lesion | [NHS — Symptoms of non-melanoma skin cancer](https://www.nhs.uk/conditions/non-melanoma-skin-cancer/symptoms/) رشد یا لکهٔ غیرمعمولِ بزرگ‌شونده یا تغییرکننده را از موارد نیازمند بررسی پزشکی می‌داند؛ [NHS — Symptoms of melanoma skin cancer](https://www.nhs.uk/conditions/melanoma-skin-cancer/symptoms/) نیز می‌گوید علامت جدید یا غیرمعمولی که برطرف نمی‌شود باید بررسی شود. | «ضایعهٔ جدید/در حال رشد» دامنه‌ای وسیع دارد و به‌تنهایی نوع ضایعه یا علت آن را مشخص نمی‌کند. منابع حاضر نه یک الگوریتم تشخیصی HBI می‌سازند، نه معیار خودکار از روی تصویر و نه مجوز اقدام یا توصیهٔ محصول. تعریف عملیاتی، زبان مشتری و مسیر ارجاع HBI همچنان نیازمند تصمیم انسانی مجاز است؛ P50 در وضعیت Safety-referral only و UNKNOWN / INSUFFICIENT می‌ماند. |
+
+### حکم این بازبینی
+- صفحات NHS منابع نامزد و قابل‌ردیابی برای زمینهٔ عمومیِ سیگنال‌های تغییر خال و ضایعه‌اند؛ در این ثبت به accepted evidence تبدیل نمی‌شوند.
+- هیچ آستانهٔ زمانی/اندازه‌ای جدیدی برای HBI تعریف یا از راهنمای عمومی به قاعدهٔ محصول تبدیل نشده است.
+- P49/P50 تشخیص نیستند؛ هر دو از مسیر Safety-referral خارج نمی‌شوند و هیچ‌یک به Accepted، consultation-ready، Need یا مجوز توصیهٔ محصول ارتقا نمی‌یابد.
+- روابط و نقش‌های Map، از جمله P49↔P48، بدون تغییر باقی می‌مانند. P53–P56 همچنان به بازبینی جداگانه و تصمیم مجاز دربارهٔ سیگنال/ارجاع نیاز دارند.
+- این تغییر صرفاً مستندسازی است؛ G8 همچنان **BLOCKED / NOT VERIFIED** می‌ماند.
+
+
+---
+
+## S08 — بازبینی هدفمندِ کفایت منابع برای P53–P56
+
+**تاریخ:** 2026-10-25. **وضعیت:** بررسی مقدماتی منابع سلامت عمومی برای زبان هشدار/ارجاع؛ نه تشخیص، نه پروتکل مصوب HBI، نه evidence پذیرفته‌شده و نه مجوز توصیهٔ محصول.
+
+| ID | منبع نامزد و دامنهٔ پشتیبانی | محدودیت و حکم |
+|---|---|---|
+| P53 — Suspicious skin-cancer lesion | [American Academy of Dermatology — Skin cancer: Symptoms, diagnosis, and causes](https://www.aad.org/public/diseases/skin-cancer) فهرستی از شکل‌های متفاوت لکه/رشدهای نگران‌کننده و نمونه‌هایی مانند رشد، خونریزی یا زخمی که بهبود نمی‌یابد ارائه می‌کند. این صفحه برای مرور عمومی زبان هشدار و تنوع ظاهری نامزد است. | «مشکوک» در نام P53 از قبل به قضاوت بالینی نیاز دارد و نباید به برچسبی تبدیل شود که HBI از تصویر یا متن مشتری تشخیص دهد. صفحهٔ عمومی معیار تشخیصی یا پروتکل ارجاع HBI نیست. P53 فقط Safety-referral signal می‌ماند؛ تعریف عملیاتی، متن مشتری و مسیر ارجاع مجاز همچنان باز است. |
+| P54 — Suspicious melanoma lesion | [NHS — Symptoms of melanoma skin cancer](https://www.nhs.uk/conditions/melanoma-skin-cancer/symptoms/) و [NCI — Melanoma signs and symptoms](https://www.cancer.gov/types/skin/patient/melanoma-treatment-pdq) تغییرات یک خال یا ناحیهٔ رنگدانه‌دار و برخی ویژگی‌های ظاهری را برای آگاهی عمومی شرح می‌دهند. | ویژگی‌ها برای غربالگری عمومی‌اند و نه تشخیص؛ نبود یک ویژگی به‌تنهایی سرطان را رد نمی‌کند و وجود آن نیز تشخیص قطعی نیست. هیچ معیار ABCDE یا اندازه‌ای در اینجا به قانون تصمیم‌گیری خودکار HBI تبدیل نمی‌شود. P54 در مسیر Safety-referral only و UNKNOWN / INSUFFICIENT باقی می‌ماند. |
+| P55 — Bleeding / non-healing lesion | [NHS — Symptoms of non-melanoma skin cancer](https://www.nhs.uk/conditions/non-melanoma-skin-cancer/symptoms/) و [AAD — Skin cancer: Symptoms, diagnosis, and causes](https://www.aad.org/public/diseases/skin-cancer) خونریزی، تغییر رشد و زخمی که خوب نمی‌شود یا برمی‌گردد را در میان علائم نیازمند بررسی پزشکی ذکر می‌کنند. | این علائم اختصاصی سرطان نیستند و از آن‌ها نمی‌توان تشخیص یا علت فردی نتیجه گرفت. بازهٔ زمانی ذکرشده در یک راهنمای عمومی به‌عنوان آستانهٔ HBI کپی نشده است؛ هر زمان‌بندی/شدت اجرایی به پروتکل مجاز جداگانه نیاز دارد. P55 فقط سیگنال ایمنی/ارجاع باقی می‌ماند. |
+| P56 — Rapid change in lesion size / shape / color | [NHS — Moles](https://www.nhs.uk/conditions/moles/) و [NHS — Symptoms of melanoma skin cancer](https://www.nhs.uk/conditions/melanoma-skin-cancer/symptoms/) تغییر اندازه، شکل یا رنگ خال را از مواردی می‌دانند که باید توسط پزشک بررسی شود؛ [CDC — Symptoms of skin cancer](https://www.cdc.gov/skin-cancer/symptoms/index.html) نیز تغییر در طول زمان را در اطلاعات عمومی هشدار پوشش می‌دهد. | «سریع» در P56 هنوز تعریف عملیاتی مصوب ندارد؛ از این منابع آستانهٔ زمانی یا مقداری برای HBI استنتاج نمی‌شود. سیگنال تغییر، تشخیص نیست و ارزیابی نباید به تشخیص تصویری خودکار واگذار شود. P56 همچنان Safety-referral only و UNKNOWN / INSUFFICIENT است. |
+
+### حکم این بازبینی
+- منابع NHS، AAD، NCI و CDC فقط **candidate sources** برای بررسی زبان عمومی و مرز ایمنی‌اند؛ با این ثبت به evidence پذیرفته‌شده تبدیل نمی‌شوند.
+- هیچ الگوریتم تشخیص سرطان، قاعدهٔ امتیازدهی، آستانهٔ زمانی/اندازه‌ای یا تصمیم خودکار از متن منابع ساخته نشده است.
+- P53–P56 تشخیص‌های تأییدشده نیستند؛ هر چهار مورد Safety-referral only می‌مانند و به Accepted، Need، consultation-ready یا مجوز توصیهٔ محصول ارتقا نمی‌یابند.
+- تعریف سیگنال، زبان قابل‌فهم مشتری، پروتکل ارجاع و تصمیم بازبین مجاز همچنان معیارهای باز هستند. روابط و ساختار Map تغییر نکرده‌اند.
+- این تغییر مستندسازی مقدماتی است؛ G8 همچنان **BLOCKED / NOT VERIFIED** می‌ماند.
+
+
+---
+
+## S09–S10 — بازبینی هدفمندِ کفایت منابع نامزد برای P51–P52 و P57–P61
+
+**تاریخ:** 2026-10-25. **وضعیت:** منبع‌یابی مقدماتی از مراجع سلامت عمومی؛ منابع زیر candidate sources هستند، نه evidence پذیرفته‌شده، نه پروتکل ایمنی مصوب و نه مجوز توصیهٔ محصول. P22 در این بررسی بازنویسی نمی‌شود.
+
+| ID | منبع نامزد و دامنهٔ پشتیبانی | محدودیت و حکم |
+|---|---|---|
+| P51 — Chronic UV damage | [AAD — Sun damage and your skin](https://www.aad.org/public/everyday-care/sun-protection/sun-damage-skin) برای زمینهٔ عمومی دربارهٔ آسیب تجمعی UV و تغییرات قابل مشاهده منبع نامزد است. | این منبع disposition قفل‌شدهٔ Map را تغییر نمی‌دهد: P51 فقط Discovery Context است، NOT NEED-LEVEL و بدون Safety/Referral خودکار. منبع‌یابی به معنی پذیرش یا ایجاد مسیر محصول نیست. |
+| P52 — Actinic keratosis | [AAD — Actinic keratosis: signs and symptoms](https://www.aad.org/public/diseases/skin-cancer/actinic-keratosis-symptoms) ظاهرهای متنوع ضایعه و ارتباط آن با آسیب UV را شرح می‌دهد و برای تغییر مشکوک ارزیابی متخصص پوست را توصیه می‌کند. | منبع عمومی، تشخیص خودکار از تصویر یا معیار عملیاتی HBI ایجاد نمی‌کند. P52 در وضعیت Clinical/Safety-sensitive و Safety-referral only می‌ماند؛ Accepted، Need یا Product نمی‌شود. |
+| P57 — Autoimmune/autoinflammatory skin disease | [NIAMS — Autoimmune Diseases](https://www.niams.nih.gov/health-topics/autoimmune-diseases) و [MedlinePlus — Autoinflammatory diseases](https://medlineplus.gov/ency/article/007845.htm) نشان می‌دهند که این دو خانواده گسترده‌اند، با هم یکی نیستند و می‌توانند تظاهرات گوناگون داشته باشند. | این عنوان یک تشخیص واحد نیست. مرز خانواده، کاربرد عملیاتی HBI و ارتباط با نیاز مراقبتی همچنان UNKNOWN است؛ صرفاً Clinical Anchor گسترده، بدون استنتاج Need یا محصول. |
+| P58 — Cutaneous lupus | [NIAMS — Lupus](https://www.niams.nih.gov/health-topics/lupus) برای علائم گوناگون لوپوس، از جمله تظاهرات پوستی و حساسیت به آفتاب، منبع عمومی نامزد است. | صفحه دربارهٔ لوپوس به‌طور کلی است و به‌تنهایی مرز تخصصی cutaneous lupus یا مسیر ارجاع HBI را تعریف نمی‌کند. P58 همچنان referral-sensitive / clinical-anchor only و Accepted = No است. |
+| P59 — Adult-onset dermatomyositis with skin findings | [MedlinePlus — Dermatomyositis](https://medlineplus.gov/ency/article/000839.htm) ترکیب تظاهرات پوستی و درگیری عضلانی و نیاز به ارزیابی پزشکی را در سطح اطلاعات عمومی شرح می‌دهد. | ظاهر پوستی به‌تنهایی برای تشخیص کافی نیست و منبع عمومی، پروتکل HBI یا تصمیم محصول نمی‌سازد. P59 همچنان Clinical-anchor only / referral-sensitive و Accepted = No است. |
+| P60 — Acanthosis nigricans/systemic-associated skin changes | [MedlinePlus — Acanthosis nigricans](https://medlineplus.gov/ency/article/000852.htm) تغییرات تیره و مخملی در چین‌های پوست و امکان ارتباط با علل گوناگون را شرح می‌دهد. | ظاهر به‌تنهایی علت سیستمیک مشخصی را اثبات نمی‌کند. از این منبع تشخیص، علت، Need یا توصیهٔ محصول استنتاج نمی‌شود؛ P60 در جایگاه Clinical Anchor باقی می‌ماند. |
+| P61 — Photosensitivity | [NIAMS — Lupus](https://www.niams.nih.gov/health-topics/lupus) و [MedlinePlus — Sunburn](https://medlineplus.gov/ency/article/003227.htm) حساسیت به نور/آفتاب را در برخی زمینه‌های پزشکی یا دارویی پوشش می‌دهند. | Photosensitivity یک ارائه/نشانه با علل متعدد است، نه تشخیص مستقل یا مدرک خودکار بیماری زمینه‌ای. رابطهٔ S09↔S10 طبق Map حفظ می‌شود؛ هیچ ارجاع خودکار یا مجوز محصولی اضافه نمی‌شود. |
+
+### حکم این بازبینی
+- منابع بالا فقط برای شناسایی دامنه و محدودیت اطلاعات عمومی ثبت شدند؛ هیچ‌کدام به‌عنوان evidence پذیرفته‌شده یا تأیید بالینی HBI علامت‌گذاری نمی‌شوند.
+- برای P51، disposition قفل‌شده عیناً حفظ می‌شود؛ P52 و P57–P61 نیز از وضعیت‌های Map خارج نمی‌شوند. هیچ تشخیص، Need، Ordinary-care، آستانهٔ ارجاع یا ادعای اثربخشی محصول ساخته نشده است.
+- P58 و P59 در مسیر clinical/referral-sensitive باقی می‌مانند؛ P60 از ظاهر به علت سیستمیک نگاشت نمی‌شود؛ P61 به‌تنهایی علت یا تشخیص را تعیین نمی‌کند.
+- P22 و روابط Map بازنویسی نشده‌اند؛ هیچ منبع یا رابطهٔ جدیدی به نقشه اضافه نشده است.
+- این بازبینی فقط کفایت و محدودیت منابع نامزد را ثبت می‌کند. تا تصویب انسانی مجازِ تعریف‌ها و مسیرهای عملیاتی، موارد همچنان **NOT ACCEPTED / UNKNOWN / NOT CONSULTATION-READY** هستند. G8 همچنان **BLOCKED / NOT VERIFIED** می‌ماند.
