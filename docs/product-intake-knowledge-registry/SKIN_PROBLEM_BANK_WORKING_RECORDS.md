@@ -1868,3 +1868,20 @@ No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care
 | P60 | [DermNet — Acanthosis nigricans](https://dermnetnz.org/topics/acanthosis-nigricans) | مرجع تخصصی برای بررسی ارتباط‌های زمینه‌ای؛ نه تشخیص بیماری زمینه‌ای در مشتری |
 
 **نتیجهٔ تکمیلی:** اکنون چند منبع تخصصی/عمومی قابل ردیابی برای شروع بررسی ثبت شده‌اند، اما این کار فقط «منبع‌یابی مقدماتی» است. برای P43/P44 و نیز برای هر ادعای اختصاصی که منبع بالا دقیقاً پشتیبانی نمی‌کند، وضعیت evidence همچنان UNKNOWN / INSUFFICIENT می‌ماند. هیچ منبع عمومی یا صفحهٔ آموزشی به‌تنهایی جایگزین مرور ادعای دقیق و تصمیم بازبین مجاز نمی‌شود.
+
+
+#### تکمیل دومِ نقشهٔ منابع نامزد — صفحات اختصاصی بیشتر
+
+| شناسه | منبع نامزد | محدودیت کاربرد |
+|---|---|---|
+| P23 | [DermNet — Poikiloderma of Civatte](https://dermnetnz.org/topics/poikiloderma-of-civatte) | فقط برای بررسی یک وضعیت مشخص با نام مشابه؛ P23 در Map همچنان Parked/Deferred است و این منبع به‌تنهایی مجوز بازگشایی نمی‌دهد |
+| P25 | [DermNet — Facial rashes](https://dermnetnz.org/topics/facial-rashes) | منبع مقدماتی برای مفهوم flushing و افتراق‌های احتمالی؛ نه معیار عملیاتی HBI |
+| P30 | [DermNet — Seborrhoeic dermatitis](https://dermnetnz.org/topics/seborrhoeic-dermatitis) | منبع موضوعی؛ رابطهٔ ساختاری S05↔S02 همچنان فقط طبق Map حفظ می‌شود |
+| P31 | [DermNet — Guidelines for the treatment of psoriasis](https://dermnetnz.org/topics/guidelines-for-the-treatment-of-psoriasis) | منبع بالینی عمومی؛ نه مجوز توصیهٔ محصول یا پذیرش Need |
+| P32 | [DermNet — Urticaria overview](https://dermnetnz.org/topics/urticaria-an-overview) | منبع موضوعی؛ پروتکل ایمنی/ارجاع HBI باید جداگانه و مجاز تعیین شود |
+| P35 | [DermNet — Tinea corporis](https://dermnetnz.org/topics/tinea-corporis) | فقط صفحهٔ اختصاصی یکی از تظاهرات tinea؛ تعمیم به تمام موارد P34/P35 بدون بررسی ممنوع |
+| P36, P40 | [DermNet — Bacterial skin infections](https://dermnetnz.org/topics/bacterial-skin-infections); [DermNet — Impetigo](https://dermnetnz.org/topics/impetigo) | اطلاعات عمومی؛ تشخیص فردی یا تصمیم درمانی از آن استنتاج نمی‌شود |
+| P37–P39 | [DermNet — Viral skin infections](https://dermnetnz.org/topics/viral-skin-infections); [DermNet — Viral warts](https://dermnetnz.org/topics/viral-wart) | صفحات دسته‌ای و اختصاصی warts؛ هر ادعای مربوط به herpes simplex باید منبع اختصاصی جدا داشته باشد |
+| P42 | [DermNet — Herpes zoster (shingles)](https://dermnetnz.org/topics/herpes-zoster) | منبع اختصاصی برای موضوع shingles؛ P42 همچنان در مسیر Clinical/Referral-sensitive است |
+
+**خلأهای صریح باقی‌مانده:** P17/P20 هنوز به تعریف عملیاتی HBI و مرزهای مصوب نیاز دارند؛ P24 و P33 به معیارهای تفکیک/ثبت نیاز دارند؛ P34/P37/P38/P41 به صفحات اختصاصی و مرزهای ارجاع مناسب خود نیاز دارند؛ P43/P44 همچنان بدون منبع/مرز عملیاتی کافی‌اند؛ P49/P50/P53–P56 نیازمند تصمیم انسانی و پروتکل ارجاع مجاز هستند؛ P57 یک خانوادهٔ بالینی گسترده است و نباید به‌عنوان یک تشخیص واحد استفاده شود. این‌ها در وضعیت UNKNOWN / INSUFFICIENT باقی می‌مانند.
