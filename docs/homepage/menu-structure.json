@@ -4,10 +4,10 @@
   "source": {
     "observed_file": "frontend/src/pages/NewHomePage.tsx",
     "observed_ref": "master",
-    "observed_commit": "856922bfcd6616a7049a046cfc6c8741e95845fd",
+    "observed_commit": "5b4aa469dfb7d812aa583bc199c8c4f3c9341fb5",
     "supporting_audit": "docs/HOMEPAGE_IA_AUDIT_STAGE2.md"
   },
-  "notice": "این ساختار برای مستندسازی و شبیه‌سازی است و به‌تنهایی منوی برنامهٔ عملیاتی را تغییر نمی‌دهد.",
+  "notice": "این فایل نقشهٔ مستنداتی و دادهٔ پیش‌نمایش است؛ منوی «دانشنامه» در frontend/src/pages/NewHomePage.tsx پیاده‌سازی شده است. ویرایش این فایل به‌تنهایی برنامهٔ عملیاتی را تغییر نمی‌دهد.",
   "menus": [
     {
       "id": "home",
@@ -15,10 +15,26 @@
       "status": "observed",
       "description": "نمای کلی عملیات و هشدارهای قابل اقدام.",
       "submenus": [
-        {"id": "home-summary", "label": "خلاصهٔ عملیات", "status": "observed"},
-        {"id": "home-attention", "label": "موارد نیازمند توجه", "status": "observed"},
-        {"id": "home-stock-movements", "label": "آخرین گردش‌های انبار", "status": "observed"},
-        {"id": "home-quick-actions", "label": "اقدام سریع: فروش مستقیم، مشتریان، مشاوره", "status": "observed"}
+        {
+          "id": "home-summary",
+          "label": "خلاصهٔ عملیات",
+          "status": "observed"
+        },
+        {
+          "id": "home-attention",
+          "label": "موارد نیازمند توجه",
+          "status": "observed"
+        },
+        {
+          "id": "home-stock-movements",
+          "label": "آخرین گردش‌های انبار",
+          "status": "observed"
+        },
+        {
+          "id": "home-quick-actions",
+          "label": "اقدام سریع: فروش مستقیم، مشتریان، مشاوره",
+          "status": "observed"
+        }
       ]
     },
     {
@@ -27,8 +43,16 @@
       "status": "observed",
       "description": "پروفایل، جست‌وجو و سابقهٔ خرید مشتری.",
       "submenus": [
-        {"id": "customer-search", "label": "جست‌وجو و سابقه", "status": "observed"},
-        {"id": "customer-profile", "label": "پروفایل مشتری", "status": "observed"}
+        {
+          "id": "customer-search",
+          "label": "جست‌وجو و سابقه",
+          "status": "observed"
+        },
+        {
+          "id": "customer-profile",
+          "label": "پروفایل مشتری",
+          "status": "observed"
+        }
       ]
     },
     {
@@ -37,8 +61,16 @@
       "status": "observed",
       "description": "ثبت مسئله، بررسی نیاز و مشاهدهٔ پیشنهادهای واجد شرایط.",
       "submenus": [
-        {"id": "consultation-new", "label": "مشاوره جدید", "status": "observed"},
-        {"id": "consultation-results", "label": "نتایج مشاوره جاری", "status": "observed"}
+        {
+          "id": "consultation-new",
+          "label": "مشاوره جدید",
+          "status": "observed"
+        },
+        {
+          "id": "consultation-results",
+          "label": "نتایج مشاوره جاری",
+          "status": "observed"
+        }
       ]
     },
     {
@@ -47,7 +79,11 @@
       "status": "observed",
       "description": "ثبت فروش؛ مشاوره پیش‌نیاز فروش مستقیم نیست.",
       "submenus": [
-        {"id": "sales-direct", "label": "ثبت فروش مستقیم", "status": "observed"}
+        {
+          "id": "sales-direct",
+          "label": "ثبت فروش مستقیم",
+          "status": "observed"
+        }
       ]
     },
     {
@@ -56,9 +92,21 @@
       "status": "observed",
       "description": "فهرست، ورود اطلاعات و بررسی QA؛ مستقل از ورود فیزیکی موجودی.",
       "submenus": [
-        {"id": "products-list", "label": "فهرست کالاها", "status": "observed"},
-        {"id": "products-intake", "label": "ورود و ویرایش محصول", "status": "observed"},
-        {"id": "products-qa", "label": "بررسی و تأیید QA", "status": "observed"}
+        {
+          "id": "products-list",
+          "label": "فهرست کالاها",
+          "status": "observed"
+        },
+        {
+          "id": "products-intake",
+          "label": "ورود و ویرایش محصول",
+          "status": "observed"
+        },
+        {
+          "id": "products-qa",
+          "label": "بررسی و تأیید QA",
+          "status": "observed"
+        }
       ]
     },
     {
@@ -67,9 +115,21 @@
       "status": "observed",
       "description": "مشاهدهٔ موجودی و گردش‌های انبار؛ جدا از مدیریت اطلاعات و تأیید محصول.",
       "submenus": [
-        {"id": "inventory-stock", "label": "موجودی کالا", "status": "observed"},
-        {"id": "inventory-low-stock", "label": "کمبود موجودی", "status": "observed"},
-        {"id": "inventory-movements", "label": "گردش کالا", "status": "observed"}
+        {
+          "id": "inventory-stock",
+          "label": "موجودی کالا",
+          "status": "observed"
+        },
+        {
+          "id": "inventory-low-stock",
+          "label": "کمبود موجودی",
+          "status": "observed"
+        },
+        {
+          "id": "inventory-movements",
+          "label": "گردش کالا",
+          "status": "observed"
+        }
       ]
     },
     {
@@ -78,7 +138,11 @@
       "status": "observed",
       "description": "ثبت خرید و ورود فیزیکی موجودی.",
       "submenus": [
-        {"id": "purchase-stock-in", "label": "خرید / ورود موجودی", "status": "observed"}
+        {
+          "id": "purchase-stock-in",
+          "label": "خرید / ورود موجودی",
+          "status": "observed"
+        }
       ]
     },
     {
@@ -87,24 +151,30 @@
       "status": "observed",
       "description": "گزارش فروش و مالی؛ گزارش موجودی و گردش کالا در بخش «کالا و موجودی» قرار دارد.",
       "submenus": [
-        {"id": "report-sales", "label": "گزارش فروش", "status": "observed"},
-        {"id": "report-finance", "label": "گزارش مالی", "status": "observed"}
+        {
+          "id": "report-sales",
+          "label": "گزارش فروش",
+          "status": "observed"
+        },
+        {
+          "id": "report-finance",
+          "label": "گزارش مالی",
+          "status": "observed"
+        }
       ]
-    }
-  ],
-  "proposed_menus": [
+    },
     {
       "id": "encyclopedia",
       "label": "دانشنامه",
-      "status": "po-approved-structure",
-      "description": "ساختار پیشنهادی مورد تأیید اولیهٔ مالک محصول؛ هنوز منوی فعال برنامه نیست و وضعیت هر مقصد جداگانه مشخص می‌شود.",
+      "status": "observed",
+      "description": "منوی فعال در هوم‌پیج طبق PR #441؛ مقصدهای هر زیرمنو وضعیت مستقل دارند.",
       "submenus": [
         {
           "id": "encyclopedia-skin",
           "label": "دانش پوست",
           "status": "reference-available-no-dedicated-page",
           "docs_path": "docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md",
-          "description": "ارجاع به مراجع رسمی موجود؛ بدون کپی‌کردن فهرست مشکلات پوستی یا ساخت مرجع موازی."
+          "description": "پیوند به فهرست مرکزی و اسناد مرجع بانک مشکلات پوستی؛ بدون کپی‌کردن فهرست P01–P61 یا ساخت مرجع موازی."
         },
         {
           "id": "encyclopedia-hair",
@@ -152,10 +222,22 @@
     }
   ],
   "top_actions": [
-    {"id": "top-main-menu", "label": "منوی اصلی", "status": "observed"},
-    {"id": "top-logout", "label": "خروج از حساب مدیر", "status": "observed"}
+    {
+      "id": "top-main-menu",
+      "label": "منوی اصلی",
+      "status": "observed"
+    },
+    {
+      "id": "top-logout",
+      "label": "خروج از حساب مدیر",
+      "status": "observed"
+    }
   ],
   "not_currently_in_main_menu": [
-    {"id": "settings", "label": "تنظیمات", "note": "در ممیزی IA قبلی پیشنهاد/ذکر شده، اما در هشت کارت منوی اصلی فعلی NewHomePage دیده نمی‌شود؛ تا تأیید و مشاهدهٔ کد، منوی فعال محسوب نشود."}
+    {
+      "id": "settings",
+      "label": "تنظیمات",
+      "note": "«تنظیمات» در نه کارت منوی اصلی ثبت‌شده در NewHomePage.tsx دیده نمی‌شود؛ تا مشاهده و تأیید جداگانه، منوی فعال محسوب نشود."
+    }
   ]
 }
