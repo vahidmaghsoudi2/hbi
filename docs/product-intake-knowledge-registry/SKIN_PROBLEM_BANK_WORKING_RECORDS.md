@@ -1997,3 +1997,24 @@ No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care
 - P49/P50 تشخیص نیستند؛ هر دو از مسیر Safety-referral خارج نمی‌شوند و هیچ‌یک به Accepted، consultation-ready، Need یا مجوز توصیهٔ محصول ارتقا نمی‌یابد.
 - روابط و نقش‌های Map، از جمله P49↔P48، بدون تغییر باقی می‌مانند. P53–P56 همچنان به بازبینی جداگانه و تصمیم مجاز دربارهٔ سیگنال/ارجاع نیاز دارند.
 - این تغییر صرفاً مستندسازی است؛ G8 همچنان **BLOCKED / NOT VERIFIED** می‌ماند.
+
+
+---
+
+## S08 — بازبینی هدفمندِ کفایت منابع برای P53–P56
+
+**تاریخ:** 2026-10-25. **وضعیت:** بررسی مقدماتی منابع سلامت عمومی برای زبان هشدار/ارجاع؛ نه تشخیص، نه پروتکل مصوب HBI، نه evidence پذیرفته‌شده و نه مجوز توصیهٔ محصول.
+
+| ID | منبع نامزد و دامنهٔ پشتیبانی | محدودیت و حکم |
+|---|---|---|
+| P53 — Suspicious skin-cancer lesion | [American Academy of Dermatology — Skin cancer: Symptoms, diagnosis, and causes](https://www.aad.org/public/diseases/skin-cancer) فهرستی از شکل‌های متفاوت لکه/رشدهای نگران‌کننده و نمونه‌هایی مانند رشد، خونریزی یا زخمی که بهبود نمی‌یابد ارائه می‌کند. این صفحه برای مرور عمومی زبان هشدار و تنوع ظاهری نامزد است. | «مشکوک» در نام P53 از قبل به قضاوت بالینی نیاز دارد و نباید به برچسبی تبدیل شود که HBI از تصویر یا متن مشتری تشخیص دهد. صفحهٔ عمومی معیار تشخیصی یا پروتکل ارجاع HBI نیست. P53 فقط Safety-referral signal می‌ماند؛ تعریف عملیاتی، متن مشتری و مسیر ارجاع مجاز همچنان باز است. |
+| P54 — Suspicious melanoma lesion | [NHS — Symptoms of melanoma skin cancer](https://www.nhs.uk/conditions/melanoma-skin-cancer/symptoms/) و [NCI — Melanoma signs and symptoms](https://www.cancer.gov/types/skin/patient/melanoma-treatment-pdq) تغییرات یک خال یا ناحیهٔ رنگدانه‌دار و برخی ویژگی‌های ظاهری را برای آگاهی عمومی شرح می‌دهند. | ویژگی‌ها برای غربالگری عمومی‌اند و نه تشخیص؛ نبود یک ویژگی به‌تنهایی سرطان را رد نمی‌کند و وجود آن نیز تشخیص قطعی نیست. هیچ معیار ABCDE یا اندازه‌ای در اینجا به قانون تصمیم‌گیری خودکار HBI تبدیل نمی‌شود. P54 در مسیر Safety-referral only و UNKNOWN / INSUFFICIENT باقی می‌ماند. |
+| P55 — Bleeding / non-healing lesion | [NHS — Symptoms of non-melanoma skin cancer](https://www.nhs.uk/conditions/non-melanoma-skin-cancer/symptoms/) و [AAD — Skin cancer: Symptoms, diagnosis, and causes](https://www.aad.org/public/diseases/skin-cancer) خونریزی، تغییر رشد و زخمی که خوب نمی‌شود یا برمی‌گردد را در میان علائم نیازمند بررسی پزشکی ذکر می‌کنند. | این علائم اختصاصی سرطان نیستند و از آن‌ها نمی‌توان تشخیص یا علت فردی نتیجه گرفت. بازهٔ زمانی ذکرشده در یک راهنمای عمومی به‌عنوان آستانهٔ HBI کپی نشده است؛ هر زمان‌بندی/شدت اجرایی به پروتکل مجاز جداگانه نیاز دارد. P55 فقط سیگنال ایمنی/ارجاع باقی می‌ماند. |
+| P56 — Rapid change in lesion size / shape / color | [NHS — Moles](https://www.nhs.uk/conditions/moles/) و [NHS — Symptoms of melanoma skin cancer](https://www.nhs.uk/conditions/melanoma-skin-cancer/symptoms/) تغییر اندازه، شکل یا رنگ خال را از مواردی می‌دانند که باید توسط پزشک بررسی شود؛ [CDC — Symptoms of skin cancer](https://www.cdc.gov/skin-cancer/symptoms/index.html) نیز تغییر در طول زمان را در اطلاعات عمومی هشدار پوشش می‌دهد. | «سریع» در P56 هنوز تعریف عملیاتی مصوب ندارد؛ از این منابع آستانهٔ زمانی یا مقداری برای HBI استنتاج نمی‌شود. سیگنال تغییر، تشخیص نیست و ارزیابی نباید به تشخیص تصویری خودکار واگذار شود. P56 همچنان Safety-referral only و UNKNOWN / INSUFFICIENT است. |
+
+### حکم این بازبینی
+- منابع NHS، AAD، NCI و CDC فقط **candidate sources** برای بررسی زبان عمومی و مرز ایمنی‌اند؛ با این ثبت به evidence پذیرفته‌شده تبدیل نمی‌شوند.
+- هیچ الگوریتم تشخیص سرطان، قاعدهٔ امتیازدهی، آستانهٔ زمانی/اندازه‌ای یا تصمیم خودکار از متن منابع ساخته نشده است.
+- P53–P56 تشخیص‌های تأییدشده نیستند؛ هر چهار مورد Safety-referral only می‌مانند و به Accepted، Need، consultation-ready یا مجوز توصیهٔ محصول ارتقا نمی‌یابند.
+- تعریف سیگنال، زبان قابل‌فهم مشتری، پروتکل ارجاع و تصمیم بازبین مجاز همچنان معیارهای باز هستند. روابط و ساختار Map تغییر نکرده‌اند.
+- این تغییر مستندسازی مقدماتی است؛ G8 همچنان **BLOCKED / NOT VERIFIED** می‌ماند.
