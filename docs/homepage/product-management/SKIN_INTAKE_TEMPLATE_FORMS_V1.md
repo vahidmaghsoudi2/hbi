@@ -654,3 +654,74 @@ The product label “cleansing gel” does not prove a particular pH, surfactant
 - [ ] Candidate skin-need relationships have a specific basis and never auto-link to P01–P61.
 - [ ] Existing DuplicateCheck, research-draft, Evidence QA, Product QA, and lifecycle controls remain authoritative.
 - [ ] This documentation does not authorize schema/API/DB changes, smart-fill, evidence verification, operational product registration, QA approval, activation, or recommendation behavior.
+
+
+### 5.7 `ANTI_ACNE`
+| Box ID | Label |
+|---|---|
+| `acne_claim` | ادعای مرتبط با جوش (متن + منبع) |
+| `active_ingredients` | مواد مؤثرهٔ اعلام‌شده (بدون حدس غلظت) |
+| `concentration_strength` | غلظت / قدرت اعلام‌شده یا نامشخص |
+| `target_claim` | هدف اعلام‌شده (مثلاً جوش، چربی یا ظاهر منافذ) |
+| `application_area` | ناحیهٔ مصرف اعلام‌شده |
+| `frequency_contact_time` | دفعات مصرف / مدت تماس، فقط طبق منبع |
+| `rinse_leave_on` | آبکشی‌شونده / بدون آبکشی / نامشخص |
+| `irritation_warnings` | هشدارهای تحریک، خشکی، حساسیت و محدودیت مصرف |
+
+#### 5.7.1 Detailed field contract — `ANTI_ACNE`
+
+This is a **conceptual V1 contract for review**, not a declaration that each candidate key exists in the API, DTO, or database. It does not authorize diagnosis, treatment decisions, smart-fill, evidence mapping, or operational product registration.
+
+| Concept / candidate key | Meaning and semantic class | Source / provenance requirement | Validation and unknown/conflict behavior | Consultation relevance |
+|---|---|---|---|---|
+| Exact product identity, brand, name | Product identity fact | Exact package or manufacturer source for the specific product | Preserve exact wording; similar names do not establish identity | Prevents transferring claims between products |
+| Market, variant, formula and package version | Identity/version context | Market-specific label, exact manufacturer SKU, or documented package evidence | Keep unknowns explicit; conflicting versions remain separate | Claims and instructions may vary by market/version |
+| Full INCI | Source fact about labelled formula | Complete ingredient list for the exact market/version | Distinguish full INCI from highlighted ingredients; partial lists must be labelled partial | Enables ingredient review without proving acne efficacy |
+| Active ingredients / `active_ingredients` | Labelled or manufacturer-identified ingredient subset | Exact label/manufacturer source; preserve whether legally designated as an active ingredient in that market | Do not call an ingredient a regulatory “active” unless the source and market justify it | Supports review of the actual formula and applicable label |
+| Concentration / strength / `concentration_strength` | Quantitative identity or claim fact | Exact package, official technical document, or product-specific source | Record only stated values and units; never infer from INCI order, ingredient reputation, or another version | Strength can materially change interpretation and tolerability |
+| Acne-related claim / `acne_claim` | Manufacturer claim, not verified outcome | Exact wording, URL/package reference, market/version and source date where available | Preserve narrow wording; “helps reduce the look of blemishes” is not equivalent to treating acne | Search/research lead, not diagnosis or guaranteed benefit |
+| Target claim / `target_claim` | Manufacturer claim or clearly labelled intended-use statement | Exact source wording | Separate acne, excess oil, clogged pores, and cosmetic appearance claims; do not treat them as interchangeable | Clarifies the actual claim under review |
+| Mechanism / ingredient role | Scientific interpretation or inference | Ingredient identity plus reliable technical evidence where necessary | Label inference and rationale; do not present a plausible mechanism as proof of finished-product results | Helps explain plausibility, not product efficacy |
+| Finished-product evidence | Evidence about the exact marketed product | Identifiable product-specific study/report with formula/version, method, population, duration, comparator and outcomes when reported | Record unavailable details as unknown; distinguish manufacturer summaries from independently reviewed reports | Best relevant evidence for the exact product claim |
+| Ingredient-level evidence | Evidence about an individual ingredient or ingredient class | Traceable study/reference and relevant conditions | Keep separate from finished-product evidence; do not transfer ingredient outcomes directly to the product | Indirect context only |
+| Skin type / suitability claim | Manufacturer claim or bounded evidence-based inference | Exact source for claims; independent support for any broader interpretation | Do not infer universal suitability for oily, sensitive, adolescent, or acne-prone skin from category or ingredient list alone | Requires individual context and caution |
+| Application area / `application_area` | Label instruction | Exact product directions | Do not assume face-only, body-safe, eye-area-safe, or spot-only use | Avoids invented use directions |
+| Frequency, amount, contact time | Label instruction | Exact product directions for the same version | Do not infer daily use, dosage, layering, or contact time; unknown remains unknown | Relevant to use and irritation risk |
+| Rinse / leave-on | Label instruction | Exact directions | Preserve explicit distinction; do not infer from gel/serum naming | Affects exposure and instructions |
+| Irritation, dryness, sensitivity and other warnings | Source fact and/or separately sourced limitation | Exact label/manufacturer warnings; independent limitations need their own evidence | “Not stated” is not “none”; retain conflicting instructions and warnings | Supports risk screening but is not safety clearance |
+| Evidence / QA state | Existing Evidence and QA workflow | Use existing source, claim, field, market, dates and QA fields where available | Do not invent new enum values or auto-verify evidence; Evidence QA is not Product QA | Supports traceable human review |
+| Candidate skin-need relationship | Research candidate only | Specific claim/feature, evidence reference and explicit relationship basis | No automatic P01–P61 mapping; no diagnosis or individual treatment recommendation | May support later reviewed search/consultation logic only if separately authorized |
+
+#### 5.7.2 Evidence review requirements
+
+For each material anti-acne, blemish, pore, oil-control, or treatment-related claim, capture or explicitly mark unknown:
+
+- exact product, market, variant and formula/version;
+- exact claim wording, source, and date when available;
+- whether the material is marketing copy, label text, ingredient-level research, product-specific testing, consumer testimony, or an independently reviewed clinical study;
+- study population, acne/blemish definition or severity, design, comparator, duration, outcome measure, numerical result, and adverse events when reported;
+- whether results apply to the finished product or only to an ingredient, and whether the tested formula matches the marketed version;
+- missing protocol/report details, limitations, conflicts, and whether the conclusion is narrower than the marketing wording.
+
+Ingredient presence alone does not establish concentration, efficacy, appropriate treatment, or suitability. Do not infer acne-treatment efficacy from an ingredient list, testimonials, before/after images, or a marketing phrase. Do not convert cosmetic appearance claims into medical treatment claims.
+
+#### 5.7.3 Unknown and conflict handling
+
+- Missing concentration, strength, pH, usage frequency, contact time, full INCI, market, formula version, or study details remain unknown; never fill them from a similar product.
+- If sources disagree, preserve the source-bound assertions and flag the conflict under the existing workflow; do not silently select the more favorable claim.
+- Distinguish “not stated”, “not applicable”, and an explicit negative claim where the current data model supports those distinctions; do not introduce new persisted values through this document.
+- Do not provide diagnosis or prescribe a product from this template. Product intake captures claims and evidence for review; it does not establish an individual's condition.
+
+#### 5.7.4 Template-specific acceptance criteria
+
+- [ ] Exact product identity and market/version are recorded or explicitly unknown.
+- [ ] Full INCI is distinguishable from selected or manufacturer-highlighted ingredients.
+- [ ] Concentrations, strength, pH, and usage instructions are captured only from exact supporting sources.
+- [ ] Cosmetic claims, manufacturer claims, ingredient-level evidence, and finished-product evidence remain distinct.
+- [ ] Evidence review retains study context, limitations, conflicts, and adverse-event information when available.
+- [ ] “Not stated” is not interpreted as “none”; UNKNOWN and CONFLICT remain visible.
+- [ ] No acne diagnosis, guaranteed outcome, or individual treatment recommendation is inferred.
+- [ ] No automatic P01–P61 linking, Evidence verification, Product QA, activation, or recommendation eligibility is introduced.
+- [ ] Existing DuplicateCheck, research-draft, Evidence QA, Product QA, and lifecycle controls remain authoritative.
+- [ ] This conceptual contract does not imply API/DTO/schema/database implementation or operational product registration.
+
