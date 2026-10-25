@@ -173,8 +173,9 @@
           "id": "encyclopedia-skin",
           "label": "دانش پوست",
           "status": "reference-available-no-dedicated-page",
-          "docs_path": "docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md",
-          "description": "پیوند به فهرست مرکزی و اسناد مرجع بانک مشکلات پوستی؛ بدون کپی‌کردن فهرست P01–P61 یا ساخت مرجع موازی."
+          "docs_path": "docs/homepage/encyclopedia/skin/PRODUCTS.md",
+          "related_docs_path": "docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md",
+          "description": "فهرست مرکزی ویژگی و پژوهش محصولات پوستی P1–P7؛ بانک مسائل P01–P61 از پیوند جداگانه در UI در دسترس می‌ماند. هیچ‌یک به معنی ثبت در Product Master یا تأیید QA نیست."
         },
         {
           "id": "encyclopedia-hair",
