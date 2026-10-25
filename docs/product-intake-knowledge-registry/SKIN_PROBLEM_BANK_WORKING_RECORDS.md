@@ -1710,18 +1710,17 @@ No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care
 | قالب حداقلی | تثبیت |
 | مرزهای P01، P02، P07 و P05 | **PO-confirmed**؛ این گروه‌بندی رابطهٔ P07 با P01 را تأیید نمی‌کند؛ هیچ‌کدام Accepted نهایی نیستند |
 | P06 | **ثبت ساختاری**؛ Identified؛ Clinical-anchor only |
-| پایلوت ساختاری S01 | **CLOSED** (ساختاری/ارجاعی — نه پزشکی)
+| پایلوت ساختاری S01 | **CLOSED** (ساختاری/ارجاعی — نه پزشکی) |
 | قفسهٔ S02 | **ثبت ساختاری شده**؛ P03/P04؛ نه Accepted |
 | G1 / G8 | خارج از دامنهٔ این Closure |
 | قفسهٔ S03 | **ثبت ساختاری شده**؛ P08–P16؛ نه Accepted |
 | قفسهٔ S04 | **ثبت ساختاری شده**؛ P17–P23؛ نه Accepted |
-| قفسهٔ S04 | **ثبت ساختاری شده**؛ P17–P23؛ نه Accepted |
-| S06 | **ثبت ساختاری شده**؛ P24–P42 در بسته‌های S05/S06؛ نه Accepted |
-| S07 | **ثبت ساختاری شده**؛ P43–P47؛ نه Accepted |
-| S08 | **ثبت ساختاری شده**؛ P48–P50 و P53–P56؛ خوشهٔ Safety/Referral؛ نه Accepted |
-| S09 | **ثبت ساختاری شده**؛ P51 و P52؛ P22 فقط ارجاع متقاطع به S04؛ نه Accepted/Need |
-| S10 | **در حال کار ساختاری**؛ P57–P61 طبق Map زنده؛ نه Accepted/Need/Product |
-| S10 | **ثبت ساختاری شده**؛ P57–P61 طبق Map زنده؛ نه Accepted/Need/Product |
+| قفسهٔ S05 | **ثبت ساختاری شده**؛ P24–P33؛ نه Accepted |
+| قفسهٔ S06 | **ثبت ساختاری شده**؛ P34–P42؛ نه Accepted |
+| قفسهٔ S07 | **ثبت ساختاری شده**؛ P43–P47؛ نه Accepted |
+| قفسهٔ S08 | **ثبت ساختاری شده**؛ P48–P50 و P53–P56؛ خوشهٔ Safety/Referral؛ نه Accepted |
+| قفسهٔ S09 | **ثبت ساختاری شده**؛ P51 و P52؛ P22 فقط ارجاع متقاطع به S04؛ نه Accepted/Need |
+| قفسهٔ S10 | **ثبت ساختاری شده**؛ P57–P61 طبق Map زنده؛ نه Accepted/Need/Product |
 | Need / Product | خارج از دامنه |
 
 ---
@@ -1861,7 +1860,8 @@ No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care
 | P29 | [DermNet — Allergic contact dermatitis](https://dermnetnz.org/topics/allergic-contact-dermatitis) | برای بررسی مفهوم و روش‌های ارزیابی تخصصی؛ نه تشخیص خوداظهاری |
 | P27–P29, P33 | [DermNet — Guidelines for the diagnosis and assessment of eczema](https://dermnetnz.org/topics/guidelines-for-the-diagnosis-and-assessment-of-eczema) | منبع افتراقی/مرزبندی؛ به‌تنهایی taxonomy یا وضعیت HBI را تعیین نمی‌کند |
 | P34–P42 | [DermNet — Skin infections](https://dermnetnz.org/topics/skin-infections); [DermNet — Bacterial skin infections](https://dermnetnz.org/topics/bacterial-skin-infections) | منابع آغازین دسته‌ای؛ هر وضعیت خاص باید منبع اختصاصی و مرز ایمنی خود را داشته باشد |
-| P44 | [NCI — Definition of hyperkeratosis](https://www.cancer.gov/publications/dictionaries/cancer-terms/def/hyperkeratosis); [NCBI Bookshelf — Hyperkeratosis](https://www.ncbi.nlm.nih.gov/books/NBK562206/) | فقط تعریف عمومیِ ضخیم‌شدن لایهٔ شاخی و علل متنوع را پشتیبانی می‌کند؛ مرز بالینی/ساختاری HBI، customer language، operational relevance یا suitability را تعیین نمی‌کند. وضعیت P44 همچنان UNKNOWN / INSUFFICIENT و Clinical-anchor only است |\n| P45 | [DermNet — Keratosis pilaris](https://dermnetnz.org/topics/keratosis-pilaris) | فقط منبع نامزد برای بررسی P45؛ پذیرش یا آمادگی مشاوره را ثابت نمی‌کند. برای P43 منبع اختصاصیِ کافی در این دفتر ثبت نشده و خلأ آن باز می‌ماند |
+| P44 | [NCI — Definition of hyperkeratosis](https://www.cancer.gov/publications/dictionaries/cancer-terms/def/hyperkeratosis); [NCBI Bookshelf — Hyperkeratosis](https://www.ncbi.nlm.nih.gov/books/NBK562206/) | فقط تعریف عمومیِ ضخیم‌شدن لایهٔ شاخی و علل متنوع را پشتیبانی می‌کند؛ مرز بالینی/ساختاری HBI، customer language، operational relevance یا suitability را تعیین نمی‌کند. وضعیت P44 همچنان UNKNOWN / INSUFFICIENT و Clinical-anchor only است |
+| P45 | [DermNet — Keratosis pilaris](https://dermnetnz.org/topics/keratosis-pilaris) | فقط منبع نامزد برای بررسی P45؛ پذیرش یا آمادگی مشاوره را ثابت نمی‌کند. برای P43 منبع اختصاصیِ کافی در این دفتر ثبت نشده و خلأ آن باز می‌ماند |
 | P46 | [DermNet — Seborrhoeic keratosis](https://dermnetnz.org/topics/seborrhoeic-keratosis) | مرجع عمومی ضایعه؛ افتراق از بدخیمی یا تصمیم دربارهٔ ضایعهٔ فردی نیازمند ارزیابی حرفه‌ای است |
 | P47 | [DermNet — Skin tags](https://dermnetnz.org/topics/skin-tag) | مرجع عمومی؛ شبیه‌بودن ظاهری ضایعات مجوز تشخیص یا اقدام نیست |
 | P58, P61 | [DermNet — Skin signs of rheumatic disease](https://dermnetnz.org/topics/skin-signs-of-rheumatic-disease); [DermNet — Photosensitivity](https://dermnetnz.org/topics/photosensitivity) | برای زمینهٔ بالینی و رابطه‌های احتمالی؛ نه تشخیص بیماری سیستمیک یا مسیر ارجاع خودکار |
