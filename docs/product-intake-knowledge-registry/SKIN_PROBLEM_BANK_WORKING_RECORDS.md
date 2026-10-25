@@ -1907,3 +1907,20 @@ No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care
 | P42 — Shingles | [NHS](https://www.nhs.uk/conditions/shingles/); [WHO](https://www.who.int/news-room/fact-sheets/detail/shingles-%28herpes-zoster%29) | منبع نامزد برای شناخت موضوع و علائم مهم؛ P42 همچنان Clinical/Referral-sensitive باقی بماند. |
 
 **قفل تصمیم:** P32 و P34–P42 به Accepted، Need، Ordinary-care candidate، consultation-ready یا مجوز توصیهٔ محصول ارتقا نمی‌یابند. هیچ رابطه‌ای در Map تغییر نمی‌کند؛ P35↔P34، P36↔P40 و P37↔P38 بدون ادغام خودکار حفظ می‌شوند. همهٔ منابع candidate هستند تا بازبین مجاز ادعای دقیق، محدودیت و تصمیم را ثبت کند. G8 همچنان **BLOCKED / NOT VERIFIED** است.
+
+
+## S06 — بازبینی هدفمندِ کفایت منابع برای P34، P37، P38 و P41
+**تاریخ:** 2026-10-25. **وضعیت:** بررسی محدودِ منابع نامزد؛ هیچ منبعی با این ثبت به evidence پذیرفته‌شده تبدیل نمی‌شود.
+
+| ID | منبع نامزد و آنچه پشتیبانی می‌کند | محدودیت و حکم |
+|---|---|---|
+| P34 — Dermatophytosis/fungal infection | [CDC — Clinical Overview of Ringworm](https://www.cdc.gov/ringworm/hcp/clinical-overview/) و [WHO — Ringworm (tinea)](https://www.who.int/news-room/fact-sheets/detail/ringworm-%28tinea%29) اطلاعاتی دربارهٔ dermatophyte/tinea، محل‌های درگیر و این‌که بعضی ضایعات با وضعیت‌های دیگر اشتباه می‌شوند ارائه می‌کنند. | این صفحات عمدتاً ringworm/tinea و برخی عفونت‌های ناخن را پوشش می‌دهند؛ برای عنوان گستردهٔ P34 تعریف جامع و مرز عملیاتی HBI کافی نیستند. P34 همچنان Clinical/Safety-sensitive و Safety-referral only؛ تعریف/پروتکل HBI UNKNOWN / INSUFFICIENT باقی می‌ماند. |
+| P37 — Viral skin infection | [DermNet — Viral skin infections](https://dermnetnz.org/topics/viral-skin-infections) طیف متنوعی از عفونت‌های ویروسی پوست و مخاط را فهرست می‌کند، از جمله HSV، زونا، molluscum و warts. | این منبع دامنهٔ گستردهٔ خانواده را نشان می‌دهد، نه یک تشخیص واحد یا مسیر مشترک عملیاتی/ارجاع. P37 همچنان Clinical/Safety-sensitive و Safety-referral only؛ هیچ زیرنوعی با این خانواده ادغام نمی‌شود. |
+| P38 — Cutaneous herpes simplex | [DermNet — Herpes simplex](https://dermnetnz.org/topics/herpes-simplex) منبع اختصاصی‌تری است و توضیح می‌دهد که HSV می‌تواند در محل‌های مخاطی/پوستی گوناگون ظاهر شود و در صورت تردید بالینی ممکن است تأیید آزمایشگاهی لازم باشد. [NHS — Cold sores](https://www.nhs.uk/conditions/cold-sores/) فقط یکی از تظاهرات را پوشش می‌دهد. | صفحهٔ DermNet منبع نامزد برای شناخت دامنه است؛ تشخیص فرد از روی عکس/متن، شدت یا مسیر HBI را تعیین نمی‌کند. P38 با P37 مرتبط می‌ماند، بدون ادغام خودکار؛ Clinical/Safety-sensitive و Safety-referral only حفظ شود. |
+| P41 — Scabies | [CDC — About Scabies](https://www.cdc.gov/scabies/about/) علائم و انتقال را شرح می‌دهد و ارزیابی حرفه‌ای را برای تشخیص/درمان توصیه می‌کند؛ [CDC — Clinical Care of Scabies](https://www.cdc.gov/scabies/hcp/clinical-care/index.html) نشان می‌دهد درمان به ارزیابی و داروهای اختصاصی نیاز دارد و محصولات OTC تأییدشده برای درمان scabies نیستند. [WHO — Scabies](https://www.who.int/news-room/fact-sheets/detail/scabies) منبع عمومی تکمیلی است. | منابع برای تعیین مرز حرفه‌ای و ردِ برداشت «مراقبت آرایشی/محصول معمول» مفیدند، اما پروتکل اجرایی HBI را به‌تنهایی تعریف نمی‌کنند. P41 همچنان Clinical/Safety-sensitive و Safety-referral only؛ بدون تشخیص یا توصیهٔ محصول از روی متن/تصویر. |
+
+### حکم این بازبینی
+- این منابع **candidate source** باقی می‌مانند؛ هیچ‌یک در این ثبت accepted evidence نیست.
+- خلأ P34 (دامنهٔ گسترده‌تر از tinea)، P37 (خانوادهٔ ناهمگون) و پروتکل HBI برای P38/P41 حل‌شده تلقی نمی‌شود.
+- روابط Map، از جمله P35↔P34 و P38↔P37، تغییر نمی‌کنند؛ هیچ وضعیت Accepted، Need، consultation-ready یا مجوز توصیهٔ محصول ایجاد نمی‌شود.
+- این تغییر صرفاً مستندسازی است؛ G8 همچنان **BLOCKED / NOT VERIFIED** می‌ماند.
