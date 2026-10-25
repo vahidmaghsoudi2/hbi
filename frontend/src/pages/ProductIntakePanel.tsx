@@ -47,7 +47,7 @@ const SKIN_TEMPLATES = [
 
 /** Only these V1 boxes have a semantically matching source-bound Evidence field. */
 const SKIN_OK_EVIDENCE_FIELDS = [
-  { key: "skin_goals", label: "اهداف پوستی اعلام‌شده", field: "known_use_cases" },
+  { key: "skin_goals", label: "اهداف پوستی اعلام‌شده", field: "skin_goals" },
   { key: "warnings", label: "هشدارها و محدودیت‌ها", field: "contraindications" },
   { key: "usage", label: "روش مصرف", field: "usage_instructions" },
   { key: "ingredients", label: "ترکیبات کلیدی اعلام‌شده", field: "ingredients" },
