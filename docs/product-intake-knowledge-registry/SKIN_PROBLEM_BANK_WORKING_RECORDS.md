@@ -2018,3 +2018,27 @@ No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care
 - P53–P56 تشخیص‌های تأییدشده نیستند؛ هر چهار مورد Safety-referral only می‌مانند و به Accepted، Need، consultation-ready یا مجوز توصیهٔ محصول ارتقا نمی‌یابند.
 - تعریف سیگنال، زبان قابل‌فهم مشتری، پروتکل ارجاع و تصمیم بازبین مجاز همچنان معیارهای باز هستند. روابط و ساختار Map تغییر نکرده‌اند.
 - این تغییر مستندسازی مقدماتی است؛ G8 همچنان **BLOCKED / NOT VERIFIED** می‌ماند.
+
+
+---
+
+## S09–S10 — بازبینی هدفمندِ کفایت منابع نامزد برای P51–P52 و P57–P61
+
+**تاریخ:** 2026-10-25. **وضعیت:** منبع‌یابی مقدماتی از مراجع سلامت عمومی؛ منابع زیر candidate sources هستند، نه evidence پذیرفته‌شده، نه پروتکل ایمنی مصوب و نه مجوز توصیهٔ محصول. P22 در این بررسی بازنویسی نمی‌شود.
+
+| ID | منبع نامزد و دامنهٔ پشتیبانی | محدودیت و حکم |
+|---|---|---|
+| P51 — Chronic UV damage | [AAD — Sun damage and your skin](https://www.aad.org/public/everyday-care/sun-protection/sun-damage-skin) برای زمینهٔ عمومی دربارهٔ آسیب تجمعی UV و تغییرات قابل مشاهده منبع نامزد است. | این منبع disposition قفل‌شدهٔ Map را تغییر نمی‌دهد: P51 فقط Discovery Context است، NOT NEED-LEVEL و بدون Safety/Referral خودکار. منبع‌یابی به معنی پذیرش یا ایجاد مسیر محصول نیست. |
+| P52 — Actinic keratosis | [AAD — Actinic keratosis: signs and symptoms](https://www.aad.org/public/diseases/skin-cancer/actinic-keratosis-symptoms) ظاهرهای متنوع ضایعه و ارتباط آن با آسیب UV را شرح می‌دهد و برای تغییر مشکوک ارزیابی متخصص پوست را توصیه می‌کند. | منبع عمومی، تشخیص خودکار از تصویر یا معیار عملیاتی HBI ایجاد نمی‌کند. P52 در وضعیت Clinical/Safety-sensitive و Safety-referral only می‌ماند؛ Accepted، Need یا Product نمی‌شود. |
+| P57 — Autoimmune/autoinflammatory skin disease | [NIAMS — Autoimmune Diseases](https://www.niams.nih.gov/health-topics/autoimmune-diseases) و [MedlinePlus — Autoinflammatory diseases](https://medlineplus.gov/ency/article/007845.htm) نشان می‌دهند که این دو خانواده گسترده‌اند، با هم یکی نیستند و می‌توانند تظاهرات گوناگون داشته باشند. | این عنوان یک تشخیص واحد نیست. مرز خانواده، کاربرد عملیاتی HBI و ارتباط با نیاز مراقبتی همچنان UNKNOWN است؛ صرفاً Clinical Anchor گسترده، بدون استنتاج Need یا محصول. |
+| P58 — Cutaneous lupus | [NIAMS — Lupus](https://www.niams.nih.gov/health-topics/lupus) برای علائم گوناگون لوپوس، از جمله تظاهرات پوستی و حساسیت به آفتاب، منبع عمومی نامزد است. | صفحه دربارهٔ لوپوس به‌طور کلی است و به‌تنهایی مرز تخصصی cutaneous lupus یا مسیر ارجاع HBI را تعریف نمی‌کند. P58 همچنان referral-sensitive / clinical-anchor only و Accepted = No است. |
+| P59 — Adult-onset dermatomyositis with skin findings | [MedlinePlus — Dermatomyositis](https://medlineplus.gov/ency/article/000839.htm) ترکیب تظاهرات پوستی و درگیری عضلانی و نیاز به ارزیابی پزشکی را در سطح اطلاعات عمومی شرح می‌دهد. | ظاهر پوستی به‌تنهایی برای تشخیص کافی نیست و منبع عمومی، پروتکل HBI یا تصمیم محصول نمی‌سازد. P59 همچنان Clinical-anchor only / referral-sensitive و Accepted = No است. |
+| P60 — Acanthosis nigricans/systemic-associated skin changes | [MedlinePlus — Acanthosis nigricans](https://medlineplus.gov/ency/article/000852.htm) تغییرات تیره و مخملی در چین‌های پوست و امکان ارتباط با علل گوناگون را شرح می‌دهد. | ظاهر به‌تنهایی علت سیستمیک مشخصی را اثبات نمی‌کند. از این منبع تشخیص، علت، Need یا توصیهٔ محصول استنتاج نمی‌شود؛ P60 در جایگاه Clinical Anchor باقی می‌ماند. |
+| P61 — Photosensitivity | [NIAMS — Lupus](https://www.niams.nih.gov/health-topics/lupus) و [MedlinePlus — Sunburn](https://medlineplus.gov/ency/article/003227.htm) حساسیت به نور/آفتاب را در برخی زمینه‌های پزشکی یا دارویی پوشش می‌دهند. | Photosensitivity یک ارائه/نشانه با علل متعدد است، نه تشخیص مستقل یا مدرک خودکار بیماری زمینه‌ای. رابطهٔ S09↔S10 طبق Map حفظ می‌شود؛ هیچ ارجاع خودکار یا مجوز محصولی اضافه نمی‌شود. |
+
+### حکم این بازبینی
+- منابع بالا فقط برای شناسایی دامنه و محدودیت اطلاعات عمومی ثبت شدند؛ هیچ‌کدام به‌عنوان evidence پذیرفته‌شده یا تأیید بالینی HBI علامت‌گذاری نمی‌شوند.
+- برای P51، disposition قفل‌شده عیناً حفظ می‌شود؛ P52 و P57–P61 نیز از وضعیت‌های Map خارج نمی‌شوند. هیچ تشخیص، Need، Ordinary-care، آستانهٔ ارجاع یا ادعای اثربخشی محصول ساخته نشده است.
+- P58 و P59 در مسیر clinical/referral-sensitive باقی می‌مانند؛ P60 از ظاهر به علت سیستمیک نگاشت نمی‌شود؛ P61 به‌تنهایی علت یا تشخیص را تعیین نمی‌کند.
+- P22 و روابط Map بازنویسی نشده‌اند؛ هیچ منبع یا رابطهٔ جدیدی به نقشه اضافه نشده است.
+- این بازبینی فقط کفایت و محدودیت منابع نامزد را ثبت می‌کند. تا تصویب انسانی مجازِ تعریف‌ها و مسیرهای عملیاتی، موارد همچنان **NOT ACCEPTED / UNKNOWN / NOT CONSULTATION-READY** هستند. G8 همچنان **BLOCKED / NOT VERIFIED** می‌ماند.
