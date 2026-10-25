@@ -44,7 +44,6 @@ const SKIN_TEMPLATES = [
   ["EXFOLIANT", "لایه‌بردار", ["نوع لایه‌بردار", "اسیدها یا ذرات اعلام‌شده", "تناوب مصرف", "هشدار تحریک از برچسب"]],
   ["OTHER_SKIN", "سایر (پوست)", ["چرا در قالب‌های بالا جا نگرفت", "یادداشت ساخت‌یافته اپراتور"]],
 ] as const;
-const SKIN_SHARED_BOXES = ["منبع / لینک / برچسب", "نوع منبع", "منطقه بازار (با شاهد)", "اهداف پوستی اعلام‌شده", "هشدارها و محدودیت‌ها", "روش مصرف", "ترکیبات کلیدی اعلام‌شده", "سایر / اضافات"] as const;
 
 /** Only these V1 boxes have a semantically matching source-bound Evidence field. */
 const SKIN_OK_EVIDENCE_FIELDS = [
