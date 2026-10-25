@@ -1,6 +1,6 @@
 # HBI Homepage — menu map and operational documentation hub
 
-**Status:** Documentation + editable prototype only (updated 2026-10-25). This is not the production homepage and does not change application code, schema, API, or database.
+**Status:** Documentation + editable prototype. The production homepage «دانشنامه» menu was implemented in merged [PR #441](https://github.com/vahidmaghsoudi2/hbi/pull/441). This documentation/prototype does not itself change application code, schema, API, or database.
 
 ## Start here
 
@@ -29,13 +29,13 @@
 1. Do not record new Product Owner decisions in this folder. Decisions and permissions belong in Issue **#406**; link to them here.
 2. Do not create a second decision/status register.
 3. Historical Issues/comments remain in GitHub; this hub links to them rather than pretending to move their history.
-4. Menu labels marked `observed` are derived from `frontend/src/pages/NewHomePage.tsx` on the recorded master snapshot. `proposed_menus` is a separate, PO-approved structure proposal and is not an active production menu. The prototype is not proof that an added menu exists in production.
+4. Menu labels marked `observed` are derived from `frontend/src/pages/NewHomePage.tsx`; the «دانشنامه» menu is active after PR #441. The prototype documents the menu and is not proof of any behavior beyond the source and runtime checks.
 5. No file here authorizes production code, schema, API, database, product creation, QA, or activation changes.
 6. Skin intake template specs live only under `docs/homepage/product-management/`; do not scatter copies.
 
 ## Observed main menu
 
-The current `NewHomePage.tsx` snapshot shows eight main menu cards:
+The current `NewHomePage.tsx` snapshot shows nine main menu cards:
 
 1. خانه و داشبورد
 2. مشتریان
@@ -45,16 +45,17 @@ The current `NewHomePage.tsx` snapshot shows eight main menu cards:
 6. کالا و موجودی
 7. خرید
 8. حسابداری و گزارش‌ها
+9. دانشنامه
 
-The prototype also identifies the top actions separately. «تنظیمات» is not treated as an active main-menu card because it is not present among those eight cards in the inspected source snapshot.
+The prototype also identifies the top actions separately. «تنظیمات» is not treated as an active main-menu card because it is not present among those nine cards in the inspected source snapshot.
 
-## Proposed encyclopedia menu — structure approved, implementation not done
+## Active encyclopedia menu — implementation and source-of-truth boundaries
 
-The `proposed_menus` array in [`menu-structure.json`](menu-structure.json) records the «دانشنامه» menu separately from the eight `observed` production menus. Its seven submenus have explicit readiness states and destinations. Only «دانش پوست» points to an existing specialist reference: [`SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md`](../product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md). It does not duplicate the P01–P61 list or replace the Consolidated Reference / Skin Problem Map. The other six destinations are marked `no-page-yet`; no empty or invented links are presented as ready.
+The «دانشنامه» menu and its seven submenus are present in the production homepage after [PR #441](https://github.com/vahidmaghsoudi2/hbi/pull/441). The prototype records this as an observed menu. «دانش پوست» links to the existing specialist entry point: [SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md](../product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md). The P01–P61 list and problem records remain only in the specialist registry; this menu does not copy or replace them. The other six submenu destinations remain marked `no-page-yet`.
 
 Two boundaries are explicit: «دانش مو» covers general hair/scalp knowledge, while «رنگ مو» covers coloring and care of color-treated hair. The knowledge category «سایر» is not the product-line value `OTHER`.
 
-This is approval of menu structure only. It does not authorize merging production UI code or claim that any submenu is ready for operational use.
+The menu implementation is merged; this does not claim that the six not-yet-created destination pages are operationally ready.
 
 ## Existing records (linked, not moved)
 
