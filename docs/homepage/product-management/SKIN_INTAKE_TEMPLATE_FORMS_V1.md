@@ -799,3 +799,61 @@ Ingredient presence does not establish concentration, product strength, safe fre
 - [ ] Existing DuplicateCheck, research-draft, Evidence QA, Product QA, and lifecycle controls remain authoritative.
 - [ ] This conceptual contract does not imply API/DTO/schema/database implementation or operational product registration.
 
+
+
+### 5.9 `OTHER_SKIN`
+| Box ID | Label |
+|---|---|
+| `other_skin_category` | نوع محصول پوستی (شرح مستند، نه حدس خودکار) |
+| `primary_function_claim` | کارکرد اصلی اعلام‌شده (متن + منبع) |
+| `key_ingredients` | ترکیبات کلیدی اعلام‌شده |
+| `usage_area` | ناحیهٔ مصرف اعلام‌شده |
+| `special_instructions` | دستورهای خاص مصرف، فقط طبق منبع |
+| `warnings_limits` | هشدارها و محدودیت‌های اعلام‌شده |
+
+#### 5.9.1 Detailed field contract — `OTHER_SKIN`
+
+This is a **conceptual V1 contract for review**, not a declaration that every candidate field exists in the API, DTO, or database. It is a controlled fallback for skin-care products that do not fit one of the eight more specific templates. It does not authorize new product categories, schema changes, smart-fill, evidence mapping, operational registration, or lifecycle changes.
+
+| Concept / candidate key | Meaning and semantic class | Source / provenance requirement | Validation and unknown/conflict behavior | Consultation relevance |
+|---|---|---|---|---|
+| Exact identity, brand and product name | Product identity fact | Exact package, verified barcode/SKU, or manufacturer source | Preserve exact spelling and variant; similar names do not establish identity | Prevents claims being transferred between products |
+| Market, formula/version, variant and size | Identity/version context | Exact regional label, package, or manufacturer source | Record only supported facts; unknown remains unknown and conflicting versions stay distinct | Regional formulas and directions may differ |
+| Product type / `other_skin_category` | Operator-selected descriptive classification | Operator selection supported by package or exact manufacturer description | Record the observed/stated type; do not silently reclassify into a specific template or invent a new canonical category | Helps route later review without implying suitability |
+| Primary function / `primary_function_claim` | Manufacturer claim or labelled intended use | Exact wording and source reference, with market/version where available | Keep cosmetic, cleansing, care, and treatment wording distinct; do not upgrade marketing language into a verified outcome | Search/research lead only |
+| Full INCI | Source fact about the labelled formula | Complete ingredient list for the exact market/version | Distinguish full INCI from selected or highlighted ingredients; partial list must be labelled partial | Supports ingredient review, not proof of product efficacy |
+| Key ingredients / `key_ingredients` | Source-reported subset | Exact package/manufacturer source naming the ingredient | Do not infer concentrations, functions, or absence from an incomplete list | Research prioritization only |
+| Ingredient role or mechanism | Scientific interpretation/inference | Ingredient identity and reliable technical reference where needed | Label as inference and preserve rationale/limits; ingredient plausibility is not finished-product proof | Context for review only |
+| Product-specific attributes | Source fact or manufacturer claim for the exact product | Exact source or documented observation, clearly distinguished | Add no ad hoc persistent field through this template; place genuinely uncategorized details in `extras` pending governance | Descriptive context only |
+| Usage area / `usage_area` | Label instruction | Exact package/manufacturer directions | Do not infer face, body, eye-area, lip, or other suitability from product name or category | Avoids unsupported use assumptions |
+| Special instructions / `special_instructions` | Label instruction | Exact directions for the same market/version | Capture amount, timing, frequency, rinse/leave-on, storage, or compatibility only when stated; unknown stays unknown | Instruction fidelity |
+| Warnings and limits / `warnings_limits` | Source fact and/or separately sourced limitation | Exact label/manufacturer warning; independent advice needs its own source | “Not stated” is not “none”; retain contradictory directions and warnings | Risk screening only, not safety clearance |
+| Finished-product evidence | Evidence about the exact marketed formula | Product/version-specific study or test tied to the stated claim | Capture design, population/test material, comparator, duration, endpoint, method, results and limitations when reported | Supports only the outcome actually measured |
+| Ingredient-level evidence | Research about an ingredient or mechanism | Traceable source and relevant context | Keep separate from finished-product evidence; do not transfer ingredient outcomes directly to the product | Indirect research context only |
+| Evidence / QA state | Existing Evidence and QA workflow | Existing source, claim, field, market, dates, conflict and QA fields where supported | Do not invent new enum/storage semantics or auto-verify Evidence; Evidence QA is not Product QA | Enables traceable human review |
+| Candidate relationship to a skin need | Research candidate only | Specific product feature/claim, evidence reference, explicit relationship basis, confirmed identifier and authorized mechanism | No automatic P01–P61 mapping, diagnosis, or individual treatment recommendation | Potential future research aid only if separately authorized |
+| Product-level `evidence_status` | Aggregate status only if its semantics are separately approved | Approved, reproducible derivation from reviewed evidence required | This template does not define or set it; preserve unresolved UNKNOWN/CONFLICT states | Must not imply completeness, safety, activation, or recommendation eligibility |
+
+#### 5.9.2 Fallback selection and evidence rules
+
+- Use `OTHER_SKIN` only when the operator has selected the SKIN product line and none of the eight more specific V1 templates accurately represents the product's primary intake needs.
+- This fallback must not become a shortcut for skipping classification review. If a product clearly fits a specific approved template, use that template instead.
+- Preserve exact source wording, market/version, and source references for material claims. Separate package facts, manufacturer claims, ingredient-level research, finished-product evidence, and reviewer inferences.
+- Do not invent concentration, pH, efficacy, intended use, application area, schedule, or warnings. Do not infer a missing attribute from a similar product.
+- If the product has no dedicated field for a detail, preserve it in `extras` as source-bound text until a governed template revision is approved. Do not add a parallel taxonomy or new persisted fields through this document.
+- If sources disagree, preserve the competing assertions and mark the conflict under the existing workflow. “Not stated” is not “none”.
+- No automatic mapping to P01–P61, Evidence verification, Product QA, activation, safety clearance, or recommendation eligibility is permitted.
+
+#### 5.9.3 Template-specific acceptance criteria
+
+- [ ] Exact product identity and market/version are recorded or explicitly unknown.
+- [ ] The operator-selected fallback category is supported by a source or documented review; no unsupported automatic reclassification occurs.
+- [ ] The primary function remains an attributed claim rather than a verified outcome.
+- [ ] Full INCI is distinguished from selected ingredients and manufacturer highlights.
+- [ ] Usage area, directions, special instructions and warnings are source-bound; unknowns remain visible.
+- [ ] Ingredient-level evidence is not presented as proof of finished-product efficacy.
+- [ ] UNKNOWN and CONFLICT remain visible and follow existing workflow semantics.
+- [ ] Details without a dedicated field are preserved in `extras`, not used to create an unapproved parallel schema.
+- [ ] No automatic P01–P61 mapping, Evidence verification, Product QA, activation, or recommendation eligibility is introduced.
+- [ ] Existing DuplicateCheck, research-draft, Evidence QA, Product QA, and lifecycle controls remain authoritative.
+- [ ] This conceptual contract does not imply API/DTO/schema/database implementation or operational product registration.
