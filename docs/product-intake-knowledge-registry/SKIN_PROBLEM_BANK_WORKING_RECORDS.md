@@ -1850,3 +1850,21 @@ No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care
 - نام/نقش بازبین و تاریخ تصمیم.
 
 **گیت مهم:** منابع بالا به‌عنوان نقطهٔ شروع تحقیق ثبت شده‌اند، نه این‌که تمام ۴۵ شناسه با آن‌ها اعتبارسنجی شده باشند. هنوز هیچ شناسه‌ای به‌واسطهٔ افزودن این فهرست، Accepted یا consultation-ready نمی‌شود. منابع مربوط به یک بیماری نیز اثربخشی محصول نهایی را ثابت نمی‌کنند.
+
+ 
+#### تکمیل پوشش منابع نامزد برای مواردی که صفحهٔ اختصاصی‌شان پیدا شد
+
+| شناسه | منبع نامزد | محدودیت کاربرد |
+|---|---|---|
+| P28 | [DermNet — Atopic dermatitis](https://dermnetnz.org/topics/atopic-dermatitis) | برای بررسی مرز مفهومی؛ نه پذیرش P28 یا توصیهٔ محصول |
+| P29 | [DermNet — Allergic contact dermatitis](https://dermnetnz.org/topics/allergic-contact-dermatitis) | برای بررسی مفهوم و روش‌های ارزیابی تخصصی؛ نه تشخیص خوداظهاری |
+| P27–P29, P33 | [DermNet — Guidelines for the diagnosis and assessment of eczema](https://dermnetnz.org/topics/guidelines-for-the-diagnosis-and-assessment-of-eczema) | منبع افتراقی/مرزبندی؛ به‌تنهایی taxonomy یا وضعیت HBI را تعیین نمی‌کند |
+| P34–P42 | [DermNet — Skin infections](https://dermnetnz.org/topics/skin-infections); [DermNet — Bacterial skin infections](https://dermnetnz.org/topics/bacterial-skin-infections) | منابع آغازین دسته‌ای؛ هر وضعیت خاص باید منبع اختصاصی و مرز ایمنی خود را داشته باشد |
+| P43–P45 | [DermNet — Keratosis pilaris](https://dermnetnz.org/topics/keratosis-pilaris) برای P45؛ [DermNet — Pigmentation disorders](https://dermnetnz.org/topics/pigmentation-disorders) فقط برای مرزهای افتراقی رنگدانه‌ای | برای P43/P44 هنوز منبع اختصاصی و مرز عملیاتی کافی ثبت نشده؛ این خلأ باز می‌ماند |
+| P46 | [DermNet — Seborrhoeic keratosis](https://dermnetnz.org/topics/seborrhoeic-keratosis) | مرجع عمومی ضایعه؛ افتراق از بدخیمی یا تصمیم دربارهٔ ضایعهٔ فردی نیازمند ارزیابی حرفه‌ای است |
+| P47 | [DermNet — Skin tags](https://dermnetnz.org/topics/skin-tag) | مرجع عمومی؛ شبیه‌بودن ظاهری ضایعات مجوز تشخیص یا اقدام نیست |
+| P58, P61 | [DermNet — Skin signs of rheumatic disease](https://dermnetnz.org/topics/skin-signs-of-rheumatic-disease); [DermNet — Photosensitivity](https://dermnetnz.org/topics/photosensitivity) | برای زمینهٔ بالینی و رابطه‌های احتمالی؛ نه تشخیص بیماری سیستمیک یا مسیر ارجاع خودکار |
+| P59 | [DermNet — Adult-onset dermatomyositis](https://dermnetnz.org/topics/adult-onset-dermatomyositis) | منبع تخصصی آغازین برای ماهیت بالینی و سیستمیک؛ P59 همچنان Clinical/Referral-sensitive باقی می‌ماند |
+| P60 | [DermNet — Acanthosis nigricans](https://dermnetnz.org/topics/acanthosis-nigricans) | مرجع تخصصی برای بررسی ارتباط‌های زمینه‌ای؛ نه تشخیص بیماری زمینه‌ای در مشتری |
+
+**نتیجهٔ تکمیلی:** اکنون چند منبع تخصصی/عمومی قابل ردیابی برای شروع بررسی ثبت شده‌اند، اما این کار فقط «منبع‌یابی مقدماتی» است. برای P43/P44 و نیز برای هر ادعای اختصاصی که منبع بالا دقیقاً پشتیبانی نمی‌کند، وضعیت evidence همچنان UNKNOWN / INSUFFICIENT می‌ماند. هیچ منبع عمومی یا صفحهٔ آموزشی به‌تنهایی جایگزین مرور ادعای دقیق و تصمیم بازبین مجاز نمی‌شود.
