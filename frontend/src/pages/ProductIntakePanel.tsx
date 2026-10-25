@@ -44,7 +44,14 @@ const SKIN_TEMPLATES = [
   ["EXFOLIANT", "لایه‌بردار", ["نوع لایه‌بردار", "اسیدها یا ذرات اعلام‌شده", "تناوب مصرف", "هشدار تحریک از برچسب"]],
   ["OTHER_SKIN", "سایر (پوست)", ["چرا در قالب‌های بالا جا نگرفت", "یادداشت ساخت‌یافته اپراتور"]],
 ] as const;
-const SKIN_SHARED_BOXES = ["منبع / لینک / برچسب", "نوع منبع", "منطقه بازار (با شاهد)", "اهداف پوستی اعلام‌شده", "هشدارها و محدودیت‌ها", "روش مصرف", "ترکیبات کلیدی اعلام‌شده", "سایر / اضافات"] as const;
+
+/** Only these V1 boxes have a semantically matching source-bound Evidence field. */
+const SKIN_OK_EVIDENCE_FIELDS = [
+  { key: "skin_goals", label: "اهداف پوستی اعلام‌شده", field: "skin_goals" },
+  { key: "warnings", label: "هشدارها و محدودیت‌ها", field: "contraindications" },
+  { key: "usage", label: "روش مصرف", field: "usage_instructions" },
+  { key: "ingredients", label: "ترکیبات کلیدی اعلام‌شده", field: "ingredients" },
+] as const;
 
 type Draft = {
   product_id: string;
@@ -279,6 +286,7 @@ export default function ProductIntakePanel({
   const [intro, setIntro] = useState("");
   const [draft, setDraft] = useState<Draft>(EMPTY);
   const [skinTemplate, setSkinTemplate] = useState<string>("");
+  const [skinBoxValues, setSkinBoxValues] = useState<Record<string, string>>({});
   /** Baseline product_line at Edit entry — used so unchanged line is omitted from PATCH. */
   const [initialProductLine, setInitialProductLine] = useState("");
   const [busy, setBusy] = useState(false);
@@ -296,7 +304,7 @@ export default function ProductIntakePanel({
   const [researchSourceReference, setResearchSourceReference] = useState("");
   const [researchClaimType, setResearchClaimType] = useState("MANUFACTURER_CLAIM");
   const [researchField, setResearchField] = useState("claimed_benefits");
-  const [researchMarketRegion, setResearchMarketRegion] = useState("IR");
+  const [researchMarketRegion, setResearchMarketRegion] = useState("");
   const [researchNotes, setResearchNotes] = useState("");
   const [researchReviewReason, setResearchReviewReason] = useState("");
   const [researchBusy, setResearchBusy] = useState(false);
@@ -309,6 +317,68 @@ export default function ProductIntakePanel({
       setResearchRows(await getProductEvidence(productId, activeToken));
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  const isP1cTestProduct = editing && draft.product_id === "TEST-P1C-001" && draft.product_line === "SKIN";
+
+  async function saveSkinEvidenceDraft() {
+    setErr(null);
+    setMsg(null);
+    if (!isP1cTestProduct || researchProductId !== "TEST-P1C-001") {
+      setErr("ثبت باکس‌های P1c فقط برای محصول آزمایشی ازپیش‌موجود TEST-P1C-001 مجاز است.");
+      return;
+    }
+    if (!researchSourceType.trim() || !researchSourceReference.trim()) {
+      setErr("نوع منبع و نشانی/مرجع دقیق منبع برای ثبت باکس‌های پژوهش الزامی است.");
+      return;
+    }
+
+    const fields = [
+      ...SKIN_OK_EVIDENCE_FIELDS.map((item) => ({
+        field: item.field,
+        label: item.label,
+        value: (skinBoxValues[item.key] || "").trim(),
+      })),
+      ...(skinTemplate === "HYDRATING_MOISTURIZER"
+        ? [{
+            field: "claimed_benefits",
+            label: "ادعای آبرسانی یا حفظ رطوبت",
+            value: (skinBoxValues.claimed_benefits || "").trim(),
+          }]
+        : []),
+    ].filter((item) => item.value.length > 0);
+
+    if (fields.length === 0) {
+      setErr("حداقل یک باکس مجاز را با متن مستند تکمیل کنید.");
+      return;
+    }
+
+    setResearchBusy(true);
+    try {
+      const activeToken = (await onEnsureSession?.()) ?? token;
+      if (!activeToken) throw new Error("نشست فعال برای ثبت پژوهش موجود نیست.");
+      await createResearchDraft(
+        "TEST-P1C-001",
+        fields.map((item) => ({
+          claim: item.value,
+          field: item.field,
+          source_type: researchSourceType.trim(),
+          source_reference: researchSourceReference.trim(),
+          claim_type: researchClaimType || "UNKNOWN",
+          market_region: researchMarketRegion.trim() || undefined,
+          notes: `P1c approved OK box: ${item.label}; template=${skinTemplate || "not-selected"}${researchNotes.trim() ? `; ${researchNotes.trim()}` : ""}`,
+        })),
+        activeToken,
+      );
+      setSkinBoxValues({});
+      setResearchNotes("");
+      setMsg("پیش‌نویس‌های مجاز P1c ثبت شدند؛ همه با QA=PENDING و evidence_status=UNKNOWN باقی می‌مانند.");
+      await loadResearch("TEST-P1C-001");
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : String(e));
+    } finally {
+      setResearchBusy(false);
     }
   }
 
@@ -365,6 +435,8 @@ export default function ProductIntakePanel({
   }
 
   useEffect(() => {
+    setSkinTemplate("");
+    setSkinBoxValues({});
     if (editProduct?.product_id) {
       const next = fromProduct(editProduct);
       setDraft(next);
@@ -543,6 +615,10 @@ export default function ProductIntakePanel({
 
   async function save() {
     setErr(null);
+    if (!editing && draft.product_id.trim() === "TEST-P1C-001") {
+      setErr("TEST-P1C-001 یک شناسهٔ آزمایشی ازپیش‌موجود است؛ ایجاد محصول با این شناسه از مسیر Intake ممنوع است.");
+      return;
+    }
     setMsg(null);
     if (!draft.product_id.trim() || !draft.brand.trim() || !draft.product_name.trim()) {
       setErr("شناسه، برند و نام محصول الزامی است.");
@@ -796,17 +872,135 @@ export default function ProductIntakePanel({
       {draft.product_line === "SKIN" && (
         <fieldset className="pro-fieldset" style={{ marginTop: "1rem" }}>
           <legend>۳) قالب ثابت محصول پوست (V1)</legend>
-          <p className="pro-lead">اسکلت P1 است: انتخاب قالب محلی است؛ باکس‌ها خالی و غیرفعال‌اند، ذخیره نمی‌شوند و به API ارسال نمی‌شوند. اطلاعات ساختگی یا تأیید خودکار ایجاد نمی‌شود.</p>
+          <p className="pro-lead">
+            فقط برای محصول ازپیش‌موجود TEST-P1C-001 فعال است. باکس‌های OK به Evidence دارای منبع تبدیل می‌شوند؛
+            سایر باکس‌ها تا قرارداد ذخیره‌سازی مستقل غیرفعال می‌مانند. این مسیر محصول نمی‌سازد و QA را تأیید نمی‌کند.
+          </p>
           <label className="pro-label" htmlFor="skin-template">قالب محصول پوست</label>
           <select id="skin-template" className="pro-input" value={skinTemplate} onChange={(e) => setSkinTemplate(e.target.value)}>
             <option value="">— انتخاب قالب —</option>
             {SKIN_TEMPLATES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
           </select>
-          <h3>باکس‌های مشترک</h3>
-          <div className="pro-grid-2">
-            {SKIN_SHARED_BOXES.map((label) => <div key={label}><label className="pro-label">{label}</label><input className="pro-input" value="" placeholder="در این مرحله غیرفعال است" disabled readOnly /></div>)}
+
+          <div className="pro-grid-2" style={{ marginTop: "0.75rem" }}>
+            <div>
+              <label className="pro-label">نوع منبع *</label>
+              <select className="pro-input" value={researchSourceType} onChange={(e) => setResearchSourceType(e.target.value)} disabled={!isP1cTestProduct}>
+                <option value="MANUFACTURER">تولیدکننده</option>
+                <option value="REGULATORY">مرجع مقرراتی</option>
+                <option value="PEER_REVIEWED">مقاله داوری‌شده</option>
+                <option value="CLINICAL_TRIAL">کارآزمایی بالینی</option>
+                <option value="OTHER">سایر</option>
+                <option value="OPERATOR_DECLARATION">اظهار اپراتور</option>
+              </select>
+            </div>
+            <div>
+              <label className="pro-label">نوع ادعا</label>
+              <select className="pro-input" value={researchClaimType} onChange={(e) => setResearchClaimType(e.target.value)} disabled={!isP1cTestProduct}>
+                <option value="UNKNOWN">نامشخص</option>
+                <option value="MANUFACTURER_CLAIM">ادعای تولیدکننده</option>
+                <option value="EVIDENCE">شاهد</option>
+                <option value="INFERENCE">استنباط</option>
+                <option value="FACT">واقعیت (فقط منبع مستقل مجاز)</option>
+                <option value="CONFLICT">متعارض</option>
+              </select>
+            </div>
+            <div style={{ gridColumn: "1 / -1" }}>
+              <label className="pro-label">نشانی یا مرجع دقیق منبع *</label>
+              <input className="pro-input" value={researchSourceReference} onChange={(e) => setResearchSourceReference(e.target.value)} placeholder="URL، شناسه مقاله یا مرجع دقیق" disabled={!isP1cTestProduct} />
+            </div>
+            <div>
+              <label className="pro-label">منطقه بازار (اختیاری، فقط با شاهد)</label>
+              <input className="pro-input" value={researchMarketRegion} onChange={(e) => setResearchMarketRegion(e.target.value)} placeholder="خالی بماند اگر معلوم نیست" disabled={!isP1cTestProduct} />
+            </div>
+            <div style={{ gridColumn: "1 / -1" }}>
+              <label className="pro-label">یادداشت / محدودیت‌ها</label>
+              <textarea className="pro-input" rows={2} value={researchNotes} onChange={(e) => setResearchNotes(e.target.value)} placeholder="اختیاری" disabled={!isP1cTestProduct} />
+            </div>
           </div>
-          {skinTemplate && <><h3>باکس‌های اختصاصی: {SKIN_TEMPLATES.find(([value]) => value === skinTemplate)?.[1]}</h3><div className="pro-grid-2">{(SKIN_TEMPLATES.find(([value]) => value === skinTemplate)?.[2] ?? []).map((label) => <div key={label}><label className="pro-label">{label}</label><input className="pro-input" value="" placeholder="در این مرحله غیرفعال است" disabled readOnly /></div>)}</div></>}
+
+          <h3>باکس‌های مشترک مجاز (OK)</h3>
+          <div className="pro-grid-2">
+            {SKIN_OK_EVIDENCE_FIELDS.map((item) => (
+              <div key={item.key}>
+                <label className="pro-label">{item.label} *</label>
+                <textarea
+                  className="pro-input"
+                  rows={2}
+                  value={skinBoxValues[item.key] || ""}
+                  onChange={(e) => setSkinBoxValues((prev) => ({ ...prev, [item.key]: e.target.value }))}
+                  placeholder={isP1cTestProduct ? "متن ادعا/ویژگی مطابق منبع" : "فقط در پایلوت مجاز فعال است"}
+                  disabled={!isP1cTestProduct}
+                />
+              </div>
+            ))}
+            <div>
+              <label className="pro-label">سایر / اضافات (فعلاً بدون مقصد ساختاریافته)</label>
+              <input className="pro-input" value="" placeholder="غیرفعال" disabled readOnly />
+            </div>
+          </div>
+
+          {skinTemplate && (
+            <>
+              <h3>باکس‌های اختصاصی: {SKIN_TEMPLATES.find(([value]) => value === skinTemplate)?.[1]}</h3>
+              <div className="pro-grid-2">
+                {(SKIN_TEMPLATES.find(([value]) => value === skinTemplate)?.[2] ?? []).map((label) => {
+                  const allowed = skinTemplate === "HYDRATING_MOISTURIZER" && label === "ادعای آبرسانی یا حفظ رطوبت (متن + منبع)";
+                  return (
+                    <div key={label}>
+                      <label className="pro-label">{label}</label>
+                      {allowed ? (
+                        <textarea
+                          className="pro-input"
+                          rows={2}
+                          value={skinBoxValues.claimed_benefits || ""}
+                          onChange={(e) => setSkinBoxValues((prev) => ({ ...prev, claimed_benefits: e.target.value }))}
+                          placeholder={isP1cTestProduct ? "ادعای منبع‌دار؛ نه نتیجه‌گیری مستقل" : "فقط در پایلوت مجاز فعال است"}
+                          disabled={!isP1cTestProduct}
+                        />
+                      ) : (
+                        <input className="pro-input" value="" placeholder="در این مرحله غیرفعال است" disabled readOnly />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          <div className="pro-actions" style={{ marginTop: "0.75rem" }}>
+            <button type="button" className="pro-btn-primary" disabled={!isP1cTestProduct || researchBusy} onClick={() => void saveSkinEvidenceDraft()}>
+              {researchBusy ? "در حال ثبت…" : "ثبت باکس‌های مجاز به‌صورت پیش‌نویس"}
+            </button>
+          </div>
+          <p className="pro-lead" role="note">
+            هر assertion فقط با claim، نوع منبع و مرجع منبع ارسال می‌شود. وضعیت QA=PENDING و evidence_status=UNKNOWN باقی می‌ماند؛ تأیید یا فعال‌سازی از این مسیر انجام نمی‌شود.
+          </p>
+          <div style={{ marginTop: "0.75rem" }}>
+            <div className="pro-actions">
+              <strong>شواهد ذخیره‌شده: {researchRows.length}</strong>
+              <button type="button" className="pro-btn-secondary" disabled={researchBusy} onClick={() => void loadResearch("TEST-P1C-001")}>
+                بازخوانی شواهد
+              </button>
+            </div>
+            {researchRows.length === 0 ? (
+              <p className="pro-lead">هنوز شاهدی برای این محصول آزمایشی بازخوانی نشده است.</p>
+            ) : (
+              <ul>
+                {researchRows.map((item) => (
+                  <li key={item.evidence_id} style={{ marginBottom: "0.5rem" }}>
+                    <strong>{item.claim || "—"}</strong>
+                    <div className="pro-lead" style={{ fontSize: "0.85rem" }}>
+                      فیلد: {String(item.field || "—")} · منبع: {item.source_type || "—"} / {item.source_reference || "—"}
+                    </div>
+                    <div className="pro-lead" style={{ fontSize: "0.85rem" }}>
+                      QA: {String(item.qa_status || "PENDING")} · evidence_status: {String(item.evidence_status || "UNKNOWN")} · conflict: {String(item.conflict_status || "NONE")}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </fieldset>
       )}
 
@@ -906,7 +1100,7 @@ export default function ProductIntakePanel({
         </fieldset>
       )}
 
-      {researchProductId && (
+      {researchProductId && researchProductId !== "TEST-P1C-001" && (
         <fieldset className="pro-fieldset" style={{ marginTop: "1rem" }}>
           <legend>۴) پیش‌نویس پژوهش و بررسی شواهد — {researchProductId}</legend>
           <p className="pro-lead" style={{ fontSize: "0.9rem" }}>
