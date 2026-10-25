@@ -507,3 +507,75 @@ The word “micellar” does not itself establish rinse-free use, complete makeu
 - [ ] Candidate skin-need relationships never auto-link to P01–P61.
 - [ ] Existing DuplicateCheck, research-draft, Evidence QA, Product QA, and lifecycle controls remain authoritative.
 - [ ] This documentation does not authorize schema/API/DB changes, smart-fill, evidence verification, operational product registration, QA approval, activation, or recommendation behavior.
+
+
+
+#### 5.5.1 Detailed field contract — `TONER`
+
+This is a conceptual contract for review, not a declaration that every candidate field exists in Product, ProductKnowledge, DTO, API, or database storage. Use the existing product identity, source provenance, research-draft, Evidence, DuplicateCheck, and QA workflows. “Toner” is a product-category label and does not, by itself, establish exfoliating action, hydration, acne treatment, or suitability for a particular skin type.
+
+| Concept / candidate key | Meaning and semantic class | Source / provenance requirement | Validation and UNKNOWN/CONFLICT behavior | Consultation relevance |
+|---|---|---|---|---|
+| Exact product identity, market, variant, formula/version | Product identity facts | Exact package or manufacturer source for the specific regional SKU | Similar names and packaging do not prove identical formulas; unknown remains unknown | Prevents transferring ingredient and claim evidence across versions |
+| Size, GTIN, packaging version | Package identity facts | Package label, barcode, dated package image, or exact SKU source | No fabricated defaults; distinguish a packaging refresh from a formula change only when evidence supports it | Duplicate and version control |
+| Full INCI | Label fact about the formula | Complete package INCI or exact manufacturer source for the same market/version | Partial lists must be labelled partial; do not reconstruct from a sibling product | Supports ingredient review, not proof of efficacy |
+| Key ingredients / `key_ingredients` | Source-reported subset | Exact package/manufacturer source | Keep separate from full INCI and manufacturer-highlighted “actives”; do not infer concentration | Research prioritization only |
+| Toner format and texture | Product descriptor or manufacturer claim | Exact source; label direct observation separately from marketing | Do not infer liquid, essence, mist, or pad format from category alone; unknown is allowed | Describes form of use, not suitability |
+| Intended function / `stated_skin_goals` | Manufacturer claim or free-text candidate | Exact claim and source reference | Preserve wording such as hydrating, soothing, balancing, or exfoliating; do not silently turn a broad claim into a verified outcome | Search/research lead, not automatic recommendation |
+| Exfoliating ingredients or action | Ingredient fact and/or product claim, depending on source | Full INCI plus exact product claim; concentration, pH, and test context only if actually sourced | Do not infer exfoliating strength, concentration, pH, or frequency from ingredient presence or product name | May materially affect tolerance and use context |
+| Hydration/soothing claims | Manufacturer claim or product-specific evidence | Exact source and, for efficacy conclusions, evidence matched to the exact product/version and endpoint | Ingredient mechanism is not proof of finished-product performance; preserve missing endpoint or study context | Candidate relevance only |
+| Alcohol, fragrance, essential oils, acids, and other ingredient presence | Formula fact based on INCI | Full INCI for the exact version | Do not declare presence or absence from a partial list; distinguish ingredient identity from assumptions about irritation | May inform a specific user's review, but presence alone does not prove harm or safety |
+| Skin-type/sensitivity claims | Manufacturer claim or separately labelled evidence assessment | Exact source; product-specific tolerability evidence where claimed | “Sensitive skin”, “gentle”, “hypoallergenic”, and “non-irritating” are not universal guarantees | Prompts review; does not guarantee individual tolerance |
+| Application area and method | Label instruction | Exact product directions | Record face/body, hands, cotton pad, hands-only application, misting, and avoidance areas only where stated | Prevents invented instructions |
+| Frequency, layering, rinse/leave-on | Label instruction | Exact product directions for the same version | Distinguish explicitly stated instructions from not stated; do not invent daily use or layering order | Instruction fidelity and tolerance review |
+| Warnings and restrictions | Label fact and/or separately sourced limitation | Exact label/manufacturer source; external guidance needs its own credible source | “Not stated” is not “none”; preserve conflicting sources | Risk screening only, not safety clearance |
+| Finished-product evidence | Evidence about the exact product/version | Study or test tied to the finished formula and the specific claim | Capture design, population, comparator, duration, endpoint, method, result, and limitations where reported | Supports only the outcome actually measured |
+| Ingredient-level evidence | Evidence about a named ingredient or mechanism | Reliable scientific/technical source with ingredient form and context where relevant | Do not treat it as proof of finished-product efficacy, tolerability, or suitability | Research context only |
+| Existing Evidence record and review status | Claim-evidence assertion and review state | Reuse existing source type/reference, claim, field, claim type, market, dates, conflict, and QA fields where available | Source capture, appraisal, conflict, and QA remain distinct; no auto-verification | Makes each material claim traceable |
+| Product-level `evidence_status` | Aggregate status only if separately approved | Must follow approved semantics and a reproducible derivation rule | This template neither defines nor sets it; retain the known implementation gap and unresolved UNKNOWN/CONFLICT semantics | Must not imply Product QA, safety clearance, activation, or recommendation eligibility |
+| Candidate relationship to a skin need | Proposed relationship concept | Specific feature/claim, evidence reference, confirmed canonical need identifier, and authorized relationship mechanism | Keep free-text goals separate; no automatic P01–P61 mapping | Research lead only, not diagnosis or individualized recommendation |
+
+#### 5.5.2 Claim and evidence boundaries for toner
+
+For material claims about hydration, soothing, oil control, pore appearance, exfoliation, redness, or acne-related outcomes, record or explicitly mark unknown:
+
+1. Exact claim wording, intended endpoint, source, market, and formula/version.
+2. Whether the statement is package text, manufacturer marketing, ingredient-level research, consumer feedback, instrumental testing, or a product-specific study.
+3. For studies/tests, the population or test material, design, duration, comparator, endpoint, measurement method, numerical result, and limitations where reported.
+4. Whether the measured endpoint actually matches the claim. A change in surface oil or skin feel does not automatically establish treatment of acne, reduced pore size, or improvement in a diagnosed condition.
+5. For exfoliating claims, the exact source basis for the ingredient/action and any reported concentration, pH, frequency, or test conditions. Missing values stay unknown.
+6. Conflicting statements, unavailable full reports, and the current review state.
+
+The category name “toner” does not establish that a product is alcohol-based, alcohol-free, exfoliating, hydrating, pH-balancing, acne-treating, or safe for all skin types. Ingredient presence alone does not prove the finished formula's outcome.
+
+#### 5.5.3 Ingredient and terminology safeguards
+
+- Keep full INCI, selected key ingredients, manufacturer-highlighted ingredients, and independently interpreted ingredient roles distinct.
+- Do not infer percentages, pH, exfoliation strength, or ingredient absence from ingredient order, marketing emphasis, or a similar product.
+- Preserve the source's exact terms, including “pore minimizing”, “balancing”, “clarifying”, “soothing”, “alcohol-free”, and “for sensitive skin”; none is self-validating proof of efficacy or universal tolerance.
+- Do not equate the presence of an acid or other potentially active ingredient with a verified exfoliating effect or a particular safe frequency.
+- Do not invent application frequency, layering order, rinse instructions, contraindications, or pregnancy-related guidance. Transcribe the label and source external guidance separately when legitimately needed.
+- A product-specific study, ingredient study, marketing claim, and user anecdote must not be represented as interchangeable evidence classes.
+
+#### 5.5.4 UNKNOWN, CONFLICT, and acceptance behavior
+
+- Missing market/version, complete INCI, concentration, pH, exact claim, application method, frequency, endpoint, test method, or warning data remains unknown; do not fill it from a similar product.
+- If package, manufacturer, retailer, or research sources disagree, preserve each source-bound assertion and mark the relevant item conflicted under the existing workflow.
+- “Not stated” must remain distinct from “no”, “alcohol-free”, “non-exfoliating”, “safe for sensitive skin”, or “use daily”.
+- If only selected ingredients are published, do not label them full INCI.
+- If only a manufacturer summary is accessible, attribute it to the manufacturer and note that the underlying protocol/report could not be appraised.
+- Any future smart-fill, if separately authorized, may propose source-linked values for human review only. It must not auto-verify Evidence, pass Product QA, activate a product, clear a safety concern, or make the product recommendation-eligible.
+
+#### 5.5.5 Template-specific acceptance criteria
+
+- [ ] Exact product identity, market, variant, and version are recorded or explicitly unknown.
+- [ ] Full INCI is distinguished from selected key ingredients and manufacturer-highlighted ingredients.
+- [ ] Toner format and intended function are source-bound and not inferred from the category name.
+- [ ] Exfoliating, hydrating, soothing, oil-control, and other material claims preserve exact scope and evidence type.
+- [ ] Concentration, pH, strength, frequency, and other quantitative details are recorded only when supported by an exact source.
+- [ ] Finished-product evidence is distinguished from ingredient-level research, marketing, and testimonials.
+- [ ] Usage directions, application areas, and warnings are transcribed from the exact version; “not stated” is not “none”.
+- [ ] UNKNOWN and CONFLICT remain visible and are not silently converted into trusted values.
+- [ ] Candidate skin-need relationships have a specific basis and never auto-link to P01–P61.
+- [ ] Existing DuplicateCheck, research-draft, Evidence QA, Product QA, and lifecycle controls remain authoritative.
+- [ ] This documentation does not authorize schema/API/DB changes, smart-fill, evidence verification, operational product registration, QA approval, activation, or recommendation behavior.
