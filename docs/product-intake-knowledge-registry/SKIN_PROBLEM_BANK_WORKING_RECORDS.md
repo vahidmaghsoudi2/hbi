@@ -1823,6 +1823,7 @@ No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care
 | قفسه/شناسه‌های مرتبط | منبع نامزد | استفادهٔ محدود در بازبینی | آنچه این منبع به‌تنهایی ثابت نمی‌کند |
 |---|---|---|---|
 | S04: P17, P19, P20, P22, P23 | [DermNet — Pigmentation disorders](https://dermnetnz.org/topics/pigmentation-disorders) | جهت‌یابی افتراقی برای تغییرات رنگدانه؛ پیدا کردن مرزهای احتمالی میان presentationها | تعریف عملیاتی پذیرفته‌شدهٔ HBI، Need، تشخیص فرد یا اثربخشی محصول |
+| S04: P17, P20 | [DermNet — Skin pigmentation problems](https://dermnetnz.org/topics/skin-pigmentation-problems) | منبع مقدماتی برای تمایز کلی hyperpigmentation، hypopigmentation و depigmentation؛ برای بررسی تعریف/مرز P17 و P20 | تعریف عملیاتی HBI، علت تغییر رنگ در فرد، تشخیص، پذیرش Problem یا اثربخشی محصول |
 | S04: P19 | [DermNet — Postinflammatory hyperpigmentation](https://dermnetnz.org/topics/postinflammatory-hyperpigmentation) | منبع آغازین تخصصی برای مفهوم PIH و تمایز آن از تغییرات رنگدانهٔ دیگر | پذیرش P19، توصیهٔ محصول، یا تعمیم اثر یک ماده به محصول نهایی |
 | S04: P18 | [American Academy of Dermatology — Melasma treatment](https://www.aad.org/public/diseases/a-z/melasma-treatment) | اطلاعات عمومی متخصصان دربارهٔ melasma و مدیریت آن؛ برای بازبینی مرز ادعاها | مجوز خودکار برای توصیهٔ OTC یا ادعای اثربخشی هر محصول دارای مادهٔ مشابه |
 | S04: P21 | [DermNet — Vitiligo](https://dermnetnz.org/topics/vitiligo) | منبع تخصصی آغازین برای مرز و ویژگی‌های کلی vitiligo | تشخیص، پذیرش Need یا مجوز مراقبت معمول |
