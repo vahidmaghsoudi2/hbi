@@ -53,7 +53,7 @@ The prototype also identifies the top actions separately. «تنظیمات» is 
 
 ## Active encyclopedia menu — implementation and source-of-truth boundaries
 
-The «دانشنامه» menu and its seven submenus are present in the production homepage after [PR #441](https://github.com/vahidmaghsoudi2/hbi/pull/441). The prototype records this as an observed menu. «دانش پوست» links to the existing specialist entry point: [SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md](../product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md). The P01–P61 list and problem records remain only in the specialist registry; this menu does not copy or replace them. The other six submenu destinations remain marked `no-page-yet`.
+The «دانشنامه» menu and its seven submenus are present in the production homepage after [PR #441](https://github.com/vahidmaghsoudi2/hbi/pull/441). Under «دانش پوست», the central product-characteristics list is [PRODUCTS.md](encyclopedia/skin/PRODUCTS.md), containing the seven research dossiers P1–P7; it is research evidence, not Product Master registration or QA approval. The separate [SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md](../product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) remains available for the specialist P01–P61 problem registry. The menu must expose both references without copying either dataset. The other six submenu destinations remain marked `no-page-yet`.
 
 Two boundaries are explicit: «دانش مو» covers general hair/scalp knowledge, while «رنگ مو» covers coloring and care of color-treated hair. The knowledge category «سایر» is not the product-line value `OTHER`.
 
@@ -75,4 +75,4 @@ The menu implementation is merged; this does not claim that the six not-yet-crea
 2. Keep the JSON schema/data coherent and review exported changes before committing them.
 3. Record actual browser/test outcomes in `USER_PATH_CHECKLIST.md` only when supported by evidence.
 4. Send policy/Gate decisions to Issue #406 and Product Knowledge evidence to PR #411.
-5. No code change is authorized by this documentation PR.
+5. This folder is documentation and prototype only; production behavior changes must be implemented and reviewed in application code.
