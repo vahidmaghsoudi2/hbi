@@ -479,6 +479,11 @@ export default function ProductIntakePanel({
   }
 
   useEffect(() => {
+    setSkinTemplate("");
+    setSkinBoxValues({});
+    setSkinSourceReference("");
+    setSkinSourceType("MANUFACTURER");
+    setSkinMarketRegion("");
     if (editProduct?.product_id) {
       const next = fromProduct(editProduct);
       setDraft(next);
