@@ -11,6 +11,8 @@
 - [User-path checklist](USER_PATH_CHECKLIST.md) — observed user paths and test evidence slots.
 - **[مدیریت محصولات — قالب ورود پوست V1](product-management/SKIN_INTAKE_TEMPLATE_FORMS_V1.md)** — fixed skin intake templates (canonical under homepage)
 - **[هاب مدیریت محصولات](product-management/README.md)** — product-management menu documentation space
+- **[دانشنامه — مرجع مستندات](encyclopedia/README.md)** — هاب هفت زیرمنو و مسیرهای محتوایی دانشنامه
+- **[دانش پوست — فهرست محصولات](encyclopedia/skin/PRODUCTS.md)** — دفتر مرکزی نمونه‌ها و تغییرات محتوای دانش پوست
 
 > The prototype edits only a browser-local draft. To persist changes in the repository, export the JSON, review it, then submit the revised `menu-structure.json` through a Pull Request. The prototype does not write to GitHub automatically. The interactive preview uses a third-party static preview service and is not GitHub Pages or a production deployment. `menu-structure.json` remains the canonical menu data; the embedded fallback in `index.html` must be refreshed whenever that JSON changes.
 
