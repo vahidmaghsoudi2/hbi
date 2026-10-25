@@ -435,6 +435,7 @@ export default function ProductIntakePanel({
   }
 
   useEffect(() => {
+    setSkinTemplate("");
     setSkinBoxValues({});
     if (editProduct?.product_id) {
       const next = fromProduct(editProduct);
