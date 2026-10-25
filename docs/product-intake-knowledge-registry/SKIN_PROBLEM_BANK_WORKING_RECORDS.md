@@ -1886,3 +1886,24 @@ No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care
 | P42 | [DermNet — Herpes zoster (shingles)](https://dermnetnz.org/topics/herpes-zoster) | منبع اختصاصی برای موضوع shingles؛ P42 همچنان در مسیر Clinical/Referral-sensitive است |
 
 **خلأهای صریح باقی‌مانده:** P17/P20 هنوز به تعریف عملیاتی HBI و مرزهای مصوب نیاز دارند؛ P24 و P33 به معیارهای تفکیک/ثبت نیاز دارند؛ P34/P37/P38/P41 به صفحات اختصاصی و مرزهای ارجاع مناسب خود نیاز دارند؛ P43/P44 همچنان بدون منبع/مرز عملیاتی کافی‌اند؛ P49/P50/P53–P56 نیازمند تصمیم انسانی و پروتکل ارجاع مجاز هستند؛ P57 یک خانوادهٔ بالینی گسترده است و نباید به‌عنوان یک تشخیص واحد استفاده شود. این‌ها در وضعیت UNKNOWN / INSUFFICIENT باقی می‌مانند.
+
+
+---
+
+## S05–S06 — ثبت منابع نامزد برای بازبینی انسانی (P32، P34–P42)
+**تاریخ:** 2026-10-25. **وضعیت:** منابع نامزد؛ نه evidence پذیرفته‌شده، نه پذیرش پزشکی، نه مجوز توصیهٔ محصول.
+
+| ID | منابع نامزد | نتیجهٔ محدود بازبینی و شکاف |
+|---|---|---|
+| P32 — Hives/Urticaria | [NHS](https://www.nhs.uk/conditions/hives/); [AAD](https://www.aad.org/public/diseases/a-z/hives-overview) | برای شرح عمومی و متن ایمنی نامزدند؛ تشخیص یا پروتکل HBI هنوز تأیید نشده است. |
+| P34 — Dermatophytosis/fungal infection | [DermNet: Skin infections](https://dermnetnz.org/topics/skin-infections); [WHO: Ringworm](https://www.who.int/news-room/fact-sheets/detail/ringworm-%28tinea%29) | DermNet دسته‌ای است و WHO بیشتر به tinea/ringworm مربوط است؛ پوشش جامع P34 ثابت نشده است. |
+| P35 — Tinea/ringworm | [NHS](https://www.nhs.uk/conditions/ringworm/); [WHO](https://www.who.int/news-room/fact-sheets/detail/ringworm-%28tinea%29) | منابع موضوعی؛ ظاهر به‌تنهایی تشخیص فردی را ثابت نمی‌کند. رابطهٔ P35↔P34 طبق Map حفظ شود. |
+| P36 — Bacterial skin infection | [DermNet](https://dermnetnz.org/topics/bacterial-skin-infections); [NHS: Cellulitis](https://www.nhs.uk/conditions/cellulitis/) | cellulitis فقط نمونه‌ای اختصاصی است و نمایندهٔ کل خانوادهٔ P36 نیست. |
+| P37 — Viral skin infection | [DermNet](https://dermnetnz.org/topics/viral-skin-infections) | خانواده‌ای از وضعیت‌های مختلف است، نه تشخیص واحد؛ تعریف/مرز HBI همچنان نیازمند بازبینی است. |
+| P38 — Cutaneous herpes simplex | [NHS: Cold sores](https://www.nhs.uk/conditions/cold-sores/); [DermNet](https://dermnetnz.org/topics/viral-skin-infections) | صفحهٔ cold sores تمام تظاهرات HSV را پوشش نمی‌دهد. رابطهٔ P38↔P37 طبق Map حفظ شود. |
+| P39 — Warts | [DermNet: Viral wart](https://dermnetnz.org/topics/viral-wart) | منبع نامزد برای زگیل ویروسی؛ تشخیص خودکار یا رد ضایعات مشابه را ثابت نمی‌کند. Cross-reference با S08 حفظ شود. |
+| P40 — Impetigo | [NHS](https://www.nhs.uk/conditions/impetigo/); [NICE NG153](https://www.nice.org.uk/guidance/ng153/chapter/Recommendations) | منابع موضوعی؛ ضایعات می‌توانند شبیه وضعیت‌های دیگر باشند. رابطهٔ P40↔P36 حفظ شود. |
+| P41 — Scabies | [NHS](https://www.nhs.uk/conditions/Scabies/) | منبع عمومی برای علائم و انتقال؛ تشخیص از روی متن/تصویر به HBI نسبت داده نمی‌شود. |
+| P42 — Shingles | [NHS](https://www.nhs.uk/conditions/shingles/); [WHO](https://www.who.int/news-room/fact-sheets/detail/shingles-%28herpes-zoster%29) | منبع نامزد برای شناخت موضوع و علائم مهم؛ P42 همچنان Clinical/Referral-sensitive باقی بماند. |
+
+**قفل تصمیم:** P32 و P34–P42 به Accepted، Need، Ordinary-care candidate، consultation-ready یا مجوز توصیهٔ محصول ارتقا نمی‌یابند. هیچ رابطه‌ای در Map تغییر نمی‌کند؛ P35↔P34، P36↔P40 و P37↔P38 بدون ادغام خودکار حفظ می‌شوند. همهٔ منابع candidate هستند تا بازبین مجاز ادعای دقیق، محدودیت و تصمیم را ثبت کند. G8 همچنان **BLOCKED / NOT VERIFIED** است.
