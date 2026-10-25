@@ -24,6 +24,7 @@ import {
 } from "../api/client";
 import ProductIntakePanel from "./ProductIntakePanel";
 import ProductReviewPanel from "./ProductReviewPanel";
+import SkinProductEncyclopedia from "./SkinProductEncyclopedia";
 import type {
   ProductDTO,
   RecommendationDTO,
@@ -52,7 +53,7 @@ const SKIN_OPTIONS = ["خشک", "چرب", "مختلط", "معمولی", "حسا�
 const CONSULTATION_LINES = [{ id: "SKIN", label: "پوست" }] as const;
 const INITIAL_RECOMMENDATION_LIMIT = 5;
 
-type Panel = "home" | "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about";
+type Panel = "home" | "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about" | "skin-encyclopedia";
 type MainSection = "home" | "customers" | "consultation" | "sales" | "products" | "inventory" | "purchases" | "reports" | "encyclopedia";
 type PageView = "main" | "section" | "content";
 
@@ -869,7 +870,7 @@ export default function NewHomePage() {
                 <article className="pro-product-card"><h2>گزارش مالی</h2><p className="pro-muted">خلاصه گزارش مالی موجود.</p><Link to="/accounting?section=finance-report" className="pro-btn-primary">بازکردن گزارش مالی</Link></article>
               </> : null}
               {mainSection === "encyclopedia" ? <>
-                <article className="pro-product-card"><h2>ویژگی محصولات پوستی</h2><p className="pro-muted">فهرست مرکزی پژوهش هفت محصول، ترکیبات اعلام‌شده، ادعاهای سازنده، محدودیت شواهد و موارد نیازمند بررسی. این پرونده‌ها به معنی ثبت محصول در سیستم یا تأیید QA نیستند.</p><a href="https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/homepage/encyclopedia/skin/PRODUCTS.md" target="_blank" rel="noreferrer" className="pro-btn-primary">بازکردن ویژگی محصولات</a></article>
+                <article className="pro-product-card"><h2>ویژگی محصولات پوستی</h2><p className="pro-muted">فهرست مرکزی پژوهش هفت محصول، ترکیبات اعلام‌شده، ادعاهای سازنده، محدودیت شواهد و موارد نیازمند بررسی. این پرونده‌ها به معنی ثبت محصول در سیستم یا تأیید QA نیستند.</p><button type="button" className="pro-btn-primary" onClick={() => { setActive("skin-encyclopedia"); setPageView("content"); }}>مشاهده محصولات ثبت‌شده</button><p><a href="https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/homepage/encyclopedia/skin/PRODUCTS.md" target="_blank" rel="noreferrer">دفتر پژوهش جداگانهٔ محصولات P1–P7</a></p></article>
                 <article className="pro-product-card"><h2>بانک مسائل پوستی</h2><p className="pro-muted">مرجع تخصصی P01–P61 و روابط مسائل پوستی؛ جدا از دفتر ویژگی و پژوهش محصولات.</p><a href="https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md" target="_blank" rel="noreferrer" className="pro-btn-secondary">بازکردن بانک مسائل پوستی</a></article>
                 <article className="pro-product-card"><h2>دانش مو</h2><p className="pro-muted">صفحهٔ مستقل دانش مو هنوز آماده نیست.</p><button type="button" className="pro-btn-secondary" disabled>هنوز صفحه ندارد</button></article>
                 <article className="pro-product-card"><h2>دانش ادکلن</h2><p className="pro-muted">صفحهٔ دانش ادکلن هنوز آماده نیست.</p><button type="button" className="pro-btn-secondary" disabled>هنوز صفحه ندارد</button></article>
@@ -881,6 +882,8 @@ export default function NewHomePage() {
             </div>
           </section>
         )}
+
+        {pageView === "content" && active === "skin-encyclopedia" && <SkinProductEncyclopedia onBack={() => { setActive("home"); setPageView("section"); setMainSection("encyclopedia"); }} />}
 
         {pageView === "content" && active === "home" && (
           <section className="pro-panel">

@@ -320,3 +320,22 @@ export interface ResearchAssertionRequest {
   market_region?: string;
   notes?: string;
 }
+
+
+/** GET /api/v1/evidence/knowledge/{product_id} — read-only aggregate. */
+export interface ProductKnowledgeDTO {
+  product_knowledge_id: string;
+  product_id: string;
+  ingredients?: string | null;
+  ingredient_roles?: string | null;
+  claimed_benefits?: string | null;
+  known_use_cases?: string | null;
+  contraindications?: string | null;
+  usage_instructions?: string | null;
+  manufacturer_claims?: string | null;
+  evidence_refs?: string | null;
+  evidence_status?: string | null;
+  knowledge_confidence?: number | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
