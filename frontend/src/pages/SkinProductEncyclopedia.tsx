@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getProduct, getProductEvidence, getProductKnowledge, listProducts } from "../api/client";
+import { getProduct, getProductEvidence, getProductKnowledge, listManageableProducts } from "../api/client";
 import type { EvidenceDTO, ProductDTO, ProductKnowledgeDTO } from "../types/api";
 
 type Props = { onBack: () => void };
@@ -36,7 +36,13 @@ export default function SkinProductEncyclopedia({ onBack }: Props) {
 
   useEffect(() => {
     let alive = true;
-    listProducts().then((rows) => {
+    const token = sessionStorage.getItem("hbi_admin_access_token") ?? "";
+    if (!token) {
+      setError("برای مشاهدهٔ فهرست مدیریتی، نشست مدیر لازم است.");
+      setLoadingList(false);
+      return () => { alive = false; };
+    }
+    listManageableProducts(token).then((rows) => {
       if (!alive) return;
       const available = Array.isArray(rows) ? rows : [];
       setProducts(available);
