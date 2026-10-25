@@ -1924,3 +1924,21 @@ No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care
 - خلأ P34 (دامنهٔ گسترده‌تر از tinea)، P37 (خانوادهٔ ناهمگون) و پروتکل HBI برای P38/P41 حل‌شده تلقی نمی‌شود.
 - روابط Map، از جمله P35↔P34 و P38↔P37، تغییر نمی‌کنند؛ هیچ وضعیت Accepted، Need، consultation-ready یا مجوز توصیهٔ محصول ایجاد نمی‌شود.
 - این تغییر صرفاً مستندسازی است؛ G8 همچنان **BLOCKED / NOT VERIFIED** می‌ماند.
+
+
+---
+
+## S07 — بازبینی هدفمندِ کفایت منابع برای P43 و P44
+
+**تاریخ:** 2026-10-25. **وضعیت:** بررسی مقدماتی منابع عمومی/تخصصی؛ نه بازبینی بالینی مستقل، نه پذیرش evidence و نه مجوز توصیهٔ محصول.
+
+| ID | منبع نامزد و آنچه پشتیبانی می‌کند | محدودیت و حکم |
+|---|---|---|
+| P43 — Uneven skin texture | [MSD Manual Professional — Evaluation of the Dermatologic Patient](https://www.msdmanuals.com/professional/dermatologic-disorders/approach-to-the-dermatologic-patient/evaluation-of-the-dermatologic-patient) و [Description of Skin Lesions](https://www.msdmanuals.com/professional/dermatologic-disorders/approach-to-the-dermatologic-patient/description-of-skin-lesions) برای توصیف حرفه‌ای برخی تفاوت‌های بافت/سطح ضایعات و ضرورت ارزیابی ضایعه مفیدند. | این صفحات تعریف عملیاتی مستقلی برای «uneven skin texture» به‌عنوان یک Need واحد HBI ارائه نمی‌کنند؛ این عبارت ممکن است توصیف ظاهری چند وضعیت متفاوت باشد. P43 همچنان boundary open و UNKNOWN / INSUFFICIENT است؛ نامزد منبع به معنی حل مرز یا پذیرش نیست. |
+| P44 — Hyperkeratosis | [NCBI Bookshelf — Hyperkeratosis (StatPearls)](https://www.ncbi.nlm.nih.gov/books/NBK562206/) تعریف عمومی افزایش ضخامت لایهٔ شاخی را توضیح می‌دهد و تأکید دارد که این یافته در وضعیت‌های گوناگون دیده می‌شود؛ [NCI Dictionary — Hyperkeratosis](https://www.cancer.gov/publications/dictionaries/cancer-terms/def/hyperkeratosis) تعریف عمومی تکمیلی ارائه می‌کند. | تعریف اصطلاح، یک تشخیص واحد یا مرز عملیاتی HBI نمی‌سازد. علت، محل، وضعیت همراه و نیاز به ارزیابی می‌توانند متفاوت باشند. P44 همچنان Clinical-anchor only، boundary open و UNKNOWN / INSUFFICIENT است؛ هیچ توصیهٔ محصول یا تشخیص از روی متن/تصویر استنتاج نمی‌شود. |
+
+### حکم این بازبینی
+- برای P43، منابع نامزد فقط به توصیف تفاوت‌های سطح/بافت کمک می‌کنند؛ خلأ تعریف و مرز اختصاصی HBI حل نشده است.
+- برای P44، تعریف اصطلاح پزشکی قابل ردیابی است، اما برای تبدیل آن به Need یا تعیین اقدام مشاوره‌ای HBI کافی نیست.
+- هر دو مورد همچنان **NOT ASSESSED** برای آمادگی مشاوره‌اند؛ وضعیت‌ها به Accepted یا consultation-ready ارتقا نمی‌یابند.
+- Map و روابط آن تغییر نمی‌کنند. این ثبت صرفاً منبع‌یابی مقدماتی است و G8 همچنان **BLOCKED / NOT VERIFIED** می‌ماند.
