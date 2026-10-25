@@ -75,4 +75,4 @@ The menu implementation is merged; this does not claim that the six not-yet-crea
 2. Keep the JSON schema/data coherent and review exported changes before committing them.
 3. Record actual browser/test outcomes in `USER_PATH_CHECKLIST.md` only when supported by evidence.
 4. Send policy/Gate decisions to Issue #406 and Product Knowledge evidence to PR #411.
-5. No code change is authorized by this documentation PR.
+5. This folder is documentation and prototype only; production behavior changes must be implemented and reviewed in application code.
