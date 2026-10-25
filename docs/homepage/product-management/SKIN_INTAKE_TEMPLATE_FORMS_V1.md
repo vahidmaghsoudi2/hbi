@@ -353,3 +353,83 @@ No phase in this table authorizes schema/API/DB changes, product activation, QA 
 ---
 
 *Documentation contract only. P0 (#452) and P1 (#455) are merged. P2 smart-fill, P3 evidence mapping, and P4 consultation bridge remain unauthorized unless separately approved in Issue #406.*
+
+
+#### 5.3.1 Detailed field contract — `BRIGHTENING_SPOT`
+
+This subsection is a **conceptual contract for audit and PO review**, not a declaration that every candidate key exists in Product, ProductKnowledge, Evidence, DTO, API, or database storage. It reuses the existing identity, ProductKnowledge, Evidence, research-draft, duplicate-check, and QA contracts. “Brightening”, “dark spot”, and similar labels describe intended positioning or claims; they do not establish a diagnosis, cause of discoloration, proven efficacy, or suitability for an individual.
+
+| Concept / candidate key | Meaning and semantic class | Source / provenance requirement | Validation and UNKNOWN/CONFLICT behavior | Consultation relevance |
+|---|---|---|---|---|
+| Brand and exact product name | Product identity fact | Exact package or manufacturer source tied to the specific product | Preserve exact wording and version; similar names do not establish identity | Prevents transferring claims between products |
+| Market / regional version | Identity and claim-context fact | Package, region-specific manufacturer page, or verified SKU source | Unknown remains unknown; do not merge regional formulas or label conventions | Formula, ingredient disclosure, and permitted claims may vary by market |
+| Variant, shade, or formula version | Identity/version fact | Exact package, SKU, or manufacturer source | Do not infer from a product-family name or image alone; preserve conflicts | Distinguishes formula and shade variants |
+| Size, GTIN, packaging version | Package identity facts | Package label, barcode, dated package image, or exact source | Never invent defaults; distinguish packaging change from formula change only when evidence supports it | Duplicate and version control |
+| Full INCI | Label fact | Complete ingredient list for the same market/version from package or exact manufacturer source | Mark partial lists as partial; do not reconstruct missing ingredients from retailers or sibling products | Enables ingredient-level research, not proof of finished-product results |
+| Selected active ingredients / `actives_stated` | Source-reported ingredient subset; may be marketing terminology | Exact label or manufacturer source; retain the source's own terminology | Do not assume every highlighted ingredient is pharmacologically active at an effective concentration; no concentration inference | Helps prioritize review of the exact disclosed formula |
+| Ingredient concentration / strength | Quantitative formula fact, only if explicitly disclosed | Exact source for the exact product/version | Leave unknown when not disclosed; ingredient order is not a reliable numeric concentration; never infer percentages from marketing copy | May materially affect interpretation but must not be guessed |
+| Target discoloration / `target_discoloration` | Manufacturer claim or operator-entered candidate | Exact source wording; distinguish terms such as dark spots, post-acne marks, uneven tone, melasma, or general radiance | Preserve the stated scope; do not turn a broad “brightening” claim into a claim for a specific condition | Candidate for later review only, not diagnosis or automatic problem linkage |
+| Brightening / spot-reduction claim | Manufacturer claim | Exact package/manufacturer wording, market/version, source date where available | Keep the claim separate from verified outcome; do not rewrite “radiance” as “treats hyperpigmentation” | Requires claim-specific evidence review |
+| Claim timeline / `claim_timeline` | Quantitative or time-bound manufacturer claim | Exact claim source and conditions, if stated | Capture stated duration verbatim and units; no default timeline; do not imply guaranteed results | Sets the scope of the claim that evidence would need to test |
+| Claim metrics / `claim_metrics` | Quantitative manufacturer claim | Exact source, units, endpoint, population, duration, comparator and method where reported | Preserve numerator/denominator, percentage versus percentage points, baseline and qualifier when available; unknown details stay unknown | Prevents vague percentages from being treated as comparable clinical outcomes |
+| Skin type / sensitivity / tolerability claim | Manufacturer claim or separately labelled evidence-based assessment | Exact product claim and source; tolerability evidence must identify population and method | “For sensitive skin”, “gentle”, “non-irritating” and similar wording are not universal safety facts; absence of a claim is not evidence of unsuitability | May prompt additional review but cannot guarantee individual tolerance |
+| Use directions and application area | Manufacturer instruction | Exact label or manufacturer source for the same version | Preserve frequency, amount, leave-on/rinse-off status, application area, layering advice, and day/night instruction only when stated | Prevents invented directions; routine compatibility requires separate consideration |
+| Sun-exposure / sunscreen instruction | Source-bound instruction or separately supported safety context | Exact label and applicable regional guidance; distinguish product label from external guidance | Do not invent product-specific SPF or reapplication advice; do not assume every brightening product has identical sun-related restrictions | Important where a product's label or evidence makes sun exposure relevant |
+| Warnings, contraindications, and use restrictions | Label fact and/or separately reviewed limitation | Exact package/manufacturer source; independent medical limitations require their own credible evidence | “Not stated” is not “none”; preserve age, pregnancy, irritation, damaged-skin, eye-area, or other warnings only when supported; do not create blanket contraindications | Supports risk review, not automatic safety clearance |
+| Finished-product efficacy study | Product-specific evidence | Accessible study/report or exact source summary tied to tested product, market/version and claim | Capture design, population, comparator, duration, endpoint, measurement method, result, uncertainty, conflicts and access limitations; manufacturer summary remains manufacturer-reported if the report is unavailable | Determines only the narrow outcome and population supported by the study |
+| Ingredient-level evidence | Evidence about a named ingredient and specific question | Scientific source, ingredient identity/form, concentration/context if known, population/model, endpoint and limitations | Do not treat mechanistic, in-vitro, or ingredient studies as proof that the finished product reduces spots; do not transfer evidence across unverified formulations | Research context, not a product-level efficacy verdict |
+| Before/after imagery or consumer review | Anecdotal or promotional material | Source, date, context, consent/access limitations where relevant, and whether image conditions are comparable | Not equivalent to a controlled study; do not infer causation, percentage efficacy, or a guaranteed result from images or testimonials | Low-strength context only unless an approved evidence rubric says otherwise |
+| Evidence record / existing `Evidence` | Claim-evidence assertion and review state | Reuse existing source type/reference, claim, field, claim type, market, dates and QA fields where available | Keep source capture, evidence appraisal, conflict status, and QA distinct; no auto-verification | Lets reviewers trace why a specific claim is or is not supported |
+| Evidence strength | Review assessment under the existing vocabulary | Follow the currently approved Evidence vocabulary and review process | Do not create a new strength scale or equate source type with evidence strength | Qualifies support for a specific claim, not the whole product |
+| Product-level `evidence_status` | Aggregate status only if its semantics and derivation are approved | Must be reproducible from reviewed source evidence under a separately approved rule | This template neither defines nor sets the field; preserve unresolved UNKNOWN/CONFLICT semantics and existing implementation gap | Must not imply Product QA, safety clearance, activation, or recommendation eligibility |
+| `knowledge_confidence` | Existing confidence concept | Basis, evidence scope and limitations must be explainable | Do not present as a calibrated probability or derive from the number of claims alone | Reviewer context only, never an approval signal |
+| Candidate relationship to a skin need | Proposed relationship concept | Specific claim/evidence plus confirmed canonical need identifier and authorized relationship mechanism | Keep candidate text separate from canonical links; no automatic P01–P61 mapping | Search/research lead, not diagnosis or individualized recommendation |
+
+#### 5.3.2 Claim and evidence boundaries for brightening products
+
+For every material claim about reducing visible discoloration, dark spots, post-acne marks, uneven tone, radiance, or time to result, capture or explicitly mark unknown:
+
+1. **Exact claim:** the source's wording, the particular outcome claimed, units and qualifiers.
+2. **Exact product:** brand, product, market, variant, formula/packaging version, and whether evidence concerns the finished product or an ingredient.
+3. **Evidence type:** marketing copy, package claim, consumer perception, before/after material, mechanistic/ingredient research, instrumental measurement, controlled clinical study, or other source.
+4. **Study context:** population and relevant baseline characteristics when reported, study design, sample size, duration, comparator, endpoint, measurement method, numerical result and uncertainty.
+5. **Claim-to-result fit:** whether the study measured the same outcome and timeline that the marketing claim states. “Improved radiance” does not by itself establish reduced melasma, post-inflammatory hyperpigmentation, or another specific condition.
+6. **Limitations and conflicts:** missing protocol/report, small or unrepresentative population, uncontrolled image conditions, self-report, co-interventions, contradictory findings, or unavailable full text.
+7. **Review state:** distinguish source capture from evidence appraisal and formal QA.
+
+A plausible mechanism or the presence of an ingredient is not proof that the finished formula produces a particular result. Ingredient identity alone does not establish concentration, bioavailability, formulation stability, clinical effect, or tolerability. Do not infer treatment of a diagnosed pigmentary condition from generic brightening language.
+
+#### 5.3.3 Ingredient and terminology safeguards
+
+- Keep the full INCI, selected highlighted ingredients, manufacturer-described “actives”, and independently interpreted ingredient roles separate.
+- Do not infer percentages from ingredient order, product name, marketing emphasis, or a similar formula.
+- Preserve the manufacturer's exact terminology. If a source calls an ingredient an “active”, record that as source language rather than silently endorsing a pharmacological classification.
+- Claims such as “brightening”, “spot corrector”, “radiance”, “even tone”, “clinical”, “dermatologist tested”, “natural”, or “gentle” must retain their exact scope and source. None is self-validating evidence of efficacy or safety.
+- Do not assume that all discoloration has the same cause or that one cosmetic product is appropriate for every type of pigmentation or every skin tone.
+- Do not invent medical advice, contraindications, pregnancy guidance, or a sunscreen regimen. Preserve the actual label and keep external clinical guidance separately sourced and scoped.
+- A product's evidence for one endpoint, population, or duration must not be generalized to another endpoint, population, or duration without an explicit evidence-based rationale.
+
+#### 5.3.4 UNKNOWN, CONFLICT, and acceptance behavior
+
+- Missing market/version, full INCI, ingredient concentration, exact claim, timeline, metric denominator, study method, population, or warnings remain unknown; do not fill them from a similarly named product.
+- If package, manufacturer page, retailer page, or study summary disagree, preserve each source-bound assertion and flag the relevant fact/claim as conflicted under the existing workflow. Do not silently choose the most favorable claim.
+- If a source says only “brightening” or “radiance”, do not normalize it into a condition-specific treatment claim.
+- If a percentage or timeline is stated without its endpoint, population, or measurement basis, preserve the wording and mark the missing context rather than treating it as a comparable clinical result.
+- If only a study abstract or manufacturer summary is available, state that the full protocol/report could not be appraised; do not describe the evidence review as complete.
+- Testimonials, retail star ratings, and uncontrolled before/after images must not be promoted to controlled product-specific evidence.
+- Smart-fill, if separately authorized in a future phase, may propose source-linked values for human review only. It must not auto-verify Evidence, pass Product QA, activate a product, clear a safety concern, or make a product recommendation-eligible.
+
+#### 5.3.5 Template-specific acceptance criteria
+
+- [ ] Exact product identity, market, variant, and version are recorded or explicitly unknown.
+- [ ] Full INCI is distinguished from selected key ingredients and manufacturer-highlighted “actives”.
+- [ ] Ingredient concentration is recorded only when the exact source states it.
+- [ ] The target discoloration and intended outcome preserve the source's exact scope; broad brightening language is not converted into a diagnosis-specific claim.
+- [ ] Every quantitative or time-bound claim retains source wording, units, timeline, endpoint and reported context, with missing elements marked unknown.
+- [ ] Finished-product studies are distinguished from ingredient-level, mechanistic, testimonial, and before/after evidence.
+- [ ] Study design, population, comparator, duration, endpoint, measurement method, result and limitations are captured where reported.
+- [ ] UNKNOWN and CONFLICT remain visible and are not silently converted into trusted values.
+- [ ] Warnings and usage directions are source-bound; “not stated” is not interpreted as “none”.
+- [ ] Candidate skin-need relationships include a specific basis and never auto-link to P01–P61.
+- [ ] Existing DuplicateCheck, research-draft, Evidence QA, Product QA, and lifecycle controls remain authoritative.
+- [ ] Completing this specification does not authorize schema/API/DB changes, smart-fill, evidence verification, product registration, QA approval, activation, or recommendation behavior.
