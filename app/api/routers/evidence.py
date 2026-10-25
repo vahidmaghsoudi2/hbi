@@ -56,6 +56,11 @@ async def get_product_knowledge(
 ):
     facade = ProductKnowledgeFacade(db)
     dto = facade.get_by_product(product_id)
+    if dto is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"ProductKnowledge for product {product_id} not found",
+        )
     return ProductKnowledgeResponse.model_validate(dto.__dict__)
 
 
