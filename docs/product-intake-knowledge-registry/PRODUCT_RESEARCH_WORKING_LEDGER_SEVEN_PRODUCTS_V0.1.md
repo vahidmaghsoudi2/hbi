@@ -1127,3 +1127,80 @@ Continue retrieval of primary reports or technical dossiers, prioritizing: (1) C
 - Product Master records created by this source audit: **NONE**.
 
 This addendum records an execution-path audit only. It does not change the roadmap, intake contract, schema, API, UI, database, or any product record.
+
+
+---
+
+## Research pass 12 — current official-page refresh and formula/version drift check (2026-10-26)
+
+**Purpose:** refresh the official pages for the product dossiers and identify source changes that could invalidate earlier formula or claim assumptions. This is append-only research. It does not verify the physical package/GTIN, establish independent finished-product efficacy, approve Product↔Problem links, or authorize ProductKnowledge changes.
+
+### 12.1 P2 — Neutrogena Clear & Defend 2% Salicylic Acid Face Wash, UK, 200 ml
+
+**Official source checked:** https://www.neutrogena.co.uk/skincare/cleansers-washes/clear-and-defend-daily-wash
+
+The current official UK page continues to identify the 200 ml product and declare 2% salicylic acid. Its displayed INCI is: Aqua, Cocamidopropyl Hydroxysultaine, Sodium Methyl Cocoyl Taurate, Glycerin, Salicylic Acid, Sodium Hydrolyzed Potato Starch Dodecenylsuccinate, C12-15 Alkyl Lactate, Panthenol, Cocamidopropyl PG-Dimonium Chloride Phosphate, Disodium Tetrapropenyl Succinate, PEG-120 Methyl Glucose Dioleate, Sodium Chloride, Disodium EDTA, Citric Acid, Sodium Hydroxide, Tocopherol, Benzalkonium Chloride, Parfum. The page states that product and ingredients may change and directs users to check the package label. It reports “97% noticed less new spots in 4 weeks” based on clinical grading in 34 subjects; the full protocol remains unavailable on the page reviewed.
+
+**Disposition:** preserve the prior exact UK-market dossier; current official web INCI is a source snapshot, not proof that a physical unit has the same formula. Keep the numeric result as a manufacturer-reported claim and P08 as a claim-led candidate only; no P09–P12 subtype relation is established.
+
+### 12.2 P3 — Garnier Vitamin C Brightening Gel Cleanser, Australia, 200 ml
+
+**Official source checked:** https://www.garnier.com.au/about-our-brands/skin-active/garnier-skin-active-vitamin-c-brightening-gel-cleanser-200ml
+
+The current Australian page confirms the 200 ml rinse-off gel cleanser and labels its highlighted “Vitamin C” as **Vitamin Cg**. The displayed INCI is: Aqua/Water, Sodium Laureth Sulfate, Coco-Betaine, Sodium Chloride, Glycerin, Citrus Lemon Fruit Extract/Lemon Fruit Extract, PPG5-Ceteth-20, Sodium Hydroxide, Ascorbyl Glucoside, Citric Acid, Panthenol, Polyquaternium-7, Tocopheryl Acetate, Sodium Benzoate, Salicylic Acid, Linalool, Limonene, Benzyl Salicylate, Parfum/Fragrance. The page explicitly says ingredient lists are updated regularly and the received package is the current reference.
+
+**Disposition:** use “Ascorbyl Glucoside / Vitamin Cg,” not “pure L-ascorbic acid.” This is a rinse-off formula; claims or study outcomes from leave-on vitamin-C products are not transferable. Fragrance constituents are a possible consideration for susceptible users, not evidence that every user will react. Physical package/GTIN remains unverified.
+
+### 12.3 P4 — SKIN1004 Hyalu-Cica Water-Fit Sun Serum, international vs US formula
+
+**International/Korean-style official page checked:** https://www.skin1004.com/products/hyalu-cica-water-fit-sun-serum-spf50-pa?country=GB  
+**US official page checked:** https://www.skin1004.com/products/hyalu-cica-water-fit-sun-serum-uv
+
+The international page names **SPF50+ PA++++** and displays a UV-filter system including Diethylamino Hydroxybenzoyl Hexyl Benzoate, Ethylhexyl Triazone, Methylene Bis-Benzotriazolyl Tetramethylbutylphenol and Diethylhexyl Butamido Triazone. The US page separately identifies a US sunscreen drug-product formula with active ingredients Avobenzone 2.7%, Homosalate 13.6%, Octisalate 4.5% and Octocrylene 9%; it also says the ingredient list may change and the package label is the latest reference.
+
+**Disposition:** these are separate formula/market dossiers. Do not copy the US active-ingredient list or US SPF50 label into the international SPF50+ PA++++ record, and do not infer the target physical package solely from the product name. International formula's product-specific independent clinical efficacy remains NOT ESTABLISHED in the sources checked.
+
+### 12.4 P5 — ISDIN FotoUltra 100 Active Unify SPF50+, Mexico
+
+**Official Mexico page checked:** https://www.isdin.com/mx/p/fotoultra-active-unify-spf-50/1160
+
+The current official page identifies a 50 ml product and reports 22% lower solar-spot intensity and 15% lower spot area after 28 and 84 days of normal use, based on 31 people aged 35–65 with mild-to-moderate facial hyperpigmented spots; the source labels the substantiation “Data on file, 2024.” The same page identifies the product's DP-Complex as niacinamide, esclareolida and Pisum sativum, highlights vitamin E, and gives sunscreen directions including generous application 30 minutes before exposure and reapplication every two hours and after sweating, swimming, bathing or towel drying.
+
+**Disposition:** the percentages remain **MANUFACTURER_CLAIM** because the underlying report is not publicly available on the page. Keep the 2023 ex-vivo MMP claim separate from human clinical outcomes. Preserve Mexico market identity; do not merge with Spot Prevent, tinted Color variants, or other market formulas without exact identity/protocol reconciliation.
+
+### 12.5 P6 — Clinique formula/name drift: current official page is not a safe substitute for the 100 ml dossier
+
+**Previously recorded page:** https://www.clinique.com/product/4034/68008/skincare/serum/even-better-clinicaltm-radical-dark-spot-corrector-interrupter  
+**Current redirect destination checked:** https://www.clinique.com/products/even-better-clinical-dark-spot-clearing-serum
+
+The older URL now redirects to a page titled **Even Better Clinical Dark Spot Clearing Serum**. The current page reports different headline endpoints: up to 49% visible improvement in sun/age spots among top responders (22 of 53 panelists; 34% average improvement across all 53) and up to 56% visible improvement in post-acne mark intensity among top responders (9 of 34 panelists; 37% average across all 34), both after 12 weeks. It lists a formula including magnesium ascorbyl phosphate, ascorbyl glucoside, niacinamide, acetyl glucosamine, salicylic acid and Dimethoxytolyl Propylresorcinol/UP302-related material. The page advises checking the received package because ingredients may change.
+
+**Critical version boundary:** these current results and the displayed ingredient list do **not** overwrite the earlier 100 ml “Radical Dark Spot Corrector + Interrupter” dossier or its previously recorded 52-woman/39% claim. The current page may represent a reformulation/rebranding, and the public redirect alone does not establish equivalence of formula, size, market, packaging or study cohort.
+
+**Disposition:** keep the P6 target identity/formula and market **UNRESOLVED / NEEDS_REVIEW** until the actual 100 ml package/market is matched. Retain the older claim as historical source-bound manufacturer material; store current-page claims as a separate version/source lead only. No P17, P13 or P19 relation is approved from this page.
+
+### 12.6 P7 — Anua Azelaic Acid 10 Hyaluron Redness Soothing Serum, US official page
+
+**Official source checked:** https://anua.com/products/azelaic-acid-10-hyaluron-redness-soothing-serum
+
+The current US page identifies 10% azelaic acid and displays the following INCI: Water, Azelaic Acid, Propylene Glycol, Sodium Hydroxide, Dipropylene Glycol, 1,2-Hexanediol, Panthenol, Hydroxyethylcellulose, Betaine Salicylate, Glycerin, Biosaccharide Gum-1, Ethylhexylglycerin, Allantoin, Dipotassium Glycyrrhizate, Melia Azadirachta Leaf Extract, Camellia Sinensis Leaf Water, Sodium Hyaluronate, Melia Azadirachta Flower Extract, Niacinamide, Aloe Barbadensis Leaf Juice, Beta-Glucan, Centella Asiatica Extract, Centella Asiatica Leaf Extract, Centella Asiatica Root Extract, Madecassoside, Asiaticoside, Asiatic Acid, Madecassic Acid, Squalane, Zinc PCA, Butylene Glycol, Pentylene Glycol, Caprylyl/Capryl Glucoside, Hydrogenated Lecithin, Ceramide NP. The page directs users to start at 1–2 times per week and gradually increase frequency to up to twice daily; daytime use should be paired with SPF 30 or higher. It labels the testing results “Non-comedogenic, Low-Irritation,” but the page reviewed does not show a full protocol, sample size or statistical report.
+
+**Disposition:** retain 10% as a manufacturer-declared concentration, and keep tolerability-test labels separate from proof of efficacy for acne, persistent redness, rosacea or pigmentation. The 90% participant-agreement statement remains a separate manufacturer claim from the brand routine page; do not infer that the current product page provides the missing protocol. Evidence for the separate Anua pad remains non-transferable to this serum.
+
+### 12.7 P1 — COSRX official identity reminder
+
+**Official source checked:** https://www.cosrx.com/collections/all/products/the-6-peptide-skin-booster-serum
+
+The official page continues to offer 150 ml and 50 ml options under the same product family. The selected dossier remains the 150 ml research target, but the actual package/GTIN is not verified. The current page's ingredient list and manufacturer-reported outcome summaries do not expose a complete independent protocol. Do not assign the 50 ml GTIN or package identity to a 150 ml unit by name matching.
+
+### 12.8 Research disposition after current-page refresh
+
+- Official page refresh completed for P1, P2, P3, P4, P5, P6 and P7.
+- Newly material discrepancy: **P6's prior official URL redirects to a differently named current serum page with different reported endpoints.** The current page must not silently replace the older 100 ml product dossier.
+- P3's official Australian page confirms Vitamin Cg means Ascorbyl Glucoside and provides a current page-level INCI snapshot; package label remains authoritative for the physical unit.
+- P4 international and US formulas remain explicitly separate.
+- Exact physical package/GTIN verification: **NOT VERIFIED** for all seven.
+- Publicly accessible exact-product independent efficacy protocols: **NOT ESTABLISHED** by this refresh; this is a bounded result, not proof of absence.
+- Approved Product↔Problem relations: **NONE**. Existing crosswalk labels such as candidate-only or manufacturer-claim-only remain unchanged.
+- Product lifecycle/QA/ProductKnowledge, schema, API, UI and database states: **UNCHANGED**.
+- This addendum is append-only research in the existing ledger; it does not authorize merging PR #411 or any implementation change.
