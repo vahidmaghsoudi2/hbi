@@ -687,9 +687,6 @@ export default function ProductIntakePanel({
           barcode_gtin: draft.barcode_gtin || null,
           market_region: draft.market_region || null,
           packaging_version: draft.packaging_version || null,
-          knowledge_use_cases: draft.category || null,
-          knowledge_evidence_claim: draft.category || null,
-          knowledge_evidence_source_reference: "PRODUCT_INTAKE",
         };
         if (
           String(dupResult?.result || "").toUpperCase() === "POSSIBLE_MATCH" &&
