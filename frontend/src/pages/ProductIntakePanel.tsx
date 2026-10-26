@@ -239,13 +239,8 @@ export function completeFromIntro(raw: string): Draft {
   if (d.spf && !/SPF/i.test(name)) name = name + " (" + d.spf + ")";
   d.product_name = name;
 
-  const slugBrand =
-    d.brand.toUpperCase().replace(/[^A-Z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 20) || "ITEM";
-  const slugSpf = d.spf.replace(/\s+/g, "").replace("+", "PLUS") || "GEN";
-  const catHint = /ضدآفتاب|sunscreen/i.test(d.category) ? "SPF" : /آبرسان|مرطوب/i.test(d.category) ? "HYDR" : "SKIN";
-  d.product_id = `${slugBrand}-${catHint}-${slugSpf}-${d.size_value}${d.size_unit.toUpperCase()}`
-    .replace(/--+/g, "-")
-    .slice(0, 64);
+  // product_id is allocated by the backend after DuplicateCheck; never invent one here.
+  d.product_id = "";
 
   d.identity_status = "NEEDS_REVIEW";
   d.qa_verdict = "PENDING";
@@ -485,7 +480,6 @@ export default function ProductIntakePanel({
   function loadResearchedP4Draft() {
     const next: Draft = {
       ...EMPTY,
-      product_id: "SKIN1004-HYALUCICA-SUN-SERUM-50ML",
       brand: "SKIN1004",
       product_name: "Madagascar Centella Hyalu-Cica Water-Fit Sun Serum",
       product_line: "SKIN",
@@ -526,8 +520,8 @@ export default function ProductIntakePanel({
     setErr(null);
     setMsg(null);
     if (editing) return;
-    if (!draft.product_id.trim() || !draft.brand.trim() || !draft.product_name.trim()) {
-      setErr("برای بررسی تکراری، شناسه، برند و نام محصول الزامی است.");
+    if (!draft.brand.trim() || !draft.product_name.trim()) {
+      setErr("برای بررسی تکراری، برند و نام محصول الزامی است؛ شناسه را backend تولید می‌کند.");
       return;
     }
     setDupBusy(true);
@@ -647,8 +641,8 @@ export default function ProductIntakePanel({
       return;
     }
     setMsg(null);
-    if (!draft.product_id.trim() || !draft.brand.trim() || !draft.product_name.trim()) {
-      setErr("شناسه، برند و نام محصول الزامی است.");
+    if ((editing && !draft.product_id.trim()) || !draft.brand.trim() || !draft.product_name.trim()) {
+      setErr("برای ثبت، برند و نام محصول الزامی است؛ شناسهٔ محصول را backend تولید می‌کند.");
       return;
     }
     if (!editing && !draft.product_line.trim()) {
@@ -704,7 +698,6 @@ export default function ProductIntakePanel({
           return;
         }
         const body: ProductCreateRequest = {
-          product_id: draft.product_id.trim(),
           brand: draft.brand.trim(),
           product_name: draft.product_name.trim(),
           product_line: draft.product_line.trim().toUpperCase(),
@@ -715,6 +708,7 @@ export default function ProductIntakePanel({
           market_region: draft.market_region || null,
           packaging_version: draft.packaging_version || null,
         };
+        // New intake never submits a client-invented product_id. Backend allocates after DuplicateCheck.
         if (
           String(dupResult?.result || "").toUpperCase() === "POSSIBLE_MATCH" &&
           dupResult?.check_id
@@ -791,15 +785,11 @@ export default function ProductIntakePanel({
       <fieldset className="pro-fieldset" style={{ marginTop: "1rem" }}>
         <legend>۲) فیلدهای پروتکل (قابل ویرایش قبل از ذخیره)</legend>
         <div className="pro-grid-2">
-          <div>
-            <label className="pro-label">product_id</label>
-            <input
-              className="pro-input"
-              value={draft.product_id}
-              onChange={(e) => setField("product_id", e.target.value)}
-              disabled={editing}
-            />
-          </div>
+          {!editing && (
+            <div style={{ gridColumn: "1 / -1" }}>
+              <p className="pro-lead">شناسهٔ محصول پس از عبور از DuplicateCheck به‌صورت یکتا توسط backend تولید می‌شود؛ شناسهٔ دستی یا حدس هوش مصنوعی وارد نمی‌شود.</p>
+            </div>
+          )}
           <div>
             <label className="pro-label">برند</label>
             <input className="pro-input" value={draft.brand} onChange={(e) => setField("brand", e.target.value)} />

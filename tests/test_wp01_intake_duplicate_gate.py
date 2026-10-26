@@ -46,6 +46,55 @@ def test_new_product_create_allowed(client, db_session):
     assert r.json()["status"] == "DRAFT"
 
 
+def test_backend_generates_product_id_when_omitted(client, db_session):
+    h = _auth(db_session)
+    r = _create(
+        client,
+        h,
+        brand="AutoIdCo",
+        product_name="System Assigned Serum",
+        size_value=30,
+        size_unit="ml",
+        variant="clear",
+    )
+    assert r.status_code == 201, r.text
+    product_id = r.json()["product_id"]
+    assert product_id.startswith("HBI-PROD-")
+    assert len(product_id) == len("HBI-PROD-") + 16
+    assert r.json()["status"] == "DRAFT"
+    assert r.json()["qa_verdict"] == "PENDING"
+    assert r.json()["identity_status"] == "NEEDS_REVIEW"
+
+
+def test_possible_match_without_id_pauses_only_until_snapshot_decision(client, db_session):
+    h = _auth(db_session)
+    first = _create(
+        client, h, product_id="WP01-AUTO-PM-A", brand="AutoReviewCo",
+        product_name="Shared Auto Serum", size_value=30, size_unit="ml", variant="clear",
+    )
+    assert first.status_code == 201, first.text
+    identity = {
+        "brand": "AutoReviewCo",
+        "product_name": "Shared Auto Serum",
+        "size_value": 30,
+        "size_unit": "ml",
+        "variant": "clear",
+    }
+    chk = client.post("/api/v1/products/duplicate-check/", headers=h, json=identity)
+    assert chk.status_code == 200, chk.text
+    assert chk.json()["result"] == "POSSIBLE_MATCH"
+    check_id = chk.json()["check_id"]
+    dec = client.post(
+        f"/api/v1/products/duplicate-check/audit/{check_id}/decision",
+        headers=h,
+        json={"decision": "NEW", "reason": "identity reviewed as distinct"},
+    )
+    assert dec.status_code == 200, dec.text
+    created = _create(client, h, **identity, duplicate_check_id=check_id)
+    assert created.status_code == 201, created.text
+    assert created.json()["product_id"].startswith("HBI-PROD-")
+
+
 def test_exact_product_id_duplicate_blocks_create(client, db_session):
     h = _auth(db_session)
     assert (

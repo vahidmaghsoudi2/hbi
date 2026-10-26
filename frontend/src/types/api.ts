@@ -130,7 +130,8 @@ export interface SaleDTO {
 
 /** POST /api/v1/products/ body — matches backend ProductCreate */
 export interface ProductCreateRequest {
-  product_id: string;
+  /** Omit for system-generated IDs; supplied legacy IDs remain supported. */
+  product_id?: string;
   brand: string;
   product_name: string;
   product_line: string;

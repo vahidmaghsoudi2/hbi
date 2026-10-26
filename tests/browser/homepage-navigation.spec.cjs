@@ -394,8 +394,9 @@ test("Researched P4 starter pre-fills a SKIN draft without guessing market ident
   await page.getByRole("button", { name: "ورود و ویرایش محصول" }).click();
   await page.getByRole("button", { name: "بارگذاری پیش‌نویس پژوهشی P4 · SKIN1004" }).click();
 
-  const field = (label) => page.locator("label").filter({ hasText: label }).first().locator("..").locator("input");
-  await expect(field("product_id")).toHaveValue("SKIN1004-HYALUCICA-SUN-SERUM-50ML");
+  const field = (label) => page.locator("label.pro-label").filter({ hasText: label }).first().locator("..").locator("input");
+  // New intake must not expose a product_id label/input (system-generated after DuplicateCheck).
+  await expect(page.locator("label.pro-label").filter({ hasText: /^product_id$/ })).toHaveCount(0);
   await expect(field("برند")).toHaveValue("SKIN1004");
   await expect(field("نام محصول")).toHaveValue("Madagascar Centella Hyalu-Cica Water-Fit Sun Serum");
   await expect(page.locator("#product-line-select")).toHaveValue("SKIN");

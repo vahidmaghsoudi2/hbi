@@ -212,8 +212,8 @@ class ConflictEntryResponse(BaseModel):
 
 
 class ProductCreate(BaseModel):
-    """P4 P0: client cannot inject lifecycle/governance state."""
-    product_id: str
+    """Product identity intake; backend generates product_id when omitted."""
+    product_id: Optional[str] = None
     brand: str
     product_name: str
     product_line: str  # Product Line V1 — required operator classification
