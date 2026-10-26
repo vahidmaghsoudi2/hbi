@@ -1239,3 +1239,31 @@ The official page continues to offer 150 ml and 50 ml options under the same pro
 - Product↔Problem relation: no relation approved by this pass; P17/P19 remain candidate-only or unresolved as already recorded.
 
 This is an append-only evidence update to the existing seven-product ledger. It does not modify product records, lifecycle/QA state, ProductKnowledge, schema, API, UI, database, or the Skin Problem Space's P01–P61 relation criteria.
+
+---
+
+## Intake identity decisions — user confirmation batch (2026-10-27)
+
+**Purpose:** record the user's consolidated answers as research-target/identity-intake decisions. These decisions supersede any implication in older section headings that a research-source market is confirmed for the target physical unit. They do not establish physical-package identity unless explicitly stated, and they do not create or approve Product Master/ProductKnowledge records.
+
+| Product | User-confirmed decision | Market / physical identity status | Handling rule |
+|---|---|---|---|
+| P1 — COSRX The 6 Peptide Skin Booster Serum | **150 ml — temporary research target** | Actual package/GTIN and formula match remain **UNVERIFIED**. | Keep the 150 ml dossier as the research target only; do not treat the selected size as confirmation of a physical unit. |
+| P3 — Garnier Vitamin C Brightening Gel Cleanser | **200 ml — volume confirmed by user** | Market = **UNKNOWN**. Australia remains an official research source, not confirmation of the user's target market or package. Physical package/GTIN remain **UNVERIFIED**. | Keep the Australian source snapshot separate; do not assign Australia as the target unit's market. |
+| P4 — SKIN1004 Madagascar Centella Hyalu-Cica Water-Fit Sun Serum | **Korean/international version selected as research target** | Physical package/GTIN and exact formula match remain **UNVERIFIED**. | Keep the US sunscreen-drug formula in a separate dossier; no formula transfer between US and Korean/international versions. |
+| P5 — ISDIN FotoUltra 100 Active Unify SPF50+ | **50 ml — temporary research target** | Market = **UNKNOWN**; physical package/GTIN and formula match remain **UNVERIFIED**. | Mexico remains a source-specific research snapshot only; do not assign Mexico or another market to the target unit. |
+| P6 — Clinique Even Better Clinical Radical Dark Spot Corrector + Interrupter | **Historical 100 ml version selected as research target** | Brand marks the older product discontinued; physical package/GTIN, market and formula/lot match remain **UNVERIFIED / NEEDS_REVIEW**. | Preserve the historical dossier separately from the replacement/current Dark Spot Clearing Serum. Do not transfer current-page ingredients or efficacy claims to the historical version. |
+| P7 — Anua Azelaic Acid 10% + Hyaluron Redness Soothing Serum | **30 ml serum selected as research target** | Physical package/GTIN and market-specific formula match remain **UNVERIFIED**. | Keep the serum separate from Anua azelaic-acid pads; do not infer physical-unit identity from the product name alone. |
+
+### Batch-level disposition
+
+- P2 remains as previously recorded: 200 ml user-confirmed; market unknown; GTIN not provided; package/formula match unverified.
+- P1 and P5 sizes are **temporary research targets**, not confirmed physical-package facts.
+- P3's 200 ml volume is user-confirmed, but its target market is explicitly **UNKNOWN**; the Australia page is source context only.
+- P4's Korean/international version is the selected research target, not proof that a physical package has been inspected.
+- P6 is explicitly the historical 100 ml product target; the replacement/current serum remains a separate product/version.
+- P7 is the 30 ml serum target, not the separate pad product.
+- For every product, missing GTIN, package, market or formula facts remain unknown/unverified rather than inferred.
+- This update records intake decisions only. **No Product Master create, DuplicateCheck, readback, QA approval, ProductKnowledge write, activation, stock-in or live runtime transaction was executed by this documentation update.** Product Master records created by this update: **NONE**.
+- Continue the existing official batch-intake procedure when an authenticated runtime/operator session is available; preserve DuplicateCheck and readback evidence for each actual transaction.
+
