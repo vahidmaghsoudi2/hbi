@@ -39,7 +39,7 @@ test("Product Intake category remains operator-only and is not sent as knowledge
         status: 201,
         contentType: "application/json",
         body: JSON.stringify({
-          product_id: createPayload.product_id,
+          product_id: createPayload.product_id || "HBI-PROD-FIXTURE0001",
           brand: createPayload.brand,
           product_name: createPayload.product_name,
           product_line: createPayload.product_line,
@@ -88,6 +88,7 @@ test("Product Intake category remains operator-only and is not sent as knowledge
   expect(createRequestCount).toBe(1);
   expect(createPayload).not.toBeNull();
   expect(createPayload.product_line).toBe("SKIN");
+  expect(createPayload).not.toHaveProperty("product_id");
   expect(createPayload).not.toHaveProperty("knowledge_use_cases");
   expect(createPayload).not.toHaveProperty("knowledge_evidence_claim");
   expect(createPayload).not.toHaveProperty("knowledge_evidence_source_reference");
