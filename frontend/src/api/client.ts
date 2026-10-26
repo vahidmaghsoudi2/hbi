@@ -22,6 +22,7 @@ import type {
   FinancialSummaryDTO,
   StockMovementDTO,
   EvidenceDTO,
+  ProductKnowledgeDTO,
   MutationLogDTO,
   DuplicateCheckRequest,
   DuplicateCheckResponse,
@@ -183,6 +184,11 @@ export function getProductEvidence(
   token: string
 ): Promise<EvidenceDTO[]> {
   return request<EvidenceDTO[]>(`/evidence/?product_id=${encodeURIComponent(productId)}`, {}, token);
+}
+
+/** Read the existing QA-eligible ProductKnowledge projection. Read-only. */
+export function getProductKnowledge(productId: string, token: string): Promise<ProductKnowledgeDTO> {
+  return request<ProductKnowledgeDTO>(`/evidence/knowledge/${encodeURIComponent(productId)}`, {}, token);
 }
 
 /** Create source-traceable research assertions; they remain PENDING/UNKNOWN until reviewed. */

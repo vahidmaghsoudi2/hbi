@@ -10,12 +10,14 @@
 |------|--------|
 | پایلوت ساختاری S01 | **CLOSED** — مرز و ارجاع؛ نه پذیرش پزشکی |
 | رکوردهای کاری | [SKIN_PROBLEM_BANK_WORKING_RECORDS.md](SKIN_PROBLEM_BANK_WORKING_RECORDS.md) — P01, P02, P05, P06, P07 |
+| ارزیابی آمادگی مشاوره و صف بازبینی انسانی S01 | [بخش S01 در Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md#s01--ارزیابی-آمادگی-مشاوره-و-صف-بازبینی-انسانی-اسنادی-نه-accepted) — ارزیابی اسنادی؛ نه Accepted؛ وضعیت‌های Accepted/Need/Product/G8 تغییر نمی‌کنند. |
+
 | فهرست مرجع مشکلات پوستی | [SKIN_PROBLEM_SPACE_MAP_V0.1.md](SKIN_PROBLEM_SPACE_MAP_V0.1.md) — مرجع تعیین‌شده توسط PO؛ بدون ادعای اعتبارسنجی پزشکی/Need/Product |
 | G1 (تعیین مرجع فهرست مشکلات پوستی) | CLOSED — Map P01–P61 طبق تصمیم PO فهرست مرجع است |
 | G8 | BLOCKED / NOT VERIFIED |
 | S01 | **CLOSED** ساختاری/ارجاعی — نه پذیرش پزشکی |
-| S02 | **در حال کار ساختاری** — P03/P04 در [Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md)؛ نه Accepted؛ منتظر بازبینی PO |
-| S03 | **ثبت ساختاری شده** — P08–P16 در [Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md)؛ نه Accepted؛ P13 فقط رابطهٔ Cross-Shelf به S04؛ P16 با مسیر Map برابر S02→S07 و ابهام ثبت‌شده. |
+| S02 | **در حال کار ساختاری** — P03/P04 نه Accepted؛ [ارزیابی آمادگی مشاوره و صف بازبینی انسانی S02](SKIN_PROBLEM_BANK_WORKING_RECORDS.md#s02--ارزیابی-آمادگی-مشاوره-و-صف-بازبینی-انسانی-اسنادی-نه-accepted) در Working Records |
+| S03 | **ثبت ساختاری شده + ارزیابی آمادگی مشاوره (اسنادی؛ نه Accepted)** — [بخش S03 در Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md#s03--ارزیابی-آمادگی-مشاوره-و-صف-بازبینی-انسانی-اسنادی-نه-accepted)؛ P08–P16؛ P13 فقط Cross-Shelf به S04؛ P16 مسیر Map برابر S02→S07؛ هیچ `consultation_ready` ثبت نشده است. |
 | S04 | **ثبت ساختاری شده** — P17–P23 در [Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md)؛ نه Accepted؛ P22 Context با ارجاع به S09؛ P23 Parked/Evidence Boundary با مرز S04↔S09؛ S09 باز نشده. |
 | S05 | **در حال کار ساختاری** — P24–P33 در [Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md)؛ نه Accepted؛ P06 فقط ارجاع S01→S05؛ P30 رابطهٔ S05↔S02 بدون بازنویسی S02؛ P31/P32 مرزهای Clinical/Referral/Safety را حفظ می‌کنند. |
 | S06 | **ثبت ساختاری شده** — P34–P42 در [Working Records](SKIN_PROBLEM_BANK_WORKING_RECORDS.md)؛ نه Accepted؛ قفسهٔ Clinical/Safety؛ P39 فقط ارجاع متقاطع S06↔S08؛ S08 باز نشده. |
@@ -39,6 +41,27 @@
 [بازکردن PR #409](https://github.com/vahidmaghsoudi2/hbi/pull/409)
 
 **وضعیت ادغام (2026-10-20):** [PR #409](https://github.com/vahidmaghsoudi2/hbi/pull/409) با موفقیت در `master` ادغام شد. ممیزی مستقل [Issue #410](https://github.com/vahidmaghsoudi2/hbi/issues/410) تکمیل و بسته شد (PASS WITH EXPLICIT LIMITS). این انتشار کنترل‌های ناوبری/مرجع را تثبیت کرد؛ G1 طبق تصمیم جاری PO بسته است و G8 همچنان BLOCKED / NOT VERIFIED است.
+
+### 2.1 شماره‌های اجرایی مرتبط — فهرست پیوندی واحد
+
+این فهرست فقط برای یافتن سابقه‌هاست؛ **محتوا، تصمیم یا جدولِ سندهای دیگر اینجا کپی نمی‌شود**. مرجع جاری هر موضوع در بخش‌های بالا و در فایل تخصصی خودش باقی می‌ماند. رکوردهای قدیمی/پیش‌نویس برای تاریخچه‌اند و بر تصمیم جاری PO اولویت ندارند.
+
+| حوزه | شماره‌های GitHub | کاربرد / وضعیت |
+|---|---|---|
+| ردیاب اصلی | [Issue #403](https://github.com/vahidmaghsoudi2/hbi/issues/403) | ردیاب بالادستی برنامه و مسیر کار Skin Problem Space؛ برای اقدام جاری از همین Index و اسناد مرجع پیروی شود. |
+| تثبیت نقطهٔ ورود | [PR #409](https://github.com/vahidmaghsoudi2/hbi/pull/409) · [Issue #410](https://github.com/vahidmaghsoudi2/hbi/issues/410) | ایجاد Workspace Index و ممیزی مستقل تاریخی ناوبری؛ سابقهٔ تثبیت مرجع. |
+| رکوردهای آغازین و ممیزی زنده | [PR #413](https://github.com/vahidmaghsoudi2/hbi/pull/413) · [PR #414](https://github.com/vahidmaghsoudi2/hbi/pull/414) · [PR #430](https://github.com/vahidmaghsoudi2/hbi/pull/430) | ثبت‌های اولیهٔ P01/P02/P05/P06/P07 و ممیزی وضعیت؛ برای وضعیت فعلی به Working Records و Map رجوع شود. |
+| ثبت ساختاری قفسه‌ها S01–S10 | [#419](https://github.com/vahidmaghsoudi2/hbi/pull/419) · [#420](https://github.com/vahidmaghsoudi2/hbi/pull/420) · [#421](https://github.com/vahidmaghsoudi2/hbi/pull/421) · [#422](https://github.com/vahidmaghsoudi2/hbi/pull/422) · [#423](https://github.com/vahidmaghsoudi2/hbi/pull/423) · [#424](https://github.com/vahidmaghsoudi2/hbi/pull/424) · [#425](https://github.com/vahidmaghsoudi2/hbi/pull/425) · [#426](https://github.com/vahidmaghsoudi2/hbi/pull/426) · [#427](https://github.com/vahidmaghsoudi2/hbi/pull/427) · [#428](https://github.com/vahidmaghsoudi2/hbi/pull/428) | سابقهٔ ثبت ساختاری قفسه‌ها؛ ثبت ساختاری به معنی Accepted/Need/Product یا اعتبارسنجی پزشکی نیست. |
+| تعیین مرجع فهرست P01–P61 | [PR #433](https://github.com/vahidmaghsoudi2/hbi/pull/433) · [PR #435](https://github.com/vahidmaghsoudi2/hbi/pull/435) | مبنای جاریِ تعیین Map P01–P61 به‌عنوان فهرست مرجع و جلوگیری از فهرست موازی؛ G1 بسته و G8 همچنان مسدود است. |
+| تصمیم مرزی P07 و همگام‌سازی S10 | [PR #442](https://github.com/vahidmaghsoudi2/hbi/pull/442) · [PR #444](https://github.com/vahidmaghsoudi2/hbi/pull/444) | P07 مستقل؛ رابطه با P01 برابر UNKNOWN / NOT VERIFIED؛ وضعیت ساختاری S10 با Index هم‌راستا شده است. |
+| آمادگی مشاوره و صف بازبینی انسانی | [PR #448 — S01](https://github.com/vahidmaghsoudi2/hbi/pull/448) · [PR #450 — S02](https://github.com/vahidmaghsoudi2/hbi/pull/450) · [PR #451 — S03](https://github.com/vahidmaghsoudi2/hbi/pull/451) | ثبت اسنادی در Working Records؛ نه Accepted و نه مجوز مشاوره. جزئیات فقط در همان بخش‌های Working Records است. |
+| دسترسی از منوی هوم‌پیج | [PR #439 — ساختار مستنداتی](https://github.com/vahidmaghsoudi2/hbi/pull/439) · [PR #441 — منوی عملیاتی](https://github.com/vahidmaghsoudi2/hbi/pull/441) | PR #441 ادغام شده و «دانشنامه ← دانش پوست» به همین Workspace Index پیوند دارد؛ منو فهرست P01–P61 را تکثیر نمی‌کند. |
+| مسیر مفهومی سه‌حوزه‌ایِ مرتبط | [PR #404](https://github.com/vahidmaghsoudi2/hbi/pull/404) · [PR #405](https://github.com/vahidmaghsoudi2/hbi/pull/405) · [PR #447](https://github.com/vahidmaghsoudi2/hbi/pull/447) | سابقهٔ نقشه‌راه و مفهوم رابطهٔ مشکل–محصول؛ جایگزین Map یا Working Records نیست. |
+| پیش‌نویس‌ها و بررسی‌های تاریخی | [PR #295](https://github.com/vahidmaghsoudi2/hbi/pull/295) · [#303](https://github.com/vahidmaghsoudi2/hbi/pull/303) · [#304](https://github.com/vahidmaghsoudi2/hbi/pull/304) · [#305](https://github.com/vahidmaghsoudi2/hbi/pull/305) · [#306](https://github.com/vahidmaghsoudi2/hbi/pull/306) · [#307](https://github.com/vahidmaghsoudi2/hbi/pull/307) · [#308](https://github.com/vahidmaghsoudi2/hbi/pull/308) · [#309](https://github.com/vahidmaghsoudi2/hbi/pull/309) · [#312](https://github.com/vahidmaghsoudi2/hbi/pull/312) · [#313](https://github.com/vahidmaghsoudi2/hbi/pull/313) · [#314](https://github.com/vahidmaghsoudi2/hbi/pull/314) · [#315](https://github.com/vahidmaghsoudi2/hbi/pull/315) · [#412](https://github.com/vahidmaghsoudi2/hbi/pull/412) · [#416](https://github.com/vahidmaghsoudi2/hbi/pull/416) · [#417](https://github.com/vahidmaghsoudi2/hbi/pull/417) | فقط سابقه؛ این‌ها را به‌جای مرجع جاری استفاده نکنید. به‌ویژه #312 به‌عنوان snapshot جایگزین‌شده و نتیجهٔ قدیمی «61/62» در #417 نباید بر تصمیم جاری PO در #433 غلبه کند. اعتبار/بازنشستگی منبع را در [Source Retirement Register](PRODUCT_INTAKE_SOURCE_RETIREMENT_REGISTER.md) بررسی کنید. |
+
+**مرز دامنه:** شماره‌های مربوط به پروندهٔ ویژگی‌ها و ورود محصولات پوستی (مانند PR #411، #446 و #449) در این فهرست بانک مشکلات ادغام نمی‌شوند؛ آن‌ها حوزهٔ محصول دارند و باید در مرجع محصولی خود بمانند. این جداسازی برای جلوگیری از مخلوط‌شدن «مشکل پوستی» با «محصول پوستی» است.
+
+---
 
 ## 3. نقشهٔ راه سه حوزه
 

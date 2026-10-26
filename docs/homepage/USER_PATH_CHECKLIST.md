@@ -43,6 +43,15 @@
 | E1 | Open QA queue/review | Only authorized roles | NOT RUN | |
 | E2 | Approve/reject does not silently activate product outside contract | Contract-aligned | NOT RUN | |
 
+## Path F — Encyclopedia → Skin product characteristics
+
+| # | Step | Expected | Result | Evidence |
+|---|------|----------|--------|----------|
+| F1 | Open «دانشنامه» from homepage | Seven encyclopedia submenus appear | NOT RUN | |
+| F2 | Open «ویژگی محصولات پوستی» | Central `docs/homepage/encyclopedia/skin/PRODUCTS.md` opens and shows P1–P7 research dossiers | NOT RUN | |
+| F3 | Open «بانک مسائل پوستی» | Specialist P01–P61 registry opens separately | NOT RUN | |
+| F4 | Confirm research is not represented as registered/QA-approved products | UI copy preserves the research-only boundary | NOT RUN | |
+
 ## Legend
 
 | Result | Meaning |
