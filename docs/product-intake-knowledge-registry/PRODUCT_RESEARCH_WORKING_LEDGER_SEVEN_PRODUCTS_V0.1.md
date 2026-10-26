@@ -1055,3 +1055,41 @@ The official **pad** page separately reports a clinical study at P&K Skin Resear
 Continue retrieval of primary reports or technical dossiers, prioritizing: (1) COSRX 2023 Dermacosmetic Skin Science Laboratory report including the blackhead/sebum endpoints; (2) Neutrogena UK 34-subject clinical grading protocol; (3) Clinique's distinct 52-, 536-, 533- and 433-person protocols; (4) ISDIN Active Unify-specific substantiation for the 22%/15% figures; and (5) Anua serum-specific protocol behind the 90% redness claim. If a report is not publicly accessible, record it as unavailable and keep the relation unlinked; do not fill gaps by inference.
 
 **Change scope:** append-only research documentation. No implementation, operational product entry, accepted relation or merge authorization.
+
+
+---
+
+## Batch intake execution handoff — P1–P7 (2026-10-26)
+
+**Product Owner direction:** all seven research products are to be entered together as one coordinated batch. P4/SKIN1004 is included and must not hold the other six products back. This is an execution handoff, not proof that any Product Master record exists.
+
+### Batch manifest
+
+| ID | Product identity from current dossier | Safe initial treatment | Do not infer / unresolved |
+|---|---|---|---|
+| P1 | COSRX The 6 Peptide Skin Booster Serum | SKIN; DRAFT; QA PENDING; identity review as needed | Select the actual size/packaging from catalog evidence; 150 ml and 50 ml variants exist; no GTIN guess |
+| P2 | Neutrogena Clear & Defend 2% Salicylic Acid Face Wash, UK, 200 ml | SKIN; DRAFT; QA PENDING | Confirm current package/GTIN and label version; preserve UK market |
+| P3 | Garnier Vitamin C Brightening Gel Cleanser, Australia, 200 ml | SKIN; DRAFT; QA PENDING | Confirm current package/GTIN and label version; preserve Australian market |
+| P4 | SKIN1004 Madagascar Centella Hyalu-Cica Water-Fit Sun Serum, Korean/international SPF50+ PA++++ dossier | SKIN; DRAFT; QA PENDING | Korean/international formula is distinct from the US SPF50 drug-label formula; confirm actual package/GTIN before final identity verification |
+| P5 | ISDIN FotoUltra 100 Active Unify SPF50+ | SKIN; DRAFT; QA PENDING | Pin market and package version; do not transfer evidence from Spot Prevent or assume a market-specific INCI |
+| P6 | Clinique Even Better Clinical Radical Dark Spot Corrector + Interrupter, 100 ml | SKIN; DRAFT; QA PENDING | Confirm actual market/package/GTIN and current INCI |
+| P7 | Anua Azelaic Acid 10% + Hyaluron Redness Soothing Serum, 30 ml | SKIN; DRAFT; QA PENDING | Confirm actual market/package/GTIN; do not transfer study evidence from the separate pad |
+
+### Required per-item execution sequence
+
+1. Use the existing official Product Intake UI and obtain an authenticated session.
+2. Enter only supported identity facts from the dossier and any available catalog/label evidence; leave unknown GTIN, market, packaging version, variant or formula fields blank rather than inventing values.
+3. Run the official DuplicateCheck for that exact identity snapshot. Stop and review any match, conflict, or stale check before creating.
+4. Create only through the existing UI/API route. Preserve `status=DRAFT`, `qa_verdict=PENDING`, and a non-promoted identity status appropriate to the evidence. Do not submit, approve, activate, or auto-populate confirmed ProductKnowledge.
+5. Read back the returned Product record and record its product ID, identity status, QA verdict, lifecycle status, DuplicateCheck result/reference, and verification evidence.
+6. Repeat for all seven, then report a seven-row outcome matrix with CREATED / BLOCKED / DUPLICATE-REVIEW / NOT VERIFIED. A green CI run is not runtime entry evidence.
+
+### Current execution state
+
+- Batch scope decision: **RECORDED** in Issue #406 comment https://github.com/vahidmaghsoudi2/hbi/issues/406#issuecomment-6416661728.
+- Research dossier for P1–P7: **AVAILABLE**, with identity and study limitations documented above.
+- Authenticated runtime session and seven official DuplicateCheck/create/readback transactions: **NOT VERIFIED / NOT YET EXECUTED** in this handoff.
+- Product Master records created by this documentation update: **NONE**.
+- No direct database writes, seed changes, new parallel Product Master records, or automatic ProductKnowledge claims are authorized.
+
+**Next action:** execute the same official intake workflow for all seven in one batch when an authenticated HBI runtime is available. Missing package-specific identifiers must remain explicit unknowns; they are not a reason to postpone the other products.
