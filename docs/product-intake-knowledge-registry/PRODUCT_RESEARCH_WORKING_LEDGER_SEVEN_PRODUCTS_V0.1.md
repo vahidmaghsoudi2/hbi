@@ -23,12 +23,14 @@ Independent context: a systematic review of cosmetic peptides identified 15 clin
 
 Open: locate original test report/protocol; search independent trials of exact formula; map ingredient roles without inferring product efficacy.
 
-## P2 — Neutrogena Clear & Defend 2% Salicylic Acid Face Wash, 200 ml, UK
-Official: https://www.neutrogena.co.uk/skincare/cleansers-washes/clear-and-defend-daily-wash
+## P2 — Neutrogena Clear & Defend 2% Salicylic Acid Face Wash, 200 ml; market/version unconfirmed
+Official research source (UK page only): https://www.neutrogena.co.uk/skincare/cleansers-washes/clear-and-defend-daily-wash
 
-UK-market 200 ml cleanser; manufacturer declares 2% salicylic acid. INCI includes surfactants, glycerin, salicylic acid, panthenol, tocopherol and fragrance. Manufacturer says 97% noticed fewer new spots in four weeks, based on clinical grading of n=34; public page does not give full protocol/control or absolute change. Do not call this a 97% acne cure. Directions: wet face, massage gently, avoid eyes/mouth, rinse; manufacturer mentions twice-daily use, but individual tolerance may differ.
+**Intake confirmation (2026-10-27):** size = 200 ml (user-confirmed); market/region = UNKNOWN (retain the existing research dossier without assigning it to the user's physical unit); information basis = prior research file; GTIN/barcode = NOT PROVIDED. Packaging version, physical-unit identity and formula match remain UNVERIFIED. The UK official page is retained as a source for the prior research snapshot, not as proof that the target unit is the UK-market version.
 
-Open: original study documentation; current package INCI and warnings; independent evidence for exact SKU. Ingredient-level salicylic acid guidance is contextual, not proof of this rinse-off product.
+The UK page declares 2% salicylic acid. Its displayed INCI includes surfactants, glycerin, salicylic acid, panthenol, tocopherol and fragrance. The manufacturer says 97% noticed fewer new spots in four weeks, based on clinical grading of n=34; the public page does not provide the full protocol/control or absolute change. Do not call this a 97% acne cure. The page gives directions to wet the face, massage gently, avoid eyes/mouth and rinse; it mentions twice-daily use, but individual tolerance may differ. These are source-page observations, not package-verified instructions for the unconfirmed target unit.
+
+Open: original study documentation; physical package INCI and warnings; market/version identity; independent evidence for the exact SKU. Ingredient-level salicylic acid guidance is contextual, not proof of this rinse-off product. No Product Master registration, ProductKnowledge approval or live runtime transaction is implied by this research update.
 
 ## P3 — Garnier Vitamin C Brightening Gel Cleanser, 200 ml, Australia
 Official: https://www.garnier.com.au/about-our-brands/skin-active/garnier-skin-active-vitamin-c-brightening-gel-cleanser-200ml
