@@ -1204,3 +1204,36 @@ The official page continues to offer 150 ml and 50 ml options under the same pro
 - Approved Product↔Problem relations: **NONE**. Existing crosswalk labels such as candidate-only or manufacturer-claim-only remain unchanged.
 - Product lifecycle/QA/ProductKnowledge, schema, API, UI and database states: **UNCHANGED**.
 - This addendum is append-only research in the existing ledger; it does not authorize merging PR #411 or any implementation change.
+
+
+---
+
+## Research pass 13 — P6 historical identity triangulation (2026-10-26)
+
+**Purpose:** follow up the material Clinique name/formula drift recorded in pass 12. This pass checks whether public product pages independently support the older 100 ml target identity and whether the brand itself distinguishes it from the replacement. It does not establish the target user's physical unit, GTIN, market-specific formula, or the protocol behind historical efficacy claims.
+
+### Sources checked
+
+- Clinique historical product page, queried at the 100 ml size: https://www.clinique.com/product/4034/68008/skincare/serum/even-better-clinicaltm-radical-dark-spot-corrector-interrupter?size=3.4_fl._oz._%2F_100_ml
+- Clinique discontinued-products page: https://www.clinique.com/discontinued-products/even-better-clinical-radical-dark-spot-corrector-interrupter
+- Harrods 100 ml listing: https://www.harrods.com/en-gb/p/clinique-even-better-clinical-radical-dark-spot-correctorand-interrupter-100ml-000000000006795757
+- Kohl's listing for the older named product: https://www.kohls.com/product/prd-5074573/clinique-even-better-clinical-radical-dark-spot-corrector-interrupter-serum.jsp
+
+### Findings
+
+1. The Clinique URL associated with the older name remains discoverable in search results with the title **Even Better Clinical Radical Dark Spot Corrector + Interrupter** and a 100 ml size parameter. Its indexed key-ingredient text names UP302 (Dimethoxytolyl Propylresorcinol), Ascorbyl Glucoside, and Salicylic Acid. This is consistent with the historical dossier's product name, but an indexed result or query parameter is not proof that the page currently serves a distinct, purchasable 100 ml formulation; the pass-12 observed redirect still matters.
+2. Clinique's own discontinued-products page explicitly says **Radical Dark Spot Corrector + Interrupter is no longer available** and presents **Even Better Clinical Dark Spot Clearing Serum** as its replacement. This is direct brand evidence that the names should not be silently treated as one unchanged live SKU.
+3. Harrods independently lists the older product name at **100 ml** and displays an INCI beginning Water/Aqua/Eau, Cyclopentasiloxane, Dimethicone, Polysilicone-11, Isododecane, Butylene Glycol, Ascorbyl Glucoside, with Salicylic Acid, Acetyl Glucosamine and Dimethoxytolyl Propylresorcinol later in the list. Kohl's displays the same older-name ingredient pattern. These retailer listings support the existence of a historical 100 ml product dossier; they do not establish the formula on a physical unit now in hand or resolve market/lot variation.
+4. The older-name INCI displayed by these listings differs from the newer page snapshot recorded in pass 12, which includes Magnesium Ascorbyl Phosphate and other listed components. The safest interpretation is **distinct historical versus current-page source snapshots**, not a merged formula.
+5. The historical product's 52-woman/39% claim remains a source-bound manufacturer claim from earlier ledger research. This pass did not locate the underlying full study protocol or independently verify its endpoint, cohort, statistical analysis, or exact correspondence to every 100 ml market variant.
+
+### P6 disposition update
+
+- Historical name/100 ml product existence: **SUPPORTED BY BRAND/RETAILER PAGE EVIDENCE**, bounded to the source records above.
+- Current brand position: **DISCONTINUED; brand identifies Dark Spot Clearing Serum as replacement**.
+- Exact physical package, GTIN, market, formula/lot match: **UNVERIFIED / NEEDS_REVIEW**.
+- Formula relationship: preserve historical and current-page INCI snapshots separately; do not combine ingredient lists or transfer claims between them.
+- Historical efficacy protocol: **NOT INDEPENDENTLY VERIFIED**.
+- Product↔Problem relation: no relation approved by this pass; P17/P19 remain candidate-only or unresolved as already recorded.
+
+This is an append-only evidence update to the existing seven-product ledger. It does not modify product records, lifecycle/QA state, ProductKnowledge, schema, API, UI, database, or the Skin Problem Space's P01–P61 relation criteria.
