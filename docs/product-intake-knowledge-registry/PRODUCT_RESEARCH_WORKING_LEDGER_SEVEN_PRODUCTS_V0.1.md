@@ -1093,3 +1093,37 @@ Continue retrieval of primary reports or technical dossiers, prioritizing: (1) C
 - No direct database writes, seed changes, new parallel Product Master records, or automatic ProductKnowledge claims are authorized.
 
 **Next action:** execute the same official intake workflow for all seven in one batch when an authenticated HBI runtime is available. Missing package-specific identifiers must remain explicit unknowns; they are not a reason to postpone the other products.
+
+
+---
+
+## Source-code execution path audit — official Product Intake (2026-10-26)
+
+**Scope:** read-only inspection of the current `master` source files. This confirms code paths and guardrails only; it does not prove that the deployed runtime is reachable or that any product was created.
+
+### Confirmed source paths
+
+- API router registration: `app/main.py` mounts products at `/api/v1/products` and DuplicateCheck at `/api/v1/products/duplicate-check`.
+- DuplicateCheck transaction: `POST /api/v1/products/duplicate-check/`, implemented by `app/api/routers/duplicate_checks.py`, calls `DuplicateCheckService.check(...)` and returns a persisted `check_id`, result, candidates, and provenance.
+- Possible-match resolution: `POST /api/v1/products/duplicate-check/audit/{check_id}/decision`. A `POSSIBLE_MATCH` requires an operator decision; the create service expects the corresponding `duplicate_check_id` after a recorded `NEW` decision.
+- Product creation: `POST /api/v1/products/`, implemented by `app/api/routers/products.py`, calls `ProductService.create_product_with_inventory(...)`. The service enforces DuplicateCheck, requires an explicit `product_line`, strips client-supplied governance fields, and initializes `status=DRAFT`, `qa_verdict=PENDING`, `identity_status=NEEDS_REVIEW`.
+- Readback: `GET /api/v1/products/{product_id}`; authorized catalog listing is `GET /api/v1/products/manage`.
+- Product registration also creates a zero-quantity Inventory anchor if one does not already exist. The code comment explicitly says this does not imply physical stock; no Stock-In transaction should be performed as part of this batch.
+
+### Operational safeguards
+
+1. Run DuplicateCheck separately for each exact product identity snapshot and preserve its `check_id` and result.
+2. For `NEW`, proceed only with supported fields; for `POSSIBLE_MATCH`, resolve the audit using the authorized operator workflow before create; for `EXISTING` or unresolved conflict, do not create a second record.
+3. `product_id` is required by the current create schema. Do not fabricate identifiers. Obtain an identifier through the existing approved intake convention/operator workflow before submitting create.
+4. `product_line=SKIN` is required and must be an explicit operator classification. Unknown barcode, market, packaging version, variant, or formula must not be filled by inference.
+5. Do not call submit, QA, identity-verification, approval, activation, Stock-In, or ProductKnowledge mutation endpoints for this initial registration batch.
+6. After create, read back each product and preserve the returned product ID, status, identity status, QA verdict, DuplicateCheck audit reference/result, and any inventory-anchor behavior.
+
+### Execution evidence boundary
+
+- Code route and service behavior: **CONFIRMED BY SOURCE INSPECTION**.
+- Authenticated deployed runtime, environment/base URL, and operator session: **NOT AVAILABLE/NOT VERIFIED in this session**.
+- DuplicateCheck/create/readback transactions for P1–P7: **NOT EXECUTED / NO TRANSACTION EVIDENCE**.
+- Product Master records created by this source audit: **NONE**.
+
+This addendum records an execution-path audit only. It does not change the roadmap, intake contract, schema, API, UI, database, or any product record.
