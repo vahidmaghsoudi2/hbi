@@ -116,6 +116,17 @@ class ProductService(BaseService[Product, ProductRepository]):
         self._enforce_duplicate_check_on_create(
             data, actor_id=actor_id, roles=roles, duplicate_check_id=duplicate_check_id
         )
+        # Generate the persistent identifier only after DuplicateCheck and any
+        # required operator decision have passed. Never bind a POSSIBLE_MATCH
+        # decision to an identifier that the system invents afterward.
+        if not product_id:
+            for _ in range(5):
+                candidate_id = f"HBI-PROD-{uuid.uuid4().hex[:16].upper()}"
+                if not self.get_by_id(candidate_id):
+                    data["product_id"] = candidate_id
+                    break
+            else:
+                raise ConflictError("Could not allocate a unique system product_id; retry create")
         # Product Line V1: required on create; operator value only (no inference).
         self._enforce_product_line_on_write(data, required=True)
         for k in list(PRODUCT_GOVERNANCE_KEYS):
