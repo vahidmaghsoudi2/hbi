@@ -82,7 +82,7 @@ const EMPTY: Draft = {
   spf: "",
   category: "",
   barcode_gtin: "",
-  market_region: "IR",
+  market_region: "",
   packaging_version: "",
   identity_status: "NEEDS_REVIEW",
   qa_verdict: "PENDING",
@@ -219,6 +219,7 @@ export function completeFromIntro(raw: string): Draft {
   else if (/لاروش|la\s*roche|laroche/i.test(text)) d.brand = "La Roche-Posay";
   else if (/بیودرما|bioderma/i.test(text)) d.brand = "Bioderma";
   else if (/اوین|eucerin/i.test(text)) d.brand = "Eucerin";
+  else if (/skin\s*1004/i.test(text)) d.brand = "SKIN1004";
   else if (/نوتروژنا|neutrogena/i.test(text)) d.brand = "Neutrogena";
   else {
     const latin = text.match(/\b([A-Z][A-Za-z0-9\-']{1,28}(?:\s+[A-Z][A-Za-z0-9\-']{1,28}){0,3})\b/);
@@ -249,7 +250,7 @@ export function completeFromIntro(raw: string): Draft {
   d.identity_status = "NEEDS_REVIEW";
   d.qa_verdict = "PENDING";
   d.status = "DRAFT";
-  d.market_region = "IR";
+  d.market_region = "";
   // product_line intentionally left empty — operator must select explicitly
   d.product_line = "";
   return d;
@@ -268,7 +269,7 @@ function fromProduct(p: ProductDTO): Draft {
     spf: "",
     category: "",
     barcode_gtin: String((p as { barcode_gtin?: string }).barcode_gtin ?? ""),
-    market_region: String((p as { market_region?: string }).market_region ?? "IR"),
+    market_region: String((p as { market_region?: string }).market_region ?? ""),
     packaging_version: String((p as { packaging_version?: string }).packaging_version ?? ""),
     identity_status: p.identity_status || "VERIFIED",
     qa_verdict: p.qa_verdict || "PENDING",
@@ -481,6 +482,32 @@ export default function ProductIntakePanel({
     }
   }
 
+  function loadResearchedP4Draft() {
+    const next: Draft = {
+      ...EMPTY,
+      product_id: "SKIN1004-HYALUCICA-SUN-SERUM-50ML",
+      brand: "SKIN1004",
+      product_name: "Madagascar Centella Hyalu-Cica Water-Fit Sun Serum",
+      product_line: "SKIN",
+      variant: "",
+      size_value: 50,
+      size_unit: "ml",
+      spf: "",
+      category: "",
+      barcode_gtin: "",
+      market_region: "",
+      packaging_version: "",
+      identity_status: "NEEDS_REVIEW",
+      qa_verdict: "PENDING",
+      status: "DRAFT",
+    };
+    setIntro("SKIN1004 Madagascar Centella Hyalu-Cica Water-Fit Sun Serum 50ml");
+    setDraft(next);
+    clearDuplicateState();
+    setErr(null);
+    setMsg("پیش‌نویس پژوهشی P4 بارگذاری شد. بازار، نسخه بسته‌بندی، GTIN، variant و SPF از روی نام حدس زده نشده‌اند. هویت محصول همچنان نیازمند بررسی است؛ این کار هنوز هیچ رکوردی ایجاد نکرده است.");
+  }
+
   function runComplete() {
     if (!intro.trim()) {
       setErr("ابتدا خلاصه معرفی محصول را بنویسید.");
@@ -687,9 +714,6 @@ export default function ProductIntakePanel({
           barcode_gtin: draft.barcode_gtin || null,
           market_region: draft.market_region || null,
           packaging_version: draft.packaging_version || null,
-          knowledge_use_cases: draft.category || null,
-          knowledge_evidence_claim: draft.category || null,
-          knowledge_evidence_source_reference: "PRODUCT_INTAKE",
         };
         if (
           String(dupResult?.result || "").toUpperCase() === "POSSIBLE_MATCH" &&
@@ -753,7 +777,14 @@ export default function ProductIntakePanel({
             <button type="button" className="pro-btn-primary" onClick={runComplete}>
               تکمیل هوشمند اطلاعات
             </button>
+            <button type="button" className="pro-btn-secondary" onClick={loadResearchedP4Draft}>
+              بارگذاری پیش‌نویس پژوهشی P4 · SKIN1004
+            </button>
           </div>
+          <p className="pro-lead" style={{ marginTop: "0.5rem", fontSize: "0.85rem" }}>
+            شروع سریع P4 فقط فیلدها را پیش‌پر می‌کند. بازار کره‌ای/بین‌المللی و آمریکا یکسان فرض نمی‌شوند؛
+            پیش از ثبت، مشخصات را بررسی و DuplicateCheck را اجرا کنید. ایجاد رکورد همچنان اقدام جداگانه اپراتور است.
+          </p>
         </div>
       )}
 
