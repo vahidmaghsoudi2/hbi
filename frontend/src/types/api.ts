@@ -66,6 +66,28 @@ export interface RecommendationDTO {
   price?: number | null;
 }
 
+/** Read-only exact GTIN lookup response (WP-1). */
+export interface GtinLookupProduct {
+  product_id: string;
+  brand: string;
+  product_name: string;
+  variant?: string | null;
+  size_value?: number | null;
+  size_unit?: string | null;
+  barcode_gtin: string;
+  product_line?: string | null;
+  status: string;
+  identity_status: string;
+  qa_verdict: string;
+}
+
+export interface GtinLookupResponse {
+  result: "MATCH" | "NO_MATCH" | "INVALID" | string;
+  reason: string;
+  product: GtinLookupProduct | null;
+  intake_hint?: string;
+}
+
 /** Public product listing item */
 export interface ProductDTO {
   product_id: string;

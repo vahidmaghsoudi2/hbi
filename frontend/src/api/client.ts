@@ -26,6 +26,7 @@ import type {
   MutationLogDTO,
   DuplicateCheckRequest,
   DuplicateCheckResponse,
+  GtinLookupResponse,
   DuplicateCheckOperatorDecisionRequest,
   DuplicateCheckOperatorDecisionResponse,
   ResearchAssertionRequest,
@@ -317,6 +318,18 @@ export function checkDuplicate(
   return request<DuplicateCheckResponse>(
     "/products/duplicate-check/",
     { method: "POST", body: JSON.stringify(body) },
+    token
+  );
+}
+
+/** GET /api/v1/products/by-gtin/{gtin} — read-only exact Product Master lookup. */
+export function identifyProductByGtin(
+  gtin: string,
+  token: string
+): Promise<GtinLookupResponse> {
+  return request<GtinLookupResponse>(
+    `/products/by-gtin/${encodeURIComponent(gtin)}`,
+    {},
     token
   );
 }
