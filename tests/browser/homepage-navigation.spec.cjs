@@ -395,7 +395,7 @@ test("Researched P4 starter pre-fills a SKIN draft without guessing market ident
   await page.getByRole("button", { name: "بارگذاری پیش‌نویس پژوهشی P4 · SKIN1004" }).click();
 
   const field = (label) => page.locator("label").filter({ hasText: label }).first().locator("..").locator("input");
-  await expect(page.getByText(/DuplicateCheck/)).toBeVisible();
+  await expect(page.locator("p.pro-lead").filter({ hasText: "backend" })).toBeVisible();
   await expect(page.locator("label").filter({ hasText: "product_id" })).toHaveCount(0);
   await expect(field("برند")).toHaveValue("SKIN1004");
   await expect(field("نام محصول")).toHaveValue("Madagascar Centella Hyalu-Cica Water-Fit Sun Serum");
