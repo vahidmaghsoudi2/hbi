@@ -239,13 +239,8 @@ export function completeFromIntro(raw: string): Draft {
   if (d.spf && !/SPF/i.test(name)) name = name + " (" + d.spf + ")";
   d.product_name = name;
 
-  const slugBrand =
-    d.brand.toUpperCase().replace(/[^A-Z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 20) || "ITEM";
-  const slugSpf = d.spf.replace(/\s+/g, "").replace("+", "PLUS") || "GEN";
-  const catHint = /ضدآفتاب|sunscreen/i.test(d.category) ? "SPF" : /آبرسان|مرطوب/i.test(d.category) ? "HYDR" : "SKIN";
-  d.product_id = `${slugBrand}-${catHint}-${slugSpf}-${d.size_value}${d.size_unit.toUpperCase()}`
-    .replace(/--+/g, "-")
-    .slice(0, 64);
+  // product_id is allocated by the backend after DuplicateCheck; never invent one here.
+  d.product_id = "";
 
   d.identity_status = "NEEDS_REVIEW";
   d.qa_verdict = "PENDING";
@@ -713,9 +708,7 @@ export default function ProductIntakePanel({
           market_region: draft.market_region || null,
           packaging_version: draft.packaging_version || null,
         };
-        if (draft.product_id.trim()) {
-          body.product_id = draft.product_id.trim();
-        }
+        // New intake never submits a client-invented product_id. Backend allocates after DuplicateCheck.
         if (
           String(dupResult?.result || "").toUpperCase() === "POSSIBLE_MATCH" &&
           dupResult?.check_id
