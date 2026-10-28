@@ -34,7 +34,7 @@ const PRODUCT_LINE_OPTIONS = [
 ] as const;
 
 const SKIN_TEMPLATES = [
-  ["HYDRATING_MOISTURIZER", "آبرسان / مرطوب‌کننده", ["بافت", "حس پوستی اعلام‌شده", "روز / شب / هر دو", "ادعای آبرسانی یا حفظ رطوبت (متن + منبع)"]],
+  ["HYDRATING_MOISTURIZER", "آبرسان / مرطوب‌کننده", ["فرم محصول (سرم / ژل / کرم / لوسیون / امولسیون / نامشخص)", "بافت", "حس پوستی اعلام‌شده", "روز / شب / هر دو طبق منبع", "ادعای آبرسانی یا حفظ رطوبت (متن + منبع)", "مواد جاذب رطوبت اعلام‌شده (مثل هیالورونیک اسید، فقط با منبع)", "مواد نرم‌کننده اعلام‌شده (فقط با منبع)", "مواد کاهنده تبخیر آب اعلام‌شده (فقط با منبع)", "نقش ترکیبات در حفظ رطوبت (تفسیر علمی با منبع مستقل)", "فهرست INCI کامل یا جزئی و نسخه/بازار", "عطر / الکل طبق INCI همین نسخه"]],
   ["SUNSCREEN", "ضدآفتاب", ["SPF", "PA / ادعای UVA", "نوع فیلتر", "مقاومت در برابر آب", "رنگی / بی‌رنگ", "صورت / بدن"]],
   ["BRIGHTENING_SPOT", "روشن‌کننده / ضدلک", ["هدف اعلام‌شده", "مواد فعال اعلام‌شده", "بازه زمانی ادعای سازنده", "اعداد ادعای سازنده (فقط با منبع)"]],
   ["MICELLAR", "میسلار واتر", ["پاک‌کنندگی آرایش", "نیاز به آبکشی", "مناسب اطراف چشم طبق برچسب"]],
@@ -53,7 +53,7 @@ const SKIN_SEVEN_PRODUCT_TEMPLATES: Record<string, string> = {
   "HBI-PROD-AB647F422E174BD8": "SUNSCREEN",
   "HBI-PROD-03781074C3BF448A": "SUNSCREEN",
   "HBI-PROD-85AD86B15C734EF2": "BRIGHTENING_SPOT",
-  "HBI-PROD-7AD37ECCEA874E12": "OTHER_SKIN",
+  "HBI-PROD-7AD37ECCEA874E12": "HYDRATING_MOISTURIZER",
 };
 
 const SKIN_PRODUCT_SPECIFIC_BOXES: Record<string, readonly string[]> = {
@@ -68,6 +68,10 @@ const SKIN_PRODUCT_SPECIFIC_BOXES: Record<string, readonly string[]> = {
 
 /** Map only semantically matching template boxes to existing Evidence fields. */
 function skinTemplateEvidenceField(template: string, label: string): string | undefined {
+  if (template === "HYDRATING_MOISTURIZER" && label === "فرم محصول (سرم / ژل / کرم / لوسیون / امولسیون / نامشخص)") return undefined;
+  if (template === "HYDRATING_MOISTURIZER" && label === "ادعای آبرسانی یا حفظ رطوبت (متن + منبع)") return "claimed_benefits";
+  if (template === "HYDRATING_MOISTURIZER" && label === "مواد جاذب رطوبت اعلام‌شده (مثل هیالورونیک اسید، فقط با منبع)") return "ingredients";
+  if (template === "HYDRATING_MOISTURIZER" && label === "فهرست INCI کامل یا جزئی و نسخه/بازار") return "ingredients";
   if (template === "BRIGHTENING_SPOT" && label === "هدف اعلام‌شده") return "known_use_cases";
   if (template === "BRIGHTENING_SPOT" && label === "مواد فعال اعلام‌شده") return "ingredients";
   if (template === "CLEANSING_GEL" && label === "تمرکز اعلام‌شده") return "known_use_cases";
