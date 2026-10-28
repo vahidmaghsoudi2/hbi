@@ -387,7 +387,7 @@ export default function ProductIntakePanel({
           boxKind: "template",
         };
       });
-    const productFields = (SKIN_PRODUCT_SPECIFIC_BOXES[researchProductId] ?? []).map((label) => {
+    const productFields = (SKIN_PRODUCT_SPECIFIC_BOXES[researchProductId || ""] ?? []).map((label) => {
       const structured = label.includes("ترکیبات") || label.includes("فیلترهای UV") || label.includes("پپتیدها") || label.includes("مشتق ویتامین C") || label.includes("آزلائیک اسید") || label.includes("سالیسیلیک اسید");
       return {
         field: structured ? "ingredients" : undefined,
@@ -1073,11 +1073,11 @@ export default function ProductIntakePanel({
                   );
                 })}
               </div>
-              {(SKIN_PRODUCT_SPECIFIC_BOXES[researchProductId] ?? []).length > 0 && (
+              {(SKIN_PRODUCT_SPECIFIC_BOXES[researchProductId || ""] ?? []).length > 0 && (
                 <>
                   <h3>باکس‌های اختصاصی همین محصول</h3>
                   <div className="pro-grid-2">
-                    {(SKIN_PRODUCT_SPECIFIC_BOXES[researchProductId] ?? []).map((label) => {
+                    {(SKIN_PRODUCT_SPECIFIC_BOXES[researchProductId || ""] ?? []).map((label) => {
                       const boxKey = `product:${researchProductId}:${label}`;
                       const structured = label.includes("ترکیبات") || label.includes("فیلترهای UV") || label.includes("پپتیدها") || label.includes("مشتق ویتامین C") || label.includes("آزلائیک اسید") || label.includes("سالیسیلیک اسید");
                       return (
