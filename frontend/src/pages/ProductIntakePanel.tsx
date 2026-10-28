@@ -383,7 +383,7 @@ export default function ProductIntakePanel({
           field,
           label,
           value: (skinBoxValues[`template:${skinTemplate}:${label}`] || "").trim(),
-          claimType: field ? (researchClaimType || "UNKNOWN") : "UNKNOWN",
+          claimType: researchClaimType || "UNKNOWN",
           boxKind: "template",
         };
       });
@@ -393,7 +393,7 @@ export default function ProductIntakePanel({
         field: structured ? "ingredients" : undefined,
         label,
         value: (skinBoxValues[`product:${researchProductId}:${label}`] || "").trim(),
-        claimType: structured ? (researchClaimType || "UNKNOWN") : "UNKNOWN",
+        claimType: researchClaimType || "UNKNOWN",
         boxKind: "product-specific",
       };
     });
