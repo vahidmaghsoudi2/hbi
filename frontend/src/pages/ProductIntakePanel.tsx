@@ -505,11 +505,11 @@ export default function ProductIntakePanel({
   }
 
   useEffect(() => {
-    setSkinTemplate("");
     setSkinBoxValues({});
     if (editProduct?.product_id) {
       const next = fromProduct(editProduct);
-      setSkinTemplate(SKIN_SEVEN_PRODUCT_TEMPLATES[editProduct.product_id] || "");
+      const approvedTemplate = SKIN_SEVEN_PRODUCT_TEMPLATES[editProduct.product_id] || "";
+      setSkinTemplate(approvedTemplate);
       setDraft(next);
       setInitialProductLine(normalizeProductLine(next.product_line));
       setIntro("");
@@ -521,6 +521,7 @@ export default function ProductIntakePanel({
       setResearchProductId(editProduct.product_id);
       void loadResearch(editProduct.product_id);
     } else {
+      setSkinTemplate("");
       setResearchProductId(null);
       setResearchRows([]);
     }
@@ -974,7 +975,7 @@ export default function ProductIntakePanel({
             این مسیر محصول نمی‌سازد و QA را تأیید نمی‌کند.
           </p>
           <label className="pro-label" htmlFor="skin-template">قالب محصول پوست</label>
-          <select id="skin-template" className="pro-input" value={skinTemplate} onChange={(e) => setSkinTemplate(e.target.value)} disabled={isApprovedSevenProduct}>
+          <select id="skin-template" className="pro-input" value={isApprovedSevenProduct ? selectedSkinTemplate : skinTemplate} onChange={(e) => setSkinTemplate(e.target.value)} disabled={isApprovedSevenProduct}>
             <option value="">— انتخاب قالب —</option>
             {SKIN_TEMPLATES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
           </select>
