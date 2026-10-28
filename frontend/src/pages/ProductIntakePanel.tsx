@@ -347,7 +347,8 @@ export default function ProductIntakePanel({
     }
   }
 
-  const selectedSkinTemplate = SKIN_SEVEN_PRODUCT_TEMPLATES[draft.product_id] || "";
+  // The persisted edit target is canonical; draft state may still be initializing on first render.
+  const selectedSkinTemplate = SKIN_SEVEN_PRODUCT_TEMPLATES[editProduct?.product_id || draft.product_id] || "";
   const isApprovedSevenProduct = Boolean(selectedSkinTemplate);
   const canSaveSkinEvidenceDraft =
     editing &&
