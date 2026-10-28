@@ -316,13 +316,17 @@ export default function ProductIntakePanel({
     }
   }
 
-  const isP1cTestProduct = editing && draft.product_id === "TEST-P1C-001" && draft.product_line === "SKIN";
+  const canSaveSkinEvidenceDraft =
+    editing &&
+    Boolean(draft.product_id.trim()) &&
+    draft.product_line === "SKIN" &&
+    researchProductId === draft.product_id;
 
   async function saveSkinEvidenceDraft() {
     setErr(null);
     setMsg(null);
-    if (!isP1cTestProduct || researchProductId !== "TEST-P1C-001") {
-      setErr("ثبت باکس‌های P1c فقط برای محصول آزمایشی ازپیش‌موجود TEST-P1C-001 مجاز است.");
+    if (!canSaveSkinEvidenceDraft || !researchProductId) {
+      setErr("ثبت باکس‌های ساخت‌یافته فقط برای محصول پوستِ موجود و انتخاب‌شده مجاز است.");
       return;
     }
     if (!researchSourceType.trim() || !researchSourceReference.trim()) {
@@ -355,7 +359,7 @@ export default function ProductIntakePanel({
       const activeToken = (await onEnsureSession?.()) ?? token;
       if (!activeToken) throw new Error("نشست فعال برای ثبت پژوهش موجود نیست.");
       await createResearchDraft(
-        "TEST-P1C-001",
+        researchProductId,
         fields.map((item) => ({
           claim: item.value,
           field: item.field,
@@ -363,14 +367,14 @@ export default function ProductIntakePanel({
           source_reference: researchSourceReference.trim(),
           claim_type: researchClaimType || "UNKNOWN",
           market_region: researchMarketRegion.trim() || undefined,
-          notes: `P1c approved OK box: ${item.label}; template=${skinTemplate || "not-selected"}${researchNotes.trim() ? `; ${researchNotes.trim()}` : ""}`,
+          notes: `Approved structured skin box: ${item.label}; template=${skinTemplate || "not-selected"}${researchNotes.trim() ? `; ${researchNotes.trim()}` : ""}`,
         })),
         activeToken,
       );
       setSkinBoxValues({});
       setResearchNotes("");
-      setMsg("پیش‌نویس‌های مجاز P1c ثبت شدند؛ همه با QA=PENDING و evidence_status=UNKNOWN باقی می‌مانند.");
-      await loadResearch("TEST-P1C-001");
+      setMsg("پیش‌نویس‌های باکس‌های مجاز برای محصول انتخاب‌شده ثبت شدند؛ همه با QA=PENDING و evidence_status=UNKNOWN باقی می‌مانند.");
+      await loadResearch(researchProductId);
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
     } finally {
@@ -894,7 +898,7 @@ export default function ProductIntakePanel({
         <fieldset className="pro-fieldset" style={{ marginTop: "1rem" }}>
           <legend>۳) قالب ثابت محصول پوست (V1)</legend>
           <p className="pro-lead">
-            فقط برای محصول ازپیش‌موجود TEST-P1C-001 فعال است. باکس‌های OK به Evidence دارای منبع تبدیل می‌شوند؛
+            برای محصول پوستِ ازپیش‌موجود و انتخاب‌شده فعال است. باکس‌های OK به Evidence دارای منبع تبدیل می‌شوند؛
             سایر باکس‌ها تا قرارداد ذخیره‌سازی مستقل غیرفعال می‌مانند. این مسیر محصول نمی‌سازد و QA را تأیید نمی‌کند.
           </p>
           <label className="pro-label" htmlFor="skin-template">قالب محصول پوست</label>
@@ -906,7 +910,7 @@ export default function ProductIntakePanel({
           <div className="pro-grid-2" style={{ marginTop: "0.75rem" }}>
             <div>
               <label className="pro-label">نوع منبع *</label>
-              <select className="pro-input" value={researchSourceType} onChange={(e) => setResearchSourceType(e.target.value)} disabled={!isP1cTestProduct}>
+              <select className="pro-input" value={researchSourceType} onChange={(e) => setResearchSourceType(e.target.value)} disabled={!canSaveSkinEvidenceDraft}>
                 <option value="MANUFACTURER">تولیدکننده</option>
                 <option value="REGULATORY">مرجع مقرراتی</option>
                 <option value="PEER_REVIEWED">مقاله داوری‌شده</option>
@@ -917,7 +921,7 @@ export default function ProductIntakePanel({
             </div>
             <div>
               <label className="pro-label">نوع ادعا</label>
-              <select className="pro-input" value={researchClaimType} onChange={(e) => setResearchClaimType(e.target.value)} disabled={!isP1cTestProduct}>
+              <select className="pro-input" value={researchClaimType} onChange={(e) => setResearchClaimType(e.target.value)} disabled={!canSaveSkinEvidenceDraft}>
                 <option value="UNKNOWN">نامشخص</option>
                 <option value="MANUFACTURER_CLAIM">ادعای تولیدکننده</option>
                 <option value="EVIDENCE">شاهد</option>
@@ -928,15 +932,15 @@ export default function ProductIntakePanel({
             </div>
             <div style={{ gridColumn: "1 / -1" }}>
               <label className="pro-label">نشانی یا مرجع دقیق منبع *</label>
-              <input className="pro-input" value={researchSourceReference} onChange={(e) => setResearchSourceReference(e.target.value)} placeholder="URL، شناسه مقاله یا مرجع دقیق" disabled={!isP1cTestProduct} />
+              <input className="pro-input" value={researchSourceReference} onChange={(e) => setResearchSourceReference(e.target.value)} placeholder="URL، شناسه مقاله یا مرجع دقیق" disabled={!canSaveSkinEvidenceDraft} />
             </div>
             <div>
               <label className="pro-label">منطقه بازار (اختیاری، فقط با شاهد)</label>
-              <input className="pro-input" value={researchMarketRegion} onChange={(e) => setResearchMarketRegion(e.target.value)} placeholder="خالی بماند اگر معلوم نیست" disabled={!isP1cTestProduct} />
+              <input className="pro-input" value={researchMarketRegion} onChange={(e) => setResearchMarketRegion(e.target.value)} placeholder="خالی بماند اگر معلوم نیست" disabled={!canSaveSkinEvidenceDraft} />
             </div>
             <div style={{ gridColumn: "1 / -1" }}>
               <label className="pro-label">یادداشت / محدودیت‌ها</label>
-              <textarea className="pro-input" rows={2} value={researchNotes} onChange={(e) => setResearchNotes(e.target.value)} placeholder="اختیاری" disabled={!isP1cTestProduct} />
+              <textarea className="pro-input" rows={2} value={researchNotes} onChange={(e) => setResearchNotes(e.target.value)} placeholder="اختیاری" disabled={!canSaveSkinEvidenceDraft} />
             </div>
           </div>
 
@@ -950,8 +954,8 @@ export default function ProductIntakePanel({
                   rows={2}
                   value={skinBoxValues[item.key] || ""}
                   onChange={(e) => setSkinBoxValues((prev) => ({ ...prev, [item.key]: e.target.value }))}
-                  placeholder={isP1cTestProduct ? "متن ادعا/ویژگی مطابق منبع" : "فقط در پایلوت مجاز فعال است"}
-                  disabled={!isP1cTestProduct}
+                  placeholder={canSaveSkinEvidenceDraft ? "متن ادعا/ویژگی مطابق منبع" : "ابتدا یک محصول پوستِ موجود را باز کنید"}
+                  disabled={!canSaveSkinEvidenceDraft}
                 />
               </div>
             ))}
@@ -976,8 +980,8 @@ export default function ProductIntakePanel({
                           rows={2}
                           value={skinBoxValues.claimed_benefits || ""}
                           onChange={(e) => setSkinBoxValues((prev) => ({ ...prev, claimed_benefits: e.target.value }))}
-                          placeholder={isP1cTestProduct ? "ادعای منبع‌دار؛ نه نتیجه‌گیری مستقل" : "فقط در پایلوت مجاز فعال است"}
-                          disabled={!isP1cTestProduct}
+                          placeholder={canSaveSkinEvidenceDraft ? "ادعای منبع‌دار؛ نه نتیجه‌گیری مستقل" : "ابتدا یک محصول پوستِ موجود را باز کنید"}
+                          disabled={!canSaveSkinEvidenceDraft}
                         />
                       ) : (
                         <input className="pro-input" value="" placeholder="در این مرحله غیرفعال است" disabled readOnly />
@@ -990,7 +994,7 @@ export default function ProductIntakePanel({
           )}
 
           <div className="pro-actions" style={{ marginTop: "0.75rem" }}>
-            <button type="button" className="pro-btn-primary" disabled={!isP1cTestProduct || researchBusy} onClick={() => void saveSkinEvidenceDraft()}>
+            <button type="button" className="pro-btn-primary" disabled={!canSaveSkinEvidenceDraft || researchBusy} onClick={() => void saveSkinEvidenceDraft()}>
               {researchBusy ? "در حال ثبت…" : "ثبت باکس‌های مجاز به‌صورت پیش‌نویس"}
             </button>
           </div>
@@ -1000,12 +1004,12 @@ export default function ProductIntakePanel({
           <div style={{ marginTop: "0.75rem" }}>
             <div className="pro-actions">
               <strong>شواهد ذخیره‌شده: {researchRows.length}</strong>
-              <button type="button" className="pro-btn-secondary" disabled={researchBusy} onClick={() => void loadResearch("TEST-P1C-001")}>
+              <button type="button" className="pro-btn-secondary" disabled={researchBusy} onClick={() => researchProductId && void loadResearch(researchProductId)}>
                 بازخوانی شواهد
               </button>
             </div>
             {researchRows.length === 0 ? (
-              <p className="pro-lead">هنوز شاهدی برای این محصول آزمایشی بازخوانی نشده است.</p>
+              <p className="pro-lead">هنوز شاهدی برای این محصول بازخوانی نشده است.</p>
             ) : (
               <ul>
                 {researchRows.map((item) => (
