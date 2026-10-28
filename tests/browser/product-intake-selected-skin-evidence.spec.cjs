@@ -6,9 +6,9 @@ test("selected existing skin product receives source-bound box drafts without cr
   });
 
   const selectedProduct = {
-    product_id: "HBI-SKIN-EXISTING-001",
-    brand: "Fixture Skin Brand",
-    product_name: "Existing Skin Product",
+    product_id: "HBI-PROD-37EB7C42C6BE413B",
+    brand: "Neutrogena",
+    product_name: "Clear & Defend 2% Salicylic Acid Face Wash",
     product_line: "SKIN",
     variant: "clear",
     size_value: 50,
@@ -45,7 +45,7 @@ test("selected existing skin product receives source-bound box drafts without cr
       return route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
     }
 
-    if (path.endsWith("/products/HBI-SKIN-EXISTING-001/research-draft") && method === "POST") {
+    if (path.endsWith("/products/HBI-PROD-37EB7C42C6BE413B/research-draft") && method === "POST") {
       researchRequestCount += 1;
       researchPath = path;
       researchPayload = request.postDataJSON();
@@ -82,15 +82,24 @@ test("selected existing skin product receives source-bound box drafts without cr
   await expect(page.getByRole("heading", { name: "فضای کاری مدیر" })).toBeVisible();
   await page.getByRole("button", { name: "ورود به مدیریت محصولات" }).click();
   await page.getByRole("button", { name: "بازکردن فهرست کالاها" }).click();
-  await expect(page.getByText("Existing Skin Product")).toBeVisible();
+  await expect(page.getByText("Clear & Defend 2% Salicylic Acid Face Wash")).toBeVisible();
   await page.getByRole("button", { name: "ویرایش" }).click();
 
   await expect(page.getByRole("heading", { name: "ویرایش محصول" })).toBeVisible();
   await expect(page.locator("#product-line-select")).toHaveValue("SKIN");
+  await expect(page.locator("#skin-template")).toHaveValue("CLEANSING_GEL");
+  await expect(page.locator("#skin-template")).toBeDisabled();
 
   const skinGoals = page.locator("label.pro-label").filter({ hasText: "اهداف پوستی اعلام‌شده" }).locator("..").locator("textarea");
   await expect(skinGoals).toBeEnabled();
   await skinGoals.fill("Fixture manufacturer claim for skin goals");
+
+  const salicylic = page.locator("label.pro-label").filter({ hasText: "سالیسیلیک اسید و غلظتِ اعلام‌شده در همین نسخه" }).locator("..").locator("textarea");
+  await expect(salicylic).toBeEnabled();
+  await salicylic.fill("2% salicylic acid as stated on the cited UK source; exact physical pack not confirmed");
+  const otherFeatures = page.locator("label.pro-label").filter({ hasText: "سایر ویژگی‌ها (برای هر محصول" }).locator("..").locator("textarea");
+  await expect(otherFeatures).toBeEnabled();
+  await otherFeatures.fill("Additional sourced note that has no dedicated box");
 
   // Source reference is mandatory: the API must not be called before it is supplied.
   await page.getByRole("button", { name: "ثبت باکس‌های مجاز به‌صورت پیش‌نویس" }).click();
@@ -102,13 +111,27 @@ test("selected existing skin product receives source-bound box drafts without cr
   await expect(page.getByRole("status")).toContainText("QA=PENDING");
   
   expect(researchRequestCount).toBe(1);
-  expect(researchPath).toBe("/api/v1/products/HBI-SKIN-EXISTING-001/research-draft");
-  expect(researchPayload.assertions).toHaveLength(1);
+  expect(researchPath).toBe("/api/v1/products/HBI-PROD-37EB7C42C6BE413B/research-draft");
+  expect(researchPayload.assertions).toHaveLength(3);
   expect(researchPayload.assertions[0]).toMatchObject({
     claim: "Fixture manufacturer claim for skin goals",
     field: "skin_goals",
     source_type: "MANUFACTURER",
     source_reference: "https://example.invalid/fixture-source",
   });
+  expect(researchPayload.assertions[1]).toMatchObject({
+    claim: "2% salicylic acid as stated on the cited UK source; exact physical pack not confirmed",
+    field: "ingredients",
+    claim_type: "MANUFACTURER_CLAIM",
+    source_reference: "https://example.invalid/fixture-source",
+  });
+  expect(researchPayload.assertions[2]).toMatchObject({
+    claim: "سایر ویژگی‌ها: Additional sourced note that has no dedicated box",
+    claim_type: "UNKNOWN",
+    source_type: "MANUFACTURER",
+    source_reference: "https://example.invalid/fixture-source",
+    notes: expect.stringContaining("box kind=other"),
+  });
+  expect(researchPayload.assertions[2]).not.toHaveProperty("field");
   expect(productCreateCount).toBe(0);
 });
