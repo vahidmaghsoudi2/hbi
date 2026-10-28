@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getProduct, getProductEvidence, getProductKnowledge, listManageableProducts } from "../api/client";
 import type { EvidenceDTO, ProductDTO, ProductKnowledgeDTO } from "../types/api";
+import { completeFromIntro } from "./ProductIntakePanel";
 
 type Props = { onBack: () => void };
 
@@ -33,6 +34,8 @@ export default function SkinProductEncyclopedia({ onBack }: Props) {
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [knowledgeError, setKnowledgeError] = useState<string | null>(null);
+  const [smartText, setSmartText] = useState("");
+  const [smartPreview, setSmartPreview] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -85,6 +88,30 @@ export default function SkinProductEncyclopedia({ onBack }: Props) {
         <button type="button" className="pro-btn-secondary" onClick={onBack}>بازگشت</button>
       </div>
       <p className="pro-lead">این صفحه فقط داده‌های موجود در مسیر رسمی محصول، شواهد و ProductKnowledge را می‌خواند. مقدار ثبت‌نشده به‌صورت نامشخص نمایش داده می‌شود؛ این صفحه محصول یا تأیید QA ایجاد نمی‌کند.</p>
+
+      <section className="pro-product-card" aria-labelledby="skin-smart-complete">
+        <h2 id="skin-smart-complete">تکمیل هوشمند (پیشنهاد محلی)</h2>
+        <p className="pro-muted">
+          این بخش از منوی ورود کالا به دانشنامه منتقل شده است. متن برچسب یا معرفی را بنویسید تا پیشنهاد استخراج‌شده را ببینید.
+          نتیجه فقط برای کمک اپراتور است؛ به‌صورت خودکار در Product Master یا Evidence ذخیره نمی‌شود.
+        </p>
+        <label className="pro-label" htmlFor="skin-smart-text">متن منبع / برچسب</label>
+        <textarea id="skin-smart-text" className="pro-input" rows={3} value={smartText} onChange={(e) => setSmartText(e.target.value)} placeholder="متن بسته یا صفحهٔ رسمی…" />
+        <div className="pro-actions" style={{ marginTop: "0.5rem" }}>
+          <button type="button" className="pro-btn-primary" onClick={() => {
+            const d = completeFromIntro(smartText);
+            setSmartPreview([
+              d.product_name ? `نام پیشنهادی: ${d.product_name}` : null,
+              d.brand ? `برند پیشنهادی: ${d.brand}` : null,
+              d.category ? `دستهٔ متنی: ${d.category}` : null,
+              d.size_value ? `حجم: ${d.size_value} ${d.size_unit}` : null,
+              d.spf ? `SPF: ${d.spf}` : null,
+            ].filter(Boolean).join("\n") || "عبارت قابل استخراج پیدا نشد.");
+          }}>اجرای تکمیل هوشمند</button>
+        </div>
+        {smartPreview ? <pre className="pro-muted" style={{ whiteSpace: "pre-wrap" }}>{smartPreview}</pre> : null}
+      </section>
+
       <p><a href="https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/homepage/encyclopedia/skin/PRODUCTS.md" target="_blank" rel="noreferrer">دفتر پژوهش هفت محصول P1–P7 (جدا از ثبت عملیاتی)</a></p>
       {loadingList ? <p role="status">در حال دریافت فهرست محصولات…</p> : null}
       {error ? <p className="pro-error" role="alert">دریافت اطلاعات کامل نشد: {error}</p> : null}
