@@ -361,7 +361,7 @@ export default function ProductIntakePanel({
       await createResearchDraft(
         researchProductId,
         fields.map((item) => ({
-          claim: item.value,
+          claim: item.field ? item.value : `${item.label}: ${item.value}`,
           field: item.field,
           source_type: researchSourceType.trim(),
           source_reference: researchSourceReference.trim(),
