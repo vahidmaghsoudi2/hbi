@@ -408,7 +408,7 @@ export default function ProductIntakePanel({
         ? [{
             field: "claimed_benefits",
             label: "ادعای آبرسانی یا حفظ رطوبت",
-            value: (skinBoxValues.claimed_benefits || "").trim(),
+            value: (skinBoxValues[`template:${skinTemplate}:ادعای آبرسانی یا حفظ رطوبت (متن + منبع)`] || skinBoxValues.claimed_benefits || "").trim(),
             claimType: researchClaimType || "UNKNOWN",
             boxKind: "template",
           }]
