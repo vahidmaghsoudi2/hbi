@@ -1311,3 +1311,60 @@ This is an append-only evidence update to the existing seven-product ledger. It 
 - The current Skin Problem Space Map remains the sole P01–P61 list. Its stated boundary labels remain unchanged. Any relation needing a clinical condition, an unresolved boundary, or evidence not present in this ledger stays `not_linked` / `UNKNOWN`.
 - The next work within the existing path is to compare these candidate cells against the already-existing Skin Problem Space Working Records/status decisions in Issue #403 and preserve any narrower current disposition there. Do not change problem statuses to make this crosswalk appear complete.
 - No outside sources were searched for this pass. No new Issue/PR or parallel document was created. No code, API, schema, UI, database, QA, lifecycle or ProductKnowledge state was changed. G8 remains **BLOCKED / NOT VERIFIED**.
+
+
+---
+
+## Research pass 15 — two-example bounded semantic pilot (2026-10-29)
+
+**Purpose:** exercise the two-decision method against the already-recorded P2/Neutrogena and P5/ISDIN dossiers. This pass uses the sources and limitations already in this ledger and the canonical Map/Working Records; it is not a new external research pass, independent second-team review, ProductKnowledge approval, or a persisted Product↔Problem relationship.
+
+### Guardrails and input readiness
+
+- The existing Research pass 14 crosswalk is retained; this section tests its two candidate rows rather than creating a second matrix.
+- Product Master IDs have **not** been matched to P2 and P5 in this pass. Research labels P2/P5 are ledger identifiers, not proof of a matching operational `product_id`.
+- Neutrogena target: 200 ml is user-confirmed, but target market, physical package, GTIN and formula match remain UNKNOWN/UNVERIFIED. The UK manufacturer page is source context, not proof of the target unit's market/version.
+- ISDIN target: 50 ml is a temporary research target; target market, physical package, GTIN and formula match remain UNKNOWN/UNVERIFIED. The Mexico page is source context, not proof of the target unit's market/version.
+- Map/Working Records boundary: P08 is mapped as an acne problem/clinical presentation, but its operational definition remains UNKNOWN and Accepted=No. P17 is mapped as hyperpigmentation/dark spots, but its operational definition remains UNKNOWN and Accepted=No. Structural presence in the Map is not problem acceptance or recommendation permission.
+
+### Pilot A — Neutrogena Clear & Defend 2% Salicylic Acid Face Wash ↔ P08
+
+**Bounded proposition under review:** The existing UK official product page reports that 97% of 34 participants noticed fewer new spots after four weeks, assessed by clinical grading; the same page declares 2% salicylic acid and gives rinse-off directions. This is a statement about what the manufacturer page reports, not a claim that 97% were cured or that the result has been independently verified.
+
+| Decision question | Finding | Basis and limitation |
+|---|---|---|
+| 1. Does the recorded source support the exact attribution? | **YES — attribution only.** | The ledger records the UK official source and its stated n=34/four-week result. Source: https://www.neutrogena.co.uk/skincare/cleansers-washes/clear-and-defend-daily-wash |
+| 2. Do the accessible details establish the claimed outcome independently? | **NOT ESTABLISHED.** | The full protocol/control, absolute change and independent exact-SKU evidence are not established in the recorded sources. The manufacturer statement must remain a manufacturer-reported claim. |
+| 3. Is the claim sufficient to support a relation to the target product and P08? | **CANDIDATE ONLY / NEEDS REVIEW.** | “Fewer new spots” is narrowly relevant to the broad P08 acne presentation, but target package/market/formula identity is unresolved and P08's operational definition/acceptance is unresolved. No P09–P12 subtype or P13 aftermath/PIH relation is inferred. |
+| Current permitted use | **Research review only.** | No approved relationship, finished-product efficacy conclusion, individual recommendation, or ProductKnowledge promotion. |
+
+**Pilot A disposition:** retain the existing P2→P08 candidate only. Do not upgrade it to supported. The main blockers are physical SKU/market match, the missing full study protocol, and the unaccepted/operationally undefined P08 record.
+
+### Pilot B — ISDIN FotoUltra 100 Active Unify SPF50+ ↔ P17
+
+**Bounded proposition under review:** The existing Mexico manufacturer page reports a 22% reduction in spot intensity and a 15% reduction in spot area in 31 participants aged 35–65 with mild/moderate facial hyperpigmentation, with assessments reported at 28 and 84 days. The underlying report/protocol is not available in the recorded public source. These are manufacturer-reported results, not independently verified efficacy.
+
+| Decision question | Finding | Basis and limitation |
+|---|---|---|
+| 1. Does the recorded source support the exact attribution? | **YES — attribution only.** | The ledger records the Mexico official page and its reported sample, population and outcomes. Source: https://www.isdin.com/mx/p/fotoultra-active-unify-spf-50/1160 |
+| 2. Do the accessible details establish the claimed outcome independently? | **NOT ESTABLISHED.** | The complete protocol, control, blinding, instruments, statistical report and independent exact-formula evidence are not established in the recorded sources. “Data on file” is provenance for a manufacturer-held report, not independent verification. |
+| 3. Is the claim sufficient to support a relation to the target product and P17? | **CANDIDATE ONLY / NEEDS REVIEW.** | The reported dark-spot intensity/area endpoints are relevant to the broad P17 presentation, but target market/package/formula identity is unresolved and P17's operational definition/acceptance is unresolved. The claim does not establish P19 (post-inflammatory hyperpigmentation). P22 remains context-only unless the exact claim and evidence separately establish the sun-related context; sunscreen status alone is not sufficient. |
+| Current permitted use | **Research review only.** | No approved relationship, finished-product efficacy conclusion, individual recommendation, or ProductKnowledge promotion. |
+
+**Pilot B disposition:** retain the existing P5→P17 candidate only. Do not upgrade it to supported. The main blockers are physical SKU/market match, unavailable full protocol, and the unaccepted/operationally undefined P17 record.
+
+### Cross-pilot findings
+
+1. The source can support that a manufacturer made a bounded claim without independently proving the outcome described by that claim.
+2. Product-specific relation decisions require an additional check of target SKU/version, endpoint-to-problem fit and the canonical problem's current boundary/status.
+3. Neither sample supports automatic extension to adjacent P-codes. For Neutrogena, acne/“new spots” does not automatically imply subtypes, scarring or PIH. For ISDIN, general dark-spot endpoints do not establish PIH, and sunscreen category alone does not establish a P22 relationship.
+4. UNKNOWN identity or missing protocol must remain visible. Neither is proof of ineffectiveness; neither permits a supported relationship.
+5. A complete two-way *software* search was not tested. Only the semantic consistency requirement was reviewed: any future product→problem and problem→product views must return the same relationship, claim, limitations and status. No existing software capability is presumed.
+6. The two pilot entries are a first-pass assessment by this workstream. Independent review by the Product Features team and joint adjudication have **not yet been performed**; no reviewer/date is invented.
+7. No Product Master, Evidence, ProductKnowledge, QA, lifecycle, database, API, schema, UI or problem-bank status was changed. No new P-code, Need, parallel document or relationship record was created. G8 remains **BLOCKED / NOT VERIFIED**.
+
+### Handoff after this pass
+
+- Product Features team: independently check the two source attributions and the recorded identity/protocol gaps; report only corrections or new evidence, not a repeat of the existing dossier.
+- Skin Problem team: confirm whether the P08/P17 boundary notes above faithfully reflect the current Map and Working Records; do not treat this as a request to accept either problem.
+- Joint next gate: compare both reviews and decide whether the temporary semantic format is sufficient. Only then decide whether any genuine gap requires a bounded proposal in Issue #406. No implementation is authorized by this pass.
