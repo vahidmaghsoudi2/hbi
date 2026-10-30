@@ -36,7 +36,12 @@ jobs:
       - name: Install frontend and Playwright
         working-directory: frontend
         run: |
-          npm install --no-audit --no-fund
+          npm install --no-audit --no-fund --include=optional
+          # npm can omit platform-specific optional dependencies; install Rollup's
+          # matching Linux binary explicitly so Vite can start on the GitHub runner.
+          ROLLUP_VERSION="$(node -p "require('rollup/package.json').version")"
+          npm install --no-save --no-audit --no-fund "@rollup/rollup-linux-x64-gnu@${ROLLUP_VERSION}"
+          node -e "require('rollup')"
           npx playwright install --with-deps chromium
       - name: Prepare isolated SQLite fixture
         run: |
