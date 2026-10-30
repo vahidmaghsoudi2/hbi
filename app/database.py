@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, event, text, inspect
 from sqlalchemy.orm import sessionmaker
 from app.models.base import Base
+from app.models import product_problem_link
 import os
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/hbi.db")
@@ -164,7 +165,7 @@ def _ensure_customer_family_name_column():
 
 
 def init_db():
-    from app.models import product, product_knowledge, evidence, evidence_mutation_log, customer, case, recommendation, inventory, sale, sale_item, category, stock_movement, payment, sale_return, operational_fx_rate, product_mutation_log, duplicate_check_audit, user_role, profile_fact, admin_credential, feedback, follow_up, outcome_assessment
+    from app.models import product, product_knowledge, product_problem_link, evidence, evidence_mutation_log, customer, case, recommendation, inventory, sale, sale_item, category, stock_movement, payment, sale_return, operational_fx_rate, product_mutation_log, duplicate_check_audit, user_role, profile_fact, admin_credential, feedback, follow_up, outcome_assessment
     Base.metadata.create_all(bind=engine)
     _ensure_customer_family_name_column()
     _ensure_recommendation_trace_columns()
