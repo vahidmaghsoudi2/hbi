@@ -13,7 +13,7 @@ from app.models.base import Base
 
 
 class ProductProblemLink(Base):
-    """Immutable, evidence-anchored product-to-problem assessment record.
+    """Append-oriented, evidence-anchored product-to-problem assessment record.
 
     V1 deliberately cannot persist SUPPORTED links. The first implementation
     records only CANDIDATE, NOT_LINKED, or DEFERRED assessments.
