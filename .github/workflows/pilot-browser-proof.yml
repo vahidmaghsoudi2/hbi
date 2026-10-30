@@ -44,6 +44,8 @@ jobs:
           node -e "require('rollup')"
           npx playwright install --with-deps chromium
       - name: Run full 61-record parser conformance
+        env:
+          HBI_PARSER_RESULT_FILE: /tmp/hbi-parser-conformance-61-results.json
         run: node tests/parser-conformance-61.cjs
       - name: Prepare isolated SQLite fixture
         run: |
@@ -77,6 +79,7 @@ jobs:
             test-results/
             /tmp/hbi-pilot-api.log
             /tmp/hbi-pilot-web.log
+            /tmp/hbi-parser-conformance-61-results.json
       - name: Cleanup disposable services and database
         if: always()
         run: |
