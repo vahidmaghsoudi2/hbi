@@ -1,6 +1,9 @@
 import pytest
 
+from sqlalchemy.exc import IntegrityError
+
 from app.core.exceptions import ConflictError, NotFoundError, ValidationError
+from app.repositories.product_problem_link_repository import ProductProblemLinkRepository
 from app.models.evidence import Evidence
 from app.models.product import Product
 from app.models.product_knowledge import ProductKnowledge
@@ -193,3 +196,79 @@ def test_duplicate_link_scope_is_rejected_by_database_constraint(db_session):
         service.create_link(**payload)
 
     assert db_session.query(ProductProblemLink).count() == 1
+
+
+
+def test_supported_status_is_also_blocked_by_database_constraint(db_session):
+    product = _product(db_session)
+    evidence = _evidence(db_session, product.product_id)
+    db_session.commit()
+    payload = _candidate_payload(product, evidence)
+    payload.update({
+        "link_id": "PPL-DIRECT-SUPPORTED",
+        "relationship_status": "SUPPORTED",
+    })
+
+    with pytest.raises(IntegrityError):
+        db_session.add(ProductProblemLink(**payload))
+        db_session.flush()
+
+    db_session.rollback()
+    assert db_session.query(ProductProblemLink).count() == 0
+
+
+def test_read_methods_return_links_by_product_problem_and_id(db_session):
+    product = _product(db_session)
+    evidence = _evidence(db_session, product.product_id)
+    service = ProductProblemLinkService(db_session)
+    link = service.create_link(**_candidate_payload(product, evidence))
+    repository = ProductProblemLinkRepository(db_session)
+
+    assert service.list_by_product(product.product_id) == [link]
+    assert service.list_by_problem("P17") == [link]
+    assert repository.get_by_id(link.link_id) == link
+
+
+def test_claim_id_and_map_version_are_validated(db_session):
+    product = _product(db_session)
+    evidence = _evidence(db_session, product.product_id)
+    service = ProductProblemLinkService(db_session)
+
+    with pytest.raises(ValidationError, match="claim_id must exactly match"):
+        service.create_link(**_candidate_payload(
+            product, evidence, claim_id="EV-WRONG-CLAIM"
+        ))
+
+    with pytest.raises(ValidationError, match="Unsupported problem_map_version"):
+        service.create_link(**_candidate_payload(
+            product, evidence, problem_map_version="SKIN_PROBLEM_SPACE_MAP_V9"
+        ))
+
+
+def test_missing_product_or_evidence_is_rejected(db_session):
+    product = _product(db_session)
+    evidence = _evidence(db_session, product.product_id)
+    service = ProductProblemLinkService(db_session)
+    payload = _candidate_payload(product, evidence)
+
+    with pytest.raises(NotFoundError, match="Product MISSING"):
+        service.create_link(**{**payload, "product_id": "MISSING"})
+
+    with pytest.raises(NotFoundError, match="Evidence MISSING"):
+        service.create_link(**{**payload, "evidence_id": "MISSING"})
+
+
+def test_invalid_role_and_variant_are_rejected(db_session):
+    product = _product(db_session)
+    evidence = _evidence(db_session, product.product_id)
+    service = ProductProblemLinkService(db_session)
+
+    with pytest.raises(ValidationError, match="Invalid relationship_role"):
+        service.create_link(**_candidate_payload(
+            product, evidence, relationship_role="diagnosis"
+        ))
+
+    with pytest.raises(ValidationError, match="Invalid variant"):
+        service.create_link(**_candidate_payload(
+            product, evidence, variant="UNKNOWN_COLOR"
+        ))
