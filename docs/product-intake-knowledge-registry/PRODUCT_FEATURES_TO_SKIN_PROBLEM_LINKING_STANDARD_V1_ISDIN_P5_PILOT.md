@@ -555,7 +555,14 @@
 
 بازار/نسخه برای ردیابی منبع ادعا ثبت می‌شود، نه به‌عنوان هدف تحقیق نامحدود. فقط تفاوتی پیگیری می‌شود که بتواند نتیجه‌گیری، هشدار، نحوه مصرف یا متن مشاوره را تغییر دهد. اطلاعات بازار دیگر به SKU فیزیکی HBI نسبت داده نمی‌شود، اما نبود SKU قطعی نیز مانع ارائه خلاصه عمومیِ درست‌منتسب به سازنده نخواهد بود.
 
-**قفل نهایی:** این اصلاح صرفاً مستنداتی است. هیچ P-code، تعریف canonical، Accepted، Product Master، Evidence approval، ProductProblemLink runtime، schema، API، DB، UI یا Recommendation تغییر نمی‌کند. PR #480 و #481 باز و Draft باقی می‌مانند.
+**قفل نهایی:** این اصلاح صرفاً مستنداتی است. هیچ P-code، تعریف canonical، Accepted، Product Master، Evidence approval، ProductProblemLink runtime، schema، API، DB، UI یا Recommendation تغییر نمی‌کند. **وضعیت جاری GitHub و کنترل مجوز — راستی‌آزمایی 2026-10-30**
+
+- PR #480: `MERGED`؛ merge commit `43712b1f47402c090733d564e02482472cdc0dc3`؛ زمان commit `2026-10-30 12:25:23 UTC` و زمان ادغام GitHub `12:25:24 UTC`.
+- PR #481: `MERGED`؛ merge commit `a9ec2c65a563103dd8a84d5f5e0fde2a00afcac6`؛ زمان commit `2026-10-30 12:27:53 UTC` و زمان ادغام GitHub `12:27:54 UTC`. ترتیب والدین commit، ادغام #480 پیش از #481 را تأیید می‌کند.
+- تصمیم PO در Issue #406، کامنت [#6520097663](https://github.com/vahidmaghsoudi2/hbi/issues/406#issuecomment-6520097663)، در `2026-10-30 10:04:40 UTC` ثبت شده و صریحاً خواسته است هر دو PR باز و Draft بمانند.
+- آرایه رسمی GitHub Reviews برای هر دو PR خالی است؛ در شواهد بررسی‌شده مدرکی از لغو یا جایگزینی متأخر تصمیم PO یافت نشد.
+
+**نتیجه:** وضعیت فنی هر دو PR برابر `MERGED` است؛ مجوز PO برابر `AUTHORIZATION NOT VERIFIED` باقی می‌ماند. Merge به‌تنهایی تأیید PO یا مجوز پیاده‌سازی، ProductProblemLink عملیاتی، Runtime یا Recommendation نیست. هیچ رابطه پژوهشی نیز صرفاً با Merge به `SUPPORTED` یا `Accepted` ارتقا نمی‌یابد.
 
 
 ---
@@ -589,4 +596,4 @@
 
 برای تست روی محصول فیزیکی و هر تصمیم بعدی درباره SKU واقعی، تصویر خوانای جلو و پشت بسته و اطلاعات قابل مشاهده بازار/GTIN/INCI لازم است. نبود این اطلاعات مانع smoke test حافظه‌ای نیست؛ اما مانع انتساب قطعی نتیجه به SKU فیزیکی HBI و هر Recommendation نهایی است.
 
-**قفل:** این ممیزی و طرح تست مستنداتی است. هیچ کد، schema، migration، API، DB، UI، runtime، موجودی یا Recommendation تغییر نمی‌کند. PR #480 و #481 باز و Draft باقی می‌مانند.
+**قفل:** این ممیزی و طرح تست مستنداتی است. هیچ کد، schema، migration، API، DB، UI، runtime، موجودی یا Recommendation تغییر نمی‌کند. PR #480 و #481 اکنون `MERGED` هستند؛ نتیجه کنترل مجوز همچنان `AUTHORIZATION NOT VERIFIED` است. زمان‌های دقیق و سابقه تصمیم PO در بخش 13.4 همین سند ثبت شده است.
