@@ -1368,3 +1368,199 @@ This is an append-only evidence update to the existing seven-product ledger. It 
 - Product Features team: independently check the two source attributions and the recorded identity/protocol gaps; report only corrections or new evidence, not a repeat of the existing dossier.
 - Skin Problem team: confirm whether the P08/P17 boundary notes above faithfully reflect the current Map and Working Records; do not treat this as a request to accept either problem.
 - Joint next gate: compare both reviews and decide whether the temporary semantic format is sufficient. Only then decide whether any genuine gap requires a bounded proposal in Issue #406. No implementation is authorized by this pass.
+
+
+---
+
+## Research pass 16 — six remaining dossiers normalized to the five-stage Product Features standard (2026-10-30)
+
+**Purpose:** continue the existing seven-product ledger after the bounded ISDIN P5 pilot. This pass normalizes P1, P2, P3, P4, P6 and P7 against the five-stage working standard recorded in PR #480. It uses only source snapshots, user identity decisions and limitations already recorded in this ledger; it is not a fresh external research sweep, physical-package inspection, runtime audit, independent clinical validation, or approval of Product↔Problem relationships.
+
+**Standard reference:** [PR #480 — Product Features to Skin Problem Linking Standard V1 / ISDIN P5 pilot](https://github.com/vahidmaghsoudi2/hbi/pull/480). PR #480 remains Draft/Open/Unmerged at the time of this pass; the standard is applied here as a working research protocol, not represented as merged policy.
+
+### A. P1 — COSRX The 6 Peptide Skin Booster Serum, 150 ml research target
+
+**1. Identity and version**
+- Research label: P1; not an operational Product Master ID.
+- User-selected research target: 150 ml. The official COSRX product page offers 150 ml and 50 ml options under the same product family.
+- Physical package, GTIN, target market and exact package-to-page/formula match: **UNKNOWN / NOT VERIFIED**. Do not infer 150 ml physical identity from the selected research target or borrow the 50 ml GTIN.
+
+**2. Features and function**
+- Existing official-page snapshot records a peptide/humectant-oriented leave-on skin booster and manufacturer-reported outcomes concerning deep moisture, texture, clarity/radiance and related cosmetic endpoints.
+- Ingredient-role notes remain label-level observations from the recorded official page; ingredient presence does not establish the finished product's clinical effect.
+- The source-recorded moisture and texture figures remain manufacturer-reported. No ingredient or claim is converted into a medical indication.
+
+**3. Evidence and provenance**
+- Primary source already recorded: https://www.cosrx.com/collections/all/products/the-6-peptide-skin-booster-serum
+- The page-level claim summary and named test context are attributable to the manufacturer. Complete study protocol, measurement methods, comparator, statistical plan and independently reviewable report remain **NOT VERIFIED** in the ledger.
+- No exact physical package/GTIN match or independent finished-product efficacy report is established.
+
+**4. Fit and limitations**
+- Moisture and texture outcomes are narrow cosmetic endpoints only. They do not establish treatment of a diagnosed skin condition, nor can they be expanded to fine lines, density, radiance or pigmentation by analogy.
+- Any tolerance or suitability assessment requires the actual package INCI and user-specific context; the present dossier does not establish universal suitability.
+
+**5. Canonical problem-link candidates**
+- P02: manufacturer-claim-only / candidate-only, limited to the recorded moisture endpoint; P02's relationship to P01 and its acceptance boundary remain governed by the canonical Map/Working Records.
+- P43: manufacturer-claim-only / candidate-only, limited to the recorded texture endpoint; the P43 boundary remains open.
+- P17: **not linked**. General clarity/radiance language or ingredient presence is insufficient.
+- No supported relation or recommendation permission.
+
+### B. P2 — Neutrogena Clear & Defend 2% Salicylic Acid Face Wash, 200 ml research target
+
+**1. Identity and version**
+- Research label: P2; not an operational Product Master ID.
+- User-confirmed target volume: 200 ml. The UK official page is the source context for the recorded formula/claim; it does not prove that the user's physical target is the UK-market package.
+- Target market, package photograph, GTIN, exact current INCI and physical package-to-page match: **UNKNOWN / NOT VERIFIED**.
+
+**2. Features and function**
+- Existing UK source snapshot declares 2% salicylic acid and identifies a rinse-off daily face wash.
+- The same manufacturer page reports that 97% of 34 participants noticed fewer new spots after four weeks, described as clinical grading.
+- Salicylic acid presence is a formula fact from the source page; it is not independent proof that the finished wash achieves a specific acne endpoint.
+
+**3. Evidence and provenance**
+- Primary source already recorded: https://www.neutrogena.co.uk/skincare/cleansers-washes/clear-and-defend-daily-wash
+- The 97% / n=34 / four-week statement is a manufacturer-reported result. Full protocol, comparator/control, baseline and absolute change, definition/counting of “new spots,” statistical analysis and independent exact-SKU report remain **NOT VERIFIED**.
+- The source's UK market identity must not be assigned to the physical target without package/GTIN evidence.
+
+**4. Fit and limitations**
+- A rinse-off product's exposure differs from a leave-on product; no efficacy transfer from leave-on salicylic-acid studies is allowed.
+- “Fewer new spots” is not a cure rate and does not establish all acne presentations, severity, scarring, PIH or a subtype-specific outcome.
+- Current package instructions and precautions must be taken from the actual package when available.
+
+**5. Canonical problem-link candidates**
+- P08: manufacturer-claim-only / candidate-only, narrowly tied to the reported fewer-new-spots endpoint; P08 operational definition and acceptance remain unresolved in Working Records.
+- P03, P09 and P10: **not linked** from the current evidence; no direct sebum/open-comedone/closed-comedone endpoint is recorded.
+- No inference to P11/P12, P13 or P19; no supported relation or recommendation permission.
+
+### C. P3 — Garnier Vitamin C Brightening Gel Cleanser, 200 ml research target
+
+**1. Identity and version**
+- Research label: P3; not an operational Product Master ID.
+- User-confirmed volume: 200 ml. User did not confirm Australia as the market; Australia is only the official source-page market recorded in the dossier.
+- Physical package, target market, GTIN and package-to-page/formula match: **UNKNOWN / NOT VERIFIED**.
+
+**2. Features and function**
+- Existing Australian official-page snapshot identifies a rinse-off gel cleanser and displays Ascorbyl Glucoside (Vitamin Cg), salicylic acid, surfactants, glycerin, panthenol and fragrance constituents including parfum and listed fragrance allergens.
+- Use “Ascorbyl Glucoside / Vitamin Cg”; do not relabel it as pure L-ascorbic acid.
+- The ingredient list is a source-page snapshot and may change; the received package label remains authoritative for the physical unit.
+
+**3. Evidence and provenance**
+- Primary source already recorded: https://www.garnier.com.au/about-our-brands/skin-active/garnier-skin-active-vitamin-c-brightening-gel-cleanser-200ml
+- The current dossier contains no verified exact-finished-product clinical protocol for a canonical skin-problem endpoint.
+- Ingredient declaration and “brightening” positioning are source-attributable facts/claims, not proof of treatment efficacy.
+
+**4. Fit and limitations**
+- Rinse-off exposure limits transfer from leave-on vitamin-C or salicylic-acid studies.
+- Fragrance constituents may be relevant when assessing an individual's sensitivities, but their presence does not prove that every user will react.
+- No medical, pigment-treatment or acne-treatment suitability conclusion is established by the present evidence.
+
+**5. Canonical problem-link candidates**
+- P03, P08, P09, P10 and P17: **not linked** on current evidence. Ingredient/category/name-level rationale is insufficient to assign a P-code.
+- No supported relation or recommendation permission.
+
+### D. P4 — SKIN1004 Madagascar Centella Hyalu-Cica Water-Fit Sun Serum, Korean/international research target
+
+**1. Identity and version**
+- Research label: P4; not an operational Product Master ID.
+- User-selected target: Korean/international formula. This is a research-version decision, not proof of a physical package.
+- International/Korean-style SPF50+ PA++++ dossier and US SPF50 sunscreen-drug formula remain separate. Physical package, GTIN and exact formula match: **UNKNOWN / NOT VERIFIED**.
+
+**2. Features and function**
+- Existing international official-page snapshot identifies SPF50+ PA++++ and an organic UV-filter system; it also records niacinamide, glycerin, centella and hyaluronic-acid-related ingredients in the page-level formula.
+- Existing manufacturer-published UV-protection and hydration test summaries remain attributed to that international formula only.
+- The US page separately lists Avobenzone 2.7%, Homosalate 13.6%, Octisalate 4.5% and Octocrylene 9%; these US active ingredients must not be copied into the international formula record.
+
+**3. Evidence and provenance**
+- International source already recorded: https://www.skin1004.com/products/hyalu-cica-water-fit-sun-serum-spf50-pa?country=GB
+- US source already recorded for version separation: https://www.skin1004.com/products/hyalu-cica-water-fit-sun-serum-uv
+- UV-protection/hydration summaries are manufacturer-source material. Independent exact-version clinical evidence for treatment of existing pigmentation or a skin condition is **NOT ESTABLISHED** in the ledger.
+- Actual package, GTIN and current label correspondence remain unverified.
+
+**4. Fit and limitations**
+- UV protection/prevention context is not treatment evidence for existing dark spots, melasma, PIH or chronic UV damage.
+- Hydration positioning/test summaries do not establish treatment of P01 dryness or every P02 presentation.
+- Use, reapplication and precautions must follow the actual market-specific package label; do not combine US and international instructions or formulas.
+
+**5. Canonical problem-link candidates**
+- P22: context/prevention candidate only, subject to the canonical Map boundary; not an independent Need or treatment link.
+- P02: manufacturer-claim-only / candidate-only, restricted to the recorded international-formula hydration test summary.
+- P17: **not linked** from sunscreen status or UV protection alone.
+- No supported relation or recommendation permission.
+
+### E. P6 — Clinique Even Better Clinical Radical Dark Spot Corrector + Interrupter, historical 100 ml research target
+
+**1. Identity and version**
+- Research label: P6; not an operational Product Master ID.
+- User-selected target is the historical 100 ml product named “Even Better Clinical Radical Dark Spot Corrector + Interrupter.”
+- The brand identifies the older product as discontinued and presents “Even Better Clinical Dark Spot Clearing Serum” as its replacement. These are not assumed to be the same unchanged SKU.
+- Physical historical package, GTIN, market, lot and exact INCI match: **UNKNOWN / NOT VERIFIED**.
+
+**2. Features and function**
+- Historical dossier retains the older product name, historical source-bound INCI snapshot and the previously recorded 52-woman / 39% visible dark-spot manufacturer claim.
+- Retailer snapshots support the existence of an older 100 ml product and display a historical INCI pattern; they do not establish the formula of a physical unit now in hand.
+- The newer/current Dark Spot Clearing Serum page reports different endpoints and a different displayed INCI snapshot. Keep it as a separate version/source record; do not merge it into the historical dossier.
+
+**3. Evidence and provenance**
+- Historical product source and retailer references are recorded in Research pass 13; the brand discontinuation/replacement page is recorded there as well.
+- The historical 52-woman / 39% result remains a manufacturer claim. Full study protocol, comparator, endpoint method, statistics and independent exact-market/100 ml formula verification remain **NOT VERIFIED**.
+- Current-page 12-week outcomes (including separate sun/age-spot and post-acne-mark cohorts) are not transferable to the historical 100 ml product.
+
+**4. Fit and limitations**
+- Historical dark-spot positioning does not establish PIH-specific or melasma-specific efficacy, a medical indication, or suitability for every pigmentation cause.
+- Do not transfer ingredients, efficacy figures or study populations from the replacement product to the historical product.
+- The discontinued status and lack of physical-unit verification materially limit operational intake and any current-use assumption.
+
+**5. Canonical problem-link candidates**
+- P17: historical manufacturer-claim-only / candidate-only, limited to the older product's recorded dark-spot claim.
+- P18 and P19: **not linked**; general dark-spot claims do not establish melasma or post-inflammatory etiology.
+- No supported relation or recommendation permission.
+
+### F. P7 — Anua Azelaic Acid 10% + Hyaluron Redness Soothing Serum, 30 ml research target
+
+**1. Identity and version**
+- Research label: P7; not an operational Product Master ID.
+- User-selected research target: 30 ml serum. Keep it distinct from Anua azelaic-acid pads and from any regional package/formula not matched to the target.
+- Physical package, market, GTIN and exact package-to-page/formula match: **UNKNOWN / NOT VERIFIED**.
+
+**2. Features and function**
+- Existing US official-page snapshot declares 10% azelaic acid and lists the serum INCI, including panthenol, betaine salicylate, glycerin, allantoin, niacinamide, centella-related ingredients, sodium hyaluronate, squalane and ceramide NP.
+- The page advises gradual introduction (starting 1–2 times weekly and increasing as tolerated, up to twice daily) and daytime SPF use.
+- “Non-comedogenic” and “low-irritation” are manufacturer test labels; they are not efficacy findings for acne, rosacea, PIH or persistent redness.
+- The 90% agreement statement is a separate manufacturer claim from the official routine/claim page, not a protocol disclosed on the serum product page.
+
+**3. Evidence and provenance**
+- Product source already recorded: https://anua.com/products/azelaic-acid-10-hyaluron-redness-soothing-serum
+- Separate routine/claim source already recorded: https://pages.anua.com/solutions/redness-prone-routine-sensitive-skin
+- Full serum-specific study protocol/report, sample details, validated endpoint, comparator and statistical analysis for the 90% claim remain **NOT VERIFIED**.
+- Evidence for the separate azelaic-acid pad is **NON-TRANSFERABLE** to this serum.
+
+**4. Fit and limitations**
+- Ingredient-level evidence for azelaic acid is not automatically finished-serum efficacy evidence.
+- Redness, irritation, acne, PIH and rosacea are not interchangeable endpoints. The serum's positioning and tolerability labels do not establish treatment of P24 or P26.
+- Follow the actual package instructions and assess tolerability; no universal suitability claim is made.
+
+**5. Canonical problem-link candidates**
+- P08, P13 and P19: retain only the previously recorded candidate-review status where applicable; no subtype-specific or recommendation relationship is established from ingredient presence or the broad “red troubled spots” claim.
+- P24 and P26: **not linked**; no persistent-redness or rosacea treatment inference.
+- No supported relation or recommendation permission.
+
+### G. Consolidated six-dossier completion status and handoff
+
+| Research dossier | Five-stage normalization | Main unresolved identity item | Evidence limitation | Current P-code handling |
+|---|---|---|---|---|
+| P1 COSRX | Recorded in this pass | Physical 150 ml package, GTIN, market/formula match | Manufacturer claim summaries; full protocol not verified | P02/P43 candidate-only; P17 not_linked |
+| P2 Neutrogena | Recorded in this pass | Market, package, GTIN and formula match | Manufacturer 34-subject claim; full protocol not verified | P08 candidate-only; subtypes not_linked |
+| P3 Garnier | Recorded in this pass | Market, package and GTIN | No exact-product problem-endpoint protocol verified | No P-code link |
+| P4 SKIN1004 | Recorded in this pass | Physical international/Korean package and GTIN | Manufacturer summaries; no exact-version treatment evidence verified | P22 context-only; P02 candidate-only; P17 not_linked |
+| P6 Clinique historical | Recorded in this pass | Physical historical 100 ml package, market, GTIN and formula/lot | Historical manufacturer claim; protocol not verified; replacement is distinct | P17 candidate-only; P18/P19 not_linked |
+| P7 Anua | Recorded in this pass | Physical 30 ml package, market, GTIN and formula | Manufacturer claim; serum protocol not verified; pad evidence excluded | Existing P08/P13/P19 candidates remain review-only; P24/P26 not_linked |
+
+**Completion meaning:** the six existing research dossiers are now organized against the five-stage working standard using the evidence already recorded. This is documentary normalization, not proof that identity gates are closed or that the dossiers are ready for Product Master approval.
+
+**Next bounded actions**
+1. Continue product-side read-only runtime audit for the actual seven existing Product records and their Evidence/ProductKnowledge readback. Record environment identity and only populated, source-traceable values; do not create or mutate records. The latest Issue #403 handoff explicitly notes that the other six records' Evidence/ProductKnowledge state had not yet been audited.
+2. Resolve physical identity only when package/GTIN/market/INCI evidence is available. Do not block completion of other dossiers on the ISDIN package.
+3. Request additional study documents only where a specific missing protocol would materially change a dossier; do not start an unbounded web search in this pass.
+4. Keep all P-code dispositions as research-only. No P-code acceptance, supported relationship, Recommendation permission, Product Master/ProductKnowledge/Evidence/QA/lifecycle write, API/schema/DB/UI change, or G8 transition is authorized.
+
+**Governance:** This is an append-only update to the existing seven-product research ledger on the existing PR #411 branch. No new Issue, PR, parallel ledger, product record or problem ID was created. PR #411 was not merged; PR #480 remains Draft/Open/Unmerged. G8 remains **BLOCKED / NOT VERIFIED**.
