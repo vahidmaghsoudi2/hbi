@@ -40,7 +40,7 @@
 1. **P17 در برابر P18/P19:** P17 سقف نمود است؛ P18 و P19 را مصرف یا جایگزین نمی‌کند.
 
 2. **P13 و P19 — توضیح دقیق‌تر (بدون ادغام یا رابطهٔ قطعی جدید):**
-   - **P13** در Map: *Acne aftermath/discoloration* — Sequela/post-inflammatory presentation با رابطهٔ **Cross-Shelf** از خوشهٔ آکنه (**P08 → S04**). دامنهٔ صریح آن به **عواقب مرتبط با آکنه** گره خورده است، نه به هر PIH از هر علت.
+   - **P13** در Map: *Acne aftermath/discoloration* — Sequela/post-inflammatory presentation با رابطهٔ **Cross-Shelf** از خوشهٔ آکنه (**P08 → S04**). عنوان و جایگاه Map آن را به عواقب آکنه و ارجاع Cross-Shelf از P08→S04 متصل می‌کند؛ بااین‌حال تعریف عملیاتی P13 در Working Records هنوز **UNKNOWN** است. بنابراین مرز دقیق آن با PIH عمومی P19 اثبات نشده و نباید از نام به‌تنهایی رابطهٔ زیرمجموعه‌ای استنتاج کرد.
    - **P19** در Map: *Post-inflammatory hyperpigmentation* در سطح **عمومی‌تر** به‌عنوان Sequela/pigmentation presentation مرتبط با **P17/S04**؛ محدود به آکنه تعریف نشده است.
    - **احتمال هم‌پوشانی مفهومی:** وقتی بی‌رنگی/تیرگی پس از آکنه مطرح است، از نظر مفهومی ممکن است هم با دامنهٔ P13 و هم با سقف عمومی P19 تماس پیدا کند. این **احتمال هم‌پوشانی** ثبت می‌شود.
    - **آنچه Map امروز اجازه نمی‌دهد / این ممیزی انجام نمی‌دهد:** ادغام شناسه‌ها، حذف یکی به‌نفع دیگری، یا ثبت رابطهٔ قطعی جدید (مثلاً «P13 ⊆ P19») بدون مجوز صریح PO. تا آن تصمیم: هر دو شناسه حفظ؛ پیوند ظریف‌تر = **UNKNOWN**؛ استنتاج خودکار ممنوع.
@@ -57,12 +57,12 @@
 
 | مفهوم | تمایز علمی خلاصه (غیرMap) | منبع قابل ردیابی |
 |------|---------------------------|------------------|
-| Melasma | اختلال رنگدانه‌ای اکتسابی مزمن/عودکننده؛ تشخیص عمدتاً بالینی؛ افتراق از PIH، lentigines و پیگمانتاسیون دارویی در منابع آموزشی مطرح است | NCBI StatPearls — Melasma: https://www.ncbi.nlm.nih.gov/books/NBK459271/ |
-| PIH | هیپرپیگمانتاسیون پس از التهاب یا آسیب؛ توزیع منطبق با ناحیهٔ التهاب اولیه؛ افتراق از melasma و solar lentigines در ارزیابی بالینی | NCBI StatPearls — Postinflammatory Hyperpigmentation: https://www.ncbi.nlm.nih.gov/books/NBK559150/ |
-| Solar lentigo / lentigines | لک‌های مرتبط با آسیب نوری مزمن؛ در منابع از ephelides و melasma متمایز می‌شوند | Passeron et al., global consensus MHD (شامل chronic hyperpigmentary photodamage و freckles/ephelides در کنار melasma/PIH/ADMH): PubMed https://pubmed.ncbi.nlm.nih.gov/41362125/ · PMC https://pmc.ncbi.nlm.nih.gov/articles/PMC13109754/ |
-| Ephelides | لک‌های کانونی مرتبط با پاسخ به UV و زمینهٔ ژنتیکی/فنوتیپ روشن؛ اغلب در سنین پایین‌تر؛ از lentigines و ضایعات مشکوک باید متمایز شوند | همان consensus جهانی MHD (بخش Freckles/Ephelides): PMC https://pmc.ncbi.nlm.nih.gov/articles/PMC13109754/ |
-| ADMH | در ادبیات به‌عنوان خوشه/مفهوم بالینی جدا (از جمله در کنار LPP/ashy و مرتبط) مطرح است؛ طبقه‌بندی و مرزها محل بحث بوده‌اند | JAAD CME Part I — Disorders of hyperpigmentation (شامل ADMH، drug-induced، ephelis، lentigo، melasma، PIH): PubMed https://pubmed.ncbi.nlm.nih.gov/35151757/ |
-| Drug-induced pigmentation | علت‌ها و الگوها متنوع‌اند (دارو، مدت، توزیع، رنگ)؛ یک مسیر بالینی واحد ندارند | همان JAAD CME Part I (کلیدواژه drug-induced hyperpigmentation): PubMed https://pubmed.ncbi.nlm.nih.gov/35151757/ |
+| Melasma | اختلال رنگدانه‌ای اکتسابی مزمن/عودکننده؛ تشخیص و افتراق بالینی از PIH، lentigines و پیگمانتاسیون دارویی | Sathe NC, Launico MV. **Melasma**. StatPearls [Internet]. Last update: 2026 Jan 31. Bookshelf ID: NBK459271. https://www.ncbi.nlm.nih.gov/books/NBK459271/ |
+| PIH | هیپرپیگمانتاسیون پس از التهاب یا آسیب؛ سابقه و توزیع التهاب/آسیب قبلی در ارزیابی اهمیت دارد؛ افتراق از melasma و solar lentigines مطرح است | Lawrence E, Syed HA, Al Aboud KM. **Postinflammatory Hyperpigmentation**. StatPearls [Internet]. Last update: 2024 Nov 25. Bookshelf ID: NBK559150. https://www.ncbi.nlm.nih.gov/books/NBK559150/ |
+| Solar lentigo / lentigines | لک‌های مرتبط با photodamage مزمن؛ consensus به‌طور مشخص solar/actinic lentigo و lentigos ناشی از photodamage را پوشش می‌دهد؛ این منبع به‌تنهایی طبقه‌بندی Map را تعیین نمی‌کند | Passeron T, et al. **Global consensus on the management of melanin hyperpigmentation disorders**. J Eur Acad Dermatol Venereol. 2026;40(5):760–772. Epub 2025 Dec 8. doi:10.1111/jdv.70185. PMID:41362125. https://doi.org/10.1111/jdv.70185 · https://pmc.ncbi.nlm.nih.gov/articles/PMC13109754/ |
+| Ephelides | freckles/ephelides به‌عنوان گروه متمایز بررسی شده‌اند؛ consensus ویژگی‌های بالینی رایج و ضرورت افتراق از lentigines و nevi را توضیح می‌دهد | Passeron T, et al. **Global consensus on the management of melanin hyperpigmentation disorders**. J Eur Acad Dermatol Venereol. 2026;40(5):760–772. doi:10.1111/jdv.70185. PMID:41362125. بخش Freckles/Ephelides. https://pmc.ncbi.nlm.nih.gov/articles/PMC13109754/ |
+| ADMH | به‌عنوان مفهوم/خوشهٔ بالینی در ادبیات بررسی شده؛ طبقه‌بندی و مرز برخی entityهای مرتبط همچنان محل بحث است | Wang RF, Ko D, Friedman BJ, Lim HW, Mohammad TF. **Disorders of hyperpigmentation. Part I. Pathogenesis and clinical features of common pigmentary disorders**. J Am Acad Dermatol. 2023;88(2):271–288. doi:10.1016/j.jaad.2022.01.051. PMID:35151757. https://pubmed.ncbi.nlm.nih.gov/35151757/ |
+| Drug-induced pigmentation | پیگمانتاسیون دارویی در مرور بالینی به‌عنوان یکی از علل/گروه‌های متمایز بررسی شده؛ تعیین علت در فرد نیازمند تاریخچه و ارزیابی است | Wang RF, et al. **Disorders of hyperpigmentation. Part I. Pathogenesis and clinical features of common pigmentary disorders**. J Am Acad Dermatol. 2023;88(2):271–288. doi:10.1016/j.jaad.2022.01.051. PMID:35151757. https://pubmed.ncbi.nlm.nih.gov/35151757/ |
 
 ### ارجاع و ارزیابی بالینی متناسب (نه حکم یکسان)
 
