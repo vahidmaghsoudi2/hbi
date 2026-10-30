@@ -41,7 +41,7 @@ class ProductProblemLinkService:
 
     @staticmethod
     def _validate_problem_id(problem_id: str) -> None:
-        match = re.fullmatch(r"P(\\d{2})", problem_id)
+        match = re.fullmatch(r"P(\d{2})", problem_id)
         if not match or not 1 <= int(match.group(1)) <= 61:
             raise ValidationError(
                 "problem_id must reference an existing P01-P61 identifier in the owner-designated Map."
