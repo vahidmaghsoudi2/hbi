@@ -843,7 +843,7 @@ export default function NewHomePage() {
                 reports: "حسابداری و گزارش‌ها", home: "خانه و داشبورد", encyclopedia: "دانشنامه", "skin-knowledge": "دانش پوست",
               } as Record<MainSection, string>)[mainSection]}</h1>
             </div>
-            <p className="pro-lead">فقط عملیات مربوط به این حوزه در این صفحه قرار دارد.</p>
+            <p className="pro-lead">{mainSection === "skin-knowledge" ? "ویژگی محصولات پوستی و مشکلات پوستی دو مرجع مستقل‌اند؛ رابطهٔ مستند میان آن‌ها فقط از ProductProblemLink موجود پیروی می‌کند. این صفحه صرفاً مسیر دسترسی را سامان می‌دهد و داده‌ها را تکثیر نمی‌کند." : "فقط عملیات مربوط به این حوزه در این صفحه قرار دارد."}</p>
             <div className="pro-product-grid">
               {mainSection === "customers" ? <>
                 <article className="pro-product-card"><h2>جست‌وجو و سابقه</h2><p className="pro-muted">یافتن مشتری و مشاهدهٔ سابقهٔ خرید.</p><button type="button" className="pro-btn-primary" onClick={() => go("previous")}>بازکردن جست‌وجوی مشتری</button></article>
@@ -881,8 +881,7 @@ export default function NewHomePage() {
               {mainSection === "skin-knowledge" ? <>
                 <article className="pro-product-card"><h2>ویژگی محصولات پوستی</h2><p className="pro-muted">فهرست مرکزی پژوهش هفت محصول، ترکیبات اعلام‌شده، ادعاهای سازنده، محدودیت شواهد و موارد نیازمند بررسی. این پرونده‌ها به معنی ثبت محصول در سیستم یا تأیید QA نیستند.</p><button type="button" className="pro-btn-primary" onClick={() => { setActive("skin-encyclopedia"); setPageView("content"); }}>مشاهده ویژگی محصولات</button><p><a href="https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/homepage/encyclopedia/skin/PRODUCTS.md" target="_blank" rel="noreferrer">دفتر پژوهش هفت محصول P1–P7</a></p></article>
                 <article className="pro-product-card"><h2>مشکلات پوستی</h2><p className="pro-muted">فهرست مرجع P01–P61 با دسته‌بندی S01–S10. این مسیر فقط به بانک موجود هدایت می‌کند؛ هیچ فهرست یا پروندهٔ موازی ساخته نمی‌شود.</p><a href="https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md" target="_blank" rel="noreferrer" className="pro-btn-primary">ورود به بانک مشکلات پوستی</a></article>
-                <p className="pro-muted">مرجع رابطهٔ میان محصول و مشکل، ProductProblemLink موجود است. ارتباط باید از همان مرجع واحد و با شواهد و تطبیق معنایی خوانده شود؛ نه از روی نام محصول، ترکیب منفرد یا شباهت واژگانی. نمایش زندهٔ این رابطه در رابط کاربری، خارج از این تغییر ناوبری است.</p>
-              </> : null}
+                </> : null}
             </div>
           </section>
         )}
