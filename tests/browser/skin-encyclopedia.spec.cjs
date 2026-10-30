@@ -62,7 +62,13 @@ test("Skin encyclopedia reads product identity, evidence and knowledge without i
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "فضای کاری مدیر" })).toBeVisible();
   await page.getByRole("button", { name: "ورود به دانشنامه" }).click();
-  await page.getByRole("button", { name: "مشاهده محصولات ثبت‌شده" }).click();
+  await page.getByRole("button", { name: "ورود به دانش پوست" }).click();
+  const problemsLink = page.getByRole("link", { name: "ورود به بانک مشکلات پوستی" });
+  await expect(problemsLink).toHaveAttribute(
+    "href",
+    "https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md",
+  );
+  await page.getByRole("button", { name: "مشاهده ویژگی محصولات" }).click();
 
   await expect(page.getByRole("heading", { name: "دانشنامهٔ ویژگی محصولات پوستی" })).toBeVisible();
   await expect(page.getByLabel("انتخاب محصول")).toContainText("Test Moisturizer");
@@ -72,4 +78,6 @@ test("Skin encyclopedia reads product identity, evidence and knowledge without i
   await expect(page.getByRole("heading", { name: "شواهد و منشأ اطلاعات" })).toBeVisible();
   await expect(page.getByText("Water")).toBeVisible();
   await expect(page.getByText(/QA: PENDING · شواهد: UNKNOWN/)).toBeVisible();
+  await page.getByRole("button", { name: "بازگشت", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "دانش پوست" })).toBeVisible();
 });

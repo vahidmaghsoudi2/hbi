@@ -172,10 +172,27 @@
         {
           "id": "encyclopedia-skin",
           "label": "دانش پوست",
-          "status": "reference-available-no-dedicated-page",
-          "docs_path": "docs/homepage/encyclopedia/skin/PRODUCTS.md",
-          "related_docs_path": "docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md",
-          "description": "فهرست مرکزی ویژگی و پژوهش محصولات پوستی P1–P7؛ بانک مسائل P01–P61 از پیوند جداگانه در UI در دسترس می‌ماند. هیچ‌یک به معنی ثبت در Product Master یا تأیید QA نیست."
+          "status": "reference-available",
+          "docs_path": "docs/homepage/encyclopedia/skin/README.md",
+          "related_docs_path": "docs/homepage/encyclopedia/skin/PRODUCTS.md",
+          "description": "دانش پوست یک صفحهٔ واسط با دو مقصد مستقل دارد: «ویژگی محصولات پوستی» (فهرست پژوهش P1–P7 و نمای read-only موجود) و «مشکلات پوستی» (ورود به مرجع واحد P01–P61). هیچ‌یک از دو بانک در منو تکثیر نمی‌شوند.",
+          "problem_docs_path": "docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md",
+          "child_items": [
+            {
+              "id": "encyclopedia-skin-products",
+              "label": "ویژگی محصولات پوستی",
+              "status": "available-existing",
+              "docs_path": "docs/homepage/encyclopedia/skin/PRODUCTS.md",
+              "description": "فهرست پژوهش هفت محصول و نمای read-only موجود؛ نه Product Master و نه تأیید QA."
+            },
+            {
+              "id": "encyclopedia-skin-problems",
+              "label": "مشکلات پوستی",
+              "status": "reference-available",
+              "docs_path": "docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md",
+              "description": "ورود به Workspace Index بانک مرجع P01–P61؛ بدون کپی داده یا ساخت فهرست موازی."
+            }
+          ]
         },
         {
           "id": "encyclopedia-hair",

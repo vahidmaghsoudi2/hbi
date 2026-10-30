@@ -54,7 +54,7 @@ const CONSULTATION_LINES = [{ id: "SKIN", label: "پوست" }] as const;
 const INITIAL_RECOMMENDATION_LIMIT = 5;
 
 type Panel = "home" | "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about" | "skin-encyclopedia";
-type MainSection = "home" | "customers" | "consultation" | "sales" | "products" | "inventory" | "purchases" | "reports" | "encyclopedia";
+type MainSection = "home" | "customers" | "consultation" | "sales" | "products" | "inventory" | "purchases" | "reports" | "encyclopedia" | "skin-knowledge";
 type PageView = "main" | "section" | "content";
 
 export default function NewHomePage() {
@@ -840,10 +840,10 @@ export default function NewHomePage() {
               <h1 id="section-menu-title">{({
                 customers: "مشتریان", consultation: "مشاوره", sales: "فروش",
                 products: "مدیریت محصولات", inventory: "کالا و موجودی", purchases: "خرید",
-                reports: "حسابداری و گزارش‌ها", home: "خانه و داشبورد", encyclopedia: "دانشنامه",
+                reports: "حسابداری و گزارش‌ها", home: "خانه و داشبورد", encyclopedia: "دانشنامه", "skin-knowledge": "دانش پوست",
               } as Record<MainSection, string>)[mainSection]}</h1>
             </div>
-            <p className="pro-lead">فقط عملیات مربوط به این حوزه در این صفحه قرار دارد.</p>
+            <p className="pro-lead">{mainSection === "skin-knowledge" ? "ویژگی محصولات پوستی و مشکلات پوستی دو مرجع مستقل‌اند؛ رابطهٔ مستند میان آن‌ها فقط از ProductProblemLink موجود پیروی می‌کند. این صفحه صرفاً مسیر دسترسی را سامان می‌دهد و داده‌ها را تکثیر نمی‌کند." : "فقط عملیات مربوط به این حوزه در این صفحه قرار دارد."}</p>
             <div className="pro-product-grid">
               {mainSection === "customers" ? <>
                 <article className="pro-product-card"><h2>جست‌وجو و سابقه</h2><p className="pro-muted">یافتن مشتری و مشاهدهٔ سابقهٔ خرید.</p><button type="button" className="pro-btn-primary" onClick={() => go("previous")}>بازکردن جست‌وجوی مشتری</button></article>
@@ -870,8 +870,7 @@ export default function NewHomePage() {
                 <article className="pro-product-card"><h2>گزارش مالی</h2><p className="pro-muted">خلاصه گزارش مالی موجود.</p><Link to="/accounting?section=finance-report" className="pro-btn-primary">بازکردن گزارش مالی</Link></article>
               </> : null}
               {mainSection === "encyclopedia" ? <>
-                <article className="pro-product-card"><h2>ویژگی محصولات پوستی</h2><p className="pro-muted">فهرست مرکزی پژوهش هفت محصول، ترکیبات اعلام‌شده، ادعاهای سازنده، محدودیت شواهد و موارد نیازمند بررسی. این پرونده‌ها به معنی ثبت محصول در سیستم یا تأیید QA نیستند.</p><button type="button" className="pro-btn-primary" onClick={() => { setActive("skin-encyclopedia"); setPageView("content"); }}>مشاهده محصولات ثبت‌شده</button><p><a href="https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/homepage/encyclopedia/skin/PRODUCTS.md" target="_blank" rel="noreferrer">دفتر پژوهش جداگانهٔ محصولات P1–P7</a></p></article>
-                <article className="pro-product-card"><h2>بانک مسائل پوستی</h2><p className="pro-muted">مرجع تخصصی P01–P61 و روابط مسائل پوستی؛ جدا از دفتر ویژگی و پژوهش محصولات.</p><a href="https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md" target="_blank" rel="noreferrer" className="pro-btn-secondary">بازکردن بانک مسائل پوستی</a></article>
+                <article className="pro-product-card"><h2>دانش پوست</h2><p className="pro-muted">ورود به دو مسیر مستقل و مرتبط: ویژگی محصولات پوستی و مشکلات پوستی. داده‌های هیچ‌کدام در این منو کپی یا بازسازی نمی‌شوند.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("skin-knowledge")}>ورود به دانش پوست</button></article>
                 <article className="pro-product-card"><h2>دانش مو</h2><p className="pro-muted">صفحهٔ مستقل دانش مو هنوز آماده نیست.</p><button type="button" className="pro-btn-secondary" disabled>هنوز صفحه ندارد</button></article>
                 <article className="pro-product-card"><h2>دانش ادکلن</h2><p className="pro-muted">صفحهٔ دانش ادکلن هنوز آماده نیست.</p><button type="button" className="pro-btn-secondary" disabled>هنوز صفحه ندارد</button></article>
                 <article className="pro-product-card"><h2>رنگ مو</h2><p className="pro-muted">موضوع رنگ مو از دانش عمومی مو جدا نگه داشته می‌شود؛ صفحه هنوز آماده نیست.</p><button type="button" className="pro-btn-secondary" disabled>هنوز صفحه ندارد</button></article>
@@ -879,11 +878,15 @@ export default function NewHomePage() {
                 <article className="pro-product-card"><h2>ابزار</h2><p className="pro-muted">صفحهٔ دانش ابزار هنوز آماده نیست.</p><button type="button" className="pro-btn-secondary" disabled>هنوز صفحه ندارد</button></article>
                 <article className="pro-product-card"><h2>سایر</h2><p className="pro-muted">موضوعات دانشنامه‌ای خارج از دسته‌های بالا؛ این مورد با نوع محصول OTHER یکی نیست.</p><button type="button" className="pro-btn-secondary" disabled>هنوز صفحه ندارد</button></article>
               </> : null}
+              {mainSection === "skin-knowledge" ? <>
+                <article className="pro-product-card"><h2>ویژگی محصولات پوستی</h2><p className="pro-muted">فهرست مرکزی پژوهش هفت محصول، ترکیبات اعلام‌شده، ادعاهای سازنده، محدودیت شواهد و موارد نیازمند بررسی. این پرونده‌ها به معنی ثبت محصول در سیستم یا تأیید QA نیستند.</p><button type="button" className="pro-btn-primary" onClick={() => { setActive("skin-encyclopedia"); setPageView("content"); }}>مشاهده ویژگی محصولات</button><p><a href="https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/homepage/encyclopedia/skin/PRODUCTS.md" target="_blank" rel="noreferrer">دفتر پژوهش هفت محصول P1–P7</a></p></article>
+                <article className="pro-product-card"><h2>مشکلات پوستی</h2><p className="pro-muted">فهرست مرجع P01–P61 با دسته‌بندی S01–S10. این مسیر فقط به بانک موجود هدایت می‌کند؛ هیچ فهرست یا پروندهٔ موازی ساخته نمی‌شود.</p><a href="https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md" target="_blank" rel="noreferrer" className="pro-btn-primary">ورود به بانک مشکلات پوستی</a></article>
+                </> : null}
             </div>
           </section>
         )}
 
-        {pageView === "content" && active === "skin-encyclopedia" && <SkinProductEncyclopedia onBack={() => { setActive("home"); setPageView("section"); setMainSection("encyclopedia"); }} />}
+        {pageView === "content" && active === "skin-encyclopedia" && <SkinProductEncyclopedia onBack={() => { setActive("home"); setPageView("section"); setMainSection("skin-knowledge"); }} />}
 
         {pageView === "content" && active === "home" && (
           <section className="pro-panel">
