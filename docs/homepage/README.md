@@ -24,7 +24,7 @@
 | **`docs/homepage/`** | Homepage menu map, prototype, operational docs and user-path evidence |
 | **`docs/homepage/product-management/`** | Product management menu: skin intake template map (V1) |
 | **[PR #411](https://github.com/vahidmaghsoudi2/hbi/pull/411)** and its research files | Technical evidence and Product Knowledge research workbook |
-| **Problem Space / PR #433 / P01–P61** | Content remains in its specialist registry; the «دانش پوست» submenu only links to the existing authoritative records |
+| **Problem Space / PR #433 / P01–P61** | Content remains in its specialist registry; «دانش پوست → مشکلات پوستی» links to the existing Workspace Index without copying records |
 
 ### Rules that prevent another source-of-truth problem
 
@@ -53,7 +53,7 @@ The prototype also identifies the top actions separately. «تنظیمات» is 
 
 ## Active encyclopedia menu — implementation and source-of-truth boundaries
 
-The «دانشنامه» menu and its seven submenus are present in the production homepage after [PR #441](https://github.com/vahidmaghsoudi2/hbi/pull/441). Under «دانش پوست», the central product-characteristics list is [PRODUCTS.md](encyclopedia/skin/PRODUCTS.md), containing the seven research dossiers P1–P7; it is research evidence, not Product Master registration or QA approval. The separate [SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md](../product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md) remains available for the specialist P01–P61 problem registry. The menu must expose both references without copying either dataset. The other six submenu destinations remain marked `no-page-yet`.
+The «دانشنامه» menu and its seven submenus are present in the production homepage after [PR #441](https://github.com/vahidmaghsoudi2/hbi/pull/441). The current second-level path is **دانشنامه → دانش پوست → (ویژگی محصولات پوستی | مشکلات پوستی)**. «ویژگی محصولات پوستی» opens the existing read-only product encyclopedia and links to [PRODUCTS.md](encyclopedia/skin/PRODUCTS.md), containing the seven research dossiers P1–P7. «مشکلات پوستی» opens the existing [SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md](../product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md), whose canonical list is P01–P61. These remain two independent sources; the menu is navigation only and must not copy either dataset. Their documented relationship source is the existing ProductProblemLink model/API; this navigation change does not add live relationship rendering to the UI. The other six encyclopedia destinations remain unchanged.
 
 Two boundaries are explicit: «دانش مو» covers general hair/scalp knowledge, while «رنگ مو» covers coloring and care of color-treated hair. The knowledge category «سایر» is not the product-line value `OTHER`.
 
