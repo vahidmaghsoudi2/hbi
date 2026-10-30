@@ -1,6 +1,6 @@
 # HBI Homepage — menu map and operational documentation hub
 
-**Status:** Documentation + editable prototype. The production homepage «دانشنامه» menu was implemented in merged [PR #441](https://github.com/vahidmaghsoudi2/hbi/pull/441). This documentation/prototype does not itself change application code, schema, API, or database.
+**Status:** Documentation + editable prototype. The production homepage «دانشنامه» menu was implemented in [PR #441](https://github.com/vahidmaghsoudi2/hbi/pull/441); its nested skin navigation was finalized in merged [PR #489](https://github.com/vahidmaghsoudi2/hbi/pull/489). This documentation/prototype does not itself change application code, schema, API, or database.
 
 ## Start here
 
