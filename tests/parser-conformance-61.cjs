@@ -86,5 +86,7 @@ const summary = {
   results,
   differences: failures,
 };
-console.log(JSON.stringify(summary, null, 2));
+const serialized = JSON.stringify(summary, null, 2) + "\n";
+fs.writeFileSync(process.env.HBI_PARSER_RESULT_FILE || "/tmp/hbi-parser-conformance-61-results.json", serialized);
+console.log(serialized);
 if (failures.length) process.exitCode = 1;
