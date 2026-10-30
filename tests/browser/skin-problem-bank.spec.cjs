@@ -36,7 +36,7 @@ test("Skin problem bank renders only six source-backed records and searches with
   await expect(list.locator(".pro-problem-item")).toHaveCount(6);
 
   const requestsAfterOpen = requests.slice(beforeOpen);
-  expect(requestsAfterOpen.filter((url) => /github\\.com|\\/api\\//i.test(url))).toEqual([]);
+  expect(requestsAfterOpen.filter((url) => /github\.com|\/api\//i.test(url))).toEqual([]);
 
   await page.getByLabel("جست‌وجو در شش مدخل پایلوت").fill("P24");
   await expect(list.locator(".pro-problem-item")).toHaveCount(1);
