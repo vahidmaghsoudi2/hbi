@@ -43,6 +43,8 @@ jobs:
           npm install --no-save --no-audit --no-fund "@rollup/rollup-linux-x64-gnu@${ROLLUP_VERSION}"
           node -e "require('rollup')"
           npx playwright install --with-deps chromium
+      - name: Run full 61-record parser conformance
+        run: node tests/parser-conformance-61.cjs
       - name: Prepare isolated SQLite fixture
         run: |
           mkdir -p /tmp/hbi-g8-pilot
