@@ -39,7 +39,7 @@ for (const record of actual) {
     if (!same(actualFields, expectedFields)) diffs.push("field sequence/value mismatch: " + JSON.stringify({ expected: expectedFields, actual: actualFields }));
     const typeField = record.fields.find((field) => field.label === "نوع واحد" || field.label === "Unit type");
     const expectedType = fixture.v[expected[3][0][2]];
-    const normalizeType = (value) => value.replace(/\\*\\*/g, "").replace(/`/g, "").split(/\\s+—\\s+/)[0].toLowerCase().replace(/\\s*\\/\\s*/g, "/").replace(/\\s+/g, " ").trim();
+    const normalizeType = (value) => value.replace(/\*\*/g, "").replace(/`/g, "").split(/\s+—\s+/)[0].toLowerCase().replace(/\s*\/\s*/g, "/").replace(/\s+/g, " ").trim();
     if (!typeField || normalizeType(typeField.value) !== normalizeType(expectedType)) diffs.push("Markdown-insensitive Unit type comparison failed: " + JSON.stringify({ expected: expectedType, actual: typeField?.value ?? null }));
     if (record.id === "P22") {
       const roles = record.mapEntries.map((entry) => [entry.shelfId, entry.role]);
