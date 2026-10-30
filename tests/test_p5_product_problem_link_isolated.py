@@ -63,6 +63,8 @@ def _link_payload(product, evidence, *, problem_id, role, status, semantic_basis
             "P18": "Clinical Condition",
             "P19": "Sequela/pigmentation presentation",
             "P22": "Context/pigmentation presentation",
+            "P08": "Problem/Clinical presentation",
+            "P24": "Problem/presentation",
         }[problem_id],
         "problem_definition_ref": f"SKIN_PROBLEM_SPACE_MAP_V0.1.md#{problem_id}",
         "relationship_role": role,
@@ -222,3 +224,77 @@ def test_p5_sun_related_pigmentation_cannot_be_created_as_independent_p22_link(d
 
     assert db_session.query(ProductProblemLink).count() == 0
     assert product.status == "DRAFT"
+
+
+
+def test_p5_non_comedogenic_and_uv_claims_do_not_link_acne_or_persistent_redness(db_session):
+    product = _p5_product(db_session)
+    non_comedogenic = _p5_evidence(
+        db_session,
+        product.product_id,
+        evidence_id="P5-EV-MX-NON-COMEDOGENIC-TEST",
+        claim_id="P5-CLAIM-MX-NON-COMEDOGENIC-TEST",
+        market_region="MEXICO",
+        claim="Manufacturer product information describes the product as non-comedogenic; no acne treatment outcome is supplied.",
+    )
+    uv_protection = _p5_evidence(
+        db_session,
+        product.product_id,
+        evidence_id="P5-EV-MX-UV-REDNESS-TEST",
+        claim_id="P5-CLAIM-MX-UV-REDNESS-TEST",
+        market_region="MEXICO",
+        claim="Manufacturer product information describes UV protection; no persistent-redness or rosacea outcome is supplied.",
+    )
+
+    service = ProductProblemLinkService(db_session)
+    p08 = service.create_link(**_link_payload(
+        product,
+        non_comedogenic,
+        problem_id="P08",
+        role="presentation",
+        status="NOT_LINKED",
+        semantic_basis=(
+            "Non-comedogenic positioning is not an acne treatment outcome and "
+            "does not establish a product-to-acne relationship."
+        ),
+        limitations=(
+            "No product-specific acne treatment evidence is supplied; P08 remains "
+            "Accepted=No and Operational=Undetermined."
+        ),
+        decision_basis=(
+            "The canonical P5 assessment explicitly rejects non-comedogenic "
+            "wording as a basis for an acne-treatment link."
+        ),
+    ))
+    p24 = service.create_link(**_link_payload(
+        product,
+        uv_protection,
+        problem_id="P24",
+        role="presentation",
+        status="NOT_LINKED",
+        semantic_basis=(
+            "UV protection does not establish a reduction in persistent redness."
+        ),
+        limitations=(
+            "No product-specific persistent-redness outcome is supplied; P24 "
+            "remains Accepted=No and Operational=Undetermined."
+        ),
+        decision_basis=(
+            "The canonical P5 assessment finds no specific evidence for persistent "
+            "redness; sunscreen positioning cannot fill that evidence gap."
+        ),
+    ))
+
+    assert p08.relationship_status == "NOT_LINKED"
+    assert p08.problem_id == "P08"
+    assert p24.relationship_status == "NOT_LINKED"
+    assert p24.problem_id == "P24"
+    assert {
+        row.problem_id for row in service.list_by_product(product.product_id)
+    } == {"P08", "P24"}
+    assert product.status == "DRAFT"
+    assert product.identity_status == "PARTIAL_IDENTITY"
+    assert product.qa_verdict == "PENDING"
+    assert db_session.query(ProductKnowledge).filter(
+        ProductKnowledge.product_id == product.product_id
+    ).first() is None
