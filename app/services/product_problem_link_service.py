@@ -142,6 +142,17 @@ class ProductProblemLinkService:
         if evidence_market and evidence_market != "UNKNOWN" and evidence_market != market_region:
             raise ValidationError("Link market_region does not match the Evidence market.")
 
+        duplicate_scope = {
+            "product_id": product_id,
+            "evidence_id": evidence_id,
+            "problem_id": problem_id,
+            "relationship_role": relationship_role,
+            "variant": variant,
+            "market_region": market_region,
+        }
+        if self.repository.find_duplicate_scope(**duplicate_scope):
+            raise ConflictError("A ProductProblemLink already exists for this evidence/problem scope.")
+
         try:
             return self.repository.create(
                 link_id=f"PPL-{uuid.uuid4().hex}",
@@ -160,10 +171,8 @@ class ProductProblemLinkService:
                 decision_basis=decision_basis,
                 problem_map_version=problem_map_version,
             )
-        except Exception as exc:
+        except Exception:
             self.db.rollback()
-            if "uq_productproblemlink_evidence_problem_scope" in str(exc):
-                raise ConflictError("A ProductProblemLink already exists for this evidence/problem scope.") from exc
             raise
 
     def list_by_product(self, product_id: str) -> List[ProductProblemLink]:
