@@ -66,7 +66,7 @@ test("Skin encyclopedia reads product identity, evidence and knowledge without i
   await page.getByRole("button", { name: "ورود به بانک مشکلات پوستی" }).click();
   await expect(page.getByRole("heading", { name: "بانک مشکلات پوستی" })).toBeVisible();
   await expect(page.locator(".pro-problem-item")).toHaveCount(6);
-  await expect(page.getByRole("heading", { name: "Hyperpigmentation / dark spots" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Hyperpigmentation/dark spots" })).toBeVisible();
   await expect(page.getByText("Commit مبنا:")).toBeVisible();
   await page.getByRole("button", { name: "بازگشت به دانش پوست" }).click();
   await expect(page.getByRole("heading", { name: "دانش پوست" })).toBeVisible();
