@@ -174,8 +174,12 @@ class ProductProblemLinkService:
             )
         except IntegrityError as exc:
             self.db.rollback()
-            raise ConflictError(
-                "A ProductProblemLink already exists for this evidence/problem scope."
+            if "UNIQUE constraint failed" in str(getattr(exc, "orig", exc)):
+                raise ConflictError(
+                    "A ProductProblemLink already exists for this evidence/problem scope."
+                ) from exc
+            raise ValidationError(
+                "ProductProblemLink persistence failed a database integrity check."
             ) from exc
 
     def list_by_product(self, product_id: str) -> List[ProductProblemLink]:
