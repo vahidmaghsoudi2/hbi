@@ -19,7 +19,7 @@ test("Skin problem bank renders only six source-backed records and searches with
   await expect(page.getByRole("heading", { name: "بانک مشکلات پوستی" })).toBeVisible();
   const list = page.getByRole("navigation", { name: "شش مدخل منتخب مشکلات پوستی" });
   await expect(list.locator(".pro-problem-item")).toHaveCount(6);
-  await expect(page.getByRole("heading", { name: "Hyperpigmentation / dark spots" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Hyperpigmentation/dark spots" })).toBeVisible();
   await expect(page.getByText("Problem/presentation", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("UNKNOWN", { exact: false }).first()).toBeVisible();
   await expect(page.getByText("Commit مبنا:")).toBeVisible();
