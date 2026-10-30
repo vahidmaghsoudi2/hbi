@@ -24,8 +24,19 @@ test("Skin problem bank renders only six source-backed records and searches with
   await expect(page.getByText("UNKNOWN", { exact: false }).first()).toBeVisible();
   await expect(page.getByText("Commit مبنا:")).toBeVisible();
 
+  // P22 is cross-listed in the Map, but its canonical row and shelf are S04.
+  // The UI must not duplicate it under S09 or infer a second canonical record.
+  await page.getByLabel("فیلتر قفسه").selectOption("S04");
+  await expect(list.locator(".pro-problem-item")).toHaveCount(4);
+  await expect(list.getByRole("button", { name: /P22/ })).toBeVisible();
+  await list.getByRole("button", { name: /P22/ }).click();
+  await expect(page.getByRole("heading", { name: "Sun-related pigmentation" })).toBeVisible();
+  await expect(page.getByText("Context/pigmentation presentation", { exact: true }).first()).toBeVisible();
+  await page.getByLabel("فیلتر قفسه").selectOption("ALL");
+  await expect(list.locator(".pro-problem-item")).toHaveCount(6);
+
   const requestsAfterOpen = requests.slice(beforeOpen);
-  expect(requestsAfterOpen.filter((url) => /github\.com|\/api\//i.test(url))).toEqual([]);
+  expect(requestsAfterOpen.filter((url) => /github\\.com|\\/api\\//i.test(url))).toEqual([]);
 
   await page.getByLabel("جست‌وجو در شش مدخل پایلوت").fill("P24");
   await expect(list.locator(".pro-problem-item")).toHaveCount(1);
