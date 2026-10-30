@@ -1,6 +1,6 @@
 import pytest
 
-from app.core.exceptions import NotFoundError, ValidationError
+from app.core.exceptions import ConflictError, NotFoundError, ValidationError
 from app.models.evidence import Evidence
 from app.models.product import Product
 from app.models.product_knowledge import ProductKnowledge
@@ -189,7 +189,7 @@ def test_duplicate_link_scope_is_rejected_by_database_constraint(db_session):
     payload = _candidate_payload(product, evidence)
 
     service.create_link(**payload)
-    with pytest.raises(Exception):
+    with pytest.raises(ConflictError, match="already exists"):
         service.create_link(**payload)
 
-    assert db_session.query(ProductProblemLink).count() == 0
+    assert db_session.query(ProductProblemLink).count() == 1
