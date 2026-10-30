@@ -108,7 +108,7 @@ export default function SkinProblemBank({ onBack }: { onBack: () => void }) {
                   <span className="pro-problem-type">{selectedMap.type}</span>
                 </div>
                 <dl className="pro-dl">
-                  <div><dt>نوع canonical در Map</dt><dd>{selectedMap.type}</dd></div>
+                  <div><dt>نوع در Map</dt><dd>{selectedMap.type}</dd></div>
                   <div><dt>جایگاه در Map</dt><dd>{selectedMap.shelfId} · {selectedMap.shelfName}</dd></div>
                   <div><dt>Disposition در Map</dt><dd>{selectedMap.disposition}</dd></div>
                   {selected.mapEntries.map((entry, index) => (
