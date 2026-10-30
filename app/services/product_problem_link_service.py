@@ -3,6 +3,7 @@ import uuid
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from app.core.exceptions import ConflictError, NotFoundError, ValidationError
 from app.models.evidence import Evidence
@@ -171,9 +172,11 @@ class ProductProblemLinkService:
                 decision_basis=decision_basis,
                 problem_map_version=problem_map_version,
             )
-        except Exception:
+        except IntegrityError as exc:
             self.db.rollback()
-            raise
+            raise ConflictError(
+                "A ProductProblemLink already exists for this evidence/problem scope."
+            ) from exc
 
     def list_by_product(self, product_id: str) -> List[ProductProblemLink]:
         return self.repository.list_by_product(product_id)
