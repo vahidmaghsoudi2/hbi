@@ -135,15 +135,10 @@ function parseMap(mapMarkdown: string): { shelfNames: Map<string, string>; rows:
     rows.set(id, entries);
   }
 
-  for (const [id, entries] of rows) {
-    if (id === "P22") {
-      for (const entry of entries) {
-        if (entry.shelfId === "S04") entry.role = "canonical";
-        else if (entry.shelfId === "S09") entry.role = "cross_reference";
-      }
-    } else if (entries.length === 1) {
-      entries[0].role = "canonical";
-    }
+  const p22Entries = rows.get("P22") ?? [];
+  for (const entry of p22Entries) {
+    if (entry.shelfId === "S04") entry.role = "canonical";
+    else if (entry.shelfId === "S09") entry.role = "cross_reference";
   }
   return { shelfNames, rows };
 }
@@ -169,7 +164,7 @@ export function parseProblemRecords(mapMarkdown: string, workingRecordsMarkdown:
       mapEntries: mapRows.get(id) ?? [],
       canonicalMapEntryIndex: id === "P22"
         ? (mapRows.get(id) ?? []).findIndex((entry) => entry.shelfId === "S04")
-        : (mapRows.get(id) ?? []).length === 1 ? 0 : null,
+        : null,
       fields,
     });
     records.set(id, entries);
