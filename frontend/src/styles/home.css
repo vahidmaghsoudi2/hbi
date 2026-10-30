@@ -537,3 +537,87 @@
   border-top: 1px solid var(--line);
   background: #ebe6dc;
 }
+
+/* Read-only Skin Problem Bank pilot */
+.pro-problem-scope {
+  margin: 1rem 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #f7f5ef;
+}
+.pro-problem-scope p { margin: 0.35rem 0 0; color: var(--muted); font-size: 0.9rem; }
+.pro-problem-controls {
+  display: grid;
+  grid-template-columns: minmax(220px, 2fr) minmax(180px, 1fr);
+  gap: 0.85rem;
+  margin: 1rem 0;
+}
+.pro-problem-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.85fr) minmax(0, 2fr);
+  gap: 1rem;
+  align-items: start;
+}
+.pro-problem-list, .pro-problem-detail, .pro-problem-provenance {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1rem;
+  background: #fff;
+}
+.pro-problem-count { margin: 0 0 0.65rem; color: var(--muted); font-size: 0.82rem; }
+.pro-problem-item {
+  display: grid;
+  width: 100%;
+  gap: 0.25rem;
+  margin: 0 0 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #faf8f4;
+  color: var(--ink);
+  text-align: right;
+  font: inherit;
+  cursor: pointer;
+}
+.pro-problem-item:hover, .pro-problem-item.is-active {
+  border-color: var(--brand);
+  background: var(--soft);
+}
+.pro-problem-item > span:last-child { color: var(--muted); font-size: 0.78rem; }
+.pro-problem-item-id {
+  display: inline-block;
+  color: var(--brand-2);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.pro-problem-detail-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+.pro-problem-detail-head h2 { margin: 0.2rem 0; }
+.pro-problem-detail-head p { margin: 0; color: var(--muted); font-size: 0.85rem; }
+.pro-problem-type {
+  max-width: 18rem;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.pro-problem-source-note, .pro-problem-provenance {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.pro-problem-provenance { margin-top: 1rem; overflow-wrap: anywhere; }
+.pro-problem-provenance p { margin: 0.35rem 0; }
+.pro-problem-provenance code { font-size: 0.78rem; }
+@media (max-width: 760px) {
+  .pro-problem-controls, .pro-problem-layout { grid-template-columns: 1fr; }
+}
