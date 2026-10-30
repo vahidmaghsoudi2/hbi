@@ -62,6 +62,7 @@ def _link_payload(product, evidence, *, problem_id, role, status, semantic_basis
             "P17": "Problem/presentation",
             "P18": "Clinical Condition",
             "P19": "Sequela/pigmentation presentation",
+            "P22": "Context/pigmentation presentation",
         }[problem_id],
         "problem_definition_ref": f"SKIN_PROBLEM_SPACE_MAP_V0.1.md#{problem_id}",
         "relationship_role": role,
