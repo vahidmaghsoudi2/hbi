@@ -48,9 +48,12 @@ function parsePilotRecords(): PilotProblem[] {
     }
     const row = line.trim().match(/^(P\d{2})\s+(.+?)\s+—\s+(.+?)\s+—\s+(.+?)\s+—\s+(.+)$/);
     if (!row || !(PILOT_IDS as readonly string[]).includes(row[1])) continue;
-    const [, id, name, type, relationship, disposition] = row;
+    const id = row[1];
+    const name = row[2];
+    const type = row[3];
+    const disposition = row[5];
     const entries = mapRows.get(id) ?? [];
-    entries.push({ name: name.trim(), type: type.trim(), shelf: relationship.trim() ? currentShelf : currentShelf, disposition: disposition.trim() });
+    entries.push({ name: name.trim(), type: type.trim(), shelf: currentShelf, disposition: disposition.trim() });
     mapRows.set(id, entries);
   }
 
@@ -81,7 +84,12 @@ function parsePilotRecords(): PilotProblem[] {
   return PILOT_IDS.map((id) => {
     const mapped = mapRows.get(id) ?? [];
     const recorded = parsed.get(id) ?? [];
-    assert(mapped.length === 1, `${id}: در جدول نگاشت Map باید دقیقاً یک ردیف وجود داشته باشد؛ تعداد فعلی ${mapped.length} است.`);
+    if (id === "P22") {
+      // P22 is intentionally cross-listed under S09; its canonical Map row remains under S04.
+      assert(mapped.length === 2 && mapped[0].shelf === "S04" && mapped[1].shelf === "S09", "P22: ارجاع متقاطع S04/S09 در Map مطابق ساختار مورد انتظار نیست.");
+    } else {
+      assert(mapped.length === 1, `${id}: در جدول نگاشت Map باید دقیقاً یک ردیف وجود داشته باشد؛ تعداد فعلی ${mapped.length} است.`);
+    }
     assert(recorded.length === 1, `${id}: در Working Records باید دقیقاً یک heading وجود داشته باشد؛ تعداد فعلی ${recorded.length} است.`);
     const mapRow = mapped[0];
     const record = recorded[0];
