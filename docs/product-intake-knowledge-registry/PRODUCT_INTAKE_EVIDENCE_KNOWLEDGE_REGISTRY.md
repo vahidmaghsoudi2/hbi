@@ -31,6 +31,7 @@
 | Execution-control | `docs/product-intake-knowledge-registry/ROADMAP_PRODUCT_INTAKE_G8.md` | CANONICAL |
 | Strategic Skin baseline | `docs/product-intake-knowledge-registry/SKIN_PRODUCT_INTAKE_STRATEGIC_BASELINE_v0.1.md` | DESIGN / NOT AUTHORIZED |
 | Skin Problem Space Map V0.1 | `docs/product-intake-knowledge-registry/SKIN_PROBLEM_SPACE_MAP_V0.1.md` | SUPPORTING — source artifact copied from Issue #293 comment 5972920377; later correction/acceptance records remain historical governance evidence |
+| Product Features → Skin Problem linking standard + ISDIN P5 pilot | [PRODUCT_FEATURES_TO_SKIN_PROBLEM_LINKING_STANDARD_V1_ISDIN_P5_PILOT.md](./PRODUCT_FEATURES_TO_SKIN_PROBLEM_LINKING_STANDARD_V1_ISDIN_P5_PILOT.md) | SUPPORTING — working standard and limited cross-team pilot; no implementation/recommendation authorization |
 | New Home IA | Issue #352 + current New Home code | CANONICAL for homepage only |
 
 ## 3. Two required angles
