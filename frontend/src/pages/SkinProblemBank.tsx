@@ -58,7 +58,7 @@ function parsePilotRecords(): PilotProblem[] {
   }
 
   const headings = [...workingRecordsMarkdown.matchAll(/^###\s+(?:رکورد|Record)\s+(P\d{2})\s*[—-]\s*(.+)$/gm)];
-  const parsed = new Map<string, { heading: string; fields: ProblemField[] }[]>();
+  const parsed = new Map<string, { fields: ProblemField[] }[]>();
   for (let index = 0; index < headings.length; index += 1) {
     const heading = headings[index];
     const id = heading[1];
@@ -77,7 +77,7 @@ function parsePilotRecords(): PilotProblem[] {
       fields.push({ label, value });
     }
     const entries = parsed.get(id) ?? [];
-    entries.push({ heading: heading[2].trim(), fields });
+    entries.push({ fields });
     parsed.set(id, entries);
   }
 
@@ -114,10 +114,6 @@ function parsePilotRecords(): PilotProblem[] {
       fields: record.fields,
     };
   });
-}
-
-function fieldValue(fields: ProblemField[], labels: string[]): string {
-  return fields.find((field) => labels.includes(field.label))?.value ?? "در منبع ثبت نشده";
 }
 
 export default function SkinProblemBank({ onBack }: { onBack: () => void }) {
@@ -177,7 +173,7 @@ export default function SkinProblemBank({ onBack }: { onBack: () => void }) {
               <label htmlFor="skin-problem-shelf">فیلتر قفسه</label>
               <select id="skin-problem-shelf" className="pro-input" value={shelfFilter} onChange={(event) => setShelfFilter(event.target.value)}>
                 <option value="ALL">همهٔ قفسه‌های پایلوت</option>
-                {[...new Map(parsed.records.map((record) => [record.shelfId, record.shelfName])).entries()].map(([id, name]) => <option key={id} value={id}>{id} · {name}</option>)}
+                {Array.from(new Map(parsed.records.map((record): [string, string] => [record.shelfId, record.shelfName])).entries()).map(([id, name]) => <option key={id} value={id}>{id} · {name}</option>)}
               </select>
             </div>
           </div>
