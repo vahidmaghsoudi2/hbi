@@ -17,6 +17,9 @@ class ProductProblemLinkRepository:
         self.db.flush()
         return record
 
+    def find_duplicate_scope(self, **scope) -> Optional[ProductProblemLink]:
+        return self.db.query(ProductProblemLink).filter_by(**scope).first()
+
     def get_by_id(self, link_id: str) -> Optional[ProductProblemLink]:
         return self.db.query(ProductProblemLink).filter(
             ProductProblemLink.link_id == link_id
