@@ -31,13 +31,6 @@ for (const record of actual) {
   if (!expected) {
     diffs.push("missing Expected fixture row");
   } else {
-    const expectedMap = expected[3].map((entry) => ({
-      shelfId: fixture.v[entry[0] === "S01" ? -1 : -1],
-      name: fixture.v[entry[1]],
-      type: fixture.v[entry[2]],
-      relationshipRaw: fixture.v[entry[3]],
-      disposition: fixture.v[entry[4]],
-    }));
     const expectedMapNormalized = expected[3].map((entry) => [entry[0], fixture.v[entry[1]], fixture.v[entry[2]], fixture.v[entry[3]], fixture.v[entry[4]]]);
     const actualMapNormalized = record.mapEntries.map((entry) => [entry.shelfId, entry.name, entry.type, entry.relationshipRaw, entry.disposition]);
     if (!same(actualMapNormalized, expectedMapNormalized)) diffs.push("Map entries mismatch: " + JSON.stringify({ expected: expectedMapNormalized, actual: actualMapNormalized }));
@@ -67,6 +60,10 @@ const stateChecks = {
   empty: getFieldState(sample, "empty") === "empty",
   unknown: getFieldState(sample, "unknown") === "unknown",
 };
+const fieldStateCounts = { missing: 0, empty: 0, unknown: 0, value: 0 };
+for (const record of actual) {
+  for (const label of fixture.k) fieldStateCounts[getFieldState(record.fields, label)] += 1;
+}
 if (Object.values(stateChecks).some((ok) => !ok)) failures.push({ id: "STATE_MODEL", detail: "Missing/Empty/UNKNOWN distinction failed: " + JSON.stringify(stateChecks) });
 
 const head = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
@@ -81,6 +78,7 @@ const summary = {
   pass: results.filter((row) => row.status === "PASS").length,
   fail: results.filter((row) => row.status === "FAIL").length,
   state_checks: stateChecks,
+  field_state_counts: fieldStateCounts,
   results,
   differences: failures,
 };
