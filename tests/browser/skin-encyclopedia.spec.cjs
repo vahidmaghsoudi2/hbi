@@ -78,6 +78,6 @@ test("Skin encyclopedia reads product identity, evidence and knowledge without i
   await expect(page.getByRole("heading", { name: "شواهد و منشأ اطلاعات" })).toBeVisible();
   await expect(page.getByText("Water")).toBeVisible();
   await expect(page.getByText(/QA: PENDING · شواهد: UNKNOWN/)).toBeVisible();
-  await page.getByRole("button", { name: "بازگشت" }).click();
+  await page.getByRole("button", { name: "بازگشت", exact: true }).click();
   await expect(page.getByRole("heading", { name: "دانش پوست" })).toBeVisible();
 });
