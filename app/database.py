@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine, event, text, inspect
 from sqlalchemy.orm import sessionmaker
 from app.models.base import Base
-from app.models import product_problem_link
 import os
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/hbi.db")
