@@ -44,7 +44,11 @@ export default function SkinProductEncyclopedia({ onBack }: Props) {
     }
     listManageableProducts(token).then((rows) => {
       if (!alive) return;
-      const available = Array.isArray(rows) ? rows : [];
+      // This is the skin encyclopedia, not the all-lines product catalog.
+      // Unknown/missing product_line values are intentionally excluded.
+      const available = Array.isArray(rows)
+        ? rows.filter((item) => String(item.product_line ?? "").trim().toUpperCase() === "SKIN")
+        : [];
       setProducts(available);
       if (available.length) setSelectedId(available[0].product_id);
     }).catch((e) => {
@@ -88,7 +92,7 @@ export default function SkinProductEncyclopedia({ onBack }: Props) {
       <p><a href="https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/homepage/encyclopedia/skin/PRODUCTS.md" target="_blank" rel="noreferrer">دفتر پژوهش هفت محصول P1–P7 (جدا از ثبت عملیاتی)</a></p>
       {loadingList ? <p role="status">در حال دریافت فهرست محصولات…</p> : null}
       {error ? <p className="pro-error" role="alert">دریافت اطلاعات کامل نشد: {error}</p> : null}
-      {!loadingList && products.length === 0 && !error ? <p className="pro-muted">محصولی در فهرست رسمی قابل نمایش نیست. پرونده‌های پژوهشی P1–P7 به معنی ثبت عملیاتی نیستند.</p> : null}
+      {!loadingList && products.length === 0 && !error ? <p className="pro-muted">محصولی با لاین «پوست (SKIN)» در فهرست رسمی قابل نمایش نیست. پرونده‌های پژوهشی P1–P7 به معنی ثبت عملیاتی نیستند.</p> : null}
       {products.length > 0 ? (
         <div className="pro-product-card">
           <label htmlFor="skin-product-select">انتخاب محصول</label>
