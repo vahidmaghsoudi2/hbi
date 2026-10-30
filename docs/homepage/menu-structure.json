@@ -4,7 +4,7 @@
   "source": {
     "observed_file": "frontend/src/pages/NewHomePage.tsx",
     "observed_ref": "master",
-    "observed_commit": "5b4aa469dfb7d812aa583bc199c8c4f3c9341fb5",
+    "observed_commit": "388f4977261cc37588389bf78a73f7014254d5e6",
     "supporting_audit": "docs/HOMEPAGE_IA_AUDIT_STAGE2.md"
   },
   "notice": "این فایل نقشهٔ مستنداتی و دادهٔ پیش‌نمایش است؛ منوی «دانشنامه» در frontend/src/pages/NewHomePage.tsx پیاده‌سازی شده است. ویرایش این فایل به‌تنهایی برنامهٔ عملیاتی را تغییر نمی‌دهد.",
