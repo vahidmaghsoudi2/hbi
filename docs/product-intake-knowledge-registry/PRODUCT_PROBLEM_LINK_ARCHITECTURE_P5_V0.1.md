@@ -280,7 +280,14 @@ P17 و P22 در حال حاضر به SUPPORTED ارتقا نمی‌یابند. �
 | P08 | Not linked | non-comedogenic معادل درمان آکنه نیست |
 | P24 | Not linked | شاهد اختصاصی کافی برای قرمزی پایدار وجود ندارد |
 
-**قفل‌ها:** P5 همچنان research_ref است و Product Master ID واقعی ندارد؛ هیچ ProductProblemLink عملیاتی، Supported، Recommendation یا تغییر نرم‌افزار/DB/API/Schema/UI ایجاد نمی‌شود. هیچ مرحله اپراتوری وجود ندارد. PR #480 و #481 باید Draft و باز باقی بمانند.
+**قفل‌ها:** P5 همچنان research_ref است و Product Master ID واقعی ندارد؛ هیچ ProductProblemLink عملیاتی، Supported، Recommendation یا تغییر نرم‌افزار/DB/API/Schema/UI ایجاد نمی‌شود. هیچ مرحله اپراتوری وجود ندارد. **وضعیت جاری GitHub و کنترل مجوز — راستی‌آزمایی 2026-10-30**
+
+- PR #480: `MERGED`؛ merge commit `43712b1f47402c090733d564e02482472cdc0dc3`؛ زمان commit `2026-10-30 12:25:23 UTC` و زمان ادغام GitHub `12:25:24 UTC`.
+- PR #481: `MERGED`؛ merge commit `a9ec2c65a563103dd8a84d5f5e0fde2a00afcac6`؛ زمان commit `2026-10-30 12:27:53 UTC` و زمان ادغام GitHub `12:27:54 UTC`. ترتیب والدین commit، ادغام #480 پیش از #481 را تأیید می‌کند.
+- تصمیم PO در Issue #406، کامنت [#6520097663](https://github.com/vahidmaghsoudi2/hbi/issues/406#issuecomment-6520097663)، در `2026-10-30 10:04:40 UTC` ثبت شده و صریحاً خواسته است هر دو PR باز و Draft بمانند.
+- آرایه رسمی GitHub Reviews برای هر دو PR خالی است؛ در شواهد بررسی‌شده مدرکی از لغو یا جایگزینی متأخر تصمیم PO یافت نشد.
+
+**نتیجه:** وضعیت فنی هر دو PR برابر `MERGED` است؛ مجوز PO برابر `AUTHORIZATION NOT VERIFIED` باقی می‌ماند. Merge به‌تنهایی تأیید PO یا مجوز پیاده‌سازی، ProductProblemLink عملیاتی، Runtime یا Recommendation نیست. هیچ رابطه پژوهشی نیز صرفاً با Merge به `SUPPORTED` یا `Accepted` ارتقا نمی‌یابد.
 
 
 ---
@@ -408,4 +415,4 @@ P17 و P22 در حال حاضر به SUPPORTED ارتقا نمی‌یابند. �
 
 **اثر بر تصمیم جاری P5:** این تکمیل علت‌شناسی، پایلوت محصول را متوقف نمی‌کند و وضعیت ارتباط‌ها را تغییر نمی‌دهد: P17=Candidate محدود؛ P18/P19=Not linked برای ارتباط محصولی؛ P22=Context/Deferred بدون ProductProblemLink مستقل؛ P08/P24=Not linked. دو شرط مستقل پذیرش هر ارتباط همچنان لازم‌اند: (1) شواهد معتبر و قابل انتساب به محصول/نسخه مورد بحث؛ (2) تطبیق معنایی معتبر با تعریف canonical و نوع Problem در بانک. ELIGIBLE، known_use_cases و شواهد تنها، جایگزین هیچ‌یک از این دو شرط نیستند.
 
-**قفل دامنه:** این الحاقیه فقط پژوهش و مستندات است. هیچ P-code، taxonomy، Map، Working Records، Accepted، schema، API، DB، UI، runtime یا Recommendation تغییر نمی‌کند. هیچ ProductProblemLink مستقل برای P22 ایجاد نمی‌شود. PR #480 و #481 باید باز و Draft بمانند.
+**قفل دامنه:** این الحاقیه فقط پژوهش و مستندات است. هیچ P-code، taxonomy، Map، Working Records، Accepted، schema، API، DB، UI، runtime یا Recommendation تغییر نمی‌کند. هیچ ProductProblemLink مستقل برای P22 ایجاد نمی‌شود. PR #480 و #481 اکنون `MERGED` هستند؛ نتیجه کنترل مجوز همچنان `AUTHORIZATION NOT VERIFIED` است. جزئیات زمان‌ها و سابقه تصمیم PO در بخش 12.4 همین سند ثبت شده است.
