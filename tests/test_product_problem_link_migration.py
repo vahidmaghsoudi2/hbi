@@ -9,6 +9,7 @@ def test_legacy_migration_preserves_rows_and_does_not_invent_revision_metadata(t
     db = tmp_path / "legacy.db"
     conn = sqlite3.connect(db)
     conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA wal_autocheckpoint=0")
     conn.executescript("""
         PRAGMA foreign_keys=ON;
         CREATE TABLE Product(product_id VARCHAR PRIMARY KEY);
@@ -46,6 +47,8 @@ def test_legacy_migration_preserves_rows_and_does_not_invent_revision_metadata(t
     conn.commit()
     # Keep a second connection open so committed WAL pages remain outside the main DB file.
     wal_keeper = sqlite3.connect(db)
+    wal_keeper.execute("BEGIN")
+    assert wal_keeper.execute("SELECT COUNT(*) FROM ProductProblemLink").fetchone() == (1,)
     conn.close()
     wal_path = Path(str(db) + "-wal")
     assert wal_path.exists()
