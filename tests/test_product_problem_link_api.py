@@ -175,7 +175,7 @@ def test_create_and_reassess_emit_central_audit_events_for_success_and_denial(
         ),
         headers=headers,
     )
-    assert rejected.status_code == 422
+    assert rejected.status_code == 404
 
     revised_payload = _payload(
         product, evidence,
