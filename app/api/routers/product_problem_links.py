@@ -3,11 +3,14 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from app.core.audit import audit_event
 from app.core.authorization import require_any_role
 from app.core.deps import get_db
 from app.core.exceptions import ConflictError, NotFoundError, ValidationError
 from app.interface.product_problem_link_schemas import (
-    ProductProblemLinkCreate, ProductProblemLinkReassess, ProductProblemLinkResponse,
+    ProductProblemLinkCreate,
+    ProductProblemLinkReassess,
+    ProductProblemLinkResponse,
 )
 from app.models.user_role import ROLE_ADMIN, ROLE_PO, ROLE_REVIEWER_QA
 from app.services.product_problem_link_service import ProductProblemLinkService
@@ -41,7 +44,29 @@ async def create_product_problem_link(
         db.commit()
     except (NotFoundError, ValidationError, ConflictError) as exc:
         db.rollback()
+        audit_event(
+            "product_problem_link_create",
+            customer_id=subject_id,
+            path="/api/v1/product-problem-links/",
+            outcome="denied",
+            detail=str(exc),
+            extra={"actor_role": sorted(roles)},
+        )
         _raise_http_domain_error(exc)
+
+    audit_event(
+        "product_problem_link_create",
+        customer_id=subject_id,
+        path="/api/v1/product-problem-links/",
+        outcome="ok",
+        detail=record.link_id,
+        extra={
+            "actor_role": sorted(roles),
+            "product_id": record.product_id,
+            "problem_id": record.problem_id,
+            "relationship_status": record.relationship_status,
+        },
+    )
     return ProductProblemLinkResponse.model_validate(record)
 
 
@@ -64,7 +89,31 @@ async def reassess_product_problem_link(
         db.commit()
     except (NotFoundError, ValidationError, ConflictError) as exc:
         db.rollback()
+        audit_event(
+            "product_problem_link_reassess",
+            customer_id=subject_id,
+            path=f"/api/v1/product-problem-links/{link_id}/reassess",
+            outcome="denied",
+            detail=str(exc),
+            extra={"actor_role": sorted(roles), "link_id": link_id},
+        )
         _raise_http_domain_error(exc)
+
+    audit_event(
+        "product_problem_link_reassess",
+        customer_id=subject_id,
+        path=f"/api/v1/product-problem-links/{link_id}/reassess",
+        outcome="ok",
+        detail=record.link_id,
+        extra={
+            "actor_role": sorted(roles),
+            "product_id": record.product_id,
+            "problem_id": record.problem_id,
+            "relationship_status": record.relationship_status,
+            "supersedes_link_id": record.supersedes_link_id,
+            "revision_no": record.revision_no,
+        },
+    )
     return ProductProblemLinkResponse.model_validate(record)
 
 
