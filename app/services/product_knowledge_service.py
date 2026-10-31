@@ -208,6 +208,7 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
         domain_has_approved: Dict[str, bool] = {}
         domain_has_conflict: Dict[str, bool] = {}
         domain_has_evaluated_empty: Dict[str, bool] = {}
+        domain_has_out_of_scope: Set[str] = set()
 
         def touch_domain(field: str, *, approved_hit: bool = False, conflict: bool = False, evaluated: bool = False):
             d = (field or "general").strip().lower() or "general"
@@ -330,16 +331,21 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
                 qa = (getattr(ev, "qa_status", None) or "").strip().upper()
                 conflict = (getattr(ev, "conflict_status", None) or "NONE").strip().upper()
                 field_l = (ev.field or "general").strip().lower()
-                if conflict == "CONFLICT":
-                    touch_domain(field_l, conflict=True, evaluated=True)
-                elif qa in self._QA_APPROVED and field_l in BLOCKING_KNOWLEDGE_FIELDS:
-                    touch_domain(field_l, evaluated=True)
-                    domain_status[field_l] = "PARTIAL"
+                # Evidence from another market/version must never inject its
+                # conflict verdict into this ProductKnowledge scope. It can,
+                # however, make an otherwise populated domain PARTIAL because
+                # potentially relevant evidence was deliberately excluded.
+                if field_l in BLOCKING_KNOWLEDGE_FIELDS and (
+                    conflict == "CONFLICT" or qa in self._QA_APPROVED
+                ):
+                    domain_has_out_of_scope.add(field_l)
 
         all_domains = set(domain_has_approved) | set(domain_has_conflict) | set(domain_has_evaluated_empty) | set(domain_status)
         for d in all_domains:
             if domain_has_conflict.get(d):
                 domain_status[d] = "CONFLICT"
+            elif d in domain_has_out_of_scope:
+                domain_status[d] = "PARTIAL"
             elif domain_has_approved.get(d):
                 domain_status[d] = "SUPPORTED"
             elif domain_has_evaluated_empty.get(d) or d in domain_status:
