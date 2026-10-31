@@ -243,19 +243,23 @@ if ($kind -eq "SQLITE") {
 
 Write-Section "3) Running Backend process hints (not proof of DB file)"
 $hints = Get-RunningHbiBackendHints
+$backendProcessDetected = ($hints.Count -gt 0)
 if ($hints.Count -eq 0) {
     Write-Host "No uvicorn app.main:app process found in this session query."
     Write-Host "Cannot prove from process list that a Backend is using this DB right now."
 } else {
     foreach ($h in $hints) { Write-Host $h }
-    Write-Host "Note: command line rarely embeds DATABASE_URL; absence of path in CMD is normal."
+    Write-Host "Backend process command lines are inspected only in memory for matching and are never printed."
 }
 
 $activeProven = $false
 $verdict = "UNKNOWN"
 
 Write-Section "4) SQLite file audit (read-only) if path known"
-if ($kind -ne "SQLITE") {
+if ($backendProcessDetected) {
+    Write-Host "Backend process detected; skipping immutable SQLite inspection to avoid reading a changing live database." -ForegroundColor Yellow
+    $verdict = "UNKNOWN"
+} elseif ($kind -ne "SQLITE") {
     Write-Host "Non-SQLite database kind reported: $kind"
     Write-Host "This script does not open non-SQLite servers (by design)."
     Write-Host "Migration scripts for ProductProblemLink assessments are SQLite-specific on master."
@@ -265,7 +269,7 @@ if ($kind -ne "SQLITE") {
     $verdict = "UNKNOWN"
 } elseif (-not (Test-Path -LiteralPath $sqlitePath)) {
     Write-Host "File does not exist: $sqlitePath" -ForegroundColor Yellow
-    Write-Host "Effective URL points here, but no file is present yet (fresh install or different working directory at runtime)."
+    Write-Host "The audit candidate points here, but this does not establish the Backend runtime database."
     $verdict = "UNKNOWN"
 } else {
     $item = Get-Item -LiteralPath $sqlitePath
