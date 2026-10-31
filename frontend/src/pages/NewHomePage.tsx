@@ -25,6 +25,7 @@ import {
 import ProductIntakePanel from "./ProductIntakePanel";
 import ProductReviewPanel from "./ProductReviewPanel";
 import SkinProductEncyclopedia from "./SkinProductEncyclopedia";
+import SkinProblemBank from "./SkinProblemBank";
 import type {
   ProductDTO,
   RecommendationDTO,
@@ -53,7 +54,7 @@ const SKIN_OPTIONS = ["خشک", "چرب", "مختلط", "معمولی", "حسا�
 const CONSULTATION_LINES = [{ id: "SKIN", label: "پوست" }] as const;
 const INITIAL_RECOMMENDATION_LIMIT = 5;
 
-type Panel = "home" | "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about" | "skin-encyclopedia";
+type Panel = "home" | "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about" | "skin-encyclopedia" | "skin-problems";
 type MainSection = "home" | "customers" | "consultation" | "sales" | "products" | "inventory" | "purchases" | "reports" | "encyclopedia" | "skin-knowledge";
 type PageView = "main" | "section" | "content";
 
@@ -880,13 +881,14 @@ export default function NewHomePage() {
               </> : null}
               {mainSection === "skin-knowledge" ? <>
                 <article className="pro-product-card"><h2>ویژگی محصولات پوستی</h2><p className="pro-muted">فهرست مرکزی پژوهش هفت محصول، ترکیبات اعلام‌شده، ادعاهای سازنده، محدودیت شواهد و موارد نیازمند بررسی. این پرونده‌ها به معنی ثبت محصول در سیستم یا تأیید QA نیستند.</p><button type="button" className="pro-btn-primary" onClick={() => { setActive("skin-encyclopedia"); setPageView("content"); }}>مشاهده ویژگی محصولات</button><p><a href="https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/homepage/encyclopedia/skin/PRODUCTS.md" target="_blank" rel="noreferrer">دفتر پژوهش هفت محصول P1–P7</a></p></article>
-                <article className="pro-product-card"><h2>مشکلات پوستی</h2><p className="pro-muted">فهرست مرجع P01–P61 با دسته‌بندی S01–S10. این مسیر فقط به بانک موجود هدایت می‌کند؛ هیچ فهرست یا پروندهٔ موازی ساخته نمی‌شود.</p><a href="https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md" target="_blank" rel="noreferrer" className="pro-btn-primary">ورود به بانک مشکلات پوستی</a></article>
+                <article className="pro-product-card"><h2>مشکلات پوستی</h2><p className="pro-muted">مرور داخلی و فقط‌خواندنی شش مدخل منتخب پایلوت از بانک مرجع P01–P61؛ Map و Working Records منبع اصلی باقی می‌مانند.</p><button type="button" className="pro-btn-primary" onClick={() => { setActive("skin-problems"); setPageView("content"); }}>ورود به بانک مشکلات پوستی</button><p><a href="https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md" target="_blank" rel="noreferrer">فهرست عملیاتی و سوابق بانک در GitHub</a></p></article>
                 </> : null}
             </div>
           </section>
         )}
 
         {pageView === "content" && active === "skin-encyclopedia" && <SkinProductEncyclopedia onBack={() => { setActive("home"); setPageView("section"); setMainSection("skin-knowledge"); }} />}
+        {pageView === "content" && active === "skin-problems" && <SkinProblemBank onBack={() => { setActive("home"); setPageView("section"); setMainSection("skin-knowledge"); }} />}
 
         {pageView === "content" && active === "home" && (
           <section className="pro-panel">

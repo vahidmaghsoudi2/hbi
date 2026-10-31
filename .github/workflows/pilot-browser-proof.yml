@@ -36,8 +36,17 @@ jobs:
       - name: Install frontend and Playwright
         working-directory: frontend
         run: |
-          npm install --no-audit --no-fund
+          npm install --no-audit --no-fund --include=optional
+          # npm can omit platform-specific optional dependencies; install Rollup's
+          # matching Linux binary explicitly so Vite can start on the GitHub runner.
+          ROLLUP_VERSION="$(node -p "require('rollup/package.json').version")"
+          npm install --no-save --no-audit --no-fund "@rollup/rollup-linux-x64-gnu@${ROLLUP_VERSION}"
+          node -e "require('rollup')"
           npx playwright install --with-deps chromium
+      - name: Run full 61-record parser conformance
+        env:
+          HBI_PARSER_RESULT_FILE: /tmp/hbi-parser-conformance-61-results.json
+        run: node tests/parser-conformance-61.cjs
       - name: Prepare isolated SQLite fixture
         run: |
           mkdir -p /tmp/hbi-g8-pilot
@@ -70,6 +79,7 @@ jobs:
             test-results/
             /tmp/hbi-pilot-api.log
             /tmp/hbi-pilot-web.log
+            /tmp/hbi-parser-conformance-61-results.json
       - name: Cleanup disposable services and database
         if: always()
         run: |

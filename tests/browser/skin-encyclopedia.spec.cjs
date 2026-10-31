@@ -63,11 +63,13 @@ test("Skin encyclopedia reads product identity, evidence and knowledge without i
   await expect(page.getByRole("heading", { name: "فضای کاری مدیر" })).toBeVisible();
   await page.getByRole("button", { name: "ورود به دانشنامه" }).click();
   await page.getByRole("button", { name: "ورود به دانش پوست" }).click();
-  const problemsLink = page.getByRole("link", { name: "ورود به بانک مشکلات پوستی" });
-  await expect(problemsLink).toHaveAttribute(
-    "href",
-    "https://github.com/vahidmaghsoudi2/hbi/blob/master/docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md",
-  );
+  await page.getByRole("button", { name: "ورود به بانک مشکلات پوستی" }).click();
+  await expect(page.getByRole("heading", { name: "بانک مشکلات پوستی" })).toBeVisible();
+  await expect(page.locator(".pro-problem-item")).toHaveCount(6);
+  await expect(page.getByRole("heading", { name: "Hyperpigmentation/dark spots" })).toBeVisible();
+  await expect(page.getByText("Commit مبنا:")).toBeVisible();
+  await page.getByRole("button", { name: "بازگشت به دانش پوست" }).click();
+  await expect(page.getByRole("heading", { name: "دانش پوست" })).toBeVisible();
   await page.getByRole("button", { name: "مشاهده ویژگی محصولات" }).click();
 
   await expect(page.getByRole("heading", { name: "دانشنامهٔ ویژگی محصولات پوستی" })).toBeVisible();
