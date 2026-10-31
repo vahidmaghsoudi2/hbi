@@ -72,9 +72,15 @@ def version_scope_key(
 
 def parse_role_entries(claim: str) -> List[Dict[str, str]]:
     """
-    Accept JSON list [{"ingredient": "...", "role": "CORE"}, ...]
-    or legacy "Name:ROLE" / "Name=ROLE" comma segments.
-    Invalid roles become UNKNOWN (explicit), never dropped silently.
+    Structured role entries only.
+
+    Accepts:
+    - JSON list [{"ingredient": "...", "role": "CORE"}, ...]
+    - Explicit "Name:ROLE" / "Name=ROLE" comma segments
+
+    Plain legacy lists such as "humectant, emollient" (no delimiter / no JSON)
+    return [] so callers can keep the pre-existing comma-string contract.
+    Invalid explicit roles become UNKNOWN (explicit), never dropped silently.
     """
     claim = (claim or "").strip()
     if not claim:
@@ -96,6 +102,7 @@ def parse_role_entries(claim: str) -> List[Dict[str, str]]:
                 if ing:
                     out.append({"ingredient": ing, "role": role})
             return out
+        return []
     entries: List[Dict[str, str]] = []
     for part in claim.split(","):
         part = part.strip()
@@ -106,7 +113,8 @@ def parse_role_entries(claim: str) -> List[Dict[str, str]]:
         elif "=" in part:
             name, role = part.split("=", 1)
         else:
-            name, role = part, "UNKNOWN"
+            # Legacy free-text token — not a structured Ingredient/Role pair.
+            continue
         role_u = role.strip().upper()
         if role_u not in ALLOWED_INGREDIENT_ROLES:
             role_u = "UNKNOWN"
@@ -114,6 +122,22 @@ def parse_role_entries(claim: str) -> List[Dict[str, str]]:
         if name:
             entries.append({"ingredient": name, "role": role_u})
     return entries
+
+
+def parse_legacy_role_tokens(claim: str) -> List[str]:
+    """Comma-separated free-text role labels without Ingredient:ROLE mapping."""
+    claim = (claim or "").strip()
+    if not claim or claim.startswith("["):
+        return []
+    if parse_role_entries(claim):
+        # Claim contains at least one explicit structured pair; do not treat as pure legacy.
+        return []
+    tokens: List[str] = []
+    for part in claim.split(","):
+        part = part.strip()
+        if part:
+            tokens.append(part)
+    return tokens
 
 
 class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepository]):
@@ -135,7 +159,11 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
     def update_from_evidence(self, product_id: str) -> ProductKnowledge:
         """Rebuild ProductKnowledge from approved Evidence with version isolation."""
         knowledge = self.get_or_create(product_id)
-        product = self.db.query(Product).filter(Product.product_id == product_id).first()
+        # Tests may construct the service via __new__ without BaseService.__init__.
+        db = getattr(self, "db", None)
+        product = None
+        if db is not None:
+            product = db.query(Product).filter(Product.product_id == product_id).first()
         evidences = self.evidence_repo.find_by_product(product_id)
 
         product_market = getattr(product, "market_region", None) if product else None
@@ -168,6 +196,7 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
         approved: List[Evidence] = []
         ingredients: Set[str] = set()
         role_map: Dict[str, str] = {}
+        legacy_role_tokens: Set[str] = set()
         benefits: Set[str] = set()
         use_cases: Set[str] = set()
         contraindications: Set[str] = set()
@@ -215,13 +244,19 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
             if field_l == "ingredients" and claim:
                 ingredients.update([i.strip() for i in claim.split(",") if i.strip()])
             elif field_l in ("ingredient_roles", "ingredient_role") and claim:
-                for entry in parse_role_entries(claim):
-                    ing = entry["ingredient"]
-                    role = entry["role"]
-                    prev = role_map.get(ing)
-                    if prev and prev != role and "UNKNOWN" not in (prev, role):
-                        touch_domain("ingredient_roles", conflict=True)
-                    role_map[ing] = role
+                structured = parse_role_entries(claim)
+                if structured:
+                    for entry in structured:
+                        ing = entry["ingredient"]
+                        role = entry["role"]
+                        prev = role_map.get(ing)
+                        if prev and prev != role and "UNKNOWN" not in (prev, role):
+                            touch_domain("ingredient_roles", conflict=True)
+                        role_map[ing] = role
+                        ingredients.add(ing)
+                else:
+                    for token in parse_legacy_role_tokens(claim):
+                        legacy_role_tokens.add(token)
             elif field_l in ("claimed_benefits", "benefit") and claim:
                 benefits.update([b.strip() for b in claim.split(",") if b.strip()])
             elif field_l in ("known_use_cases", "use_case") and claim:
@@ -312,13 +347,20 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
         else:
             overall = "UNKNOWN"
 
-        roles_payload = [
-            {"ingredient": ing, "role": role_map[ing]} for ing in sorted(role_map.keys())
-        ]
+        if role_map:
+            roles_payload = [
+                {"ingredient": ing, "role": role_map[ing]} for ing in sorted(role_map.keys())
+            ]
+            ingredient_roles_value = json.dumps(roles_payload, ensure_ascii=False)
+        elif legacy_role_tokens:
+            # Preserve pre-structured Product Intake contract: plain comma list.
+            ingredient_roles_value = ", ".join(sorted(legacy_role_tokens))
+        else:
+            ingredient_roles_value = None
 
         update_data = {
             "ingredients": ", ".join(sorted(ingredients)) if ingredients else None,
-            "ingredient_roles": json.dumps(roles_payload, ensure_ascii=False) if roles_payload else None,
+            "ingredient_roles": ingredient_roles_value,
             "claimed_benefits": ", ".join(sorted(benefits)) if benefits else None,
             "known_use_cases": ", ".join(sorted(use_cases)) if use_cases else None,
             "contraindications": ", ".join(sorted(contraindications)) if contraindications else None,
