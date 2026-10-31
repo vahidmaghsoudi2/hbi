@@ -204,7 +204,7 @@ class ProductProblemLinkService:
         elif expected_revision_no != predecessor.revision_no:
             raise ConflictError("Stale assessment revision; reload the latest revision before reassessing.")
         if self.repository.find_successor(predecessor.link_id) is not None:
-            raise ConflictError("This assessment already has a successor; reassess the latest assessment.")
+            raise ConflictError("Stale assessment revision: this assessment already has a successor; reassess the latest assessment.")
         immutable_scope = ("product_id", "problem_id", "relationship_role", "variant", "market_region")
         if any(getattr(predecessor, field) != data[field] for field in immutable_scope):
             raise ValidationError("Reassessment must keep the same product/problem/role/variant/market scope.")
@@ -245,5 +245,9 @@ class ProductProblemLinkService:
                 break
             revisions.append(cursor)
             seen.add(cursor.link_id)
-        events = self.repository.list_events([item.link_id for item in revisions])
+        event_rows = self.repository.list_events([item.link_id for item in revisions])
+        events_by_link = {}
+        for event in event_rows:
+            events_by_link.setdefault(event.link_id, []).append(event)
+        events = [event for assessment in revisions for event in events_by_link.get(assessment.link_id, [])]
         return {"assessments": revisions, "events": events}
