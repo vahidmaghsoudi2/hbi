@@ -186,7 +186,7 @@ print(json.dumps(out, ensure_ascii=False))
 '@
 
     # Pass Python source inline; no temporary file is created.
-    $jsonText = & $py.Source -c $code $DbPath 2>&1
+    $jsonText = & $py.Path -c $code $DbPath 2>&1
     if ($LASTEXITCODE -ne 0) {
         return @{ Ok = $false; Error = "python exited $LASTEXITCODE : $jsonText" }
     }
