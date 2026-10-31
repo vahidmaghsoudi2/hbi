@@ -2,6 +2,7 @@ from app.models.base import Base
 from app.models.product import Product
 from app.models.product_knowledge import ProductKnowledge
 from app.models.product_problem_link import ProductProblemLink
+from app.models.product_problem_link_assessment_event import ProductProblemLinkAssessmentEvent
 from app.models.evidence import Evidence
 from app.models.evidence_mutation_log import EvidenceMutationLog
 from app.models.customer import Customer
@@ -26,9 +27,10 @@ from app.models.outcome_assessment import OutcomeAssessment
 from app.models.admin_credential import AdminCredential
 
 __all__ = [
-    "Base", "Product", "ProductKnowledge", "ProductProblemLink", "Evidence", "EvidenceMutationLog",
+    "Base", "Product", "ProductKnowledge", "ProductProblemLink",
+    "ProductProblemLinkAssessmentEvent", "Evidence", "EvidenceMutationLog",
     "Customer", "ProfileFact", "Case", "Recommendation", "Inventory", "Sale",
     "SaleItem", "Category", "StockMovement", "Payment", "SaleReturn",
-    "OperationalFxRate", "ProductMutationLog", "DuplicateCheckAudit", "UserRole", "SpecialistOverride",
-    "Feedback", "FollowUp", "AdminCredential", "OutcomeAssessment",
+    "OperationalFxRate", "ProductMutationLog", "DuplicateCheckAudit", "UserRole",
+    "SpecialistOverride", "Feedback", "FollowUp", "AdminCredential", "OutcomeAssessment",
 ]
