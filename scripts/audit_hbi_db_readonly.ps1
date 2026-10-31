@@ -11,10 +11,12 @@
   - Does not create/alter/drop tables or columns
   - Does not run migrations
   - Does not backup or restore
-  - Does not modify any file
+  - Does not create temporary files or modify any file
   - Does not stop any process
-  - SQLite is opened only with URI mode=ro (read-only)
-  - Secrets (passwords, userinfo in URLs) are never printed
+  - SQLite is opened with mode=ro&immutable=1 (no writes or sidecars)
+  - WAL / rollback-journal sidecars cause a safe refusal
+  - Backend runtime DATABASE_URL is never inferred from the audit shell
+  - Secrets are never printed  - Secrets (passwords, userinfo in URLs) are never printed
 
 .OUTPUT
   Text report to the console. Exit codes:
@@ -100,10 +102,9 @@ function Get-RunningHbiBackendHints {
                 )
             }
         foreach ($p in $procs) {
-            $cl = $p.CommandLine
-            $cl = [regex]::Replace($cl, '(?i)(password|pwd|secret|token)=(\S+)', '$1=***')
-            $hints.Add("PID=$($p.ProcessId) CMD=$cl")
-        }
+            # Never emit command lines: they can contain credentials or connection URLs.
+            $hints.Add("PID=$($p.ProcessId) PROCESS=$($p.Name) BACKEND_SIGNATURE_MATCHED=yes")
+        }        }
     } catch {
         $hints.Add("(could not query processes: $($_.Exception.Message))")
     }
@@ -120,10 +121,18 @@ function Invoke-SqliteReadonlyAudit([string]$DbPath) {
 import json, os, sqlite3, sys, pathlib
 path = sys.argv[1]
 if not os.path.isfile(path):
-    print(json.dumps({"ok": False, "error": "file_not_found", "path": path}))
+    print(json.dumps({"ok": False, "error": "file_not_found"}))
     sys.exit(0)
-uri = pathlib.Path(path).resolve().as_uri() + "?mode=ro"
+# Refuse sidecars: read-only audit must not create/change WAL or journal files.
+sidecars = [path + "-wal", path + "-shm", path + "-journal"]
+present = [p for p in sidecars if os.path.exists(p)]
+if present:
+    print(json.dumps({"ok": False, "error": "sqlite_sidecar_present",
+                      "sidecars": [os.path.basename(p) for p in present]}))
+    sys.exit(0)
+uri = pathlib.Path(path).resolve().as_uri() + "?mode=ro&immutable=1"
 try:
+    conn = sqlite3.connect(uri, uri=True, timeout=5.0)try:
     conn = sqlite3.connect(uri, uri=True, timeout=5.0)
 except Exception as e:
     print(json.dumps({"ok": False, "error": "connect_failed", "detail": str(e)}))
@@ -177,18 +186,13 @@ conn.close()
 print(json.dumps(out, ensure_ascii=False))
 '@
 
-    $tmp = [System.IO.Path]::GetTempFileName() + ".py"
-    try {
-        Set-Content -LiteralPath $tmp -Value $code -Encoding UTF8
-        $jsonText = & python $tmp $DbPath 2>&1
-        if ($LASTEXITCODE -ne 0) {
-            return @{ Ok = $false; Error = "python exited $LASTEXITCODE : $jsonText" }
-        }
-        $obj = $jsonText | ConvertFrom-Json
-        return @{ Ok = $true; Data = $obj }
-    } finally {
-        Remove-Item -LiteralPath $tmp -Force -ErrorAction SilentlyContinue
+    # Pass Python source inline; no temporary file is created.
+    $jsonText = & $py.Source -c $code $DbPath 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        return @{ Ok = $false; Error = "python exited $LASTEXITCODE : $jsonText" }
     }
+    $obj = $jsonText | ConvertFrom-Json
+    return @{ Ok = $true; Data = $obj }    }
 }
 
 Write-Host "HBI read-only database audit" -ForegroundColor Green
@@ -213,22 +217,28 @@ if (-not $repoRoot) {
 Write-Host "Resolved repo root: $repoRoot"
 Write-Host "app\main.py: present"
 
-Write-Section "2) Effective DATABASE_URL (redacted)"
+Write-Section "2) Audit-shell setting (not proof of Backend runtime configuration)"
 $envUrl = $env:DATABASE_URL
-$source = if ($null -eq $envUrl -or $envUrl -eq "") { "default (env unset)" } else { "process environment DATABASE_URL" }
-$effectiveUrl = if ($null -eq $envUrl -or $envUrl -eq "") { "sqlite:///./data/hbi.db" } else { $envUrl }
-$kind = Get-DatabaseKind $effectiveUrl
-Write-Host "Source: $source"
-Write-Host "Kind:   $kind"
-Write-Host "URL (redacted): $(Redact-DatabaseUrl $effectiveUrl)"
+$envWasUnset = ($null -eq $envUrl -or $envUrl -eq "")
+Write-Host ("AUDIT_SHELL_DATABASE_URL: " + $(if ($envWasUnset) { "NOT_SET" } else { "SET (value withheld)" }))
+Write-Host "BACKEND_RUNTIME_DATABASE_URL: NOT_PROVEN"
+if ($envWasUnset) {
+    Write-Host "Audit candidate source: code default sqlite:///./data/hbi.db (candidate only)"
+    $candidateUrl = "sqlite:///./data/hbi.db"
+} else {
+    Write-Host "Audit candidate source: DATABASE_URL in this PowerShell process only"
+    $candidateUrl = $envUrl
+}
+$kind = Get-DatabaseKind $candidateUrl
+Write-Host "Audit candidate kind: $kind"
 
 $sqlitePath = $null
 if ($kind -eq "SQLITE") {
-    $sqlitePath = Resolve-SqlitePathFromUrl $effectiveUrl $repoRoot
+    $sqlitePath = Resolve-SqlitePathFromUrl $candidateUrl $repoRoot
     if ($sqlitePath) {
-        Write-Host "Resolved SQLite file path: $sqlitePath"
+        Write-Host "Audit candidate path (relative paths resolved against this repo root; NOT runtime proof): $sqlitePath"
     } else {
-        Write-Host "Could not resolve SQLite file path from URL." -ForegroundColor Yellow
+        Write-Host "Could not resolve SQLite candidate path." -ForegroundColor Yellow
     }
 }
 
@@ -298,14 +308,6 @@ if ($kind -ne "SQLITE") {
             }
         }
 
-        $defaultPath = [System.IO.Path]::GetFullPath((Join-Path $repoRoot "data\hbi.db"))
-        $envWasUnset = ($null -eq $envUrl -or $envUrl -eq "")
-        if ($envWasUnset -and ($sqlitePath -eq $defaultPath)) {
-            Write-Host ""
-            Write-Host "Correlation: env DATABASE_URL unset + default path under this repo root."
-            Write-Host "This matches the code default and Windows launcher working directory assumption."
-            Write-Host "Still not a kernel-level proof that a running Backend has this file open."
-        }
         $verdict = "READY_FOR_REVIEW"
         $activeProven = $false
     }
@@ -344,7 +346,7 @@ Write-Host ""
 Write-Host "Interpretation:"
 Write-Host "  READY_FOR_REVIEW = file opened read-only and schema facts were collected; human still decides migration."
 Write-Host "  UNKNOWN          = effective DB not established or file/schema could not be read."
-Write-Host "  No migration was run. No file was modified."
+Write-Host "  No migration was run. No temporary files or SQLite writes were performed."
 Write-Host ""
 Write-Host "Done."
 exit 0
