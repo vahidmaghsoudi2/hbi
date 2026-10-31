@@ -8,6 +8,7 @@ def test_legacy_migration_preserves_rows_and_does_not_invent_revision_metadata(t
     migrate = runpy.run_path(str(script))["migrate"]
     db = tmp_path / "legacy.db"
     conn = sqlite3.connect(db)
+    conn.execute("PRAGMA journal_mode=WAL")
     conn.executescript("""
         PRAGMA foreign_keys=ON;
         CREATE TABLE Product(product_id VARCHAR PRIMARY KEY);
@@ -43,9 +44,23 @@ def test_legacy_migration_preserves_rows_and_does_not_invent_revision_metadata(t
         );
     """)
     conn.commit()
+    # Keep a second connection open so committed WAL pages remain outside the main DB file.
+    wal_keeper = sqlite3.connect(db)
     conn.close()
+    wal_path = Path(str(db) + "-wal")
+    assert wal_path.exists()
 
-    assert migrate(db).startswith("MIGRATED")
+    migration_result = migrate(db)
+    wal_keeper.close()
+    assert migration_result.startswith("MIGRATED")
+    backup_path = Path(migration_result.split("Backup: ", 1)[1])
+    assert backup_path.is_file()
+    backup_conn = sqlite3.connect(backup_path)
+    backup_row = backup_conn.execute(
+        "SELECT link_id, relationship_status FROM ProductProblemLink"
+    ).fetchone()
+    assert backup_row == ("L1", "NOT_LINKED")
+    backup_conn.close()
     conn = sqlite3.connect(db)
     columns = {r[1] for r in conn.execute('PRAGMA table_info("ProductProblemLink")')}
     row = conn.execute(
