@@ -42,8 +42,7 @@ def migrate(db_path: str | Path) -> str:
                     actor_id VARCHAR NOT NULL, actor_role VARCHAR NULL,
                     event_type VARCHAR NOT NULL, reason TEXT NOT NULL,
                     before_state TEXT NULL, after_state TEXT NOT NULL,
-                    correlation_id VARCHAR NULL, timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY(link_id) REFERENCES ProductProblemLink(link_id) ON DELETE RESTRICT
+                    correlation_id VARCHAR NULL, timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                 )
             """)
             conn.execute("CREATE INDEX IF NOT EXISTS ix_ppl_event_link_time ON ProductProblemLinkAssessmentEvent(link_id, timestamp)")
@@ -76,8 +75,7 @@ def migrate(db_path: str | Path) -> str:
                 CONSTRAINT uq_productproblemlink_successor UNIQUE(supersedes_link_id),
                 FOREIGN KEY(product_id) REFERENCES Product(product_id) ON DELETE RESTRICT,
                 FOREIGN KEY(claim_id) REFERENCES Evidence(claim_id) ON DELETE RESTRICT,
-                FOREIGN KEY(evidence_id) REFERENCES Evidence(evidence_id) ON DELETE RESTRICT,
-                FOREIGN KEY(supersedes_link_id) REFERENCES ProductProblemLink__assessment_new(link_id) ON DELETE RESTRICT
+                FOREIGN KEY(evidence_id) REFERENCES Evidence(evidence_id) ON DELETE RESTRICT
             )
         """)
         names = ", ".join(f'"{name}"' for name in LEGACY_COLUMNS)
@@ -99,8 +97,7 @@ def migrate(db_path: str | Path) -> str:
                 actor_id VARCHAR NOT NULL, actor_role VARCHAR NULL,
                 event_type VARCHAR NOT NULL, reason TEXT NOT NULL,
                 before_state TEXT NULL, after_state TEXT NOT NULL,
-                correlation_id VARCHAR NULL, timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY(link_id) REFERENCES ProductProblemLink(link_id) ON DELETE RESTRICT
+                correlation_id VARCHAR NULL, timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
         """)
         conn.execute('CREATE INDEX ix_ppl_event_link_time ON ProductProblemLinkAssessmentEvent(link_id, timestamp)')

@@ -17,7 +17,7 @@ Status: implementation proposal on an isolated branch; not merged or deployed.
 - Every API write requires a caller-supplied idempotency_key; the server stores a request fingerprint. Same key/same payload returns the original assessment; same key/different payload conflicts.
 - Reassessment supplies expected_revision_no. Stale revisions conflict; the unique assertion_key/revision_no constraint is the final race guard.
 - Assessment row and ProductProblemLinkAssessmentEvent are flushed in the same SQLAlchemy session and committed by the router in one transaction.
-- Events record authenticated actor, role, timestamp, reason, and before/after snapshots. Normal application routes expose read-only history and provide no event update/delete operation. This is append-only through normal application paths, not a claim of tamper-proof storage.
+- Events record authenticated actor, role, timestamp, reason, and before/after snapshots. Normal application routes expose read-only history and provide no event update/delete operation. Event link references and supersedes pointers intentionally have no cascading FK: the audit record must outlive the row it describes. The service verifies predecessor existence and the database enforces one successor per predecessor. This is append-only through normal application paths, not a claim of tamper-proof storage.
 - Legacy rows are preserved with NULL feature_basis, outcome, assertion_key, and revision_no; no reviewer, version, or decision is fabricated. A legacy row can be superseded by the first governed revision, which starts at revision 1 and explicitly references the legacy row.
 
 ## Migration and deployment

@@ -32,9 +32,9 @@ class ProductProblemLink(Base):
     problem_map_version = Column(String, nullable=False)
     assertion_key = Column(String, nullable=True)
     revision_no = Column(Integer, nullable=True)
-    supersedes_link_id = Column(
-        String, ForeignKey("ProductProblemLink.link_id", ondelete="RESTRICT"), nullable=True
-    )
+    # Deliberately stored as an immutable reference, not an FK: the assessment chain
+    # must remain readable if a legacy row is ever archived outside normal API paths.
+    supersedes_link_id = Column(String, nullable=True)
     idempotency_key = Column(String, nullable=True)
     request_fingerprint = Column(String, nullable=True)
     created_at = Column(DateTime, nullable=False, server_default=func.current_timestamp())

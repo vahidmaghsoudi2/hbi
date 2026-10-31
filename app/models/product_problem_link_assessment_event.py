@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import Column, DateTime, Index, Integer, String, Text
 from sqlalchemy.sql import func
 
 from app.models.base import Base
@@ -10,7 +10,8 @@ class ProductProblemLinkAssessmentEvent(Base):
     __tablename__ = "ProductProblemLinkAssessmentEvent"
 
     event_id = Column(String, primary_key=True)
-    link_id = Column(String, ForeignKey("ProductProblemLink.link_id", ondelete="RESTRICT"), nullable=False)
+    # No FK by design: audit events must outlive the assessment row they describe.
+    link_id = Column(String, nullable=False)
     assertion_key = Column(String, nullable=True, index=True)
     revision_no = Column(Integer, nullable=True)
     actor_id = Column(String, nullable=False)
