@@ -340,7 +340,13 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
                 ):
                     domain_has_out_of_scope.add(field_l)
 
-        all_domains = set(domain_has_approved) | set(domain_has_conflict) | set(domain_has_evaluated_empty) | set(domain_status)
+        all_domains = (
+            set(domain_has_approved)
+            | set(domain_has_conflict)
+            | set(domain_has_evaluated_empty)
+            | set(domain_has_out_of_scope)
+            | set(domain_status)
+        )
         for d in all_domains:
             if domain_has_conflict.get(d):
                 domain_status[d] = "CONFLICT"
