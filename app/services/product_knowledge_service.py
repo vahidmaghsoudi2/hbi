@@ -364,6 +364,10 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
                 overall = "PARTIAL"
             else:
                 overall = "SUPPORTED"
+        elif any(domain_status.get(d) == "PARTIAL" for d in domain_status):
+            # Out-of-scope evidence can make a domain partial even when this
+            # scope has no independently supported domain yet.
+            overall = "PARTIAL"
         else:
             overall = "UNKNOWN"
 
