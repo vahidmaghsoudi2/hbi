@@ -129,13 +129,12 @@ def parse_legacy_role_tokens(claim: str) -> List[str]:
     claim = (claim or "").strip()
     if not claim or claim.startswith("["):
         return []
-    if parse_role_entries(claim):
-        # Claim contains at least one explicit structured pair; do not treat as pure legacy.
-        return []
+    # Preserve unstructured segments even when the same claim also contains
+    # explicit Name:ROLE / Name=ROLE pairs. Mixed input must never drop tokens.
     tokens: List[str] = []
     for part in claim.split(","):
         part = part.strip()
-        if part:
+        if part and ":" not in part and "=" not in part:
             tokens.append(part)
     return tokens
 
@@ -254,9 +253,10 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
                             touch_domain("ingredient_roles", conflict=True)
                         role_map[ing] = role
                         ingredients.add(ing)
-                else:
-                    for token in parse_legacy_role_tokens(claim):
-                        legacy_role_tokens.add(token)
+                # Mixed structured + legacy input is retained without guessing that
+                # a legacy label is an ingredient or assigning it a fabricated role.
+                for token in parse_legacy_role_tokens(claim):
+                    legacy_role_tokens.add(token)
             elif field_l in ("claimed_benefits", "benefit") and claim:
                 benefits.update([b.strip() for b in claim.split(",") if b.strip()])
             elif field_l in ("known_use_cases", "use_case") and claim:
@@ -352,6 +352,10 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
                 {"ingredient": ing, "role": role_map[ing]} for ing in sorted(role_map.keys())
             ]
             ingredient_roles_value = json.dumps(roles_payload, ensure_ascii=False)
+            if legacy_role_tokens:
+                # Keep mixed legacy labels in the neutral catch-all instead of
+                # misclassifying them as ingredients or silently dropping them.
+                other_attributes["_legacy_ingredient_role_tokens"] = sorted(legacy_role_tokens)
         elif legacy_role_tokens:
             # Preserve pre-structured Product Intake contract: plain comma list.
             ingredient_roles_value = ", ".join(sorted(legacy_role_tokens))
