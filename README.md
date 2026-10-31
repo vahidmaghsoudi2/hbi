@@ -24,7 +24,7 @@ Last Updated: 1405-08-09 (2026-10-31)
 ## Quick Links
 - Project State: docs/01_project_state/HBI_PROJECT_STATE.md
 - Architecture: docs/02_architecture/HBI_ARCHITECTURE.md
-- Decision Log: docs/03_decision_log//DECISION_LOG_INDEX.md
+- Decision Log: docs/03_decision_log/DECISION_LOG_INDEX.md
 - QA Frameworks: docs/04_frameworks/
 - Evidence: docs/07_evidence/
 - Gate Reports: docs/09_gate_reports/
