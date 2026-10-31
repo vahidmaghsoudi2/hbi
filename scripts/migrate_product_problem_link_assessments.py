@@ -1,7 +1,6 @@
 """SQLite migration for append-only ProductProblemLink assessments."""
 from __future__ import annotations
 import argparse
-import shutil
 import sqlite3
 from datetime import datetime
 from pathlib import Path
@@ -15,14 +14,45 @@ LEGACY_COLUMNS = [
 ]
 
 
+
+def _backup_database(db_path: Path, backup_path: Path) -> None:
+    """Create a consistent SQLite backup, including committed pages in a WAL file."""
+    source = sqlite3.connect(str(db_path), timeout=30)
+    destination = sqlite3.connect(str(backup_path), timeout=30)
+    try:
+        source.backup(destination)
+        integrity = destination.execute("PRAGMA integrity_check").fetchone()
+        if not integrity or integrity[0] != "ok":
+            raise RuntimeError(f"SQLite backup integrity check failed: {integrity}")
+        destination.commit()
+    finally:
+        destination.close()
+        source.close()
+
+
+def _restore_database(backup_path: Path, db_path: Path) -> None:
+    """Restore using SQLite's backup API rather than copying only the main DB file."""
+    source = sqlite3.connect(f"file:{backup_path}?mode=ro", uri=True, timeout=30)
+    destination = sqlite3.connect(str(db_path), timeout=30)
+    try:
+        source.backup(destination)
+        destination.commit()
+        integrity = destination.execute("PRAGMA integrity_check").fetchone()
+        if not integrity or integrity[0] != "ok":
+            raise RuntimeError(f"SQLite restore integrity check failed: {integrity}")
+    finally:
+        destination.close()
+        source.close()
+
+
 def migrate(db_path: str | Path) -> str:
     db_path = Path(db_path)
     if not db_path.is_file():
         raise FileNotFoundError(db_path)
     backup_path = db_path.with_name(
-        f"{db_path.stem}.before_ppl_assessment_{datetime.now().strftime('%Y%m%d_%H%M%S')}{db_path.suffix}"
+        f"{db_path.stem}.before_ppl_assessment_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}{db_path.suffix}"
     )
-    shutil.copy2(db_path, backup_path)
+    _backup_database(db_path, backup_path)
     conn = sqlite3.connect(str(db_path))
     try:
         conn.execute("PRAGMA foreign_keys=OFF")
@@ -117,7 +147,7 @@ def migrate(db_path: str | Path) -> str:
             conn.rollback()
         finally:
             conn.close()
-        shutil.copy2(backup_path, db_path)
+        _restore_database(backup_path, db_path)
         raise
     finally:
         try:
