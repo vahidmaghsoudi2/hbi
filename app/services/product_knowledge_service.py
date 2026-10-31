@@ -185,10 +185,9 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
         if preferred in scopes:
             primary_list = scopes[preferred]
             other_scopes = {k: v for k, v in scopes.items() if k != preferred}
-        elif len(scopes) == 1:
-            primary_list = next(iter(scopes.values()))
-            other_scopes = {}
         else:
+            # A lone evidence scope does not prove that it belongs to this Product.
+            # Never infer the Product market from evidence carrying another market.
             primary_list = []
             other_scopes = scopes
 
