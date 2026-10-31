@@ -259,3 +259,32 @@ def test_conflicting_known_roles_are_not_arbitrarily_persisted(db):
     domains = json.loads(pk.domain_evidence_status or "{}")
     assert domains["ingredient_roles"] == "CONFLICT"
 
+
+
+def test_foreign_market_conflict_does_not_poison_primary_domain(db):
+    _seed_product(db, pid="P-MARKET-CONFLICT", market="UK", packaging="v1")
+    _ev(
+        db,
+        pid="P-MARKET-CONFLICT",
+        eid="E-UK-ING",
+        field="ingredients",
+        claim="Niacinamide",
+        market="UK",
+        qa="VERIFIED",
+    )
+    _ev(
+        db,
+        pid="P-MARKET-CONFLICT",
+        eid="E-US-CONFLICT",
+        field="ingredients",
+        claim="Avobenzone",
+        market="US",
+        qa="VERIFIED",
+        conflict="CONFLICT",
+    )
+    pk = ProductKnowledgeService(db).update_from_evidence("P-MARKET-CONFLICT")
+    assert "Niacinamide" in (pk.ingredients or "")
+    assert "Avobenzone" not in (pk.ingredients or "")
+    domains = json.loads(pk.domain_evidence_status or "{}")
+    assert domains["ingredients"] == "PARTIAL"
+    assert pk.evidence_status == "PARTIAL"
