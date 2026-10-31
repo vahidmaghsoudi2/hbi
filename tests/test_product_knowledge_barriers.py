@@ -316,3 +316,22 @@ def test_multiple_foreign_market_scopes_without_primary_are_partial(db):
     domains = json.loads(pk.domain_evidence_status or "{}")
     assert domains["ingredients"] == "PARTIAL"
     assert pk.evidence_status == "PARTIAL"
+
+
+
+def test_single_foreign_market_is_not_inferred_as_product_scope(db):
+    _seed_product(db, pid="P-FOREIGN-SINGLE", market="UK", packaging="v1")
+    _ev(
+        db,
+        pid="P-FOREIGN-SINGLE",
+        eid="E-US-SINGLE",
+        field="ingredients",
+        claim="Avobenzone",
+        market="US",
+        qa="VERIFIED",
+    )
+    pk = ProductKnowledgeService(db).update_from_evidence("P-FOREIGN-SINGLE")
+    assert pk.ingredients is None
+    domains = json.loads(pk.domain_evidence_status or "{}")
+    assert domains["ingredients"] == "PARTIAL"
+    assert pk.evidence_status == "PARTIAL"
