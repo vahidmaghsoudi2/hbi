@@ -163,6 +163,21 @@ def _ensure_customer_family_name_column():
     # the legacy name field or overwrite historical identity data.
 
 
+def _ensure_product_knowledge_columns():
+    """Additive columns for structured roles/other attrs and domain status."""
+    inspector = inspect(engine)
+    if "ProductKnowledge" not in inspector.get_table_names():
+        return
+    columns = {c["name"] for c in inspector.get_columns("ProductKnowledge")}
+    with engine.begin() as conn:
+        if "other_attributes" not in columns:
+            conn.execute(text('ALTER TABLE "ProductKnowledge" ADD COLUMN other_attributes TEXT'))
+        if "domain_evidence_status" not in columns:
+            conn.execute(
+                text('ALTER TABLE "ProductKnowledge" ADD COLUMN domain_evidence_status TEXT')
+            )
+
+
 def init_db():
     from app.models import product, product_knowledge, product_problem_link, evidence, evidence_mutation_log, customer, case, recommendation, inventory, sale, sale_item, category, stock_movement, payment, sale_return, operational_fx_rate, product_mutation_log, duplicate_check_audit, user_role, profile_fact, admin_credential, feedback, follow_up, outcome_assessment
     Base.metadata.create_all(bind=engine)
@@ -170,6 +185,7 @@ def init_db():
     _ensure_recommendation_trace_columns()
     _ensure_accounting_control_columns()
     _ensure_sale_customer_optional()
+    _ensure_product_knowledge_columns()
     with engine.connect() as conn:
         conn.execute(text("CREATE VIEW IF NOT EXISTS CustomerPurchaseHistory AS SELECT c.customer_id, si.product_id, si.quantity, s.created_at AS purchase_date FROM Sale s JOIN SaleItem si ON s.sale_id = si.sale_id JOIN Customer c ON s.customer_id = c.customer_id"))
         conn.commit()

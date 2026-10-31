@@ -351,6 +351,8 @@ class ProductKnowledgeFacade:
             product_id=knowledge.product_id,
             ingredients=knowledge.ingredients,
             ingredient_roles=knowledge.ingredient_roles,
+            other_attributes=getattr(knowledge, "other_attributes", None),
+            domain_evidence_status=getattr(knowledge, "domain_evidence_status", None),
             claimed_benefits=knowledge.claimed_benefits,
             known_use_cases=knowledge.known_use_cases,
             contraindications=knowledge.contraindications,

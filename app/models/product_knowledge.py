@@ -20,8 +20,14 @@ class ProductKnowledge(Base):
     contraindications = Column(String, nullable=True)
     usage_instructions = Column(String, nullable=True)
     manufacturer_claims = Column(String, nullable=True)
+    # Structured catch-all for features that do not fit dedicated boxes.
+    # JSON object string; never merge into contraindications or claims.
+    other_attributes = Column(String, nullable=True)
     evidence_refs = Column(String, nullable=True)
+    # Overall knowledge evidence_status per PO semantics (nullable = unevaluated).
     evidence_status = Column(String, nullable=True)
+    # JSON map of domain -> status for partial/domain-scoped evaluation.
+    domain_evidence_status = Column(String, nullable=True)
     knowledge_confidence = Column(Float, nullable=True)
     created_at = Column(DateTime, server_default=func.current_timestamp())
     updated_at = Column(
@@ -32,11 +38,13 @@ class ProductKnowledge(Base):
 
     __table_args__ = (
         CheckConstraint(
-            "evidence_status IS NULL OR evidence_status IN ('SUPPORTED', 'PARTIAL', 'CONFLICT', 'UNKNOWN')",
+            "evidence_status IS NULL OR evidence_status IN "
+            "('SUPPORTED', 'PARTIAL', 'CONFLICT', 'UNKNOWN')",
             name="ck_productknowledge_evidence_status",
         ),
         CheckConstraint(
-            "knowledge_confidence IS NULL OR (knowledge_confidence >= 0.0 AND knowledge_confidence <= 1.0)",
+            "knowledge_confidence IS NULL OR "
+            "(knowledge_confidence >= 0.0 AND knowledge_confidence <= 1.0)",
             name="ck_productknowledge_knowledge_confidence",
         ),
     )
