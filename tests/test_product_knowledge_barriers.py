@@ -288,3 +288,31 @@ def test_foreign_market_conflict_does_not_poison_primary_domain(db):
     domains = json.loads(pk.domain_evidence_status or "{}")
     assert domains["ingredients"] == "PARTIAL"
     assert pk.evidence_status == "PARTIAL"
+
+
+
+def test_multiple_foreign_market_scopes_without_primary_are_partial(db):
+    _seed_product(db, pid="P-FOREIGN-ONLY", market="UK", packaging="v1")
+    _ev(
+        db,
+        pid="P-FOREIGN-ONLY",
+        eid="E-US-ONLY",
+        field="ingredients",
+        claim="Avobenzone",
+        market="US",
+        qa="VERIFIED",
+    )
+    _ev(
+        db,
+        pid="P-FOREIGN-ONLY",
+        eid="E-CA-ONLY",
+        field="ingredients",
+        claim="Octocrylene",
+        market="CA",
+        qa="VERIFIED",
+    )
+    pk = ProductKnowledgeService(db).update_from_evidence("P-FOREIGN-ONLY")
+    assert pk.ingredients is None
+    domains = json.loads(pk.domain_evidence_status or "{}")
+    assert domains["ingredients"] == "PARTIAL"
+    assert pk.evidence_status == "PARTIAL"
