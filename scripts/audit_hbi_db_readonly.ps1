@@ -16,7 +16,7 @@
   - SQLite is opened with mode=ro&immutable=1 (no writes or sidecars)
   - WAL / rollback-journal sidecars cause a safe refusal
   - Backend runtime DATABASE_URL is never inferred from the audit shell
-  - Secrets are never printed  - Secrets (passwords, userinfo in URLs) are never printed
+  - Secrets are never printed
 
 .OUTPUT
   Text report to the console. Exit codes:
@@ -104,7 +104,7 @@ function Get-RunningHbiBackendHints {
         foreach ($p in $procs) {
             # Never emit command lines: they can contain credentials or connection URLs.
             $hints.Add("PID=$($p.ProcessId) PROCESS=$($p.Name) BACKEND_SIGNATURE_MATCHED=yes")
-        }        }
+        }
     } catch {
         $hints.Add("(could not query processes: $($_.Exception.Message))")
     }
@@ -132,7 +132,6 @@ if present:
     sys.exit(0)
 uri = pathlib.Path(path).resolve().as_uri() + "?mode=ro&immutable=1"
 try:
-    conn = sqlite3.connect(uri, uri=True, timeout=5.0)try:
     conn = sqlite3.connect(uri, uri=True, timeout=5.0)
 except Exception as e:
     print(json.dumps({"ok": False, "error": "connect_failed", "detail": str(e)}))
@@ -192,7 +191,7 @@ print(json.dumps(out, ensure_ascii=False))
         return @{ Ok = $false; Error = "python exited $LASTEXITCODE : $jsonText" }
     }
     $obj = $jsonText | ConvertFrom-Json
-    return @{ Ok = $true; Data = $obj }    }
+    return @{ Ok = $true; Data = $obj }
 }
 
 Write-Host "HBI read-only database audit" -ForegroundColor Green
