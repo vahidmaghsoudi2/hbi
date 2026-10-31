@@ -195,6 +195,7 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
         approved: List[Evidence] = []
         ingredients: Set[str] = set()
         role_map: Dict[str, str] = {}
+        role_conflicts: Set[str] = set()
         legacy_role_tokens: Set[str] = set()
         benefits: Set[str] = set()
         use_cases: Set[str] = set()
@@ -249,9 +250,22 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
                         ing = entry["ingredient"]
                         role = entry["role"]
                         prev = role_map.get(ing)
-                        if prev and prev != role and "UNKNOWN" not in (prev, role):
-                            touch_domain("ingredient_roles", conflict=True)
-                        role_map[ing] = role
+                        if ing in role_conflicts:
+                            # Once two distinct known roles conflict, never let a
+                            # later row arbitrarily restore one of them.
+                            ingredients.add(ing)
+                            continue
+                        if prev and prev != role:
+                            if prev == "UNKNOWN":
+                                role_map[ing] = role
+                            elif role == "UNKNOWN":
+                                pass
+                            else:
+                                touch_domain("ingredient_roles", conflict=True)
+                                role_map.pop(ing, None)
+                                role_conflicts.add(ing)
+                        else:
+                            role_map[ing] = role
                         ingredients.add(ing)
                 # Mixed structured + legacy input is retained without guessing that
                 # a legacy label is an ingredient or assigning it a fabricated role.
