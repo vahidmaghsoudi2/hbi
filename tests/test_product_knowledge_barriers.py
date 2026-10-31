@@ -234,3 +234,28 @@ def test_legacy_only_role_tokens_keep_legacy_string_contract(db):
     )
     pk = ProductKnowledgeService(db).update_from_evidence("P-LEGACY")
     assert pk.ingredient_roles == "emollient, humectant"
+
+def test_conflicting_known_roles_are_not_arbitrarily_persisted(db):
+    _seed_product(db, pid="P-ROLE-CONFLICT")
+    _ev(
+        db,
+        pid="P-ROLE-CONFLICT",
+        eid="E-ROLE-CORE",
+        field="ingredient_roles",
+        claim="Niacinamide:CORE",
+        qa="VERIFIED",
+    )
+    _ev(
+        db,
+        pid="P-ROLE-CONFLICT",
+        eid="E-ROLE-SUPPORT",
+        field="ingredient_roles",
+        claim="Niacinamide:SUPPORT",
+        qa="VERIFIED",
+    )
+    pk = ProductKnowledgeService(db).update_from_evidence("P-ROLE-CONFLICT")
+    roles = json.loads(pk.ingredient_roles or "[]")
+    assert all(item["ingredient"] != "Niacinamide" for item in roles)
+    domains = json.loads(pk.domain_evidence_status or "{}")
+    assert domains["ingredient_roles"] == "CONFLICT"
+
