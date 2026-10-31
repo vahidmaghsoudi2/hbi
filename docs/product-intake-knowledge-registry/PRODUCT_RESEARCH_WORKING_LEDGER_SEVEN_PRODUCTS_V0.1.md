@@ -1619,3 +1619,79 @@ Before any candidate ingredient row is treated as source-verified, its research 
 The submitted map adds useful role granularity to the existing pass-16 dossiers, especially the separation of cleansing systems, UV filters, declared actives, supporting ingredients and formulation technology. It does **not** establish that every ingredient in the supplied tables is present in the target physical package, nor does it establish efficacy or safety of the finished products. The source-bound identity, market/version and evidence limitations already recorded in passes 1–16 remain controlling.
 
 **No ProductKnowledge approval, Product QA promotion, Product↔Problem relationship, Recommendation permission, G8 transition, or implementation authorization is created by this pass.**
+
+
+---
+
+## Research pass 18 — Product Owner review and ProductKnowledge persistence matrix (2026-10-31)
+
+**Review basis:** pass 1–17 in this ledger; current Product Intake UI, Evidence model/service/API schema, ProductKnowledge model/service/response, and the explicit PO decision recorded in PR #411 comment 6468141807.
+
+**Disposition:** research review and persistence mapping only. No Product Master, Evidence, ProductKnowledge, QA, lifecycle, database, API, schema, UI, Recommendation or Product↔Problem data was written.
+
+### A. Product Owner review — accepted with evidence boundaries
+
+The CORE / SUPPORT / CLAIM-LINK / RISK / TECH / UNKNOWN vocabulary is accepted as an **analyst-facing ingredient-role map**, with the following binding interpretation:
+
+- CORE means central to the product's declared/formulation function, not clinically proven efficacy.
+- SUPPORT means plausible formulation/skin-conditioning support, not a finished-product outcome.
+- CLAIM-LINK means a manufacturer-positioning link or a candidate requiring source confirmation; it is not independent efficacy evidence.
+- RISK is a context-sensitive review flag, not a contraindication or prediction of an individual reaction.
+- TECH describes formula construction, not a skin benefit.
+- UNKNOWN must remain visible and must not be converted to empty, absent, safe, zero concentration or ineffective.
+
+**Product-specific disposition**
+
+| Product dossier | Review decision | Conditions before any operational transfer |
+|---|---|---|
+| P1 COSRX 6 Peptide Booster, 150 ml | Accept the peptide cluster as CLAIM-LINK; niacinamide/humectant/NMF and soothing ingredients as SUPPORT candidates; base/emulsifier/preservative groups as TECH. | Confirm the target package/version and exact INCI. Keep individual peptide concentrations UNKNOWN. Do not convert peptide presence into a product efficacy or anti-age claim. |
+| P2 Neutrogena Clear & Defend 2% SA Face Wash, 200 ml | Accept the surfactant system as cleansing CORE; the 2% SA as manufacturer-declared CORE for the UK source version; glycerin/panthenol as SUPPORT; fragrance as conditional RISK. | UK is a source market only; physical unit market, package INCI and warning text remain unverified. Keep 2% tied to the UK source. |
+| P3 Garnier Vitamin C Brightening Gel Cleanser, 200 ml | Accept surfactant system as cleansing CORE; Ascorbyl Glucoside/lemon as CLAIM-LINK; glycerin/panthenol/tocopheryl acetate as SUPPORT; fragrance/allergens as conditional RISK. | Australia source does not prove target package market. Keep salicylic acid concentration UNKNOWN. Do not equate Ascorbyl Glucoside with pure L-ascorbic acid or transfer leave-on evidence to a rinse-off cleanser. |
+| P4 SKIN1004 Hyalu-Cica Water-Fit Sun Serum | Accept UV filters as CORE only within the exact formula/market; niacinamide, humectants and Centella as SUPPORT candidates. | Maintain separate international/Korean and US dossiers. Do not merge active filters, percentages, ppm or INCI between them. |
+| P5 ISDIN FotoUltra 100 Active Unify SPF50+ | Accept UV-filter system as sunscreen CORE; Unify ingredients as CLAIM-LINK candidates; other supported conditioning ingredients as SUPPORT; formula base as TECH. | Keep Mexico official claim data separate from EU/IT candidate INCI. Do not accept the EU/IT peptide pair, Titanium Dioxide nano status or other market-specific details without exact primary-source confirmation. |
+| P6 Clinique Even Better Clinical Radical Dark Spot Corrector + Interrupter, historical 100 ml | Accept silicone base as TECH; named brightening ingredients as CLAIM-LINK candidates; botanical/conditioning ingredients as SUPPORT only where verified against the historical formula. | Preserve historical formula identity; do not import replacement formula facts. Concentrations remain UNKNOWN. |
+| P7 Anua Azelaic Acid 10% + Hyaluron Redness Soothing Serum, 30 ml | Accept 10% azelaic acid as manufacturer-declared CORE for the exact serum source; humectant, soothing, Centella and barrier-supporting ingredients as SUPPORT; base/thickeners as TECH. | Keep serum distinct from pads. Verify market-specific label before transfer; do not infer pH defect, contraindication or finished-product efficacy from ingredient presence alone. |
+
+This review accepts the **classification method and bounded interpretation**, not the unsourced completeness of every ingredient row. The pass-17 candidate additions remain subject to exact package/version INCI verification. No ingredient-level clinical efficacy, customer suitability or Product↔Problem relationship is accepted by this review.
+
+### B. Existing persistence path — verified capabilities and blockers
+
+| Data item | Existing source/persistence route | Decision |
+|---|---|---|
+| Product identity, market, size, packaging version | Product fields include `product_id`, `market_region`, `packaging_version`, size and GTIN. | Use only after DuplicateCheck and identity/version review. P1–P7 are research dossier labels, not proven Product.product_id values. Do not create or mutate Product records from these labels. |
+| Source-bound INCI assertion | Evidence supports `claim`, `source_type`, `source_reference`, `claim_type`, `field`, `market_region`, `source_date`, `notes`, QA and conflict states. UI exposes `ingredients`. | Potentially reusable as a source-bound draft. One complete INCI assertion per exact Product/version/source is safer than one Evidence row per ingredient under the same field, because current conflict detection treats distinct claims on the same field as a conflict. |
+| ProductKnowledge ingredient summary | `ProductKnowledge.ingredients`; Evidence-to-Knowledge rebuild maps field `ingredients` into this string. | Reusable only after explicit evidence review and exact version identity. Current aggregation splits comma-separated claims, deduplicates through a set, and does not preserve original INCI order or full source/version context in the summary. Evidence remains the provenance record. |
+| CORE / SUPPORT / CLAIM-LINK / RISK / TECH role map | Backend rebuild recognizes `ingredient_roles` / `ingredient_role` and maps them to `ProductKnowledge.ingredient_roles`. The Product Intake UI research-field selector does **not** expose `ingredient_roles`. | **BLOCKED for current UI workflow.** Role labels are analyst INFERENCE, not FACT or MANUFACTURER_CLAIM. Do not route them into `claimed_benefits`, `manufacturer_claims` or `contraindications`. A future approved workflow must preserve ingredient-to-role pairing and source/version context. |
+| Manufacturer's declared concentration / formula / performance statement | UI/API supports `manufacturer_claims` and `MANUFACTURER_CLAIM`; ProductKnowledge maps only explicitly typed manufacturer claims to `manufacturer_claims`. | Reusable as a source-attributed manufacturer claim, not as independently verified efficacy. Keep exact market/version and quoted metric/protocol limitation in the Evidence row. |
+| Claimed finished-product benefits | Existing `claimed_benefits` mapping exists; UI exposes it. | Use only for an actual source-bound product benefit claim. Ingredient-role labels and inferred mechanisms must not be stored here. |
+| Known use cases | Existing `known_use_cases` mapping exists; UI exposes it. | Use only for explicit, source-bound use cases. Do not translate P-codes or ingredient presence into use cases. |
+| Contraindications / warnings | Existing `contraindications` mapping exists; UI exposes it. | Use only for explicit label warnings or reviewed contraindications. RISK tags for fragrance/allergens are not automatic contraindications. |
+| Usage instructions | Existing `usage_instructions` mapping exists; UI exposes it. | Use only from exact package/source directions. Do not borrow directions across market/version or similar products. |
+| TECH and UNKNOWN | No dedicated ProductKnowledge destination for TECH or unknown concentrations/roles. | Keep in the research ledger and source-bound Evidence notes until a safe approved representation exists. Never write UNKNOWN as empty or as an affirmative ProductKnowledge fact. |
+| Universal “Other features” box | PO decision requires it for all seven products, but the current Evidence UI field selector has no general/other-features destination. | **BLOCKED for current UI workflow.** Do not misroute into benefits/use cases. Existing API `field` is nullable/free text, but an arbitrary field is not a supported ProductKnowledge mapping. |
+
+### C. Cross-cutting technical findings that prevent unsafe bulk transfer
+
+1. **Dossier IDs are not product IDs.** P1–P7 in this ledger are research labels. Each must be matched to an existing, exact Product Master record before Evidence can be attached.
+2. **Version isolation is not enforced by ProductKnowledge rebuild.** Evidence has `market_region`, but the rebuild queries all Evidence by `product_id` and does not filter by market/version. Evidence has no dedicated `packaging_version` column. Different market formulas attached to one product_id could therefore be combined into one ProductKnowledge profile. Do not attach distinct formula versions to one product_id.
+3. **Evidence conflict detection is field-wide.** Multiple distinct claims sharing the same `field` for one product are marked CONFLICT, even where they might represent separate ingredients or separate versions. Do not create one Evidence row per ingredient using the same field under the current behavior.
+4. **Role mapping is not exposed in the current intake UI.** The backend understands `ingredient_roles`, but the UI dropdown omits it. No UI or schema change is authorized by this review.
+5. **Evidence QA is not scientific truth certification.** The UI itself states VERIFIED means the review result was recorded; it does not guarantee scientific truth or safety. Manufacturer claims, independent evidence and analyst inference must remain distinguished.
+6. **Confidence aggregation is not a product efficacy score.** The current rebuild averages `evidence_strength` across all QA-approved rows without separating claim types or product/version applicability. Do not interpret `knowledge_confidence` as clinical confidence or product effectiveness.
+7. **Evidence status reset needs a contract decision.** The current PR branch adds `evidence_status=None` on every rebuild. The ProductKnowledge model allows NULL and the enum includes UNKNOWN, but the current code does not derive a status from the rebuilt evidence set. This should be reviewed against the EMPTY-vs-UNKNOWN contract before merge; this review does not authorize a code change.
+
+### D. Approved data-transfer rule for the seven dossiers
+
+- **Now:** retain the pass-17/18 research map in the ledger. Do not bulk-seed Evidence or ProductKnowledge.
+- **After identity/version match:** create source-bound Evidence drafts only for assertions with exact source, market/version and clear claim type. They must remain PENDING/UNKNOWN until a human reviewer checks the source and scope.
+- **After human verification:** only supported existing fields may flow through the current rebuild. Do not treat VERIFIED as a Product QA verdict or lifecycle approval.
+- **For role labels and Other features:** keep them in the ledger until an approved, tested persistence route exists. No silent remapping to benefits, claims, contraindications or use cases.
+- **For formula variants:** use separate, verified Product identities if the catalog supports them; otherwise stop and request a version-isolation decision before attaching Evidence.
+
+### E. Decision and handoff
+
+**Product Owner review:** PASS WITH LIMITATIONS for the role taxonomy and product-specific interpretation; NOT VERIFIED for exhaustive package-level INCI completeness and physical-unit/version matching.
+
+**ProductKnowledge integration readiness:** PARTIAL. Existing Evidence → ProductKnowledge path can safely carry some source-bound fields, but role mapping and Other features are not fully supported by the current UI, and product/version aggregation plus field-wide conflict detection prevent safe bulk ingredient-level transfer.
+
+**Implementation status:** no code/schema/API/UI/database changes authorized or made by this pass. Next allowed step is to prepare a minimal, separately reviewed work package for the blockers in sections B–C, after product identity matching. Do not merge PR #411 based only on this research review.
