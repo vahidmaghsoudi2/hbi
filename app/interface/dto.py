@@ -107,6 +107,8 @@ class ProductKnowledgeDTO:
     product_id: str
     ingredients: Optional[str] = None
     ingredient_roles: Optional[str] = None
+    other_attributes: Optional[str] = None
+    domain_evidence_status: Optional[str] = None
     claimed_benefits: Optional[str] = None
     known_use_cases: Optional[str] = None
     contraindications: Optional[str] = None
