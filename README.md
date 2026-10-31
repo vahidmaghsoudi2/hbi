@@ -1,7 +1,7 @@
 # HBI - Maqsoudi Gallery
 Central memory repository and Source of Truth for HBI project.
 
-Last Updated: 1405-05-22 (2026-08-13)
+Last Updated: 1405-08-09 (2026-10-31)
 
 ## Repository Structure
 | Path | Role |
@@ -28,6 +28,54 @@ Last Updated: 1405-05-22 (2026-08-13)
 - QA Frameworks: docs/04_frameworks/
 - Evidence: docs/07_evidence/
 - Gate Reports: docs/09_gate_reports/
+
+
+## Developer Setup (local)
+
+Short onboarding only. This is **not** product acceptance and does **not** replace `docs/01_project_control/PROJECT_RULES.md`.
+
+### Prerequisites
+- Python **3.12** (matches GitHub Actions)
+- Node.js + npm (frontend)
+- Git
+
+### Backend
+```bash
+python -m venv .venv
+# Windows: .venv\\Scripts\\activate
+source .venv/bin/activate
+pip install -r requirements.txt
+# lean CI set (optional): pip install -r requirements-ci.txt
+mkdir -p data
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+- Default database: `sqlite:///./data/hbi.db` (override with `DATABASE_URL`)
+- API docs: http://127.0.0.1:8000/docs
+
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
+### Tests
+```bash
+pytest tests/ -q
+```
+
+### Windows one-click launcher
+- `scripts/start-hbi.bat` or `scripts/start-hbi.ps1`
+- Starts backend on `:8000` and frontend on `:5173` after a Git sync check
+
+### Environment notes
+| Variable | Role |
+|---|---|
+| `DATABASE_URL` | DB URL; default `sqlite:///./data/hbi.db` |
+| `HBI_ENV` | default `development` |
+| `JWT_SECRET_KEY` | required when `HBI_ENV=production` |
+
+Before any product work: read `docs/01_project_control/PROJECT_RULES.md` and verify current `origin/master` SHA.
 
 ---
 
@@ -63,4 +111,3 @@ Mandatory principles:
 Complete rules:
 
 `docs/01_project_control/PROJECT_RULES.md`
-
