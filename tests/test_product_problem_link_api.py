@@ -209,4 +209,4 @@ def test_create_and_reassess_emit_central_audit_events_for_success_and_denial(
         ("product_problem_link_reassess", "denied"),
     ]
     assert events[0][1]["customer_id"] == "api-po-audit"
-    assert events[2][1]["supersedes_link_id"] == first["link_id"]
+    assert events[2][1]["extra"]["supersedes_link_id"] == first["link_id"]
