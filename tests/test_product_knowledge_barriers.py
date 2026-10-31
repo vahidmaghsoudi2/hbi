@@ -204,3 +204,33 @@ def test_rebuild_does_not_activate_product(db):
     p = db.query(Product).filter_by(product_id="P-L").one()
     assert p.status == "DRAFT"
     assert p.qa_verdict == "PENDING"
+
+def test_mixed_structured_and_legacy_role_tokens_are_not_dropped(db):
+    _seed_product(db, pid="P-MIX")
+    _ev(
+        db,
+        pid="P-MIX",
+        eid="E-MIX",
+        field="ingredient_roles",
+        claim="Water:TECH, Glycerin",
+        qa="VERIFIED",
+    )
+    pk = ProductKnowledgeService(db).update_from_evidence("P-MIX")
+    roles = json.loads(pk.ingredient_roles)
+    assert roles == [{"ingredient": "Water", "role": "TECH"}]
+    attrs = json.loads(pk.other_attributes or "{}")
+    assert attrs["_legacy_ingredient_role_tokens"] == ["Glycerin"]
+
+
+def test_legacy_only_role_tokens_keep_legacy_string_contract(db):
+    _seed_product(db, pid="P-LEGACY")
+    _ev(
+        db,
+        pid="P-LEGACY",
+        eid="E-LEGACY",
+        field="ingredient_roles",
+        claim="humectant, emollient",
+        qa="VERIFIED",
+    )
+    pk = ProductKnowledgeService(db).update_from_evidence("P-LEGACY")
+    assert pk.ingredient_roles == "emollient, humectant"
