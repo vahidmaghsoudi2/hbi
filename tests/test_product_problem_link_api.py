@@ -1,5 +1,7 @@
 import pytest
 
+from app.api.routers import product_problem_links as product_problem_links_router
+
 from app.core.auth import create_access_token
 from app.models.evidence import Evidence
 from app.models.product import Product
@@ -140,3 +142,71 @@ def test_read_api_requires_exactly_one_selector(client, db_session):
     both = client.get("/api/v1/product-problem-links/",
                       params={"product_id": "P1", "problem_id": "P17"}, headers=headers)
     assert neither.status_code == 422 and both.status_code == 422
+
+
+
+def test_create_and_reassess_emit_central_audit_events_for_success_and_denial(
+    client, db_session, monkeypatch
+):
+    events = []
+    monkeypatch.setattr(
+        product_problem_links_router,
+        "audit_event",
+        lambda event, **kwargs: events.append((event, kwargs)),
+    )
+    product, evidence = _seed_product_and_evidence(db_session)
+    _grant(db_session, "api-po-audit", ROLE_PO)
+    headers = {"Authorization": f"Bearer {_token('api-po-audit')}"}
+
+    created = client.post(
+        "/api/v1/product-problem-links/",
+        json=_payload(product, evidence),
+        headers=headers,
+    )
+    assert created.status_code == 201, created.text
+    first = created.json()
+
+    rejected = client.post(
+        "/api/v1/product-problem-links/",
+        json=_payload(
+            product, evidence,
+            relationship_status="SUPPORTED",
+            idempotency_key="api-audit-denied-create",
+        ),
+        headers=headers,
+    )
+    assert rejected.status_code == 422
+
+    revised_payload = _payload(
+        product, evidence,
+        relationship_status="DEFERRED",
+        feature_basis="Same evidence claim, narrower interpretation.",
+        outcome="Intensity endpoint only; no area or cause inference.",
+        reason="Deferred until formula identity is verified.",
+        idempotency_key="api-audit-reassess-0002",
+    )
+    revised_payload["expected_revision_no"] = 1
+    revised = client.post(
+        f"/api/v1/product-problem-links/{first['link_id']}/reassess",
+        json=revised_payload,
+        headers=headers,
+    )
+    assert revised.status_code == 201, revised.text
+
+    stale_payload = dict(revised_payload)
+    stale_payload["idempotency_key"] = "api-audit-reassess-stale"
+    stale = client.post(
+        f"/api/v1/product-problem-links/{first['link_id']}/reassess",
+        json=stale_payload,
+        headers=headers,
+    )
+    assert stale.status_code == 409
+
+    assert [(event, data["outcome"]) for event, data in events] == [
+        ("product_problem_link_create", "ok"),
+        ("product_problem_link_create", "denied"),
+        ("product_problem_link_reassess", "ok"),
+        ("product_problem_link_reassess", "denied"),
+    ]
+    assert events[0][1]["customer_id"] == "api-po-audit"
+    assert events[2][1]["supersedes_link_id"] == first["link_id"]
