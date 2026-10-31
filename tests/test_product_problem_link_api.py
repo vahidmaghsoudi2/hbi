@@ -170,7 +170,7 @@ def test_create_and_reassess_emit_central_audit_events_for_success_and_denial(
         "/api/v1/product-problem-links/",
         json=_payload(
             product, evidence,
-            relationship_status="SUPPORTED",
+            product_id="API-PPL-MISSING-PRODUCT",
             idempotency_key="api-audit-denied-create",
         ),
         headers=headers,
