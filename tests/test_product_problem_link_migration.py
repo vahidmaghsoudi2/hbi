@@ -151,7 +151,12 @@ def test_already_migrated_rejects_incomplete_event_table_and_restores_backup(tmp
     conn = sqlite3.connect(db)
     conn.executescript("""
         CREATE TABLE ProductProblemLink (
-            link_id VARCHAR PRIMARY KEY,
+            link_id VARCHAR PRIMARY KEY, product_id VARCHAR, variant VARCHAR,
+            market_region VARCHAR, claim_id VARCHAR, evidence_id VARCHAR,
+            problem_id VARCHAR, problem_type VARCHAR, problem_definition_ref VARCHAR,
+            relationship_role VARCHAR, relationship_status VARCHAR,
+            semantic_basis TEXT, limitations TEXT, decision_basis TEXT,
+            problem_map_version VARCHAR, created_at DATETIME, updated_at DATETIME,
             feature_basis TEXT, outcome TEXT, assertion_key VARCHAR,
             revision_no INTEGER, supersedes_link_id VARCHAR,
             idempotency_key VARCHAR, request_fingerprint VARCHAR
@@ -212,5 +217,40 @@ def test_already_migrated_checks_foreign_key_violations_and_restores_backup(tmp_
     assert conn.execute(
         "SELECT name FROM sqlite_master WHERE type='index' "
         "AND name='ix_ProductProblemLinkAssessmentEvent_assertion_key'"
+    ).fetchone() is None
+    conn.close()
+
+
+
+def test_already_migrated_rejects_incomplete_product_problem_link_schema(tmp_path):
+    script = Path(__file__).resolve().parents[1] / "scripts" / "migrate_product_problem_link_assessments.py"
+    migrate = runpy.run_path(str(script))["migrate"]
+    db = tmp_path / "incomplete_ppl_schema.db"
+    conn = sqlite3.connect(db)
+    conn.executescript("""
+        CREATE TABLE ProductProblemLink (
+            link_id VARCHAR PRIMARY KEY,
+            feature_basis TEXT, outcome TEXT, assertion_key VARCHAR,
+            revision_no INTEGER, supersedes_link_id VARCHAR,
+            idempotency_key VARCHAR, request_fingerprint VARCHAR
+        );
+    """)
+    conn.close()
+
+    with pytest.raises(RuntimeError, match="ProductProblemLink schema is incomplete"):
+        migrate(db)
+
+    conn = sqlite3.connect(db)
+    columns = {
+        row[1] for row in conn.execute('PRAGMA table_info("ProductProblemLink")')
+    }
+    assert columns == {
+        "link_id", "feature_basis", "outcome", "assertion_key",
+        "revision_no", "supersedes_link_id", "idempotency_key",
+        "request_fingerprint",
+    }
+    assert conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' "
+        "AND name='ProductProblemLinkAssessmentEvent'"
     ).fetchone() is None
     conn.close()
