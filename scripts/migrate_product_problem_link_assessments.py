@@ -76,6 +76,10 @@ def migrate(db_path: str | Path) -> str:
             return "SKIPPED: ProductProblemLink does not exist; fresh create_all will create the new schema."
         columns = {r[1] for r in conn.execute('PRAGMA table_info("ProductProblemLink")')}
         if NEW_COLUMNS.issubset(columns):
+            if not set(LEGACY_COLUMNS).issubset(columns):
+                raise RuntimeError(
+                    "Existing ProductProblemLink schema is incomplete; manual inspection required."
+                )
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS ProductProblemLinkAssessmentEvent (
                     event_id VARCHAR PRIMARY KEY, link_id VARCHAR NOT NULL,
