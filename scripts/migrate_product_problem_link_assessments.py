@@ -86,7 +86,6 @@ def migrate(db_path: str | Path) -> str:
                     correlation_id VARCHAR NULL, timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                 )
             """)
-            conn.execute("CREATE INDEX IF NOT EXISTS ix_ppl_event_link_time ON ProductProblemLinkAssessmentEvent(link_id, timestamp)")
             event_columns = {
                 row[1] for row in conn.execute(
                     'PRAGMA table_info("ProductProblemLinkAssessmentEvent")'
@@ -97,6 +96,7 @@ def migrate(db_path: str | Path) -> str:
                     "Existing ProductProblemLinkAssessmentEvent schema is incomplete; "
                     "manual inspection required."
                 )
+            conn.execute("CREATE INDEX IF NOT EXISTS ix_ppl_event_link_time ON ProductProblemLinkAssessmentEvent(link_id, timestamp)")
             conn.execute("CREATE INDEX IF NOT EXISTS ix_ProductProblemLinkAssessmentEvent_assertion_key ON ProductProblemLinkAssessmentEvent(assertion_key)")
             conn.commit()
             conn.execute("PRAGMA foreign_keys=ON")
