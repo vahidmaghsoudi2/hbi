@@ -26,7 +26,6 @@ test("Skin problem bank renders all 61 source-backed records and searches the fu
   // P22 is cross-listed in the Map, but its canonical row and shelf are S04.
   // The UI must not duplicate it under S09 or infer a second canonical record.
   await page.getByLabel("فیلتر قفسه").selectOption("S04");
-  await expect(list.locator(".pro-problem-item").count()).resolves.toBeGreaterThan(0);
   await expect(list.getByRole("button", { name: /P22/ })).toBeVisible();
   await list.getByRole("button", { name: /P22/ }).click();
   await expect(page.getByRole("heading", { name: "Sun-related pigmentation" })).toBeVisible();
