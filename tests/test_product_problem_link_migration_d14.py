@@ -425,3 +425,59 @@ def test_restore_preserves_custom_objects_after_fk_failure(tmp_path):
     cols = {r[1] for r in conn.execute("PRAGMA table_info('ProductProblemLink')")}
     assert "assertion_key" not in cols
     conn.close()
+
+
+def test_canonical_name_expression_index_is_conflict(tmp_path):
+    """Expression index (cid=-2) must not be accepted as a canonical column index."""
+    migrate = _migrate()
+    db = tmp_path / "expr.db"
+    conn = sqlite3.connect(db)
+    conn.executescript(
+        _legacy_sql(
+            extra=(
+                "CREATE INDEX ix_productproblemlink_product "
+                "ON ProductProblemLink((lower(product_id)));"
+            )
+        )
+    )
+    conn.close()
+    with pytest.raises(RuntimeError, match="differ in definition"):
+        migrate(db)
+
+
+def test_snapshot_restore_preserves_row_content(tmp_path):
+    """Post-mutation FK failure must restore exact legacy row values, not only counts."""
+    migrate = _migrate()
+    db = tmp_path / "row_content.db"
+    conn = sqlite3.connect(db)
+    conn.execute("PRAGMA foreign_keys=OFF")
+    conn.executescript(
+        _legacy_sql(
+            extra="""
+            CREATE INDEX ix_productproblemlink_product ON ProductProblemLink(product_id);
+            CREATE INDEX ix_productproblemlink_problem ON ProductProblemLink(problem_id);
+            CREATE INDEX ix_productproblemlink_status ON ProductProblemLink(relationship_status);
+            CREATE TABLE Parent(parent_id INTEGER PRIMARY KEY);
+            CREATE TABLE Child(parent_id INTEGER REFERENCES Parent(parent_id));
+            """
+        )
+    )
+    conn.execute("PRAGMA foreign_keys=OFF")
+    conn.execute("INSERT INTO Child(parent_id) VALUES (7)")
+    conn.commit()
+    before = conn.execute(
+        "SELECT link_id, product_id, market_region, semantic_basis, limitations "
+        "FROM ProductProblemLink WHERE link_id='L1'"
+    ).fetchone()
+    conn.close()
+    with pytest.raises(RuntimeError, match="Foreign-key violations"):
+        migrate(db)
+    conn = sqlite3.connect(db)
+    after = conn.execute(
+        "SELECT link_id, product_id, market_region, semantic_basis, limitations "
+        "FROM ProductProblemLink WHERE link_id='L1'"
+    ).fetchone()
+    cols = {r[1] for r in conn.execute("PRAGMA table_info('ProductProblemLink')")}
+    conn.close()
+    assert after == before
+    assert "assertion_key" not in cols
