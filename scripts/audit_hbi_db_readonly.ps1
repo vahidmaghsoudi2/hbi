@@ -185,11 +185,14 @@ conn.close()
 print(json.dumps(out, ensure_ascii=False))
 '@
 
-    # Pass Python source inline; no temporary file is created.
+    # Hex-encode Python source to avoid Windows PowerShell 5.1 native-argument
+    # quote stripping when passing multiline code to python.exe.
+    $codeHex = ([BitConverter]::ToString([Text.Encoding]::UTF8.GetBytes($code))).Replace("-", "").ToLowerInvariant()
+    $pythonBootstrap = "exec(compile(bytes.fromhex(__import__(chr(115)+chr(121)+chr(115)).argv[1]),chr(60)+chr(97)+chr(117)+chr(100)+chr(105)+chr(116)+chr(62),chr(101)+chr(120)+chr(101)+chr(99)))"
     $priorErrorActionPreference = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
     try {
-        $jsonText = @(& $py.Path -c $code $DbPath 2>&1 | ForEach-Object { "$_" })
+        $jsonText = @(& $py.Path -c $pythonBootstrap $codeHex $DbPath 2>&1 | ForEach-Object { "$_" })
         $pythonExitCode = $LASTEXITCODE
     } finally {
         $ErrorActionPreference = $priorErrorActionPreference
