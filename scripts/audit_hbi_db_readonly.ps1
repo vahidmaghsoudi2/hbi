@@ -242,7 +242,7 @@ if ($kind -eq "SQLITE") {
 }
 
 Write-Section "3) Running Backend process hints (not proof of DB file)"
-$hints = Get-RunningHbiBackendHints
+$hints = @(Get-RunningHbiBackendHints)
 $backendProcessDetected = ($hints.Count -gt 0)
 if ($hints.Count -eq 0) {
     Write-Host "No uvicorn app.main:app process found in this session query."
@@ -303,7 +303,7 @@ if ($backendProcessDetected) {
             Write-Host "ProductProblemLinkAssessmentEvent row count: $($d.ProductProblemLinkAssessmentEvent_row_count)"
         }
         Write-Host "Indexes/triggers on ProductProblemLink:"
-        if ($d.ProductProblemLink_indexes_and_triggers.Count -eq 0) {
+        if (@($d.ProductProblemLink_indexes_and_triggers).Count -eq 0) {
             Write-Host "  (none listed in sqlite_master)"
         } else {
             foreach ($it in $d.ProductProblemLink_indexes_and_triggers) {
