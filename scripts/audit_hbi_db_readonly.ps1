@@ -118,7 +118,7 @@ function Invoke-SqliteReadonlyAudit([string]$DbPath) {
     }
 
     $code = @'
-import json, os, sqlite3, sys, pathlib
+import json, os, sqlite3, sys, urllib.parse
 path = sys.argv[1]
 if not os.path.isfile(path):
     print(json.dumps({"ok": False, "error": "file_not_found"}))
@@ -130,11 +130,12 @@ if present:
     print(json.dumps({"ok": False, "error": "sqlite_sidecar_present",
                       "sidecars": [os.path.basename(p) for p in present]}))
     sys.exit(0)
-uri = pathlib.Path(path).resolve().as_uri() + "?mode=ro&immutable=1"
+absolute_path = os.path.abspath(path).replace(os.sep, "/")
+uri = "file:" + urllib.parse.quote(absolute_path, safe="/:") + "?mode=ro&immutable=1"
 try:
     conn = sqlite3.connect(uri, uri=True, timeout=5.0)
-except Exception as e:
-    print(json.dumps({"ok": False, "error": "connect_failed", "detail": str(e)}))
+except BaseException as e:
+    print(json.dumps({"ok": False, "error": "connect_failed", "detail": repr(e), "uri_path": os.path.basename(path)}))
     sys.exit(0)
 conn.row_factory = sqlite3.Row
 cur = conn.cursor()
@@ -186,11 +187,18 @@ print(json.dumps(out, ensure_ascii=False))
 '@
 
     # Pass Python source inline; no temporary file is created.
-    $jsonText = & $py.Path -c $code $DbPath 2>&1
-    if ($LASTEXITCODE -ne 0) {
-        return @{ Ok = $false; Error = "python exited $LASTEXITCODE : $jsonText" }
+    $priorErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $jsonText = @(& $py.Path -c $code $DbPath 2>&1 | ForEach-Object { "$_" })
+        $pythonExitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $priorErrorActionPreference
     }
-    $obj = $jsonText | ConvertFrom-Json
+    if ($pythonExitCode -ne 0) {
+        return @{ Ok = $false; Error = "python exited $pythonExitCode : $($jsonText -join `" `")" }
+    }
+    $obj = ($jsonText -join "`n") | ConvertFrom-Json
     return @{ Ok = $true; Data = $obj }
 }
 
