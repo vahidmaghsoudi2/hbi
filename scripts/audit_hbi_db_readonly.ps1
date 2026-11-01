@@ -292,7 +292,15 @@ if ($backendProcessDetected) {
         Write-Host "Read-only open failed: $($audit.Error)" -ForegroundColor Yellow
         $verdict = "UNKNOWN"
     } elseif (-not $audit.Data.ok) {
-        Write-Host "SQLite report: $($audit.Data.error) $($audit.Data.detail)" -ForegroundColor Yellow
+        $sqliteError = ""
+        $sqliteDetail = ""
+        if ($audit.Data.PSObject.Properties.Name -contains "error") {
+            $sqliteError = [string]$audit.Data.error
+        }
+        if ($audit.Data.PSObject.Properties.Name -contains "detail") {
+            $sqliteDetail = [string]$audit.Data.detail
+        }
+        Write-Host ("SQLite report: {0} {1}" -f $sqliteError, $sqliteDetail) -ForegroundColor Yellow
         $verdict = "UNKNOWN"
     } else {
         $d = $audit.Data
