@@ -76,6 +76,7 @@ def migrate(db_path: str | Path) -> str:
                 )
             """)
             conn.execute("CREATE INDEX IF NOT EXISTS ix_ppl_event_link_time ON ProductProblemLinkAssessmentEvent(link_id, timestamp)")
+            conn.execute("CREATE INDEX IF NOT EXISTS ix_ProductProblemLinkAssessmentEvent_assertion_key ON ProductProblemLinkAssessmentEvent(assertion_key)")
             conn.commit()
             conn.execute("PRAGMA foreign_keys=ON")
             return "ALREADY MIGRATED: assessment columns and history table are present."
@@ -131,6 +132,7 @@ def migrate(db_path: str | Path) -> str:
             )
         """)
         conn.execute('CREATE INDEX ix_ppl_event_link_time ON ProductProblemLinkAssessmentEvent(link_id, timestamp)')
+        conn.execute('CREATE INDEX ix_ProductProblemLinkAssessmentEvent_assertion_key ON ProductProblemLinkAssessmentEvent(assertion_key)')
         after_count = conn.execute('SELECT COUNT(*) FROM ProductProblemLink').fetchone()[0]
         if before_count != after_count:
             raise RuntimeError(f"Legacy row count changed: {before_count} -> {after_count}")
