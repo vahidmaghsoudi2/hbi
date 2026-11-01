@@ -189,7 +189,7 @@ print(json.dumps(out, ensure_ascii=False))
     # argument after the command in sys.argv[0], not sys.argv[1].
     $payload = @{ code = $code; path = $DbPath } | ConvertTo-Json -Compress
     $payloadHex = ([BitConverter]::ToString([Text.Encoding]::UTF8.GetBytes($payload))).Replace("-", "").ToLowerInvariant()
-    $pythonBootstrap = "import sys,json; p=json.loads(bytes.fromhex(sys.argv[0])); sys.argv=['audit',p['path']]; exec(compile(p['code'],'<audit>','exec'))"
+    $pythonBootstrap = "import sys,json; p=json.loads(bytes.fromhex(sys.argv[1])); sys.argv=['audit',p['path']]; exec(compile(p['code'],'<audit>','exec'))"
     $priorErrorActionPreference = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
     try {
