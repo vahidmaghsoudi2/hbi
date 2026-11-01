@@ -97,4 +97,19 @@ def test_legacy_migration_preserves_rows_and_does_not_invent_revision_metadata(t
     assert conn.execute("SELECT COUNT(*) FROM ProductProblemLink").fetchone()[0] == 2
     assert conn.execute("PRAGMA foreign_key_check").fetchall() == []
     conn.close()
+    # The already-migrated path must repair a missing model-declared index too.
+    conn = sqlite3.connect(db)
+    conn.execute('DROP INDEX ix_ProductProblemLinkAssessmentEvent_assertion_key')
+    conn.commit()
+    conn.close()
     assert migrate(db).startswith("ALREADY MIGRATED")
+    conn = sqlite3.connect(db)
+    repaired_event_indexes = {
+        row[1]
+        for row in conn.execute(
+            'PRAGMA index_list("ProductProblemLinkAssessmentEvent")'
+        )
+    }
+    assert "ix_ppl_event_link_time" in repaired_event_indexes
+    assert "ix_ProductProblemLinkAssessmentEvent_assertion_key" in repaired_event_indexes
+    conn.close()
