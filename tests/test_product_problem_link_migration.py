@@ -72,6 +72,14 @@ def test_legacy_migration_preserves_rows_and_does_not_invent_revision_metadata(t
     assert {"feature_basis", "outcome", "assertion_key", "revision_no"}.issubset(columns)
     assert row == ("L1", "NOT_LINKED", None, None, None, None)
     assert conn.execute("SELECT COUNT(*) FROM ProductProblemLinkAssessmentEvent").fetchone()[0] == 0
+    event_indexes = {
+        row[1]
+        for row in conn.execute(
+            'PRAGMA index_list("ProductProblemLinkAssessmentEvent")'
+        )
+    }
+    assert "ix_ppl_event_link_time" in event_indexes
+    assert "ix_ProductProblemLinkAssessmentEvent_assertion_key" in event_indexes
     # The old scope-only unique constraint is gone; a governed successor may reuse that scope.
     conn.execute("""
         INSERT INTO ProductProblemLink(
