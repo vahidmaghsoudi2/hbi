@@ -2,6 +2,8 @@ import runpy
 import sqlite3
 from pathlib import Path
 
+import pytest
+
 
 def test_legacy_migration_preserves_rows_and_does_not_invent_revision_metadata(tmp_path):
     script = Path(__file__).resolve().parents[1] / "scripts" / "migrate_product_problem_link_assessments.py"
@@ -33,6 +35,18 @@ def test_legacy_migration_preserves_rows_and_does_not_invent_revision_metadata(t
             FOREIGN KEY(claim_id) REFERENCES Evidence(claim_id),
             FOREIGN KEY(evidence_id) REFERENCES Evidence(evidence_id)
         );
+        CREATE INDEX ix_custom_ppl_market ON ProductProblemLink(market_region);
+        CREATE TABLE ProductProblemLinkAudit(
+            audit_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            link_id VARCHAR NOT NULL,
+            new_status VARCHAR NOT NULL
+        );
+        CREATE TRIGGER trg_custom_ppl_status_audit
+        AFTER UPDATE OF relationship_status ON ProductProblemLink
+        BEGIN
+            INSERT INTO ProductProblemLinkAudit(link_id, new_status)
+            VALUES (NEW.link_id, NEW.relationship_status);
+        END;
         INSERT INTO Product VALUES ('P1');
         INSERT INTO Evidence VALUES ('E1','C1','P1');
         INSERT INTO ProductProblemLink(
@@ -80,6 +94,20 @@ def test_legacy_migration_preserves_rows_and_does_not_invent_revision_metadata(t
     }
     assert "ix_ppl_event_link_time" in event_indexes
     assert "ix_ProductProblemLinkAssessmentEvent_assertion_key" in event_indexes
+    ppl_indexes = {
+        row[1] for row in conn.execute('PRAGMA index_list("ProductProblemLink")')
+    }
+    assert "ix_custom_ppl_market" in ppl_indexes
+    trigger_sql = conn.execute(
+        "SELECT sql FROM sqlite_master WHERE type='trigger' AND name='trg_custom_ppl_status_audit'"
+    ).fetchone()
+    assert trigger_sql and "ProductProblemLinkAudit" in trigger_sql[0]
+    conn.execute(
+        "UPDATE ProductProblemLink SET relationship_status='CANDIDATE' WHERE link_id='L1'"
+    )
+    assert conn.execute(
+        "SELECT link_id, new_status FROM ProductProblemLinkAudit"
+    ).fetchone() == ("L1", "CANDIDATE")
     # The old scope-only unique constraint is gone; a governed successor may reuse that scope.
     conn.execute("""
         INSERT INTO ProductProblemLink(
@@ -112,4 +140,77 @@ def test_legacy_migration_preserves_rows_and_does_not_invent_revision_metadata(t
     }
     assert "ix_ppl_event_link_time" in repaired_event_indexes
     assert "ix_ProductProblemLinkAssessmentEvent_assertion_key" in repaired_event_indexes
+    conn.close()
+
+
+
+def test_already_migrated_rejects_incomplete_event_table_and_restores_backup(tmp_path):
+    script = Path(__file__).resolve().parents[1] / "scripts" / "migrate_product_problem_link_assessments.py"
+    migrate = runpy.run_path(str(script))["migrate"]
+    db = tmp_path / "malformed_already_migrated.db"
+    conn = sqlite3.connect(db)
+    conn.executescript("""
+        CREATE TABLE ProductProblemLink (
+            link_id VARCHAR PRIMARY KEY,
+            feature_basis TEXT, outcome TEXT, assertion_key VARCHAR,
+            revision_no INTEGER, supersedes_link_id VARCHAR,
+            idempotency_key VARCHAR, request_fingerprint VARCHAR
+        );
+        CREATE TABLE ProductProblemLinkAssessmentEvent(event_id VARCHAR PRIMARY KEY);
+    """)
+    conn.close()
+
+    with pytest.raises(RuntimeError, match="schema is incomplete"):
+        migrate(db)
+
+    conn = sqlite3.connect(db)
+    event_columns = {
+        row[1] for row in conn.execute(
+            'PRAGMA table_info("ProductProblemLinkAssessmentEvent")'
+        )
+    }
+    assert event_columns == {"event_id"}
+    assert conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='index' "
+        "AND name='ix_ProductProblemLinkAssessmentEvent_assertion_key'"
+    ).fetchone() is None
+    conn.close()
+
+
+def test_already_migrated_checks_foreign_key_violations_and_restores_backup(tmp_path):
+    script = Path(__file__).resolve().parents[1] / "scripts" / "migrate_product_problem_link_assessments.py"
+    migrate = runpy.run_path(str(script))["migrate"]
+    db = tmp_path / "fk_violation_already_migrated.db"
+    conn = sqlite3.connect(db)
+    conn.executescript("""
+        PRAGMA foreign_keys=OFF;
+        CREATE TABLE ProductProblemLink (
+            link_id VARCHAR PRIMARY KEY,
+            feature_basis TEXT, outcome TEXT, assertion_key VARCHAR,
+            revision_no INTEGER, supersedes_link_id VARCHAR,
+            idempotency_key VARCHAR, request_fingerprint VARCHAR
+        );
+        CREATE TABLE ProductProblemLinkAssessmentEvent (
+            event_id VARCHAR PRIMARY KEY, link_id VARCHAR NOT NULL,
+            assertion_key VARCHAR NULL, revision_no INTEGER NULL,
+            actor_id VARCHAR NOT NULL, actor_role VARCHAR NULL,
+            event_type VARCHAR NOT NULL, reason TEXT NOT NULL,
+            before_state TEXT NULL, after_state TEXT NOT NULL,
+            correlation_id VARCHAR NULL, timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE Parent(parent_id INTEGER PRIMARY KEY);
+        CREATE TABLE Child(parent_id INTEGER REFERENCES Parent(parent_id));
+        INSERT INTO Child(parent_id) VALUES (999);
+    """)
+    conn.close()
+
+    with pytest.raises(RuntimeError, match="Foreign-key violations"):
+        migrate(db)
+
+    conn = sqlite3.connect(db)
+    assert conn.execute("PRAGMA foreign_key_check").fetchall()
+    assert conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='index' "
+        "AND name='ix_ProductProblemLinkAssessmentEvent_assertion_key'"
+    ).fetchone() is None
     conn.close()
