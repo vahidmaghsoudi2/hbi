@@ -118,7 +118,7 @@ function Invoke-SqliteReadonlyAudit([string]$DbPath) {
     }
 
     $code = @'
-import json, os, sqlite3, sys, urllib.parse
+import json, os, sqlite3, sys, pathlib
 path = sys.argv[1]
 if not os.path.isfile(path):
     print(json.dumps({"ok": False, "error": "file_not_found"}))
@@ -130,8 +130,7 @@ if present:
     print(json.dumps({"ok": False, "error": "sqlite_sidecar_present",
                       "sidecars": [os.path.basename(p) for p in present]}))
     sys.exit(0)
-absolute_path = os.path.abspath(path).replace(os.sep, "/")
-uri = "file:" + urllib.parse.quote(absolute_path, safe="/:") + "?mode=ro&immutable=1"
+uri = pathlib.Path(path).resolve().as_uri() + "?mode=ro&immutable=1"
 try:
     conn = sqlite3.connect(uri, uri=True, timeout=5.0)
 except BaseException as e:
