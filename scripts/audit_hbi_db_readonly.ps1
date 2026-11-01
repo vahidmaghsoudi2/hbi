@@ -185,14 +185,15 @@ conn.close()
 print(json.dumps(out, ensure_ascii=False))
 '@
 
-    # Hex-encode Python source to avoid Windows PowerShell 5.1 native-argument
-    # quote stripping when passing multiline code to python.exe.
-    $codeHex = ([BitConverter]::ToString([Text.Encoding]::UTF8.GetBytes($code))).Replace("-", "").ToLowerInvariant()
-    $pythonBootstrap = "exec(compile(bytes.fromhex(__import__(chr(115)+chr(121)+chr(115)).argv[1]),chr(60)+chr(97)+chr(117)+chr(100)+chr(105)+chr(116)+chr(62),chr(101)+chr(120)+chr(101)+chr(99)))"
+    # Package source and DB path together. Python -c places the first
+    # argument after the command in sys.argv[0], not sys.argv[1].
+    $payload = @{ code = $code; path = $DbPath } | ConvertTo-Json -Compress
+    $payloadHex = ([BitConverter]::ToString([Text.Encoding]::UTF8.GetBytes($payload))).Replace("-", "").ToLowerInvariant()
+    $pythonBootstrap = "import sys,json; p=json.loads(bytes.fromhex(sys.argv[0])); sys.argv=['audit',p['path']]; exec(compile(p['code'],'<audit>','exec'))"
     $priorErrorActionPreference = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
     try {
-        $jsonText = @(& $py.Path -c $pythonBootstrap $codeHex $DbPath 2>&1 | ForEach-Object { "$_" })
+        $jsonText = @(& $py.Path -c $pythonBootstrap $payloadHex 2>&1 | ForEach-Object { "$_" })
         $pythonExitCode = $LASTEXITCODE
     } finally {
         $ErrorActionPreference = $priorErrorActionPreference
