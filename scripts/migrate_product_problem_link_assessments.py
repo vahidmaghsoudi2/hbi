@@ -12,6 +12,17 @@ LEGACY_COLUMNS = [
     "relationship_status", "semantic_basis", "limitations", "decision_basis",
     "problem_map_version", "created_at", "updated_at",
 ]
+EVENT_COLUMNS = {
+    "event_id", "link_id", "assertion_key", "revision_no", "actor_id",
+    "actor_role", "event_type", "reason", "before_state", "after_state",
+    "correlation_id", "timestamp",
+}
+CANONICAL_PPL_INDEXES = {
+    "ix_productproblemlink_product",
+    "ix_productproblemlink_problem",
+    "ix_productproblemlink_status",
+    "ix_productproblemlink_assertion",
+}
 
 
 
@@ -76,14 +87,48 @@ def migrate(db_path: str | Path) -> str:
                 )
             """)
             conn.execute("CREATE INDEX IF NOT EXISTS ix_ppl_event_link_time ON ProductProblemLinkAssessmentEvent(link_id, timestamp)")
+            event_columns = {
+                row[1] for row in conn.execute(
+                    'PRAGMA table_info("ProductProblemLinkAssessmentEvent")'
+                )
+            }
+            if not EVENT_COLUMNS.issubset(event_columns):
+                raise RuntimeError(
+                    "Existing ProductProblemLinkAssessmentEvent schema is incomplete; "
+                    "manual inspection required."
+                )
             conn.execute("CREATE INDEX IF NOT EXISTS ix_ProductProblemLinkAssessmentEvent_assertion_key ON ProductProblemLinkAssessmentEvent(assertion_key)")
             conn.commit()
             conn.execute("PRAGMA foreign_keys=ON")
-            return "ALREADY MIGRATED: assessment columns and history table are present."
+            if conn.execute("PRAGMA foreign_keys").fetchone()[0] != 1:
+                raise RuntimeError("SQLite foreign-key enforcement could not be restored.")
+            violations = conn.execute("PRAGMA foreign_key_check").fetchall()
+            if violations:
+                raise RuntimeError(f"Foreign-key violations after migration: {violations[:10]}")
+            return "ALREADY MIGRATED: assessment columns, history table, indexes, and foreign keys verified."
         if not set(LEGACY_COLUMNS).issubset(columns) or columns.intersection(NEW_COLUMNS):
             raise RuntimeError("Unexpected or partially migrated ProductProblemLink schema; manual inspection required.")
 
         conn.execute("BEGIN IMMEDIATE")
+        custom_objects = conn.execute(
+            """
+            SELECT type, name, sql
+            FROM sqlite_master
+            WHERE tbl_name = 'ProductProblemLink'
+              AND type IN ('index', 'trigger')
+              AND sql IS NOT NULL
+            ORDER BY type, name
+            """
+        ).fetchall()
+        conflicting_names = sorted(
+            name for object_type, name, _sql in custom_objects
+            if object_type == "index" and name in CANONICAL_PPL_INDEXES
+        )
+        if conflicting_names:
+            raise RuntimeError(
+                "Legacy ProductProblemLink has custom index names that collide with "
+                f"migration-managed indexes: {conflicting_names}; manual inspection required."
+            )
         conn.execute("""
             CREATE TABLE ProductProblemLink__assessment_new (
                 link_id VARCHAR PRIMARY KEY, product_id VARCHAR NOT NULL,
@@ -121,6 +166,10 @@ def migrate(db_path: str | Path) -> str:
         conn.execute('CREATE INDEX ix_productproblemlink_problem ON ProductProblemLink(problem_id)')
         conn.execute('CREATE INDEX ix_productproblemlink_status ON ProductProblemLink(relationship_status)')
         conn.execute('CREATE INDEX ix_productproblemlink_assertion ON ProductProblemLink(assertion_key)')
+        # DROP TABLE removes table-owned explicit indexes and triggers. Recreate their
+        # original SQL against the renamed table before committing the rebuild.
+        for _object_type, _name, object_sql in custom_objects:
+            conn.execute(object_sql)
         conn.execute("""
             CREATE TABLE ProductProblemLinkAssessmentEvent (
                 event_id VARCHAR PRIMARY KEY, link_id VARCHAR NOT NULL,
