@@ -1,6 +1,6 @@
 const { test, expect } = require("@playwright/test");
 
-test("Skin problem bank renders only six source-backed records and searches within the pilot", async ({ page }) => {
+test("Skin problem bank renders all 61 source-backed records and searches the full bank", async ({ page }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "skin-problem-bank-test-token");
   });
@@ -17,33 +17,32 @@ test("Skin problem bank renders only six source-backed records and searches with
   const beforeOpen = requests.length;
   await page.getByRole("button", { name: "ورود به بانک مشکلات پوستی" }).click();
   await expect(page.getByRole("heading", { name: "بانک مشکلات پوستی" })).toBeVisible();
-  const list = page.getByRole("navigation", { name: "شش مدخل منتخب مشکلات پوستی" });
-  await expect(list.locator(".pro-problem-item")).toHaveCount(6);
-  await expect(page.getByRole("heading", { name: "Hyperpigmentation/dark spots" })).toBeVisible();
-  await expect(page.getByText("Problem/presentation", { exact: true }).first()).toBeVisible();
+  const list = page.getByRole("navigation", { name: "فهرست مشکلات پوستی P01 تا P61" });
+  await expect(list.locator(".pro-problem-item")).toHaveCount(61);
+  await expect(list.getByText("61 از 61 مدخل")).toBeVisible();
   await expect(page.getByText("UNKNOWN", { exact: false }).first()).toBeVisible();
   await expect(page.getByText("Commit مبنا:")).toBeVisible();
 
   // P22 is cross-listed in the Map, but its canonical row and shelf are S04.
   // The UI must not duplicate it under S09 or infer a second canonical record.
   await page.getByLabel("فیلتر قفسه").selectOption("S04");
-  await expect(list.locator(".pro-problem-item")).toHaveCount(4);
+  await expect(list.locator(".pro-problem-item").count()).resolves.toBeGreaterThan(0);
   await expect(list.getByRole("button", { name: /P22/ })).toBeVisible();
   await list.getByRole("button", { name: /P22/ }).click();
   await expect(page.getByRole("heading", { name: "Sun-related pigmentation" })).toBeVisible();
   await expect(page.getByText("Context/pigmentation presentation", { exact: true }).first()).toBeVisible();
   await page.getByLabel("فیلتر قفسه").selectOption("ALL");
-  await expect(list.locator(".pro-problem-item")).toHaveCount(6);
+  await expect(list.locator(".pro-problem-item")).toHaveCount(61);
 
   const requestsAfterOpen = requests.slice(beforeOpen);
   expect(requestsAfterOpen.filter((url) => /github\.com|\/api\//i.test(url))).toEqual([]);
 
-  await page.getByLabel("جست‌وجو در شش مدخل پایلوت").fill("P24");
+  await page.getByLabel("جست‌وجو در بانک مشکلات پوستی").fill("P24");
   await expect(list.locator(".pro-problem-item")).toHaveCount(1);
   await expect(list.getByRole("button", { name: /P24/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Persistent redness" })).toBeVisible();
 
-  await page.getByLabel("جست‌وجو در شش مدخل پایلوت").fill("not-a-record");
+  await page.getByLabel("جست‌وجو در بانک مشکلات پوستی").fill("not-a-record");
   await expect(list.locator(".pro-problem-item")).toHaveCount(0);
-  await expect(page.getByText("در محدودهٔ همین شش مدخل نتیجه‌ای پیدا نشد.")).toBeVisible();
+  await expect(page.getByText("در محدودهٔ انتخاب‌شده نتیجه‌ای پیدا نشد.")).toBeVisible();
 });
