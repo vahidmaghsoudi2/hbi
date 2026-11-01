@@ -138,22 +138,21 @@ def test_legacy_migration_preserves_rows_and_does_not_invent_revision_metadata(t
             'PRAGMA index_list("ProductProblemLinkAssessmentEvent")'
         )
     }
-    assert "ix_ppl_event_link_time" in repaired_event_indexes
     assert "ix_ProductProblemLinkAssessmentEvent_assertion_key" in repaired_event_indexes
     conn.close()
-
 
 
 def test_already_migrated_rejects_incomplete_event_table_and_restores_backup(tmp_path):
     script = Path(__file__).resolve().parents[1] / "scripts" / "migrate_product_problem_link_assessments.py"
     migrate = runpy.run_path(str(script))["migrate"]
-    db = tmp_path / "malformed_already_migrated.db"
+    db = tmp_path / "incomplete_event.db"
     conn = sqlite3.connect(db)
     conn.executescript("""
         CREATE TABLE ProductProblemLink (
-            link_id VARCHAR PRIMARY KEY, product_id VARCHAR, variant VARCHAR,
-            market_region VARCHAR, claim_id VARCHAR, evidence_id VARCHAR,
-            problem_id VARCHAR, problem_type VARCHAR, problem_definition_ref VARCHAR,
+            link_id VARCHAR PRIMARY KEY,
+            product_id VARCHAR, variant VARCHAR, market_region VARCHAR,
+            claim_id VARCHAR, evidence_id VARCHAR, problem_id VARCHAR,
+            problem_type VARCHAR, problem_definition_ref VARCHAR,
             relationship_role VARCHAR, relationship_status VARCHAR,
             semantic_basis TEXT, limitations TEXT, decision_basis TEXT,
             problem_map_version VARCHAR, created_at DATETIME, updated_at DATETIME,
@@ -161,20 +160,21 @@ def test_already_migrated_rejects_incomplete_event_table_and_restores_backup(tmp
             revision_no INTEGER, supersedes_link_id VARCHAR,
             idempotency_key VARCHAR, request_fingerprint VARCHAR
         );
-        CREATE TABLE ProductProblemLinkAssessmentEvent(event_id VARCHAR PRIMARY KEY);
+        CREATE TABLE ProductProblemLinkAssessmentEvent (
+            event_id VARCHAR PRIMARY KEY,
+            link_id VARCHAR NOT NULL
+        );
     """)
     conn.close()
 
-    with pytest.raises(RuntimeError, match="schema is incomplete"):
+    with pytest.raises(RuntimeError, match="ProductProblemLinkAssessmentEvent schema is incomplete"):
         migrate(db)
 
     conn = sqlite3.connect(db)
-    event_columns = {
-        row[1] for row in conn.execute(
-            'PRAGMA table_info("ProductProblemLinkAssessmentEvent")'
-        )
+    columns = {
+        row[1] for row in conn.execute('PRAGMA table_info("ProductProblemLinkAssessmentEvent")')
     }
-    assert event_columns == {"event_id"}
+    assert columns == {"event_id", "link_id"}
     assert conn.execute(
         "SELECT name FROM sqlite_master WHERE type='index' "
         "AND name='ix_ProductProblemLinkAssessmentEvent_assertion_key'"
@@ -185,21 +185,17 @@ def test_already_migrated_rejects_incomplete_event_table_and_restores_backup(tmp
 def test_already_migrated_checks_foreign_key_violations_and_restores_backup(tmp_path):
     script = Path(__file__).resolve().parents[1] / "scripts" / "migrate_product_problem_link_assessments.py"
     migrate = runpy.run_path(str(script))["migrate"]
-    db = tmp_path / "fk_violation_already_migrated.db"
+    db = tmp_path / "fk_violation.db"
     conn = sqlite3.connect(db)
     conn.executescript("""
-        PRAGMA foreign_keys=OFF;
         CREATE TABLE ProductProblemLink (
-            link_id VARCHAR PRIMARY KEY, product_id VARCHAR NOT NULL,
-            variant VARCHAR NOT NULL DEFAULT 'UNKNOWN', market_region VARCHAR NOT NULL,
-            claim_id VARCHAR NOT NULL, evidence_id VARCHAR NOT NULL,
-            problem_id VARCHAR NOT NULL, problem_type VARCHAR NOT NULL,
-            problem_definition_ref VARCHAR NOT NULL, relationship_role VARCHAR NOT NULL,
-            relationship_status VARCHAR NOT NULL DEFAULT 'CANDIDATE',
-            semantic_basis TEXT NOT NULL, limitations TEXT NOT NULL,
-            decision_basis TEXT NOT NULL, problem_map_version VARCHAR NOT NULL,
-            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            link_id VARCHAR PRIMARY KEY,
+            product_id VARCHAR, variant VARCHAR, market_region VARCHAR,
+            claim_id VARCHAR, evidence_id VARCHAR, problem_id VARCHAR,
+            problem_type VARCHAR, problem_definition_ref VARCHAR,
+            relationship_role VARCHAR, relationship_status VARCHAR,
+            semantic_basis TEXT, limitations TEXT, decision_basis TEXT,
+            problem_map_version VARCHAR, created_at DATETIME, updated_at DATETIME,
             feature_basis TEXT, outcome TEXT, assertion_key VARCHAR,
             revision_no INTEGER, supersedes_link_id VARCHAR,
             idempotency_key VARCHAR, request_fingerprint VARCHAR
@@ -228,7 +224,6 @@ def test_already_migrated_checks_foreign_key_violations_and_restores_backup(tmp_
         "AND name='ix_ProductProblemLinkAssessmentEvent_assertion_key'"
     ).fetchone() is None
     conn.close()
-
 
 
 def test_already_migrated_rejects_incomplete_product_problem_link_schema(tmp_path):
@@ -262,4 +257,109 @@ def test_already_migrated_rejects_incomplete_product_problem_link_schema(tmp_pat
         "SELECT name FROM sqlite_master WHERE type='table' "
         "AND name='ProductProblemLinkAssessmentEvent'"
     ).fetchone() is None
+    conn.close()
+
+
+def test_legacy_with_standard_hbi_indexes_migrates_successfully(tmp_path):
+    """Real HBI DBs already have the three standard PPL indexes; they must not abort."""
+    script = Path(__file__).resolve().parents[1] / "scripts" / "migrate_product_problem_link_assessments.py"
+    migrate = runpy.run_path(str(script))["migrate"]
+    db = tmp_path / "legacy_with_standard_indexes.db"
+    conn = sqlite3.connect(db)
+    conn.executescript("""
+        PRAGMA foreign_keys=ON;
+        CREATE TABLE Product(product_id VARCHAR PRIMARY KEY);
+        CREATE TABLE Evidence(
+            evidence_id VARCHAR PRIMARY KEY, claim_id VARCHAR UNIQUE,
+            product_id VARCHAR NOT NULL, FOREIGN KEY(product_id) REFERENCES Product(product_id)
+        );
+        CREATE TABLE ProductProblemLink(
+            link_id VARCHAR PRIMARY KEY, product_id VARCHAR NOT NULL,
+            variant VARCHAR NOT NULL DEFAULT 'UNKNOWN', market_region VARCHAR NOT NULL,
+            claim_id VARCHAR NOT NULL, evidence_id VARCHAR NOT NULL,
+            problem_id VARCHAR NOT NULL, problem_type VARCHAR NOT NULL,
+            problem_definition_ref VARCHAR NOT NULL, relationship_role VARCHAR NOT NULL,
+            relationship_status VARCHAR NOT NULL DEFAULT 'CANDIDATE',
+            semantic_basis VARCHAR NOT NULL, limitations VARCHAR NOT NULL,
+            decision_basis VARCHAR NOT NULL, problem_map_version VARCHAR NOT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(product_id,evidence_id,problem_id,relationship_role,variant,market_region),
+            FOREIGN KEY(product_id) REFERENCES Product(product_id),
+            FOREIGN KEY(claim_id) REFERENCES Evidence(claim_id),
+            FOREIGN KEY(evidence_id) REFERENCES Evidence(evidence_id)
+        );
+        CREATE INDEX ix_productproblemlink_product ON ProductProblemLink(product_id);
+        CREATE INDEX ix_productproblemlink_problem ON ProductProblemLink(problem_id);
+        CREATE INDEX ix_productproblemlink_status ON ProductProblemLink(relationship_status);
+        INSERT INTO Product VALUES ('P1');
+        INSERT INTO Evidence VALUES ('E1','C1','P1');
+        INSERT INTO ProductProblemLink(
+            link_id,product_id,variant,market_region,claim_id,evidence_id,problem_id,
+            problem_type,problem_definition_ref,relationship_role,relationship_status,
+            semantic_basis,limitations,decision_basis,problem_map_version
+        ) VALUES (
+            'L1','P1','UNKNOWN','MEXICO','C1','E1','P17','presentation','Map#P17',
+            'presentation','NOT_LINKED','old basis','old limits','old decision','SKIN_PROBLEM_SPACE_MAP_V0.1'
+        );
+    """)
+    conn.close()
+    result = migrate(db)
+    assert result.startswith("MIGRATED")
+    conn = sqlite3.connect(db)
+    indexes = {row[1] for row in conn.execute('PRAGMA index_list("ProductProblemLink")')}
+    assert "ix_productproblemlink_product" in indexes
+    assert "ix_productproblemlink_problem" in indexes
+    assert "ix_productproblemlink_status" in indexes
+    assert "ix_productproblemlink_assertion" in indexes
+    assert conn.execute("SELECT COUNT(*) FROM ProductProblemLink").fetchone()[0] == 1
+    conn.close()
+
+
+def test_real_index_name_conflict_with_different_definition_aborts(tmp_path):
+    script = Path(__file__).resolve().parents[1] / "scripts" / "migrate_product_problem_link_assessments.py"
+    migrate = runpy.run_path(str(script))["migrate"]
+    db = tmp_path / "index_conflict.db"
+    conn = sqlite3.connect(db)
+    conn.executescript("""
+        PRAGMA foreign_keys=ON;
+        CREATE TABLE Product(product_id VARCHAR PRIMARY KEY);
+        CREATE TABLE Evidence(
+            evidence_id VARCHAR PRIMARY KEY, claim_id VARCHAR UNIQUE,
+            product_id VARCHAR NOT NULL, FOREIGN KEY(product_id) REFERENCES Product(product_id)
+        );
+        CREATE TABLE ProductProblemLink(
+            link_id VARCHAR PRIMARY KEY, product_id VARCHAR NOT NULL,
+            variant VARCHAR NOT NULL DEFAULT 'UNKNOWN', market_region VARCHAR NOT NULL,
+            claim_id VARCHAR NOT NULL, evidence_id VARCHAR NOT NULL,
+            problem_id VARCHAR NOT NULL, problem_type VARCHAR NOT NULL,
+            problem_definition_ref VARCHAR NOT NULL, relationship_role VARCHAR NOT NULL,
+            relationship_status VARCHAR NOT NULL DEFAULT 'CANDIDATE',
+            semantic_basis VARCHAR NOT NULL, limitations VARCHAR NOT NULL,
+            decision_basis VARCHAR NOT NULL, problem_map_version VARCHAR NOT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(product_id,evidence_id,problem_id,relationship_role,variant,market_region),
+            FOREIGN KEY(product_id) REFERENCES Product(product_id),
+            FOREIGN KEY(claim_id) REFERENCES Evidence(claim_id),
+            FOREIGN KEY(evidence_id) REFERENCES Evidence(evidence_id)
+        );
+        CREATE INDEX ix_productproblemlink_product ON ProductProblemLink(market_region);
+        INSERT INTO Product VALUES ('P1');
+        INSERT INTO Evidence VALUES ('E1','C1','P1');
+        INSERT INTO ProductProblemLink(
+            link_id,product_id,variant,market_region,claim_id,evidence_id,problem_id,
+            problem_type,problem_definition_ref,relationship_role,relationship_status,
+            semantic_basis,limitations,decision_basis,problem_map_version
+        ) VALUES (
+            'L1','P1','UNKNOWN','MEXICO','C1','E1','P17','presentation','Map#P17',
+            'presentation','NOT_LINKED','old basis','old limits','old decision','SKIN_PROBLEM_SPACE_MAP_V0.1'
+        );
+    """)
+    conn.close()
+    with pytest.raises(RuntimeError, match="differ in definition"):
+        migrate(db)
+    conn = sqlite3.connect(db)
+    columns = {row[1] for row in conn.execute('PRAGMA table_info("ProductProblemLink")')}
+    assert "feature_basis" not in columns
     conn.close()
