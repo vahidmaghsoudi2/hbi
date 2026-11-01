@@ -196,7 +196,7 @@ print(json.dumps(out, ensure_ascii=False))
         $ErrorActionPreference = $priorErrorActionPreference
     }
     if ($pythonExitCode -ne 0) {
-        return @{ Ok = $false; Error = "python exited $pythonExitCode : $($jsonText -join `" `")" }
+        return @{ Ok = $false; Error = "python exited $pythonExitCode : $($jsonText -join ' ')" }
     }
     $obj = ($jsonText -join "`n") | ConvertFrom-Json
     return @{ Ok = $true; Data = $obj }
