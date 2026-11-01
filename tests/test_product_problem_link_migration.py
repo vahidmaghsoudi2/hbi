@@ -190,7 +190,16 @@ def test_already_migrated_checks_foreign_key_violations_and_restores_backup(tmp_
     conn.executescript("""
         PRAGMA foreign_keys=OFF;
         CREATE TABLE ProductProblemLink (
-            link_id VARCHAR PRIMARY KEY,
+            link_id VARCHAR PRIMARY KEY, product_id VARCHAR NOT NULL,
+            variant VARCHAR NOT NULL DEFAULT 'UNKNOWN', market_region VARCHAR NOT NULL,
+            claim_id VARCHAR NOT NULL, evidence_id VARCHAR NOT NULL,
+            problem_id VARCHAR NOT NULL, problem_type VARCHAR NOT NULL,
+            problem_definition_ref VARCHAR NOT NULL, relationship_role VARCHAR NOT NULL,
+            relationship_status VARCHAR NOT NULL DEFAULT 'CANDIDATE',
+            semantic_basis TEXT NOT NULL, limitations TEXT NOT NULL,
+            decision_basis TEXT NOT NULL, problem_map_version VARCHAR NOT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             feature_basis TEXT, outcome TEXT, assertion_key VARCHAR,
             revision_no INTEGER, supersedes_link_id VARCHAR,
             idempotency_key VARCHAR, request_fingerprint VARCHAR
