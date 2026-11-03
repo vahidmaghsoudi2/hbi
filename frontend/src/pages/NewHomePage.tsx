@@ -82,6 +82,7 @@ export default function NewHomePage() {
   const [saleProductsError, setSaleProductsError] = useState<string | null>(null);
   const [saleProductsLoading, setSaleProductsLoading] = useState(true);
   const [saleCustomerSearch, setSaleCustomerSearch] = useState("");
+  const [saleCustomerSearchResults, setSaleCustomerSearchResults] = useState<CustomerSearchResult[]>([]);
   const [saleCustomerId, setSaleCustomerId] = useState<string | null>(null);
   const [saleCustomerLabel, setSaleCustomerLabel] = useState<string | null>(null);
   const [catalogError, setCatalogError] = useState<string | null>(null);
@@ -309,7 +310,7 @@ export default function NewHomePage() {
     const requestId = ++customerSearchRequestId.current;
     const query = saleCustomerSearch.trim();
     if (!query) {
-      setCustomerSearchResults([]);
+      setSaleCustomerSearchResults([]);
       setCustomerSearchBusy(false);
       setError("برای اتصال طرف‌حساب، نام خانوادگی را وارد کنید.");
       return;
@@ -321,12 +322,12 @@ export default function NewHomePage() {
       if (!operatorToken) throw new Error("نشست مدیر برای جست‌وجوی مشتری در دسترس نیست.");
       const found = await searchCustomers(query, operatorToken);
       if (requestId === customerSearchRequestId.current) {
-        setCustomerSearchResults(Array.isArray(found) ? found : []);
+        setSaleCustomerSearchResults(Array.isArray(found) ? found : []);
         if (!Array.isArray(found) || found.length === 0) setStatusMsg("مشتری مطابق جست‌وجو پیدا نشد؛ فروش مستقیم همچنان ممکن است.");
       }
     } catch (err) {
       if (requestId === customerSearchRequestId.current) {
-        setCustomerSearchResults([]);
+        setSaleCustomerSearchResults([]);
         setError(err instanceof Error ? err.message : String(err));
       }
     } finally {
@@ -337,7 +338,7 @@ export default function NewHomePage() {
   function chooseSaleCustomer(customer: CustomerSearchResult) {
     setSaleCustomerId(customer.customer_id);
     setSaleCustomerLabel(customer.family_name?.trim() || customer.customer_id);
-    setCustomerSearchResults([]);
+    setSaleCustomerSearchResults([]);
     setSaleCustomerSearch("");
     setError(null);
     setStatusMsg("طرف‌حساب فقط به این فاکتور متصل شد؛ مشاوره شروع نشد.");
@@ -1411,7 +1412,7 @@ export default function NewHomePage() {
                       <button type="button" className="pro-btn-secondary" onClick={() => void searchSaleCustomers()} disabled={customerSearchBusy}>
                         {customerSearchBusy ? "در حال جست‌وجو…" : "یافتن طرف‌حساب"}
                       </button>
-                      {customerSearchResults.map((customer) => (
+                      {saleCustomerSearchResults.map((customer) => (
                         <button key={customer.customer_id} type="button" className="pro-btn-secondary" onClick={() => chooseSaleCustomer(customer)}>
                           {customer.family_name ?? "بدون نام خانوادگی"} · {customer.customer_id}
                         </button>
