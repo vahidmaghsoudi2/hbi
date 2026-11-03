@@ -1,12 +1,32 @@
 import os
 from datetime import datetime, timedelta, timezone
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Literal
 
 from jose import JWTError, jwt
 from pydantic import BaseModel
 
 
-_ENV = os.getenv("HBI_ENV", "development").lower()
+def get_runtime_env() -> Literal["development", "production"]:
+    """Single source of truth for HBI_ENV.
+
+    - Missing/blank defaults to development (local/dev ergonomics).
+    - Any other non-whitelist value fails closed at startup/import.
+    """
+    raw = os.getenv("HBI_ENV", "development")
+    normalized = (raw or "").strip().lower()
+    if normalized in ("development", "production"):
+        return normalized  # type: ignore[return-value]
+    raise RuntimeError(
+        "HBI_ENV must be exactly 'development' or 'production' "
+        f"(got {raw!r}). Refusing to start with an ambiguous environment."
+    )
+
+
+def is_production() -> bool:
+    return get_runtime_env() == "production"
+
+
+_ENV = get_runtime_env()
 
 if _ENV == "production":
     SECRET_KEY = os.getenv("JWT_SECRET_KEY")
