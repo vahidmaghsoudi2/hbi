@@ -1,3 +1,17 @@
+> ## HISTORICAL SNAPSHOT — NOT THE CURRENT EXECUTION QUEUE (2026-10-13)
+>
+> This document was last reconciled on **2026-09-07** and contains a historical baseline (42cc77ec...) and superseded next-action/phase statements, including “Product Intake Contract v1 pending merge”. Do **not** use those statements as current status or authorization.
+>
+> **Current repository baseline:** master @ cc7848e472b837746e99103ea94ff4bb28eb0c2b.
+> **Current approved Skin Product Intake contract:** docs/architecture/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md (PO APPROVED).
+> **Current operational mission and reconciled gaps:** [Issue #283](https://github.com/vahidmaghsoudi2/hbi/issues/283) and [Issue #278](https://github.com/vahidmaghsoudi2/hbi/issues/278).
+>
+> Preserve this document for historical traceability and strategic context. Its original text is intentionally retained; it is not current proof of implementation, test execution, G8 acceptance, or permission to change code/merge.
+>
+> This warning is a documentation hygiene proposal on a draft branch. It has **not** changed master and is not effective until separately reviewed/merged.
+>
+> ---
+>
 # PRODUCT INTAKE — MASTER EXECUTION ROADMAP
 
 **Project:** HBI — Health & Beauty Intelligence  
