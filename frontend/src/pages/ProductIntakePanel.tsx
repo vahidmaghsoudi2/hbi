@@ -63,8 +63,23 @@ const SKIN_PRODUCT_SPECIFIC_BOXES: Record<string, readonly string[]> = {
   "HBI-PROD-7F55ED88F41144F1": ["درجه‌بندی PA/UVA همین نسخه", "فیلترهای UV همین نسخه/بازار", "مقاومت در برابر آب، فقط اگر برچسب تصریح کند"],
   "HBI-PROD-96788ADC488942E3": ["فیلترهای UV همین نسخه/بازار", "ادعای ضدلک و نقطهٔ پایانیِ اعلام‌شده"],
   "HBI-PROD-70EEE418BE0F4DAB": ["نتیجهٔ آزمون بالینی و مدت آن", "نتیجهٔ آزمون مصرف‌کننده، حجم نمونه و مدت آن"],
-  "HBI-PROD-22C55A8223A945A6": ["درصد آزلائیک اسیدِ اعلام‌شده در منبع", "ترکیبات پشتیبان و ادعای تسکین طبق منبع"],
+  "HBI-PROD-22C55A8223A945A6": ["درصد آزلائیک اسیدِ اعلام‌شده در منبع", "ترکیبات پشتیبانِ اعلام‌شده طبق منبع", "ادعای تسکینِ اعلام‌شده طبق منبع"],
 };
+
+function skinProductEvidenceField(productId: string, label: string): string | undefined {
+  if (
+    productId === "HBI-PROD-22C55A8223A945A6" &&
+    label === "ادعای تسکینِ اعلام‌شده طبق منبع"
+  ) return "manufacturer_claims";
+
+  const structured = label.includes("ترکیبات") ||
+    label.includes("فیلترهای UV") ||
+    label.includes("پپتیدها") ||
+    label.includes("مشتق ویتامین C") ||
+    label.includes("آزلائیک اسید") ||
+    label.includes("سالیسیلیک اسید");
+  return structured ? "ingredients" : undefined;
+}
 
 /** Map only semantically matching template boxes to existing Evidence fields. */
 function skinTemplateEvidenceField(template: string, label: string): string | undefined {
@@ -393,9 +408,8 @@ export default function ProductIntakePanel({
         };
       });
     const productFields = (SKIN_PRODUCT_SPECIFIC_BOXES[researchProductId || ""] ?? []).map((label) => {
-      const structured = label.includes("ترکیبات") || label.includes("فیلترهای UV") || label.includes("پپتیدها") || label.includes("مشتق ویتامین C") || label.includes("آزلائیک اسید") || label.includes("سالیسیلیک اسید");
       return {
-        field: structured ? "ingredients" : undefined,
+        field: skinProductEvidenceField(researchProductId || "", label),
         label,
         value: (skinBoxValues[`product:${researchProductId}:${label}`] || "").trim(),
         claimType: researchClaimType || "UNKNOWN",
@@ -1085,10 +1099,10 @@ export default function ProductIntakePanel({
                   <div className="pro-grid-2">
                     {(SKIN_PRODUCT_SPECIFIC_BOXES[researchProductId || ""] ?? []).map((label) => {
                       const boxKey = `product:${researchProductId}:${label}`;
-                      const structured = label.includes("ترکیبات") || label.includes("فیلترهای UV") || label.includes("پپتیدها") || label.includes("مشتق ویتامین C") || label.includes("آزلائیک اسید") || label.includes("سالیسیلیک اسید");
+                      const mappedField = skinProductEvidenceField(researchProductId || "", label);
                       return (
                         <div key={boxKey}>
-                          <label className="pro-label">{label}{structured ? " *" : " (ادعای منبع‌دار؛ بدون نگاشت ساختاریافته)"}</label>
+                          <label className="pro-label">{label}{mappedField ? " *" : " (ادعای منبع‌دار؛ بدون نگاشت ساختاریافته)"}</label>
                           <textarea
                             className="pro-input"
                             rows={2}
