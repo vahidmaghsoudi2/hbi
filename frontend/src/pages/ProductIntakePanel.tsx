@@ -47,23 +47,23 @@ const SKIN_TEMPLATES = [
 
 /** Seven approved existing dossiers only; template is tied to Product Master identity. */
 const SKIN_SEVEN_PRODUCT_TEMPLATES: Record<string, string> = {
-  "HBI-PROD-F66ED6FEA6144D71": "OTHER_SKIN",
-  "HBI-PROD-37EB7C42C6BE413B": "CLEANSING_GEL",
-  "HBI-PROD-9F7C2CE624D14E5A": "CLEANSING_GEL",
-  "HBI-PROD-AB647F422E174BD8": "SUNSCREEN",
-  "HBI-PROD-03781074C3BF448A": "SUNSCREEN",
-  "HBI-PROD-85AD86B15C734EF2": "BRIGHTENING_SPOT",
-  "HBI-PROD-7AD37ECCEA874E12": "HYDRATING_MOISTURIZER",
+  "HBI-PROD-FE320FA135B843B6": "OTHER_SKIN",
+  "HBI-PROD-2CC249240D504453": "CLEANSING_GEL",
+  "HBI-PROD-C29AA2F410A84CCA": "CLEANSING_GEL",
+  "HBI-PROD-7F55ED88F41144F1": "SUNSCREEN",
+  "HBI-PROD-96788ADC488942E3": "SUNSCREEN",
+  "HBI-PROD-70EEE418BE0F4DAB": "BRIGHTENING_SPOT",
+  "HBI-PROD-22C55A8223A945A6": "HYDRATING_MOISTURIZER",
 };
 
 const SKIN_PRODUCT_SPECIFIC_BOXES: Record<string, readonly string[]> = {
-  "HBI-PROD-F66ED6FEA6144D71": ["پپتیدها و ترکیبات کلیدی طبق منبع", "ادعاهای اختصاصی بوستر طبق منبع"],
-  "HBI-PROD-37EB7C42C6BE413B": ["سالیسیلیک اسید و غلظتِ اعلام‌شده در همین نسخه", "بازار و نسخهٔ منبع Neutrogena"],
-  "HBI-PROD-9F7C2CE624D14E5A": ["مشتق ویتامین C طبق INCI همین نسخه", "غلظت مادهٔ شاخص، فقط اگر منبع اعلام کرده باشد"],
-  "HBI-PROD-AB647F422E174BD8": ["درجه‌بندی PA/UVA همین نسخه", "فیلترهای UV همین نسخه/بازار", "مقاومت در برابر آب، فقط اگر برچسب تصریح کند"],
-  "HBI-PROD-03781074C3BF448A": ["فیلترهای UV همین نسخه/بازار", "ادعای ضدلک و نقطهٔ پایانیِ اعلام‌شده"],
-  "HBI-PROD-85AD86B15C734EF2": ["نتیجهٔ آزمون بالینی و مدت آن", "نتیجهٔ آزمون مصرف‌کننده، حجم نمونه و مدت آن"],
-  "HBI-PROD-7AD37ECCEA874E12": ["درصد آزلائیک اسیدِ اعلام‌شده در منبع", "ترکیبات پشتیبان و ادعای تسکین طبق منبع"],
+  "HBI-PROD-FE320FA135B843B6": ["پپتیدها و ترکیبات کلیدی طبق منبع", "ادعاهای اختصاصی بوستر طبق منبع"],
+  "HBI-PROD-2CC249240D504453": ["سالیسیلیک اسید و غلظتِ اعلام‌شده در همین نسخه", "بازار و نسخهٔ منبع Neutrogena"],
+  "HBI-PROD-C29AA2F410A84CCA": ["مشتق ویتامین C طبق INCI همین نسخه", "غلظت مادهٔ شاخص، فقط اگر منبع اعلام کرده باشد"],
+  "HBI-PROD-7F55ED88F41144F1": ["درجه‌بندی PA/UVA همین نسخه", "فیلترهای UV همین نسخه/بازار", "مقاومت در برابر آب، فقط اگر برچسب تصریح کند"],
+  "HBI-PROD-96788ADC488942E3": ["فیلترهای UV همین نسخه/بازار", "ادعای ضدلک و نقطهٔ پایانیِ اعلام‌شده"],
+  "HBI-PROD-70EEE418BE0F4DAB": ["نتیجهٔ آزمون بالینی و مدت آن", "نتیجهٔ آزمون مصرف‌کننده، حجم نمونه و مدت آن"],
+  "HBI-PROD-22C55A8223A945A6": ["درصد آزلائیک اسیدِ اعلام‌شده در منبع", "ترکیبات پشتیبان و ادعای تسکین طبق منبع"],
 };
 
 /** Map only semantically matching template boxes to existing Evidence fields. */
