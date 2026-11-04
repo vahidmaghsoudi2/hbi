@@ -6,7 +6,7 @@ test("selected existing skin product receives source-bound box drafts without cr
   });
 
   const selectedProduct = {
-    product_id: "HBI-PROD-37EB7C42C6BE413B",
+    product_id: "HBI-PROD-2CC249240D504453",
     brand: "Neutrogena",
     product_name: "Clear & Defend 2% Salicylic Acid Face Wash",
     product_line: "SKIN",
@@ -45,7 +45,7 @@ test("selected existing skin product receives source-bound box drafts without cr
       return route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
     }
 
-    if (path.endsWith("/products/HBI-PROD-37EB7C42C6BE413B/research-draft") && method === "POST") {
+    if (path.endsWith("/products/HBI-PROD-2CC249240D504453/research-draft") && method === "POST") {
       researchRequestCount += 1;
       researchPath = path;
       researchPayload = request.postDataJSON();
@@ -111,7 +111,7 @@ test("selected existing skin product receives source-bound box drafts without cr
   await expect(page.getByRole("status")).toContainText("QA=PENDING");
   
   expect(researchRequestCount).toBe(1);
-  expect(researchPath).toBe("/api/v1/products/HBI-PROD-37EB7C42C6BE413B/research-draft");
+  expect(researchPath).toBe("/api/v1/products/HBI-PROD-2CC249240D504453/research-draft");
   expect(researchPayload.assertions).toHaveLength(3);
   expect(researchPayload.assertions[0]).toMatchObject({
     claim: "Fixture manufacturer claim for skin goals",
