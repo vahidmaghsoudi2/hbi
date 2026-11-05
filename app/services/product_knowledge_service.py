@@ -8,6 +8,10 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import NotFoundError, ValidationError
+from app.domain.product_knowledge_fields import (
+    BLOCKING_KNOWLEDGE_FIELDS,
+    IDENTITY_FIELDS,
+)
 from app.models.evidence import Evidence
 from app.models.product import Product
 from app.models.product_knowledge import ProductKnowledge
@@ -20,10 +24,6 @@ ALLOWED_INGREDIENT_ROLES = frozenset(
     {"CORE", "SUPPORT", "CLAIM-LINK", "RISK", "TECH", "UNKNOWN"}
 )
 
-from app.domain.product_knowledge_fields import (
-    BLOCKING_KNOWLEDGE_FIELDS,
-    IDENTITY_FIELDS,
-)
 
 
 
