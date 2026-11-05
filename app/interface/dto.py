@@ -124,6 +124,7 @@ class ProductKnowledgeDTO:
 @dataclass
 class ConflictEntryDTO:
     field: Optional[str] = None
+    market_region: Optional[str] = None
     values: List[str] = None
     evidence_ids: List[str] = None
     severity: str = "HIGH"
