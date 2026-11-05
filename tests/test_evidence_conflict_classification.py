@@ -1,4 +1,7 @@
 """Regression tests for conservative evidence-conflict classification."""
+import pytest
+
+from app.core.exceptions import ValidationError
 from app.models.evidence import Evidence
 from app.models.product import Product
 from app.services.evidence_service import EvidenceService
@@ -296,3 +299,39 @@ def test_unscoped_evidence_inherits_product_market_for_conflict_detection(db_ses
         "EV-CONFLICT-CLASS-1",
         "EV-CONFLICT-CLASS-2",
     }
+
+def test_reclassification_rejects_unknown_target_field_without_mutation_or_audit(db_session):
+    from app.models.evidence_mutation_log import EvidenceMutationLog
+
+    product_id = _add_product_and_evidence(
+        db_session,
+        [
+            {
+                "source_type": "MANUFACTURER_WEBSITE",
+                "source_reference": "https://example.test/product",
+                "claim": "The product has an unsupported custom field claim.",
+                "field": "ingredients",
+            },
+        ],
+    )
+
+    with pytest.raises(ValidationError, match="Unsupported target field"):
+        EvidenceService(db_session).reclassify_field(
+            "EV-CONFLICT-CLASS-1",
+            "unreviewed_custom_field",
+            "This target is intentionally outside the supported taxonomy.",
+            actor_id="po-user",
+            actor_role="PRODUCT_OWNER",
+        )
+
+    row = db_session.query(Evidence).filter(
+        Evidence.evidence_id == "EV-CONFLICT-CLASS-1"
+    ).one()
+    assert row.field == "ingredients"
+    assert row.conflict_status == "CONFLICT"
+    assert row.qa_status == "PENDING"
+    assert row.evidence_status == "UNKNOWN"
+    assert db_session.query(EvidenceMutationLog).filter(
+        EvidenceMutationLog.product_id == product_id
+    ).count() == 0
+
