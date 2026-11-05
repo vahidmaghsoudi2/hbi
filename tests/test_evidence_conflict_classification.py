@@ -226,14 +226,14 @@ def test_resolving_conflict_does_not_reject_other_market_evidence(db_session):
                 "source_reference": "https://example.test/us",
                 "claim": "The US formula contains ingredient A.",
                 "field": "ingredients",
-                "market_region": "US",
+                "market_region": None,
             },
             {
                 "source_type": "INDEPENDENT_REVIEW",
                 "source_reference": "https://review.example/us",
                 "claim": "The US formula contains ingredient B.",
                 "field": "ingredients",
-                "market_region": "US",
+                "market_region": "us",
             },
             {
                 "source_type": "MANUFACTURER_WEBSITE",
@@ -243,6 +243,7 @@ def test_resolving_conflict_does_not_reject_other_market_evidence(db_session):
                 "market_region": "EU",
             },
         ],
+        product_market="US",
     )
 
     selected = EvidenceService(db_session).resolve_conflict(
