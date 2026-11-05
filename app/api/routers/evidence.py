@@ -7,7 +7,7 @@ from app.core.authorization import require_any_role
 from app.core.exceptions import NotFoundError, ValidationError, ConflictError
 from app.interface.schemas import (
     EvidenceCreate, EvidenceUpdate, EvidenceResponse,
-    VerifyRequest, ResolveConflictRequest,
+    VerifyRequest, ResolveConflictRequest, EvidenceReclassifyRequest,
     ProductKnowledgeResponse, ConflictEntryResponse
 )
 from app.interface.facades import EvidenceFacade, ProductKnowledgeFacade
@@ -122,6 +122,31 @@ async def verify_evidence(
             actor_role=next(iter(roles), None),
             reason=request.reason,
         )
+        return EvidenceResponse.model_validate(dto.__dict__)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except ValidationError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
+
+@router.post("/{evidence_id}/reclassify", response_model=EvidenceResponse)
+async def reclassify_evidence_field(
+    evidence_id: str,
+    request: EvidenceReclassifyRequest,
+    db: Session = Depends(get_db),
+    auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
+):
+    facade = EvidenceFacade(db)
+    try:
+        subject_id, roles = auth
+        evidence = facade.service.reclassify_field(
+            evidence_id,
+            request.field,
+            request.reason,
+            actor_id=subject_id,
+            actor_role=next(iter(roles), None),
+        )
+        dto = facade._to_evidence_dto(evidence)
         return EvidenceResponse.model_validate(dto.__dict__)
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
