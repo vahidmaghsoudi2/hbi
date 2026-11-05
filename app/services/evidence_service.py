@@ -245,6 +245,12 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
         selected = self.get_by_id(evidence_id)
         if selected is None:
             raise NotFoundError(f"Evidence {evidence_id} not found")
+        if target_field in {"claim", "manufacturer_claim", "manufacturer_claims"} and (
+            (selected.claim_type or "").strip().upper() != "MANUFACTURER_CLAIM"
+        ):
+            raise ValidationError(
+                "Manufacturer claim fields require claim_type MANUFACTURER_CLAIM."
+            )
         if (selected.qa_status or "").strip().upper() != "PENDING":
             raise ValidationError("Only PENDING evidence may be reclassified.")
         if (selected.field or "").strip().lower() == target_field:
