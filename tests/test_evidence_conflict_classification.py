@@ -208,3 +208,10 @@ def test_pending_evidence_field_reclassification_is_audited_and_preserves_govern
         "RECLASSIFY_FIELD", "RECLASSIFY_CONFLICT_STATE"
     }
     assert all(row.reason for row in audit_rows)
+
+    import json
+    field_audit = next(row for row in audit_rows if row.action == "RECLASSIFY_FIELD")
+    assert json.loads(field_audit.diff)["field"] == {
+        "old": "ingredients",
+        "new": "manufacturer_claims",
+    }
