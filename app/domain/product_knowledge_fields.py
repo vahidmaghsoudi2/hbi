@@ -39,7 +39,10 @@ IDENTITY_FIELDS = frozenset(
 
 # Only fields with explicit downstream semantics may be reclassification targets.
 RECLASSIFIABLE_EVIDENCE_FIELDS = frozenset(
-    BLOCKING_KNOWLEDGE_FIELDS | IDENTITY_FIELDS | {"claim"}
+    # Identity fields are conflict-classification domains, not ProductKnowledge
+    # payload targets. Reclassification must not claim support for data that
+    # ProductKnowledge does not persist or interpret.
+    BLOCKING_KNOWLEDGE_FIELDS | {"claim"}
 )
 
 __all__ = [
