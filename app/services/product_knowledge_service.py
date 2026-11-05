@@ -57,6 +57,13 @@ IDENTITY_FIELDS = frozenset(
     }
 )
 
+# Evidence fields with explicit downstream ProductKnowledge or identity semantics.
+# Reclassification must not route claims into arbitrary fields that the knowledge
+# builder cannot interpret or preserve in its structured output.
+RECLASSIFIABLE_EVIDENCE_FIELDS = frozenset(
+    BLOCKING_KNOWLEDGE_FIELDS | IDENTITY_FIELDS | {"claim"}
+)
+
 
 def version_scope_key(
     *,
