@@ -65,7 +65,7 @@ def version_scope_key(
     packaging_version: Optional[str],
 ) -> str:
     """Build a non-guessing scope key. Empty segments stay empty (not defaulted to IR)."""
-    market = (evidence_market or product_market or "").strip().upper()
+    market = (evidence_market or "").strip().upper() or (product_market or "").strip().upper()
     pack = (packaging_version or "").strip()
     return f"market={market}|pack={pack}"
 
