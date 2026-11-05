@@ -20,49 +20,11 @@ ALLOWED_INGREDIENT_ROLES = frozenset(
     {"CORE", "SUPPORT", "CLAIM-LINK", "RISK", "TECH", "UNKNOWN"}
 )
 
-# Fields that affect whole-product knowledge status when in unresolved CONFLICT.
-BLOCKING_KNOWLEDGE_FIELDS = frozenset(
-    {
-        "ingredients",
-        "ingredient_roles",
-        "ingredient_role",
-        "known_use_cases",
-        "use_case",
-        "contraindications",
-        "usage_instructions",
-        "usage_instruction",
-        "usage",
-        "manufacturer_claims",
-        "manufacturer_claim",
-        "claimed_benefits",
-        "benefit",
-        "other_attributes",
-        "other_attribute",
-    }
+from app.domain.product_knowledge_fields import (
+    BLOCKING_KNOWLEDGE_FIELDS,
+    IDENTITY_FIELDS,
 )
 
-# Identity-level fields: conflict here is product identity, not knowledge merge noise.
-IDENTITY_FIELDS = frozenset(
-    {
-        "brand",
-        "product_name",
-        "barcode",
-        "gtin",
-        "barcode_gtin",
-        "variant",
-        "size_value",
-        "size_unit",
-        "packaging_version",
-        "market_region",
-    }
-)
-
-# Evidence fields with explicit downstream ProductKnowledge or identity semantics.
-# Reclassification must not route claims into arbitrary fields that the knowledge
-# builder cannot interpret or preserve in its structured output.
-RECLASSIFIABLE_EVIDENCE_FIELDS = frozenset(
-    BLOCKING_KNOWLEDGE_FIELDS | IDENTITY_FIELDS | {"claim"}
-)
 
 
 def version_scope_key(
