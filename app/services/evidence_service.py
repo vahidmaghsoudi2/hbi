@@ -261,13 +261,32 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
             row.evidence_id: self.audit.snapshot(row)
             for row in self.repository.find_by_product(product_id)
         }
-        self.repository.update(evidence_id, field=target_field)
+        # Conditional UPDATE is the concurrency boundary: if QA has changed
+        # the row since the read above, reclassification must not proceed.
+        from sqlalchemy import update as sql_update
+
+        pending_update = (
+            sql_update(Evidence)
+            .where(
+                Evidence.evidence_id == evidence_id,
+                Evidence.qa_status == "PENDING",
+            )
+            .values(field=target_field)
+        )
+        result = self.db.execute(pending_update)
+        if result.rowcount != 1:
+            self.db.rollback()
+            raise ValidationError(
+                "Evidence is no longer PENDING; reclassification was not applied."
+            )
+        self.db.expire_all()
 
         active_conflict_ids = {
             item_id
             for group in self.detect_conflicts(product_id)
             for item_id in group["evidence_ids"]
         }
+        operation_correlation_id = correlation_id or f"EVID-{uuid.uuid4().hex}"
         for row in self.repository.find_by_product(product_id):
             old_status = (row.conflict_status or "NONE").strip().upper()
             field_changed = row.evidence_id == evidence_id
@@ -293,7 +312,7 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
                 },
                 reason=reason.strip(),
                 resulting_state=updated.qa_status,
-                correlation_id=correlation_id or f"EVID-{uuid.uuid4().hex}",
+                correlation_id=operation_correlation_id,
             )
         return self.get_by_id(evidence_id)
 
