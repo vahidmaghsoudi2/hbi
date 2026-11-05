@@ -215,3 +215,49 @@ def test_pending_evidence_field_reclassification_is_audited_and_preserves_govern
         "old": "ingredients",
         "new": "manufacturer_claims",
     }
+
+def test_resolving_conflict_does_not_reject_other_market_evidence(db_session):
+    product_id = _add_product_and_evidence(
+        db_session,
+        [
+            {
+                "source_type": "MANUFACTURER_WEBSITE",
+                "source_reference": "https://example.test/us",
+                "claim": "The US formula contains ingredient A.",
+                "field": "ingredients",
+                "market_region": "US",
+            },
+            {
+                "source_type": "INDEPENDENT_REVIEW",
+                "source_reference": "https://review.example/us",
+                "claim": "The US formula contains ingredient B.",
+                "field": "ingredients",
+                "market_region": "US",
+            },
+            {
+                "source_type": "MANUFACTURER_WEBSITE",
+                "source_reference": "https://example.test/eu",
+                "claim": "The EU formula contains ingredient C.",
+                "field": "ingredients",
+                "market_region": "EU",
+            },
+        ],
+    )
+
+    selected = EvidenceService(db_session).resolve_conflict(
+        "EV-CONFLICT-CLASS-1",
+        "US-market claim selected for this test.",
+        actor_id="qa-user",
+        actor_role="Reviewer/QA",
+    )
+
+    rows = db_session.query(Evidence).filter(Evidence.product_id == product_id).all()
+    by_id = {row.evidence_id: row for row in rows}
+
+    assert selected.conflict_status == "NONE"
+    assert selected.qa_status == "PENDING"
+    assert by_id["EV-CONFLICT-CLASS-2"].conflict_status == "NONE"
+    assert by_id["EV-CONFLICT-CLASS-2"].qa_status == "REJECTED"
+    assert by_id["EV-CONFLICT-CLASS-3"].conflict_status == "CONFLICT"
+    assert by_id["EV-CONFLICT-CLASS-3"].qa_status == "PENDING"
+
