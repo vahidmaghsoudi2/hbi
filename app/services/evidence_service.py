@@ -168,7 +168,8 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
             if (getattr(ev, "qa_status", None) or "").strip().upper() == "REJECTED":
                 continue
             field = ev.field or "general"
-            field_map.setdefault(field, []).append({
+            market_region = (getattr(ev, "market_region", None) or "").strip().upper() or None
+            field_map.setdefault((field, market_region), []).append({
                 "evidence_id": ev.evidence_id,
                 "value": ev.claim,
                 "claim_type": ev.claim_type,
@@ -178,7 +179,7 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
             })
 
         conflicts = []
-        for field, entries in field_map.items():
+        for (field, market_region), entries in field_map.items():
             if len(entries) > 1:
                 unique_values = {entry["value"] for entry in entries}
                 if len(unique_values) > 1:
@@ -204,6 +205,7 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
                     )
                     conflicts.append({
                         "field": field,
+                        "market_region": market_region,
                         "values": [entry["value"] for entry in entries],
                         "evidence_ids": [entry["evidence_id"] for entry in entries],
                         "new_evidence_id": entries[-1]["evidence_id"],
@@ -211,6 +213,68 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
                         "status": "NEEDS_REVIEW" if same_source_group else "UNRESOLVED",
                     })
         return conflicts
+
+    def reclassify_field(
+        self,
+        evidence_id: str,
+        new_field: str,
+        reason: str,
+        *,
+        actor_id: str = "system",
+        actor_role: Optional[str] = None,
+        correlation_id: Optional[str] = None,
+    ) -> Optional[Evidence]:
+        """Audited field-only correction for PENDING evidence; does not verify or publish."""
+        target_field = (new_field or "").strip()
+        if not target_field or not (reason or "").strip():
+            raise ValidationError("Target field and reclassification reason are required.")
+        selected = self.get_by_id(evidence_id)
+        if selected is None:
+            raise NotFoundError(f"Evidence {evidence_id} not found")
+        if (selected.qa_status or "").strip().upper() != "PENDING":
+            raise ValidationError("Only PENDING evidence may be reclassified.")
+        if (selected.field or "").strip() == target_field:
+            raise ValidationError("Evidence already uses the requested field.")
+
+        product_id = selected.product_id
+        before = {
+            row.evidence_id: self.audit.snapshot(row)
+            for row in self.repository.find_by_product(product_id)
+        }
+        self.repository.update(evidence_id, field=target_field)
+
+        active_conflict_ids = {
+            item_id
+            for group in self.detect_conflicts(product_id)
+            for item_id in group["evidence_ids"]
+        }
+        for row in self.repository.find_by_product(product_id):
+            old_status = (row.conflict_status or "NONE").strip().upper()
+            new_status = (
+                "CONFLICT" if row.evidence_id in active_conflict_ids
+                else ("NONE" if old_status == "CONFLICT" else old_status)
+            )
+            if old_status == new_status:
+                continue
+            updated = self.repository.update(row.evidence_id, conflict_status=new_status)
+            self.audit.append(
+                actor_id=actor_id,
+                actor_role=actor_role,
+                action="RECLASSIFY_FIELD" if row.evidence_id == evidence_id else "RECLASSIFY_CONFLICT_STATE",
+                target_id=row.evidence_id,
+                product_id=product_id,
+                before=before.get(row.evidence_id),
+                after=self.audit.snapshot(updated),
+                diff={
+                    "field": {"old": selected.field, "new": target_field}
+                    if row.evidence_id == evidence_id else None,
+                    "conflict_status": {"old": old_status, "new": new_status},
+                },
+                reason=reason.strip(),
+                resulting_state=updated.qa_status,
+                correlation_id=correlation_id or f"EVID-{uuid.uuid4().hex}",
+            )
+        return self.get_by_id(evidence_id)
 
     def resolve_conflict(
         self,
@@ -234,9 +298,11 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
         # governance decision, so every competing claim in the same field
         # must be excluded from Knowledge/Recommendation.
         field = selected.field or "general"
+        market_region = (getattr(selected, "market_region", None) or "").strip().upper() or None
         related = [
             ev for ev in self.repository.find_by_product(selected.product_id)
             if (ev.field or "general") == field
+            and ((getattr(ev, "market_region", None) or "").strip().upper() or None) == market_region
             and ev.evidence_id != selected.evidence_id
             and (ev.conflict_status or "").upper() == "CONFLICT"
         ]
