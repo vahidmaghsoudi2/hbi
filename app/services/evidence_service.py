@@ -307,11 +307,19 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
         # governance decision, so every competing claim in the same field
         # must be excluded from Knowledge/Recommendation.
         field = (selected.field or "general").strip().lower() or "general"
-        market_region = (getattr(selected, "market_region", None) or "").strip().upper() or None
+        product = self.db.query(Product).filter(Product.product_id == selected.product_id).first()
+        product_market = (getattr(product, "market_region", None) or "").strip().upper() or None
+        market_region = (
+            (getattr(selected, "market_region", None) or "").strip().upper()
+            or product_market
+        )
         related = [
             ev for ev in self.repository.find_by_product(selected.product_id)
             if ((ev.field or "general").strip().lower() or "general") == field
-            and ((getattr(ev, "market_region", None) or "").strip().upper() or None) == market_region
+            and (
+                (getattr(ev, "market_region", None) or "").strip().upper()
+                or product_market
+            ) == market_region
             and ev.evidence_id != selected.evidence_id
             and (ev.conflict_status or "").upper() == "CONFLICT"
         ]
