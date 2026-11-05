@@ -139,12 +139,21 @@ async def reclassify_evidence_field(
     facade = EvidenceFacade(db)
     try:
         subject_id, roles = auth
+        role_priority = {
+            ROLE_ADMIN: 0,
+            ROLE_PO: 1,
+            ROLE_REVIEWER_QA: 2,
+        }
+        ordered_roles = sorted(
+            (str(role) for role in roles),
+            key=lambda role: (role_priority.get(role, 99), role),
+        )
         evidence = facade.service.reclassify_field(
             evidence_id,
             request.field,
             request.reason,
             actor_id=subject_id,
-            actor_role=next(iter(roles), None),
+            actor_role=ordered_roles[0] if ordered_roles else None,
         )
         dto = facade._to_evidence_dto(evidence)
         return EvidenceResponse.model_validate(dto.__dict__)
