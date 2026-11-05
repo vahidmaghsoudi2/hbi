@@ -11,7 +11,7 @@ from app.repositories.evidence_repository import EvidenceRepository
 from app.services.base import BaseService
 from app.core.exceptions import ValidationError, ConflictError, NotFoundError
 from app.domain.claim_taxonomy import CLAIM_TYPES
-from app.services.product_knowledge_service import RECLASSIFIABLE_EVIDENCE_FIELDS
+from app.domain.product_knowledge_fields import RECLASSIFIABLE_EVIDENCE_FIELDS
 from app.services.evidence_mutation_log_service import EvidenceMutationLogService
 
 logger = logging.getLogger(__name__)
