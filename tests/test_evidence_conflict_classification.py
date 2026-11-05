@@ -30,7 +30,7 @@ def _add_product_and_evidence(db_session, source_pairs, product_market=None):
                 source_reference=item["source_reference"],
                 claim=item["claim"],
                 field=item.get("field", "manufacturer_claims"),
-                claim_type="MANUFACTURER_CLAIM",
+                claim_type=item.get("claim_type", "MANUFACTURER_CLAIM"),
                 evidence_status="UNKNOWN",
                 conflict_status="CONFLICT",
                 qa_status="PENDING",
@@ -320,6 +320,42 @@ def test_reclassification_rejects_unknown_target_field_without_mutation_or_audit
             "EV-CONFLICT-CLASS-1",
             "unreviewed_custom_field",
             "This target is intentionally outside the supported taxonomy.",
+            actor_id="po-user",
+            actor_role="PRODUCT_OWNER",
+        )
+
+    row = db_session.query(Evidence).filter(
+        Evidence.evidence_id == "EV-CONFLICT-CLASS-1"
+    ).one()
+    assert row.field == "ingredients"
+    assert row.conflict_status == "CONFLICT"
+    assert row.qa_status == "PENDING"
+    assert row.evidence_status == "UNKNOWN"
+    assert db_session.query(EvidenceMutationLog).filter(
+        EvidenceMutationLog.product_id == product_id
+    ).count() == 0
+
+def test_reclassification_enforces_manufacturer_claim_type_for_claim_fields(db_session):
+    from app.models.evidence_mutation_log import EvidenceMutationLog
+
+    product_id = _add_product_and_evidence(
+        db_session,
+        [
+            {
+                "source_type": "REGULATORY",
+                "source_reference": "https://example.test/regulatory",
+                "claim": "The label declares active ingredient X.",
+                "field": "ingredients",
+                "claim_type": "FACT",
+            },
+        ],
+    )
+
+    with pytest.raises(ValidationError, match="claim_type MANUFACTURER_CLAIM"):
+        EvidenceService(db_session).reclassify_field(
+            "EV-CONFLICT-CLASS-1",
+            "manufacturer_claims",
+            "This evidence is an independently sourced fact, not a manufacturer claim.",
             actor_id="po-user",
             actor_role="PRODUCT_OWNER",
         )
