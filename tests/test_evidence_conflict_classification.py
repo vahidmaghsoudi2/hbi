@@ -25,11 +25,12 @@ def _add_product_and_evidence(db_session, source_pairs):
                 source_type=item["source_type"],
                 source_reference=item["source_reference"],
                 claim=item["claim"],
-                field="manufacturer_claims",
+                field=item.get("field", "manufacturer_claims"),
                 claim_type="MANUFACTURER_CLAIM",
                 evidence_status="UNKNOWN",
                 conflict_status="CONFLICT",
                 qa_status="PENDING",
+                market_region=item.get("market_region"),
             )
         )
     db_session.commit()
@@ -135,3 +136,75 @@ def test_facade_preserves_same_source_classification_in_conflict_dto(db_session)
     assert conflicts[0].status == "NEEDS_REVIEW"
     rows = db_session.query(Evidence).filter(Evidence.product_id == product_id).all()
     assert all(row.conflict_status == "CONFLICT" for row in rows)
+
+
+
+def test_conflicts_are_scoped_to_market_region(db_session):
+    product_id = _add_product_and_evidence(
+        db_session,
+        [
+            {
+                "source_type": "MANUFACTURER_WEBSITE",
+                "source_reference": "https://example.test/product",
+                "claim": "The formula contains ingredient A.",
+                "market_region": None,
+            },
+            {
+                "source_type": "MANUFACTURER_WEBSITE",
+                "source_reference": "https://example.test/product",
+                "claim": "The US formula contains ingredient B.",
+                "market_region": "US",
+            },
+        ],
+    )
+
+    assert EvidenceService(db_session).detect_conflicts(product_id) == []
+
+
+def test_pending_evidence_field_reclassification_is_audited_and_preserves_governance(db_session):
+    from app.models.evidence_mutation_log import EvidenceMutationLog
+
+    product_id = _add_product_and_evidence(
+        db_session,
+        [
+            {
+                "source_type": "MANUFACTURER_WEBSITE",
+                "source_reference": "https://example.test/product",
+                "claim": "The manufacturer states the product contains 10% active X.",
+                "field": "ingredients",
+            },
+            {
+                "source_type": "MANUFACTURER_WEBSITE",
+                "source_reference": "https://example.test/product",
+                "claim": "The manufacturer's INCI declaration lists active X.",
+                "field": "ingredients",
+            },
+        ],
+    )
+
+    result = EvidenceService(db_session).reclassify_field(
+        "EV-CONFLICT-CLASS-1",
+        "manufacturer_claims",
+        "Separate the manufacturer concentration statement from the INCI declaration.",
+        actor_id="po-user",
+        actor_role="PRODUCT_OWNER",
+    )
+
+    rows = db_session.query(Evidence).filter(Evidence.product_id == product_id).all()
+    by_id = {row.evidence_id: row for row in rows}
+    assert result.field == "manufacturer_claims"
+    assert by_id["EV-CONFLICT-CLASS-2"].field == "ingredients"
+    assert all(row.conflict_status == "NONE" for row in rows)
+    assert all(row.qa_status == "PENDING" for row in rows)
+    assert all(row.evidence_status == "UNKNOWN" for row in rows)
+
+    audit_rows = (
+        db_session.query(EvidenceMutationLog)
+        .filter(EvidenceMutationLog.product_id == product_id)
+        .all()
+    )
+    assert len(audit_rows) == 2
+    assert {row.action for row in audit_rows} == {
+        "RECLASSIFY_FIELD", "RECLASSIFY_CONFLICT_STATE"
+    }
+    assert all(row.reason for row in audit_rows)
