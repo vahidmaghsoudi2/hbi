@@ -267,7 +267,7 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
                 before=before.get(row.evidence_id),
                 after=self.audit.snapshot(updated),
                 diff={
-                    "field": {"old": selected.field, "new": target_field}
+                    "field": {"old": before.get(row.evidence_id, {}).get("field"), "new": target_field}
                     if row.evidence_id == evidence_id else None,
                     "conflict_status": {"old": old_status, "new": new_status},
                 },
