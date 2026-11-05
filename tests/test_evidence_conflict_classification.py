@@ -280,7 +280,7 @@ def test_unscoped_evidence_inherits_product_market_for_conflict_detection(db_ses
                 "source_reference": "https://review.example/us",
                 "claim": "The formula contains ingredient B.",
                 "field": "ingredients",
-                "market_region": "US",
+                "market_region": "us",
             },
         ],
         product_market="US",
