@@ -170,7 +170,7 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
             # They must not re-open conflicts when a new claim is added on the same field.
             if (getattr(ev, "qa_status", None) or "").strip().upper() == "REJECTED":
                 continue
-            field = ev.field or "general"
+            field = (ev.field or "general").strip().lower() or "general"
             # Match ProductKnowledge scope semantics: unscoped evidence inherits
             # the Product market, but never guesses a market when Product is unscoped.
             market_region = (
@@ -233,7 +233,7 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
         correlation_id: Optional[str] = None,
     ) -> Optional[Evidence]:
         """Audited field-only correction for PENDING evidence; does not verify or publish."""
-        target_field = (new_field or "").strip()
+        target_field = (new_field or "").strip().lower()
         if not target_field or not (reason or "").strip():
             raise ValidationError("Target field and reclassification reason are required.")
         selected = self.get_by_id(evidence_id)
@@ -241,7 +241,7 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
             raise NotFoundError(f"Evidence {evidence_id} not found")
         if (selected.qa_status or "").strip().upper() != "PENDING":
             raise ValidationError("Only PENDING evidence may be reclassified.")
-        if (selected.field or "").strip() == target_field:
+        if (selected.field or "").strip().lower() == target_field:
             raise ValidationError("Evidence already uses the requested field.")
 
         product_id = selected.product_id
@@ -306,11 +306,11 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
         # The evidence_id is the explicit winning claim. Resolution is a
         # governance decision, so every competing claim in the same field
         # must be excluded from Knowledge/Recommendation.
-        field = selected.field or "general"
+        field = (selected.field or "general").strip().lower() or "general"
         market_region = (getattr(selected, "market_region", None) or "").strip().upper() or None
         related = [
             ev for ev in self.repository.find_by_product(selected.product_id)
-            if (ev.field or "general") == field
+            if ((ev.field or "general").strip().lower() or "general") == field
             and ((getattr(ev, "market_region", None) or "").strip().upper() or None) == market_region
             and ev.evidence_id != selected.evidence_id
             and (ev.conflict_status or "").upper() == "CONFLICT"
