@@ -371,3 +371,38 @@ def test_reclassification_enforces_manufacturer_claim_type_for_claim_fields(db_s
         EvidenceMutationLog.product_id == product_id
     ).count() == 0
 
+def test_reclassification_rejects_identity_field_without_downstream_knowledge_mapping(db_session):
+    from app.models.evidence_mutation_log import EvidenceMutationLog
+
+    product_id = _add_product_and_evidence(
+        db_session,
+        [
+            {
+                "source_type": "MANUFACTURER_WEBSITE",
+                "source_reference": "https://example.test/product",
+                "claim": "The product name appears on the manufacturer's page.",
+                "field": "ingredients",
+            },
+        ],
+    )
+
+    with pytest.raises(ValidationError, match="Unsupported target field"):
+        EvidenceService(db_session).reclassify_field(
+            "EV-CONFLICT-CLASS-1",
+            "product_name",
+            "Identity data must use the governed Product Master identity workflow.",
+            actor_id="po-user",
+            actor_role="PRODUCT_OWNER",
+        )
+
+    row = db_session.query(Evidence).filter(
+        Evidence.evidence_id == "EV-CONFLICT-CLASS-1"
+    ).one()
+    assert row.field == "ingredients"
+    assert row.conflict_status == "CONFLICT"
+    assert row.qa_status == "PENDING"
+    assert row.evidence_status == "UNKNOWN"
+    assert db_session.query(EvidenceMutationLog).filter(
+        EvidenceMutationLog.product_id == product_id
+    ).count() == 0
+
