@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
 from app.models.evidence import Evidence
+from app.models.product import Product
 from app.repositories.evidence_repository import EvidenceRepository
 from app.services.base import BaseService
 from app.core.exceptions import ValidationError, ConflictError, NotFoundError
@@ -161,6 +162,8 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
         if not evidences:
             return []
 
+        product = self.db.query(Product).filter(Product.product_id == product_id).first()
+        product_market = (getattr(product, "market_region", None) or "").strip().upper() or None
         field_map = {}
         for ev in evidences:
             # REJECTED rows are governance-excluded (e.g. conflict losers).
@@ -168,7 +171,12 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
             if (getattr(ev, "qa_status", None) or "").strip().upper() == "REJECTED":
                 continue
             field = ev.field or "general"
-            market_region = (getattr(ev, "market_region", None) or "").strip().upper() or None
+            # Match ProductKnowledge scope semantics: unscoped evidence inherits
+            # the Product market, but never guesses a market when Product is unscoped.
+            market_region = (
+                (getattr(ev, "market_region", None) or "").strip().upper()
+                or product_market
+            )
             field_map.setdefault((field, market_region), []).append({
                 "evidence_id": ev.evidence_id,
                 "value": ev.claim,
