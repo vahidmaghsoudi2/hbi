@@ -250,17 +250,18 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
         }
         for row in self.repository.find_by_product(product_id):
             old_status = (row.conflict_status or "NONE").strip().upper()
+            field_changed = row.evidence_id == evidence_id
             new_status = (
                 "CONFLICT" if row.evidence_id in active_conflict_ids
                 else ("NONE" if old_status == "CONFLICT" else old_status)
             )
-            if old_status == new_status:
+            if old_status == new_status and not field_changed:
                 continue
             updated = self.repository.update(row.evidence_id, conflict_status=new_status)
             self.audit.append(
                 actor_id=actor_id,
                 actor_role=actor_role,
-                action="RECLASSIFY_FIELD" if row.evidence_id == evidence_id else "RECLASSIFY_CONFLICT_STATE",
+                action="RECLASSIFY_FIELD" if field_changed else "RECLASSIFY_CONFLICT_STATE",
                 target_id=row.evidence_id,
                 product_id=product_id,
                 before=before.get(row.evidence_id),
