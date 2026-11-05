@@ -325,6 +325,7 @@ class EvidenceFacade:
     def _to_conflict_dto(self, conflict: Dict) -> ConflictEntryDTO:
         return ConflictEntryDTO(
             field=conflict.get("field"),
+            market_region=conflict.get("market_region"),
             values=conflict.get("values", []),
             evidence_ids=conflict.get("evidence_ids", []),
             severity=conflict.get("severity", "HIGH"),
