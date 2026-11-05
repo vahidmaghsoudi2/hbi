@@ -11,6 +11,7 @@ from app.repositories.evidence_repository import EvidenceRepository
 from app.services.base import BaseService
 from app.core.exceptions import ValidationError, ConflictError, NotFoundError
 from app.domain.claim_taxonomy import CLAIM_TYPES
+from app.services.product_knowledge_service import RECLASSIFIABLE_EVIDENCE_FIELDS
 from app.services.evidence_mutation_log_service import EvidenceMutationLogService
 
 logger = logging.getLogger(__name__)
@@ -236,6 +237,11 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
         target_field = (new_field or "").strip().lower()
         if not target_field or not (reason or "").strip():
             raise ValidationError("Target field and reclassification reason are required.")
+        if target_field not in RECLASSIFIABLE_EVIDENCE_FIELDS:
+            allowed = ", ".join(sorted(RECLASSIFIABLE_EVIDENCE_FIELDS))
+            raise ValidationError(
+                f"Unsupported target field {target_field!r}; allowed values: {allowed}"
+            )
         selected = self.get_by_id(evidence_id)
         if selected is None:
             raise NotFoundError(f"Evidence {evidence_id} not found")
