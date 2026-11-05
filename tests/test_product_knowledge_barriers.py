@@ -17,6 +17,7 @@ from app.services.product_knowledge_service import (
     ALLOWED_INGREDIENT_ROLES,
     ProductKnowledgeService,
     parse_role_entries,
+    version_scope_key,
 )
 
 
@@ -335,3 +336,12 @@ def test_single_foreign_market_is_not_inferred_as_product_scope(db):
     domains = json.loads(pk.domain_evidence_status or "{}")
     assert domains["ingredients"] == "PARTIAL"
     assert pk.evidence_status == "PARTIAL"
+
+
+
+def test_blank_evidence_market_falls_back_to_normalized_product_market():
+    assert version_scope_key(
+        evidence_market="   ",
+        product_market=" us ",
+        packaging_version=" v1 ",
+    ) == "market=US|pack=v1"
