@@ -164,6 +164,11 @@ class ResolveConflictRequest(BaseModel):
     resolution: str
 
 
+class EvidenceReclassifyRequest(BaseModel):
+    field: str
+    reason: str
+
+
 class ResearchAssertion(BaseModel):
     claim: str
     source_type: str
@@ -207,6 +212,7 @@ class ProductKnowledgeResponse(BaseModel):
 
 class ConflictEntryResponse(BaseModel):
     field: Optional[str] = None
+    market_region: Optional[str] = None
     values: List[str] = []
     evidence_ids: List[str] = []
     severity: str = "HIGH"
