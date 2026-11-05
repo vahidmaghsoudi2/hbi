@@ -4,7 +4,7 @@ from app.models.product import Product
 from app.services.evidence_service import EvidenceService
 
 
-def _add_product_and_evidence(db_session, source_pairs):
+def _add_product_and_evidence(db_session, source_pairs, product_market=None):
     product_id = "P_CONFLICT_CLASSIFICATION_001"
     db_session.add(
         Product(
@@ -14,6 +14,7 @@ def _add_product_and_evidence(db_session, source_pairs):
             product_line="SKIN",
             identity_status="NEEDS_REVIEW",
             qa_verdict="PENDING",
+            market_region=product_market,
         )
     )
     for index, item in enumerate(source_pairs, start=1):
@@ -261,3 +262,36 @@ def test_resolving_conflict_does_not_reject_other_market_evidence(db_session):
     assert by_id["EV-CONFLICT-CLASS-3"].conflict_status == "CONFLICT"
     assert by_id["EV-CONFLICT-CLASS-3"].qa_status == "PENDING"
 
+
+
+def test_unscoped_evidence_inherits_product_market_for_conflict_detection(db_session):
+    product_id = _add_product_and_evidence(
+        db_session,
+        [
+            {
+                "source_type": "MANUFACTURER_WEBSITE",
+                "source_reference": "https://example.test/unscoped",
+                "claim": "The formula contains ingredient A.",
+                "field": "ingredients",
+                "market_region": None,
+            },
+            {
+                "source_type": "INDEPENDENT_REVIEW",
+                "source_reference": "https://review.example/us",
+                "claim": "The formula contains ingredient B.",
+                "field": "ingredients",
+                "market_region": "US",
+            },
+        ],
+        product_market="US",
+    )
+
+    conflicts = EvidenceService(db_session).detect_conflicts(product_id)
+
+    assert len(conflicts) == 1
+    assert conflicts[0]["field"] == "ingredients"
+    assert conflicts[0]["market_region"] == "US"
+    assert set(conflicts[0]["evidence_ids"]) == {
+        "EV-CONFLICT-CLASS-1",
+        "EV-CONFLICT-CLASS-2",
+    }
