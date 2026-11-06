@@ -102,7 +102,7 @@ test("Home Page keeps customer recommendations when operator session fails", asy
 import sqlite3, sys
 c = sqlite3.connect(sys.argv[1])
 row = c.execute(
-    "SELECT case_id, customer_id, case_type FROM cases WHERE case_id=?",
+    "SELECT case_id, customer_id, case_type FROM \"Case\" WHERE case_id=?",
     (sys.argv[2],),
 ).fetchone()
 if not row:
