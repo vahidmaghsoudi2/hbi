@@ -396,3 +396,36 @@ def test_foreign_key_violation_restores_backup(tmp_path):
     conn = sqlite3.connect(db)
     assert conn.execute("PRAGMA foreign_key_check").fetchall()
     conn.close()
+
+
+def test_required_unique_index_must_be_full_plain_and_non_partial():
+    script = (
+        Path(__file__).resolve().parents[1]
+        / "scripts"
+        / "migrate_product_problem_link_assessments.py"
+    )
+    module = runpy.run_path(str(script))
+    check = module["_is_full_plain_unique_index"]
+    base = {
+        "unique": True,
+        "partial": 0,
+        "has_expression": False,
+        "desc": [0, 0],
+        "coll": ["BINARY", "BINARY"],
+        "columns": ["assertion_key", "revision_no"],
+    }
+    assert check(base)
+    assert not check({**base, "partial": 1})
+    assert not check({**base, "has_expression": True})
+    assert not check({**base, "desc": [0, 1]})
+    assert not check({**base, "coll": ["NOCASE", "BINARY"]})
+
+
+def test_migration_delete_policy_matches_orm_restrict_contract():
+    script = (
+        Path(__file__).resolve().parents[1]
+        / "scripts"
+        / "migrate_product_problem_link_assessments.py"
+    )
+    module = runpy.run_path(str(script))
+    assert module["ALLOWED_ON_DELETE"] == frozenset({"RESTRICT"})
