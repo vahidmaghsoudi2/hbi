@@ -174,14 +174,18 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 and answer.get("value_state") == "KNOWN"
                 and str(answer.get("value") or "").strip()
             ):
-                evidence_factors.append(
-                    {
-                        "name": "concern",
-                        "value": str(answer["value"]).strip(),
-                        "source": "customer_input",
-                        "validity": "DECLARED",
-                    }
-                )
+                for raw_value in str(answer["value"]).split(","):
+                    normalized_value = raw_value.strip()
+                    if not normalized_value or normalized_value.casefold() == "unknown":
+                        continue
+                    evidence_factors.append(
+                        {
+                            "name": "concern",
+                            "value": normalized_value,
+                            "source": "customer_input",
+                            "validity": "DECLARED",
+                        }
+                    )
 
         if not evidence_factors or not generated_needs:
             return False

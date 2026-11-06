@@ -155,3 +155,8 @@ def test_need_match_uses_explicit_controlled_product_surface():
 def test_canonical_ids_are_stable_keys():
     assert "hydration" in CANONICAL_NEEDS
     assert CANONICAL_NEEDS["sun_protection"] == "sun protection"
+
+
+def test_all_canonical_need_ids_are_accepted_as_homepage_values():
+    for canonical_id in CANONICAL_NEEDS:
+        assert map_phrase_to_canonical(canonical_id) == canonical_id

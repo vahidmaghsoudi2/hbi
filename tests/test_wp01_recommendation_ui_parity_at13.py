@@ -25,10 +25,21 @@ def test_at13_show_more_exists_only_when_more_than_five_results():
     assert "setShowAllRecommendations(true)" in source
 
 
-def test_at13_backend_full_result_set_is_still_stored():
+def test_at13_customer_results_are_published_before_optional_operator_enrichment():
     source = _source()
-    assert "setRecs(Array.isArray(list) ? list : []);" in source
     assert "const list = await generateRecommendations(" in source
+    assert "const publicList = Array.isArray(list) ? list : [];" in source
+    assert "setRecs(publicList);" in source
+    assert "setRecDone(true);" in source
+    assert 'setActive("results");' in source
+
+    # Customer-visible results must be committed to UI state before the
+    # optional operator session is requested. A missing operator token must
+    # never turn a completed customer consultation into a failed flow.
+    publish_at = source.index("// Publish customer-visible results immediately; operator access is optional.")
+    operator_at = source.index("const operatorToken = await ensureProductSession();", publish_at)
+    assert publish_at < operator_at
+    assert "listInternalEvaluationsByCase(newCaseId, operatorToken)" in source
 
 
 def test_at13_consultation_recommendations_remain_separate_from_direct_sale():
