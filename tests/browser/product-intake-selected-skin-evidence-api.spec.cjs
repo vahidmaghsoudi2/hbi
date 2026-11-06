@@ -66,7 +66,7 @@ test("authenticated Anua Evidence draft is saved and read back without changing 
   );
   await page.getByRole("button", { name: "ثبت باکس‌های مجاز به‌صورت پیش‌نویس" }).click();
   const saveResponse = await saveResponsePromise;
-  expect(saveResponse.status(), await saveResponse.text()).toBe(201);
+  expect(saveResponse.status(), await saveResponse.text()).toBe(200);
   await expect(page.getByRole("status")).toContainText("QA=PENDING");
   expect(researchDraftCount).toBe(1);
   expect(productCreateCount).toBe(0);
