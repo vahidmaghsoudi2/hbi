@@ -402,3 +402,16 @@ def test_text_answer_is_bounded_and_unknown_is_preserved(client, db_session):
     state = json.loads(case.evidence_gaps)
     gap = next(item for item in state["gaps"] if item["question_id"] == "skin.product_history.v1")
     assert gap["status"] == "UNKNOWN"
+
+def test_explicit_unknown_current_answer_blocks_legacy_profile_fallback(client, db_session):
+    customer, case = _setup_skin_case(db_session)
+    customer.concerns = "hydration"
+    db_session.commit()
+    service = SkinNextQuestionService(db_session)
+    service.capture_answer(case, QUESTION_ID, "unknown")
+
+    current = service.current_input_from_case(case)
+    assert current["concerns"] == "unknown"
+    profile = ProfileFactContextService(db_session).build(case, current)
+    assert profile["concerns"] == "unknown"
+    assert profile["_profile_fact_context"]["sources"]["concerns"]["source"] == "CURRENT_CONSULTATION"
