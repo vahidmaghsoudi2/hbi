@@ -116,6 +116,10 @@ def _customer_public(c) -> Dict[str, Any]:
 def _looks_like_mobile(value: Optional[str]) -> bool:
     if not value:
         return False
+    # Customer IDs contain timestamps; counting their digits misclassifies
+    # CUST_GUEST_* identities as phone numbers during authenticated intake.
+    if value.strip().upper().startswith("CUST_"):
+        return False
     digits = "".join(ch for ch in value if ch.isdigit())
     return len(digits) >= 10
 
