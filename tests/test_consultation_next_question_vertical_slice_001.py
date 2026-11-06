@@ -108,10 +108,10 @@ def test_missing_skin_input_produces_one_bounded_question(client, db_session):
     assert question["question_id"] == QUESTION_ID
     assert question["factor"] == FACTOR_KEY
     assert question["mode"] == "MISSING_INPUT"
-    assert len(question["options"]) == 2
+    assert len(question["options"]) == 11
     assert {item["value"] for item in question["options"]} == {
-        "hydration",
-        "sun_protection",
+        "hydration", "barrier_repair", "dry_skin", "oil_control", "acne_care",
+        "sensitivity", "sun_protection", "brightening", "anti_aging", "cleansing", "unknown",
     }
     assert question["evidence_gap"]["status"] == "MISSING"
     assert question["evidence_gap"]["gap_id"] == f"{case.case_id}:{QUESTION_ID}"
@@ -130,9 +130,10 @@ def test_known_skin_input_produces_no_question(client, db_session):
     # Current consultation input is the authoritative known value for this attempt.
     from app.services.skin_next_question_service import SkinNextQuestionService
 
-    assert SkinNextQuestionService(db_session).get_question(
+    next_question = SkinNextQuestionService(db_session).get_question(
         case, {"concerns": "hydration"}
-    ) is None
+    )
+    assert next_question["question_id"] == "skin.current_type.v1"
 
 
 def test_answer_is_captured_in_case_and_not_profilefact(client, db_session):
@@ -164,7 +165,32 @@ def test_answer_is_captured_in_case_and_not_profilefact(client, db_session):
         headers=headers,
     )
     assert follow_up.status_code == 200
-    assert follow_up.json()["status"] == "NO_QUESTION"
+    assert follow_up.json()["status"] == "QUESTION_REQUIRED"
+    assert follow_up.json()["question"]["question_id"] == "skin.current_type.v1"
+
+    remaining = [
+        ("skin.current_type.v1", "unknown"),
+        ("skin.duration.v1", "unknown"),
+        ("skin.self_reported_severity.v1", "unknown"),
+        ("skin.affected_area.v1", "unknown"),
+        ("skin.aggravating_factors.v1", "unknown"),
+        ("skin.product_history.v1", "unknown"),
+        ("skin.additional_context.v1", "unknown"),
+    ]
+    for question_id, answer in remaining:
+        saved = client.post(
+            f"/api/v1/recommendations/next-question/{case.case_id}/answer",
+            headers=headers,
+            json={"question_id": question_id, "answer": answer},
+        )
+        assert saved.status_code == 200, saved.text
+
+    completed = client.get(
+        f"/api/v1/recommendations/next-question/{case.case_id}",
+        headers=headers,
+    )
+    assert completed.status_code == 200
+    assert completed.json()["status"] == "NO_QUESTION"
 
 
 def test_answer_a_and_b_rerun_existing_recommendation_with_observable_effect(client, db_session):
@@ -218,7 +244,8 @@ def test_current_consultation_overrides_profile_fact_for_question_boundary(clien
     db_session.commit()
 
     service = SkinNextQuestionService(db_session)
-    assert service.get_question(case, {"concerns": "sun_protection"}) is None
+    next_question = service.get_question(case, {"concerns": "sun_protection"})
+    assert next_question["question_id"] == "skin.current_type.v1"
     profile = ProfileFactContextService(db_session).build(
         case, {"concerns": "sun_protection"}
     )
@@ -303,3 +330,75 @@ def test_frozen_scoring_formula_is_unchanged():
     assert result["final_score"] == 1.0
     assert result["confidence"] == 1.0
     assert result["eligibility"] == "ELIGIBLE"
+
+def test_legacy_profile_is_confirmation_context_not_current_case_answer(client, db_session):
+    customer, case = _setup_skin_case(db_session)
+    customer.concerns = "hydration"
+    db_session.commit()
+    service = SkinNextQuestionService(db_session)
+
+    question = service.get_question(case)
+    assert question["question_id"] == QUESTION_ID
+    assert question["mode"] == "CONFIRM_CURRENT_SESSION"
+    assert question["evidence_gap"]["status"] == "STALE_PROFILE_REQUIRES_CONFIRMATION"
+
+    saved = service.capture_answer(case, QUESTION_ID, "sun_protection")
+    assert saved["answer"] == "sun_protection"
+    current = service.current_input_from_case(case)
+    assert current["concerns"] == "sun_protection"
+    profile = ProfileFactContextService(db_session).build(case, current)
+    assert profile["concerns"] == "sun_protection"
+    assert profile["_profile_fact_context"]["sources"]["concerns"]["source"] == "CURRENT_CONSULTATION"
+
+
+def test_bounded_consultation_sequence_persists_all_customer_reported_factors(client, db_session):
+    customer, case = _setup_skin_case(db_session)
+    service = SkinNextQuestionService(db_session)
+    answers = [
+        (QUESTION_ID, "hydration,sun_protection"),
+        ("skin.current_type.v1", "خشک,حساس"),
+        ("skin.duration.v1", "one_to_four_weeks"),
+        ("skin.self_reported_severity.v1", "moderate"),
+        ("skin.affected_area.v1", "face"),
+        ("skin.aggravating_factors.v1", "sun_exposure,cosmetics"),
+        ("skin.product_history.v1", "مرطوب‌کننده و ضدآفتاب؛ واکنش گزارش‌شده: سوزش"),
+        ("skin.additional_context.v1", "توضیح ثبت‌شده توسط مشتری"),
+    ]
+    for question_id, answer in answers:
+        question = service.get_question(case)
+        assert question is not None
+        assert question["question_id"] == question_id
+        result = service.capture_answer(case, question_id, answer)
+        assert result["source"] == "CURRENT_CASE_CONSULTATION"
+
+    assert service.get_question(case) is None
+    db_session.expire_all()
+    persisted = db_session.get(Case, case.case_id)
+    state = json.loads(persisted.evidence_gaps)
+    by_question = {item["question_id"]: item for item in state["answers"]}
+    assert by_question[QUESTION_ID]["value"] == "hydration,sun_protection"
+    assert by_question["skin.current_type.v1"]["value"] == "خشک,حساس"
+    assert by_question["skin.duration.v1"]["value"] == "one_to_four_weeks"
+    assert by_question["skin.self_reported_severity.v1"]["value"] == "moderate"
+    assert by_question["skin.affected_area.v1"]["value"] == "face"
+    assert by_question["skin.aggravating_factors.v1"]["value"] == "sun_exposure,cosmetics"
+    assert by_question["skin.product_history.v1"]["value"].startswith("مرطوب‌کننده")
+    assert by_question["skin.additional_context.v1"]["value"] == "توضیح ثبت‌شده توسط مشتری"
+    current = SkinNextQuestionService.current_input_from_case(persisted)
+    assert current["concerns"] == "hydration,sun_protection"
+    assert current["skin_profile"] == "خشک,حساس"
+
+
+def test_text_answer_is_bounded_and_unknown_is_preserved(client, db_session):
+    customer, case = _setup_skin_case(db_session)
+    service = SkinNextQuestionService(db_session)
+    try:
+        service.capture_answer(case, "skin.product_history.v1", "x" * 601)
+        assert False, "overlong text should be rejected"
+    except ValueError as exc:
+        assert "length" in str(exc)
+    result = service.capture_answer(case, "skin.product_history.v1", "unknown")
+    assert result["value_state"] == "UNKNOWN"
+    state = json.loads(case.evidence_gaps)
+    gap = next(item for item in state["gaps"] if item["question_id"] == "skin.product_history.v1")
+    assert gap["status"] == "UNKNOWN"
