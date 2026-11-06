@@ -439,10 +439,29 @@ def _verify_successful_migration(before: Dict[str, Any], conn: sqlite3.Connectio
     if before.get("triggers") != after.get("triggers"):
         raise RuntimeError("Trigger definitions changed during ProductProblemLink migration.")
 
-    for table in before_tables - {"ProductProblemLink"}:
+    for table in before_tables - {"ProductProblemLink", "ProductProblemLinkAssessmentEvent"}:
         for key in ("table_sql", "columns", "counts", "rows", "indexes"):
             if before[key][table] != after[key][table]:
                 raise RuntimeError(f"Unrelated table {table} changed in {key} during migration.")
+
+    event_table = "ProductProblemLinkAssessmentEvent"
+    if event_table in before_tables:
+        for key in ("table_sql", "columns", "counts", "rows"):
+            if before[key][event_table] != after[key][event_table]:
+                raise RuntimeError(f"Existing event history changed in {key} during migration.")
+        canonical_event_names = set(CANONICAL_EVENT_INDEXES)
+        before_event_custom = {
+            name: meta for name, meta in before["indexes"][event_table].items()
+            if name not in canonical_event_names and not name.startswith("sqlite_autoindex")
+        }
+        after_event_custom = {
+            name: meta for name, meta in after["indexes"][event_table].items()
+            if name not in canonical_event_names and not name.startswith("sqlite_autoindex")
+        }
+        if before_event_custom != after_event_custom:
+            raise RuntimeError("Custom event-history index definitions changed during migration.")
+    elif after["counts"].get(event_table) != 0:
+        raise RuntimeError("New assessment event history must be empty after schema-only migration.")
 
     legacy_columns = before["columns"].get("ProductProblemLink", [])
     before_legacy_rows = before["rows"].get("ProductProblemLink", [])
