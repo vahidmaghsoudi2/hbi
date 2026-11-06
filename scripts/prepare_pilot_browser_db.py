@@ -64,6 +64,23 @@ init_db()
 db = SessionLocal()
 try:
     seed(db)
+    anua_id = "HBI-PROD-22C55A8223A945A6"
+    if db.get(Product, anua_id) is None:
+        db.add(Product(
+            product_id=anua_id,
+            brand="Anua",
+            product_name="Azelaic Acid 10% + Hyaluron Redness Soothing Serum",
+            product_line="SKIN",
+            size_value=30,
+            size_unit="ml",
+            identity_status="NEEDS_REVIEW",
+            qa_verdict="PENDING",
+            status="DRAFT",
+        ))
+        db.flush()
+    if db.get(ProductKnowledge, f"PK-{anua_id}") is None:
+        db.add(ProductKnowledge(product_knowledge_id=f"PK-{anua_id}", product_id=anua_id))
+
     product = db.query(Product).filter_by(product_id="ISDIN-FOTOUTRA100-50ML").one()
     product.status = "ACTIVE"
     product.identity_status = "VERIFIED"
