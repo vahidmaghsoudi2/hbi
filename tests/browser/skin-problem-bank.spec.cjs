@@ -57,7 +57,7 @@ test("Skin problem bank renders all 61 source-backed records and searches across
   await expect(list.getByRole("button", { name: /P61/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Photosensitivity" })).toBeVisible();
 
-  await page.getByLabel("جست‌وجو در شش مدخل پایلوت").fill("not-a-record");
+  await page.getByLabel("جست‌وجو در ۶۱ مشکل پوستی P01–P61").fill("not-a-record");
   await expect(list.locator(".pro-problem-item")).toHaveCount(0);
   await expect(page.getByText("در میان ۶۱ مشکل پوستی نتیجه‌ای پیدا نشد.")).toBeVisible();
 });
