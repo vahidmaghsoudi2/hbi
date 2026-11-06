@@ -47,9 +47,13 @@ test("Skin problem bank renders all 61 source-backed records and searches across
   const requestsAfterOpen = requests.slice(beforeOpen);
   expect(requestsAfterOpen.filter((url) => /github\.com|\/api\//i.test(url))).toEqual([]);
 
+  // P24 is referenced by its related P25/P26 records; full-text search
+  // intentionally returns all three source-backed records.
   await page.getByLabel("جست‌وجو در ۶۱ مشکل پوستی P01–P61").fill("P24");
-  await expect(list.locator(".pro-problem-item")).toHaveCount(1);
+  await expect(list.locator(".pro-problem-item")).toHaveCount(3);
   await expect(list.getByRole("button", { name: /P24/ })).toBeVisible();
+  await expect(list.getByRole("button", { name: /P25/ })).toBeVisible();
+  await expect(list.getByRole("button", { name: /P26/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Persistent redness" })).toBeVisible();
 
   await page.getByLabel("جست‌وجو در ۶۱ مشکل پوستی P01–P61").fill("P61");
