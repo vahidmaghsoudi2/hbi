@@ -393,6 +393,10 @@ export default function ProductIntakePanel({
   const [researchField, setResearchField] = useState("claimed_benefits");
   const [researchMarketRegion, setResearchMarketRegion] = useState("");
   const [researchNotes, setResearchNotes] = useState("");
+  const [roleSourceType, setRoleSourceType] = useState("PEER_REVIEWED");
+  const [roleSourceReference, setRoleSourceReference] = useState("");
+  const [roleMarketRegion, setRoleMarketRegion] = useState("");
+  const [roleNotes, setRoleNotes] = useState("");
   const [researchReviewReason, setResearchReviewReason] = useState("");
   const [researchBusy, setResearchBusy] = useState(false);
   const editing = Boolean(editProduct?.product_id);
