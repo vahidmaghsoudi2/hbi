@@ -80,7 +80,7 @@ test("Homepage keeps persisted customer recommendations when operator evaluation
   expect(caseAnswerWrites).toBe(1);
 
   await expect(page.getByRole("heading", { name: "نتایج ارزیابی برای اپراتور" })).toBeVisible();
-  await expect(page.getByText(eligibleRows[0].product_id, { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: eligibleRows[0].product_id })).toBeVisible();
   await expect(page.getByText(/پیشنهاد واجد شرایط آماده است/)).toBeVisible();
   await expect(page.getByText("هنوز پیشنهادی گرفته نشده — از مشاوره شروع کنید.")).toHaveCount(0);
   await expect.poll(() => operatorFailures).toBeGreaterThan(0);
