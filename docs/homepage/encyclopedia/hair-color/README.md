@@ -212,6 +212,28 @@
 
 **وضعیت اطلاعات کاتالوگ:** هویت کاتالوگی نمونه، منبع اصلی، فیلدهای لازم، گزارش موجودی ۱۰ عددی و نقش ترکیبی متخصص ثبت شدند. این وضعیت فقط پذیرش اطلاعات برای مشاورهٔ انتخاب رنگ از کاتالوگ را پوشش می‌دهد؛ نه تأیید ادعاهای فنی/شیمیایی یا مجوز اجرای محصول.
 
+### ردیف ۵۹ — بررسی اولیهٔ معماری موجود HBI برای خدمت رنگ مو
+
+**وضعیت: PARTIAL — ممیزی اولیهٔ شواهد موجود انجام شد؛ انتخاب نهایی معماری هنوز انجام نشده است.**
+
+**مبنای بررسی:** شاخهٔ کاری رنگ مو `docs/hair-color-conceptual-architecture-scenarios-20261102` در مقایسه با `master` وضعیت `diverged` دارد: ۱۷۴ commit جلوتر و ۳۶ commit عقب‌تر؛ بنابراین این شاخه بدون بررسی مستقل نباید با master ادغام یا بازپایه‌گذاری شود. SHA شاخهٔ مبنای master در زمان مقایسه: `9f9cfc5e102b1b6bcef0b156eb86139aec0ad736`. این ثبت فقط وضعیت مشاهده‌شده است؛ هیچ merge/rebase انجام نشده است.
+
+**واقعیت‌های مستند در master:**
+- معماری موجود چهار لایهٔ Models، Repositories، Services و Interface/Facade دارد؛ Facadeها use-case-oriented هستند و Interface نباید مستقیماً به Repository/Model/Database دسترسی داشته باشد. سند: `docs/02_architecture/HBI_ARCHITECTURE.md`؛ blob SHA: `d0a4b37c61633b6f7af3264fb84a96ab73739e8b`.
+- راه‌اندازی مستند پروژه Python 3.12، FastAPI/Uvicorn، SQLAlchemy و frontend مبتنی بر React/Vite است. شواهد: `README.md`، `requirements.txt`، `frontend/package.json`.
+- `app/main.py` از قبل routerهای Case، Recommendation، Inventory، Evidence، Specialist و Outcome Assessment را بارگذاری می‌کند؛ بنابراین این قابلیت‌های عمومی در مخزن وجود دارند و نباید بدون ممیزی دوباره ساخته شوند.
+- مدل `Product` فیلد `product_line` و مقدار مجاز `HAIR` دارد؛ مدل‌های `Case`، `Recommendation` و `Evidence` نیز موجودند. شواهد: `app/models/product.py`، `app/models/case.py`، `app/models/recommendation.py` و `app/models/evidence.py`.
+- `RecommendationService` از سرویس‌ها و منطق نام‌گذاری‌شدهٔ Skin استفاده می‌کند؛ فیلتر صریح `SKIN` دارد و رفتار غیر-SKIN را legacy نگه می‌دارد. این موضوع نشانهٔ آماده‌بودن موتور تصمیم رنگ مو نیست؛ یک نقطهٔ نیازمند ممیزی سازگاری است.
+- مدل `ProductKnowledge` فیلدهای عمومی دانش محصول را دارد؛ `InventoryService` موجودی را بر پایهٔ `product_id` مدیریت می‌کند؛ `SpecialistOverrideService` رویداد override متخصص را جدا از خروجی اصلی Recommendation ثبت می‌کند.
+- سند معماری موجود اعلام می‌کند Schema v1.1 قفل است و تغییر آن فقط از مسیر Change Request مجاز است. هیچ تغییر Schema یا کدنویسی در این بررسی انجام نشده است.
+
+**استنباط معماری اولیه، نه تصمیم مصوب:** مسیر کم‌ریسک برای بررسی بعدی، ارزیابی امکان استفاده از لایه‌ها و موجودیت‌های موجود HBI و توسعهٔ محدودِ use case رنگ مو در همان الگوی Facade/Service/Repository است؛ نه ساخت برنامه یا انبار موازی. بااین‌حال، به‌علت وابستگی‌های Skin در RecommendationService، قفل Schema v1.1 و اختلاف ۳۶ commit شاخه با master، هنوز نمی‌توان سازگاری کامل یا کفایت Schema را تأیید کرد.
+
+**کارهای باز همین ردیف:** تطبیق قرارداد رنگ مو با Product/ProductKnowledge/Case/Recommendation/Evidence/Inventory/Specialist؛ بررسی مرز Product Line=HAIR در سرویس‌ها و APIها؛ بررسی محدودیت‌های Schema v1.1 و مسیر Change Request در صورت نیاز؛ بررسی رابط کاربری موجود؛ و تهیهٔ گزینه‌ها/معیارهای انتخاب بدون کدنویسی.
+
+**محدودیت بررسی:** این یک ممیزی اولیهٔ مستندات و فایل‌های کلیدی master است؛ Reality Audit کامل همهٔ APIها، مدل‌ها، frontend، آزمون‌ها و migrationها انجام نشده است. آزمون نرم‌افزاری اجرا نشده و هیچ ادعای آمادگی عملیاتی مطرح نمی‌شود.
+
+
 **وضعیت فنی:** پیاده‌سازی فنی و پایلوت عملیاتی آغاز نشده‌اند.
 
 **وضعیت حاکمیت مرجع:** انتقال پرونده از طریق PR #500 در شاخهٔ اصلی ادغام شد؛ Issue #499 بسته و به همین مرجع ارجاع داده شد.
