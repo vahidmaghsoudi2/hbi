@@ -31,6 +31,8 @@
 
 **نقطهٔ ورود فعلی این واحد کار:** همین فهرست عملیاتی و سپس [مرجع تجمیعی بانک مشکلات پوستی](SKIN_PROBLEM_BANK_CONSOLIDATED_REFERENCE.md).
 
+**نقشهٔ پیشرفت و مسیر اجرایی مشاوره پوستی HBI:** [نقشه راه مشاوره پوستی](PROJECT_PROGRESS_MASTER/نقشه%20راه%20مشاوره%20پوستی.md) — مرجع ثابت ۷۶ فعالیتی برای پیگیری تکمیل Home Page، Consultation، ProductKnowledge، بانک مشکلات پوستی، Recommendation، روتین صبح/شب و پذیرش G8. این سند فقط در همین مسیر و با همین نام به‌روزرسانی می‌شود؛ نسخهٔ موازی نسازید.
+
 
 **رکوردهای کاری پایلوت:** [SKIN_PROBLEM_BANK_WORKING_RECORDS.md](SKIN_PROBLEM_BANK_WORKING_RECORDS.md).
 
