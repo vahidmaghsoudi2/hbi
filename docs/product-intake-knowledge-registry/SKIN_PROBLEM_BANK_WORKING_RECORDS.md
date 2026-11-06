@@ -1751,51 +1751,51 @@ No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care
 
 | قفسه | ID | نام کاری طبق رکورد موجود | مرز عملیاتی ثبت‌شده | آمادگی مشاوره در این بررسی | اقدام بعدی مشخص |
 |---|---|---|---|---|---|
-| S04 | P17 | Hyperpigmentation / dark spots | Problem/presentation; Map parent of P18/P19 only | NOT ASSESSED؛ نه آماده | تعریف و مرز خانواده، شواهد، زبان مشتری و ایمنی |
-| S04 | P18 | Melasma | Clinical Anchor; linked to P17 per Map | NOT ASSESSED؛ Clinical-anchor only | منبع معتبر، مرز بالینی و حدود ارجاع |
-| S04 | P19 | Post-inflammatory hyperpigmentation | Sequela/pigmentation presentation; related to P17, not merged | NOT ASSESSED؛ نه آماده | مرز presentation/sequela و شواهد |
-| S04 | P20 | Hypopigmentation | Problem/presentation; evidence boundary retained | NOT ASSESSED؛ نه آماده | مرز و شواهد مستقل |
-| S04 | P21 | Vitiligo | Clinical/Referral-sensitive; Clinical-anchor only | NOT ASSESSED؛ Clinical-anchor only | حدود نقش و ارجاع معتبر |
-| S04 | P22 | Sun-related pigmentation | Context/presentation; cross-reference S04↔S09; S04 record owns it | NOT ASSESSED؛ نه آماده | مرز Context با Problem؛ بدون رکورد تکراری |
-| S04 | P23 | Poikiloderma | Parked / Evidence Boundary; Deferred | NOT ASSESSED؛ Deferred | معیار و شاهد معتبر برای بازگشایی |
-| S05 | P24 | Persistent redness | Problem/presentation; Map parent of P25/P26 only | NOT ASSESSED؛ نه آماده | تعریف/مرز، شواهد، زبان مشتری و ایمنی |
-| S05 | P25 | Flushing | Symptom/manifestation; Related/Signal to P24 | NOT ASSESSED؛ نه آماده | معنی سیگنال؛ هر آستانه فقط با منبع معتبر |
-| S05 | P26 | Rosacea | Clinical Anchor | NOT ASSESSED؛ Clinical-anchor only | حدود بالینی و ارجاع معتبر |
-| S05 | P27 | Eczema/Dermatitis | Clinical Anchor; Map parent of P28/P29 only | NOT ASSESSED؛ Clinical-anchor only | مرز خانواده، شواهد و زبان مشتری |
-| S05 | P28 | Atopic dermatitis | Clinical Anchor; related to P27 | NOT ASSESSED؛ Clinical-anchor only | مرز با P27 و منبع معتبر؛ عدم ادغام |
-| S05 | P29 | Allergic contact dermatitis | Clinical Anchor; related to P27 | NOT ASSESSED؛ Clinical-anchor only | مرز با P27 و منبع معتبر؛ عدم ادغام |
-| S05 | P30 | Seborrhoeic dermatitis | Clinical Anchor; cross-shelf S05↔S02 | NOT ASSESSED؛ Clinical-anchor only | رابطه/مالکیت cross-shelf؛ S02 بازنویسی نشود |
-| S05 | P31 | Psoriasis | Clinical/Referral-sensitive; Clinical-anchor only | NOT ASSESSED؛ Clinical-anchor only | مرز ارجاع و شواهد معتبر |
-| S05 | P32 | Hives/Urticaria | Safety/Referral-sensitive; Safety-referral only | NOT ASSESSED؛ Safety-referral only | پروتکل/آستانه ایمنی معتبر؛ بدون حدس |
-| S05 | P33 | Unspecified rash | Unresolved presenting problem/manifestation | NOT ASSESSED؛ نه آماده | مرز ثبت و وضعیت unresolved؛ بدون استنتاج تشخیص |
-| S06 | P34 | Dermatophytosis/fungal infection | Clinical/Safety-sensitive; Safety-referral only | NOT ASSESSED؛ Safety-referral only | تعریف، شواهد و حدود ارجاع |
-| S06 | P35 | Tinea/ringworm | Clinical subtype/manifestation; child/related to P34 per Map | NOT ASSESSED؛ Clinical-anchor only | مرز subtype/manifestation؛ بدون ادغام خودکار |
-| S06 | P36 | Bacterial skin infection | Clinical/Safety-sensitive; Safety-referral only | NOT ASSESSED؛ Safety-referral only | شواهد و مرز ایمنی/ارجاع |
-| S06 | P37 | Viral skin infection | Clinical/Safety-sensitive; Safety-referral only | NOT ASSESSED؛ Safety-referral only | شواهد و مرز ایمنی/ارجاع |
-| S06 | P38 | Cutaneous herpes simplex | Clinical/Safety-sensitive; related to P37 | NOT ASSESSED؛ Safety-referral only | مرز با P37 و مسیر ارجاع معتبر |
-| S06 | P39 | Warts | Clinical Anchor; cross-reference S06↔S08 | NOT ASSESSED؛ Clinical-anchor only | رابطه/مالکیت S08 فقط cross-reference؛ شواهد/حدود نقش |
-| S06 | P40 | Impetigo | Clinical/Safety-sensitive; related to P36 | NOT ASSESSED؛ Safety-referral only | مرز با P36 و حدود ارجاع |
-| S06 | P41 | Scabies | Clinical/Safety-sensitive; Safety-referral only | NOT ASSESSED؛ Safety-referral only | تعریف، شواهد و مرز ایمنی/ارجاع |
-| S06 | P42 | Shingles | Clinical/Referral-sensitive; Clinical-anchor only | NOT ASSESSED؛ Clinical-anchor only | حدود ارجاع و ارتباط با دامنه HBI |
-| S07 | P43 | Uneven skin texture | Problem/presentation; boundary open | NOT ASSESSED؛ نه آماده | مرز باز، شواهد و ارتباط عملیاتی |
-| S07 | P44 | Hyperkeratosis | Clinical/structural presentation; boundary open | NOT ASSESSED؛ Clinical-anchor only | مرز بالینی/ساختاری و شواهد |
-| S07 | P45 | Keratosis pilaris | Clinical Anchor | NOT ASSESSED؛ Clinical-anchor only | تعریف/مرز و شواهد مستقل |
-| S07 | P46 | Seborrhoeic keratosis | Clinical Anchor; cross-reference S07↔S08 | NOT ASSESSED؛ Clinical-anchor only | حفظ cross-reference؛ مرز/شواهد؛ بدون استنتاج تشخیص |
-| S07 | P47 | Skin tags | Clinical Anchor; cross-reference S07↔S08 | NOT ASSESSED؛ Clinical-anchor only | حفظ cross-reference؛ مرز/شواهد؛ عدم ادغام خاموش |
-| S08 | P48 | Moles/nevi | Safety-aware Clinical Anchor | NOT ASSESSED؛ Clinical-anchor only | مرز نقش و شواهد؛ بدون مسیر معمول محصول |
-| S08 | P49 | Changing mole | Safety/Referral Signal; related to P48 | NOT ASSESSED؛ Safety-referral only | حد و مسیر ارجاع فقط با پروتکل معتبر |
-| S08 | P50 | New/growing skin lesion | Safety/Referral Signal | NOT ASSESSED؛ Safety-referral only | تعریف سیگنال و مسیر ارجاع معتبر |
-| S08 | P53 | Suspicious skin-cancer lesion | Safety/Referral Signal | NOT ASSESSED؛ Safety-referral only | حفظ مرز ارجاع؛ بدون تشخیص/محصول |
-| S08 | P54 | Suspicious melanoma lesion | Safety/Referral Signal | NOT ASSESSED؛ Safety-referral only | حفظ مرز ارجاع؛ بدون تشخیص/محصول |
-| S08 | P55 | Bleeding/non-healing lesion | Safety/Referral Signal | NOT ASSESSED؛ Safety-referral only | تعریف و مسیر ارجاع معتبر؛ بدون حدس آستانه |
-| S08 | P56 | Rapid change in lesion size/shape/color | Safety/Referral Signal | NOT ASSESSED؛ Safety-referral only | تعریف سیگنال و مسیر ارجاع معتبر |
-| S09 | P51 | Chronic UV damage | Context/Discovery Problem; locked, NOT NEED-LEVEL | NOT ELIGIBLE for V1 Need؛ NOT ACCEPTED | قفل حفظ شود؛ NOT ELIGIBLE for V1 Need؛ no automatic safety flag |
-| S09 | P52 | Actinic keratosis | Clinical/Safety-sensitive lesion; cross-shelf S09↔S08 | NOT ASSESSED؛ Safety-referral only | مرز بالینی/ارجاع و رابطه متقاطع با منبع معتبر |
-| S10 | P57 | Autoimmune/autoinflammatory skin disease | Broad Clinical Domain/Condition Family; Clinical Anchor | NOT ASSESSED؛ Clinical-anchor only | مرز خانواده، شواهد و ارتباط عملیاتی |
-| S10 | P58 | Cutaneous lupus | Clinical/Referral-sensitive | NOT ASSESSED؛ Clinical-anchor only | مرز بالینی و مسیر ارجاع معتبر |
-| S10 | P59 | Adult-onset dermatomyositis with skin findings | Clinical/Referral-sensitive | NOT ASSESSED؛ Clinical-anchor only | مرز بالینی و مسیر ارجاع معتبر |
-| S10 | P60 | Acanthosis nigricans/systemic-associated skin changes | Clinical/systemic-associated presentation; Clinical Anchor | NOT ASSESSED؛ Clinical-anchor only | عدم تبدیل ارتباط سیستمی به تشخیص/Need؛ مرز و شواهد |
-| S10 | P61 | Photosensitivity | Symptom/clinical presentation; cross-shelf S09↔S10 | NOT ASSESSED؛ Clinical-anchor only | معنی، مرز و رابطه Context با شواهد؛ بدون ارجاع خودکار |
+| S04 | P17 | Hyperpigmentation / dark spots | Problem/presentation; Map parent of P18/P19 only | NOT READY — presentation candidate; definition, customer wording, evidence, and safety review pending | تعریف و مرز خانواده، شواهد، زبان مشتری و ایمنی |
+| S04 | P18 | Melasma | Clinical Anchor; linked to P17 per Map | CLINICAL ANCHOR ONLY — not V1 Need; clinical boundary and evidence review pending | منبع معتبر، مرز بالینی و حدود ارجاع |
+| S04 | P19 | Post-inflammatory hyperpigmentation | Sequela/pigmentation presentation; related to P17, not merged | NOT READY — sequela; temporal relationship and independent evidence pending | مرز presentation/sequela و شواهد |
+| S04 | P20 | Hypopigmentation | Problem/presentation; evidence boundary retained | NOT READY — presentation candidate; definition, customer wording, evidence, and safety review pending | مرز و شواهد مستقل |
+| S04 | P21 | Vitiligo | Clinical/Referral-sensitive; Clinical-anchor only | CLINICAL ANCHOR ONLY — not V1 Need; clinical boundary and evidence review pending | حدود نقش و ارجاع معتبر |
+| S04 | P22 | Sun-related pigmentation | Context/presentation; cross-reference S04↔S09; S04 record owns it | CONTEXT/PRESENTATION — not accepted Need; preserve S04 canonical record and S09 cross-reference | مرز Context با Problem؛ بدون رکورد تکراری |
+| S04 | P23 | Poikiloderma | Parked / Evidence Boundary; Deferred | DEFERRED — not eligible until evidence boundary is resolved | معیار و شاهد معتبر برای بازگشایی |
+| S05 | P24 | Persistent redness | Problem/presentation; Map parent of P25/P26 only | NOT READY — presentation candidate; definition, customer wording, evidence, and safety review pending | تعریف/مرز، شواهد، زبان مشتری و ایمنی |
+| S05 | P25 | Flushing | Symptom/manifestation; Related/Signal to P24 | SYMPTOM/MANIFESTATION — not independent Need; relationship and evidence review pending | معنی سیگنال؛ هر آستانه فقط با منبع معتبر |
+| S05 | P26 | Rosacea | Clinical Anchor | CLINICAL ANCHOR ONLY — not V1 Need; clinical boundary and evidence review pending | حدود بالینی و ارجاع معتبر |
+| S05 | P27 | Eczema/Dermatitis | Clinical Anchor; Map parent of P28/P29 only | CLINICAL ANCHOR ONLY — not V1 Need; clinical boundary and evidence review pending | مرز خانواده، شواهد و زبان مشتری |
+| S05 | P28 | Atopic dermatitis | Clinical Anchor; related to P27 | CLINICAL ANCHOR ONLY — not V1 Need; clinical boundary and evidence review pending | مرز با P27 و منبع معتبر؛ عدم ادغام |
+| S05 | P29 | Allergic contact dermatitis | Clinical Anchor; related to P27 | CLINICAL ANCHOR ONLY — not V1 Need; clinical boundary and evidence review pending | مرز با P27 و منبع معتبر؛ عدم ادغام |
+| S05 | P30 | Seborrhoeic dermatitis | Clinical Anchor; cross-shelf S05↔S02 | CLINICAL ANCHOR ONLY — not V1 Need; clinical boundary and evidence review pending | رابطه/مالکیت cross-shelf؛ S02 بازنویسی نشود |
+| S05 | P31 | Psoriasis | Clinical/Referral-sensitive; Clinical-anchor only | CLINICAL ANCHOR ONLY — not V1 Need; clinical boundary and evidence review pending | مرز ارجاع و شواهد معتبر |
+| S05 | P32 | Hives/Urticaria | Safety/Referral-sensitive; Safety-referral only | SAFETY/REFERRAL ONLY — not Ordinary Care/Recommendation; human referral boundary pending | پروتکل/آستانه ایمنی معتبر؛ بدون حدس |
+| S05 | P33 | Unspecified rash | Unresolved presenting problem/manifestation | UNRESOLVED PRESENTATION — NOT READY; preserve UNKNOWN and do not infer diagnosis | مرز ثبت و وضعیت unresolved؛ بدون استنتاج تشخیص |
+| S06 | P34 | Dermatophytosis/fungal infection | Clinical/Safety-sensitive; Safety-referral only | SAFETY/REFERRAL ONLY — not Ordinary Care/Recommendation; human referral boundary pending | تعریف، شواهد و حدود ارجاع |
+| S06 | P35 | Tinea/ringworm | Clinical subtype/manifestation; child/related to P34 per Map | CLINICAL ANCHOR ONLY — not V1 Need; clinical boundary and evidence review pending | مرز subtype/manifestation؛ بدون ادغام خودکار |
+| S06 | P36 | Bacterial skin infection | Clinical/Safety-sensitive; Safety-referral only | SAFETY/REFERRAL ONLY — not Ordinary Care/Recommendation; human referral boundary pending | شواهد و مرز ایمنی/ارجاع |
+| S06 | P37 | Viral skin infection | Clinical/Safety-sensitive; Safety-referral only | SAFETY/REFERRAL ONLY — not Ordinary Care/Recommendation; human referral boundary pending | شواهد و مرز ایمنی/ارجاع |
+| S06 | P38 | Cutaneous herpes simplex | Clinical/Safety-sensitive; related to P37 | SAFETY/REFERRAL ONLY — not Ordinary Care/Recommendation; human referral boundary pending | مرز با P37 و مسیر ارجاع معتبر |
+| S06 | P39 | Warts | Clinical Anchor; cross-reference S06↔S08 | CLINICAL ANCHOR ONLY — not V1 Need; clinical boundary and evidence review pending | رابطه/مالکیت S08 فقط cross-reference؛ شواهد/حدود نقش |
+| S06 | P40 | Impetigo | Clinical/Safety-sensitive; related to P36 | SAFETY/REFERRAL ONLY — not Ordinary Care/Recommendation; human referral boundary pending | مرز با P36 و حدود ارجاع |
+| S06 | P41 | Scabies | Clinical/Safety-sensitive; Safety-referral only | SAFETY/REFERRAL ONLY — not Ordinary Care/Recommendation; human referral boundary pending | تعریف، شواهد و مرز ایمنی/ارجاع |
+| S06 | P42 | Shingles | Clinical/Referral-sensitive; Clinical-anchor only | CLINICAL ANCHOR ONLY — not V1 Need; clinical boundary and evidence review pending | حدود ارجاع و ارتباط با دامنه HBI |
+| S07 | P43 | Uneven skin texture | Problem/presentation; boundary open | NOT READY — presentation candidate; definition, customer wording, evidence, and safety review pending | مرز باز، شواهد و ارتباط عملیاتی |
+| S07 | P44 | Hyperkeratosis | Clinical/structural presentation; boundary open | CLINICAL ANCHOR ONLY — not V1 Need; clinical boundary and evidence review pending | مرز بالینی/ساختاری و شواهد |
+| S07 | P45 | Keratosis pilaris | Clinical Anchor | CLINICAL ANCHOR ONLY — not V1 Need; clinical boundary and evidence review pending | تعریف/مرز و شواهد مستقل |
+| S07 | P46 | Seborrhoeic keratosis | Clinical Anchor; cross-reference S07↔S08 | CLINICAL ANCHOR ONLY — not V1 Need; clinical boundary and evidence review pending | حفظ cross-reference؛ مرز/شواهد؛ بدون استنتاج تشخیص |
+| S07 | P47 | Skin tags | Clinical Anchor; cross-reference S07↔S08 | CLINICAL ANCHOR ONLY — not V1 Need; clinical boundary and evidence review pending | حفظ cross-reference؛ مرز/شواهد؛ عدم ادغام خاموش |
+| S08 | P48 | Moles/nevi | Safety-aware Clinical Anchor | CLINICAL ANCHOR ONLY — not V1 Need; clinical boundary and evidence review pending | مرز نقش و شواهد؛ بدون مسیر معمول محصول |
+| S08 | P49 | Changing mole | Safety/Referral Signal; related to P48 | SAFETY/REFERRAL ONLY — not Ordinary Care/Recommendation; human referral boundary pending | حد و مسیر ارجاع فقط با پروتکل معتبر |
+| S08 | P50 | New/growing skin lesion | Safety/Referral Signal | SAFETY/REFERRAL ONLY — not Ordinary Care/Recommendation; human referral boundary pending | تعریف سیگنال و مسیر ارجاع معتبر |
+| S08 | P53 | Suspicious skin-cancer lesion | Safety/Referral Signal | SAFETY/REFERRAL ONLY — not Ordinary Care/Recommendation; human referral boundary pending | حفظ مرز ارجاع؛ بدون تشخیص/محصول |
+| S08 | P54 | Suspicious melanoma lesion | Safety/Referral Signal | SAFETY/REFERRAL ONLY — not Ordinary Care/Recommendation; human referral boundary pending | حفظ مرز ارجاع؛ بدون تشخیص/محصول |
+| S08 | P55 | Bleeding/non-healing lesion | Safety/Referral Signal | SAFETY/REFERRAL ONLY — not Ordinary Care/Recommendation; human referral boundary pending | تعریف و مسیر ارجاع معتبر؛ بدون حدس آستانه |
+| S08 | P56 | Rapid change in lesion size/shape/color | Safety/Referral Signal | SAFETY/REFERRAL ONLY — not Ordinary Care/Recommendation; human referral boundary pending | تعریف سیگنال و مسیر ارجاع معتبر |
+| S09 | P51 | Chronic UV damage | Context/Discovery Problem; locked, NOT NEED-LEVEL | CONTEXT/DISCOVERY ONLY — NOT NEED-LEVEL; not eligible for V1 Need | قفل حفظ شود؛ NOT ELIGIBLE for V1 Need؛ no automatic safety flag |
+| S09 | P52 | Actinic keratosis | Clinical/Safety-sensitive lesion; cross-shelf S09↔S08 | SAFETY/REFERRAL ONLY — not Ordinary Care/Recommendation; human referral boundary pending | مرز بالینی/ارجاع و رابطه متقاطع با منبع معتبر |
+| S10 | P57 | Autoimmune/autoinflammatory skin disease | Broad Clinical Domain/Condition Family; Clinical Anchor | CLINICAL ANCHOR ONLY — not V1 Need; clinical boundary and evidence review pending | مرز خانواده، شواهد و ارتباط عملیاتی |
+| S10 | P58 | Cutaneous lupus | Clinical/Referral-sensitive | CLINICAL ANCHOR ONLY — not V1 Need; clinical boundary and evidence review pending | مرز بالینی و مسیر ارجاع معتبر |
+| S10 | P59 | Adult-onset dermatomyositis with skin findings | Clinical/Referral-sensitive | CLINICAL ANCHOR ONLY — not V1 Need; clinical boundary and evidence review pending | مرز بالینی و مسیر ارجاع معتبر |
+| S10 | P60 | Acanthosis nigricans/systemic-associated skin changes | Clinical/systemic-associated presentation; Clinical Anchor | CLINICAL ANCHOR ONLY — not V1 Need; clinical boundary and evidence review pending | عدم تبدیل ارتباط سیستمی به تشخیص/Need؛ مرز و شواهد |
+| S10 | P61 | Photosensitivity | Symptom/clinical presentation; cross-shelf S09↔S10 | SYMPTOM/CLINICAL PRESENTATION — not independent Need; preserve S09↔S10 cross-reference; review pending | معنی، مرز و رابطه Context با شواهد؛ بدون ارجاع خودکار |
 
 
 ### صف اقدام به ترتیب قفسه‌ها
@@ -2042,3 +2042,23 @@ No relationship beyond the live Map is inferred. No S10 item is an Ordinary-care
 - P58 و P59 در مسیر clinical/referral-sensitive باقی می‌مانند؛ P60 از ظاهر به علت سیستمیک نگاشت نمی‌شود؛ P61 به‌تنهایی علت یا تشخیص را تعیین نمی‌کند.
 - P22 و روابط Map بازنویسی نشده‌اند؛ هیچ منبع یا رابطهٔ جدیدی به نقشه اضافه نشده است.
 - این بازبینی فقط کفایت و محدودیت منابع نامزد را ثبت می‌کند. تا تصویب انسانی مجازِ تعریف‌ها و مسیرهای عملیاتی، موارد همچنان **NOT ACCEPTED / UNKNOWN / NOT CONSULTATION-READY** هستند. G8 همچنان **BLOCKED / NOT VERIFIED** می‌ماند.
+
+## ۹. تصمیم Product Owner و ارزیابی آمادگی عملیاتی — 2026-11-06
+
+Product Owner قاعدهٔ محافظه‌کارانه را تأیید کرد: **هیچ Problem تا تکمیل Evidence و بازبینی انسانی به Need پذیرفته‌شده یا consultation_ready تبدیل نمی‌شود و Recommendation فعال نمی‌شود.** بر همین اساس، تمام ۴۵ شناسهٔ P17–P61 در این ماتریس اکنون دارای Disposition عملیاتی روشن هستند؛ این کار «آمادگی» را ارزیابی می‌کند، نه اینکه وضعیت پزشکی را تأیید کند.
+
+| Disposition | شناسه‌ها | تعداد | نتیجهٔ V1 |
+|---|---|---:|---|
+| Problem / Presentation candidate | P17, P20, P24, P43 | ۴ | NOT READY؛ تعریف، زبان مشتری، Evidence و مرز ایمنی تکمیل نشده |
+| Sequela | P19 | ۱ | NOT READY؛ رابطهٔ زمانی و شواهد مستقل لازم است |
+| Clinical Anchor / Clinical Domain | P18, P21, P26–P31, P35, P39, P42, P44–P48, P57–P60 | ۲۰ | Clinical-anchor only؛ Need مستقل یا Ordinary Care نیست |
+| Safety / Referral | P32, P34, P36–P38, P40–P41, P49–P50, P52–P56 | ۱۴ | Safety/referral only؛ از Recommendation عادی خارج |
+| Context / Presentation | P22 | ۱ | Context؛ رکورد canonical در S04 و cross-reference در S09 |
+| Context / Discovery | P51 | ۱ | NOT NEED-LEVEL؛ خارج از V1 Need |
+| Symptom / Manifestation | P25, P61 | ۲ | Symptom/clinical presentation؛ Need مستقل نیست |
+| Unresolved presentation | P33 | ۱ | UNKNOWN حفظ شود؛ تشخیص استنتاج نشود |
+| Deferred | P23 | ۱ | Deferred تا رفع مرز Evidence |
+
+**جمع:** ۴۵ شناسه، ۴۵ Disposition ثبت‌شده، صفر Need پذیرفته‌شده، صفر consultation_ready و صفر Recommendation فعال‌شده.
+
+این جدول، ارزیابی آمادگی عملیاتی محافظه‌کارانه است؛ جایگزین بازبینی بالینی متخصص یا پروتکل ارجاع مصوب نیست. موارد Clinical Anchor و Safety/Referral تا زمان بازبینی انسانی در مسیر توصیهٔ محصول قرار نمی‌گیرند. هیچ تعریف پزشکی جدید یا رابطهٔ جدیدی به Map افزوده نشده است.
