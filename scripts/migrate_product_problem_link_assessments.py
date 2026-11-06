@@ -352,15 +352,21 @@ def _list_user_tables(conn: sqlite3.Connection) -> List[str]:
     return [r[0] for r in rows]
 
 
+def _table_row_fingerprint_columns(
+    conn: sqlite3.Connection, table: str, columns: List[str]
+) -> List[Tuple[Any, ...]]:
+    if not columns:
+        return []
+    col_list = ", ".join(f'"{column}"' for column in columns)
+    order = ", ".join(f'"{column}"' for column in columns)
+    rows = conn.execute(f'SELECT {col_list} FROM "{table}" ORDER BY {order}').fetchall()
+    return [tuple(row) for row in rows]
+
+
 def _table_row_fingerprint(conn: sqlite3.Connection, table: str) -> List[Tuple[Any, ...]]:
     """Ordered full-row fingerprint so restore proves data content, not only counts."""
     cols = [r[1] for r in conn.execute(f'PRAGMA table_info("{table}")').fetchall()]
-    if not cols:
-        return []
-    col_list = ", ".join(f'"{c}"' for c in cols)
-    order = ", ".join(f'"{c}"' for c in cols)
-    rows = conn.execute(f'SELECT {col_list} FROM "{table}" ORDER BY {order}').fetchall()
-    return [tuple(r) for r in rows]
+    return _table_row_fingerprint_columns(conn, table, cols)
 
 
 def _capture_snapshot(conn: sqlite3.Connection) -> Dict[str, Any]:
@@ -368,12 +374,14 @@ def _capture_snapshot(conn: sqlite3.Connection) -> Dict[str, Any]:
     fk_check = [tuple(r) for r in conn.execute("PRAGMA foreign_key_check").fetchall()]
     tables = _list_user_tables(conn)
     table_sql: Dict[str, str] = {}
+    columns: Dict[str, List[str]] = {}
     counts: Dict[str, int] = {}
     rows: Dict[str, List[Tuple[Any, ...]]] = {}
     indexes: Dict[str, Dict[str, dict]] = {}
     triggers: List[Tuple[str, str, str]] = []
     for table in tables:
         table_sql[table] = _table_sql(conn, table) or ""
+        columns[table] = [row[1] for row in conn.execute(f'PRAGMA table_info("{table}")').fetchall()]
         counts[table] = int(conn.execute(f'SELECT COUNT(*) FROM "{table}"').fetchone()[0])
         rows[table] = _table_row_fingerprint(conn, table)
         indexes[table] = {
@@ -397,6 +405,7 @@ def _capture_snapshot(conn: sqlite3.Connection) -> Dict[str, Any]:
         "fk_check": fk_check,
         "tables": tables,
         "table_sql": table_sql,
+        "columns": columns,
         "counts": counts,
         "rows": rows,
         "indexes": indexes,
@@ -407,11 +416,68 @@ def _capture_snapshot(conn: sqlite3.Connection) -> Dict[str, Any]:
 def _snapshots_equal(before: Dict[str, Any], after: Dict[str, Any]) -> List[str]:
     diffs: List[str] = []
     for key in (
-        "integrity", "fk_check", "tables", "table_sql", "counts", "rows", "indexes", "triggers",
+        "integrity", "fk_check", "tables", "table_sql", "columns", "counts", "rows", "indexes", "triggers",
     ):
         if before.get(key) != after.get(key):
             diffs.append(key)
     return diffs
+
+def _verify_successful_migration(before: Dict[str, Any], conn: sqlite3.Connection) -> None:
+    """Verify successful migration preserves every legacy row and unrelated table."""
+    after = _capture_snapshot(conn)
+    before_tables = set(before["tables"])
+    after_tables = set(after["tables"])
+    expected_tables = before_tables | {"ProductProblemLinkAssessmentEvent"}
+    if after_tables != expected_tables:
+        raise RuntimeError(
+            f"Unexpected table changes during migration: before={sorted(before_tables)}, after={sorted(after_tables)}"
+        )
+    if before.get("integrity") != "ok" or after.get("integrity") != "ok":
+        raise RuntimeError("SQLite integrity_check must be ok before and after migration.")
+    if before.get("fk_check") or after.get("fk_check"):
+        raise RuntimeError("Foreign-key violations must be absent before and after migration.")
+    if before.get("triggers") != after.get("triggers"):
+        raise RuntimeError("Trigger definitions changed during ProductProblemLink migration.")
+
+    for table in before_tables - {"ProductProblemLink"}:
+        for key in ("table_sql", "columns", "counts", "rows", "indexes"):
+            if before[key][table] != after[key][table]:
+                raise RuntimeError(f"Unrelated table {table} changed in {key} during migration.")
+
+    legacy_columns = before["columns"].get("ProductProblemLink", [])
+    before_legacy_rows = before["rows"].get("ProductProblemLink", [])
+    after_legacy_rows = _table_row_fingerprint_columns(conn, "ProductProblemLink", legacy_columns)
+    if before_legacy_rows != after_legacy_rows:
+        raise RuntimeError("Legacy ProductProblemLink row values changed during migration.")
+
+    canonical_names = set(CANONICAL_PPL_INDEXES)
+    before_custom = {
+        name: meta
+        for name, meta in before["indexes"]["ProductProblemLink"].items()
+        if name not in canonical_names and not name.startswith("sqlite_autoindex")
+    }
+    after_custom = {
+        name: meta
+        for name, meta in after["indexes"]["ProductProblemLink"].items()
+        if name not in canonical_names and not name.startswith("sqlite_autoindex")
+    }
+    if before_custom != after_custom:
+        raise RuntimeError("Custom ProductProblemLink index definitions changed during migration.")
+
+    if after["counts"].get("ProductProblemLinkAssessmentEvent") != 0:
+        raise RuntimeError("New assessment event history must be empty after schema-only migration.")
+    metadata_columns = (
+        "feature_basis", "outcome", "assertion_key", "revision_no",
+        "supersedes_link_id", "idempotency_key", "request_fingerprint",
+    )
+    for column in metadata_columns:
+        count = conn.execute(
+            f'SELECT COUNT(*) FROM "ProductProblemLink" WHERE "{column}" IS NOT NULL'
+        ).fetchone()[0]
+        if count:
+            raise RuntimeError(
+                f"Legacy migration unexpectedly populated {column} for {count} rows."
+            )
 
 
 def _restore_database(
@@ -673,6 +739,7 @@ def migrate(db_path: str | Path) -> str:
         _validate_canonical_indexes(
             conn, "ProductProblemLinkAssessmentEvent", CANONICAL_EVENT_INDEXES, allow_missing=False
         )
+        _verify_successful_migration(snapshot, conn)
         conn.commit()
         _verify_foreign_keys(conn)
         return (
