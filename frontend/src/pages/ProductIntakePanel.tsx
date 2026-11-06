@@ -67,40 +67,81 @@ const SKIN_PRODUCT_SPECIFIC_BOXES: Record<string, readonly string[]> = {
 };
 
 function skinProductEvidenceField(productId: string, label: string): string | undefined {
+  if (label.includes("بازار و نسخهٔ منبع")) return "other_attributes";
+  if (label.includes("درجه‌بندی PA/UVA")) return "other_attributes";
+  if (label.includes("مقاومت در برابر آب")) return "manufacturer_claims";
+  if (label.includes("ادعا") || label.includes("نتیجهٔ آزمون")) return "manufacturer_claims";
   if (
-    productId === "HBI-PROD-22C55A8223A945A6" &&
-    label === "ادعای تسکینِ اعلام‌شده طبق منبع"
-  ) return "manufacturer_claims";
-
-  const structured = label.includes("ترکیبات") ||
+    label.includes("ترکیبات") ||
     label.includes("فیلترهای UV") ||
     label.includes("پپتیدها") ||
     label.includes("مشتق ویتامین C") ||
     label.includes("آزلائیک اسید") ||
-    label.includes("سالیسیلیک اسید");
-  return structured ? "ingredients" : undefined;
-}
-
-/** Map only semantically matching template boxes to existing Evidence fields. */
-function skinTemplateEvidenceField(template: string, label: string): string | undefined {
-  if (template === "HYDRATING_MOISTURIZER" && label === "فرم محصول (سرم / ژل / کرم / لوسیون / امولسیون / نامشخص)") return undefined;
-  if (template === "HYDRATING_MOISTURIZER" && label === "ادعای آبرسانی یا حفظ رطوبت (متن + منبع)") return "claimed_benefits";
-  if (template === "HYDRATING_MOISTURIZER" && label === "مواد جاذب رطوبت اعلام‌شده (مثل هیالورونیک اسید، فقط با منبع)") return "ingredients";
-  if (template === "HYDRATING_MOISTURIZER" && label === "فهرست INCI کامل یا جزئی و نسخه/بازار") return "ingredients";
-  if (template === "BRIGHTENING_SPOT" && label === "هدف اعلام‌شده") return "known_use_cases";
-  if (template === "BRIGHTENING_SPOT" && label === "مواد فعال اعلام‌شده") return "ingredients";
-  if (template === "CLEANSING_GEL" && label === "تمرکز اعلام‌شده") return "known_use_cases";
-  if (template === "CLEANSING_GEL" && label === "تناوب مصرف طبق برچسب") return "usage_instructions";
-  if (template === "SUNSCREEN" && label === "صورت / بدن") return "known_use_cases";
+    label.includes("سالیسیلیک اسید")
+  ) return "ingredients";
   return undefined;
 }
 
-/** Only these V1 boxes have a semantically matching source-bound Evidence field. */
+/** Map only to existing ProductKnowledge fields; unclassified details use other_attributes. */
+function skinTemplateEvidenceField(template: string, label: string): string | undefined {
+  if (template === "HYDRATING_MOISTURIZER") {
+    if (label.includes("فرم محصول") || label === "بافت") return "other_attributes";
+    if (label === "حس پوستی اعلام‌شده") return "manufacturer_claims";
+    if (label.includes("روز / شب")) return "usage_instructions";
+    if (label.includes("ادعای آبرسانی")) return "claimed_benefits";
+    if (label.includes("نقش ترکیبات")) return "ingredient_roles";
+    if (
+      label.includes("مواد جاذب رطوبت") ||
+      label.includes("مواد نرم‌کننده") ||
+      label.includes("مواد کاهنده تبخیر آب") ||
+      label.includes("فهرست INCI") ||
+      label.includes("عطر / الکل")
+    ) return "ingredients";
+  }
+  if (template === "BRIGHTENING_SPOT") {
+    if (label === "هدف اعلام‌شده") return "known_use_cases";
+    if (label === "مواد فعال اعلام‌شده") return "ingredients";
+    if (label.includes("بازه زمانی") || label.includes("اعداد ادعای")) return "manufacturer_claims";
+  }
+  if (template === "CLEANSING_GEL") {
+    if (label === "آبکشی‌شونده" || label.includes("تناوب مصرف")) return "usage_instructions";
+    if (label === "تمرکز اعلام‌شده") return "known_use_cases";
+  }
+  if (template === "SUNSCREEN") {
+    if (label === "SPF" || label.includes("PA / ادعای UVA") || label === "رنگی / بی‌رنگ") return "other_attributes";
+    if (label === "نوع فیلتر") return "ingredients";
+    if (label === "مقاومت در برابر آب") return "manufacturer_claims";
+    if (label === "صورت / بدن") return "known_use_cases";
+  }
+  if (template === "MICELLAR") {
+    if (label === "پاک‌کنندگی آرایش" || label === "مناسب اطراف چشم طبق برچسب") return "known_use_cases";
+    if (label === "نیاز به آبکشی") return "usage_instructions";
+  }
+  if (template === "TONER") {
+    if (label === "نقش اعلام‌شده") return "known_use_cases";
+    if (label === "الکل طبق فرمول اعلام‌شده") return "ingredients";
+  }
+  if (template === "ANTI_ACNE") {
+    if (label === "تمرکز اعلام‌شده") return "known_use_cases";
+    if (label === "مواد فعال اعلام‌شده") return "ingredients";
+    if (label === "ماندگار / آبکشی") return "usage_instructions";
+  }
+  if (template === "EXFOLIANT") {
+    if (label === "نوع لایه‌بردار" || label === "اسیدها یا ذرات اعلام‌شده") return "ingredients";
+    if (label === "تناوب مصرف") return "usage_instructions";
+    if (label === "هشدار تحریک از برچسب") return "contraindications";
+  }
+  if (template === "OTHER_SKIN") return "other_attributes";
+  return undefined;
+}
+
+/** Existing ProductKnowledge fields with an exact V1 persistence destination. */
 const SKIN_OK_EVIDENCE_FIELDS = [
-  { key: "skin_goals", label: "اهداف پوستی اعلام‌شده", field: "skin_goals" },
-  { key: "warnings", label: "هشدارها و محدودیت‌ها", field: "contraindications" },
-  { key: "usage", label: "روش مصرف", field: "usage_instructions" },
+  { key: "skin_goals", label: "کاربردهای پوستی اعلام‌شده سازنده", field: "known_use_cases" },
+  { key: "warnings", label: "موارد منع مصرف صریح طبق منبع", field: "contraindications" },
+  { key: "usage", label: "روش مصرف طبق منبع", field: "usage_instructions" },
   { key: "ingredients", label: "ترکیبات کلیدی اعلام‌شده", field: "ingredients" },
+  { key: "ingredient_roles", label: "نقش ترکیبات (JSON یا نام:ROLE؛ CORE/SUPPORT/CLAIM-LINK/RISK/TECH/UNKNOWN)", field: "ingredient_roles" },
 ] as const;
 
 type Draft = {
