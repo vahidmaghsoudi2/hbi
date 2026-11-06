@@ -436,3 +436,25 @@ def test_multi_need_case_answer_passes_d1(client, db_session):
     assert {item["product_id"] for item in generated.json()} == {
         "PROD-NQ-HYDRATION", "PROD-NQ-SUN"
     }
+
+
+def test_unknown_case_need_does_not_reuse_legacy_customer_concern(client, db_session):
+    customer, case = _setup_skin_case(db_session)
+    customer.concerns = "hydration"
+    db_session.commit()
+    token = _token(client, customer.customer_id)
+    headers = {"Authorization": f"Bearer {token}"}
+
+    saved = client.post(
+        f"/api/v1/recommendations/next-question/{case.case_id}/answer",
+        headers=headers,
+        json={"question_id": QUESTION_ID, "answer": "unknown"},
+    )
+    assert saved.status_code == 200, saved.text
+    generated = client.post(
+        "/api/v1/recommendations/generate",
+        headers=headers,
+        json={"case_id": case.case_id, "customer_profile": {}},
+    )
+    assert generated.status_code == 200, generated.text
+    assert generated.json() == []
