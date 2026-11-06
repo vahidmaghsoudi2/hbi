@@ -211,9 +211,10 @@
         {
           "id": "encyclopedia-hair-color",
           "label": "رنگ مو",
-          "status": "no-page-yet",
-          "docs_path": null,
-          "description": "رنگ‌آمیزی، انتخاب رنگ و نگهداری موی رنگ‌شده؛ متمایز از دانش عمومی مراقبت مو."
+          "status": "reference-available",
+          "docs_path": "docs/homepage/encyclopedia/hair-color/README.md",
+          "description": "مرجع معماری رنگ مو و فهرست مادر ثابت پیشرفت پروژه؛ فهرست مادر فقط در همان مسیر ویرایش می‌شود و شماره‌های پیگیری ثابت می‌مانند.",
+          "progress_docs_path": "docs/homepage/encyclopedia/hair-color/PROJECT_PROGRESS_MASTER.md"
         },
         {
           "id": "encyclopedia-makeup",
