@@ -122,7 +122,7 @@ test("Homepage keeps persisted customer recommendations when operator evaluation
   await page.getByRole("button", { name: "ورود به مشاوره" }).click();
   await page.getByRole("button", { name: "مشاهده نتایج همین نشست" }).click();
   await expect(page.getByRole("heading", { name: "نتایج ارزیابی برای اپراتور" })).toBeVisible();
-  await expect(page.getByText(eligibleRows[0].product_id, { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: eligibleRows[0].product_id })).toBeVisible();
   await expect(page.getByText("هنوز پیشنهادی گرفته نشده — از مشاوره شروع کنید.")).toHaveCount(0);
   await expect.poll(() => operatorFailures).toBeGreaterThan(1);
 });
