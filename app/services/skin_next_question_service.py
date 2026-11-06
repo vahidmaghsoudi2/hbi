@@ -155,8 +155,10 @@ class SkinNextQuestionService:
         if not isinstance(decoded, dict):
             return {"version": CONTRACT_VERSION, "gaps": [], "answers": []}
         decoded.setdefault("version", CONTRACT_VERSION)
-        decoded.setdefault("gaps", [])
-        decoded.setdefault("answers", [])
+        if not isinstance(decoded.get("gaps"), list):
+            decoded["gaps"] = []
+        if not isinstance(decoded.get("answers"), list):
+            decoded["answers"] = []
         return decoded
 
     def _save_state(self, case: Case, state: Dict[str, Any]) -> None:
