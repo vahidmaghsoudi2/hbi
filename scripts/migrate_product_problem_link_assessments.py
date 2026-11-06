@@ -305,13 +305,7 @@ def _validate_ppl_constraints(conn: sqlite3.Connection) -> None:
     index_meta = _index_meta(conn, "ProductProblemLink")
     unique_col_sets = set()
     for meta in index_meta.values():
-        if (
-            meta["unique"]
-            and int(meta.get("partial") or 0) == 0
-            and not meta.get("has_expression")
-            and not any(meta.get("desc") or [])
-            and all((coll or "BINARY").upper() == "BINARY" for coll in meta.get("coll") or [])
-        ):
+        if _is_full_plain_unique_index(meta):
             unique_col_sets.add(frozenset(meta["columns"]))
     for match in re.finditer(r"unique\s*\(([^)]+)\)", sql):
         parts = tuple(p.strip().split()[0] for p in match.group(1).split(",") if p.strip())
