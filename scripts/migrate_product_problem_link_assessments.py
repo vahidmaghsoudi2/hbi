@@ -58,16 +58,14 @@ REQUIRED_PPL_UNIQUE_COLUMN_SETS = (
     frozenset({"idempotency_key"}),
     frozenset({"supersedes_link_id"}),
 )
-# ORM declares ondelete="RESTRICT".
-# Observed SQLite PRAGMA foreign_key_list.on_delete may be RESTRICT or NO ACTION
-# depending on DDL. Both currently accepted (ALLOWED_ON_DELETE) pending explicit
-# PO decision; do not narrow or widen this set without owner approval.
+# Match the existing ORM contract exactly. NO ACTION is not accepted as a
+# substitute for RESTRICT; fail closed if the existing database differs.
 REQUIRED_PPL_FK = (
     ("product_id", "Product", "product_id"),
     ("claim_id", "Evidence", "claim_id"),
     ("evidence_id", "Evidence", "evidence_id"),
 )
-ALLOWED_ON_DELETE = frozenset({"RESTRICT", "NO ACTION"})
+ALLOWED_ON_DELETE = frozenset({"RESTRICT"})
 
 
 def _backup_database(db_path: Path, backup_path: Path) -> None:
@@ -297,7 +295,13 @@ def _validate_ppl_constraints(conn: sqlite3.Connection) -> None:
     index_meta = _index_meta(conn, "ProductProblemLink")
     unique_col_sets = set()
     for meta in index_meta.values():
-        if meta["unique"]:
+        if (
+            meta["unique"]
+            and int(meta.get("partial") or 0) == 0
+            and not meta.get("has_expression")
+            and not any(meta.get("desc") or [])
+            and all((coll or "BINARY").upper() == "BINARY" for coll in meta.get("coll") or [])
+        ):
             unique_col_sets.add(frozenset(meta["columns"]))
     for match in re.finditer(r"unique\s*\(([^)]+)\)", sql):
         parts = tuple(p.strip().split()[0] for p in match.group(1).split(",") if p.strip())
