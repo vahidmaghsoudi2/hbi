@@ -68,6 +68,8 @@ try:
     product.status = "ACTIVE"
     product.identity_status = "VERIFIED"
     product.qa_verdict = "VALID"
+    # Homepage SKIN consultations only evaluate SKIN-line candidates.
+    product.product_line = "SKIN"
     inv = db.query(Inventory).filter_by(product_id=product.product_id).first()
     if inv is None:
         inv = Inventory(
