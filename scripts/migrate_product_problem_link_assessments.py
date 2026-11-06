@@ -283,6 +283,16 @@ def _validate_ppl_fk(conn: sqlite3.Connection) -> None:
         )
 
 
+def _is_full_plain_unique_index(meta: Dict[str, Any]) -> bool:
+    return bool(
+        meta.get("unique")
+        and int(meta.get("partial") or 0) == 0
+        and not meta.get("has_expression")
+        and not any(meta.get("desc") or [])
+        and all((coll or "BINARY").upper() == "BINARY" for coll in meta.get("coll") or [])
+    )
+
+
 def _validate_ppl_constraints(conn: sqlite3.Connection) -> None:
     sql = _norm_sql(_table_sql(conn, "ProductProblemLink"))
     if not sql:
