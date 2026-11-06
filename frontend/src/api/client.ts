@@ -551,3 +551,14 @@ export function getStockMovements(
     adminToken
   );
 }
+
+export function getNextSkinQuestion(caseId: string, token: string): Promise<any> {
+  return request<any>(`/recommendations/next-question/${encodeURIComponent(caseId)}`, {}, token);
+}
+
+export function answerNextSkinQuestion(caseId: string, questionId: string, answer: string, token: string): Promise<any> {
+  return request<any>(`/recommendations/next-question/${encodeURIComponent(caseId)}/answer`, {
+    method: "POST",
+    body: JSON.stringify({ question_id: questionId, answer }),
+  }, token);
+}
