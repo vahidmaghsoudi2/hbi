@@ -35,6 +35,24 @@ test("Homepage keeps persisted customer recommendations when operator evaluation
     });
   });
 
+  // The current Home Page does not yet render Next Question (activity 32).
+  // Preserve the existing Case-owned answer gate in this isolation proof by
+  // recording the bounded answer before the real recommendation endpoint runs.
+  let caseAnswerWrites = 0;
+  await page.route("**/recommendations/generate", async (route) => {
+    const payload = route.request().postDataJSON();
+    const answerResponse = await request.post(
+      `${api}/recommendations/next-question/${encodeURIComponent(payload.case_id)}/answer`,
+      {
+        headers: { Authorization: `Bearer ${customerToken}` },
+        data: { question_id: "skin.primary_need.v1", answer: "sun_protection" },
+      },
+    );
+    expect(answerResponse.status(), await answerResponse.text()).toBe(200);
+    caseAnswerWrites += 1;
+    await route.continue();
+  });
+
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "فضای کاری مدیر" })).toBeVisible();
   await page.getByRole("button", { name: "ورود به مشاوره" }).click();
@@ -59,6 +77,7 @@ test("Homepage keeps persisted customer recommendations when operator evaluation
     String(row.eligibility_status ?? row.eligibility ?? "").trim().toUpperCase() === "ELIGIBLE"
   );
   expect(eligibleRows.length, "The isolated HBI seed must produce at least one eligible recommendation").toBeGreaterThan(0);
+  expect(caseAnswerWrites).toBe(1);
 
   await expect(page.getByRole("heading", { name: "نتایج ارزیابی برای اپراتور" })).toBeVisible();
   await expect(page.getByText(eligibleRows[0].product_id, { exact: true })).toBeVisible();
