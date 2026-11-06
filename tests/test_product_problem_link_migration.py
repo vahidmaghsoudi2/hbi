@@ -365,9 +365,9 @@ def test_foreign_key_violation_restores_backup(tmp_path):
             CHECK (revision_no IS NULL OR revision_no >= 1),
             UNIQUE(assertion_key, revision_no),
             UNIQUE(supersedes_link_id),
-            FOREIGN KEY(product_id) REFERENCES Product(product_id),
-            FOREIGN KEY(claim_id) REFERENCES Evidence(claim_id),
-            FOREIGN KEY(evidence_id) REFERENCES Evidence(evidence_id)
+            FOREIGN KEY(product_id) REFERENCES Product(product_id) ON DELETE RESTRICT,
+            FOREIGN KEY(claim_id) REFERENCES Evidence(claim_id) ON DELETE RESTRICT,
+            FOREIGN KEY(evidence_id) REFERENCES Evidence(evidence_id) ON DELETE RESTRICT
         );
         CREATE TABLE ProductProblemLinkAssessmentEvent (
             event_id VARCHAR PRIMARY KEY, link_id VARCHAR NOT NULL,
