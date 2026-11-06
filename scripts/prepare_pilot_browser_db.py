@@ -105,8 +105,13 @@ try:
             qa_status="APPROVED",
             conflict_status="NONE",
         ))
-    if db.get(Customer, "CUST-PILOT-1") is None:
-        db.add(Customer(customer_id="CUST-PILOT-1", name="Browser Pilot User"))
+    pilot_customer = db.get(Customer, "CUST-PILOT-1")
+    if pilot_customer is None:
+        pilot_customer = Customer(customer_id="CUST-PILOT-1", name="Browser Pilot User")
+        db.add(pilot_customer)
+    # Match the browser form's deterministic identity fields in this disposable DB.
+    pilot_customer.family_name = "پذیرش جداسازی نشست"
+    pilot_customer.mobile = "09000000001"
     db.commit()
 finally:
     db.close()
