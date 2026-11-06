@@ -341,9 +341,11 @@ class SkinNextQuestionService:
         }
         result: Dict[str, Any] = {}
         primary = latest_by_question.get(QUESTION_ID)
-        if primary and primary.get("value_state") != "UNKNOWN":
+        if primary:
+            # Preserve explicit UNKNOWN so legacy Customer/profile values cannot
+            # silently replace the current visit's unknown answer.
             result[FACTOR_KEY] = primary.get("value")
         skin_type = latest_by_question.get("skin.current_type.v1")
-        if skin_type and skin_type.get("value_state") != "UNKNOWN":
+        if skin_type:
             result["skin_profile"] = skin_type.get("value")
         return result
