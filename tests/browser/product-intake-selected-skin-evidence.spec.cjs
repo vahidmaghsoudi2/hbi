@@ -233,7 +233,7 @@ test("Anua soothing claim maps to manufacturer claims, not ingredients", async (
     source_reference: "https://anua.com/products/azelaic-acid-10-hyaluron-redness-soothing-serum",
   });
   expect(researchPayload.assertions[1]).toMatchObject({
-    claim: "ادعای تسکینِ اعلام‌شده طبق منبع: The manufacturer describes the serum as redness soothing",
+    claim: "The manufacturer describes the serum as redness soothing",
     field: "manufacturer_claims",
     claim_type: "MANUFACTURER_CLAIM",
     source_type: "MANUFACTURER",
