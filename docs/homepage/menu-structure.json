@@ -190,13 +190,7 @@
               "label": "مشکلات پوستی",
               "status": "reference-available",
               "docs_path": "docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md",
-              "description": "ورود به Workspace Index بانک مرجع P01–P61؛ بدون کپی داده یا ساخت فهرست موازی.",
-              "related_reference": {
-                "id": "hair-color-project-progress-master",
-                "label": "فهرست مادر پروژهٔ مشاورهٔ هوشمند رنگ مو",
-                "docs_path": "docs/PROJECT_PROGRESS_MASTER.md",
-                "note": "پیوند مرجع مدیریتی مستقل؛ محتوای بانک مشکلات پوستی و دامنهٔ آن تغییر نمی‌کند."
-              }
+              "description": "ورود به Workspace Index بانک مرجع P01–P61؛ بدون کپی داده یا ساخت فهرست موازی."
             }
           ]
         },
