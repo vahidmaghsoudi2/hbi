@@ -44,6 +44,14 @@ def test_profile_dimensions_do_not_contaminate_skin_concerns(db_session):
     assert [factor["value"] for factor in state["factors"]] == ["آبرسان"]
 
 
+def test_need_factor_keeps_customer_legacy_provenance(db_session):
+    _, case = _customer_case(db_session, concerns="آبرسان")
+    profile = ProfileFactContextService(db_session).build(case, {})
+    state = RecommendationService(db_session)._build_decision_state(case.case_id, profile)
+
+    assert state["factors"][0]["source"] == "customer_legacy"
+
+
 def test_profile_fact_context_projects_all_supported_profile_keys_separately(db_session):
     customer, case = _customer_case(db_session)
     facts = [
