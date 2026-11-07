@@ -26,7 +26,7 @@ class RecommendationRequest(BaseModel):
 
 class SkinNextQuestionAnswerRequest(BaseModel):
     question_id: str
-    answer: Union[str, List[str]]
+    answer: Union[List[str], str]
 
 
 def _to_dict(obj) -> dict:
