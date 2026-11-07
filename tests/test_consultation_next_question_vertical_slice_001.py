@@ -225,7 +225,11 @@ def test_current_consultation_overrides_profile_fact_for_question_boundary(clien
     db_session.commit()
 
     service = SkinNextQuestionService(db_session)
-    assert service.get_question(case, {"concerns": "sun_protection"}) is None
+    # Current request input overrides the ProfileFact value for projection,
+    # but it is not a persisted answer owned by this Case.
+    question = service.get_question(case, {"concerns": "sun_protection"})
+    assert question is not None
+    assert question["mode"] == "MISSING_INPUT"
     profile = ProfileFactContextService(db_session).build(
         case, {"concerns": "sun_protection"}
     )
