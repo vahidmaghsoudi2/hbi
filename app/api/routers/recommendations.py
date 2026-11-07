@@ -52,10 +52,10 @@ async def generate_recommendations(
 ) -> List[dict]:
     case = _assert_case_owned(db, request.case_id, customer_id)
     try:
-        # The Case-owned answer is the latest case-scoped consultation evidence.
-        # Request profile values fill other fields but cannot overwrite that answer.
-        case_input = dict(request.customer_profile or {})
-        case_input.update(SkinNextQuestionService.current_input_from_case(case))
+        # Case-captured answers are current consultation context. Explicit request
+        # input remains the highest-precedence current consultation value.
+        case_input = SkinNextQuestionService.current_input_from_case(case)
+        case_input.update(request.customer_profile or {})
         consultation_profile = ProfileFactContextService(db).build(
             case,
             case_input,
