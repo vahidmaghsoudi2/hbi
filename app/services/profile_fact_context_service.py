@@ -11,7 +11,7 @@ from app.models.customer import Customer
 from app.models.profile_fact import PROFILE_FACT_KEYS, ProfileFact
 
 
-CONTEXT_KEYS = frozenset({"skin_profile", "concerns"})
+CONTEXT_KEYS = PROFILE_FACT_KEYS
 TRUSTED_STATUS = "ACTIVE"
 UNKNOWN_STATES = frozenset({"UNKNOWN", "PREFER_NOT_TO_SAY", "NOT_APPLICABLE"})
 
@@ -65,6 +65,7 @@ class ProfileFactContextService:
             "scalp_profile": getattr(customer, "scalp_profile", None),
             "age_range": getattr(customer, "age_range", None),
             "concerns": getattr(customer, "concerns", None),
+            "operator_notes": getattr(customer, "operator_notes", None),
         }
 
         facts = []
@@ -163,33 +164,10 @@ class ProfileFactContextService:
             if key not in CONTEXT_KEYS and self._present(value):
                 profile[key] = value
 
-        # Preserve the existing recommendation input surface: skin/hair/scalp
-        # profile dimensions are surfaced through concerns without changing
-        # the frozen scoring/eligibility implementation.
-        recommendation_parts = [profile.get("concerns")]
-        for key, prefix in (("skin_profile", "پوست"), ("skin_type", "پوست")):
-            if self._present(profile.get(key)):
-                values = profile[key] if isinstance(profile[key], list) else str(profile[key]).split(",")
-                recommendation_parts.append(", ".join(
-                    f"{prefix} {str(item).strip()}" for item in values if str(item).strip()
-                ))
-        for key in ("hair_profile", "scalp_profile"):
-            if self._present(profile.get(key)):
-                recommendation_parts.append(str(profile[key]))
-        parts = []
-        seen = set()
-        for value in recommendation_parts:
-            if value is None:
-                continue
-            for item in (value if isinstance(value, list) else str(value).split(",")):
-                item = str(item).strip()
-                if item and item not in seen:
-                    seen.add(item)
-                    parts.append(item)
-        if parts:
-            profile["concerns"] = ", ".join(parts)
-        else:
-            profile.pop("concerns", None)
+        # Keep profile dimensions separate from the active concern/Need surface.
+        # Line-specific profile facts remain available as context, but must never
+        # be concatenated into concerns where another consultation line can
+        # normalize them as a Skin Need.
 
         profile["customer_id"] = case.customer_id
         profile["_profile_fact_context"] = trace
