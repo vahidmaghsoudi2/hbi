@@ -9,6 +9,8 @@ import {
   customerIntake,
   createGuest,
   generateRecommendations,
+  getSkinNextQuestion,
+  answerSkinNextQuestion,
   listInternalEvaluationsByCase,
   createSale,
   getTotalSales,
@@ -605,6 +607,17 @@ export default function NewHomePage() {
       sessionStorage.setItem("hbi_case_id", newCaseId);
       setCaseId(newCaseId);
       setStatusMsg("مراجعه ثبت شد. در حال دریافت پیشنهاد…");
+      // Every selected Need must first be captured as explicit Case-owned evidence.
+      const nextQuestion = await getSkinNextQuestion(newCaseId, currentToken);
+      if (nextQuestion.status !== "QUESTION_REQUIRED" || !nextQuestion.question) {
+        throw new Error("سؤال ثبت شواهد مشاوره برای این پرونده در دسترس نیست.");
+      }
+      await answerSkinNextQuestion(
+        newCaseId,
+        nextQuestion.question.question_id,
+        concerns,
+        currentToken
+      );
       const list = await generateRecommendations(
         {
           case_id: newCaseId,
