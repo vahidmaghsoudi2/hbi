@@ -121,7 +121,11 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         source_map = profile_fact_context.get("sources") or {}
         concern_source = (source_map.get("concerns") or {}).get("source", "CURRENT_CONSULTATION")
         concern_fact_id = (source_map.get("concerns") or {}).get("profile_fact_id")
-        factor_source = "profile_fact" if concern_source == "PROFILE_FACT" else "customer_input"
+        factor_source = {
+            "PROFILE_FACT": "profile_fact",
+            "CUSTOMER_LEGACY": "customer_legacy",
+            "CURRENT_CONSULTATION": "current_consultation",
+        }.get(concern_source, "customer_input")
         factors = [{
             "name": "concern",
             "value": c,
