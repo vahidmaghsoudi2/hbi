@@ -418,7 +418,7 @@ test("Obsolete standalone catalog URL redirects to the homepage", async ({ page 
 });
 
 
-test("Home Page captures Case-owned Skin evidence before generating an eligible recommendation", async ({ page, request }) => {
+test("Home Page persists all six Case-owned Needs before Recommendation and fails closed without a qualifying product", async ({ page, request }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-multi-need-e2e-admin-token");
   });
@@ -438,7 +438,21 @@ test("Home Page captures Case-owned Skin evidence before generating an eligible 
   await page.getByRole("button", { name: "شروع مشاوره" }).click();
   await page.locator("#name").fill("Home Page E2E Customer");
   await page.locator("#mobile").fill(mobile);
-  await page.locator("label.pro-check-card").filter({ hasText: "ضدآفتاب / SPF" }).locator('input[type="checkbox"]').check();
+  const selections = [
+    { label: "ضدآفتاب / SPF", value: "ضدآفتاب" },
+    { label: "آبرسانی پوست", value: "آبرسان" },
+    { label: "لک و تیرگی", value: "لک صورت" },
+    { label: "حساسیت / قرمزی", value: "پوست حساس" },
+    { label: "ضدچروک", value: "ضدچروک" },
+    { label: "پوست چرب", value: "کنترل چربی" },
+  ];
+  for (const selection of selections) {
+    await page.locator("label.pro-check-card")
+      .filter({ hasText: selection.label })
+      .locator('input[type="checkbox"]')
+      .check();
+  }
+  const selectedNeeds = selections.map(selection => selection.value);
 
   const answerRequestPromise = page.waitForRequest(req =>
     req.method() === "POST" &&
@@ -468,18 +482,20 @@ test("Home Page captures Case-owned Skin evidence before generating an eligible 
 
   expect(answerResponse.status(), await answerResponse.text()).toBe(200);
   const answerPayload = answerRequest.postDataJSON();
-  expect(answerPayload.answer).toEqual(["ضدآفتاب"]);
+  expect(answerPayload.answer).toEqual(selectedNeeds);
   const answerBody = await answerResponse.json();
   expect(answerBody.source).toBe("CURRENT_CASE_CONSULTATION");
   expect(answerBody.value_state).toBe("KNOWN");
 
   expect(generateResponse.status(), await generateResponse.text()).toBe(200);
   const generatePayload = generateRequest.postDataJSON();
-  expect(generatePayload.customer_profile.concerns).toBe("ضدآفتاب");
+  expect(generatePayload.customer_profile.concerns).toBe(selectedNeeds.join(", "));
   const generated = await generateResponse.json();
   expect(Array.isArray(generated)).toBeTruthy();
-  expect(generated.length).toBeGreaterThan(0);
-  expect(generated.some(row => row.eligibility_status === "ELIGIBLE")).toBeTruthy();
+  // The isolated browser fixture has no evidence-backed product covering this
+  // newly-created six-Need Case. It must fail closed rather than invent one.
+  expect(generated).toEqual([]);
+  await expect(page.getByText("پیشنهاد واجد شرایطی با شواهد کافی یافت نشد.")).toBeVisible();
 
   expect(flow.indexOf("answer")).toBeGreaterThanOrEqual(0);
   expect(flow.indexOf("generate")).toBeGreaterThan(flow.indexOf("answer"));
@@ -505,6 +521,5 @@ test("Home Page captures Case-owned Skin evidence before generating an eligible 
   );
   expect(persisted.status()).toBe(200);
   const savedRows = await persisted.json();
-  expect(savedRows.length).toBeGreaterThan(0);
-  expect(savedRows.every(row => row.eligibility_status === "ELIGIBLE")).toBeTruthy();
+  expect(savedRows).toEqual([]);
 });
