@@ -90,6 +90,33 @@ def test_skin_consultation_answer_cannot_authorize_an_unanswered_need(db_session
     assert not service._has_minimum_consultation_evidence(case.case_id, ["acne care"])
 
 
+def test_zero_need_match_remains_eligible_for_skin_case(db_session):
+    _, case = _customer_case(db_session)
+    SkinNextQuestionService(db_session).capture_answer(
+        case, "skin.primary_need.v1", "hydration"
+    )
+    decision_state = {
+        "case_id": case.case_id,
+        "needs": ["hydration"],
+        "unknowns": [],
+        "consultation_evidence_ready": True,
+        "medical_context_active": False,
+    }
+    engine_result = {
+        "claim_boundary_violations": [],
+        "conflicts": [],
+    }
+
+    eligibility = RecommendationService(db_session)._map_eligibility(
+        engine_result,
+        decision_state,
+        need_match=0.0,
+        evidence_score=1.0,
+    )
+
+    assert eligibility == "ELIGIBLE"
+
+
 def test_latest_case_answer_is_the_only_consultation_evidence(db_session):
     _, case = _customer_case(db_session)
     question = SkinNextQuestionService(db_session)
