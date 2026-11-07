@@ -92,6 +92,8 @@ def test_profile_fact_context_projects_all_supported_profile_keys_separately(db_
     assert profile["concerns"] == "hydration"
     sources = profile["_profile_fact_context"]["sources"]
     assert all(sources[key]["source"] == "PROFILE_FACT" for key, _ in facts)
+    state = RecommendationService(db_session)._build_decision_state(case.case_id, profile)
+    assert state["factors"][0]["source"] == "profile_fact"
 
 
 def test_skin_consultation_answer_cannot_authorize_an_unanswered_need(db_session):
