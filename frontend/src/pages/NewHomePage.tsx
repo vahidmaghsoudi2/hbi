@@ -576,7 +576,7 @@ export default function NewHomePage() {
     if (!name.trim()) return setError("نام الزامی است.");
     if (!mobile.trim()) return setError("شماره موبایل الزامی است.");
     if (!consultationLine) return setError("ابتدا لاین مشاوره را انتخاب کنید.");
-    if (!concernsText && !skin.length) return setError("حداقل یک موضوع یا نوع پوست را انتخاب کنید.");
+    if (!concernsText) return setError("حداقل یک موضوع مشاوره را انتخاب کنید.");
     setBusy(true);
     try {
       const currentToken = await ensureSession(name.trim(), concernsText);
