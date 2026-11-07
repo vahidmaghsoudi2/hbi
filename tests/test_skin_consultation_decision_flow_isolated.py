@@ -5,7 +5,13 @@ from app.models.customer import Customer
 from app.models.profile_fact import ProfileFact
 from app.services.profile_fact_context_service import ProfileFactContextService
 from app.services.recommendation_service import RecommendationService
-from app.services.skin_next_question_service import SkinNextQuestionService
+from app.services.skin_next_question_service import (
+    CONTRACT_VERSION,
+    LEGACY_QUESTION_ID,
+    OPTIONS,
+    QUESTION_ID,
+    SkinNextQuestionService,
+)
 
 
 def _customer_case(db_session, *, case_type="SKIN", **customer_fields):
@@ -183,3 +189,63 @@ def test_current_operator_and_medical_notes_have_consultation_provenance(db_sess
 
     active, _ = RecommendationService(db_session)._detect_medical_context(profile, [])
     assert active is True
+
+
+
+def test_six_need_question_contract_is_v2_and_legacy_v1_answers_remain_readable(db_session):
+    import json
+
+    _, case = _customer_case(db_session)
+    service = SkinNextQuestionService(db_session)
+
+    question = service.get_question(case)
+    assert QUESTION_ID == "skin.primary_need.v2"
+    assert LEGACY_QUESTION_ID == "skin.primary_need.v1"
+    assert CONTRACT_VERSION == "2"
+    assert question["question_id"] == QUESTION_ID
+    assert len(OPTIONS) == 6
+    assert len(question["options"]) == 6
+
+    # Historical v1 clients may still submit the two original canonical values.
+    legacy_result = service.capture_answer(case, LEGACY_QUESTION_ID, "hydration")
+    state = json.loads(case.evidence_gaps)
+    assert state["version"] == "2"
+    assert legacy_result["question_id"] == LEGACY_QUESTION_ID
+    assert service.current_input_from_case(case) == {"concerns": ["hydration"]}
+    assert RecommendationService(db_session)._has_minimum_consultation_evidence(
+        case.case_id, ["hydration"]
+    )
+
+    # The old contract cannot silently submit one of the newly introduced v2 labels.
+    try:
+        service.capture_answer(case, LEGACY_QUESTION_ID, "لک صورت")
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("Legacy v1 contract unexpectedly accepted a v2-only option")
+
+
+def test_explicit_generate_input_keeps_precedence_but_mismatch_fails_evidence_gate(db_session):
+    _, case = _customer_case(db_session)
+    question_service = SkinNextQuestionService(db_session)
+    question_service.capture_answer(case, QUESTION_ID, ["آبرسان"])
+
+    # PR #226 explicitly preserves request input as the highest-precedence
+    # current-consultation value. A mismatch must therefore fail the Case
+    # evidence subset gate rather than silently authorize another Need.
+    profile = ProfileFactContextService(db_session).build(
+        case, {"concerns": "لک صورت"}
+    )
+    recommendation_service = RecommendationService(db_session)
+    decision_state = recommendation_service._build_decision_state(
+        case.case_id, profile
+    )
+    generated_needs = recommendation_service._generate_needs_from_decision_state(
+        decision_state
+    )
+
+    assert generated_needs == ["brightening"]
+    assert decision_state["consultation_evidence_ready"] is False
+    assert not recommendation_service._has_minimum_consultation_evidence(
+        case.case_id, generated_needs
+    )
