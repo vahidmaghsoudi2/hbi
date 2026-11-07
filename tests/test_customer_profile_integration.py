@@ -389,3 +389,33 @@ def test_guest_endpoint_public_no_auth(client):
 def test_search_requires_auth(client):
     r = client.get("/api/v1/customers/search", params={"q": "سارا"})
     assert r.status_code == 401
+
+
+def test_intake_without_new_consent_decision_preserves_existing_customer_consent(client, db_session):
+    from datetime import datetime
+    from app.models.customer import Customer
+
+    consent_date = datetime(2026, 10, 1, 12, 0, 0)
+    existing = Customer(
+        customer_id="CUST-CONSENT-PRESERVE-001",
+        name="Existing Consent Customer",
+        consent_to_store_data=1,
+        consent_date=consent_date,
+    )
+    db_session.add(existing)
+    db_session.commit()
+
+    response = client.post(
+        "/api/v1/customers/intake",
+        headers=_auth(),
+        json={
+            "name": "Existing Consent Customer",
+            "open_case": True,
+            "concerns": "آبرسان",
+        },
+    )
+
+    assert response.status_code == 201, response.text
+    db_session.refresh(existing)
+    assert existing.consent_to_store_data == 1
+    assert existing.consent_date == consent_date
