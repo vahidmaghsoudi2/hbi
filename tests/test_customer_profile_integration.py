@@ -395,7 +395,8 @@ def test_search_requires_auth(client):
     assert r.status_code == 401
 
 
-def test_intake_without_new_consent_decision_preserves_existing_customer_consent(client, db_session):
+@pytest.mark.parametrize("open_case", [True, False])
+def test_intake_without_new_consent_decision_preserves_existing_customer_consent(client, db_session, open_case):
     from datetime import datetime
     from app.models.customer import Customer
 
@@ -411,10 +412,10 @@ def test_intake_without_new_consent_decision_preserves_existing_customer_consent
 
     response = client.post(
         "/api/v1/customers/intake",
-        headers=_auth(),
+        headers=_auth(existing.customer_id),
         json={
             "name": "Existing Consent Customer",
-            "open_case": True,
+            "open_case": open_case,
             "concerns": "آبرسان",
         },
     )
