@@ -16,9 +16,10 @@ from app.models.case import Case
 from app.services.profile_fact_context_service import ProfileFactContextService
 
 
-QUESTION_ID = "skin.primary_need.v1"
+QUESTION_ID = "skin.primary_need.v2"
+LEGACY_QUESTION_ID = "skin.primary_need.v1"
 FACTOR_KEY = "concerns"
-CONTRACT_VERSION = "1"
+CONTRACT_VERSION = "2"
 
 OPTIONS = (
     {"value": "ضدآفتاب", "label": "ضدآفتاب / SPF"},
@@ -96,7 +97,7 @@ class SkinNextQuestionService:
         prior_answers = [
             item for item in (state.get("answers") or [])
             if isinstance(item, dict)
-            and item.get("question_id") == QUESTION_ID
+            and item.get("question_id") in {QUESTION_ID, LEGACY_QUESTION_ID}
             and item.get("factor") == FACTOR_KEY
             and item.get("source") == "CURRENT_CASE_CONSULTATION"
             and item.get("value_state") == "KNOWN"
@@ -157,17 +158,18 @@ class SkinNextQuestionService:
         }
 
     def capture_answer(self, case: Case, question_id: str, answer: Any) -> Dict[str, Any]:
-        if question_id != QUESTION_ID:
+        if question_id not in {QUESTION_ID, LEGACY_QUESTION_ID}:
             raise ValueError("Unsupported question_id")
 
-        # Current Home Page values are Persian labels. Keep the original
-        # canonical values accepted by the prior two-option contract so
-        # existing API clients and recommendation regressions remain valid.
-        # This is a bounded compatibility set, not free-form Need inference.
-        allowed = {item["value"] for item in OPTIONS} | {
-            "hydration",
-            "sun_protection",
-        }
+        # Version 2 adds the six approved Home Page labels and multi-select.
+        # Version 1 remains writable only for its original two canonical values.
+        # This keeps old clients bounded while making the contract transition auditable.
+        legacy_allowed = {"hydration", "sun_protection"}
+        allowed = (
+            ({item["value"] for item in OPTIONS} | legacy_allowed)
+            if question_id == QUESTION_ID
+            else legacy_allowed
+        )
         submitted = answer if isinstance(answer, list) else [answer]
         if (
             not submitted
@@ -180,7 +182,8 @@ class SkinNextQuestionService:
         stored_answer = answer_values if isinstance(answer, list) else answer_values[0]
 
         state = self._decode_case_state(case)
-        gap_id = f"{case.case_id}:{QUESTION_ID}"
+        state["version"] = CONTRACT_VERSION
+        gap_id = f"{case.case_id}:{question_id}"
         gap = {
             "gap_id": gap_id,
             "factor": FACTOR_KEY,
@@ -194,7 +197,7 @@ class SkinNextQuestionService:
         ] + [gap]
 
         answer_record = {
-            "question_id": QUESTION_ID,
+            "question_id": question_id,
             "factor": FACTOR_KEY,
             "value": stored_answer,
             "source": "CURRENT_CASE_CONSULTATION",
@@ -208,7 +211,7 @@ class SkinNextQuestionService:
         self._save_state(case, state)
         return {
             "case_id": case.case_id,
-            "question_id": QUESTION_ID,
+            "question_id": question_id,
             "factor": FACTOR_KEY,
             "answer": stored_answer,
             "value_state": "KNOWN",
@@ -221,7 +224,7 @@ class SkinNextQuestionService:
         state = cls._decode_case_state(case)
         answers = [
             item for item in state.get("answers", [])
-            if item.get("question_id") == QUESTION_ID
+            if item.get("question_id") in {QUESTION_ID, LEGACY_QUESTION_ID}
         ]
         if not answers:
             return {}
