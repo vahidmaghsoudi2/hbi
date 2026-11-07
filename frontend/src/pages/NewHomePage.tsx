@@ -588,7 +588,7 @@ export default function NewHomePage() {
           family_name: name.trim(),
           mobile: mobile.trim() || undefined,
           concerns: concernsText,
-          consent: 0,
+          // Omitted consent means no new decision; backend preserves existing consent.
           skin_profile: skin.length ? skin.join(",") : undefined,
           case_type: consultationLine,
           guest: false,
