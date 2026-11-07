@@ -429,6 +429,7 @@ test("Home Page captures all six Case-owned Needs before generating an eligible 
   const flow = [];
   page.on("request", req => {
     const pathname = new URL(req.url()).pathname;
+    if (req.method() === "GET" && /\/recommendations\/next-question\/[^/]+$/.test(pathname)) flow.push("question");
     if (/\/recommendations\/next-question\/[^/]+\/answer$/.test(pathname)) flow.push("answer");
     if (pathname.endsWith("/recommendations/generate")) flow.push("generate");
   });
@@ -454,6 +455,14 @@ test("Home Page captures all six Case-owned Needs before generating an eligible 
   }
   const selectedNeeds = selections.map(selection => selection.value);
 
+  const questionRequestPromise = page.waitForRequest(req =>
+    req.method() === "GET" &&
+    /\/recommendations\/next-question\/[^/]+$/.test(new URL(req.url()).pathname)
+  );
+  const questionResponsePromise = page.waitForResponse(response =>
+    response.request().method() === "GET" &&
+    /\/recommendations\/next-question\/[^/]+$/.test(new URL(response.url()).pathname)
+  );
   const answerRequestPromise = page.waitForRequest(req =>
     req.method() === "POST" &&
     /\/recommendations\/next-question\/[^/]+\/answer$/.test(new URL(req.url()).pathname)
@@ -473,15 +482,23 @@ test("Home Page captures all six Case-owned Needs before generating an eligible 
 
   await page.getByRole("button", { name: "ثبت مراجعه + دریافت پیشنهاد" }).click();
 
-  const [answerRequest, answerResponse, generateRequest, generateResponse] = await Promise.all([
+  const [questionRequest, questionResponse, answerRequest, answerResponse, generateRequest, generateResponse] = await Promise.all([
+    questionRequestPromise,
+    questionResponsePromise,
     answerRequestPromise,
     answerResponsePromise,
     generateRequestPromise,
     generateResponsePromise,
   ]);
 
+  expect(questionRequest.method()).toBe("GET");
+  expect(questionResponse.status(), await questionResponse.text()).toBe(200);
+  const questionBody = await questionResponse.json();
+  expect(questionBody.status).toBe("QUESTION_REQUIRED");
+
   expect(answerResponse.status(), await answerResponse.text()).toBe(200);
   const answerPayload = answerRequest.postDataJSON();
+  expect(answerPayload.question_id).toBe(questionBody.question.question_id);
   expect(answerPayload.answer).toEqual(selectedNeeds);
   const answerBody = await answerResponse.json();
   expect(answerBody.source).toBe("CURRENT_CASE_CONSULTATION");
@@ -496,7 +513,8 @@ test("Home Page captures all six Case-owned Needs before generating an eligible 
   expect(generated.every(row => row.eligibility_status === "ELIGIBLE")).toBeTruthy();
   await expect(page.getByText(/پیشنهاد واجد شرایط آماده است/)).toBeVisible();
 
-  expect(flow.indexOf("answer")).toBeGreaterThanOrEqual(0);
+  expect(flow.indexOf("question")).toBeGreaterThanOrEqual(0);
+  expect(flow.indexOf("answer")).toBeGreaterThan(flow.indexOf("question"));
   expect(flow.indexOf("generate")).toBeGreaterThan(flow.indexOf("answer"));
 
   await expect(page.getByRole("heading", { name: "نتایج ارزیابی برای اپراتور" })).toBeVisible();
