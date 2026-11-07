@@ -419,3 +419,69 @@ def test_intake_without_new_consent_decision_preserves_existing_customer_consent
     db_session.refresh(existing)
     assert existing.consent_to_store_data == 1
     assert existing.consent_date == consent_date
+
+
+def test_skin_quick_intake_captures_all_selected_needs_as_case_evidence(client, db_session):
+    import json
+    from app.models.case import Case
+    from app.services.need_normalization import normalize_needs_from_factors
+
+    intake = client.post(
+        "/api/v1/customers/intake",
+        headers=_auth(),
+        json={
+            "name": "Multi Need Consultation",
+            "mobile": "09130000991",
+            "concerns": "ضدآفتاب, آبرسان, لک صورت, پوست حساس, ضدچروک, کنترل چربی",
+            "open_case": True,
+        },
+    )
+    assert intake.status_code == 201, intake.text
+    case_id = intake.json()["case"]["case_id"]
+    case_token = _auth(intake.json()["customer"]["customer_id"])
+
+    question = client.get(
+        f"/api/v1/recommendations/next-question/{case_id}",
+        headers=case_token,
+    )
+    assert question.status_code == 200, question.text
+    assert question.json()["status"] == "QUESTION_REQUIRED"
+    assert len(question.json()["question"]["options"]) == 6
+
+    selected = ["ضدآفتاب", "آبرسان", "لک صورت", "پوست حساس", "ضدچروک", "کنترل چربی"]
+    answer = client.post(
+        f"/api/v1/recommendations/next-question/{case_id}/answer",
+        headers=case_token,
+        json={
+            "question_id": question.json()["question"]["question_id"],
+            "answer": selected,
+        },
+    )
+    assert answer.status_code == 200, answer.text
+    assert answer.json()["answer"] == selected
+
+    case = db_session.get(Case, case_id)
+    state = json.loads(case.evidence_gaps)
+    assert state["answers"][-1]["value"] == selected
+    factors = [
+        {"name": "concern", "value": value, "source": "customer_input", "validity": "DECLARED"}
+        for value in selected
+    ]
+    needs, _, unmapped, ambiguous = normalize_needs_from_factors(factors)
+    assert set(needs) == {
+        "sun protection",
+        "hydration",
+        "brightening",
+        "sensitivity",
+        "anti aging",
+        "oil control",
+    }
+    assert unmapped == []
+    assert ambiguous == []
+
+    no_question = client.get(
+        f"/api/v1/recommendations/next-question/{case_id}",
+        headers=case_token,
+    )
+    assert no_question.status_code == 200
+    assert no_question.json()["status"] == "NO_QUESTION"
