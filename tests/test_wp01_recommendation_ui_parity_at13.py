@@ -25,10 +25,23 @@ def test_at13_show_more_exists_only_when_more_than_five_results():
     assert "setShowAllRecommendations(true)" in source
 
 
-def test_at13_backend_full_result_set_is_still_stored():
+def test_at13_customer_results_are_published_before_optional_operator_enrichment():
     source = _source()
-    assert "setRecs(Array.isArray(list) ? list : []);" in source
-    assert "const list = await generateRecommendations(" in source
+    assert "listRecommendationsByCase" in source
+
+    generate_start = source.index("const list = await generateRecommendations(")
+    generated_public_list = source.index("const publicList = Array.isArray(list) ? list : [];", generate_start)
+    generated_publish = source.index("setRecs(publicList);", generated_public_list)
+    generated_done = source.index("setRecDone(true);", generated_publish)
+    generated_results = source.index('setActive("results");', generated_done)
+    generated_operator = source.index("const operatorToken = await ensureProductSession();", generated_results)
+    assert generated_public_list < generated_publish < generated_done < generated_results < generated_operator
+
+    refresh_start = source.index("const publicList = await listRecommendationsByCase(storedCaseId, token);")
+    refresh_publish = source.index("setRecs(Array.isArray(publicList) ? publicList : []);", refresh_start)
+    refresh_done = source.index("setRecDone(true);", refresh_publish)
+    refresh_operator = source.index("const operatorToken = await ensureProductSession();", refresh_done)
+    assert refresh_start < refresh_publish < refresh_done < refresh_operator
 
 
 def test_at13_consultation_recommendations_remain_separate_from_direct_sale():
