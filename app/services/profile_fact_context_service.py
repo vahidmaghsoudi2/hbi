@@ -159,6 +159,10 @@ class ProfileFactContextService:
         for key, value in legacy.items():
             if key not in CONTEXT_KEYS and self._present(value):
                 profile[key] = value
+                trace["sources"][key] = self._trace_entry(
+                    source="CUSTOMER_LEGACY",
+                    value=value,
+                )
 
         for key, value in current.items():
             if key not in CONTEXT_KEYS and self._present(value):
