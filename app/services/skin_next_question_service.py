@@ -160,15 +160,24 @@ class SkinNextQuestionService:
         if question_id != QUESTION_ID:
             raise ValueError("Unsupported question_id")
 
-        allowed = {item["value"] for item in OPTIONS}
+        # Current Home Page values are Persian labels. Keep the original
+        # canonical values accepted by the prior two-option contract so
+        # existing API clients and recommendation regressions remain valid.
+        # This is a bounded compatibility set, not free-form Need inference.
+        allowed = {item["value"] for item in OPTIONS} | {
+            "hydration",
+            "sun_protection",
+        }
         submitted = answer if isinstance(answer, list) else [answer]
         if (
             not submitted
             or any(not isinstance(item, str) or item not in allowed for item in submitted)
         ):
             raise ValueError("Answer must contain one or more bounded Skin consultation options")
-        # Preserve selection order while removing duplicates.
+        # Preserve scalar shape for legacy single-answer clients; multi-select
+        # answers remain ordered, de-duplicated lists in Case evidence.
         answer_values = list(dict.fromkeys(submitted))
+        stored_answer = answer_values if isinstance(answer, list) else answer_values[0]
 
         state = self._decode_case_state(case)
         gap_id = f"{case.case_id}:{QUESTION_ID}"
@@ -187,7 +196,7 @@ class SkinNextQuestionService:
         answer_record = {
             "question_id": QUESTION_ID,
             "factor": FACTOR_KEY,
-            "value": answer_values,
+            "value": stored_answer,
             "source": "CURRENT_CASE_CONSULTATION",
             "value_state": "KNOWN",
         }
@@ -201,7 +210,7 @@ class SkinNextQuestionService:
             "case_id": case.case_id,
             "question_id": QUESTION_ID,
             "factor": FACTOR_KEY,
-            "answer": answer_values,
+            "answer": stored_answer,
             "value_state": "KNOWN",
             "source": "CURRENT_CASE_CONSULTATION",
             "evidence_gap": gap,
