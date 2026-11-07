@@ -418,7 +418,7 @@ test("Obsolete standalone catalog URL redirects to the homepage", async ({ page 
 });
 
 
-test("Home Page persists all six Case-owned Needs before Recommendation and fails closed without a qualifying product", async ({ page, request }) => {
+test("Home Page captures all six Case-owned Needs before generating an eligible recommendation", async ({ page, request }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-multi-need-e2e-admin-token");
   });
@@ -492,10 +492,9 @@ test("Home Page persists all six Case-owned Needs before Recommendation and fail
   expect(generatePayload.customer_profile.concerns).toBe(selectedNeeds.join(", "));
   const generated = await generateResponse.json();
   expect(Array.isArray(generated)).toBeTruthy();
-  // The isolated browser fixture has no evidence-backed product covering this
-  // newly-created six-Need Case. It must fail closed rather than invent one.
-  expect(generated).toEqual([]);
-  await expect(page.getByText("پیشنهاد واجد شرایطی با شواهد کافی یافت نشد.")).toBeVisible();
+  expect(generated.length).toBeGreaterThan(0);
+  expect(generated.every(row => row.eligibility_status === "ELIGIBLE")).toBeTruthy();
+  await expect(page.getByText(/پیشنهاد واجد شرایط آماده است/)).toBeVisible();
 
   expect(flow.indexOf("answer")).toBeGreaterThanOrEqual(0);
   expect(flow.indexOf("generate")).toBeGreaterThan(flow.indexOf("answer"));
@@ -521,5 +520,6 @@ test("Home Page persists all six Case-owned Needs before Recommendation and fail
   );
   expect(persisted.status()).toBe(200);
   const savedRows = await persisted.json();
-  expect(savedRows).toEqual([]);
+  expect(savedRows.length).toBeGreaterThan(0);
+  expect(savedRows.every(row => row.eligibility_status === "ELIGIBLE")).toBeTruthy();
 });
