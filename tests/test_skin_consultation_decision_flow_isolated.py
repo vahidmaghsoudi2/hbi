@@ -216,6 +216,17 @@ def test_six_need_question_contract_is_v2_and_legacy_v1_answers_remain_readable(
         case.case_id, ["hydration"]
     )
 
+    # A new v2 answer upgrades the same Case envelope and replaces the old answer.
+    service.capture_answer(case, QUESTION_ID, ["آبرسان", "لک صورت"])
+    upgraded = json.loads(case.evidence_gaps)
+    assert upgraded["version"] == "2"
+    assert len(upgraded["answers"]) == 1
+    assert upgraded["answers"][0]["question_id"] == QUESTION_ID
+    assert upgraded["answers"][0]["value"] == ["آبرسان", "لک صورت"]
+    assert len(upgraded["gaps"]) == 1
+    assert upgraded["gaps"][0]["question_id"] == QUESTION_ID
+    assert service.current_input_from_case(case) == {"concerns": ["آبرسان", "لک صورت"]}
+
     # The old contract cannot silently submit one of the newly introduced v2 labels.
     try:
         service.capture_answer(case, LEGACY_QUESTION_ID, "لک صورت")
