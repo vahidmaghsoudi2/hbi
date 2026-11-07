@@ -424,6 +424,8 @@ test("Home Page captures Case-owned Skin evidence before generating an eligible 
   });
 
   const api = process.env.HBI_TEST_API_URL || "http://127.0.0.1:8765/api/v1";
+  // Avoid colliding with seeded pilot customers or a previous browser run.
+  const mobile = `0913${String(Date.now()).slice(-7)}`;
   const flow = [];
   page.on("request", req => {
     const pathname = new URL(req.url()).pathname;
@@ -435,7 +437,7 @@ test("Home Page captures Case-owned Skin evidence before generating an eligible 
   await page.getByRole("button", { name: "ورود به مشاوره" }).click();
   await page.getByRole("button", { name: "شروع مشاوره" }).click();
   await page.locator("#name").fill("Home Page E2E Customer");
-  await page.locator("#mobile").fill("09130009998");
+  await page.locator("#mobile").fill(mobile);
   await page.locator("label.pro-check-card").filter({ hasText: "ضدآفتاب / SPF" }).locator('input[type="checkbox"]').check();
 
   const answerRequestPromise = page.waitForRequest(req =>
