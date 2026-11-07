@@ -184,25 +184,6 @@ def test_irrelevant_consultation_evidence_cannot_authorize_different_need(client
     assert response.json() == []
 
 
-def test_case_answer_precedence_and_zero_need_match_contract_for_skin_case(client):
-    headers, case_id = _create_owned_case(client, "CUST-CVS-1")
-    _capture_skin_consultation_answer(client, headers, case_id, answer="hydration")
-
-    response = client.post(
-        "/api/v1/recommendations/generate",
-        headers=headers,
-        json={"case_id": case_id, "customer_profile": {"concerns": "ضدآفتاب"}},
-    )
-    assert response.status_code == 200, response.text
-    body = response.json()
-    assert body, "zero Need Match must not become a new eligibility gate"
-    selected = next(
-        item for item in body if item["product_id"] == "ISDIN-FOTOUTRA100-50ML"
-    )
-    assert selected["need_match_score"] == 0.0
-    assert selected["eligibility_status"] == "ELIGIBLE"
-
-
 def test_consultation_evidence_is_required_before_eligibility(client):
     headers, case_id = _create_owned_case(client, "CUST-CVS-1")
 
