@@ -174,7 +174,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         # Only the latest valid answer to this bounded question is authoritative.
         # A single overlap must not certify additional profile-derived Needs.
         answers = [
-            answer for answer in state.get("answers", [])
+            answer for answer in (state.get("answers") or [])
             if isinstance(answer, dict)
             and answer.get("question_id") == "skin.primary_need.v1"
         ]
