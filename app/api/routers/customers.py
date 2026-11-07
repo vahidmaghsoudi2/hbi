@@ -375,9 +375,11 @@ async def quick_intake(
                 name=data.name,
                 mobile=None if data.guest else mobile,
                 family_name=data.family_name,
-                concerns=data.concerns,
+                # When opening a Case, today's concerns/profile belong to
+                # that consultation payload, not the reusable Customer record.
+                concerns=data.concerns if not data.open_case else None,
                 consent=data.consent,
-                skin_profile=data.skin_profile,
+                skin_profile=data.skin_profile if not data.open_case else None,
                 guest=data.guest or not mobile,
             )
 
