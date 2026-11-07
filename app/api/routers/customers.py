@@ -65,7 +65,8 @@ class IntakeRequest(BaseModel):
         default=None,
         description="نیاز/دغدغه امروز؛ به موتور توصیه به‌صورت concerns پاس داده می‌شود",
     )
-    consent: int = 0
+    # None means no new decision during this visit; preserve existing consent.
+    consent: Optional[int] = None
     skin_profile: Optional[str] = None
     guest: bool = False
     case_type: str = Field(
@@ -336,9 +337,9 @@ async def quick_intake(
         authenticated = svc.get_by_id(customer_id)
         if authenticated is not None:
             # Continue the same identity as the JWT (Home Front Door path).
-            fields: Dict[str, Any] = {
-                "consent_to_store_data": data.consent,
-            }
+            fields: Dict[str, Any] = {}
+            if data.consent is not None:
+                fields["consent_to_store_data"] = data.consent
             # Preserve the legacy display-name field for established customers.
             # The new family_name field is authoritative for identity checks.
             if authenticated.customer_id.startswith("CUST_GUEST_"):
@@ -378,7 +379,7 @@ async def quick_intake(
                 # When opening a Case, today's concerns/profile belong to
                 # that consultation payload, not the reusable Customer record.
                 concerns=data.concerns if not data.open_case else None,
-                consent=data.consent,
+                consent=data.consent if data.consent is not None else 0,
                 skin_profile=data.skin_profile if not data.open_case else None,
                 guest=data.guest or not mobile,
             )
