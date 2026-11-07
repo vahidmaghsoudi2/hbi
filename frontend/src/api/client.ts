@@ -133,6 +133,42 @@ export function generateRecommendations(
   );
 }
 
+export interface SkinNextQuestionResponse {
+  case_id: string;
+  status: "QUESTION_REQUIRED" | "NO_QUESTION";
+  question: null | {
+    question_id: string;
+    options: Array<{ value: string; label: string }>;
+  };
+}
+
+export function getSkinNextQuestion(
+  caseId: string,
+  token: string
+): Promise<SkinNextQuestionResponse> {
+  return request<SkinNextQuestionResponse>(
+    `/recommendations/next-question/${encodeURIComponent(caseId)}`,
+    {},
+    token
+  );
+}
+
+export function answerSkinNextQuestion(
+  caseId: string,
+  questionId: string,
+  answers: string[],
+  token: string
+): Promise<Record<string, unknown>> {
+  return request<Record<string, unknown>>(
+    `/recommendations/next-question/${encodeURIComponent(caseId)}/answer`,
+    {
+      method: "POST",
+      body: JSON.stringify({ question_id: questionId, answer: answers }),
+    },
+    token
+  );
+}
+
 export function listRecommendationsByCase(
   caseId: string,
   token: string
