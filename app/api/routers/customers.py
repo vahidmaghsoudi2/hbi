@@ -381,8 +381,12 @@ async def quick_intake(
                 guest=data.guest or not mobile,
             )
 
+        # A skin profile supplied for this visit is case-scoped when a Case
+        # is opened; include it in the returned recommendation profile without
+        # overwriting the customer's persistent profile.
+        profile_extra = {"skin_profile": data.skin_profile} if data.skin_profile is not None else None
         profile = svc.build_recommendation_profile(
-            customer, concerns=data.concerns
+            customer, concerns=data.concerns, extra=profile_extra
         )
 
         case_payload = None
