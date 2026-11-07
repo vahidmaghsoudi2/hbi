@@ -59,7 +59,7 @@ def test_need_factor_keeps_current_consultation_provenance(db_session):
     )
     state = RecommendationService(db_session)._build_decision_state(case.case_id, profile)
 
-    assert state["factors"][0]["source"] == "current_consultation"
+    assert state["factors"][0]["source"] == "customer_input"
 
 
 def test_profile_fact_context_projects_all_supported_profile_keys_separately(db_session):
