@@ -8,6 +8,7 @@ from __future__ import annotations
 import pytest
 from app.core.auth import create_access_token
 from app.interface.dto import RecommendationDTO
+from app.models.customer import Customer
 from app.interface.facades import RecommendationFacade
 from app.services.customer_service import CustomerService
 
@@ -248,6 +249,91 @@ def test_recommendation_profile_from_customer_fields(client, db_session):
     rebuilt = svc.build_recommendation_profile(c)
     assert rebuilt["concerns"] == "پوست حساس"
     assert rebuilt.get("skin_profile") == "sensitive"
+
+
+def test_new_customer_case_scoped_inputs_do_not_persist_as_reusable_profile(client, db_session):
+    response = client.post(
+        "/api/v1/customers/intake",
+        headers=_auth("operator_gallery"),
+        json={
+            "name": "New Case-Scoped Customer",
+            "skin_profile": "dry",
+            "concerns": "آبرسان",
+            "consent": 1,
+            "open_case": True,
+        },
+    )
+    assert response.status_code == 201, response.text
+    body = response.json()
+    assert body["case"] is not None
+    assert body["recommendation_profile"]["skin_profile"] == "dry"
+    assert body["recommendation_profile"]["concerns"] == "آبرسان"
+
+    persisted = db_session.get(Customer, body["customer"]["customer_id"])
+    assert persisted is not None
+    assert persisted.skin_profile is None
+    assert persisted.concerns is None
+
+
+def test_guest_bootstrap_then_case_intake_keeps_consultation_inputs_out_of_customer(client, db_session):
+    guest_response = client.post(
+        "/api/v1/customers/guest",
+        json={"name": "Guest Case-Scoped Customer", "consent": 0},
+    )
+    assert guest_response.status_code == 201, guest_response.text
+    customer_id = guest_response.json()["customer_id"]
+
+    response = client.post(
+        "/api/v1/customers/intake",
+        headers=_auth(customer_id),
+        json={
+            "name": "Guest Case-Scoped Customer",
+            "skin_profile": "dry",
+            "concerns": "آبرسان",
+            "consent": 0,
+            "open_case": True,
+        },
+    )
+    assert response.status_code == 201, response.text
+    body = response.json()
+    assert body["case"] is not None
+    assert body["recommendation_profile"]["skin_profile"] == "dry"
+    assert body["recommendation_profile"]["concerns"] == "آبرسان"
+
+    persisted = db_session.get(Customer, customer_id)
+    assert persisted is not None
+    assert persisted.skin_profile is None
+    assert persisted.concerns is None
+
+
+def test_existing_customer_case_scoped_skin_profile_reaches_recommendation_profile(client, db_session):
+    existing = Customer(
+        customer_id="operator_gallery",
+        name="Existing Profile Customer",
+        consent_to_store_data=1,
+    )
+    db_session.add(existing)
+    db_session.commit()
+
+    response = client.post(
+        "/api/v1/customers/intake",
+        headers=_auth(),
+        json={
+            "name": "Existing Profile Customer",
+            "skin_profile": "dry",
+            "concerns": "آبرسان",
+            "consent": 1,
+            "open_case": True,
+        },
+    )
+    assert response.status_code == 201, response.text
+    body = response.json()
+    assert body["case"] is not None
+    assert body["recommendation_profile"]["skin_profile"] == "dry"
+    assert body["recommendation_profile"]["concerns"] == "آبرسان"
+
+    persisted = db_session.get(Customer, "operator_gallery")
+    assert persisted.skin_profile is None
 
 
 # ---------------------------------------------------------------------------
