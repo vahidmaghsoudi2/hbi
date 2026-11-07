@@ -191,9 +191,10 @@ class SkinNextQuestionService:
             "resolution": "CURRENT_CASE_ANSWER",
             "question_id": question_id,
         }
+        legacy_gap_id = f"{case.case_id}:{LEGACY_QUESTION_ID}"
         state["gaps"] = [
             item for item in state["gaps"]
-            if item.get("gap_id") != gap_id
+            if item.get("gap_id") not in {gap_id, legacy_gap_id}
         ] + [gap]
 
         answer_record = {
