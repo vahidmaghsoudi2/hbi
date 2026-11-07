@@ -124,7 +124,6 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         factor_source = {
             "PROFILE_FACT": "profile_fact",
             "CUSTOMER_LEGACY": "customer_legacy",
-            "CURRENT_CONSULTATION": "current_consultation",
         }.get(concern_source, "customer_input")
         factors = [{
             "name": "concern",
