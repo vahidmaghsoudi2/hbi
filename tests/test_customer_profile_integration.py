@@ -479,6 +479,29 @@ def test_skin_quick_intake_captures_all_selected_needs_as_case_evidence(client, 
     assert unmapped == []
     assert ambiguous == []
 
+    # Exercise the actual API generation boundary after the Case-owned answer
+    # has been captured. This fixture has no sellable catalog candidate, so
+    # assert the evidence gate directly rather than inventing a recommendation.
+    generated = client.post(
+        "/api/v1/recommendations/generate",
+        headers=case_token,
+        json={
+            "case_id": case_id,
+            "customer_profile": {
+                "concerns": "ضدآفتاب, آبرسان, لک صورت, پوست حساس, ضدچروک, کنترل چربی"
+            },
+        },
+    )
+    assert generated.status_code == 200, generated.text
+    assert isinstance(generated.json(), list)
+
+    from app.services.recommendation_service import RecommendationService
+    recommendation_service = RecommendationService(db_session)
+    assert recommendation_service._has_minimum_consultation_evidence(case_id, needs)
+    assert not recommendation_service._has_minimum_consultation_evidence(
+        case_id, needs + ["acne care"]
+    )
+
     no_question = client.get(
         f"/api/v1/recommendations/next-question/{case_id}",
         headers=case_token,
