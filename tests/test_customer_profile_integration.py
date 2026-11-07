@@ -251,6 +251,30 @@ def test_recommendation_profile_from_customer_fields(client, db_session):
     assert rebuilt.get("skin_profile") == "sensitive"
 
 
+def test_new_customer_case_scoped_inputs_do_not_persist_as_reusable_profile(client, db_session):
+    response = client.post(
+        "/api/v1/customers/intake",
+        headers=_auth("operator_gallery"),
+        json={
+            "name": "New Case-Scoped Customer",
+            "skin_profile": "dry",
+            "concerns": "آبرسان",
+            "consent": 1,
+            "open_case": True,
+        },
+    )
+    assert response.status_code == 201, response.text
+    body = response.json()
+    assert body["case"] is not None
+    assert body["recommendation_profile"]["skin_profile"] == "dry"
+    assert body["recommendation_profile"]["concerns"] == "آبرسان"
+
+    persisted = db_session.get(Customer, body["customer"]["customer_id"])
+    assert persisted is not None
+    assert persisted.skin_profile is None
+    assert persisted.concerns is None
+
+
 def test_existing_customer_case_scoped_skin_profile_reaches_recommendation_profile(client, db_session):
     existing = Customer(
         customer_id="operator_gallery",
