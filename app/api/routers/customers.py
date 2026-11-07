@@ -325,6 +325,10 @@ async def quick_intake(
         mobile
         and not data.guest
         and _looks_like_mobile(mobile)
+        # Customer IDs such as CUST_GUEST_<timestamp> contain many digits,
+        # but are not phone identifiers. Only compare when the whole JWT
+        # subject is itself a phone-like identifier.
+        and all(ch.isdigit() or ch in "+- ()" for ch in customer_id)
         and _looks_like_mobile(customer_id)
         and mobile != customer_id
     ):
