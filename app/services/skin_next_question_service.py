@@ -29,7 +29,7 @@ OPTIONS = (
     {"value": "کنترل چربی", "label": "پوست چرب"},
 )
 
-_PROMPT = "نیاز اصلی پوست شما در این مراجعه چیست؟"
+_PROMPT = "در این مراجعه کدام‌یک از نیازهای پوستی زیر را می‌خواهید بررسی کنیم؟ امکان انتخاب چند مورد وجود دارد."
 
 
 class SkinNextQuestionService:
@@ -100,7 +100,7 @@ class SkinNextQuestionService:
             and item.get("factor") == FACTOR_KEY
             and item.get("source") == "CURRENT_CASE_CONSULTATION"
             and item.get("value_state") == "KNOWN"
-            and isinstance(item.get("value"), list)
+            and isinstance(item.get("value"), (list, str))
             and item.get("value")
         ]
         if prior_answers:
