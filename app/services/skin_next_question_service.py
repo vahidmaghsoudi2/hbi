@@ -21,8 +21,12 @@ FACTOR_KEY = "concerns"
 CONTRACT_VERSION = "1"
 
 OPTIONS = (
-    {"value": "hydration", "label": "آبرسانی"},
-    {"value": "sun_protection", "label": "محافظت در برابر آفتاب"},
+    {"value": "ضدآفتاب", "label": "ضدآفتاب / SPF"},
+    {"value": "آبرسان", "label": "آبرسانی پوست"},
+    {"value": "لک صورت", "label": "لک و تیرگی"},
+    {"value": "پوست حساس", "label": "حساسیت / قرمزی"},
+    {"value": "ضدچروک", "label": "ضدچروک"},
+    {"value": "کنترل چربی", "label": "پوست چرب"},
 )
 
 _PROMPT = "نیاز اصلی پوست شما در این مراجعه چیست؟"
@@ -85,7 +89,21 @@ class SkinNextQuestionService:
         profile = self._context(case, current_input)
         trace = profile.get("_profile_fact_context") or {}
 
-        if self._has_concern(profile):
+        # A profile/Quick Intake value is not Case-owned consultation evidence.
+        # Ask for an explicit answer on this Case even when a concern is already
+        # present in the projected profile.
+        state = self._decode_case_state(case)
+        prior_answers = [
+            item for item in (state.get("answers") or [])
+            if isinstance(item, dict)
+            and item.get("question_id") == QUESTION_ID
+            and item.get("factor") == FACTOR_KEY
+            and item.get("source") == "CURRENT_CASE_CONSULTATION"
+            and item.get("value_state") == "KNOWN"
+            and isinstance(item.get("value"), list)
+            and item.get("value")
+        ]
+        if prior_answers:
             return None
 
         conflict = next(
@@ -138,13 +156,19 @@ class SkinNextQuestionService:
             },
         }
 
-    def capture_answer(self, case: Case, question_id: str, answer: str) -> Dict[str, Any]:
+    def capture_answer(self, case: Case, question_id: str, answer: Any) -> Dict[str, Any]:
         if question_id != QUESTION_ID:
             raise ValueError("Unsupported question_id")
 
         allowed = {item["value"] for item in OPTIONS}
-        if answer not in allowed:
-            raise ValueError("Answer must be one of the bounded Skin question options")
+        submitted = answer if isinstance(answer, list) else [answer]
+        if (
+            not submitted
+            or any(not isinstance(item, str) or item not in allowed for item in submitted)
+        ):
+            raise ValueError("Answer must contain one or more bounded Skin consultation options")
+        # Preserve selection order while removing duplicates.
+        answer_values = list(dict.fromkeys(submitted))
 
         state = self._decode_case_state(case)
         gap_id = f"{case.case_id}:{QUESTION_ID}"
@@ -163,7 +187,7 @@ class SkinNextQuestionService:
         answer_record = {
             "question_id": QUESTION_ID,
             "factor": FACTOR_KEY,
-            "value": answer,
+            "value": answer_values,
             "source": "CURRENT_CASE_CONSULTATION",
             "value_state": "KNOWN",
         }
@@ -177,7 +201,7 @@ class SkinNextQuestionService:
             "case_id": case.case_id,
             "question_id": QUESTION_ID,
             "factor": FACTOR_KEY,
-            "answer": answer,
+            "answer": answer_values,
             "value_state": "KNOWN",
             "source": "CURRENT_CASE_CONSULTATION",
             "evidence_gap": gap,
@@ -193,4 +217,5 @@ class SkinNextQuestionService:
         if not answers:
             return {}
         latest = answers[-1]
-        return {FACTOR_KEY: latest.get("value")}
+        value = latest.get("value")
+        return {FACTOR_KEY: value if isinstance(value, list) else [value]}
