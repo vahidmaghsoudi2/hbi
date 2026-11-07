@@ -531,7 +531,7 @@ export default function NewHomePage() {
         family_name: name.trim(),
         mobile: mobile.trim() || undefined,
         concerns: concernsText || undefined,
-        consent: 0,
+        // No consent decision is collected in this form; preserve existing consent.
         skin_profile: skin.length ? skin.join(",") : undefined,
         guest: false,
         open_case: false,
