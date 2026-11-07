@@ -16,16 +16,21 @@ from app.models.case import Case
 from app.services.profile_fact_context_service import ProfileFactContextService
 
 
-QUESTION_ID = "skin.primary_need.v1"
+QUESTION_ID = "skin.primary_need.v2"
+LEGACY_QUESTION_ID = "skin.primary_need.v1"
 FACTOR_KEY = "concerns"
-CONTRACT_VERSION = "1"
+CONTRACT_VERSION = "2"
 
 OPTIONS = (
-    {"value": "hydration", "label": "آبرسانی"},
-    {"value": "sun_protection", "label": "محافظت در برابر آفتاب"},
+    {"value": "ضدآفتاب", "label": "ضدآفتاب / SPF"},
+    {"value": "آبرسان", "label": "آبرسانی پوست"},
+    {"value": "لک صورت", "label": "لک و تیرگی"},
+    {"value": "پوست حساس", "label": "حساسیت / قرمزی"},
+    {"value": "ضدچروک", "label": "ضدچروک"},
+    {"value": "کنترل چربی", "label": "پوست چرب"},
 )
 
-_PROMPT = "نیاز اصلی پوست شما در این مراجعه چیست؟"
+_PROMPT = "در این مراجعه کدام‌یک از نیازهای پوستی زیر را می‌خواهید بررسی کنیم؟ امکان انتخاب چند مورد وجود دارد."
 
 
 class SkinNextQuestionService:
@@ -85,7 +90,21 @@ class SkinNextQuestionService:
         profile = self._context(case, current_input)
         trace = profile.get("_profile_fact_context") or {}
 
-        if self._has_concern(profile):
+        # A profile/Quick Intake value is not Case-owned consultation evidence.
+        # Ask for an explicit answer on this Case even when a concern is already
+        # present in the projected profile.
+        state = self._decode_case_state(case)
+        prior_answers = [
+            item for item in (state.get("answers") or [])
+            if isinstance(item, dict)
+            and item.get("question_id") in {QUESTION_ID, LEGACY_QUESTION_ID}
+            and item.get("factor") == FACTOR_KEY
+            and item.get("source") == "CURRENT_CASE_CONSULTATION"
+            and item.get("value_state") == "KNOWN"
+            and isinstance(item.get("value"), (list, str))
+            and item.get("value")
+        ]
+        if prior_answers:
             return None
 
         conflict = next(
@@ -138,46 +157,64 @@ class SkinNextQuestionService:
             },
         }
 
-    def capture_answer(self, case: Case, question_id: str, answer: str) -> Dict[str, Any]:
-        if question_id != QUESTION_ID:
+    def capture_answer(self, case: Case, question_id: str, answer: Any) -> Dict[str, Any]:
+        if question_id not in {QUESTION_ID, LEGACY_QUESTION_ID}:
             raise ValueError("Unsupported question_id")
 
-        allowed = {item["value"] for item in OPTIONS}
-        if answer not in allowed:
-            raise ValueError("Answer must be one of the bounded Skin question options")
+        # Version 2 adds the six approved Home Page labels and multi-select.
+        # Version 1 remains writable only for its original two canonical values.
+        # This keeps old clients bounded while making the contract transition auditable.
+        legacy_allowed = {"hydration", "sun_protection"}
+        allowed = (
+            ({item["value"] for item in OPTIONS} | legacy_allowed)
+            if question_id == QUESTION_ID
+            else legacy_allowed
+        )
+        submitted = answer if isinstance(answer, list) else [answer]
+        if (
+            not submitted
+            or any(not isinstance(item, str) or item not in allowed for item in submitted)
+        ):
+            raise ValueError("Answer must contain one or more bounded Skin consultation options")
+        # Preserve scalar shape for legacy single-answer clients; multi-select
+        # answers remain ordered, de-duplicated lists in Case evidence.
+        answer_values = list(dict.fromkeys(submitted))
+        stored_answer = answer_values if isinstance(answer, list) else answer_values[0]
 
         state = self._decode_case_state(case)
-        gap_id = f"{case.case_id}:{QUESTION_ID}"
+        state["version"] = CONTRACT_VERSION
+        gap_id = f"{case.case_id}:{question_id}"
         gap = {
             "gap_id": gap_id,
             "factor": FACTOR_KEY,
             "status": "RESOLVED",
             "resolution": "CURRENT_CASE_ANSWER",
-            "question_id": QUESTION_ID,
+            "question_id": question_id,
         }
+        legacy_gap_id = f"{case.case_id}:{LEGACY_QUESTION_ID}"
         state["gaps"] = [
             item for item in state["gaps"]
-            if item.get("gap_id") != gap_id
+            if item.get("gap_id") not in {gap_id, legacy_gap_id}
         ] + [gap]
 
         answer_record = {
-            "question_id": QUESTION_ID,
+            "question_id": question_id,
             "factor": FACTOR_KEY,
-            "value": answer,
+            "value": stored_answer,
             "source": "CURRENT_CASE_CONSULTATION",
             "value_state": "KNOWN",
         }
         state["answers"] = [
             item for item in state["answers"]
-            if item.get("question_id") != QUESTION_ID
+            if item.get("question_id") not in {QUESTION_ID, LEGACY_QUESTION_ID}
         ] + [answer_record]
 
         self._save_state(case, state)
         return {
             "case_id": case.case_id,
-            "question_id": QUESTION_ID,
+            "question_id": question_id,
             "factor": FACTOR_KEY,
-            "answer": answer,
+            "answer": stored_answer,
             "value_state": "KNOWN",
             "source": "CURRENT_CASE_CONSULTATION",
             "evidence_gap": gap,
@@ -188,9 +225,10 @@ class SkinNextQuestionService:
         state = cls._decode_case_state(case)
         answers = [
             item for item in state.get("answers", [])
-            if item.get("question_id") == QUESTION_ID
+            if item.get("question_id") in {QUESTION_ID, LEGACY_QUESTION_ID}
         ]
         if not answers:
             return {}
         latest = answers[-1]
-        return {FACTOR_KEY: latest.get("value")}
+        value = latest.get("value")
+        return {FACTOR_KEY: value if isinstance(value, list) else [value]}

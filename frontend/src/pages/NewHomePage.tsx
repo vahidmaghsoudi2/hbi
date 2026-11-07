@@ -9,6 +9,8 @@ import {
   customerIntake,
   createGuest,
   generateRecommendations,
+  getSkinNextQuestion,
+  answerSkinNextQuestion,
   listInternalEvaluationsByCase,
   createSale,
   getTotalSales,
@@ -44,8 +46,6 @@ const CONCERN_OPTIONS = [
   { id: "hydrate", value: "آبرسان", label: "آبرسانی پوست" },
   { id: "spot", value: "لک صورت", label: "لک و تیرگی" },
   { id: "sensitive", value: "پوست حساس", label: "حساسیت / قرمزی" },
-  { id: "hair", value: "مراقبت مو", label: "مراقبت مو" },
-  { id: "scalp", value: "پوست سر", label: "پوست سر" },
   { id: "antiage", value: "ضدچروک", label: "ضدچروک" },
   { id: "oil", value: "کنترل چربی", label: "پوست چرب" },
 ] as const;
@@ -268,11 +268,7 @@ export default function NewHomePage() {
     if (active === "home") void refreshDashboard();
   }, [active, refreshDashboard]);
 
-  const concernsText = useMemo(() => {
-    const parts = [...concerns, ...skin.map((s) => `پوست ${s}`)];
-    if (note.trim()) parts.push(note.trim());
-    return parts.join(", ");
-  }, [concerns, skin, note]);
+  const concernsText = useMemo(() => concerns.join(", "), [concerns]);
 
   function toggleIn(list: string[], value: string, setter: (v: string[]) => void) {
     setter(list.includes(value) ? list.filter((x) => x !== value) : [...list, value]);
@@ -535,7 +531,7 @@ export default function NewHomePage() {
         family_name: name.trim(),
         mobile: mobile.trim() || undefined,
         concerns: concernsText || undefined,
-        consent: 0,
+        // No consent decision is collected in this form; preserve existing consent.
         skin_profile: skin.length ? skin.join(",") : undefined,
         guest: false,
         open_case: false,
@@ -582,10 +578,11 @@ export default function NewHomePage() {
     if (!name.trim()) return setError("نام الزامی است.");
     if (!mobile.trim()) return setError("شماره موبایل الزامی است.");
     if (!consultationLine) return setError("ابتدا لاین مشاوره را انتخاب کنید.");
-    if (!concernsText) return setError("حداقل یک موضوع یا نوع پوست را انتخاب کنید.");
+    if (!concernsText) return setError("حداقل یک موضوع مشاوره را انتخاب کنید.");
     setBusy(true);
     try {
-      const currentToken = await ensureSession(name.trim(), concernsText);
+      // Case-scoped concerns must not be written during guest bootstrap.
+      const currentToken = await ensureSession(name.trim(), "");
       sessionStorage.setItem("hbi_concerns", concernsText);
       const intake = (await customerIntake(
         {
@@ -593,7 +590,7 @@ export default function NewHomePage() {
           family_name: name.trim(),
           mobile: mobile.trim() || undefined,
           concerns: concernsText,
-          consent: 0,
+          // Omitted consent means no new decision; backend preserves existing consent.
           skin_profile: skin.length ? skin.join(",") : undefined,
           case_type: consultationLine,
           guest: false,
@@ -610,8 +607,26 @@ export default function NewHomePage() {
       sessionStorage.setItem("hbi_case_id", newCaseId);
       setCaseId(newCaseId);
       setStatusMsg("مراجعه ثبت شد. در حال دریافت پیشنهاد…");
+      // Every selected Need must first be captured as explicit Case-owned evidence.
+      const nextQuestion = await getSkinNextQuestion(newCaseId, currentToken);
+      if (nextQuestion.status !== "QUESTION_REQUIRED" || !nextQuestion.question) {
+        throw new Error("سؤال ثبت شواهد مشاوره برای این پرونده در دسترس نیست.");
+      }
+      await answerSkinNextQuestion(
+        newCaseId,
+        nextQuestion.question.question_id,
+        concerns,
+        currentToken
+      );
       const list = await generateRecommendations(
-        { case_id: newCaseId, customer_profile: { concerns: concernsText, skin_type: skin.join(",") || undefined } },
+        {
+          case_id: newCaseId,
+          customer_profile: {
+            concerns: concernsText,
+            skin_profile: skin.join(",") || undefined,
+            operator_notes: note.trim() || undefined,
+          },
+        },
         currentToken
       );
       const operatorToken = await ensureProductSession();

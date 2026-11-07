@@ -108,16 +108,20 @@ def test_missing_skin_input_produces_one_bounded_question(client, db_session):
     assert question["question_id"] == QUESTION_ID
     assert question["factor"] == FACTOR_KEY
     assert question["mode"] == "MISSING_INPUT"
-    assert len(question["options"]) == 2
+    assert len(question["options"]) == 6
     assert {item["value"] for item in question["options"]} == {
-        "hydration",
-        "sun_protection",
+        "ضدآفتاب",
+        "آبرسان",
+        "لک صورت",
+        "پوست حساس",
+        "ضدچروک",
+        "کنترل چربی",
     }
     assert question["evidence_gap"]["status"] == "MISSING"
     assert question["evidence_gap"]["gap_id"] == f"{case.case_id}:{QUESTION_ID}"
 
 
-def test_known_skin_input_produces_no_question(client, db_session):
+def test_known_quick_intake_input_still_requires_case_owned_answer(client, db_session):
     customer, case = _setup_skin_case(db_session)
     token = _token(client, customer.customer_id)
 
@@ -127,12 +131,15 @@ def test_known_skin_input_produces_no_question(client, db_session):
     )
     assert response.json()["status"] == "QUESTION_REQUIRED"
 
-    # Current consultation input is the authoritative known value for this attempt.
+    # A Quick Intake/profile value is not yet Case-owned evidence.
+    # The explicit answer endpoint must persist it before recommendation.
     from app.services.skin_next_question_service import SkinNextQuestionService
 
-    assert SkinNextQuestionService(db_session).get_question(
+    question = SkinNextQuestionService(db_session).get_question(
         case, {"concerns": "hydration"}
-    ) is None
+    )
+    assert question is not None
+    assert question["mode"] == "MISSING_INPUT"
 
 
 def test_answer_is_captured_in_case_and_not_profilefact(client, db_session):
@@ -218,7 +225,11 @@ def test_current_consultation_overrides_profile_fact_for_question_boundary(clien
     db_session.commit()
 
     service = SkinNextQuestionService(db_session)
-    assert service.get_question(case, {"concerns": "sun_protection"}) is None
+    # Current request input overrides the ProfileFact value for projection,
+    # but it is not a persisted answer owned by this Case.
+    question = service.get_question(case, {"concerns": "sun_protection"})
+    assert question is not None
+    assert question["mode"] == "MISSING_INPUT"
     profile = ProfileFactContextService(db_session).build(
         case, {"concerns": "sun_protection"}
     )

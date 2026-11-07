@@ -91,8 +91,12 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             texts.extend([str(c) for c in concerns])
         else:
             texts.append(str(concerns))
-        notes = customer_profile.get("medical_notes") or customer_profile.get("operator_notes") or ""
-        texts.append(str(notes))
+        # Both channels are independent context sources. A non-empty medical
+        # note must not hide an operator note (or vice versa).
+        for key in ("medical_notes", "operator_notes"):
+            value = customer_profile.get(key)
+            if value:
+                texts.append(str(value))
         for f in factors:
             texts.append(str(f.get("value", "")))
         combined = " ".join(texts).lower()
@@ -109,7 +113,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
     def _build_decision_state(self, case_id: str, customer_profile: Dict) -> Dict[str, Any]:
         raw_concerns = []
         concerns_raw = customer_profile.get("concerns") or ""
-        if isinstance(concerns_raw, list):
+        if isinstance(concerns_raw, (list, tuple, set)):
             raw_concerns = [str(c).strip() for c in concerns_raw if c and str(c).strip()]
         else:
             raw_concerns = [c.strip() for c in str(concerns_raw).split(",") if c.strip()]
@@ -117,7 +121,10 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         source_map = profile_fact_context.get("sources") or {}
         concern_source = (source_map.get("concerns") or {}).get("source", "CURRENT_CONSULTATION")
         concern_fact_id = (source_map.get("concerns") or {}).get("profile_fact_id")
-        factor_source = "profile_fact" if concern_source == "PROFILE_FACT" else "customer_input"
+        factor_source = {
+            "PROFILE_FACT": "profile_fact",
+            "CUSTOMER_LEGACY": "customer_legacy",
+        }.get(concern_source, "customer_input")
         factors = [{
             "name": "concern",
             "value": c,
@@ -163,31 +170,40 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         if not isinstance(state, dict):
             return False
 
-        evidence_factors = []
-        for answer in state.get("answers", []):
-            if not isinstance(answer, dict):
-                continue
-            if (
-                answer.get("question_id") == "skin.primary_need.v1"
-                and answer.get("factor") == "concerns"
-                and answer.get("source") == "CURRENT_CASE_CONSULTATION"
-                and answer.get("value_state") == "KNOWN"
-                and str(answer.get("value") or "").strip()
-            ):
-                evidence_factors.append(
-                    {
-                        "name": "concern",
-                        "value": str(answer["value"]).strip(),
-                        "source": "customer_input",
-                        "validity": "DECLARED",
-                    }
-                )
-
-        if not evidence_factors or not generated_needs:
+        # Only the latest valid answer to this bounded question is authoritative.
+        # A single overlap must not certify additional profile-derived Needs.
+        answers = [
+            answer for answer in (state.get("answers") or [])
+            if isinstance(answer, dict)
+            and answer.get("question_id") in {"skin.primary_need.v1", "skin.primary_need.v2"}
+        ]
+        if not answers or not generated_needs:
             return False
 
+        answer = answers[-1]
+        values = answer.get("value")
+        if isinstance(values, str):
+            values = [values]
+        if (
+            answer.get("factor") != "concerns"
+            or answer.get("source") != "CURRENT_CASE_CONSULTATION"
+            or answer.get("value_state") != "KNOWN"
+            or not isinstance(values, list)
+            or not values
+            or any(not isinstance(value, str) or not value.strip() for value in values)
+        ):
+            return False
+
+        evidence_factors = [{
+            "name": "concern",
+            "value": value.strip(),
+            "source": "customer_input",
+            "validity": "DECLARED",
+        } for value in values]
         evidence_needs, _, _, _ = normalize_needs_from_factors(evidence_factors)
-        return bool(set(evidence_needs) & set(generated_needs))
+        # Every selected/generated Need must be explicitly covered by the
+        # Case-owned multi-select answer. Partial overlap is never sufficient.
+        return bool(evidence_needs) and set(generated_needs).issubset(set(evidence_needs))
 
     def _generate_needs_from_decision_state(self, decision_state: Dict[str, Any]) -> List[str]:
         """Need ONLY from Decision State (F2 + GAP-05 L1). No silent guessing."""

@@ -100,7 +100,7 @@ export interface CustomerIntakeRequest {
   family_name?: string;
   mobile?: string;
   concerns?: string;
-  consent: number;
+  consent?: number;
   skin_profile?: unknown;
   guest?: boolean;
   case_type?: string;

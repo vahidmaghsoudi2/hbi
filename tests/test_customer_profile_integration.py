@@ -8,6 +8,7 @@ from __future__ import annotations
 import pytest
 from app.core.auth import create_access_token
 from app.interface.dto import RecommendationDTO
+from app.models.customer import Customer
 from app.interface.facades import RecommendationFacade
 from app.services.customer_service import CustomerService
 
@@ -250,6 +251,95 @@ def test_recommendation_profile_from_customer_fields(client, db_session):
     assert rebuilt.get("skin_profile") == "sensitive"
 
 
+def test_new_customer_case_scoped_inputs_do_not_persist_as_reusable_profile(client, db_session):
+    response = client.post(
+        "/api/v1/customers/intake",
+        headers=_auth("operator_gallery"),
+        json={
+            "name": "New Case-Scoped Customer",
+            "skin_profile": "dry",
+            "concerns": "آبرسان",
+            "consent": 1,
+            "open_case": True,
+        },
+    )
+    assert response.status_code == 201, response.text
+    body = response.json()
+    assert body["case"] is not None
+    assert body["recommendation_profile"]["skin_profile"] == "dry"
+    assert body["recommendation_profile"]["concerns"] == "آبرسان"
+
+    persisted = db_session.get(Customer, body["customer"]["customer_id"])
+    assert persisted is not None
+    assert persisted.skin_profile is None
+    assert persisted.concerns is None
+
+
+def test_guest_bootstrap_then_case_intake_keeps_consultation_inputs_out_of_customer(client, db_session):
+    guest_response = client.post(
+        "/api/v1/customers/guest",
+        json={"name": "Guest Case-Scoped Customer", "consent": 0},
+    )
+    assert guest_response.status_code == 201, guest_response.text
+    customer_id = guest_response.json()["customer_id"]
+
+    response = client.post(
+        "/api/v1/customers/intake",
+        headers=_auth(customer_id),
+        json={
+            "name": "Guest Case-Scoped Customer",
+            "family_name": "Guest Case-Scoped Customer",
+            "mobile": "09135550199",
+            "skin_profile": "dry",
+            "concerns": "آبرسان",
+            "consent": 0,
+            "open_case": True,
+        },
+    )
+    assert response.status_code == 201, response.text
+    body = response.json()
+    assert body["case"] is not None
+    assert body["recommendation_profile"]["skin_profile"] == "dry"
+    assert body["recommendation_profile"]["concerns"] == "آبرسان"
+
+    persisted = db_session.get(Customer, customer_id)
+    assert persisted is not None
+    assert persisted.mobile == "09135550199"
+    assert persisted.family_name == "Guest Case-Scoped Customer"
+    assert persisted.skin_profile is None
+    assert persisted.concerns is None
+
+
+def test_existing_customer_case_scoped_skin_profile_reaches_recommendation_profile(client, db_session):
+    existing = Customer(
+        customer_id="operator_gallery",
+        name="Existing Profile Customer",
+        consent_to_store_data=1,
+    )
+    db_session.add(existing)
+    db_session.commit()
+
+    response = client.post(
+        "/api/v1/customers/intake",
+        headers=_auth(),
+        json={
+            "name": "Existing Profile Customer",
+            "skin_profile": "dry",
+            "concerns": "آبرسان",
+            "consent": 1,
+            "open_case": True,
+        },
+    )
+    assert response.status_code == 201, response.text
+    body = response.json()
+    assert body["case"] is not None
+    assert body["recommendation_profile"]["skin_profile"] == "dry"
+    assert body["recommendation_profile"]["concerns"] == "آبرسان"
+
+    persisted = db_session.get(Customer, "operator_gallery")
+    assert persisted.skin_profile is None
+
+
 # ---------------------------------------------------------------------------
 # E — Recommendation Facade invoked with real profile
 # ---------------------------------------------------------------------------
@@ -303,3 +393,123 @@ def test_guest_endpoint_public_no_auth(client):
 def test_search_requires_auth(client):
     r = client.get("/api/v1/customers/search", params={"q": "سارا"})
     assert r.status_code == 401
+
+
+@pytest.mark.parametrize("open_case", [True, False])
+def test_intake_without_new_consent_decision_preserves_existing_customer_consent(client, db_session, open_case):
+    from datetime import datetime
+    from app.models.customer import Customer
+
+    consent_date = datetime(2026, 10, 1, 12, 0, 0)
+    existing = Customer(
+        customer_id="CUST-CONSENT-PRESERVE-001",
+        name="Existing Consent Customer",
+        consent_to_store_data=1,
+        consent_date=consent_date,
+    )
+    db_session.add(existing)
+    db_session.commit()
+
+    response = client.post(
+        "/api/v1/customers/intake",
+        headers=_auth(existing.customer_id),
+        json={
+            "name": "Existing Consent Customer",
+            "open_case": open_case,
+            "concerns": "آبرسان",
+        },
+    )
+
+    assert response.status_code == 201, response.text
+    db_session.refresh(existing)
+    assert existing.consent_to_store_data == 1
+    assert existing.consent_date == consent_date
+
+
+def test_skin_quick_intake_captures_all_selected_needs_as_case_evidence(client, db_session):
+    import json
+    from app.models.case import Case
+    from app.services.need_normalization import normalize_needs_from_factors
+
+    intake = client.post(
+        "/api/v1/customers/intake",
+        headers=_auth(),
+        json={
+            "name": "Multi Need Consultation",
+            "mobile": "09130000991",
+            "concerns": "ضدآفتاب, آبرسان, لک صورت, پوست حساس, ضدچروک, کنترل چربی",
+            "open_case": True,
+        },
+    )
+    assert intake.status_code == 201, intake.text
+    case_id = intake.json()["case"]["case_id"]
+    case_token = _auth(intake.json()["customer"]["customer_id"])
+
+    question = client.get(
+        f"/api/v1/recommendations/next-question/{case_id}",
+        headers=case_token,
+    )
+    assert question.status_code == 200, question.text
+    assert question.json()["status"] == "QUESTION_REQUIRED"
+    assert len(question.json()["question"]["options"]) == 6
+
+    selected = ["ضدآفتاب", "آبرسان", "لک صورت", "پوست حساس", "ضدچروک", "کنترل چربی"]
+    answer = client.post(
+        f"/api/v1/recommendations/next-question/{case_id}/answer",
+        headers=case_token,
+        json={
+            "question_id": question.json()["question"]["question_id"],
+            "answer": selected,
+        },
+    )
+    assert answer.status_code == 200, answer.text
+    assert answer.json()["answer"] == selected
+
+    case = db_session.get(Case, case_id)
+    state = json.loads(case.evidence_gaps)
+    assert state["answers"][-1]["value"] == selected
+    factors = [
+        {"name": "concern", "value": value, "source": "customer_input", "validity": "DECLARED"}
+        for value in selected
+    ]
+    needs, _, unmapped, ambiguous = normalize_needs_from_factors(factors)
+    assert set(needs) == {
+        "sun protection",
+        "hydration",
+        "brightening",
+        "sensitivity",
+        "anti aging",
+        "oil control",
+    }
+    assert unmapped == []
+    assert ambiguous == []
+
+    # Exercise the actual API generation boundary after the Case-owned answer
+    # has been captured. This fixture has no sellable catalog candidate, so
+    # assert the evidence gate directly rather than inventing a recommendation.
+    generated = client.post(
+        "/api/v1/recommendations/generate",
+        headers=case_token,
+        json={
+            "case_id": case_id,
+            "customer_profile": {
+                "concerns": "ضدآفتاب, آبرسان, لک صورت, پوست حساس, ضدچروک, کنترل چربی"
+            },
+        },
+    )
+    assert generated.status_code == 200, generated.text
+    assert isinstance(generated.json(), list)
+
+    from app.services.recommendation_service import RecommendationService
+    recommendation_service = RecommendationService(db_session)
+    assert recommendation_service._has_minimum_consultation_evidence(case_id, needs)
+    assert not recommendation_service._has_minimum_consultation_evidence(
+        case_id, needs + ["acne care"]
+    )
+
+    no_question = client.get(
+        f"/api/v1/recommendations/next-question/{case_id}",
+        headers=case_token,
+    )
+    assert no_question.status_code == 200
+    assert no_question.json()["status"] == "NO_QUESTION"

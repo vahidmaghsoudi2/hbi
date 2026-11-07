@@ -68,6 +68,9 @@ try:
     product.status = "ACTIVE"
     product.identity_status = "VERIFIED"
     product.qa_verdict = "VALID"
+    # The Home Page E2E creates SKIN Cases; classify this disposable fixture
+    # product explicitly so the real SKIN candidate-line gate is exercised.
+    product.product_line = "SKIN"
     inv = db.query(Inventory).filter_by(product_id=product.product_id).first()
     if inv is None:
         inv = Inventory(

@@ -416,3 +416,128 @@ test("Obsolete standalone catalog URL redirects to the homepage", async ({ page 
   await expect(page.getByRole("heading", { name: "فضای کاری مدیر" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "کاتالوگ محصولات با هویت تأییدشده" })).toHaveCount(0);
 });
+
+
+test("Home Page captures all six Case-owned Needs before generating an eligible recommendation", async ({ page, request }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-multi-need-e2e-admin-token");
+  });
+
+  const api = process.env.HBI_TEST_API_URL || "http://127.0.0.1:8765/api/v1";
+  // Avoid colliding with seeded pilot customers or a previous browser run.
+  const mobile = `0913${String(Date.now()).slice(-7)}`;
+  const flow = [];
+  page.on("request", req => {
+    const pathname = new URL(req.url()).pathname;
+    if (req.method() === "GET" && /\/recommendations\/next-question\/[^/]+$/.test(pathname)) flow.push("question");
+    if (/\/recommendations\/next-question\/[^/]+\/answer$/.test(pathname)) flow.push("answer");
+    if (pathname.endsWith("/recommendations/generate")) flow.push("generate");
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "ورود به مشاوره" }).click();
+  await page.getByRole("button", { name: "شروع مشاوره" }).click();
+  await page.locator("#name").fill("Home Page E2E Customer");
+  await page.locator("#mobile").fill(mobile);
+  const selections = [
+    { label: "ضدآفتاب / SPF", value: "ضدآفتاب" },
+    { label: "آبرسانی پوست", value: "آبرسان" },
+    { label: "لک و تیرگی", value: "لک صورت" },
+    { label: "حساسیت / قرمزی", value: "پوست حساس" },
+    { label: "ضدچروک", value: "ضدچروک" },
+    { label: "پوست چرب", value: "کنترل چربی" },
+  ];
+  for (const selection of selections) {
+    await page.locator("label.pro-check-card")
+      .filter({ hasText: selection.label })
+      .locator('input[type="checkbox"]')
+      .check();
+  }
+  const selectedNeeds = selections.map(selection => selection.value);
+
+  const questionRequestPromise = page.waitForRequest(req =>
+    req.method() === "GET" &&
+    /\/recommendations\/next-question\/[^/]+$/.test(new URL(req.url()).pathname)
+  );
+  const questionResponsePromise = page.waitForResponse(response =>
+    response.request().method() === "GET" &&
+    /\/recommendations\/next-question\/[^/]+$/.test(new URL(response.url()).pathname)
+  );
+  const answerRequestPromise = page.waitForRequest(req =>
+    req.method() === "POST" &&
+    /\/recommendations\/next-question\/[^/]+\/answer$/.test(new URL(req.url()).pathname)
+  );
+  const answerResponsePromise = page.waitForResponse(response =>
+    response.request().method() === "POST" &&
+    /\/recommendations\/next-question\/[^/]+\/answer$/.test(new URL(response.url()).pathname)
+  );
+  const generateRequestPromise = page.waitForRequest(req =>
+    req.method() === "POST" &&
+    new URL(req.url()).pathname.endsWith("/recommendations/generate")
+  );
+  const generateResponsePromise = page.waitForResponse(response =>
+    response.request().method() === "POST" &&
+    new URL(response.url()).pathname.endsWith("/recommendations/generate")
+  );
+
+  await page.getByRole("button", { name: "ثبت مراجعه + دریافت پیشنهاد" }).click();
+
+  const [questionRequest, questionResponse, answerRequest, answerResponse, generateRequest, generateResponse] = await Promise.all([
+    questionRequestPromise,
+    questionResponsePromise,
+    answerRequestPromise,
+    answerResponsePromise,
+    generateRequestPromise,
+    generateResponsePromise,
+  ]);
+
+  expect(questionRequest.method()).toBe("GET");
+  expect(questionResponse.status(), await questionResponse.text()).toBe(200);
+  const questionBody = await questionResponse.json();
+  expect(questionBody.status).toBe("QUESTION_REQUIRED");
+
+  expect(answerResponse.status(), await answerResponse.text()).toBe(200);
+  const answerPayload = answerRequest.postDataJSON();
+  expect(answerPayload.question_id).toBe(questionBody.question.question_id);
+  expect(answerPayload.answer).toEqual(selectedNeeds);
+  const answerBody = await answerResponse.json();
+  expect(answerBody.source).toBe("CURRENT_CASE_CONSULTATION");
+  expect(answerBody.value_state).toBe("KNOWN");
+
+  expect(generateResponse.status(), await generateResponse.text()).toBe(200);
+  const generatePayload = generateRequest.postDataJSON();
+  expect(generatePayload.customer_profile.concerns).toBe(selectedNeeds.join(", "));
+  const generated = await generateResponse.json();
+  expect(Array.isArray(generated)).toBeTruthy();
+  expect(generated.length).toBeGreaterThan(0);
+  expect(generated.every(row => row.eligibility_status === "ELIGIBLE")).toBeTruthy();
+  await expect(page.getByText(/پیشنهاد واجد شرایط آماده است/)).toBeVisible();
+
+  expect(flow.indexOf("question")).toBeGreaterThanOrEqual(0);
+  expect(flow.indexOf("answer")).toBeGreaterThan(flow.indexOf("question"));
+  expect(flow.indexOf("generate")).toBeGreaterThan(flow.indexOf("answer"));
+
+  await expect(page.getByRole("heading", { name: "نتایج ارزیابی برای اپراتور" })).toBeVisible();
+  const session = await page.evaluate(() => ({
+    caseId: sessionStorage.getItem("hbi_case_id"),
+    token: sessionStorage.getItem("hbi_access_token"),
+  }));
+  expect(session.caseId).toBeTruthy();
+  expect(session.token).toBeTruthy();
+
+  const nextQuestion = await request.get(
+    `${api}/recommendations/next-question/${encodeURIComponent(session.caseId)}`,
+    { headers: { Authorization: `Bearer ${session.token}` } }
+  );
+  expect(nextQuestion.status()).toBe(200);
+  expect((await nextQuestion.json()).status).toBe("NO_QUESTION");
+
+  const persisted = await request.get(
+    `${api}/recommendations/case/${encodeURIComponent(session.caseId)}`,
+    { headers: { Authorization: `Bearer ${session.token}` } }
+  );
+  expect(persisted.status()).toBe(200);
+  const savedRows = await persisted.json();
+  expect(savedRows.length).toBeGreaterThan(0);
+  expect(savedRows.every(row => row.eligibility_status === "ELIGIBLE")).toBeTruthy();
+});

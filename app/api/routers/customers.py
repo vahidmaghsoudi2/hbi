@@ -65,7 +65,8 @@ class IntakeRequest(BaseModel):
         default=None,
         description="نیاز/دغدغه امروز؛ به موتور توصیه به‌صورت concerns پاس داده می‌شود",
     )
-    consent: int = 0
+    # None means no new decision during this visit; preserve existing consent.
+    consent: Optional[int] = None
     skin_profile: Optional[str] = None
     guest: bool = False
     case_type: str = Field(
@@ -324,6 +325,10 @@ async def quick_intake(
         mobile
         and not data.guest
         and _looks_like_mobile(mobile)
+        # Customer IDs such as CUST_GUEST_<timestamp> contain many digits,
+        # but are not phone identifiers. Only compare when the whole JWT
+        # subject is itself a phone-like identifier.
+        and all(ch.isdigit() or ch in "+- ()" for ch in customer_id)
         and _looks_like_mobile(customer_id)
         and mobile != customer_id
     ):
@@ -336,9 +341,9 @@ async def quick_intake(
         authenticated = svc.get_by_id(customer_id)
         if authenticated is not None:
             # Continue the same identity as the JWT (Home Front Door path).
-            fields: Dict[str, Any] = {
-                "consent_to_store_data": data.consent,
-            }
+            fields: Dict[str, Any] = {}
+            if data.consent is not None:
+                fields["consent_to_store_data"] = data.consent
             # Preserve the legacy display-name field for established customers.
             # The new family_name field is authoritative for identity checks.
             if authenticated.customer_id.startswith("CUST_GUEST_"):
@@ -375,14 +380,20 @@ async def quick_intake(
                 name=data.name,
                 mobile=None if data.guest else mobile,
                 family_name=data.family_name,
-                concerns=data.concerns,
-                consent=data.consent,
-                skin_profile=data.skin_profile,
+                # When opening a Case, today's concerns/profile belong to
+                # that consultation payload, not the reusable Customer record.
+                concerns=data.concerns if not data.open_case else None,
+                consent=data.consent if data.consent is not None else 0,
+                skin_profile=data.skin_profile if not data.open_case else None,
                 guest=data.guest or not mobile,
             )
 
+        # A skin profile supplied for this visit is case-scoped when a Case
+        # is opened; include it in the returned recommendation profile without
+        # overwriting the customer's persistent profile.
+        profile_extra = {"skin_profile": data.skin_profile} if data.skin_profile is not None else None
         profile = svc.build_recommendation_profile(
-            customer, concerns=data.concerns
+            customer, concerns=data.concerns, extra=profile_extra
         )
 
         case_payload = None
