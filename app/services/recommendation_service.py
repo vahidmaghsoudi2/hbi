@@ -175,7 +175,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         answers = [
             answer for answer in (state.get("answers") or [])
             if isinstance(answer, dict)
-            and answer.get("question_id") == "skin.primary_need.v1"
+            and answer.get("question_id") in {"skin.primary_need.v1", "skin.primary_need.v2"}
         ]
         if not answers or not generated_needs:
             return False
