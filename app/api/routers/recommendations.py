@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Union
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
@@ -26,7 +26,7 @@ class RecommendationRequest(BaseModel):
 
 class SkinNextQuestionAnswerRequest(BaseModel):
     question_id: str
-    answer: str
+    answer: Union[str, List[str]]
 
 
 def _to_dict(obj) -> dict:
