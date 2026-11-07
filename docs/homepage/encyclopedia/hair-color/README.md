@@ -2873,3 +2873,34 @@ DRAFT → REVIEW → APPROVED → ACTIVE → RETIRED
 - ردیف ۴۳: گردش استاندارد پیشنهادی تدوین شد؛ تطبیق با فرایند واقعی گالری باقی است.
 - ردیف ۴۴: ارزیابی ابزار تصویربرداری به دستور Product Owner از دامنه حذف شد؛ هیچ آزمون یا معیار فنی برای دوربین پیگیری نمی‌شود.
 - این خروجی‌ها مجوز ساخت نرم‌افزار، تأیید تخصصی یک فرد مشخص یا مجوز اجرای شیمیایی ایجاد نمی‌کنند.
+
+### تکمیل ممیزی ایستای API و Frontend در ردیف ۵۹ — ۷ نوامبر ۲۰۲۶
+
+**دامنهٔ این تکمیل:** بررسی مسیرهای مرتبط Case، Recommendation، Evidence، Specialist، Outcome، ثبت Routerها و صفحات/کلاینت Frontend در شاخهٔ کاری. این بررسی فقط خواندن کد است؛ هیچ API، تست، migration یا اجرای برنامه‌ای اجرا نشده است.
+
+#### یافته‌های مستند در شاخهٔ کاری
+
+| لایه | شاهد کد | واقعیت مشاهده‌شده | نتیجه برای HAIR |
+|---|---|---|---|
+| Case API | `app/api/routers/cases.py`، `app/interface/facades.py` | درخواست ایجاد Case فقط `customer_id` و `case_type` می‌گیرد؛ `CaseFacade` نیز همین قرارداد عمومی را به `CaseService` می‌فرستد. | `service_kind`، Hair Case مستقل و اتصال Snapshot/Decision Run در این مسیر وجود ندارد. |
+| Recommendation API | `app/api/routers/recommendations.py` | تولید Recommendation ورودی Case را از `SkinNextQuestionService` می‌سازد، سپس `ProfileFactContextService` و `RecommendationFacade` را فراخوانی می‌کند. مسیرهای پرسش بعدی نیز صریحاً Skin هستند. | این endpoint موتور HAIR نیست؛ نبود کنترل نوع خدمت پیش از فراخوانی، خطر عبور Case غیر-SKIN به منطق Skin را ایجاد می‌کند. |
+| Evidence API | `app/api/routers/evidence.py` و `EvidenceCreate` | ایجاد/بازیابی Evidence و Knowledge بر محور `product_id` است؛ مسیر مستقل CASE_EVIDENCE مشاهده نشد. | نیاز HAIR به شواهد پرونده‌محور را پوشش نمی‌دهد. |
+| Specialist API | `app/api/routers/specialist.py` | هویت ثبت‌کننده از `get_current_customer_id` گرفته و به‌عنوان `operator_id` استفاده می‌شود؛ کنترل تخصیص HAIR Specialist یا تأیید متصل به Snapshot و Decision Run دیده نشد. Override و Feedback وجود دارند، اما دروازهٔ انتشار HAIR نیستند. | الگوی موجود جایگزین نقش تخصصی مستقل، بازبینی پرونده و مجوز انتشار مصوب HAIR نیست. |
+| Outcome API | `app/api/routers/outcome_assessments.py` | ارزیابی به Case متصل است؛ `recommendation_id` و `product_id` اختیاری‌اند. | وجود این API به‌تنهایی تفکیک رویدادهای پذیرش، خرید، رضایت اجرا، اجرای واقعی و Outcome را برای دو خدمت اثبات نمی‌کند. |
+| ثبت Routerها | `app/api/routers/__init__.py`، `app/main.py` | Routerهای عمومی ثبت شده‌اند؛ Router یا مسیر اختصاصی HAIR در فهرست ثبت‌شده مشاهده نشد. | مسیر API مستقل HAIR در این نقطه از کد وجود ندارد. |
+| Frontend | `frontend/src/App.tsx`، `PilotPage.tsx`، `RecommendationPage.tsx`، `api/client.ts` | مسیر Pilot برابر احراز هویت → Case عمومی → Recommendation عمومی است. فرم Case فقط `case_type` دارد؛ صفحهٔ Recommendation endpoint عمومی را فراخوانی و اقلام را با `product_id` نمایش می‌دهد. مسیر/قرارداد جداگانه برای دو خدمت، Hair Snapshot، Catalog Reference یا دروازهٔ نمایش پس از تأیید متخصص مشاهده نشد. | UI فعلی برای اجرای دو گردش مستقل HAIR آماده نیست و نباید به‌عنوان رابط عملیاتی HAIR تلقی شود. |
+
+#### اختلاف شاخهٔ کاری با master
+
+مقایسهٔ GitHub در زمان این ممیزی، وضعیت شاخه را `diverged` با **۱۹۹ کامیت جلوتر و ۳۷ کامیت عقب‌تر** نشان داد؛ بنابراین ادغام شاخهٔ مستندات با master در این مرحله انجام نمی‌شود.
+
+در فایل‌های مرتبطِ بررسی‌شده، بیشتر کدهای اصلی API و Frontend در دو مرجع SHA یکسان داشتند؛ بااین‌حال دو اختلاف مشخص ثبت شد:
+- `app/api/routers/recommendations.py`: اختلاف مشاهده‌شده در شاخه و master محدود به نوع annotation پاسخ `answer` بود؛ این اختلاف به‌تنهایی تغییر رفتار اجرایی را اثبات نمی‌کند.
+- `app/api/routers/evidence.py`: شاخهٔ کاری فاقد مسیر `/{evidence_id}/reclassify` است که در master وجود دارد. این قابلیت در ممیزی HAIR به‌عنوان قابلیت CASE_EVIDENCE محسوب نمی‌شود؛ اختلاف باید پیش از هر ادغام مستندات/کد جداگانه بررسی شود.
+
+#### نتیجه و مرز اعتبار
+
+- **نتیجهٔ قطعی این بررسی ایستا:** مسیرهای فعلی Case، Recommendation، Evidence، Specialist و Frontend قرارداد مستقل دو خدمت HAIR را پیاده نمی‌کنند.
+- **استنباط معماری:** استفادهٔ مستقیم از Recommendation API فعلی برای HAIR باید ممنوع باشد؛ کنترل نوع خدمت باید پیش از فراخوانی منطق Skin انجام شود. این ممنوعیت به معنی حذف یا تغییر رفتار سرویس فعلی برای لاین‌های موجود نیست.
+- **محدودیت شواهد:** هیچ تستی اجرا نشده؛ صحت runtime، وضعیت پایگاه دادهٔ زنده، صحت اجرایی migrationها و رفتار واقعی انتشار بررسی نشده‌اند. بنابراین این تکمیل، Reality Audit ردیف ۵۹ را **جزئی/تکمیل‌شده در دامنهٔ API و Frontend** می‌کند، نه ممیزی اجرایی کامل.
+- هیچ کد، Schema، migration، API، UI، شاخهٔ master یا وضعیت ادغام تغییر نکرده است.
