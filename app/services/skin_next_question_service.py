@@ -189,7 +189,7 @@ class SkinNextQuestionService:
             "factor": FACTOR_KEY,
             "status": "RESOLVED",
             "resolution": "CURRENT_CASE_ANSWER",
-            "question_id": QUESTION_ID,
+            "question_id": question_id,
         }
         state["gaps"] = [
             item for item in state["gaps"]
@@ -205,7 +205,7 @@ class SkinNextQuestionService:
         }
         state["answers"] = [
             item for item in state["answers"]
-            if item.get("question_id") != QUESTION_ID
+            if item.get("question_id") not in {QUESTION_ID, LEGACY_QUESTION_ID}
         ] + [answer_record]
 
         self._save_state(case, state)
