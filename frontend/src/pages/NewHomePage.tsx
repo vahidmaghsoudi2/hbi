@@ -11,6 +11,7 @@ import {
   generateRecommendations,
   getSkinNextQuestion,
   answerSkinNextQuestion,
+  listRecommendationsByCase,
   listInternalEvaluationsByCase,
   createSale,
   getTotalSales,
@@ -499,14 +500,22 @@ export default function NewHomePage() {
     let cancelled = false;
     void (async () => {
       try {
-        // The operator UI reads internal evaluation history through the
-        // role-protected endpoint; the ordinary customer endpoint stays eligible-only.
-        const operatorToken = await ensureProductSession();
-        if (!operatorToken) throw new Error("نشست اپراتور در دسترس نیست.");
-        const list = await listInternalEvaluationsByCase(storedCaseId, operatorToken);
+        // Customer-visible recommendations are authoritative for the results view.
+        const publicList = await listRecommendationsByCase(storedCaseId, token);
         if (cancelled) return;
-        setRecs(Array.isArray(list) ? list : []);
+        setRecs(Array.isArray(publicList) ? publicList : []);
         setRecDone(true);
+
+        // Operator evaluations are optional enrichment; failures must preserve public results.
+        try {
+          const operatorToken = await ensureProductSession();
+          if (!operatorToken) return;
+          const evaluations = await listInternalEvaluationsByCase(storedCaseId, operatorToken);
+          if (cancelled) return;
+          if (Array.isArray(evaluations)) setRecs(evaluations);
+        } catch {
+          // Keep the customer-visible list when operator access is unavailable.
+        }
       } catch {
         if (cancelled) return;
         setRecs([]);
@@ -629,18 +638,27 @@ export default function NewHomePage() {
         },
         currentToken
       );
-      const operatorToken = await ensureProductSession();
-      const evaluations = operatorToken
-        ? await listInternalEvaluationsByCase(newCaseId, operatorToken)
-        : list;
-      const eligibleCount = (Array.isArray(evaluations) ? evaluations : []).filter(
+      const publicList = Array.isArray(list) ? list : [];
+      const eligibleCount = publicList.filter(
         (r) => (r.eligibility_status ?? r.eligibility ?? "").trim().toUpperCase() === "ELIGIBLE"
       ).length;
-      setRecs(Array.isArray(evaluations) ? evaluations : []);
+
+      // Publish customer-visible results immediately; operator access is optional.
+      setRecs(publicList);
       setShowAllRecommendations(false);
       setRecDone(true);
       setStatusMsg(eligibleCount ? `${eligibleCount} پیشنهاد واجد شرایط آماده است.` : "پیشنهاد واجد شرایطی با شواهد کافی یافت نشد.");
       setActive("results");
+
+      try {
+        const operatorToken = await ensureProductSession();
+        if (operatorToken) {
+          const evaluations = await listInternalEvaluationsByCase(newCaseId, operatorToken);
+          if (Array.isArray(evaluations)) setRecs(evaluations);
+        }
+      } catch {
+        // Operator enrichment must not fail a completed customer consultation.
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
