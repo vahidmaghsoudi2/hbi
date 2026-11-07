@@ -167,6 +167,10 @@ class ProfileFactContextService:
         for key, value in current.items():
             if key not in CONTEXT_KEYS and self._present(value):
                 profile[key] = value
+                trace["sources"][key] = self._trace_entry(
+                    source="CURRENT_CONSULTATION",
+                    value=value,
+                )
 
         # Keep profile dimensions separate from the active concern/Need surface.
         # Line-specific profile facts remain available as context, but must never
