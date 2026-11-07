@@ -113,7 +113,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
     def _build_decision_state(self, case_id: str, customer_profile: Dict) -> Dict[str, Any]:
         raw_concerns = []
         concerns_raw = customer_profile.get("concerns") or ""
-        if isinstance(concerns_raw, list):
+        if isinstance(concerns_raw, (list, tuple, set)):
             raw_concerns = [str(c).strip() for c in concerns_raw if c and str(c).strip()]
         else:
             raw_concerns = [c.strip() for c in str(concerns_raw).split(",") if c.strip()]
@@ -181,21 +181,28 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             return False
 
         answer = answers[-1]
+        values = answer.get("value")
+        if isinstance(values, str):
+            values = [values]
         if (
             answer.get("factor") != "concerns"
             or answer.get("source") != "CURRENT_CASE_CONSULTATION"
             or answer.get("value_state") != "KNOWN"
-            or not str(answer.get("value") or "").strip()
+            or not isinstance(values, list)
+            or not values
+            or any(not isinstance(value, str) or not value.strip() for value in values)
         ):
             return False
 
         evidence_factors = [{
             "name": "concern",
-            "value": str(answer["value"]).strip(),
+            "value": value.strip(),
             "source": "customer_input",
             "validity": "DECLARED",
-        }]
+        } for value in values]
         evidence_needs, _, _, _ = normalize_needs_from_factors(evidence_factors)
+        # Every selected/generated Need must be explicitly covered by the
+        # Case-owned multi-select answer. Partial overlap is never sufficient.
         return bool(evidence_needs) and set(generated_needs).issubset(set(evidence_needs))
 
     def _generate_needs_from_decision_state(self, decision_state: Dict[str, Any]) -> List[str]:
