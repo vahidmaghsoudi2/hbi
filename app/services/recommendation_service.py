@@ -91,8 +91,12 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             texts.extend([str(c) for c in concerns])
         else:
             texts.append(str(concerns))
-        notes = customer_profile.get("medical_notes") or customer_profile.get("operator_notes") or ""
-        texts.append(str(notes))
+        # Both channels are independent context sources. A non-empty medical
+        # note must not hide an operator note (or vice versa).
+        for key in ("medical_notes", "operator_notes"):
+            value = customer_profile.get(key)
+            if value:
+                texts.append(str(value))
         for f in factors:
             texts.append(str(f.get("value", "")))
         combined = " ".join(texts).lower()
@@ -163,31 +167,33 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         if not isinstance(state, dict):
             return False
 
-        evidence_factors = []
-        for answer in state.get("answers", []):
-            if not isinstance(answer, dict):
-                continue
-            if (
-                answer.get("question_id") == "skin.primary_need.v1"
-                and answer.get("factor") == "concerns"
-                and answer.get("source") == "CURRENT_CASE_CONSULTATION"
-                and answer.get("value_state") == "KNOWN"
-                and str(answer.get("value") or "").strip()
-            ):
-                evidence_factors.append(
-                    {
-                        "name": "concern",
-                        "value": str(answer["value"]).strip(),
-                        "source": "customer_input",
-                        "validity": "DECLARED",
-                    }
-                )
-
-        if not evidence_factors or not generated_needs:
+        # Only the latest valid answer to this bounded question is authoritative.
+        # A single overlap must not certify additional profile-derived Needs.
+        answers = [
+            answer for answer in state.get("answers", [])
+            if isinstance(answer, dict)
+            and answer.get("question_id") == "skin.primary_need.v1"
+        ]
+        if not answers or not generated_needs:
             return False
 
+        answer = answers[-1]
+        if (
+            answer.get("factor") != "concerns"
+            or answer.get("source") != "CURRENT_CASE_CONSULTATION"
+            or answer.get("value_state") != "KNOWN"
+            or not str(answer.get("value") or "").strip()
+        ):
+            return False
+
+        evidence_factors = [{
+            "name": "concern",
+            "value": str(answer["value"]).strip(),
+            "source": "customer_input",
+            "validity": "DECLARED",
+        }]
         evidence_needs, _, _, _ = normalize_needs_from_factors(evidence_factors)
-        return bool(set(evidence_needs) & set(generated_needs))
+        return bool(evidence_needs) and set(generated_needs).issubset(set(evidence_needs))
 
     def _generate_needs_from_decision_state(self, decision_state: Dict[str, Any]) -> List[str]:
         """Need ONLY from Decision State (F2 + GAP-05 L1). No silent guessing."""
