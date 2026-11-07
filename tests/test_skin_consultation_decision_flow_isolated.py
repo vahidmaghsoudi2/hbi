@@ -1,7 +1,5 @@
 """Isolated regression tests for consultation source, line and evidence boundaries."""
 
-import json
-
 from app.models.case import Case
 from app.models.customer import Customer
 from app.models.profile_fact import ProfileFact
