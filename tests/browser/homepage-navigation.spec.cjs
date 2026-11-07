@@ -427,7 +427,7 @@ test("Home Page captures Case-owned Skin evidence before generating an eligible 
   const flow = [];
   page.on("request", req => {
     const pathname = new URL(req.url()).pathname;
-    if (/\\/recommendations\\/next-question\\/[^/]+\\/answer$/.test(pathname)) flow.push("answer");
+    if (/\/recommendations\/next-question\/[^/]+\/answer$/.test(pathname)) flow.push("answer");
     if (pathname.endsWith("/recommendations/generate")) flow.push("generate");
   });
 
@@ -440,11 +440,11 @@ test("Home Page captures Case-owned Skin evidence before generating an eligible 
 
   const answerRequestPromise = page.waitForRequest(req =>
     req.method() === "POST" &&
-    /\\/recommendations\\/next-question\\/[^/]+\\/answer$/.test(new URL(req.url()).pathname)
+    /\/recommendations\/next-question\/[^/]+\/answer$/.test(new URL(req.url()).pathname)
   );
   const answerResponsePromise = page.waitForResponse(response =>
     response.request().method() === "POST" &&
-    /\\/recommendations\\/next-question\\/[^/]+\\/answer$/.test(new URL(response.url()).pathname)
+    /\/recommendations\/next-question\/[^/]+\/answer$/.test(new URL(response.url()).pathname)
   );
   const generateRequestPromise = page.waitForRequest(req =>
     req.method() === "POST" &&
