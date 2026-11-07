@@ -416,3 +416,93 @@ test("Obsolete standalone catalog URL redirects to the homepage", async ({ page 
   await expect(page.getByRole("heading", { name: "فضای کاری مدیر" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "کاتالوگ محصولات با هویت تأییدشده" })).toHaveCount(0);
 });
+
+
+test("Home Page captures Case-owned Skin evidence before generating an eligible recommendation", async ({ page, request }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-multi-need-e2e-admin-token");
+  });
+
+  const api = process.env.HBI_TEST_API_URL || "http://127.0.0.1:8765/api/v1";
+  const flow = [];
+  page.on("request", req => {
+    const pathname = new URL(req.url()).pathname;
+    if (/\\/recommendations\\/next-question\\/[^/]+\\/answer$/.test(pathname)) flow.push("answer");
+    if (pathname.endsWith("/recommendations/generate")) flow.push("generate");
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "ورود به مشاوره" }).click();
+  await page.getByRole("button", { name: "شروع مشاوره" }).click();
+  await page.locator("#name").fill("Home Page E2E Customer");
+  await page.locator("#mobile").fill("09130009998");
+  await page.locator("label.pro-check-card").filter({ hasText: "ضدآفتاب / SPF" }).locator('input[type="checkbox"]').check();
+
+  const answerRequestPromise = page.waitForRequest(req =>
+    req.method() === "POST" &&
+    /\\/recommendations\\/next-question\\/[^/]+\\/answer$/.test(new URL(req.url()).pathname)
+  );
+  const answerResponsePromise = page.waitForResponse(response =>
+    response.request().method() === "POST" &&
+    /\\/recommendations\\/next-question\\/[^/]+\\/answer$/.test(new URL(response.url()).pathname)
+  );
+  const generateRequestPromise = page.waitForRequest(req =>
+    req.method() === "POST" &&
+    new URL(req.url()).pathname.endsWith("/recommendations/generate")
+  );
+  const generateResponsePromise = page.waitForResponse(response =>
+    response.request().method() === "POST" &&
+    new URL(response.url()).pathname.endsWith("/recommendations/generate")
+  );
+
+  await page.getByRole("button", { name: "ثبت مراجعه + دریافت پیشنهاد" }).click();
+
+  const [answerRequest, answerResponse, generateRequest, generateResponse] = await Promise.all([
+    answerRequestPromise,
+    answerResponsePromise,
+    generateRequestPromise,
+    generateResponsePromise,
+  ]);
+
+  expect(answerResponse.status(), await answerResponse.text()).toBe(200);
+  const answerPayload = answerRequest.postDataJSON();
+  expect(answerPayload.answer).toEqual(["ضدآفتاب"]);
+  const answerBody = await answerResponse.json();
+  expect(answerBody.source).toBe("CURRENT_CASE_CONSULTATION");
+  expect(answerBody.value_state).toBe("KNOWN");
+
+  expect(generateResponse.status(), await generateResponse.text()).toBe(200);
+  const generatePayload = generateRequest.postDataJSON();
+  expect(generatePayload.customer_profile.concerns).toBe("ضدآفتاب");
+  const generated = await generateResponse.json();
+  expect(Array.isArray(generated)).toBeTruthy();
+  expect(generated.length).toBeGreaterThan(0);
+  expect(generated.some(row => row.eligibility_status === "ELIGIBLE")).toBeTruthy();
+
+  expect(flow.indexOf("answer")).toBeGreaterThanOrEqual(0);
+  expect(flow.indexOf("generate")).toBeGreaterThan(flow.indexOf("answer"));
+
+  await expect(page.getByRole("heading", { name: "نتایج ارزیابی برای اپراتور" })).toBeVisible();
+  const session = await page.evaluate(() => ({
+    caseId: sessionStorage.getItem("hbi_case_id"),
+    token: sessionStorage.getItem("hbi_access_token"),
+  }));
+  expect(session.caseId).toBeTruthy();
+  expect(session.token).toBeTruthy();
+
+  const nextQuestion = await request.get(
+    `${api}/recommendations/next-question/${encodeURIComponent(session.caseId)}`,
+    { headers: { Authorization: `Bearer ${session.token}` } }
+  );
+  expect(nextQuestion.status()).toBe(200);
+  expect((await nextQuestion.json()).status).toBe("NO_QUESTION");
+
+  const persisted = await request.get(
+    `${api}/recommendations/case/${encodeURIComponent(session.caseId)}`,
+    { headers: { Authorization: `Bearer ${session.token}` } }
+  );
+  expect(persisted.status()).toBe(200);
+  const savedRows = await persisted.json();
+  expect(savedRows.length).toBeGreaterThan(0);
+  expect(savedRows.every(row => row.eligibility_status === "ELIGIBLE")).toBeTruthy();
+});
