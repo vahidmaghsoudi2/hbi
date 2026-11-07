@@ -85,7 +85,6 @@ _SYNONYM_TO_CANONICAL: Dict[str, str] = {
     "uv": "sun_protection",
     "ضدآفتاب": "sun_protection",
     "ضد آفتاب": "sun_protection",
-    "ضدآفتاب": "sun_protection",
     "محافظت در برابر آفتاب": "sun_protection",
     "brightening": "brightening",
     "pigmentation": "brightening",
