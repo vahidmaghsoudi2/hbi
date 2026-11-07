@@ -163,3 +163,23 @@ def test_persisted_operator_notes_remain_visible_to_medical_context_detection(db
     assert profile["operator_notes"] == "pregnancy context"
     assert profile["_profile_fact_context"]["sources"]["operator_notes"]["source"] == "CUSTOMER_LEGACY"
     assert active is True
+
+
+def test_current_operator_and_medical_notes_have_consultation_provenance(db_session):
+    _, case = _customer_case(db_session)
+    profile = ProfileFactContextService(db_session).build(
+        case,
+        {
+            "operator_notes": "pregnancy context",
+            "medical_notes": "routine note",
+        },
+    )
+
+    sources = profile["_profile_fact_context"]["sources"]
+    assert sources["operator_notes"]["source"] == "CURRENT_CONSULTATION"
+    assert sources["medical_notes"]["source"] == "CURRENT_CONSULTATION"
+    assert sources["operator_notes"]["value"] == "pregnancy context"
+    assert sources["medical_notes"]["value"] == "routine note"
+
+    active, _ = RecommendationService(db_session)._detect_medical_context(profile, [])
+    assert active is True
