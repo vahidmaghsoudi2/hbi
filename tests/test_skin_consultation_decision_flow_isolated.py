@@ -161,4 +161,5 @@ def test_persisted_operator_notes_remain_visible_to_medical_context_detection(db
     active, _ = RecommendationService(db_session)._detect_medical_context(profile, [])
 
     assert profile["operator_notes"] == "pregnancy context"
+    assert profile["_profile_fact_context"]["sources"]["operator_notes"]["source"] == "CUSTOMER_LEGACY"
     assert active is True
