@@ -275,6 +275,37 @@ def test_new_customer_case_scoped_inputs_do_not_persist_as_reusable_profile(clie
     assert persisted.concerns is None
 
 
+def test_guest_bootstrap_then_case_intake_keeps_consultation_inputs_out_of_customer(client, db_session):
+    guest_response = client.post(
+        "/api/v1/customers/guest",
+        json={"name": "Guest Case-Scoped Customer", "consent": 0},
+    )
+    assert guest_response.status_code == 201, guest_response.text
+    customer_id = guest_response.json()["customer_id"]
+
+    response = client.post(
+        "/api/v1/customers/intake",
+        headers=_auth(customer_id),
+        json={
+            "name": "Guest Case-Scoped Customer",
+            "skin_profile": "dry",
+            "concerns": "آبرسان",
+            "consent": 0,
+            "open_case": True,
+        },
+    )
+    assert response.status_code == 201, response.text
+    body = response.json()
+    assert body["case"] is not None
+    assert body["recommendation_profile"]["skin_profile"] == "dry"
+    assert body["recommendation_profile"]["concerns"] == "آبرسان"
+
+    persisted = db_session.get(Customer, customer_id)
+    assert persisted is not None
+    assert persisted.skin_profile is None
+    assert persisted.concerns is None
+
+
 def test_existing_customer_case_scoped_skin_profile_reaches_recommendation_profile(client, db_session):
     existing = Customer(
         customer_id="operator_gallery",
