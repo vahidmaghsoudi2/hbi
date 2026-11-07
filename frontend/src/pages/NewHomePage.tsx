@@ -579,7 +579,8 @@ export default function NewHomePage() {
     if (!concernsText) return setError("حداقل یک موضوع مشاوره را انتخاب کنید.");
     setBusy(true);
     try {
-      const currentToken = await ensureSession(name.trim(), concernsText);
+      // Case-scoped concerns must not be written during guest bootstrap.
+      const currentToken = await ensureSession(name.trim(), "");
       sessionStorage.setItem("hbi_concerns", concernsText);
       const intake = (await customerIntake(
         {
