@@ -288,6 +288,8 @@ def test_guest_bootstrap_then_case_intake_keeps_consultation_inputs_out_of_custo
         headers=_auth(customer_id),
         json={
             "name": "Guest Case-Scoped Customer",
+            "family_name": "Guest Case-Scoped Customer",
+            "mobile": "09135550199",
             "skin_profile": "dry",
             "concerns": "آبرسان",
             "consent": 0,
@@ -302,6 +304,8 @@ def test_guest_bootstrap_then_case_intake_keeps_consultation_inputs_out_of_custo
 
     persisted = db_session.get(Customer, customer_id)
     assert persisted is not None
+    assert persisted.mobile == "09135550199"
+    assert persisted.family_name == "Guest Case-Scoped Customer"
     assert persisted.skin_profile is None
     assert persisted.concerns is None
 
