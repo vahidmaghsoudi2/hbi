@@ -106,6 +106,13 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
                 self.repository.update(conflicting_id, conflict_status="CONFLICT")
         evidence = self.repository.get_by_id(evidence.evidence_id)
 
+        # Conflict transitions can leave an existing ProductKnowledge aggregate
+        # stale (e.g. prior SUPPORTED domain now CONFLICT). Rebuild only when
+        # conflicts were actually marked so PENDING-only drafts stay no-ops.
+        if conflicts:
+            from app.services.product_knowledge_service import ProductKnowledgeService
+            ProductKnowledgeService(self.db).update_from_evidence(product_id)
+
         self.audit.append(
             actor_id=actor_id,
             actor_role=actor_role,
@@ -167,13 +174,9 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
         product_market = (getattr(product, "market_region", None) or "").strip().upper() or None
         field_map = {}
         for ev in evidences:
-            # REJECTED rows are governance-excluded (e.g. conflict losers).
-            # They must not re-open conflicts when a new claim is added on the same field.
             if (getattr(ev, "qa_status", None) or "").strip().upper() == "REJECTED":
                 continue
             field = (ev.field or "general").strip().lower() or "general"
-            # Match ProductKnowledge scope semantics: unscoped evidence inherits
-            # the Product market, but never guesses a market when Product is unscoped.
             market_region = (
                 (getattr(ev, "market_region", None) or "").strip().upper()
                 or product_market
@@ -192,15 +195,10 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
             if len(entries) > 1:
                 unique_values = {entry["value"] for entry in entries}
                 if len(unique_values) > 1:
-                    # Distinct wording from the same source is ambiguous, not
-                    # proof of a factual contradiction. Keep the persisted
-                    # CONFLICT block fail-closed, but report it for review
-                    # rather than asserting HIGH / UNRESOLVED contradiction.
                     normalized_references = [
                         (entry.get("source_reference") or "").strip().rstrip("/").casefold()
                         for entry in entries
                     ]
-                    # Missing source references cannot establish source identity.
                     same_source_group = (
                         all(normalized_references)
                         and len(set(normalized_references)) == 1
@@ -261,8 +259,6 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
             row.evidence_id: self.audit.snapshot(row)
             for row in self.repository.find_by_product(product_id)
         }
-        # Conditional UPDATE is the concurrency boundary: if QA has changed
-        # the row since the read above, reclassification must not proceed.
         from sqlalchemy import update as sql_update
 
         pending_update = (
@@ -334,9 +330,6 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
         if selected.conflict_status != "CONFLICT":
             raise ValidationError("This evidence is not in conflict status.")
 
-        # The evidence_id is the explicit winning claim. Resolution is a
-        # governance decision, so every competing claim in the same field
-        # must be excluded from Knowledge/Recommendation.
         field = (selected.field or "general").strip().lower() or "general"
         product = self.db.query(Product).filter(Product.product_id == selected.product_id).first()
         product_market = (getattr(product, "market_region", None) or "").strip().upper() or None
