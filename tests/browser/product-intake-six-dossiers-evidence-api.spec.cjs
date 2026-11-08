@@ -54,7 +54,8 @@ const PRODUCTS = [
     productId: "HBI-PROD-96788ADC488942E3",
     source: "https://www.isdin.com/mx/p/fotoultra-active-unify-spf-50/1160",
     marketRegion: "MX",
-    claim: "The Mexico manufacturer page reports reductions of 22% in spot intensity and 15% in spot area in 31 subjects, labelled as manufacturer-held data (2024). This is a manufacturer-reported result; the full protocol and match to the physical target package/formula are not independently verified.",
+    sourceDate: "2024",
+    claim: "The existing research ledger's Mexico manufacturer source snapshot (2024) records reductions of 22% in spot intensity and 15% in spot area in 31 subjects. The current public page no longer exposes this result, so retain it only as a historical manufacturer-reported claim pending source revalidation; it is not independent efficacy evidence and is not proof of the physical target package/formula.",
   },
   {
     dossier: "P6 Clinique historical",
@@ -115,6 +116,7 @@ test("P1-P6 source-bound Evidence drafts persist and read back without Product M
         claim_type: product.claimType || "MANUFACTURER_CLAIM",
         notes: `Issue #406 approved P1-P6 staged intake; dossier=${product.dossier}; exact physical package/version match remains subject to the recorded dossier limits.`,
         ...(product.marketRegion ? { market_region: product.marketRegion } : {}),
+        ...(product.sourceDate ? { source_date: product.sourceDate } : {}),
       },
       ...(product.additionalAssertions || []),
     ];
