@@ -125,6 +125,9 @@ QUESTION_DEFINITIONS = (
     },
 )
 
+# Compatibility export retained for existing decision-flow tests and callers.
+OPTIONS = [item["value"] for item in QUESTION_DEFINITIONS[0]["options"]]
+
 
 class SkinNextQuestionService:
     """Bounded Case-owned consultation capture with no diagnostic inference."""
