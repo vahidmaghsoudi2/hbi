@@ -42,11 +42,11 @@ const PRODUCTS = [
     dossier: "P6 Clinique historical",
     productId: "HBI-PROD-70EEE418BE0F4DAB",
     source: "https://www.harrods.com/en-gb/p/clinique-even-better-clinical-radical-dark-spot-correctorand-interrupter-100ml-000000000006795757",
-    marketRegion: undefined,
-    field: null,
+    marketRegion: "UK",
+    field: "ingredients",
     sourceType: "RETAILER",
-    claimType: "FACT",
-    claim: "The retailer listing identifies the historical 100 ml Even Better Clinical Radical Dark Spot Corrector + Interrupter and displays a historical INCI pattern including Ascorbyl Glucoside, Salicylic Acid and Dimethoxytolyl Propylresorcinol. This is retailer listing evidence only; physical package, market, lot and exact formula remain unverified. Do not transfer the replacement serum's formula or claims.",
+    claimType: "EVIDENCE",
+    claim: "Harrods UK retailer listing for the historical 100 ml Even Better Clinical Radical Dark Spot Corrector + Interrupter displays this INCI string: WaterAquaEau, Cyclopentasiloxane, Dimethicone, Polysilicone-11, Isododecane, Butylene Glycol, Ascorbyl Glucoside, Peg-10 Dimethicone, Peg-6, Morus Bombycis (Mulberry) Root Extract, Scutellaria Baicalensis Root Extract, Camellia Sinensis Leaf Extract, Cucumis Sativus (Cucumber) Fruit Extract, Saccharomyces Lysate Extract, Hordeum Vulgare (Barley) ExtractExtrait D'Orge, Salicylic Acid, Triticum Vulgare (Wheat) Germ Extract, Cholesterol, Oryza Sativa (Rice) Bran Extract, Squalane, Acetyl Glucosamine, Sodium Hyaluronate, Caffeine, Isohexadecane, Betula Alba (Birch) Bark Extract, Trametes Versicolor Extract, Sodium Rna, Glycyrrhetinic Acid, Dimethoxytolyl Propylresorcinol, Di-C12-18 Alkyl Dimonium Chloride, Helianthus Annuus (Sunflower) Seedcake, Yeast ExtractFaexExtrait De Levure, Caprylyl Glycol, Propylene Glycol Dicaprate, Ammonium Acryloyldimethyltaurate/Vp Copolymer, Acrylamide/Sodium Acryloyldimethyltaurate Copolymer, Polysorbate 20, Tocopheryl Acetate, Polysorbate 80, Tromethamine, Sodium Hydroxide, Hexylene Glycol, Disodium Edta, Sodium Benzoate, Sodium Metabisulfite, Sodium Sulfite, Phenoxyethanol, Yellow 6 (Ci 15985), Yellow 5 (Ci 19140). This is a retailer source snapshot, not the physical package label; exact market/lot/formula match remains unverified. Keep it separate from the replacement Dark Spot Clearing Serum.",
   },
 ];
 
