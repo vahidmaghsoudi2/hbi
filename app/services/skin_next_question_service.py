@@ -201,7 +201,7 @@ class SkinNextQuestionService:
             gap_status = "MISSING"
             gap_detail: Dict[str, Any] = {}
             if question_id == QUESTION_ID:
-                profile = self.context_service.build(case, {})
+                profile = self.context_service.build(case, supplied)
                 trace = profile.get("_profile_fact_context") or {}
                 conflict = next(
                     (item for item in trace.get("conflicts", []) if item.get("attribute_key") == FACTOR_KEY),
@@ -225,9 +225,6 @@ class SkinNextQuestionService:
                         "profile_fact_id": unknown.get("profile_fact_id"),
                         "value_state": unknown.get("value_state"),
                     }
-                elif self._present(profile.get(FACTOR_KEY)):
-                    mode = "CONFIRM_CURRENT_SESSION"
-                    gap_status = "STALE_PROFILE_REQUIRES_CONFIRMATION"
 
             question = {
                 "question_id": question_id,

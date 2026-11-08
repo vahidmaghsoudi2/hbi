@@ -150,7 +150,7 @@ def test_answer_is_captured_in_case_and_not_profilefact(client, db_session):
     response = client.post(
         f"/api/v1/recommendations/next-question/{case.case_id}/answer",
         headers=headers,
-        json={"question_id": QUESTION_ID, "answer": "hydration"},
+        json={"question_id": QUESTION_ID, "answer": ["آبرسان"]},
     )
     assert response.status_code == 200, response.text
     assert response.json()["source"] == "CURRENT_CASE_CONSULTATION"
@@ -158,7 +158,7 @@ def test_answer_is_captured_in_case_and_not_profilefact(client, db_session):
     db_session.expire_all()
     persisted_case = db_session.get(Case, case.case_id)
     state = json.loads(persisted_case.evidence_gaps)
-    assert state["answers"][-1]["value"] == "hydration"
+    assert state["answers"][-1]["value"] == ["آبرسان"]
     assert state["answers"][-1]["source"] == "CURRENT_CASE_CONSULTATION"
     assert state["gaps"][-1]["status"] == "RESOLVED"
     assert db_session.query(ProfileFact).filter_by(
@@ -171,7 +171,8 @@ def test_answer_is_captured_in_case_and_not_profilefact(client, db_session):
         headers=headers,
     )
     assert follow_up.status_code == 200
-    assert follow_up.json()["status"] == "NO_QUESTION"
+    assert follow_up.json()["status"] == "QUESTION_REQUIRED"
+    assert follow_up.json()["question"]["question_id"] == "skin.current_type.v1"
 
 
 def test_answer_a_and_b_rerun_existing_recommendation_with_observable_effect(client, db_session):
@@ -181,8 +182,8 @@ def test_answer_a_and_b_rerun_existing_recommendation_with_observable_effect(cli
 
     observed = []
     for answer, expected_product in [
-        ("hydration", "PROD-NQ-HYDRATION"),
-        ("sun_protection", "PROD-NQ-SUN"),
+        (["آبرسان"], "PROD-NQ-HYDRATION"),
+        (["ضدآفتاب"], "PROD-NQ-SUN"),
     ]:
         answered = client.post(
             f"/api/v1/recommendations/next-question/{case.case_id}/answer",
