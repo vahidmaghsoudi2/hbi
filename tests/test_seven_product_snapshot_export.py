@@ -30,6 +30,7 @@ def test_export_is_read_only_scoped_and_redacts_case_ids(tmp_path):
     assert payload["table_row_counts"]["Product"]==1
     assert payload["table_row_counts"]["Evidence"]==1
     assert payload["table_row_counts"]["Recommendation"]==1
+    assert payload["missing_columns"]["Product"]
     raw=out.read_text(encoding="utf-8")
     assert "UNRELATED" not in raw and "PRIVATE-CASE" not in raw
     assert json.loads(raw)["tables"]["Evidence"][0]["qa_status"]=="PENDING"
@@ -47,10 +48,11 @@ def test_export_rejects_missing_database(tmp_path):
 
 def test_validation_exit_code_requires_complete_tables_and_clean_foreign_keys():
     from scripts.export_seven_product_acceptance_snapshot import validation_exit_code
-    assert validation_exit_code({"missing_product_ids": [], "missing_tables": [], "foreign_key_violation_count": 0}) == 0
-    assert validation_exit_code({"missing_product_ids": ["P1"], "missing_tables": [], "foreign_key_violation_count": 0}) == 2
-    assert validation_exit_code({"missing_product_ids": [], "missing_tables": ["Evidence"], "foreign_key_violation_count": 0}) == 3
-    assert validation_exit_code({"missing_product_ids": [], "missing_tables": [], "foreign_key_violation_count": 1}) == 3
+    assert validation_exit_code({"missing_product_ids": [], "missing_tables": [], "missing_columns": {}, "foreign_key_violation_count": 0}) == 0
+    assert validation_exit_code({"missing_product_ids": ["P1"], "missing_tables": [], "missing_columns": {}, "foreign_key_violation_count": 0}) == 2
+    assert validation_exit_code({"missing_product_ids": [], "missing_tables": ["Evidence"], "missing_columns": {}, "foreign_key_violation_count": 0}) == 3
+    assert validation_exit_code({"missing_product_ids": [], "missing_tables": [], "missing_columns": {"Product": ["status"]}, "foreign_key_violation_count": 0}) == 3
+    assert validation_exit_code({"missing_product_ids": [], "missing_tables": [], "missing_columns": {}, "foreign_key_violation_count": 1}) == 3
 
 
 def test_export_reads_uncheckpointed_wal_without_mutating_source_or_wal(tmp_path):
