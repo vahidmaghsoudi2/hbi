@@ -55,7 +55,7 @@ const PRODUCTS = [
     source: "https://www.isdin.com/mx/p/fotoultra-active-unify-spf-50/1160",
     marketRegion: "MX",
     sourceDate: "2024",
-    claim: "The existing research ledger's Mexico manufacturer source snapshot (2024) records reductions of 22% in spot intensity and 15% in spot area in 31 subjects. The current public page no longer exposes this result, so retain it only as a historical manufacturer-reported claim pending source revalidation; it is not independent efficacy evidence and is not proof of the physical target package/formula.",
+    claim: "The Mexico manufacturer page reports reductions of 22% in spot intensity and 15% in spot area in 31 subjects aged 35–65 after 28 and 84 days of normal use; the page labels this Data on file, 2024. This is a manufacturer-reported result, not independent efficacy evidence and not proof of the physical target package/formula.",
   },
   {
     dossier: "P6 Clinique historical",
