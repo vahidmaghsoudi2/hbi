@@ -656,6 +656,8 @@ def migrate(db_path: str | Path) -> str:
                 tables = {
                     r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
                 }
+                # Keep repair DDL atomic as well as the legacy-table rebuild path.
+                conn.execute("BEGIN IMMEDIATE")
                 mutation_started = True
                 return _handle_already_migrated(conn, tables)
             except Exception:
