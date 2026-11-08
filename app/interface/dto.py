@@ -96,6 +96,7 @@ class EvidenceDTO:
     evidence_status: Optional[str] = None
     conflict_status: Optional[str] = None
     market_region: Optional[str] = None
+    packaging_version: Optional[str] = None
     notes: Optional[str] = None
     qa_status: Optional[str] = None
     created_at: Optional[datetime] = None
@@ -125,6 +126,7 @@ class ProductKnowledgeDTO:
 class ConflictEntryDTO:
     field: Optional[str] = None
     market_region: Optional[str] = None
+    packaging_version: Optional[str] = None
     values: List[str] = None
     evidence_ids: List[str] = None
     severity: str = "HIGH"
