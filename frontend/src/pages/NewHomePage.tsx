@@ -1253,7 +1253,7 @@ export default function NewHomePage() {
               </fieldset>
               <fieldset className="pro-fieldset">
                 <legend>۸) توضیح تکمیلی مشتری</legend>
-                <textarea className="pro-input pro-textarea" value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={600} placeholder="توضیح اختیاری مشتری…" />
+                <textarea id="consult-additional-context" className="pro-input pro-textarea" value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={600} placeholder="توضیح اختیاری مشتری…" />
                 {concernsText ? (
                   <p className="pro-summary">
                     موضوع‌های انتخاب‌شده: <strong>{concernsText}</strong>
