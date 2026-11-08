@@ -162,7 +162,8 @@ def export_snapshot(database_path, output_path):
         "source_database": source_state,
         "source_access": {
             "method": "stable DB+WAL file copy; source never opened by SQLite",
-            "source_components_opened_for_read": ["database", "wal", "shm", "journal"],
+            "source_components_hashed_for_stability": ["database", "wal", "shm", "journal"],
+            "source_database_opened_by_sqlite": False,
             "sqlite_connection_target": "isolated temporary copy only",
             "shm_copied": False,
             "source_sidecars_verified_before_after_copy": True,
