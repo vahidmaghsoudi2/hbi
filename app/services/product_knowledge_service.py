@@ -127,7 +127,7 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
     def update_from_evidence(self, product_id: str) -> Optional[ProductKnowledge]:
         """Rebuild ProductKnowledge from evaluated Evidence with version isolation.
 
-        Source-bound drafts (PENDING/NEEDS_REVIEW/UNKNOWN with no conflict)
+        Source-bound drafts (PENDING/UNKNOWN with no conflict)
         are not a ProductKnowledge evaluation. They must not create a row or
         change an existing row's nullable evidence_status/confidence fields.
         """
