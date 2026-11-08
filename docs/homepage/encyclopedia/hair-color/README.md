@@ -4247,11 +4247,19 @@ Event، تغییر یا تصمیمی را ثبت می‌کند که در جها�
 - prior_state و resulting_state فقط در صورت معلوم‌بودن و با نسخهٔ قرارداد وضعیت؛
 - reason_code و توضیح محدود و غیرمحرمانه؛ evidence_refs؛
 - supersedes_event_id یا corrects_event_id در اصلاح/جایگزینی؛
-- idempotency_key فقط اگر سامانهٔ اجرایی آینده نیازمند جلوگیری از ثبت تکراری باشد؛ این فیلد در این مرحله صرفاً پیشنهاد طراحی است.
+- idempotency_key اجباری برای Eventهای append-only، در فضای نام service_kind + hair_case_id + run_id + event_type/operation؛ کلید یکسان با payload یکسان همان نتیجهٔ قبلی را بدون اثر تکراری برمی‌گرداند؛ کلید یکسان با payload متفاوت تعارض صریح ایجاد می‌کند؛ کلید میان Case/Run/خدمت متفاوت مشترک نیست. TTL، الگوریتم digest و ساختار ذخیره‌سازی به طراحی تفصیلی موکول‌اند، اما الزام معنایی Idempotency از قبل در C11 ثبت شده و اختیاری نیست.
 
-**انواع Event پیشنهادی:** CASE_CREATED، INPUT_RECORDED، INPUT_CORRECTED، GOAL_CHANGED، ARTIFACT_CAPTURED، EVIDENCE_ASSESSED، RULE_VERSION_APPROVED، RULE_VERSION_SUSPENDED، KNOWLEDGE_PACKAGE_RELEASED، DECISION_RUN_STARTED، GATE_EVALUATED، DECISION_RUN_COMPLETED، OUTPUT_RENDERED، OUTPUT_ACCEPTED، OUTPUT_REJECTED، EXECUTION_CONSENT_GRANTED، EXECUTION_CONSENT_WITHDRAWN، EXECUTION_STARTED، EXECUTION_COMPLETED، EXECUTION_DEVIATION_RECORDED، CUSTOMER_STOP_REQUESTED، CASE_STOPPED، FOLLOW_UP_RECORDED، OUTCOME_RECORDED، REVIEW_RECORDED.
+**انواع Event پیشنهادی، هم‌راستا با قرارداد مصوب هفت‌رویدادی و C11:**
 
-این فهرست taxonomy پیشنهادی است؛ وجود هر Event در سیستم فعلی ادعا نمی‌شود و هیچ‌یک بدون وقوع واقعی نباید ثبت شود.
+- رویدادهای هفت‌گانه به همان ترتیب معنایی: DECISION_OUTPUT، SPECIALIST_REVIEW (فقط در صورت وقوع یا الزام معتبر)، CUSTOMER_VISIBILITY، CUSTOMER_CONFIRMATION، EXECUTION_CONSENT، REAL_EXECUTION، OUTCOME.
+- رویدادهای داده/منشأ: CASE_CREATED، INPUT_RECORDED، INPUT_CORRECTED، GOAL_CHANGED، ARTIFACT_CAPTURED، EVIDENCE_ASSESSED.
+- رویدادهای حکمرانی: RULE_VERSION_APPROVED، RULE_VERSION_SUSPENDED، KNOWLEDGE_PACKAGE_RELEASED، REVIEW_RECORDED.
+- رویدادهای کنترل/تصمیم: DECISION_RUN_STARTED، GATE_EVALUATED، DECISION_RUN_COMPLETED.
+- رویدادهای تغییر تاریخچه: CORRECTION_RECORDED، MODIFICATION_RECORDED، REVOCATION_RECORDED، SUPERSESSION_RECORDED.
+- رویدادهای خرید و مسیر: PRODUCT_PURCHASE_RECORDED (جدا از هفت رویداد)، EXECUTION_CONSENT_WITHDRAWN، EXECUTION_DEVIATION_RECORDED، CUSTOMER_STOP_REQUESTED، CASE_STOPPED، FOLLOW_UP_RECORDED، OUTCOME_RECORDED.
+- رویداد فنی بازسازی: HISTORICAL_REPLAY_REQUESTED؛ replay تاریخی فقط خواندنی است و نباید Run، Decision Output، رضایت یا اجرای تازه بسازد.
+
+نام‌ها taxonomy پیشنهادی برای طراحی‌اند؛ قرارداد معنایی هفت رویداد و Idempotency از قبل در README وجود دارد و در اینجا دوباره تصویب نمی‌شود. وجود هر Event در سیستم فعلی ادعا نمی‌شود و هیچ Event بدون وقوع واقعی نباید ثبت شود. PRODUCT_PURCHASE_RECORDED رویداد تجاری مستقل است و نه CUSTOMER_CONFIRMATION، نه EXECUTION_CONSENT و نه REAL_EXECUTION محسوب می‌شود.
 
 #### ۶۶-د۹-۴) ناوردایی‌های Lineage
 
@@ -4260,11 +4268,13 @@ Event، تغییر یا تصمیمی را ثبت می‌کند که در جها�
 3. **Pinned dependencies:** هر Run به نسخهٔ دقیق Snapshot، artifact، Evidence assessment، Rule، Claim/Knowledge Package، Engine build و config مورد استفاده متصل است. اشاره به latest/current برای بازسازی تاریخی کافی نیست.
 4. **Explicit dependency:** وابستگی خروجی باید Edge مستقیم یا مسیر مشتق‌شدهٔ قابل پیمایش داشته باشد. وابستگی از شباهت ظاهری، ترتیب زمانی یا هم‌پرونده‌بودن استنتاج نمی‌شود.
 5. **No silent carry-forward:** پذیرش مشتری به OUTPUT_VERSION و رضایت اجرا به SERVICE_VERSION + scope مشخص متصل است. هیچ‌کدام به نسخهٔ تازه، مسیر جایگزین، خروجی ترجمه‌شده/بازرندرشده یا خدمت تغییرکرده خودکار منتقل نمی‌شود.
-6. **Execution is factual:** EXECUTION_EVENT فقط برای خدمت واقعاً انجام‌شده ثبت می‌شود؛ رزرو، پیشنهاد، پذیرش یا رضایت به‌تنهایی اجرای واقعی نیست.
-7. **Correction is not erasure:** اصلاح داده یا رخداد، نسخهٔ قبلی را از تاریخچه پاک نمی‌کند؛ ارتباط اصلاح و اثر آن بر Runهای متأثر ثبت می‌شود.
-8. **Unknown is not false:** نبود Edge، سند یا Event به‌معنی اثبات عدم وقوع/عدم وابستگی نیست. اگر پوشش گراف برای داوری کافی نباشد، اثر تغییر UNRESOLVED است.
-9. **Scoped invalidation:** تغییر، فقط Nodeها و Outputهایی را بی‌اعتبار/نیازمند ارزیابی می‌کند که مسیر وابستگی معتبر از Node تغییرکرده به آن‌ها وجود دارد؛ دامنهٔ نامعلوم fail-closed می‌ماند.
-10. **No circular approval:** Rule یا Knowledge Package نمی‌تواند صرفاً با ارجاع به Review/Approvalی که خودش از همان Rule/Package تولید شده، اعتبار خود را اثبات کند؛ زنجیرهٔ اختیار و وابستگی باید قابل تشخیص باشد.
+6. **Execution is factual:** REAL_EXECUTION فقط برای خدمت واقعاً انجام‌شده ثبت می‌شود؛ رزرو، پیشنهاد، پذیرش، خرید یا رضایت به‌تنهایی اجرای واقعی نیست.
+7. **Correction is not erasure:** اصلاح/تغییر/لغو/جایگزینی با Event تازه و ارجاع به نسخه/رخداد قبلی ثبت می‌شود؛ تاریخچه پاک یا بازنویسی نمی‌شود.
+8. **Replay is read-only:** بازسازی تاریخی فقط داده و رخدادهای همان Run را می‌خواند؛ هیچ Run یا Event تصمیم‌ساز جدید نمی‌سازد. تصمیم تازه، Run تازه با شناسه و کلید مستقل می‌خواهد.
+9. **Idempotency is mandatory:** کلید در فضای نام service_kind + hair_case_id + run_id + event_type/operation است؛ کلید و payload یکسان اثر تکراری ندارد؛ همان کلید با payload متفاوت conflict می‌سازد؛ کلید بین Case/Run/خدمت مشترک نیست.
+10. **Unknown is not false:** نبود Edge، سند یا Event به‌معنی اثبات عدم وقوع/عدم وابستگی نیست. اگر پوشش گراف برای داوری کافی نباشد، اثر تغییر UNRESOLVED است.
+11. **Scoped invalidation:** تغییر، فقط Nodeها و Outputهایی را بی‌اعتبار/نیازمند ارزیابی می‌کند که مسیر وابستگی معتبر از Node تغییرکرده به آن‌ها وجود دارد؛ دامنهٔ نامعلوم fail-closed می‌ماند.
+12. **No circular approval:** Rule یا Knowledge Package نمی‌تواند صرفاً با ارجاع به Review/Approvalی که خودش از همان Rule/Package تولید شده، اعتبار خود را اثبات کند؛ زنجیرهٔ اختیار و وابستگی باید قابل تشخیص باشد.
 
 #### ۶۶-د۹-۵) الگوریتم مفهومی اثر تغییر بر خروجی
 
