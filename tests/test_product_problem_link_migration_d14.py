@@ -481,3 +481,68 @@ def test_snapshot_restore_preserves_row_content(tmp_path):
     conn.close()
     assert after == before
     assert "assertion_key" not in cols
+
+
+def test_already_migrated_rejects_unique_event_index(tmp_path):
+    """A canonical Event index name cannot hide a UNIQUE definition."""
+    migrate = _migrate()
+    db = tmp_path / "event_unique.db"
+    conn = sqlite3.connect(db)
+    conn.executescript(_full_migrated_sql())
+    conn.execute("DROP INDEX ix_ppl_event_link_time")
+    conn.execute(
+        "CREATE UNIQUE INDEX ix_ppl_event_link_time "
+        "ON ProductProblemLinkAssessmentEvent(link_id, timestamp)"
+    )
+    conn.commit()
+    conn.close()
+    with pytest.raises(RuntimeError, match="canonical index mismatch"):
+        migrate(db)
+
+
+def test_already_migrated_rejects_partial_event_index(tmp_path):
+    """A canonical Event index name cannot hide a PARTIAL definition."""
+    migrate = _migrate()
+    db = tmp_path / "event_partial.db"
+    conn = sqlite3.connect(db)
+    conn.executescript(_full_migrated_sql())
+    conn.execute("DROP INDEX ix_ppl_event_link_time")
+    conn.execute(
+        "CREATE INDEX ix_ppl_event_link_time "
+        "ON ProductProblemLinkAssessmentEvent(link_id, timestamp) "
+        "WHERE event_type = 'CREATE'"
+    )
+    conn.commit()
+    conn.close()
+    with pytest.raises(RuntimeError, match="canonical index mismatch"):
+        migrate(db)
+
+
+def test_already_migrated_rejects_cascade_on_claim_id(tmp_path):
+    """claim_id must retain ON DELETE RESTRICT, not CASCADE."""
+    migrate = _migrate()
+    db = tmp_path / "claim_cascade.db"
+    sql = _full_migrated_sql().replace(
+        "FOREIGN KEY(claim_id) REFERENCES Evidence(claim_id) ON DELETE RESTRICT",
+        "FOREIGN KEY(claim_id) REFERENCES Evidence(claim_id) ON DELETE CASCADE",
+    )
+    conn = sqlite3.connect(db)
+    conn.executescript(sql)
+    conn.close()
+    with pytest.raises(RuntimeError, match="on_delete"):
+        migrate(db)
+
+
+def test_already_migrated_rejects_cascade_on_evidence_id(tmp_path):
+    """evidence_id must retain ON DELETE RESTRICT, not CASCADE."""
+    migrate = _migrate()
+    db = tmp_path / "evidence_cascade.db"
+    sql = _full_migrated_sql().replace(
+        "FOREIGN KEY(evidence_id) REFERENCES Evidence(evidence_id) ON DELETE RESTRICT",
+        "FOREIGN KEY(evidence_id) REFERENCES Evidence(evidence_id) ON DELETE CASCADE",
+    )
+    conn = sqlite3.connect(db)
+    conn.executescript(sql)
+    conn.close()
+    with pytest.raises(RuntimeError, match="on_delete"):
+        migrate(db)
