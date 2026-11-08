@@ -124,15 +124,33 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
 
     _QA_APPROVED = frozenset({"APPROVED", "VERIFIED"})
 
-    def update_from_evidence(self, product_id: str) -> ProductKnowledge:
-        """Rebuild ProductKnowledge from approved Evidence with version isolation."""
-        knowledge = self.get_or_create(product_id)
+    def update_from_evidence(self, product_id: str) -> Optional[ProductKnowledge]:
+        """Rebuild ProductKnowledge from evaluated Evidence with version isolation.
+
+        Source-bound drafts (PENDING/NEEDS_REVIEW/UNKNOWN with no conflict)
+        are not a ProductKnowledge evaluation. They must not create a row or
+        change an existing row's nullable evidence_status/confidence fields.
+        """
         # Tests may construct the service via __new__ without BaseService.__init__.
         db = getattr(self, "db", None)
         product = None
         if db is not None:
             product = db.query(Product).filter(Product.product_id == product_id).first()
         evidences = self.evidence_repo.find_by_product(product_id)
+
+        evaluated = any(
+            (getattr(ev, "conflict_status", None) or "NONE").strip().upper() == "CONFLICT"
+            or (getattr(ev, "qa_status", None) or "").strip().upper() in (
+                self._QA_APPROVED | frozenset({"REJECTED", "INVALID"})
+            )
+            for ev in evidences
+        )
+        if evidences and not evaluated:
+            # Keep existing ProductKnowledge byte-for-byte unchanged; if none
+            # exists, do not create one just because a research draft arrived.
+            return self.repository.find_by_product(product_id)
+
+        knowledge = self.get_or_create(product_id)
 
         product_market = getattr(product, "market_region", None) if product else None
         packaging_version = getattr(product, "packaging_version", None) if product else None
