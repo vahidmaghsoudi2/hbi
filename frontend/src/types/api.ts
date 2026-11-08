@@ -329,6 +329,8 @@ export interface ProductKnowledgeDTO {
   product_id: string;
   ingredients?: string | null;
   ingredient_roles?: string | null;
+  other_attributes?: string | null;
+  domain_evidence_status?: string | null;
   claimed_benefits?: string | null;
   known_use_cases?: string | null;
   contraindications?: string | null;
