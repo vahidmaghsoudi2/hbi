@@ -331,13 +331,13 @@ def test_structured_consultation_captures_all_eight_case_owned_answers(client, d
     ]
 
     for expected_question_id, answer in answers:
-        question = service.get_question(case)
+        question = service.get_question(case, include_details=True)
         assert question is not None
         assert question["question_id"] == expected_question_id
         result = service.capture_answer(case, expected_question_id, answer)
         assert result["source"] == "CURRENT_CASE_CONSULTATION"
 
-    assert service.get_question(case) is None
+    assert service.get_question(case, include_details=True) is None
     db_session.expire_all()
     persisted = db_session.get(Case, case.case_id)
     state = json.loads(persisted.evidence_gaps)
