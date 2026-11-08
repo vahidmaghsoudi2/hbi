@@ -4,7 +4,7 @@
 >
 > This is a research continuity ledger, not an approved ProductKnowledge record. The technical status matrix in Research pass 18 is a historical 2026-10-31 snapshot; where it conflicts with current master, the current-master facts below supersede it. Preserve the research claims and source/version caveats, but do not reuse stale implementation assumptions.
 >
-> **Canonical Product ID mapping (P1–P7), verified in current master and PR #504:**
+> **Canonical Product ID mapping (P1–P7), verified against current master:**
 > - P1 COSRX → `HBI-PROD-FE320FA135B843B6`
 > - P2 Neutrogena → `HBI-PROD-2CC249240D504453`
 > - P3 Garnier → `HBI-PROD-C29AA2F410A84CCA`
@@ -24,8 +24,11 @@
 > - **Unresolved semantic caution:** the current UI maps the warnings box to Evidence field `contraindications`. Prior review comments identify that a general warning is not automatically a contraindication. Do not broaden or interpret this mapping as clinical contraindication approval without an explicit PO contract decision.
 >
 > **Open implementation/acceptance boundaries:**
-> - PR #465 carries the current-master read-only ProductKnowledge GET correction; it is Draft pending independent review and PO merge decision.
-> - PR #504 remains the seven-product Home Page acceptance tracker. A fresh read-only local DB snapshot is still required before the isolated seven-product E2E. Historical snapshots are not current.
+> - PR #465 carries the current-master read-only ProductKnowledge GET correction; it is OPEN and not Draft. A focused technical COMMENT review is recorded; independent human review and PO merge decision remain.
+> - PR #504 remains only the seven-product Home Page acceptance tracker. Its current code head is `44241419552cddcc5411ae8c168cafec59afba35`, 9 commits ahead / 9 behind current master, and contains an old implementation delta; do not merge or replay any code from that branch. A fresh read-only local DB snapshot is still required before isolated seven-product E2E. Historical snapshots are not current.
+> - PR #523 supplies the read-only snapshot exporter for #504. Exact head `842719fe4e46e40374cf672226765b412fc51f5d` passed 753 tests / 88% coverage, Auto Tasks, Browser Proof 30/30 and parser 61/61; its regression coverage includes WAL preservation, Inventory row identity, missing schema reporting, symlink/sidecar refusal and no-overwrite. The exporter has not yet been run against the user's local DB.
+> - PR #511 is the canonical current-master implementation for activities 29–30; duplicate PR #524 is closed/unmerged. Do not replay the duplicate branch.
+> - PR #521 is the current replacement for #476; PR #522 is the current replacement for #498. Both are open, unmerged and have exact-head CI/Browser Proof success.
 > - PR #359 was closed as superseded; do not reintroduce its older global status algorithm.
 >
 > This reconciliation is documentation only. It does not create or approve Evidence, ProductKnowledge, Product Master, QA, lifecycle, inventory, ProductProblemLink or Recommendation data.
