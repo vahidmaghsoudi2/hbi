@@ -146,10 +146,12 @@ export interface SkinNextQuestionResponse {
 
 export function getSkinNextQuestion(
   caseId: string,
-  token: string
+  token: string,
+  structured = false
 ): Promise<SkinNextQuestionResponse> {
+  const sequence = structured ? "?sequence=structured" : "";
   return request<SkinNextQuestionResponse>(
-    `/recommendations/next-question/${encodeURIComponent(caseId)}`,
+    `/recommendations/next-question/${encodeURIComponent(caseId)}${sequence}`,
     {},
     token
   );
