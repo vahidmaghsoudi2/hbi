@@ -338,8 +338,11 @@ class ProductKnowledgeFacade:
         self.db = db
         self.service = ProductKnowledgeService(db)
 
-    def get_by_product(self, product_id: str) -> ProductKnowledgeDTO:
-        knowledge = self.service.get_or_create(product_id)
+    def get_by_product(self, product_id: str) -> Optional[ProductKnowledgeDTO]:
+        # A read must never create ProductKnowledge as a side effect.
+        knowledge = self.service.repository.find_by_product(product_id)
+        if knowledge is None:
+            return None
         return self._to_knowledge_dto(knowledge)
 
     def refresh_from_evidence(self, product_id: str) -> ProductKnowledgeDTO:
