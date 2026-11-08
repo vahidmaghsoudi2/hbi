@@ -3101,13 +3101,13 @@ DRAFT → REVIEW → APPROVED → ACTIVE → RETIRED
 
 | رویداد | پیش‌شرط حداقلی | پیوند الزامی |
 |---|---|---|
-| Decision Output | Snapshot کامل و ارجاع Evidence و نسخه‌های Rule/Knowledge/Engine | run_id |
-| Specialist Review | اختیاری، مگر قاعدهٔ معتبر همان مسیر بازبینی را الزامی کند؛ در صورت ثبت، Output متعلق به همان Run باید معتبر باشد | output_id و run_id و snapshot_id و service_kind |
-| Visibility | عبور همان Output/Run/Snapshot از دروازه‌های داده، ایمنی، قواعد و شواهد؛ فقط اگر قاعدهٔ معتبر بازبینی را الزامی کرده باشد، Review=ACCEPT معتبر برای همان نسخه نیز لازم است؛ بازبینی اختیاریِ انجام‌شده به‌عنوان رویداد ثبت می‌شود و به‌تنهایی شرط عمومی انتشار نیست | decision_output_id؛ و در مسیر الزام‌آور review_event_id |
-| Customer Confirmation | Visibility ثبت‌شده و قابل مشاهده برای همان نسخه | visibility_event_id |
-| Execution Consent | تأیید مثبت مشتری برای همان نسخه و همان خدمت | confirmation_event_id |
-| اجرای واقعی | Consent معتبر و شرایط اجرایی خارج از موتور تصمیم | consent_event_id و مرجع رخداد اجرا |
-| Outcome | رخداد واقعی ثبت‌شده؛ Outcome صرفاً از پذیرش یا خرید استنتاج نشود | مرجع اجرای واقعی |
+| Decision Output | Decision Run و Snapshot کامل؛ ثبت نتیجهٔ دروازه‌های داده، ایمنی، قواعد و شواهد؛ در صورت عدم ارائهٔ مشاوره، ثبت علت و دادهٔ لازم بدون ساخت Recommendation قابل اجرا | hair_case_id، service_kind، run_id، snapshot_id، output_id |
+| Specialist Review | اختیاری، مگر قاعدهٔ معتبر همان مسیر بازبینی را الزامی کند؛ اگر ثبت شد، actor دارای هویت/اختیار معتبر و Output متعلق به همان Run را بررسی کند | actor_id، hair_case_id، service_kind، output_id، run_id، snapshot_id، review_event_id |
+| Visibility | عبور همان Output/Run/Snapshot از دروازه‌های داده، ایمنی، قواعد و شواهد؛ فقط در مسیر الزام‌آور، Review=ACCEPT معتبر برای همان نسخه نیز لازم است؛ بازبینی اختیاری به‌تنهایی شرط عمومی انتشار نیست | hair_case_id، service_kind، decision_output_id، run_id، snapshot_id؛ و در مسیر الزام‌آور review_event_id |
+| Customer Confirmation | Visibility ثبت‌شده و قابل مشاهده برای همان نسخه؛ ثبت تصمیم واقعی مشتری دربارهٔ همان پیشنهاد، شامل پذیرش یا رد؛ پرسش مشتری تصمیم محسوب نمی‌شود | customer_id، hair_case_id، service_kind، visibility_event_id، decision_output_id، confirmation_event_id |
+| Execution Consent | رضایت مثبت، صریح و جداگانهٔ مشتری برای اجرای همان خدمت و همان نسخه؛ پذیرش پیشنهاد یا خرید محصول به‌تنهایی کافی نیست | customer_id، hair_case_id، service_kind، decision_output_id، confirmation_event_id، consent_event_id |
+| اجرای واقعی | Consent معتبر و شروط اجرایی خارج از موتور تصمیم؛ ثبت اینکه واقعاً چه خدمت/محصولی، توسط چه مسئول و در چه زمانی انجام شد | consent_event_id، execution_id، مسئول اجرا، زمان و مرجع ثبت اجرای واقعی |
+| Outcome | فقط پس از رخداد واقعی اجرا؛ نتیجه باید به همان اجرای واقعی و نسخه متصل باشد؛ Outcome از پذیرش پیشنهاد، خرید یا رضایت اجرا استنتاج نشود | execution_id، hair_case_id، service_kind، run_id، outcome_id
 
 ### ۶۶-ت) Lineage، Idempotency و بازسازی تاریخی
 
