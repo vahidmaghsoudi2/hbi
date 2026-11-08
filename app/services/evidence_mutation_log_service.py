@@ -77,7 +77,7 @@ class EvidenceMutationLogService:
             return {}
         keys = [
             "evidence_id", "product_id", "claim_id", "source_type",
-            "source_reference", "claim", "field", "market_region", "notes",
+            "source_reference", "claim", "field", "market_region", "packaging_version", "notes",
             "claim_type", "evidence_strength", "evidence_status",
             "conflict_status", "source_date", "evidence_date", "qa_status",
         ]
