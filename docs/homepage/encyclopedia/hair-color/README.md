@@ -4181,3 +4181,145 @@ AI نمی‌تواند:
 - **P2 — حکمرانی داده:** access/retention policy، آرشیو/حذف، طبقه‌بندی افشا و audit actor.
 
 اولویت‌ها پیشنهاد بازبین‌اند و تصویب PO محسوب نمی‌شوند. این ممیزی فقط قرارداد مستندات را تکمیل می‌کند و هیچ مجوز Schema/API/DB یا پیاده‌سازی ایجاد نمی‌کند.
+
+---
+
+### ۶۶-د۹) قرارداد مفهومی Dependency Graph و Event Lineage
+
+**وضعیت این بخش:** پیشنهاد معماری برای تکمیل Manifest و C10 است؛ نه Schema مصوب، نه مدل اجرایی موجود و نه مجوز پیاده‌سازی. برای provenance از الگوی عمومی W3C PROV-O به‌عنوان مرجع مفهومی استفاده می‌شود: Entity برای داده/سند/نسخه، Activity برای رخداد یا فرایند، Agent برای مسئول انسانی/سازمانی/نرم‌افزاری؛ رابطه‌هایی مانند used، wasGeneratedBy، wasDerivedFrom، wasAttributedTo و wasAssociatedWith امکان بیان زنجیرهٔ منشأ را می‌دهند. این ارجاع به معنی الزام به RDF/OWL یا پیاده‌سازی PROV-O نیست: https://www.w3.org/TR/prov-o/
+
+#### ۶۶-د۹-۱) انواع Node
+
+گراف باید Nodeهای نوع‌دار داشته باشد؛ شناسهٔ هر Node در محدودهٔ نوع خودش یکتا و ارجاع آن پایدار باشد:
+
+| نوع Node | نمونهٔ مفهومی | قاعده |
+|---|---|---|
+| CASE | پروندهٔ مشاوره | ظرف تجمیع؛ به‌تنهایی منبع تصمیم نیست |
+| SNAPSHOT | نسخهٔ ثابت داده‌های پرونده | محتوای تاریخی بازنویسی نمی‌شود |
+| INPUT | یک مقدار/وضعیت ورودی با منشأ | مقدار، واحد/معنا، وضعیت، زمان مشاهده و actor از منبع ثبت شود |
+| ARTIFACT | فایل/کاتالوگ/تصویر/سند | نسخه و hash فقط از بایت‌های artifact واقعی |
+| EVIDENCE | ارزیابی یک منبع برای یک ادعای مشخص | ارزیابی به Claim و دامنهٔ معین متصل است |
+| CLAIM | گزارهٔ دانش با دامنه و وضعیت | وضعیت Claim مستقل از اعتبار منبع و مستقل از Rule است |
+| RULE | یک نسخهٔ تغییرناپذیر از Rule | دامنه، وضعیت، تصویب و تاریخ اعتبار مستقل ثبت شود |
+| RULE_SET / KNOWLEDGE_PACKAGE | بستهٔ نسخه‌دار | عضویت دقیق نسخه‌ها در هر بسته ثبت شود |
+| ENGINE_BUILD / CONFIG | نسخهٔ موتور و پیکربندی | شناسهٔ نسخه/ساخت واقعی؛ نه برچسب شناور مانند latest |
+| GATE_RESULT | نتیجهٔ یک کنترل در یک Run | ورودی‌ها، نسخهٔ کنترل، زمان و دلیل ثبت شود |
+| REVIEW | تصمیم بازبین با دامنهٔ صلاحیت | actor، نقش، دامنه، زمان، نتیجه و محدودیت ثبت شود |
+| DECISION_RUN | اجرای منطقی تصمیم | به Snapshot و تمام وابستگی‌های مؤثر pin شود |
+| OUTPUT | خروجی مشخص برای مخاطب/کانال | payload و نسخهٔ دقیق خروجی ثبت شود |
+| ACCEPTANCE_EVENT | پذیرش مشتری | به output_version مشخص متصل شود |
+| EXECUTION_CONSENT_EVENT | رضایت اجرای خدمت | مستقل از acceptance و به service/version/scope مشخص متصل شود |
+| EXECUTION_EVENT | اجرای واقعی خدمت | فقط پس از وقوع واقعی ثبت شود؛ برنامه یا پیشنهاد، اجرای واقعی نیست |
+| OUTCOME | مشاهدهٔ پس از اجرا/پیگیری | منبع، زمان مشاهده و ثبت و رابطه با اجرای واقعی مشخص باشد |
+| ACTOR / AGENT | مشتری، اپراتور، بازبین، PO یا نرم‌افزار | نقش در هر Activity صریح باشد؛ نقش از عنوان یا دسترسی فنی استنتاج نشود |
+
+#### ۶۶-د۹-۲) انواع Edge و جهت آن‌ها
+
+جهت استاندارد گراف در این قرارداد **از منبع/عامل اثرگذار به Node وابسته/تولیدشده** است؛ بنابراین برای یافتن خروجی‌های متأثر از یک تغییر، گراف در جهت Edgeها پیمایش می‌شود.
+
+| Edge | معنی | نمونه |
+|---|---|---|
+| USED_BY | منبع در Activity/Run مصرف شده | ARTIFACT → DECISION_RUN |
+| GENERATED_BY | Entity توسط Activity تولید شده | OUTPUT → DECISION_RUN |
+| DERIVED_FROM | نسخه/محتوا از منبعی مشتق شده | SNAPSHOT_B → SNAPSHOT_A |
+| MEMBER_OF | عضو یک بسته/مجموعه است | RULE_VERSION → RULE_SET_VERSION |
+| ASSESSES | ارزیابی دربارهٔ Evidence/Claim انجام شده | REVIEW → EVIDENCE یا CLAIM |
+| GOVERNED_BY | Run/Rule تحت کنترل نسخهٔ مشخص است | DECISION_RUN → RULE_VERSION و GATE_RESULT |
+| REVIEWED_FOR | Review دقیقاً برای دامنه/نسخهٔ مشخص انجام شده | REVIEW → DECISION_RUN یا OUTPUT_VERSION |
+| RENDERS | خروجی از داده و قالب/زبان ساخته شده | RENDER_ACTIVITY → OUTPUT_VERSION |
+| ACCEPTS_VERSION | مشتری نسخهٔ دقیق خروجی را پذیرفته | ACCEPTANCE_EVENT → OUTPUT_VERSION |
+| CONSENTS_TO | مشتری به اجرای خدمت/نسخه/دامنهٔ مشخص رضایت داده | EXECUTION_CONSENT_EVENT → SERVICE_VERSION |
+| EXECUTES_AS | اجرای واقعی با نسخه/دامنهٔ مشخص انجام شده | EXECUTION_EVENT → SERVICE_VERSION |
+| OBSERVED_AFTER | Outcome پس از رخداد مشخص مشاهده شده | OUTCOME → EXECUTION_EVENT |
+| ATTRIBUTED_TO / ASSOCIATED_WITH | انتساب یا مسئولیت Agent | ACTIVITY → ACTOR |
+
+نام Edgeها واژگان پیشنهادی داخلی‌اند؛ معادل‌سازی مفهومی با واژگان PROV-O در صورت نیاز مجاز است، اما نباید ادعا شود این واژگان دقیقاً همان معنا/قواعد هنجاری PROV-O را دارند.
+
+هر Edge حداقل این ویژگی‌ها را نیاز دارد: edge_id، from_node_id، to_node_id، edge_type، scope، valid_time در صورت کاربرد، recorded_at، asserted_by، evidence_ref یا دلیل، و edge_status شامل ASSERTED / DISPUTED / RETRACTED. Edge اصلاح‌شده حذف یا بازنویسی نمی‌شود؛ Edge تازه با ارجاع به مورد قبلی ثبت می‌شود.
+
+#### ۶۶-د۹-۳) قرارداد Event
+
+Event، تغییر یا تصمیمی را ثبت می‌کند که در جهان پرونده رخ داده یا توسط actor ثبت شده است. حداقل فیلدهای مفهومی:
+
+- event_id پایدار و یکتا؛ event_type؛ case_id؛ subject_ref و related_refs؛
+- occurred_at زمان وقوع ادعاشده/واقعی؛ recorded_at زمان ثبت؛ effective_at زمان اثرگذاری، اگر متفاوت باشد؛ timezone صریح؛
+- actor_id و actor_role در زمان رخداد؛ source_ref و capture_method؛
+- prior_state و resulting_state فقط در صورت معلوم‌بودن و با نسخهٔ قرارداد وضعیت؛
+- reason_code و توضیح محدود و غیرمحرمانه؛ evidence_refs؛
+- supersedes_event_id یا corrects_event_id در اصلاح/جایگزینی؛
+- idempotency_key فقط اگر سامانهٔ اجرایی آینده نیازمند جلوگیری از ثبت تکراری باشد؛ این فیلد در این مرحله صرفاً پیشنهاد طراحی است.
+
+**انواع Event پیشنهادی:** CASE_CREATED، INPUT_RECORDED، INPUT_CORRECTED، GOAL_CHANGED، ARTIFACT_CAPTURED، EVIDENCE_ASSESSED، RULE_VERSION_APPROVED، RULE_VERSION_SUSPENDED، KNOWLEDGE_PACKAGE_RELEASED، DECISION_RUN_STARTED، GATE_EVALUATED، DECISION_RUN_COMPLETED، OUTPUT_RENDERED، OUTPUT_ACCEPTED، OUTPUT_REJECTED، EXECUTION_CONSENT_GRANTED، EXECUTION_CONSENT_WITHDRAWN، EXECUTION_STARTED، EXECUTION_COMPLETED، EXECUTION_DEVIATION_RECORDED، CUSTOMER_STOP_REQUESTED، CASE_STOPPED، FOLLOW_UP_RECORDED، OUTCOME_RECORDED، REVIEW_RECORDED.
+
+این فهرست taxonomy پیشنهادی است؛ وجود هر Event در سیستم فعلی ادعا نمی‌شود و هیچ‌یک بدون وقوع واقعی نباید ثبت شود.
+
+#### ۶۶-د۹-۴) ناوردایی‌های Lineage
+
+1. **Append-only history:** رخداد ثبت‌شده، تصمیم قبلی، Snapshot، Rule/Claim نسخه‌دار و خروجی تاریخی بازنویسی/حذف خاموش نمی‌شود. اصلاح با Event جدید و ارجاع به مورد قبلی انجام می‌شود.
+2. **Dual time:** occurred_at، effective_at و recorded_at مفاهیم جدا هستند. اگر زمان وقوع از منبع قابل اثبات نیست، UNKNOWN بماند؛ زمان ثبت نباید جای زمان وقوع جا زده شود.
+3. **Pinned dependencies:** هر Run به نسخهٔ دقیق Snapshot، artifact، Evidence assessment، Rule، Claim/Knowledge Package، Engine build و config مورد استفاده متصل است. اشاره به latest/current برای بازسازی تاریخی کافی نیست.
+4. **Explicit dependency:** وابستگی خروجی باید Edge مستقیم یا مسیر مشتق‌شدهٔ قابل پیمایش داشته باشد. وابستگی از شباهت ظاهری، ترتیب زمانی یا هم‌پرونده‌بودن استنتاج نمی‌شود.
+5. **No silent carry-forward:** پذیرش مشتری به OUTPUT_VERSION و رضایت اجرا به SERVICE_VERSION + scope مشخص متصل است. هیچ‌کدام به نسخهٔ تازه، مسیر جایگزین، خروجی ترجمه‌شده/بازرندرشده یا خدمت تغییرکرده خودکار منتقل نمی‌شود.
+6. **Execution is factual:** EXECUTION_EVENT فقط برای خدمت واقعاً انجام‌شده ثبت می‌شود؛ رزرو، پیشنهاد، پذیرش یا رضایت به‌تنهایی اجرای واقعی نیست.
+7. **Correction is not erasure:** اصلاح داده یا رخداد، نسخهٔ قبلی را از تاریخچه پاک نمی‌کند؛ ارتباط اصلاح و اثر آن بر Runهای متأثر ثبت می‌شود.
+8. **Unknown is not false:** نبود Edge، سند یا Event به‌معنی اثبات عدم وقوع/عدم وابستگی نیست. اگر پوشش گراف برای داوری کافی نباشد، اثر تغییر UNRESOLVED است.
+9. **Scoped invalidation:** تغییر، فقط Nodeها و Outputهایی را بی‌اعتبار/نیازمند ارزیابی می‌کند که مسیر وابستگی معتبر از Node تغییرکرده به آن‌ها وجود دارد؛ دامنهٔ نامعلوم fail-closed می‌ماند.
+10. **No circular approval:** Rule یا Knowledge Package نمی‌تواند صرفاً با ارجاع به Review/Approvalی که خودش از همان Rule/Package تولید شده، اعتبار خود را اثبات کند؛ زنجیرهٔ اختیار و وابستگی باید قابل تشخیص باشد.
+
+#### ۶۶-د۹-۵) الگوریتم مفهومی اثر تغییر بر خروجی
+
+برای هر تغییر ثبت‌شده:
+
+1. Node تغییرکرده و نسخهٔ پیشین/جدید آن تعیین شود.
+2. Edgeهای مستقیم خروجی از Node تغییرکرده خوانده شود.
+3. گراف وابستگی در جهت منبع → وابسته پیمایش شود تا تمام Nodeهای reachable به‌دست آید.
+4. هر Output reachable جداگانه با دامنهٔ تغییر، نسخهٔ مصرف‌شده و Gateهای وابسته ارزیابی شود.
+5. خروجی بدون مسیر وابستگی فقط وقتی NON-MATERIAL است که کامل‌بودن گراف در دامنهٔ موردنظر اثبات شده و نبود وابستگی مستند باشد.
+6. اگر Edge مفقود، مبهم، متعارض یا ناقص باشد، خروجی مربوط UNRESOLVED است؛ نبود مسیر در گراف ناقص، دلیل استقلال نیست.
+7. برای خروجی MATERIAL، Run تازه ساخته می‌شود؛ Run تاریخی حفظ می‌شود.
+8. برای خروجی UNRESOLVED، فقط همان خروجی و وابستگی‌های downstream آن تا رفع ابهام متوقف می‌شوند؛ سایر خروجی‌ها فقط با اثبات استقلال ادامه می‌یابند.
+9. نتیجهٔ طبقه‌بندی، Nodeهای بررسی‌شده، Edgeهای پیموده‌شده، دلیل، actor و زمان در یک Change Impact Assessment ثبت می‌شود.
+
+#### ۶۶-د۹-۶) سه گراف نمونه برای آزمودن C10
+
+**الف) MATERIAL — نسخهٔ کاتالوگ تغییر کرده است**
+
+ARTIFACT_CATALOG_v1 → EVIDENCE_ASSESSMENT_v1 → INPUT_CATALOG_IDENTITY_v1 → DECISION_RUN_1 → OUTPUT_IDENTITY_v1
+
+نسخهٔ تازه به‌صورت Node جدا ثبت می‌شود:
+
+ARTIFACT_CATALOG_v2 → EVIDENCE_ASSESSMENT_v2 → INPUT_CATALOG_IDENTITY_v2 → DECISION_RUN_2 → OUTPUT_IDENTITY_v2
+
+Run 2 به Run 1 با رابطهٔ REPLACES_FOR_CURRENT_SCOPE یا رابطهٔ معادلِ نسخهٔ جدید متصل می‌شود؛ Run 1 حذف نمی‌شود. فقط خروجی هویت کاتالوگی وابسته به نسخهٔ قدیمی نیازمند ارزیابی تازه است. موجودی، تناسب مو، ایمنی و نتیجهٔ رنگ Nodeهای مستقل‌اند و از تغییر کاتالوگ استنتاج نمی‌شوند.
+
+**ب) NON-MATERIAL — ترجیح زبان برای یک lookup محدود تغییر می‌کند**
+
+ARTIFACT_CATALOG_v1 → EVIDENCE_ASSESSMENT_v1 → INPUT_CATALOG_IDENTITY_v1 → DECISION_RUN_1 → OUTPUT_CONTENT_v1
+
+تغییر ترجیح زبان به Node مستقل CUSTOMER_LANGUAGE_PREFERENCE_v2 ثبت می‌شود. اگر زبان فقط بر rendering اثر داشته باشد:
+
+CUSTOMER_LANGUAGE_PREFERENCE_v2 + OUTPUT_CONTENT_v1 → RENDER_ACTIVITY_2 → OUTPUT_RENDERED_v2
+
+نتیجهٔ معنایی هویت کاتالوگی تغییر نکرده است؛ اما نسخهٔ نمایشی تازه، نسخهٔ خروجی تازه محسوب می‌شود. اگر پذیرش مشتری برای آن خروجی لازم باشد، پذیرش قبلی به خروجی rendered_v2 منتقل نمی‌شود و باید مستقل ثبت شود. این طبقه‌بندی فقط برای خروجی lookup و فقط پس از اثبات عدم اثر بر معنا/هشدار/رضایت‌نامه معتبر است.
+
+**ج) UNRESOLVED — تصویر تازه با منشأ نامشخص**
+
+ARTIFACT_IMAGE_UNKNOWN → PROVENANCE_ASSESSMENT_UNRESOLVED → CHANGE_IMPACT_ASSESSMENT_UNRESOLVED → OUTPUT_IDENTITY_CURRENT_UNRESOLVED
+
+گراف نسخهٔ قبلی کاتالوگ را حفظ می‌کند؛ تصویر تازه به‌عنوان artifact مستقل با منشأ نامعلوم ثبت می‌شود. تا احراز منشأ و دامنه، خروجی هویت جاری قطعی نمی‌شود. خروجی‌های دیگر تنها با dependency closure کامل می‌توانند مستقل تلقی شوند.
+
+#### ۶۶-د۹-۷) اصلاح دقت در قرارداد C10 قبلی
+
+در جدول خلاصهٔ C10، عبارت انتقال احتمالی پذیرش در حالت NON-MATERIAL نباید به‌صورت مجوز انتقال خودکار خوانده شود. قاعدهٔ دقیق‌تر: **هیچ Acceptance یا Execution Consent به نسخهٔ جدید منتقل نمی‌شود.** اگر خروجی مشتری با rendering/زبان/محتوا نسخهٔ تازه‌ای پیدا کند، پذیرش قبلی فقط سابقهٔ همان نسخهٔ قبلی است؛ هر پذیرش لازم برای نسخهٔ جدید باید به‌صورت Event مستقل ثبت شود. در مثال ترجیح زبان، چون lookup صرفاً اطلاع‌رسانی است، Acceptance و Execution Consent اصلاً ایجاد نشده‌اند.
+
+#### ۶۶-د۹-۸) معیار کفایت گراف برای تصمیم PO
+
+پیشنهاد می‌شود گراف فقط زمانی برای تصمیم‌گیری C10 «کافی» شناخته شود که:
+- هر Output به Run و تمام ورودی‌ها/Artifactها/Ruleها/Claimها/Engine/Gateهای مؤثر خود مسیر قابل پیمایش داشته باشد؛
+- هر Review و Approval به Agent، نقش، دامنه و نسخهٔ دقیق مورد بررسی متصل باشد؛
+- Acceptance، Execution Consent، Execution و Outcome از هم تفکیک و نسخه‌محور باشند؛
+- زمان‌های وقوع/اثر/ثبت و اصلاحات تاریخی قابل بازسازی باشند؛
+- هیچ وابستگی مؤثرِ موردنیاز برای یک Output در وضعیت UNKNOWN یا بدون Edge نمانده باشد؛
+- آزمون مفهومی با تغییر یک Node، فقط Outputهای reachable را متأثر کند و برای گراف ناقص، نتیجهٔ NON-MATERIAL صادر نکند.
+
+این معیارها معیار طراحی پیشنهادی‌اند؛ تا تصویب PO، «پذیرفته‌شده» یا «تکمیل‌شدهٔ اجرایی» تلقی نمی‌شوند.
