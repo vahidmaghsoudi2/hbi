@@ -180,6 +180,7 @@ class SkinNextQuestionService:
         self,
         case: Case,
         current_input: Optional[Dict[str, Any]] = None,
+        include_details: bool = False,
     ) -> Optional[Dict[str, Any]]:
         state = self._decode_case_state(case)
         answers = {
@@ -191,7 +192,8 @@ class SkinNextQuestionService:
             answers[QUESTION_ID] = answers[LEGACY_QUESTION_ID]
         supplied = current_input or {}
 
-        for definition in QUESTION_DEFINITIONS:
+        definitions = QUESTION_DEFINITIONS if include_details else QUESTION_DEFINITIONS[:1]
+        for definition in definitions:
             question_id = definition["question_id"]
             factor = definition["factor"]
             if question_id in answers:
@@ -260,6 +262,8 @@ class SkinNextQuestionService:
     def _validate_answer(definition: Dict[str, Any], answer: Any) -> tuple[Any, str]:
         answer_type = definition["answer_type"]
         allowed = {item["value"] for item in definition.get("options", [])}
+        if definition["question_id"] == QUESTION_ID:
+            allowed.update({"hydration", "sun_protection"})
 
         if answer_type == "SINGLE_SELECT":
             if isinstance(answer, list):
