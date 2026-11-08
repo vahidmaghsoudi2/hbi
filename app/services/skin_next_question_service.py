@@ -332,9 +332,14 @@ class SkinNextQuestionService:
         }
         state = self._decode_case_state(case)
         state["version"] = CONTRACT_VERSION
+        replaced_question_ids = {question_id}
+        if factor == FACTOR_KEY:
+            # v1 and v2 are mutually exclusive versions of the same primary Need.
+            replaced_question_ids.update({QUESTION_ID, LEGACY_QUESTION_ID})
+        replaced_gap_ids = {f"{case.case_id}:{qid}" for qid in replaced_question_ids}
         state["gaps"] = [
             item for item in state["gaps"]
-            if not isinstance(item, dict) or item.get("gap_id") != gap_id
+            if not isinstance(item, dict) or item.get("gap_id") not in replaced_gap_ids
         ] + [gap]
         answer_record = {
             "question_id": question_id,
@@ -345,7 +350,7 @@ class SkinNextQuestionService:
         }
         state["answers"] = [
             item for item in state["answers"]
-            if not isinstance(item, dict) or item.get("question_id") != question_id
+            if not isinstance(item, dict) or item.get("question_id") not in replaced_question_ids
         ] + [answer_record]
         self._save_state(case, state)
         return {
