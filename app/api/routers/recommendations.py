@@ -132,11 +132,20 @@ async def get_internal_evaluations_by_case(
 @router.get("/next-question/{case_id}")
 async def get_next_skin_question(
     case_id: str,
+    sequence: str = "primary",
     db: Session = Depends(get_db),
     customer_id: str = Depends(get_current_customer_id),
 ) -> dict:
+    if sequence not in {"primary", "structured"}:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="sequence must be primary or structured",
+        )
     case = _assert_case_owned(db, case_id, customer_id)
-    question = SkinNextQuestionService(db).get_question(case)
+    question = SkinNextQuestionService(db).get_question(
+        case,
+        include_details=sequence == "structured",
+    )
     if question is None:
         return {
             "case_id": case_id,
