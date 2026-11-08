@@ -53,10 +53,14 @@ def export_snapshot(database_path, output_path):
         existing={r["name"] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
         tables={}
         missing_tables=[]
+        missing_columns={}
         for table, allowed in COLUMNS.items():
             if table not in existing:
                 missing_tables.append(table); tables[table]=[]; continue
             present={r["name"] for r in conn.execute(f'PRAGMA table_info("{table}")')}
+            missing=[c for c in allowed.split() if c not in present]
+            if missing:
+                missing_columns[table]=missing
             cols=[c for c in allowed.split() if c in present]
             if "product_id" not in cols:
                 tables[table]=[]; continue
@@ -78,7 +82,7 @@ def export_snapshot(database_path, output_path):
       "source_database_name":db.name,"source_database":before,
       "integrity_check":integrity,"foreign_key_violation_count":len(fk_issues),
       "canonical_product_ids":list(PRODUCT_IDS),"missing_product_ids":missing,
-      "missing_tables":missing_tables,
+      "missing_tables":missing_tables,"missing_columns":missing_columns,
       "table_row_counts":{k:len(v) for k,v in tables.items()},
       "tables":tables,
       "privacy":{"scope":"canonical seven product IDs only",
@@ -99,7 +103,7 @@ def export_snapshot(database_path, output_path):
 def validation_exit_code(payload):
     if payload["missing_product_ids"]:
         return 2
-    if payload["missing_tables"] or payload["foreign_key_violation_count"]:
+    if payload["missing_tables"] or payload.get("missing_columns") or payload["foreign_key_violation_count"]:
         return 3
     return 0
 
@@ -116,6 +120,7 @@ def main():
       "foreign_key_violation_count":p["foreign_key_violation_count"],
       "missing_product_ids":p["missing_product_ids"],
       "missing_tables":p["missing_tables"],
+      "missing_columns":p["missing_columns"],
       "table_row_counts":p["table_row_counts"]},ensure_ascii=False,indent=2))
     return validation_exit_code(p)
 
