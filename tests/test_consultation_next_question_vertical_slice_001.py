@@ -387,8 +387,10 @@ def test_eight_question_case_owned_sequence_persists_all_factors_and_allows_mult
     )
 
 
-def test_unknown_case_owned_answer_is_persisted_and_not_reasked(client, db_session):
+def test_unknown_case_owned_answer_is_persisted_and_overrides_legacy_profile(client, db_session):
     customer, case = _setup_skin_case(db_session)
+    customer.skin_profile = "خشک"
+    db_session.commit()
     token = _token(client, customer.customer_id)
     headers = {"Authorization": f"Bearer {token}"}
     for question_id, answer in [
@@ -406,6 +408,15 @@ def test_unknown_case_owned_answer_is_persisted_and_not_reasked(client, db_sessi
     assert saved["skin.current_type.v1"]["value"] == ["unknown"]
     assert saved["skin.current_type.v1"]["value_state"] == "UNKNOWN"
     assert state["gaps"][-1]["status"] == "UNKNOWN"
+    current_input = SkinNextQuestionService.current_input_from_case(
+        db_session.get(Case, case.case_id)
+    )
+    assert current_input["skin_profile"] == "unknown"
+    profile = ProfileFactContextService(db_session).build(
+        db_session.get(Case, case.case_id), current_input
+    )
+    assert profile["skin_profile"] == "unknown"
+    assert profile["_profile_fact_context"]["sources"]["skin_profile"]["source"] == "CURRENT_CONSULTATION"
     next_response = client.get(
         f"/api/v1/recommendations/next-question/{case.case_id}",
         headers=headers,
