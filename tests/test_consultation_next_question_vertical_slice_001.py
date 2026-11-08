@@ -358,15 +358,17 @@ def test_structured_consultation_captures_all_eight_case_owned_answers(client, d
 
 def test_structured_consultation_preserves_unknown_without_profile_fallback(client, db_session):
     customer, case = _setup_skin_case(db_session)
-    customer.concerns = "آبرسان"
+    customer.skin_profile = "خشک"
     db_session.commit()
     service = SkinNextQuestionService(db_session)
-    result = service.capture_answer(case, QUESTION_ID, ["unknown"])
+    service.capture_answer(case, QUESTION_ID, ["آبرسان"])
+    result = service.capture_answer(case, "skin.current_type.v1", ["unknown"])
     assert result["value_state"] == "UNKNOWN"
     current = service.current_input_from_case(case)
-    assert current["concerns"] == ["unknown"]
+    assert current["concerns"] == ["آبرسان"]
+    assert current["skin_profile"] == ["unknown"]
     state = json.loads(case.evidence_gaps)
-    assert state["answers"][0]["value_state"] == "UNKNOWN"
+    assert state["answers"][-1]["value_state"] == "UNKNOWN"
 
 
 def test_structured_primary_question_keeps_only_six_approved_homepage_options(client, db_session):
@@ -374,5 +376,5 @@ def test_structured_primary_question_keeps_only_six_approved_homepage_options(cl
     question = SkinNextQuestionService(db_session).get_question(case)
     assert question["question_id"] == QUESTION_ID
     assert {item["value"] for item in question["options"]} == {
-        "ضدآفتاب", "آبرسان", "لک صورت", "پوست حساس", "ضدچروک", "کنترل چربی", "unknown"
+        "ضدآفتاب", "آبرسان", "لک صورت", "پوست حساس", "ضدچروک", "کنترل چربی"
     }
