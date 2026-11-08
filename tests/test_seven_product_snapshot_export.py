@@ -43,3 +43,11 @@ def test_export_never_overwrites_existing_output(tmp_path):
 def test_export_rejects_missing_database(tmp_path):
     with pytest.raises(ValueError,match="existing regular file"):
         export_snapshot(tmp_path/"missing.db",tmp_path/"snapshot.json")
+
+
+def test_validation_exit_code_requires_complete_tables_and_clean_foreign_keys():
+    from scripts.export_seven_product_acceptance_snapshot import validation_exit_code
+    assert validation_exit_code({"missing_product_ids": [], "missing_tables": [], "foreign_key_violation_count": 0}) == 0
+    assert validation_exit_code({"missing_product_ids": ["P1"], "missing_tables": [], "foreign_key_violation_count": 0}) == 2
+    assert validation_exit_code({"missing_product_ids": [], "missing_tables": ["Evidence"], "foreign_key_violation_count": 0}) == 3
+    assert validation_exit_code({"missing_product_ids": [], "missing_tables": [], "foreign_key_violation_count": 1}) == 3

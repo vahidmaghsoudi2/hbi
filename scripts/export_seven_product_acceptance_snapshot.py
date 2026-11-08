@@ -96,6 +96,13 @@ def export_snapshot(database_path, output_path):
         raise
     return payload
 
+def validation_exit_code(payload):
+    if payload["missing_product_ids"]:
+        return 2
+    if payload["missing_tables"] or payload["foreign_key_violation_count"]:
+        return 3
+    return 0
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--database",required=True,help="Local SQLite database path")
@@ -108,7 +115,8 @@ def main():
       "integrity_check":p["integrity_check"],
       "foreign_key_violation_count":p["foreign_key_violation_count"],
       "missing_product_ids":p["missing_product_ids"],
+      "missing_tables":p["missing_tables"],
       "table_row_counts":p["table_row_counts"]},ensure_ascii=False,indent=2))
-    return 0 if not p["missing_product_ids"] else 2
+    return validation_exit_code(p)
 
 if __name__=="__main__": raise SystemExit(main())
