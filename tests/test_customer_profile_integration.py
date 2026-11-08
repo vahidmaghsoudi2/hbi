@@ -544,4 +544,5 @@ def test_skin_quick_intake_captures_all_selected_needs_as_case_evidence(client, 
         headers=case_token,
     )
     assert no_question.status_code == 200
-    assert no_question.json()["status"] == "NO_QUESTION"
+    assert no_question.json()["status"] == "QUESTION_REQUIRED"
+    assert no_question.json()["question"]["question_id"] == "skin.current_type.v1"
