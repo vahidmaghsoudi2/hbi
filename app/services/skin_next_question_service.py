@@ -262,7 +262,12 @@ class SkinNextQuestionService:
         allowed = {item["value"] for item in definition.get("options", [])}
 
         if answer_type == "SINGLE_SELECT":
-            value = answer if isinstance(answer, str) else ""
+            if isinstance(answer, list):
+                if len(answer) != 1 or not isinstance(answer[0], str):
+                    raise ValueError("Single-select questions accept exactly one answer")
+                value = answer[0]
+            else:
+                value = answer if isinstance(answer, str) else ""
             value = value.strip() or "unknown"
             if value not in allowed:
                 raise ValueError("Answer must be one of the bounded question options")
@@ -281,7 +286,12 @@ class SkinNextQuestionService:
             return normalized, "UNKNOWN" if normalized == ["unknown"] else "KNOWN"
 
         if answer_type == "TEXT":
-            value = answer.strip() if isinstance(answer, str) else ""
+            if isinstance(answer, list):
+                if len(answer) != 1 or not isinstance(answer[0], str):
+                    raise ValueError("Text questions accept exactly one text answer")
+                value = answer[0].strip()
+            else:
+                value = answer.strip() if isinstance(answer, str) else ""
             if len(value) > int(definition.get("max_length", 600)):
                 raise ValueError("Text answer exceeds the allowed length")
             if not value or value.casefold() in {"unknown", "نامشخص", "نمی‌دانم"}:
