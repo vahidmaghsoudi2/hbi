@@ -2,23 +2,11 @@ const { test, expect } = require("@playwright/test");
 
 test("Homepage records structured skin consultation answers on the current Case before recommendation", async ({ page, request }) => {
   const api = process.env.HBI_TEST_API_URL || "http://127.0.0.1:8765/api/v1";
-  const customerTokenResponse = await request.post(`${api}/auth/pilot-token`, {
-    data: { customer_id: "CUST-PILOT-1" },
-  });
-  expect(customerTokenResponse.status(), await customerTokenResponse.text()).toBe(200);
-  const customerToken = (await customerTokenResponse.json()).access_token;
-
-  const operatorTokenResponse = await request.post(`${api}/auth/pilot-operator-token`);
-  expect(operatorTokenResponse.status(), await operatorTokenResponse.text()).toBe(200);
-  const operatorToken = (await operatorTokenResponse.json()).access_token;
-
-  await page.addInitScript(({ customerToken: customer, operatorToken: operator }) => {
+  const mobile = `0914${String(Date.now()).slice(-7)}`;
+  // Use the real guest-intake path and a fresh identity; never mutate a seeded pilot customer.
+  await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-structured-intake-admin-gate");
-    sessionStorage.setItem("hbi_access_token", customer);
-    sessionStorage.setItem("hbi_refresh_token", "browser-proof-refresh-placeholder");
-    sessionStorage.setItem("hbi_customer_id", "CUST-PILOT-1");
-    sessionStorage.setItem("hbi_operator_access_token", operator);
-  }, { customerToken, operatorToken });
+  });
 
   let operatorFailures = 0;
   let nextQuestionReads = 0;
@@ -45,7 +33,7 @@ test("Homepage records structured skin consultation answers on the current Case 
   await expect(page.getByRole("heading", { name: "فرم مشاوره سریع" })).toBeVisible();
 
   await page.locator("#name").fill("پذیرش جداسازی نشست");
-  await page.locator("#mobile").fill("09000000001");
+  await page.locator("#mobile").fill(mobile);
   await page.getByText("ضدآفتاب / SPF", { exact: true }).click();
   await page.getByText("چرب", { exact: true }).click();
   await page.locator("#consult-duration").selectOption("one_to_four_weeks");
@@ -75,11 +63,18 @@ test("Homepage records structured skin consultation answers on the current Case 
   await expect(page.getByRole("heading", { name: eligibleRows[0].product_id })).toBeVisible();
   await expect.poll(() => operatorFailures).toBeGreaterThan(0);
 
-  const caseId = await page.evaluate(() => sessionStorage.getItem("hbi_case_id"));
-  expect(caseId).toBeTruthy();
+  const session = await page.evaluate(() => ({
+    caseId: sessionStorage.getItem("hbi_case_id"),
+    customerId: sessionStorage.getItem("hbi_customer_id"),
+    token: sessionStorage.getItem("hbi_access_token"),
+  }));
+  expect(session.caseId).toBeTruthy();
+  expect(session.customerId).toBeTruthy();
+  expect(session.token).toBeTruthy();
+  const caseId = session.caseId;
 
-  const caseRead = await request.get(`${api}/cases/customer/CUST-PILOT-1`, {
-    headers: { Authorization: `Bearer ${customerToken}` },
+  const caseRead = await request.get(`${api}/cases/customer/${encodeURIComponent(session.customerId)}`, {
+    headers: { Authorization: `Bearer ${session.token}` },
   });
   expect(caseRead.status(), await caseRead.text()).toBe(200);
   const cases = await caseRead.json();
@@ -104,13 +99,13 @@ test("Homepage records structured skin consultation answers on the current Case 
 
   const nextQuestion = await request.get(
     `${api}/recommendations/next-question/${encodeURIComponent(caseId)}`,
-    { headers: { Authorization: `Bearer ${customerToken}` } },
+    { headers: { Authorization: `Bearer ${session.token}` } },
   );
   expect(nextQuestion.status(), await nextQuestion.text()).toBe(200);
   expect((await nextQuestion.json()).status).toBe("NO_QUESTION");
 
   const publicRead = await request.get(`${api}/recommendations/case/${encodeURIComponent(caseId)}`, {
-    headers: { Authorization: `Bearer ${customerToken}` },
+    headers: { Authorization: `Bearer ${session.token}` },
   });
   expect(publicRead.status(), await publicRead.text()).toBe(200);
   const publicRows = await publicRead.json();
@@ -119,7 +114,7 @@ test("Homepage records structured skin consultation answers on the current Case 
 
   const internalRead = await request.get(
     `${api}/recommendations/case/${encodeURIComponent(caseId)}/evaluations`,
-    { headers: { Authorization: `Bearer ${customerToken}` } },
+    { headers: { Authorization: `Bearer ${session.token}` } },
   );
   expect([401, 403]).toContain(internalRead.status());
 
