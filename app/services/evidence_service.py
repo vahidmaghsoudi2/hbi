@@ -106,6 +106,12 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
                 self.repository.update(conflicting_id, conflict_status="CONFLICT")
         evidence = self.repository.get_by_id(evidence.evidence_id)
 
+        # Direct Evidence creation can bypass ResearchDraftService's batch rebuild.
+        # Rebuild only when conflict detection changed the eligibility of existing rows.
+        if conflicts:
+            from app.services.product_knowledge_service import ProductKnowledgeService
+            ProductKnowledgeService(self.db).update_from_evidence(product_id)
+
         self.audit.append(
             actor_id=actor_id,
             actor_role=actor_role,
