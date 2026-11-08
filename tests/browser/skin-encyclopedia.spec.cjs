@@ -30,9 +30,29 @@ test("Skin encyclopedia reads product identity, evidence and knowledge without i
     qa_verdict: "PENDING",
     status: "DRAFT",
   };
+  const unknownLineProduct = {
+    ...hairProduct,
+    product_id: "TEST-UNKNOWN-LINE-001",
+    product_name: "Test Unknown-Line Serum",
+    product_line: "UNKNOWN",
+  };
+  const missingLineProduct = {
+    ...hairProduct,
+    product_id: "TEST-MISSING-LINE-001",
+    product_name: "Test Missing-Line Serum",
+    product_line: null,
+  };
+  const normalizedSkinProduct = {
+    ...product,
+    product_id: "TEST-SKIN-NORMALIZED-001",
+    product_name: "Test Normalized Skin Product",
+    product_line: " skin ",
+  };
 
   await page.route("**/api/v1/products/manage", (route) => route.fulfill({
-    status: 200, contentType: "application/json", body: JSON.stringify([product, hairProduct]),
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify([product, hairProduct, unknownLineProduct, missingLineProduct, normalizedSkinProduct]),
   }));
   await page.route("**/api/v1/products/TEST-SKIN-001", (route) => route.fulfill({
     status: 200, contentType: "application/json", body: JSON.stringify(product),
@@ -87,7 +107,10 @@ test("Skin encyclopedia reads product identity, evidence and knowledge without i
 
   await expect(page.getByRole("heading", { name: "دانشنامهٔ ویژگی محصولات پوستی" })).toBeVisible();
   await expect(page.getByLabel("انتخاب محصول")).toContainText("Test Moisturizer");
+  await expect(page.getByLabel("انتخاب محصول")).toContainText("Test Normalized Skin Product");
   await expect(page.getByLabel("انتخاب محصول")).not.toContainText("Test Hair Serum");
+  await expect(page.getByLabel("انتخاب محصول")).not.toContainText("Test Unknown-Line Serum");
+  await expect(page.getByLabel("انتخاب محصول")).not.toContainText("Test Missing-Line Serum");
   await expect(page.getByRole("heading", { name: "هویت و نسخهٔ محصول" })).toBeVisible();
   await expect(page.getByText("ثبت نشده / نامشخص").first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "دانش تجمیع‌شدهٔ واجد شرایط" })).toBeVisible();
