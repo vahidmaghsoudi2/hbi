@@ -3054,10 +3054,10 @@ DRAFT → REVIEW → APPROVED → ACTIVE → RETIRED
 2. هر Hair Case دقیقاً یک `service_kind` دارد: `COMBINATION_CONSULT` یا `CATALOG_READY`. درخواست هم‌زمان دو خدمت به دو پروندهٔ مستقل تبدیل می‌شود.
 3. Candidate Set Isolation و Domain Guard برای هر `service_kind` الزامی است؛ شکست دامنه باید به توقف صریح منتهی شود، نه عبور permissive.
 4. `CASE_EVIDENCE` و `PRODUCT_EVIDENCE` از نظر معنایی و مالکیت داده مستقل‌اند.
-5. نقش منطقی `HAIR_SPECIALIST` از مشتری مستقل است؛ نمایش به مشتری فقط پس از ACCEPT معتبر متخصص مجاز است و REJECT مانع نمایش محتوای پیشنهاد می‌شود.
+5. نقش منطقی `HAIR_SPECIALIST` از مشتری مستقل است؛ بازبینی متخصص یک رویداد اختیاری است، مگر قاعدهٔ معتبر و مشخص برای همان مسیر آن را الزامی کند. نمایش به مشتری پس از عبور خروجی از دروازه‌های داده، ایمنی، قواعد و شواهد مجاز است؛ فقط در مسیر دارای الزام بازبینی، ACCEPT معتبر همان Output/Run/Snapshot شرط انتشار است. REJECT اختیاری به‌تنهایی مانع عمومی انتشار نیست؛ یافتهٔ مستندِ مربوط به خطر یا نقص باید در کنترل مرتبط دوباره ارزیابی شود.
 6. زنجیرهٔ مفهومی lineage از Run و Case/Service Kind تا Snapshot، Evidence، نسخه‌های Rule/Knowledge/Engine، Output، Review، Visibility، Confirmation، Consent و Outcome حفظ می‌شود.
 7. بازسازی تاریخی فقط خواندن نسخه‌های تاریخی است؛ اجرای تازه باید Run تازه بسازد و نسخهٔ جدید جایگزین سابقهٔ قبلی نمی‌شود.
-8. کلاس‌های توقف مصوب شامل SAFETY، ENGINE_FAIL، OUT_OF_DOMAIN، KNOWLEDGE_GAP، DATA_GAP و SPECIALIST_REJECT است.
+8. کلاس‌های توقف مصوب شامل SAFETY، ENGINE_FAIL، OUT_OF_DOMAIN، KNOWLEDGE_GAP و DATA_GAP هستند. `SPECIALIST_REJECT` فقط وضعیت گردش کارِ مسیر دارای الزام معتبر بازبینی است و توقف عمومی موتور محسوب نمی‌شود.
 9. Schema v1.1 قفل است؛ هر تغییر ساختاری نیازمند Change Request و تصویب PO است.
 
 ### ۶۶-ب) حداقل تصمیم‌های فنی لازم پیش از تصویب طرح
@@ -3066,10 +3066,10 @@ DRAFT → REVIEW → APPROVED → ACTIVE → RETIRED
 |---|---|---|
 | مرز ماژول و Domain Guard | Guard در مرز API/Facade برای اعتبارسنجی نوع خدمت؛ Guard دوم در مرز Service/Candidate Set برای کنترل تعلق نامزدها؛ مسیر HAIR نباید RecommendationService محصول‌محور فعلی را فراخوانی کند. | نوع خدمت خالی/ناشناخته و Candidate متعلق به خدمت دیگر fail-closed رد شوند؛ هیچ HAIR به مسیر Skin/legacy pass-through نرسد. |
 | قرارداد Hair Case | تا پیش از CR، مسیر کم‌تغییر و غیرمخرب بررسی شود: Hair Case منطقی مستقل یا قرارداد منطقی روی Case موجود؛ هیچ تغییر Schema بدون CR مجاز نیست. | هر پرونده دقیقاً یک service_kind معتبر داشته باشد؛ نگاشت دادهٔ قدیمی فقط خواندنی باشد و نوع خدمت از دادهٔ مبهم حدس زده نشود. |
-| Snapshot و Decision Run | Run باید service_kind، Case، Snapshot، Evidence و نسخه‌های Rule/Knowledge/Engine را به‌صورت قابل بازیابی ثبت کند. | خروجی تأییدشده به همان Snapshot و ورودی‌های نسخه‌دار قابل ردیابی باشد؛ بازسازی تاریخی اجرای تازه ایجاد نکند. |
-| Specialist Review و Visibility | Review باید به output_id، run_id، snapshot_id و service_kind متصل باشد؛ در لحظهٔ Visibility همان پیوندها و اعتبار نسخه دوباره بررسی شوند. | Review بدون پیوندهای اجباری رد شود؛ تغییر مؤثر Snapshot/Run، Review قبلی را از اعتبار انتشار خارج کند. |
+| Snapshot و Decision Run | Run باید service_kind، Case، Snapshot، Evidence و نسخه‌های Rule/Knowledge/Engine را به‌صورت قابل بازیابی ثبت کند. | خروجی تصمیم به همان Snapshot و ورودی‌های نسخه‌دار قابل ردیابی باشد؛ اگر بازبینی انجام شده، به همان نسخه متصل بماند؛ بازسازی تاریخی اجرای تازه ایجاد نکند. |
+| Specialist Review و Visibility | اگر بازبینی انجام شود یا قاعدهٔ معتبر آن را الزامی کند، Review به output_id، run_id، snapshot_id و service_kind متصل باشد؛ در لحظهٔ Visibility، اعتبار Review فقط در مسیرهای الزام‌آور دوباره بررسی شود. | Review ثبت‌شده بدون پیوندهای اجباری رد شود؛ تغییر مؤثر Snapshot/Run، Review قبلی را برای نسخهٔ تازه بی‌اعتبار کند؛ نبود Review در مسیر فاقد الزام، به‌تنهایی Visibility را مسدود نکند. |
 | هفت رویداد و پیش‌شرط‌ها | ترتیب و پیوند رویدادهای Output، Review، Visibility، Customer Confirmation، Execution Consent، Execution و Outcome در قرارداد ثبت شود. | هیچ رویدادی بدون پیش‌شرط و ارجاع رویداد قبلی ثبت نشود؛ زنجیره‌های دو service_kind ادغام نشوند. |
-| تغییر مؤثر C10 | تغییر مؤثر در ورودی هدف/وضعیت مو/سابقه، Evidence، تصویرِ دارای تغییر محتوا، Catalog Reference/نسخهٔ کاتالوگ، Rule/Knowledge/Engine و تخصیص متخصص طبقه‌بندی شود. | تغییر مؤثر، Run/Snapshot جدید یا بازبینی لازم را ایجاد کند و تأیید وابستهٔ قبلی را باطل/معلق سازد؛ اصلاح فرادادهٔ بی‌اثر خودکار Run جدید نسازد. |
+| تغییر مؤثر C10 | تغییر مؤثر در ورودی هدف/وضعیت مو/سابقه، Evidence، تصویرِ دارای تغییر محتوا، Catalog Reference/نسخهٔ کاتالوگ، Rule/Knowledge/Engine و تخصیص متخصص در مسیرهایی که بازبینی در آن‌ها انجام شده یا الزامی است طبقه‌بندی شود. | تغییر مؤثر، Run/Snapshot جدید ایجاد کند و بازبینی وابستهٔ قبلی را برای نسخهٔ تازه بی‌اعتبار سازد؛ بازبینی مجدد فقط در صورت الزام معتبر همان مسیر لازم است؛ اصلاح فرادادهٔ بی‌اثر خودکار Run جدید نسازد. |
 | منع fallback legacy | مسیر non-SKIN permissive در RecommendationService فعلی، مسیر معتبر HAIR محسوب نشود؛ تا زمان جایگزینی، HAIR از آن سرویس استفاده نکند. | نبود service_kind یا نوع ناشناخته هرگز با fallback به منطق Skin یا مسیر عمومی پذیرفته نشود. |
 
 ### ۶۶-پ) زنجیرهٔ رویدادها و پیش‌شرط‌های پیشنهادی
@@ -3077,8 +3077,8 @@ DRAFT → REVIEW → APPROVED → ACTIVE → RETIRED
 | رویداد | پیش‌شرط حداقلی | پیوند الزامی |
 |---|---|---|
 | Decision Output | Snapshot کامل و ارجاع Evidence و نسخه‌های Rule/Knowledge/Engine | run_id |
-| Specialist Review | Output معتبر متعلق به همان Run | output_id و run_id و snapshot_id |
-| Visibility | Review=ACCEPT برای همان Output و Snapshot؛ اعتبارسنجی مجدد نسخه | review_event_id |
+| Specialist Review | اختیاری، مگر قاعدهٔ معتبر همان مسیر بازبینی را الزامی کند؛ در صورت ثبت، Output متعلق به همان Run باید معتبر باشد | output_id و run_id و snapshot_id و service_kind |
+| Visibility | عبور همان Output/Run/Snapshot از دروازه‌های داده، ایمنی، قواعد و شواهد؛ فقط اگر قاعدهٔ معتبر بازبینی را الزامی کرده باشد، Review=ACCEPT معتبر برای همان نسخه نیز لازم است؛ بازبینی اختیاریِ انجام‌شده به‌عنوان رویداد ثبت می‌شود و به‌تنهایی شرط عمومی انتشار نیست | decision_output_id؛ و در مسیر الزام‌آور review_event_id |
 | Customer Confirmation | Visibility ثبت‌شده و قابل مشاهده برای همان نسخه | visibility_event_id |
 | Execution Consent | تأیید مثبت مشتری برای همان نسخه و همان خدمت | confirmation_event_id |
 | اجرای واقعی | Consent معتبر و شرایط اجرایی خارج از موتور تصمیم | consent_event_id و مرجع رخداد اجرا |
