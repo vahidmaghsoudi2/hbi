@@ -120,7 +120,8 @@ def test_verify_then_reject_then_reverify_rebuilds_knowledge(db):
     _add_use_case_evidence(db, pid="P-PK-QA", eid="E1", claim="sunscreen", qa="PENDING")
 
     pk0 = ProductKnowledgeService(db).update_from_evidence("P-PK-QA")
-    assert not (pk0.known_use_cases and "sunscreen" in pk0.known_use_cases)
+    assert pk0 is None
+    assert db.query(ProductKnowledge).filter_by(product_id="P-PK-QA").one_or_none() is None
 
     EvidenceService(db).verify_evidence("E1", "VERIFIED")
     db.commit()
