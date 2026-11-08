@@ -51,3 +51,42 @@ def test_validation_exit_code_requires_complete_tables_and_clean_foreign_keys():
     assert validation_exit_code({"missing_product_ids": ["P1"], "missing_tables": [], "foreign_key_violation_count": 0}) == 2
     assert validation_exit_code({"missing_product_ids": [], "missing_tables": ["Evidence"], "foreign_key_violation_count": 0}) == 3
     assert validation_exit_code({"missing_product_ids": [], "missing_tables": [], "foreign_key_violation_count": 1}) == 3
+
+
+def test_export_reads_uncheckpointed_wal_without_mutating_source_or_wal(tmp_path):
+    db = tmp_path / "hbi-wal.db"
+    out = tmp_path / "snapshot-wal.json"
+    _db(db)
+    writer = sqlite3.connect(db)
+    writer.execute("PRAGMA journal_mode=WAL")
+    writer.execute(
+        "UPDATE Product SET product_name=? WHERE product_id=?",
+        ("WAL-visible product", PRODUCT_IDS[0]),
+    )
+    writer.commit()
+
+    wal = Path(str(db) + "-wal")
+    assert wal.exists()
+    db_before = hashlib.sha256(db.read_bytes()).hexdigest()
+    wal_before = hashlib.sha256(wal.read_bytes()).hexdigest()
+
+    payload = export_snapshot(db, out)
+
+    assert hashlib.sha256(db.read_bytes()).hexdigest() == db_before
+    assert hashlib.sha256(wal.read_bytes()).hexdigest() == wal_before
+    assert payload["tables"]["Product"][0]["product_name"] == "WAL-visible product"
+    writer.close()
+
+
+def test_export_rejects_symlink_source_and_database_sidecar_output(tmp_path):
+    db = tmp_path / "hbi.db"
+    out = tmp_path / "snapshot.json"
+    _db(db)
+    link = tmp_path / "hbi-link.db"
+    link.symlink_to(db)
+
+    with pytest.raises(ValueError, match="not a symlink"):
+        export_snapshot(link, out)
+
+    with pytest.raises(ValueError, match="sidecars"):
+        export_snapshot(db, Path(str(db) + "-wal"))
