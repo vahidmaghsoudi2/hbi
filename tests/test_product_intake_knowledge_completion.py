@@ -9,6 +9,7 @@ from sqlalchemy.pool import StaticPool
 from app.models.base import Base
 from app.models.evidence import Evidence
 from app.models.product import Product
+from app.models.product_knowledge import ProductKnowledge
 from app.services.product_knowledge_service import ProductKnowledgeService
 
 
