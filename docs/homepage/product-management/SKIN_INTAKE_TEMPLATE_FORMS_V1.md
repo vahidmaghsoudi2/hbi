@@ -51,6 +51,8 @@ The Product Owner approved nine templates and merged hydration + moisturizer int
 
 V1 uses one primary template. No additional template category is in scope without a later explicit revision.
 
+The primary template is an intake layout, not an exclusive scientific classification. A product can have hydration-related attributes and also contain ingredients or claims relevant to other use cases. For the existing Anua Azelaic Acid 10% + Hyaluron Redness Soothing Serum dossier, the intake UI uses `HYDRATING_MOISTURIZER` to capture hydration-related information while retaining the product-specific azelaic-acid and soothing boxes. This does not create a new Product Master record or establish a verified efficacy claim.
+
 ## 4. Shared boxes
 
 | Box ID | Label (FA) | Intake rule |
@@ -76,12 +78,21 @@ V1 uses one primary template. No additional template category is in scope withou
 ## 5. Template-specific boxes (minimum V1)
 
 ### 5.1 `HYDRATING_MOISTURIZER`
-| Box ID | Label |
-|---|---|
-| `texture` | بافت (کرم / ژل / لوسیون / سرم / نامشخص) |
-| `skin_feel` | حس پوستی اعلام‌شده |
-| `day_night` | روز / شب / هر دو / نامشخص |
-| `hydration_claim` | ادعای آبرسانی یا حفظ رطوبت (متن + منبع) |
+| Box ID | Label | Evidence handling |
+|---|---|---|
+| `product_form` | فرم محصول (سرم / ژل / کرم / لوسیون / امولسیون / نامشخص) | Source-bound claim or operator-reviewed identity detail; unknown stays blank |
+| `texture` | بافت | Source-bound claim or explicitly labelled operator observation |
+| `skin_feel` | حس پوستی اعلام‌شده | Keep marketing claim distinct from observed experience |
+| `day_night` | روز / شب / هر دو طبق منبع | Capture label directions only; do not infer from product type |
+| `hydration_claim` | ادعای آبرسانی یا حفظ رطوبت (متن + منبع) | Existing `claimed_benefits` evidence field; claim remains pending |
+| `humectants` | مواد جاذب رطوبت اعلام‌شده (مثل هیالورونیک اسید، فقط با منبع) | Existing `ingredients` field only for ingredients explicitly named by source |
+| `emollients` | مواد نرم‌کننده اعلام‌شده (فقط با منبع) | Source-bound claim; no inferred ingredients |
+| `evaporation_reduction` | مواد کاهنده تبخیر آب اعلام‌شده (فقط با منبع) | Source-bound claim; no inferred ingredients |
+| `ingredient_roles` | نقش ترکیبات در حفظ رطوبت (تفسیر علمی با منبع مستقل) | Interpretation requires a separate reliable technical source; not a manufacturer fact by default |
+| `inci_list` | فهرست INCI کامل یا جزئی و نسخه/بازار | Existing `ingredients` field; label full vs partial and identify version/market |
+| `fragrance_alcohol` | عطر / الکل طبق INCI همین نسخه | Record presence only when supported by the exact INCI; absence of mention is not proof of absence |
+
+The implementation may expose these as source-bound draft boxes without introducing new API/database fields. Only semantically compatible existing Evidence fields are structured; all other values retain their box label in the claim text and remain `UNKNOWN` until reviewed.
 
 
 
