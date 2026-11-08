@@ -184,8 +184,8 @@ def test_null_vs_unknown_evidence_status(db):
 
     _ev(db, pid="P-N", eid="E-X", field="ingredients", claim="Water", qa="PENDING")
     pk2 = ProductKnowledgeService(db).update_from_evidence("P-N")
-    assert pk2 is None
-    assert db.query(ProductKnowledge).filter_by(product_id="P-N").one_or_none() is None
+    assert pk2.evidence_status is None
+    assert db.query(ProductKnowledge).filter_by(product_id="P-N").one() is pk0
 
     # UNKNOWN is an evaluated state after an explicit QA decision, not merely a draft.
     pending = db.query(Evidence).filter_by(evidence_id="E-X").one()
