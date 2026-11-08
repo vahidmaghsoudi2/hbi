@@ -9,6 +9,7 @@ from sqlalchemy.pool import StaticPool
 from app.models.base import Base
 from app.models.evidence import Evidence
 from app.models.product import Product
+from app.models.product_knowledge import ProductKnowledge
 from app.services.product_knowledge_service import ProductKnowledgeService
 
 
@@ -95,7 +96,12 @@ def test_non_approved_evidence_does_not_populate_completion_fields(db, qa_status
     )
 
     knowledge = ProductKnowledgeService(db).update_from_evidence("P-KC-001")
-    assert knowledge.usage_instructions is None
+    if qa_status == "PENDING":
+        assert knowledge is None
+        assert db.query(ProductKnowledge).filter_by(product_id="P-KC-001").one_or_none() is None
+    else:
+        assert knowledge is not None
+        assert knowledge.usage_instructions is None
 
 
 def test_conflicting_evidence_does_not_populate_completion_fields(db):

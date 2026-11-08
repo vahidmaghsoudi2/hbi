@@ -64,6 +64,33 @@ init_db()
 db = SessionLocal()
 try:
     seed(db)
+    # Canonical P1-P7 Product IDs exist only in this disposable browser fixture.
+    # These rows are test fixtures, not writes to the user's Product Master database.
+    canonical_skin_products = [
+        ("HBI-PROD-FE320FA135B843B6", "COSRX", "The 6 Peptide Skin Booster Serum"),
+        ("HBI-PROD-2CC249240D504453", "Neutrogena", "Clear & Defend 2% Salicylic Acid Face Wash"),
+        ("HBI-PROD-C29AA2F410A84CCA", "Garnier", "Vitamin C Brightening Gel Cleanser"),
+        ("HBI-PROD-7F55ED88F41144F1", "SKIN1004", "Madagascar Centella Hyalu-Cica Water-Fit Sun Serum"),
+        ("HBI-PROD-96788ADC488942E3", "ISDIN", "FotoUltra 100 Active Unify SPF50+"),
+        ("HBI-PROD-70EEE418BE0F4DAB", "Clinique", "Even Better Clinical Radical Dark Spot Corrector + Interrupter (historical target)"),
+        ("HBI-PROD-22C55A8223A945A6", "Anua", "Azelaic Acid 10% + Hyaluron Redness Soothing Serum"),
+    ]
+    for product_id, brand, product_name in canonical_skin_products:
+        if db.get(Product, product_id) is None:
+            db.add(Product(
+                product_id=product_id,
+                brand=brand,
+                product_name=product_name,
+                product_line="SKIN",
+                # Physical package size/market/GTIN are intentionally not inferred.
+                identity_status="NEEDS_REVIEW",
+                qa_verdict="PENDING",
+                status="DRAFT",
+            ))
+            db.flush()
+        if db.get(ProductKnowledge, f"PK-{product_id}") is None:
+            db.add(ProductKnowledge(product_knowledge_id=f"PK-{product_id}", product_id=product_id))
+
     product = db.query(Product).filter_by(product_id="ISDIN-FOTOUTRA100-50ML").one()
     product.status = "ACTIVE"
     product.identity_status = "VERIFIED"

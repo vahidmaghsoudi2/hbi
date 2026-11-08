@@ -34,7 +34,7 @@ const PRODUCT_LINE_OPTIONS = [
 ] as const;
 
 const SKIN_TEMPLATES = [
-  ["HYDRATING_MOISTURIZER", "آبرسان / مرطوب‌کننده", ["بافت", "حس پوستی اعلام‌شده", "روز / شب / هر دو", "ادعای آبرسانی یا حفظ رطوبت (متن + منبع)"]],
+  ["HYDRATING_MOISTURIZER", "آبرسان / مرطوب‌کننده", ["فرم محصول (سرم / ژل / کرم / لوسیون / امولسیون / نامشخص)", "بافت", "حس پوستی اعلام‌شده", "روز / شب / هر دو طبق منبع", "ادعای آبرسانی یا حفظ رطوبت (متن + منبع)", "مواد جاذب رطوبت اعلام‌شده (مثل هیالورونیک اسید، فقط با منبع)", "مواد نرم‌کننده اعلام‌شده (فقط با منبع)", "مواد کاهنده تبخیر آب اعلام‌شده (فقط با منبع)", "نقش ترکیبات در حفظ رطوبت (تفسیر علمی با منبع مستقل)", "فهرست INCI کامل یا جزئی و نسخه/بازار", "عطر / الکل طبق INCI همین نسخه"]],
   ["SUNSCREEN", "ضدآفتاب", ["SPF", "PA / ادعای UVA", "نوع فیلتر", "مقاومت در برابر آب", "رنگی / بی‌رنگ", "صورت / بدن"]],
   ["BRIGHTENING_SPOT", "روشن‌کننده / ضدلک", ["هدف اعلام‌شده", "مواد فعال اعلام‌شده", "بازه زمانی ادعای سازنده", "اعداد ادعای سازنده (فقط با منبع)"]],
   ["MICELLAR", "میسلار واتر", ["پاک‌کنندگی آرایش", "نیاز به آبکشی", "مناسب اطراف چشم طبق برچسب"]],
@@ -45,12 +45,103 @@ const SKIN_TEMPLATES = [
   ["OTHER_SKIN", "سایر (پوست)", ["چرا در قالب‌های بالا جا نگرفت", "یادداشت ساخت‌یافته اپراتور"]],
 ] as const;
 
-/** Only these V1 boxes have a semantically matching source-bound Evidence field. */
+/** Seven approved existing dossiers only; template is tied to Product Master identity. */
+const SKIN_SEVEN_PRODUCT_TEMPLATES: Record<string, string> = {
+  "HBI-PROD-FE320FA135B843B6": "OTHER_SKIN",
+  "HBI-PROD-2CC249240D504453": "CLEANSING_GEL",
+  "HBI-PROD-C29AA2F410A84CCA": "CLEANSING_GEL",
+  "HBI-PROD-7F55ED88F41144F1": "SUNSCREEN",
+  "HBI-PROD-96788ADC488942E3": "SUNSCREEN",
+  "HBI-PROD-70EEE418BE0F4DAB": "BRIGHTENING_SPOT",
+  "HBI-PROD-22C55A8223A945A6": "HYDRATING_MOISTURIZER",
+};
+
+const SKIN_PRODUCT_SPECIFIC_BOXES: Record<string, readonly string[]> = {
+  "HBI-PROD-FE320FA135B843B6": ["پپتیدها و ترکیبات کلیدی طبق منبع", "ادعاهای اختصاصی بوستر طبق منبع"],
+  "HBI-PROD-2CC249240D504453": ["سالیسیلیک اسید و غلظتِ اعلام‌شده در همین نسخه", "بازار و نسخهٔ منبع Neutrogena"],
+  "HBI-PROD-C29AA2F410A84CCA": ["مشتق ویتامین C طبق INCI همین نسخه", "غلظت مادهٔ شاخص، فقط اگر منبع اعلام کرده باشد"],
+  "HBI-PROD-7F55ED88F41144F1": ["درجه‌بندی PA/UVA همین نسخه", "فیلترهای UV همین نسخه/بازار", "مقاومت در برابر آب، فقط اگر برچسب تصریح کند"],
+  "HBI-PROD-96788ADC488942E3": ["فیلترهای UV همین نسخه/بازار", "ادعای ضدلک و نقطهٔ پایانیِ اعلام‌شده"],
+  "HBI-PROD-70EEE418BE0F4DAB": ["نتیجهٔ آزمون بالینی و مدت آن", "نتیجهٔ آزمون مصرف‌کننده، حجم نمونه و مدت آن"],
+  "HBI-PROD-22C55A8223A945A6": ["درصد آزلائیک اسیدِ اعلام‌شده در منبع", "ترکیبات پشتیبانِ اعلام‌شده طبق منبع", "ادعای تسکینِ اعلام‌شده طبق منبع"],
+};
+
+function skinProductEvidenceField(productId: string, label: string): string | undefined {
+  if (label.includes("بازار و نسخهٔ منبع")) return "other_attributes";
+  if (label.includes("درجه‌بندی PA/UVA")) return "other_attributes";
+  if (label.includes("مقاومت در برابر آب")) return "manufacturer_claims";
+  if (label.includes("ادعا") || label.includes("نتیجهٔ آزمون")) return "manufacturer_claims";
+  if (
+    label.includes("ترکیبات") ||
+    label.includes("فیلترهای UV") ||
+    label.includes("پپتیدها") ||
+    label.includes("مشتق ویتامین C") ||
+    label.includes("آزلائیک اسید") ||
+    label.includes("سالیسیلیک اسید")
+  ) return "ingredients";
+  return undefined;
+}
+
+/** Map only to existing ProductKnowledge fields; unclassified details use other_attributes. */
+function skinTemplateEvidenceField(template: string, label: string): string | undefined {
+  if (template === "HYDRATING_MOISTURIZER") {
+    if (label.includes("فرم محصول") || label === "بافت") return "other_attributes";
+    if (label === "حس پوستی اعلام‌شده") return "manufacturer_claims";
+    if (label.includes("روز / شب")) return "usage_instructions";
+    if (label.includes("ادعای آبرسانی")) return "claimed_benefits";
+    if (label.includes("نقش ترکیبات")) return "ingredient_roles";
+    if (
+      label.includes("مواد جاذب رطوبت") ||
+      label.includes("مواد نرم‌کننده") ||
+      label.includes("مواد کاهنده تبخیر آب") ||
+      label.includes("فهرست INCI") ||
+      label.includes("عطر / الکل")
+    ) return "ingredients";
+  }
+  if (template === "BRIGHTENING_SPOT") {
+    if (label === "هدف اعلام‌شده") return "known_use_cases";
+    if (label === "مواد فعال اعلام‌شده") return "ingredients";
+    if (label.includes("بازه زمانی") || label.includes("اعداد ادعای")) return "manufacturer_claims";
+  }
+  if (template === "CLEANSING_GEL") {
+    if (label === "آبکشی‌شونده" || label.includes("تناوب مصرف")) return "usage_instructions";
+    if (label === "تمرکز اعلام‌شده") return "known_use_cases";
+  }
+  if (template === "SUNSCREEN") {
+    if (label === "SPF" || label.includes("PA / ادعای UVA") || label === "رنگی / بی‌رنگ") return "other_attributes";
+    if (label === "نوع فیلتر") return "ingredients";
+    if (label === "مقاومت در برابر آب") return "manufacturer_claims";
+    if (label === "صورت / بدن") return "known_use_cases";
+  }
+  if (template === "MICELLAR") {
+    if (label === "پاک‌کنندگی آرایش" || label === "مناسب اطراف چشم طبق برچسب") return "known_use_cases";
+    if (label === "نیاز به آبکشی") return "usage_instructions";
+  }
+  if (template === "TONER") {
+    if (label === "نقش اعلام‌شده") return "known_use_cases";
+    if (label === "الکل طبق فرمول اعلام‌شده") return "ingredients";
+  }
+  if (template === "ANTI_ACNE") {
+    if (label === "تمرکز اعلام‌شده") return "known_use_cases";
+    if (label === "مواد فعال اعلام‌شده") return "ingredients";
+    if (label === "ماندگار / آبکشی") return "usage_instructions";
+  }
+  if (template === "EXFOLIANT") {
+    if (label === "نوع لایه‌بردار" || label === "اسیدها یا ذرات اعلام‌شده") return "ingredients";
+    if (label === "تناوب مصرف") return "usage_instructions";
+    if (label === "هشدار تحریک از برچسب") return "contraindications";
+  }
+  if (template === "OTHER_SKIN") return "other_attributes";
+  return undefined;
+}
+
+/** Existing ProductKnowledge fields with an exact V1 persistence destination. */
 const SKIN_OK_EVIDENCE_FIELDS = [
-  { key: "skin_goals", label: "اهداف پوستی اعلام‌شده", field: "skin_goals" },
-  { key: "warnings", label: "هشدارها و محدودیت‌ها", field: "contraindications" },
-  { key: "usage", label: "روش مصرف", field: "usage_instructions" },
+  { key: "skin_goals", label: "کاربردهای پوستی اعلام‌شده سازنده", field: "known_use_cases" },
+  { key: "warnings", label: "موارد منع مصرف صریح طبق منبع", field: "contraindications" },
+  { key: "usage", label: "روش مصرف طبق منبع", field: "usage_instructions" },
   { key: "ingredients", label: "ترکیبات کلیدی اعلام‌شده", field: "ingredients" },
+  { key: "ingredient_roles", label: "نقش ترکیبات (JSON یا نام:ROLE؛ CORE/SUPPORT/CLAIM-LINK/RISK/TECH/UNKNOWN)", field: "ingredient_roles" },
 ] as const;
 
 type Draft = {
@@ -302,6 +393,10 @@ export default function ProductIntakePanel({
   const [researchField, setResearchField] = useState("claimed_benefits");
   const [researchMarketRegion, setResearchMarketRegion] = useState("");
   const [researchNotes, setResearchNotes] = useState("");
+  const [roleSourceType, setRoleSourceType] = useState("PEER_REVIEWED");
+  const [roleSourceReference, setRoleSourceReference] = useState("");
+  const [roleMarketRegion, setRoleMarketRegion] = useState("");
+  const [roleNotes, setRoleNotes] = useState("");
   const [researchReviewReason, setResearchReviewReason] = useState("");
   const [researchBusy, setResearchBusy] = useState(false);
   const editing = Boolean(editProduct?.product_id);
@@ -316,13 +411,21 @@ export default function ProductIntakePanel({
     }
   }
 
-  const isP1cTestProduct = editing && draft.product_id === "TEST-P1C-001" && draft.product_line === "SKIN";
+  // The persisted edit target is canonical; draft state may still be initializing on first render.
+  const selectedSkinTemplate = SKIN_SEVEN_PRODUCT_TEMPLATES[editProduct?.product_id || draft.product_id] || "";
+  const isApprovedSevenProduct = Boolean(selectedSkinTemplate);
+  const canSaveSkinEvidenceDraft =
+    editing &&
+    isApprovedSevenProduct &&
+    Boolean(draft.product_id.trim()) &&
+    draft.product_line === "SKIN" &&
+    researchProductId === draft.product_id;
 
   async function saveSkinEvidenceDraft() {
     setErr(null);
     setMsg(null);
-    if (!isP1cTestProduct || researchProductId !== "TEST-P1C-001") {
-      setErr("ثبت باکس‌های P1c فقط برای محصول آزمایشی ازپیش‌موجود TEST-P1C-001 مجاز است.");
+    if (!canSaveSkinEvidenceDraft || !researchProductId) {
+      setErr("ثبت باکس‌های ساخت‌یافته فقط برای محصول پوستِ موجود و انتخاب‌شده مجاز است.");
       return;
     }
     if (!researchSourceType.trim() || !researchSourceReference.trim()) {
@@ -330,19 +433,54 @@ export default function ProductIntakePanel({
       return;
     }
 
+    const sharedFields = SKIN_OK_EVIDENCE_FIELDS.map((item) => ({
+      field: item.field,
+      label: item.label,
+      value: (skinBoxValues[item.key] || "").trim(),
+      claimType: researchClaimType || "UNKNOWN",
+      boxKind: "shared",
+    }));
+    const templateFields = (SKIN_TEMPLATES.find(([value]) => value === skinTemplate)?.[2] ?? [])
+      .filter((label) => !(skinTemplate === "HYDRATING_MOISTURIZER" && label === "ادعای آبرسانی یا حفظ رطوبت (متن + منبع)"))
+      .map((label) => {
+        const field = skinTemplateEvidenceField(skinTemplate, label);
+        return {
+          field,
+          label,
+          value: (skinBoxValues[`template:${skinTemplate}:${label}`] || "").trim(),
+          claimType: researchClaimType || "UNKNOWN",
+          boxKind: "template",
+        };
+      });
+    const productFields = (SKIN_PRODUCT_SPECIFIC_BOXES[researchProductId || ""] ?? []).map((label) => {
+      return {
+        field: skinProductEvidenceField(researchProductId || "", label),
+        label,
+        value: (skinBoxValues[`product:${researchProductId}:${label}`] || "").trim(),
+        claimType: researchClaimType || "UNKNOWN",
+        boxKind: "product-specific",
+      };
+    });
     const fields = [
-      ...SKIN_OK_EVIDENCE_FIELDS.map((item) => ({
-        field: item.field,
-        label: item.label,
-        value: (skinBoxValues[item.key] || "").trim(),
-      })),
+      ...sharedFields,
       ...(skinTemplate === "HYDRATING_MOISTURIZER"
         ? [{
             field: "claimed_benefits",
             label: "ادعای آبرسانی یا حفظ رطوبت",
-            value: (skinBoxValues.claimed_benefits || "").trim(),
+            value: (skinBoxValues[`template:${skinTemplate}:ادعای آبرسانی یا حفظ رطوبت (متن + منبع)`] || skinBoxValues.claimed_benefits || "").trim(),
+            claimType: researchClaimType || "UNKNOWN",
+            boxKind: "template",
           }]
         : []),
+      ...templateFields,
+      ...productFields,
+      {
+        field: undefined,
+        label: "سایر ویژگی‌ها",
+        value: (skinBoxValues.other_features || "").trim(),
+        claimType: "UNKNOWN",
+        boxKind: "other",
+      },
     ].filter((item) => item.value.length > 0);
 
     if (fields.length === 0) {
@@ -355,22 +493,22 @@ export default function ProductIntakePanel({
       const activeToken = (await onEnsureSession?.()) ?? token;
       if (!activeToken) throw new Error("نشست فعال برای ثبت پژوهش موجود نیست.");
       await createResearchDraft(
-        "TEST-P1C-001",
+        researchProductId,
         fields.map((item) => ({
-          claim: item.value,
+          claim: item.field ? item.value : `${item.label}: ${item.value}`,
           field: item.field,
           source_type: researchSourceType.trim(),
           source_reference: researchSourceReference.trim(),
-          claim_type: researchClaimType || "UNKNOWN",
+          claim_type: item.claimType,
           market_region: researchMarketRegion.trim() || undefined,
-          notes: `P1c approved OK box: ${item.label}; template=${skinTemplate || "not-selected"}${researchNotes.trim() ? `; ${researchNotes.trim()}` : ""}`,
+          notes: `Skin intake box kind=${item.boxKind}; label=${item.label}; template=${skinTemplate || "not-selected"}${researchNotes.trim() ? `; ${researchNotes.trim()}` : ""}`,
         })),
         activeToken,
       );
       setSkinBoxValues({});
       setResearchNotes("");
-      setMsg("پیش‌نویس‌های مجاز P1c ثبت شدند؛ همه با QA=PENDING و evidence_status=UNKNOWN باقی می‌مانند.");
-      await loadResearch("TEST-P1C-001");
+      setMsg("پیش‌نویس‌های باکس‌های مجاز برای محصول انتخاب‌شده ثبت شدند؛ همه با QA=PENDING و evidence_status=UNKNOWN باقی می‌مانند.");
+      await loadResearch(researchProductId);
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
     } finally {
@@ -431,10 +569,11 @@ export default function ProductIntakePanel({
   }
 
   useEffect(() => {
-    setSkinTemplate("");
     setSkinBoxValues({});
     if (editProduct?.product_id) {
       const next = fromProduct(editProduct);
+      const approvedTemplate = SKIN_SEVEN_PRODUCT_TEMPLATES[editProduct.product_id] || "";
+      setSkinTemplate(approvedTemplate);
       setDraft(next);
       setInitialProductLine(normalizeProductLine(next.product_line));
       setIntro("");
@@ -446,6 +585,7 @@ export default function ProductIntakePanel({
       setResearchProductId(editProduct.product_id);
       void loadResearch(editProduct.product_id);
     } else {
+      setSkinTemplate("");
       setResearchProductId(null);
       setResearchRows([]);
     }
@@ -894,19 +1034,26 @@ export default function ProductIntakePanel({
         <fieldset className="pro-fieldset" style={{ marginTop: "1rem" }}>
           <legend>۳) قالب ثابت محصول پوست (V1)</legend>
           <p className="pro-lead">
-            فقط برای محصول ازپیش‌موجود TEST-P1C-001 فعال است. باکس‌های OK به Evidence دارای منبع تبدیل می‌شوند؛
-            سایر باکس‌ها تا قرارداد ذخیره‌سازی مستقل غیرفعال می‌مانند. این مسیر محصول نمی‌سازد و QA را تأیید نمی‌کند.
+            این مسیر فقط برای هفت محصول موجودِ ماتریس فعال است. هر باکسِ پرشده با منبع به‌صورت پیش‌نویس پژوهشی ثبت می‌شود؛
+            فقط باکس‌هایی که نگاشت معنایی معتبر دارند field می‌گیرند. «سایر ویژگی‌ها» با field خالی و claim_type=UNKNOWN ذخیره می‌شود.
+            این مسیر محصول نمی‌سازد و QA را تأیید نمی‌کند.
           </p>
           <label className="pro-label" htmlFor="skin-template">قالب محصول پوست</label>
-          <select id="skin-template" className="pro-input" value={skinTemplate} onChange={(e) => setSkinTemplate(e.target.value)}>
+          <select id="skin-template" className="pro-input" value={isApprovedSevenProduct ? selectedSkinTemplate : skinTemplate} onChange={(e) => setSkinTemplate(e.target.value)} disabled={isApprovedSevenProduct}>
             <option value="">— انتخاب قالب —</option>
             {SKIN_TEMPLATES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
           </select>
+          {isApprovedSevenProduct && (
+            <p className="pro-lead">قالب این محصول از ماتریس مصوب هفت محصول تعیین شده است؛ برای جلوگیری از ثبت در قالب اشتباه، انتخاب قالب قفل است.</p>
+          )}
+          {!isApprovedSevenProduct && (
+            <p className="pro-lead">ثبت باکس‌های این مسیر فعلاً فقط برای هفت شناسهٔ مصوب فعال است.</p>
+          )}
 
           <div className="pro-grid-2" style={{ marginTop: "0.75rem" }}>
             <div>
               <label className="pro-label">نوع منبع *</label>
-              <select className="pro-input" value={researchSourceType} onChange={(e) => setResearchSourceType(e.target.value)} disabled={!isP1cTestProduct}>
+              <select className="pro-input" value={researchSourceType} onChange={(e) => setResearchSourceType(e.target.value)} disabled={!canSaveSkinEvidenceDraft}>
                 <option value="MANUFACTURER">تولیدکننده</option>
                 <option value="REGULATORY">مرجع مقرراتی</option>
                 <option value="PEER_REVIEWED">مقاله داوری‌شده</option>
@@ -917,7 +1064,7 @@ export default function ProductIntakePanel({
             </div>
             <div>
               <label className="pro-label">نوع ادعا</label>
-              <select className="pro-input" value={researchClaimType} onChange={(e) => setResearchClaimType(e.target.value)} disabled={!isP1cTestProduct}>
+              <select className="pro-input" value={researchClaimType} onChange={(e) => setResearchClaimType(e.target.value)} disabled={!canSaveSkinEvidenceDraft}>
                 <option value="UNKNOWN">نامشخص</option>
                 <option value="MANUFACTURER_CLAIM">ادعای تولیدکننده</option>
                 <option value="EVIDENCE">شاهد</option>
@@ -928,15 +1075,15 @@ export default function ProductIntakePanel({
             </div>
             <div style={{ gridColumn: "1 / -1" }}>
               <label className="pro-label">نشانی یا مرجع دقیق منبع *</label>
-              <input className="pro-input" value={researchSourceReference} onChange={(e) => setResearchSourceReference(e.target.value)} placeholder="URL، شناسه مقاله یا مرجع دقیق" disabled={!isP1cTestProduct} />
+              <input className="pro-input" value={researchSourceReference} onChange={(e) => setResearchSourceReference(e.target.value)} placeholder="URL، شناسه مقاله یا مرجع دقیق" disabled={!canSaveSkinEvidenceDraft} />
             </div>
             <div>
               <label className="pro-label">منطقه بازار (اختیاری، فقط با شاهد)</label>
-              <input className="pro-input" value={researchMarketRegion} onChange={(e) => setResearchMarketRegion(e.target.value)} placeholder="خالی بماند اگر معلوم نیست" disabled={!isP1cTestProduct} />
+              <input className="pro-input" value={researchMarketRegion} onChange={(e) => setResearchMarketRegion(e.target.value)} placeholder="خالی بماند اگر معلوم نیست" disabled={!canSaveSkinEvidenceDraft} />
             </div>
             <div style={{ gridColumn: "1 / -1" }}>
               <label className="pro-label">یادداشت / محدودیت‌ها</label>
-              <textarea className="pro-input" rows={2} value={researchNotes} onChange={(e) => setResearchNotes(e.target.value)} placeholder="اختیاری" disabled={!isP1cTestProduct} />
+              <textarea className="pro-input" rows={2} value={researchNotes} onChange={(e) => setResearchNotes(e.target.value)} placeholder="اختیاری" disabled={!canSaveSkinEvidenceDraft} />
             </div>
           </div>
 
@@ -950,47 +1097,76 @@ export default function ProductIntakePanel({
                   rows={2}
                   value={skinBoxValues[item.key] || ""}
                   onChange={(e) => setSkinBoxValues((prev) => ({ ...prev, [item.key]: e.target.value }))}
-                  placeholder={isP1cTestProduct ? "متن ادعا/ویژگی مطابق منبع" : "فقط در پایلوت مجاز فعال است"}
-                  disabled={!isP1cTestProduct}
+                  placeholder={canSaveSkinEvidenceDraft ? "متن ادعا/ویژگی مطابق منبع" : "ابتدا یک محصول پوستِ موجود را باز کنید"}
+                  disabled={!canSaveSkinEvidenceDraft}
                 />
               </div>
             ))}
             <div>
-              <label className="pro-label">سایر / اضافات (فعلاً بدون مقصد ساختاریافته)</label>
-              <input className="pro-input" value="" placeholder="غیرفعال" disabled readOnly />
+              <label className="pro-label">سایر ویژگی‌ها (برای هر محصول؛ منبع الزامی)</label>
+              <textarea
+                className="pro-input"
+                rows={2}
+                value={skinBoxValues.other_features || ""}
+                onChange={(e) => setSkinBoxValues((prev) => ({ ...prev, other_features: e.target.value }))}
+                placeholder={canSaveSkinEvidenceDraft ? "ویژگی مستندشده‌ای که باکس اختصاصی ندارد؛ متن آزادِ بررسی‌نشده" : "ابتدا یکی از هفت محصول مصوب را باز کنید"}
+                disabled={!canSaveSkinEvidenceDraft}
+              />
             </div>
           </div>
 
           {skinTemplate && (
             <>
-              <h3>باکس‌های اختصاصی: {SKIN_TEMPLATES.find(([value]) => value === skinTemplate)?.[1]}</h3>
+              <h3>باکس‌های اختصاصی گروه: {SKIN_TEMPLATES.find(([value]) => value === skinTemplate)?.[1]}</h3>
               <div className="pro-grid-2">
                 {(SKIN_TEMPLATES.find(([value]) => value === skinTemplate)?.[2] ?? []).map((label) => {
-                  const allowed = skinTemplate === "HYDRATING_MOISTURIZER" && label === "ادعای آبرسانی یا حفظ رطوبت (متن + منبع)";
+                  const moisturizerBenefit = skinTemplate === "HYDRATING_MOISTURIZER" && label === "ادعای آبرسانی یا حفظ رطوبت (متن + منبع)";
+                  const boxKey = moisturizerBenefit ? "claimed_benefits" : `template:${skinTemplate}:${label}`;
+                  const mappedField = moisturizerBenefit ? "claimed_benefits" : skinTemplateEvidenceField(skinTemplate, label);
                   return (
                     <div key={label}>
-                      <label className="pro-label">{label}</label>
-                      {allowed ? (
-                        <textarea
-                          className="pro-input"
-                          rows={2}
-                          value={skinBoxValues.claimed_benefits || ""}
-                          onChange={(e) => setSkinBoxValues((prev) => ({ ...prev, claimed_benefits: e.target.value }))}
-                          placeholder={isP1cTestProduct ? "ادعای منبع‌دار؛ نه نتیجه‌گیری مستقل" : "فقط در پایلوت مجاز فعال است"}
-                          disabled={!isP1cTestProduct}
-                        />
-                      ) : (
-                        <input className="pro-input" value="" placeholder="در این مرحله غیرفعال است" disabled readOnly />
-                      )}
+                      <label className="pro-label">{label}{mappedField ? " *" : " (ادعای منبع‌دار؛ بدون نگاشت ساختاریافته)"}</label>
+                      <textarea
+                        className="pro-input"
+                        rows={2}
+                        value={skinBoxValues[boxKey] || ""}
+                        onChange={(e) => setSkinBoxValues((prev) => ({ ...prev, [boxKey]: e.target.value }))}
+                        placeholder={canSaveSkinEvidenceDraft ? (mappedField ? "متن مطابق منبع؛ وضعیت پیش‌نویس" : "متن مطابق منبع؛ به‌صورت ادعای UNKNOWN ذخیره می‌شود") : "ابتدا یکی از هفت محصول مصوب را باز کنید"}
+                        disabled={!canSaveSkinEvidenceDraft}
+                      />
                     </div>
                   );
                 })}
               </div>
+              {(SKIN_PRODUCT_SPECIFIC_BOXES[researchProductId || ""] ?? []).length > 0 && (
+                <>
+                  <h3>باکس‌های اختصاصی همین محصول</h3>
+                  <div className="pro-grid-2">
+                    {(SKIN_PRODUCT_SPECIFIC_BOXES[researchProductId || ""] ?? []).map((label) => {
+                      const boxKey = `product:${researchProductId}:${label}`;
+                      const mappedField = skinProductEvidenceField(researchProductId || "", label);
+                      return (
+                        <div key={boxKey}>
+                          <label className="pro-label">{label}{mappedField ? " *" : " (ادعای منبع‌دار؛ بدون نگاشت ساختاریافته)"}</label>
+                          <textarea
+                            className="pro-input"
+                            rows={2}
+                            value={skinBoxValues[boxKey] || ""}
+                            onChange={(e) => setSkinBoxValues((prev) => ({ ...prev, [boxKey]: e.target.value }))}
+                            placeholder={canSaveSkinEvidenceDraft ? "فقط مطابق منبع همین محصول/نسخه؛ وضعیت پیش‌نویس" : "ابتدا یکی از هفت محصول مصوب را باز کنید"}
+                            disabled={!canSaveSkinEvidenceDraft}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </>
           )}
 
           <div className="pro-actions" style={{ marginTop: "0.75rem" }}>
-            <button type="button" className="pro-btn-primary" disabled={!isP1cTestProduct || researchBusy} onClick={() => void saveSkinEvidenceDraft()}>
+            <button type="button" className="pro-btn-primary" disabled={!canSaveSkinEvidenceDraft || researchBusy} onClick={() => void saveSkinEvidenceDraft()}>
               {researchBusy ? "در حال ثبت…" : "ثبت باکس‌های مجاز به‌صورت پیش‌نویس"}
             </button>
           </div>
@@ -1000,12 +1176,12 @@ export default function ProductIntakePanel({
           <div style={{ marginTop: "0.75rem" }}>
             <div className="pro-actions">
               <strong>شواهد ذخیره‌شده: {researchRows.length}</strong>
-              <button type="button" className="pro-btn-secondary" disabled={researchBusy} onClick={() => void loadResearch("TEST-P1C-001")}>
+              <button type="button" className="pro-btn-secondary" disabled={researchBusy} onClick={() => researchProductId && void loadResearch(researchProductId)}>
                 بازخوانی شواهد
               </button>
             </div>
             {researchRows.length === 0 ? (
-              <p className="pro-lead">هنوز شاهدی برای این محصول آزمایشی بازخوانی نشده است.</p>
+              <p className="pro-lead">هنوز شاهدی برای این محصول بازخوانی نشده است.</p>
             ) : (
               <ul>
                 {researchRows.map((item) => (
