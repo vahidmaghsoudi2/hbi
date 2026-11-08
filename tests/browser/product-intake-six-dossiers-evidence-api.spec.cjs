@@ -28,7 +28,7 @@ const PRODUCTS = [
     productId: "HBI-PROD-C29AA2F410A84CCA",
     source: "https://www.garnier.com.au/about-our-brands/skin-active/garnier-skin-active-vitamin-c-brightening-gel-cleanser-200ml",
     marketRegion: "AU",
-    claim: "The Australian manufacturer page identifies a Vitamin C brightening gel cleanser and lists Ascorbyl Glucoside (Vitamin Cg). This is a source-page snapshot; it does not establish the physical target package market or prove treatment efficacy.",
+    claim: "The Australian manufacturer page identifies a Vitamin C brightening gel cleanser and lists Ascorbyl Glucoside (Vitamin Cg). It also lists GTIN-13 3600542524261 for the AU source-market listing; this is only a candidate identifier and has not been applied to Product Master. This source-page snapshot does not establish the physical target package market or prove treatment efficacy.",
     additionalAssertions: [{
       claim: "The Australian manufacturer page displays this INCI list for the 200 ml Vitamin C Brightening Gel Cleanser: AQUA/WATER, SODIUM LAURETH SULFATE, COCO-BETAINE, SODIUM CHLORIDE, GLYCERIN, CITRUS LEMON FRUIT EXTRACT / LEMON FRUIT EXTRACT, PPG5-CETETH-20, SODIUM HYDROXIDE, ASCORBYL GLUCOSIDE, CITRIC ACID, PANTHENOL, POLYQUATERNIUM-7, TOCOPHERYL ACETATE, SODIUM BENZOATE, SALICYLIC ACID, LINALOOL, LIMONENE, BENZYL SALICYLATE, PARFUM / FRAGRANCE. The manufacturer warns ingredient lists are updated regularly and the package label is authoritative.",
       field: "ingredients", source_type: "MANUFACTURER",
