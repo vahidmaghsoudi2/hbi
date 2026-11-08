@@ -326,9 +326,18 @@ class SkinNextQuestionService:
             "question_id": question_id,
         }
         state = self._decode_case_state(case)
+        replaced_question_ids = (
+            {QUESTION_ID, LEGACY_QUESTION_ID}
+            if question_id in {QUESTION_ID, LEGACY_QUESTION_ID}
+            else {question_id}
+        )
+        replaced_gap_ids = {
+            f"{case.case_id}:{item_question_id}"
+            for item_question_id in replaced_question_ids
+        }
         state["gaps"] = [
             item for item in state["gaps"]
-            if not isinstance(item, dict) or item.get("gap_id") != gap_id
+            if not isinstance(item, dict) or item.get("gap_id") not in replaced_gap_ids
         ] + [gap]
         answer_record = {
             "question_id": question_id,
@@ -339,7 +348,7 @@ class SkinNextQuestionService:
         }
         state["answers"] = [
             item for item in state["answers"]
-            if not isinstance(item, dict) or item.get("question_id") != question_id
+            if not isinstance(item, dict) or item.get("question_id") not in replaced_question_ids
         ] + [answer_record]
         self._save_state(case, state)
         return {
