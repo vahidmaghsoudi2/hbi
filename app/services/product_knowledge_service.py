@@ -141,7 +141,7 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
         evaluated = any(
             (getattr(ev, "conflict_status", None) or "NONE").strip().upper() == "CONFLICT"
             or (getattr(ev, "qa_status", None) or "").strip().upper() in (
-                self._QA_APPROVED | frozenset({"REJECTED", "INVALID"})
+                self._QA_APPROVED | frozenset({"REJECTED", "INVALID", "NEEDS_REVIEW"})
             )
             for ev in evidences
         )
