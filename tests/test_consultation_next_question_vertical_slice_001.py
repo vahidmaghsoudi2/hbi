@@ -314,3 +314,100 @@ def test_frozen_scoring_formula_is_unchanged():
     assert result["final_score"] == 1.0
     assert result["confidence"] == 1.0
     assert result["eligibility"] == "ELIGIBLE"
+
+
+
+def test_eight_question_case_owned_sequence_persists_all_factors_and_allows_multi_need(client, db_session):
+    customer, case = _setup_skin_case(db_session)
+    token = _token(client, customer.customer_id)
+    headers = {"Authorization": f"Bearer {token}"}
+    answers = [
+        (QUESTION_ID, ["ضدآفتاب", "آبرسان"]),
+        ("skin.current_type.v1", ["چرب"]),
+        ("skin.duration.v1", "one_to_four_weeks"),
+        ("skin.self_reported_severity.v1", "moderate"),
+        ("skin.affected_area.v1", "face"),
+        ("skin.aggravating_factors.v1", ["sun_exposure"]),
+        ("skin.product_history.v1", "ضدآفتاب قبلی؛ خشکی گزارش‌شده"),
+        ("skin.additional_context.v1", "توضیح ثبت‌شده توسط مشتری در همین مراجعه"),
+    ]
+    for question_id, answer in answers:
+        next_response = client.get(
+            f"/api/v1/recommendations/next-question/{case.case_id}",
+            headers=headers,
+        )
+        assert next_response.status_code == 200, next_response.text
+        question = next_response.json()["question"]
+        assert question["question_id"] == question_id
+        saved = client.post(
+            f"/api/v1/recommendations/next-question/{case.case_id}/answer",
+            headers=headers,
+            json={"question_id": question_id, "answer": answer},
+        )
+        assert saved.status_code == 200, saved.text
+        assert saved.json()["source"] == "CURRENT_CASE_CONSULTATION"
+
+    complete = client.get(
+        f"/api/v1/recommendations/next-question/{case.case_id}",
+        headers=headers,
+    )
+    assert complete.status_code == 200
+    assert complete.json()["status"] == "NO_QUESTION"
+
+    db_session.expire_all()
+    saved_case = db_session.get(Case, case.case_id)
+    state = json.loads(saved_case.evidence_gaps)
+    saved = {item["question_id"]: item for item in state["answers"]}
+    assert saved[QUESTION_ID]["value"] == ["ضدآفتاب", "آبرسان"]
+    assert saved["skin.current_type.v1"]["value"] == ["چرب"]
+    assert saved["skin.duration.v1"]["value"] == "one_to_four_weeks"
+    assert saved["skin.self_reported_severity.v1"]["value"] == "moderate"
+    assert saved["skin.affected_area.v1"]["value"] == "face"
+    assert saved["skin.aggravating_factors.v1"]["value"] == ["sun_exposure"]
+    assert saved["skin.product_history.v1"]["value"] == "ضدآفتاب قبلی؛ خشکی گزارش‌شده"
+    assert saved["skin.additional_context.v1"]["value"] == "توضیح ثبت‌شده توسط مشتری در همین مراجعه"
+    assert all(item["source"] == "CURRENT_CASE_CONSULTATION" for item in saved.values())
+
+    current_input = SkinNextQuestionService.current_input_from_case(saved_case)
+    assert current_input["concerns"] == ["ضدآفتاب", "آبرسان"]
+    assert current_input["skin_profile"] == "چرب"
+
+    generated = client.post(
+        "/api/v1/recommendations/generate",
+        headers=headers,
+        json={"case_id": case.case_id, "customer_profile": {}},
+    )
+    assert generated.status_code == 200, generated.text
+    generated_rows = generated.json()
+    assert generated_rows
+    assert all(row["eligibility_status"] == "ELIGIBLE" for row in generated_rows)
+    assert {"PROD-NQ-HYDRATION", "PROD-NQ-SUN"}.issubset(
+        {row["product_id"] for row in generated_rows}
+    )
+
+
+def test_unknown_case_owned_answer_is_persisted_and_not_reasked(client, db_session):
+    customer, case = _setup_skin_case(db_session)
+    token = _token(client, customer.customer_id)
+    headers = {"Authorization": f"Bearer {token}"}
+    for question_id, answer in [
+        (QUESTION_ID, ["ضدآفتاب"]),
+        ("skin.current_type.v1", ["unknown"]),
+    ]:
+        response = client.post(
+            f"/api/v1/recommendations/next-question/{case.case_id}/answer",
+            headers=headers,
+            json={"question_id": question_id, "answer": answer},
+        )
+        assert response.status_code == 200, response.text
+    state = json.loads(db_session.get(Case, case.case_id).evidence_gaps)
+    saved = {item["question_id"]: item for item in state["answers"]}
+    assert saved["skin.current_type.v1"]["value"] == ["unknown"]
+    assert saved["skin.current_type.v1"]["value_state"] == "UNKNOWN"
+    assert state["gaps"][-1]["status"] == "UNKNOWN"
+    next_response = client.get(
+        f"/api/v1/recommendations/next-question/{case.case_id}",
+        headers=headers,
+    )
+    assert next_response.status_code == 200
+    assert next_response.json()["question"]["question_id"] == "skin.duration.v1"
