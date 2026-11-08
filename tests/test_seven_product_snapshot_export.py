@@ -17,6 +17,7 @@ def _db(path: Path):
     c.execute("INSERT INTO Product VALUES(?,?,?,?,?,?,?)",(pid,"B","P","SKIN","NEEDS_REVIEW","PENDING","DRAFT"))
     c.execute("INSERT INTO Product VALUES(?,?,?,?,?,?,?)",("UNRELATED","X","Y","SKIN","VERIFIED","VALID","ACTIVE"))
     c.execute("INSERT INTO Evidence VALUES(?,?,?,?,?,?)",("E1",pid,"claim","source","PENDING","UNKNOWN"))
+    c.execute("INSERT INTO Inventory VALUES(?,?,?,?,?,?)",("I1",pid,5,1,0,"IN_STOCK"))
     c.execute("INSERT INTO Recommendation VALUES(?,?,?,?,?)",("R1",pid,"PRIVATE-CASE","INELIGIBLE_PENDING_REVIEW","E1"))
     c.commit(); c.close()
 
@@ -30,6 +31,8 @@ def test_export_is_read_only_scoped_and_redacts_case_ids(tmp_path):
     assert payload["table_row_counts"]["Product"]==1
     assert payload["table_row_counts"]["Evidence"]==1
     assert payload["table_row_counts"]["Recommendation"]==1
+    assert payload["table_row_counts"]["Inventory"]==1
+    assert payload["tables"]["Inventory"][0]["inventory_id"]=="I1"
     assert payload["missing_columns"]["Product"]
     raw=out.read_text(encoding="utf-8")
     assert "UNRELATED" not in raw and "PRIVATE-CASE" not in raw

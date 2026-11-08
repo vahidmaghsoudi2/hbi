@@ -14,7 +14,7 @@ COLUMNS = {
  "Product": "product_id brand product_name product_line variant size_value size_unit barcode_gtin market_region country_of_origin packaging_version identity_status identity_confidence identity_source_refs qa_verdict qa_reviewed_at qa_notes status created_at updated_at",
  "Evidence": "evidence_id product_id claim_id source_type source_reference claim field market_region notes claim_type evidence_strength evidence_status conflict_status source_date evidence_date qa_status created_at",
  "ProductKnowledge": "product_knowledge_id product_id ingredients ingredient_roles claimed_benefits known_use_cases contraindications usage_instructions manufacturer_claims other_attributes evidence_refs evidence_status domain_evidence_status knowledge_confidence created_at updated_at",
- "Inventory": "product_id quantity_available quantity_reserved quantity_damaged stock_status updated_at",
+ "Inventory": "inventory_id product_id quantity_available quantity_reserved quantity_damaged stock_status updated_at",
  "Recommendation": "recommendation_id product_id need_match_score evidence_score eligibility_status ranking_score ranking_reasons exclusion_reasons evidence_refs warnings created_at",
  "ProductProblemLink": "link_id product_id variant market_region claim_id evidence_id problem_id problem_type problem_definition_ref relationship_role relationship_status feature_basis outcome semantic_basis limitations decision_basis problem_map_version assertion_key revision_no supersedes_link_id created_at updated_at",
 }
