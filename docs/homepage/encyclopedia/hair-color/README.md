@@ -4220,18 +4220,18 @@ AI نمی‌تواند:
 | Edge | معنی | نمونه |
 |---|---|---|
 | USED_BY | منبع در Activity/Run مصرف شده | ARTIFACT → DECISION_RUN |
-| GENERATED_BY | Entity توسط Activity تولید شده | OUTPUT → DECISION_RUN |
-| DERIVED_FROM | نسخه/محتوا از منبعی مشتق شده | SNAPSHOT_B → SNAPSHOT_A |
+| PRODUCES | Activity خروجی/Entity را تولید کرده | DECISION_RUN → OUTPUT |
+| DERIVES_INTO | منبع به نسخه/محتوای مشتق‌شده تبدیل شده | SNAPSHOT_A → SNAPSHOT_B |
 | MEMBER_OF | عضو یک بسته/مجموعه است | RULE_VERSION → RULE_SET_VERSION |
-| ASSESSES | ارزیابی دربارهٔ Evidence/Claim انجام شده | REVIEW → EVIDENCE یا CLAIM |
-| GOVERNED_BY | Run/Rule تحت کنترل نسخهٔ مشخص است | DECISION_RUN → RULE_VERSION و GATE_RESULT |
-| REVIEWED_FOR | Review دقیقاً برای دامنه/نسخهٔ مشخص انجام شده | REVIEW → DECISION_RUN یا OUTPUT_VERSION |
-| RENDERS | خروجی از داده و قالب/زبان ساخته شده | RENDER_ACTIVITY → OUTPUT_VERSION |
-| ACCEPTS_VERSION | مشتری نسخهٔ دقیق خروجی را پذیرفته | ACCEPTANCE_EVENT → OUTPUT_VERSION |
-| CONSENTS_TO | مشتری به اجرای خدمت/نسخه/دامنهٔ مشخص رضایت داده | EXECUTION_CONSENT_EVENT → SERVICE_VERSION |
-| EXECUTES_AS | اجرای واقعی با نسخه/دامنهٔ مشخص انجام شده | EXECUTION_EVENT → SERVICE_VERSION |
-| OBSERVED_AFTER | Outcome پس از رخداد مشخص مشاهده شده | OUTCOME → EXECUTION_EVENT |
-| ATTRIBUTED_TO / ASSOCIATED_WITH | انتساب یا مسئولیت Agent | ACTIVITY → ACTOR |
+| ASSESSED_IN | Evidence/Claim در ارزیابی مشخص بررسی شده | EVIDENCE یا CLAIM → REVIEW/ASSESSMENT |
+| GOVERNED_BY | نسخهٔ Rule/کنترل بر Run حاکم است | RULE_VERSION و GATE_DEFINITION → DECISION_RUN |
+| REVIEWED_FOR | Review به دامنه/نسخهٔ مشخص مربوط است | REVIEW → DECISION_RUN یا OUTPUT_VERSION |
+| RENDERS | Activity خروجی نمایشی را تولید می‌کند | RENDER_ACTIVITY → OUTPUT_VERSION |
+| ACCEPTS_VERSION | رویداد پذیرش به نسخهٔ خروجی مشخص اشاره دارد | OUTPUT_VERSION → ACCEPTANCE_EVENT |
+| CONSENTS_TO | رضایت به خدمت/نسخه/دامنهٔ مشخص متصل است | SERVICE_VERSION → EXECUTION_CONSENT_EVENT |
+| EXECUTES_AS | اجرای واقعی با نسخه/دامنهٔ مشخص انجام شده | SERVICE_VERSION → EXECUTION_EVENT |
+| OBSERVED_AFTER | Outcome پس از رخداد مشخص مشاهده شده | EXECUTION_EVENT → OUTCOME |
+| ATTRIBUTED_TO / ASSOCIATED_WITH | Agent مسئول یا مرتبط با Activity است | ACTOR → ACTIVITY |
 
 نام Edgeها واژگان پیشنهادی داخلی‌اند؛ معادل‌سازی مفهومی با واژگان PROV-O در صورت نیاز مجاز است، اما نباید ادعا شود این واژگان دقیقاً همان معنا/قواعد هنجاری PROV-O را دارند.
 
