@@ -19,6 +19,14 @@ CONTRACT_VERSION = "2"
 QUESTION_ID = "skin.primary_need.v2"
 LEGACY_QUESTION_ID = "skin.primary_need.v1"
 FACTOR_KEY = "concerns"
+OPTIONS = (
+    {"value": "ضدآفتاب", "label": "ضدآفتاب / SPF"},
+    {"value": "آبرسان", "label": "آبرسانی پوست"},
+    {"value": "لک صورت", "label": "لک و تیرگی"},
+    {"value": "پوست حساس", "label": "حساسیت / قرمزی"},
+    {"value": "ضدچروک", "label": "ضدچروک"},
+    {"value": "کنترل چربی", "label": "پوست چرب"},
+)
 
 QUESTION_DEFINITIONS = (
     {
@@ -26,15 +34,7 @@ QUESTION_DEFINITIONS = (
         "factor": "concerns",
         "prompt": "در این مراجعه کدام موضوع‌های پوستی برای مشتری مهم‌ترند؟",
         "answer_type": "MULTI_SELECT",
-        "options": [
-            {"value": "ضدآفتاب", "label": "ضدآفتاب / SPF"},
-            {"value": "آبرسان", "label": "آبرسانی پوست"},
-            {"value": "لک صورت", "label": "لک و تیرگی"},
-            {"value": "پوست حساس", "label": "حساسیت / قرمزی"},
-            {"value": "ضدچروک", "label": "ضدچروک"},
-            {"value": "کنترل چربی", "label": "پوست چرب"},
-            {"value": "unknown", "label": "نامشخص"},
-        ],
+        "options": list(OPTIONS),
         "max_length": 200,
     },
     {
