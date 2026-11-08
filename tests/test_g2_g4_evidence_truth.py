@@ -77,6 +77,9 @@ def test_research_draft_is_source_traceable_and_stays_pending(db_session):
 
     knowledge = ProductKnowledgeService(db_session).get_or_create("G2-G4-001")
     assert knowledge.known_use_cases is None
+    # A PENDING research draft must not evaluate or initialize Knowledge status.
+    assert knowledge.evidence_status is None
+    assert knowledge.knowledge_confidence is None
 
 
 def test_research_draft_rejects_missing_source(db_session):
