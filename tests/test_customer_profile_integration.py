@@ -106,6 +106,38 @@ def test_post_customers_guest_public_201(client):
     assert body["concerns"] == "ضدآفتاب"
 
 
+
+def test_guest_timestamp_customer_id_can_complete_mobile_intake(client):
+    """A timestamp inside CUST_GUEST_* must not be mistaken for a mobile number."""
+    guest = client.post(
+        "/api/v1/customers/guest",
+        json={"name": "Guest timestamp regression", "consent": 0},
+    )
+    assert guest.status_code == 201, guest.text
+    customer_id = guest.json()["customer_id"]
+    assert customer_id.startswith("CUST_GUEST_")
+
+    headers = _auth(sub=customer_id)
+    intake = client.post(
+        "/api/v1/customers/intake",
+        headers=headers,
+        json={
+            "name": "Guest timestamp regression",
+            "family_name": "Guest",
+            "mobile": "09130000991",
+            "concerns": "ضدآفتاب",
+            "consent": 0,
+            "case_type": "SKIN",
+            "open_case": True,
+        },
+    )
+    assert intake.status_code == 201, intake.text
+    body = intake.json()
+    assert body["customer"]["customer_id"] == customer_id
+    assert body["customer"]["mobile"] == "09130000991"
+    assert body["case"]["customer_id"] == customer_id
+    assert body["case"]["case_type"] == "SKIN"
+
 def test_intake_requires_auth_401(client):
     r = client.post(
         "/api/v1/customers/intake",
