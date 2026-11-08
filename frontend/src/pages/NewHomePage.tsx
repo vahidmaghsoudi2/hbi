@@ -671,7 +671,7 @@ export default function NewHomePage() {
           default: throw new Error(`پرسش پشتیبانی‌نشده در گردش مشاوره: ${factor}`);
         }
       };
-      let nextQuestion = await getSkinNextQuestion(newCaseId, currentToken);
+      let nextQuestion = await getSkinNextQuestion(newCaseId, currentToken, true);
       let answeredQuestions = 0;
       while (nextQuestion.status === "QUESTION_REQUIRED" && nextQuestion.question) {
         if (answeredQuestions >= 8) throw new Error("تعداد پرسش‌های مشاوره از حد مجاز بیشتر شد.");
@@ -686,7 +686,7 @@ export default function NewHomePage() {
           currentToken
         );
         answeredQuestions += 1;
-        nextQuestion = await getSkinNextQuestion(newCaseId, currentToken);
+        nextQuestion = await getSkinNextQuestion(newCaseId, currentToken, true);
       }
       if (nextQuestion.status !== "NO_QUESTION") {
         throw new Error("پاسخ‌های مشاوره در پرونده همین جلسه کامل ثبت نشدند؛ پیشنهاد محصول اجرا نشد.");
