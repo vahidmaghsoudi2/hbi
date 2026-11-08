@@ -393,6 +393,11 @@ export default function NewHomePage() {
       setMobile(customer.mobile ?? "");
       setConcerns(customer.concerns ? customer.concerns.split(",").map((x) => x.trim()).filter(Boolean) : []);
       setSkin(customer.skin_profile ? customer.skin_profile.split(",").map((x) => x.trim()).filter(Boolean) : []);
+      setDuration("unknown");
+      setSeverity("unknown");
+      setAffectedArea("unknown");
+      setAggravatingFactors([]);
+      setProductHistory("");
       setNote("");
       setRecs([]);
       setRecDone(false);
