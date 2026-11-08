@@ -429,3 +429,46 @@ def test_migration_delete_policy_matches_orm_restrict_contract():
     )
     module = runpy.run_path(str(script))
     assert module["ALLOWED_ON_DELETE"] == frozenset({"RESTRICT"})
+
+
+def test_already_migrated_repairs_run_inside_immediate_transaction(tmp_path):
+    script = (
+        Path(__file__).resolve().parents[1]
+        / "scripts"
+        / "migrate_product_problem_link_assessments.py"
+    )
+    module = runpy.run_path(str(script))
+    migrate = module["migrate"]
+    db = tmp_path / "already_migrated_repair_transaction.db"
+    conn = sqlite3.connect(db)
+    conn.executescript(_legacy_sql())
+    conn.close()
+
+    assert migrate(db).startswith("MIGRATED")
+    conn = sqlite3.connect(db)
+    conn.execute("DROP TABLE ProductProblemLinkAssessmentEvent")
+    conn.commit()
+    conn.close()
+
+    original = module["_handle_already_migrated"]
+
+    def assert_transaction_is_active(connection, tables):
+        assert connection.in_transaction, (
+            "already-migrated schema repair must begin an IMMEDIATE transaction "
+            "before creating or repairing schema objects"
+        )
+        return original(connection, tables)
+
+    module["_handle_already_migrated"] = assert_transaction_is_active
+    try:
+        assert migrate(db).startswith("ALREADY MIGRATED")
+    finally:
+        module["_handle_already_migrated"] = original
+
+    conn = sqlite3.connect(db)
+    assert conn.execute(
+        "SELECT COUNT(*) FROM sqlite_master "
+        "WHERE type='table' AND name='ProductProblemLinkAssessmentEvent'"
+    ).fetchone()[0] == 1
+    assert conn.execute("PRAGMA foreign_key_check").fetchall() == []
+    conn.close()
