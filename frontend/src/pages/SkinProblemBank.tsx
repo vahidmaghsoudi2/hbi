@@ -3,10 +3,9 @@ import mapMarkdown from "../../../docs/product-intake-knowledge-registry/SKIN_PR
 import workingRecordsMarkdown from "../../../docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKING_RECORDS.md?raw";
 import { parseProblemRecords, type ProblemRecord } from "./skinProblemParser";
 
-const PILOT_IDS = ["P08", "P17", "P18", "P19", "P22", "P24"] as const;
-const SOURCE_COMMIT = "ca27443959091da5b02562458856da0e70b02235";
+const SOURCE_COMMIT = "f03db2d5cbdeead22e20b7f4c3f91842b39689ff";
 const MAP_BLOB = "c57ce7edbcee513dcb60b735ce91b98de22d8aa2";
-const WORKING_RECORDS_BLOB = "be4e7432631db71c2a16de293838dc6a1f64636c";
+const WORKING_RECORDS_BLOB = "67b3ff1403a2c7eb1bcabb5c16c7ec3b449a50f8";
 const REPOSITORY = "https://github.com/vahidmaghsoudi2/hbi";
 
 export default function SkinProblemBank({ onBack }: { onBack: () => void }) {
@@ -14,7 +13,7 @@ export default function SkinProblemBank({ onBack }: { onBack: () => void }) {
     try {
       const allRecords = parseProblemRecords(mapMarkdown, workingRecordsMarkdown);
       return {
-        records: allRecords.filter((record) => (PILOT_IDS as readonly string[]).includes(record.id)),
+        records: allRecords,
         error: null as string | null,
       };
     } catch (error) {
@@ -49,11 +48,11 @@ export default function SkinProblemBank({ onBack }: { onBack: () => void }) {
         <h1 id="skin-problem-bank-title">بانک مشکلات پوستی</h1>
         <button type="button" className="pro-btn-secondary" onClick={onBack}>بازگشت به دانش پوست</button>
       </div>
-      <p className="pro-lead">نمای داخلی و فقط‌خواندنی از شش مدخل منتخب پایلوت. Parser داده‌های مرجع P01–P61 را پردازش می‌کند؛ نمایش این صفحه همچنان به شش مدخل محدود است.</p>
+      <p className="pro-lead">نمای داخلی و فقط‌خواندنی از فهرست مرجع ۶۱ مشکل پوستی P01–P61. داده‌ها مستقیماً از Map و Working Records خوانده می‌شوند؛ این صفحه وضعیت پزشکی یا صلاحیت مشاوره را تغییر نمی‌دهد.</p>
       <div className="pro-problem-scope" role="note">
         <strong>محدوده و محدودیت</strong>
         <p>این صفحه ابزار تشخیص، پذیرش Need، ارزیابی آمادگی مشاوره یا توصیهٔ محصول نیست. وضعیت‌ها و عبارت‌های UNKNOWN، GAP، Conflict و Accepted عیناً از منبع خوانده می‌شوند و به نتیجهٔ مثبت یا منفی تبدیل نمی‌شوند.</p>
-        <p>نقش‌های پایلوت فقط برای بررسی محدود ارتباط‌ها هستند و نوع canonical رکورد را جایگزین نمی‌کنند.</p>
+        <p>ارجاع‌های متقاطع فقط به‌عنوان رابطهٔ ثبت‌شده در Map نمایش داده می‌شوند و رکورد canonical را تکثیر نمی‌کنند.</p>
       </div>
 
       {parsed.error ? (
@@ -66,13 +65,13 @@ export default function SkinProblemBank({ onBack }: { onBack: () => void }) {
         <>
           <div className="pro-problem-controls">
             <div>
-              <label htmlFor="skin-problem-search">جست‌وجو در شش مدخل پایلوت</label>
+              <label htmlFor="skin-problem-search">جست‌وجو در ۶۱ مشکل پوستی P01–P61</label>
               <input id="skin-problem-search" className="pro-input" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="شناسه، نام، نوع، وضعیت یا متن فیلد…" />
             </div>
             <div>
               <label htmlFor="skin-problem-shelf">فیلتر قفسه</label>
               <select id="skin-problem-shelf" className="pro-input" value={shelfFilter} onChange={(event) => setShelfFilter(event.target.value)}>
-                <option value="ALL">همهٔ قفسه‌های پایلوت</option>
+                <option value="ALL">همهٔ قفسه‌ها</option>
                 {Array.from(new Map(parsed.records.map((record) => {
                   const primary = record.mapEntries[record.canonicalMapEntryIndex ?? 0];
                   return [primary.shelfId, primary.shelfName] as [string, string];
@@ -82,8 +81,8 @@ export default function SkinProblemBank({ onBack }: { onBack: () => void }) {
           </div>
 
           <div className="pro-problem-layout">
-            <nav className="pro-problem-list" aria-label="شش مدخل منتخب مشکلات پوستی">
-              <p className="pro-problem-count">{filtered.length} از {parsed.records.length} مدخل پایلوت</p>
+            <nav className="pro-problem-list" aria-label="فهرست ۶۱ مشکل پوستی P01 تا P61">
+              <p className="pro-problem-count">{filtered.length} از {parsed.records.length} مشکل پوستی</p>
               {filtered.map((record) => {
                 const primary = record.mapEntries[record.canonicalMapEntryIndex ?? 0];
                 return (
@@ -94,7 +93,7 @@ export default function SkinProblemBank({ onBack }: { onBack: () => void }) {
                   </button>
                 );
               })}
-              {filtered.length === 0 ? <p className="pro-muted">در محدودهٔ همین شش مدخل نتیجه‌ای پیدا نشد.</p> : null}
+              {filtered.length === 0 ? <p className="pro-muted">در میان ۶۱ مشکل پوستی نتیجه‌ای پیدا نشد.</p> : null}
             </nav>
 
             {selected && selectedMap ? (
