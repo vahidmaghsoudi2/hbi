@@ -314,3 +314,65 @@ def test_frozen_scoring_formula_is_unchanged():
     assert result["final_score"] == 1.0
     assert result["confidence"] == 1.0
     assert result["eligibility"] == "ELIGIBLE"
+
+
+def test_structured_consultation_captures_all_eight_case_owned_answers(client, db_session):
+    customer, case = _setup_skin_case(db_session)
+    service = SkinNextQuestionService(db_session)
+    answers = [
+        (QUESTION_ID, ["آبرسان", "ضدآفتاب"]),
+        ("skin.current_type.v1", ["خشک", "حساس"]),
+        ("skin.duration.v1", "one_to_four_weeks"),
+        ("skin.self_reported_severity.v1", "moderate"),
+        ("skin.affected_area.v1", "face"),
+        ("skin.aggravating_factors.v1", ["sun_exposure", "cosmetics"]),
+        ("skin.product_history.v1", "مرطوب‌کننده و ضدآفتاب؛ واکنش گزارش‌شده: سوزش"),
+        ("skin.additional_context.v1", "توضیح تکمیلی ثبت‌شده توسط مشتری"),
+    ]
+
+    for expected_question_id, answer in answers:
+        question = service.get_question(case)
+        assert question is not None
+        assert question["question_id"] == expected_question_id
+        result = service.capture_answer(case, expected_question_id, answer)
+        assert result["source"] == "CURRENT_CASE_CONSULTATION"
+
+    assert service.get_question(case) is None
+    db_session.expire_all()
+    persisted = db_session.get(Case, case.case_id)
+    state = json.loads(persisted.evidence_gaps)
+    by_question = {item["question_id"]: item for item in state["answers"]}
+
+    assert by_question[QUESTION_ID]["value"] == ["آبرسان", "ضدآفتاب"]
+    assert by_question["skin.current_type.v1"]["value"] == ["خشک", "حساس"]
+    assert by_question["skin.duration.v1"]["value"] == "one_to_four_weeks"
+    assert by_question["skin.self_reported_severity.v1"]["value"] == "moderate"
+    assert by_question["skin.affected_area.v1"]["value"] == "face"
+    assert by_question["skin.aggravating_factors.v1"]["value"] == ["sun_exposure", "cosmetics"]
+    assert by_question["skin.product_history.v1"]["value"].startswith("مرطوب‌کننده")
+    assert by_question["skin.additional_context.v1"]["value"].startswith("توضیح تکمیلی")
+    current = SkinNextQuestionService.current_input_from_case(persisted)
+    assert current["concerns"] == ["آبرسان", "ضدآفتاب"]
+    assert current["skin_profile"] == ["خشک", "حساس"]
+
+
+def test_structured_consultation_preserves_unknown_without_profile_fallback(client, db_session):
+    customer, case = _setup_skin_case(db_session)
+    customer.concerns = "آبرسان"
+    db_session.commit()
+    service = SkinNextQuestionService(db_session)
+    result = service.capture_answer(case, QUESTION_ID, ["unknown"])
+    assert result["value_state"] == "UNKNOWN"
+    current = service.current_input_from_case(case)
+    assert current["concerns"] == ["unknown"]
+    state = json.loads(case.evidence_gaps)
+    assert state["answers"][0]["value_state"] == "UNKNOWN"
+
+
+def test_structured_primary_question_keeps_only_six_approved_homepage_options(client, db_session):
+    _, case = _setup_skin_case(db_session)
+    question = SkinNextQuestionService(db_session).get_question(case)
+    assert question["question_id"] == QUESTION_ID
+    assert {item["value"] for item in question["options"]} == {
+        "ضدآفتاب", "آبرسان", "لک صورت", "پوست حساس", "ضدچروک", "کنترل چربی", "unknown"
+    }
