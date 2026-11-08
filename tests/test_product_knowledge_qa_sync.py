@@ -86,11 +86,33 @@ def _add_use_case_evidence(db, *, pid, eid, claim="sunscreen", qa="PENDING"):
     db.commit()
 
 
-def test_pending_evidence_not_in_product_knowledge(db):
+def test_pending_evidence_does_not_create_product_knowledge(db):
     _seed_product(db)
     _add_use_case_evidence(db, pid="P-PK-QA", eid="E-PEND", qa="PENDING")
     pk = ProductKnowledgeService(db).update_from_evidence("P-PK-QA")
-    assert pk.known_use_cases is None or "sunscreen" not in (pk.known_use_cases or "")
+    assert pk is None
+    assert db.query(ProductKnowledge).filter_by(product_id="P-PK-QA").one_or_none() is None
+
+
+def test_pending_evidence_does_not_mutate_existing_product_knowledge(db):
+    _seed_product(db)
+    knowledge = ProductKnowledge(
+        product_knowledge_id="PK-P-PK-QA",
+        product_id="P-PK-QA",
+        known_use_cases="previously approved use case",
+        evidence_status="SUPPORTED",
+        knowledge_confidence=0.6,
+    )
+    db.add(knowledge)
+    db.commit()
+    _add_use_case_evidence(db, pid="P-PK-QA", eid="E-PEND-EXISTING", qa="PENDING")
+
+    returned = ProductKnowledgeService(db).update_from_evidence("P-PK-QA")
+    db.refresh(knowledge)
+    assert returned.product_knowledge_id == knowledge.product_knowledge_id
+    assert knowledge.known_use_cases == "previously approved use case"
+    assert knowledge.evidence_status == "SUPPORTED"
+    assert knowledge.knowledge_confidence == 0.6
 
 
 def test_verify_then_reject_then_reverify_rebuilds_knowledge(db):
