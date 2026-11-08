@@ -4133,3 +4133,51 @@ AI نمی‌تواند:
 | آیا تصمیم متخصص/PO جعل می‌شود؟ | خیر | خیر | خیر |
 
 **نکتهٔ معماری:** برچسب C10 باید به زوج «تغییر مشخص + خروجی مشخص» متصل باشد، نه صرفاً به پرونده. هر طبقه‌بندی باید actor، زمان، شواهد، دامنه، دلیل و وابستگی‌های بررسی‌شده را ثبت کند. اگر اثر بر یک خروجی معلوم نیست، آن خروجی UNRESOLVED می‌ماند؛ «عدم مشاهدهٔ تغییر ظاهری» به‌تنهایی دلیل NON-MATERIAL نیست.
+
+
+---
+
+### ۶۶-د۸) ممیزی شکاف Manifest در برابر قابلیت بازسازی یک Decision Run
+
+**مبنای ممیزی:** نمونهٔ A در همین سند و قراردادهای C03/C04/C09/C10/C11/C12. این یک ممیزی ایستای متن طراحی است؛ هیچ runtime، پایگاه داده، artifact واقعی یا پیاده‌سازی بررسی نشده است.
+
+| حوزه | آنچه در نمونه/قرارداد فعلی دیده می‌شود | شکاف برای بازسازی قابل ممیزی | پیشنهاد تکمیل طراحی |
+|---|---|---|---|
+| هویت Run | case_id، snapshot_id/version، output_version | شناسهٔ یکتای Run، وضعیت Run و رابطهٔ retry/replay صریح نیست | run_id یکتا؛ parent_run_id و replay_of در صورت کاربرد |
+| زمان | snapshot_effective_at | زمان ثبت، زمان مشاهدهٔ هر ورودی، timezone و ترتیب رویدادها یکپارچه نیست | effective_at، observed_at، recorded_at و timezone جداگانه |
+| Snapshot | شناسه/نسخه آمده است | روش ساخت Snapshot، مرز فیلدها و hash محتوای snapshot مشخص نیست | snapshot schema/version و hash محاسبه‌شده از payload واقعی |
+| هدف/دامنه | customer_goal، service_kind، service_variant، goal_version | actor/منبع تغییر هدف و علت تغییر روشن نیست | goal_source، changed_by، change_reason و timestamp |
+| ورودی‌ها | hair_state_snapshot و چند Evidence ref | فهرست کامل ورودی‌های مؤثر، مقدار/وضعیت، منبع و زمان هرکدام وجود ندارد | input manifest ردیفی با field، value/status، source_ref، observed_at و actor |
+| Artifact مرجع | catalog_source_status و الزام کلی به پیوند artifact | در نمونه شناسه/نسخه/hash واقعی/الگوریتم/محل artifact پر نشده است | artifact_id، version، content_hash، hash_algorithm، source_uri/location، captured_at و access_status؛ مقادیر فقط از artifact واقعی |
+| Evidence | evidence_refs | نوع Evidence، مالک، استقلال، کیفیت، محدودیت و رابطهٔ ادعا-منبع ساخت‌یافته نیست | evidence_type، issuer/owner، independence_group، assessment_ref، claim_links و limitations |
+| Rule | rule_set_ref و rule_refs | وضعیت، نسخهٔ دقیق هر Rule، دامنه، تاریخ اعتبار و تصویب‌کننده برای هر Rule جداگانه ثبت نشده | rule_id/version/status/scope/effective_period/approval_ref به ازای هر Rule |
+| Knowledge | knowledge_package_ref و claim refs | نسخه و وضعیت هر Claim، منابع و محدودیت‌های Claim در Run snapshot نشده | package_version و claim_id/version/status/source_refs/assessment_ref |
+| Engine | engine_ref مفهومی | build/version دقیق، config، dependency و پارامترهای تصمیم ثبت نشده | engine_build، config_version/hash و dependency manifest |
+| Controls/Gates | چند وضعیت خلاصه | نتیجهٔ هر Gate، نسخهٔ کنترل، ورودی‌های بررسی‌شده و دلیل تصمیم ساخت‌یافته نیست | gate_id/version/result/reason/input_refs/evaluated_at |
+| تعارض | status کلی source verification | تعارض‌ها، دو سوی ادعا، دامنه و مرجع تعیین تکلیف به Run وصل نشده | conflict_id، competing_claim_refs، scope، status، resolution_ref |
+| Review | review_ref | هویت/نقش بازبین، صلاحیت دامنه‌ای، تصمیم، محدودیت و زمان نامشخص است | reviewer_id/role، qualification_scope_ref، decision، rationale_ref، reviewed_at |
+| خروجی | decision_output و output_version | payload دقیق، مخاطب/کانال و مرز محتوای داخلی/مشتری مشخص نیست | output_artifact_ref/hash، audience، channel، rendered_at و disclosure_class |
+| پذیرش مشتری | customer_acceptance | متن/نسخهٔ پذیرفته‌شده، actor، زمان و وضعیت لغو/انقضا ثبت نشده | acceptance_event با output_version، customer_actor، accepted_at و status |
+| رضایت اجرا | execution_consent | خدمت/نسخه/دامنهٔ رضایت، actor، زمان و شرایط مشخص نیست | consent_event مستقل با service_version، scope، actor، timestamp و status |
+| اجرای واقعی | actual_execution: NONE | اگر اجرا رخ دهد، رویداد، مسئول، زمان و تفاوت اجرای واقعی با برنامه ثبت نمی‌شود | execution_event فقط در صورت وقوع؛ operator، actual_service_version، timestamps و deviations |
+| Outcome | در نمونه نیست | نتیجهٔ بعدی، منبع، زمان و ارتباط با Run قابل ثبت نیست | outcome_event، source، observed_at، recorded_at و linked_run_id |
+| Lineage | متن کلی «ارجاع‌ها به نسخهٔ همین نمونه» | یال‌های وابستگی هر خروجی به ورودی/Rule/Claim/Review روشن نیست | dependency_edges با from/to، dependency_type و affected_output_ids |
+| دسترسی/نگهداری | در نمونه نیست | retention، مجوز دسترسی، محرمانگی و وضعیت حذف/آرشیو تعریف نشده | access_policy_ref، retention_policy_ref، archive/deletion event و audit actor |
+
+#### یافته‌های اصلی
+
+1. نمونهٔ Manifest برای توضیح معماری مفید است، اما در وضعیت فعلی یک فهرست وابستگی سطح‌بالاست؛ به‌تنهایی برای بازسازی دقیق و مستقل یک Run واقعی کافی نیست.
+2. مهم‌ترین شکاف، artifact مرجع است: تصمیم PO دربارهٔ مرجعیت اصل کاتالوگ روشن است، اما خود artifact مصرف‌شده باید با شناسه، نسخه، hash واقعی، الگوریتم و زمان capture به هر Run پیوند بخورد.
+3. زمان مؤثر، زمان مشاهده و زمان ثبت سه مفهوم متفاوت‌اند؛ ادغام آن‌ها باعث خطای تازگی موجودی و بازسازی تاریخی می‌شود.
+4. ارجاع به Rule Set یا Knowledge Package کافی نیست؛ نسخه و وضعیت هر Rule/Claim مؤثر باید در زمان Run ثابت و قابل بازیابی باشد.
+5. پذیرش پیشنهاد، رضایت اجرای خدمت، اجرای واقعی و Outcome چهار رویداد مستقل‌اند؛ Manifest باید نسخه و زمان هرکدام را جداگانه ثبت کند.
+6. Lineage باید dependency graph قابل پیمایش باشد؛ عبارت متنی «همهٔ ارجاع‌ها» برای تحلیل انتخابی C10 کافی نیست.
+7. این شکاف‌ها پیشنهاد تکمیل قرارداد طراحی‌اند؛ هیچ‌یک به‌معنای وجود یا فقدان یک قابلیت در runtime/DB فعلی نیست، چون بررسی اجرایی مجاز و انجام نشده است.
+
+#### اولویت تکمیل پیش از تصویب PO
+
+- **P0 — بازسازی و صحت تصمیم:** run_id؛ snapshot hash؛ زمان‌های تفکیک‌شده؛ artifact واقعی و hash؛ نسخهٔ دقیق Rule/Claim/Engine؛ نتیجهٔ Gate و دلیل؛ dependency edges.
+- **P1 — رضایت و مسئولیت:** هویت/نقش Review؛ نسخهٔ خروجی مشتری؛ رویداد مستقل acceptance و execution consent؛ execution event و Outcome.
+- **P2 — حکمرانی داده:** access/retention policy، آرشیو/حذف، طبقه‌بندی افشا و audit actor.
+
+اولویت‌ها پیشنهاد بازبین‌اند و تصویب PO محسوب نمی‌شوند. این ممیزی فقط قرارداد مستندات را تکمیل می‌کند و هیچ مجوز Schema/API/DB یا پیاده‌سازی ایجاد نمی‌کند.
