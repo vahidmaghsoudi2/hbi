@@ -78,7 +78,7 @@ def test_add_evidence_rebuilds_product_knowledge_after_conflict(db_session):
 
     created = EvidenceService(db_session).add_evidence({
         "product_id": product_id,
-        "source_type": "INDEPENDENT_REVIEW",
+        "source_type": "PEER_REVIEWED",
         "source_reference": "https://review.example/product",
         "claim": "The formula contains ingredient B.",
         "field": "ingredients",
