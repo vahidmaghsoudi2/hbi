@@ -41,9 +41,12 @@ const PRODUCTS = [
   {
     dossier: "P6 Clinique historical",
     productId: "HBI-PROD-70EEE418BE0F4DAB",
-    source: "https://www.clinique.com/product/4034/68008/skincare/serum/even-better-clinicaltm-radical-dark-spot-corrector-interrupter",
+    source: "https://www.harrods.com/en-gb/p/clinique-even-better-clinical-radical-dark-spot-correctorand-interrupter-100ml-000000000006795757",
     marketRegion: undefined,
-    claim: "The historical Even Better Clinical Radical Dark Spot Corrector + Interrupter dossier records a manufacturer-reported 52-woman / 39% visible dark-spot result. The product is discontinued; its historical formula and result must not be merged with the replacement Dark Spot Clearing Serum. Physical historical package, market, lot and exact INCI remain unverified.",
+    field: null,
+    sourceType: "RETAILER",
+    claimType: "FACT",
+    claim: "The retailer listing identifies the historical 100 ml Even Better Clinical Radical Dark Spot Corrector + Interrupter and displays a historical INCI pattern including Ascorbyl Glucoside, Salicylic Acid and Dimethoxytolyl Propylresorcinol. This is retailer listing evidence only; physical package, market, lot and exact formula remain unverified. Do not transfer the replacement serum's formula or claims.",
   },
 ];
 
@@ -74,16 +77,23 @@ test("P1-P6 source-bound Evidence drafts persist and read back without Product M
     );
     expect(evidenceResponse.status(), await evidenceResponse.text()).toBe(200);
     before.set(`${product.productId}:evidenceIds`, new Set((await evidenceResponse.json()).map((item) => item.evidence_id)));
+
+    const knowledgeResponse = await request.get(
+      `${api}/evidence/knowledge/${encodeURIComponent(product.productId)}`,
+      { headers },
+    );
+    expect(knowledgeResponse.status(), await knowledgeResponse.text()).toBe(200);
+    before.set(`${product.productId}:knowledge`, await knowledgeResponse.json());
   }
 
   const written = [];
   for (const product of PRODUCTS) {
     const assertion = {
       claim: product.claim,
-      field: "manufacturer_claims",
-      source_type: "MANUFACTURER",
+      field: product.field === undefined ? "manufacturer_claims" : product.field,
+      source_type: product.sourceType || "MANUFACTURER",
       source_reference: product.source,
-      claim_type: "MANUFACTURER_CLAIM",
+      claim_type: product.claimType || "MANUFACTURER_CLAIM",
       notes: `Issue #406 approved P1-P6 staged intake; dossier=${product.dossier}; exact physical package/version match remains subject to the recorded dossier limits.`,
       ...(product.marketRegion ? { market_region: product.marketRegion } : {}),
     };
@@ -96,9 +106,10 @@ test("P1-P6 source-bound Evidence drafts persist and read back without Product M
     expect(saved).toHaveLength(1);
     expect(saved[0]).toMatchObject({
       product_id: product.productId,
-      field: "manufacturer_claims",
-      source_type: "MANUFACTURER",
+      field: product.field === undefined ? "manufacturer_claims" : product.field,
+      source_type: product.sourceType || "MANUFACTURER",
       source_reference: product.source,
+      claim_type: product.claimType || "MANUFACTURER_CLAIM",
       qa_status: "PENDING",
       evidence_status: "UNKNOWN",
     });
@@ -117,13 +128,28 @@ test("P1-P6 source-bound Evidence drafts persist and read back without Product M
     expect(newRows[0].evidence_id).toBe(evidenceId);
     expect(newRows[0]).toMatchObject({
       product_id: product.productId,
-      field: "manufacturer_claims",
-      source_type: "MANUFACTURER",
+      field: product.field === undefined ? "manufacturer_claims" : product.field,
+      source_type: product.sourceType || "MANUFACTURER",
       source_reference: product.source,
-      claim_type: "MANUFACTURER_CLAIM",
+      claim_type: product.claimType || "MANUFACTURER_CLAIM",
       qa_status: "PENDING",
       evidence_status: "UNKNOWN",
     });
+
+    const knowledgeAfterResponse = await request.get(
+      `${api}/evidence/knowledge/${encodeURIComponent(product.productId)}`,
+      { headers },
+    );
+    expect(knowledgeAfterResponse.status(), await knowledgeAfterResponse.text()).toBe(200);
+    const knowledgeAfter = await knowledgeAfterResponse.json();
+    const knowledgeBefore = before.get(`${product.productId}:knowledge`);
+    for (const field of [
+      "ingredients", "ingredient_roles", "claimed_benefits", "known_use_cases",
+      "contraindications", "usage_instructions", "manufacturer_claims",
+      "other_attributes", "evidence_refs", "evidence_status", "knowledge_confidence",
+    ]) {
+      expect(knowledgeAfter[field], `${product.dossier}: ProductKnowledge.${field} changed`).toEqual(knowledgeBefore[field]);
+    }
 
     const productAfterResponse = await request.get(
       `${api}/products/${encodeURIComponent(product.productId)}`,
