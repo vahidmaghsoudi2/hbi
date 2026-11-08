@@ -2,18 +2,10 @@ const { test, expect } = require("@playwright/test");
 
 test("Homepage persists the structured skin intake on the current Case", async ({ page, request }) => {
   const api = process.env.HBI_TEST_API_URL || "http://127.0.0.1:8765/api/v1";
-  const tokenResponse = await request.post(`${api}/auth/pilot-token`, {
-    data: { customer_id: "CUST-PILOT-1" },
-  });
-  expect(tokenResponse.status(), await tokenResponse.text()).toBe(200);
-  const customerToken = (await tokenResponse.json()).access_token;
-
-  await page.addInitScript((accessToken) => {
+  const mobile = `0913${String(Date.now()).slice(-7)}`;
+  await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-structured-intake-admin-gate");
-    sessionStorage.setItem("hbi_access_token", accessToken);
-    sessionStorage.setItem("hbi_refresh_token", "browser-proof-refresh-placeholder");
-    sessionStorage.setItem("hbi_customer_id", "CUST-PILOT-1");
-  }, customerToken);
+  });
 
   let questionReads = 0;
   let answerWrites = 0;
@@ -29,8 +21,8 @@ test("Homepage persists the structured skin intake on the current Case", async (
   await page.getByRole("button", { name: "شروع مشاوره" }).click();
   await expect(page.getByRole("heading", { name: "فرم مشاوره سریع" })).toBeVisible();
 
-  await page.locator("#name").fill("مشاوره ساختاریافته");
-  await page.locator("#mobile").fill("09000000001");
+  await page.locator("#name").fill("Home Page Structured Intake E2E");
+  await page.locator("#mobile").fill(mobile);
   await page.getByText("ضدآفتاب / SPF", { exact: true }).click();
   await page.getByText("چرب", { exact: true }).click();
   await page.locator("#consult-duration").selectOption("one_to_four_weeks");
@@ -50,10 +42,17 @@ test("Homepage persists the structured skin intake on the current Case", async (
   expect(questionReads).toBe(9);
   expect(answerWrites).toBe(8);
 
-  const caseId = await page.evaluate(() => sessionStorage.getItem("hbi_case_id"));
+  const session = await page.evaluate(() => ({
+    caseId: sessionStorage.getItem("hbi_case_id"),
+    customerId: sessionStorage.getItem("hbi_customer_id"),
+    accessToken: sessionStorage.getItem("hbi_access_token"),
+  }));
+  const { caseId, customerId, accessToken } = session;
   expect(caseId).toBeTruthy();
-  const casesResponse = await request.get(`${api}/cases/customer/CUST-PILOT-1`, {
-    headers: { Authorization: `Bearer ${customerToken}` },
+  expect(customerId).toBeTruthy();
+  expect(accessToken).toBeTruthy();
+  const casesResponse = await request.get(`${api}/cases/customer/${encodeURIComponent(customerId)}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
   expect(casesResponse.status(), await casesResponse.text()).toBe(200);
   const cases = await casesResponse.json();
@@ -78,7 +77,7 @@ test("Homepage persists the structured skin intake on the current Case", async (
   }
 
   const next = await request.get(`${api}/recommendations/next-question/${encodeURIComponent(caseId)}`, {
-    headers: { Authorization: `Bearer ${customerToken}` },
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
   expect(next.status(), await next.text()).toBe(200);
   expect((await next.json()).status).toBe("NO_QUESTION");
