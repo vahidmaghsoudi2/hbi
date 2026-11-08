@@ -1,4 +1,4 @@
-﻿from sqlalchemy import Column, DateTime, ForeignKey, String, text
+from sqlalchemy import Column, DateTime, ForeignKey, String, text
 from sqlalchemy.orm import relationship
 from app.models.base import Base
 
@@ -12,6 +12,9 @@ class Evidence(Base):
     claim = Column(String, nullable=False)
     field = Column(String, nullable=True)
     market_region = Column(String, nullable=True)
+    # Optional per-assertion packaging provenance. Independent of Product.packaging_version.
+    # NULL = legacy (no independently verified packaging version on this assertion).
+    packaging_version = Column(String, nullable=True)
     notes = Column(String, nullable=True)
     claim_type = Column(String, nullable=True)
     evidence_strength = Column(String, nullable=True)
