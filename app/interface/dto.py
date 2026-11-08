@@ -30,6 +30,8 @@ class CaseDTO:
     case_id: str
     customer_id: str
     case_type: str
+    # Customer-reported consultation answers stored on this Case only.
+    evidence_gaps: Optional[str] = None
 
 @dataclass
 class RecommendationDTO:
