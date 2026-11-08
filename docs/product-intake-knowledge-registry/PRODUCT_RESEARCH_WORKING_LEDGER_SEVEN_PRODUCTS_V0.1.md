@@ -1731,3 +1731,40 @@ This review accepts the **classification method and bounded interpretation**, no
 **ProductKnowledge integration readiness:** PARTIAL. Existing Evidence → ProductKnowledge path can safely carry some source-bound fields, but role mapping and Other features are not fully supported by the current UI, and product/version aggregation plus field-wide conflict detection prevent safe bulk ingredient-level transfer.
 
 **Implementation status:** no code/schema/API/UI/database changes authorized or made by this pass. Next allowed step is to prepare a minimal, separately reviewed work package for the blockers in sections B–C, after product identity matching. Do not merge PR #411 based only on this research review.
+
+
+---
+
+## Current-master persistence re-audit — 2026-11-08 (supersedes stale UI/service observations above)
+
+**Purpose:** Reconcile the pass-18 persistence matrix against the actual current master after the subsequent implementation work. This is a source-code re-audit only; it does not claim runtime or database acceptance.
+
+**Pinned baseline:** `master` = `0126fd43b5062c5e74fe8fa1eab930c57f6910d5`.
+
+### 1. Corrections now VERIFIED in current master
+
+| Earlier observation in pass 18 | Current-master source evidence | Corrected disposition |
+|---|---|---|
+| Product Intake UI does not expose `ingredient_roles`. | `frontend/src/pages/ProductIntakePanel.tsx` SHA `874d24cd4ecf9fb5e02bffab6294a4b87bda6c36`: `SKIN_OK_EVIDENCE_FIELDS` now includes `ingredient_roles`; the role control accepts structured JSON or `Name:ROLE`; the hydrating-moisturizer template maps its ingredient-role box to `ingredient_roles`. | **SUPERSEDED — UI field is present.** Do not reopen this as a missing-selector task. |
+| Backend role mapping was only a general mapping observation. | `app/services/product_knowledge_service.py` SHA `ed2bcb3f5c385c8cb6e0e9d0598db51b1d9cab88`: parses structured ingredient/role pairs, limits roles to CORE/SUPPORT/CLAIM-LINK/RISK/TECH/UNKNOWN, preserves explicit UNKNOWN, handles contradictory role assignments conservatively, and serializes the resulting role map. | **VERIFIED at source level.** This does not establish that every UI template exposes a role box or that live records have been populated. |
+| ProductKnowledge rebuild had no market/version scoping. | The same service defines `version_scope_key()`, selects a preferred market/packaging scope, excludes out-of-scope evidence from aggregate content, and records affected domains as PARTIAL. Conflict detection in `app/services/evidence_service.py` SHA `ff18bc719cf4088213f86391f8948c6131ebb006` groups by field and market. | **PARTIALLY SUPERSEDED.** Market scoping is implemented. Packaging-version lineage remains incomplete because the Evidence model SHA `934d3f7eff1717eee3ef2b0c3dcb33dd22b43907` has no `packaging_version` field; the scope key takes packaging version from the Product record, not from each Evidence assertion. Do not claim independent evidence-level package-version matching. |
+| ProductKnowledge status was not derived by rebuild. | Current service derives domain statuses and overall `SUPPORTED / PARTIAL / CONFLICT / UNKNOWN`, and writes both `evidence_status` and `domain_evidence_status`. The ProductKnowledge model SHA `a78a45159c224767f13a3b2b96527379ffddd7f7` defines nullable overall status and the domain map. | **SUPERSEDED at implementation-source level.** Runtime persistence/readback and migration compatibility still require exact evidence. |
+| No catch-all ProductKnowledge destination existed. | ProductKnowledge model includes `other_attributes`; backend `ProductKnowledgeDTO` in `app/interface/dto.py` includes `other_attributes` and `domain_evidence_status`; the service aggregates `other_attributes` as JSON. Some template-specific boxes map to this field. | **SUPERSEDED for the backend data model/service.** Do not describe the destination as absent. |
+| Universal “سایر ویژگی‌ها” had no safe destination. | In `ProductIntakePanel.tsx`, the universal box is still submitted with `field: undefined`, `claim_type: UNKNOWN`, and its label is prefixed into the claim. The API stores it as a source-bound Evidence draft, but it is not assigned `other_attributes`; the rebuild therefore does not aggregate that universal box into ProductKnowledge.other_attributes. | **REMAINS BLOCKED for ProductKnowledge readback.** The UI box exists and its draft can be recorded, but the universal box is not yet connected to the catch-all aggregate. Do not confuse “draft saved” with “ProductKnowledge populated.” |
+
+### 2. Additional current-master gaps retained
+
+1. **Frontend DTO drift:** `frontend/src/types/api.ts` SHA `4828f7057a7310c046dd0b5f7e5f4176a2a0adc9` declares `ProductKnowledgeDTO` without `other_attributes` and `domain_evidence_status`, although the backend DTO includes both. This is a frontend contract/type gap; it does not by itself prove that the runtime API omits the fields.
+2. **Packaging-version provenance:** Evidence stores `market_region` but has no per-assertion `packaging_version`. Product-level packaging version in the scope key cannot prove that a historical Evidence row belongs to the current package version if a Product record is later revised in place.
+3. **Conflict-triggered rebuild:** `EvidenceService.add_evidence()` marks every member of a detected conflict group as `CONFLICT`, but the inspected method does not call ProductKnowledge rebuild after those flags are written. A previously aggregated ProductKnowledge value may therefore remain stale until another rebuild-triggering action. This requires a focused regression check before any claim that conflict creation immediately updates ProductKnowledge.
+4. **Confidence semantics remain bounded:** `_calculate_confidence_from_evidences()` still averages fixed evidence-strength weights. It is not a calibrated probability, clinical confidence, safety rating, or finished-product efficacy score.
+5. **No operational acceptance inferred:** source inspection does not prove that the current DB schema has all columns, migrations run successfully, the API serializes the new fields in the deployed runtime, or the seven real product dossiers have been populated and read back.
+
+### 3. Corrected next work (no duplicate implementation)
+
+- Do not recreate the `ingredient_roles` selector, the role parser, market scoping, domain status derivation, or the `other_attributes` model/service destination; those are present in current master.
+- Keep the remaining work narrow: (a) connect the universal Other features draft to the existing `other_attributes` field without inventing a new schema, (b) align frontend ProductKnowledge types/readback with backend DTO fields, (c) add/verify conflict-add → ProductKnowledge rebuild regression coverage, and (d) establish package-version provenance or preserve separate immutable Product identities where the existing contract requires it.
+- Before implementation, inspect the exact API schema/response and current tests for these paths. No new schema/API or database mutation is authorized by this documentation correction.
+- Product identity matching and the human QA boundary remain mandatory. No P1–P7 dossier label is a Product ID; no research assertion is promoted to approved ProductKnowledge by this note.
+
+**Disposition:** This addendum corrects the stale pass-18 observations using current-master source hashes. It closes no runtime, DB, Product QA, clinical, G8, or PO acceptance gate. No application code, tests, schema, API, UI, database, Product Master, Evidence, ProductKnowledge, lifecycle, Recommendation, or Product↔Problem data was changed.
