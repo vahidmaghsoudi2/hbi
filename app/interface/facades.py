@@ -40,7 +40,8 @@ def _to_case_dto(c) -> CaseDTO:
     return CaseDTO(
         case_id=c.case_id,
         customer_id=c.customer_id,
-        case_type=c.case_type
+        case_type=c.case_type,
+        evidence_gaps=getattr(c, "evidence_gaps", None),
     )
 
 
