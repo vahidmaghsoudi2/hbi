@@ -17,9 +17,21 @@ test("Skin encyclopedia reads product identity, evidence and knowledge without i
     qa_verdict: "PENDING",
     status: "DRAFT",
   };
+  const hairProduct = {
+    product_id: "TEST-HAIR-001",
+    brand: "Test Brand",
+    product_name: "Test Hair Serum",
+    product_line: "HAIR",
+    variant: null,
+    size_value: null,
+    size_unit: null,
+    identity_status: "UNVERIFIED",
+    qa_verdict: "PENDING",
+    status: "DRAFT",
+  };
 
   await page.route("**/api/v1/products/manage", (route) => route.fulfill({
-    status: 200, contentType: "application/json", body: JSON.stringify([product]),
+    status: 200, contentType: "application/json", body: JSON.stringify([product, hairProduct]),
   }));
   await page.route("**/api/v1/products/TEST-SKIN-001", (route) => route.fulfill({
     status: 200, contentType: "application/json", body: JSON.stringify(product),
@@ -65,7 +77,7 @@ test("Skin encyclopedia reads product identity, evidence and knowledge without i
   await page.getByRole("button", { name: "ورود به دانش پوست" }).click();
   await page.getByRole("button", { name: "ورود به بانک مشکلات پوستی" }).click();
   await expect(page.getByRole("heading", { name: "بانک مشکلات پوستی" })).toBeVisible();
-  await expect(page.locator(".pro-problem-item")).toHaveCount(6);
+  await expect(page.locator(".pro-problem-item")).toHaveCount(61);
   await expect(page.getByRole("heading", { name: "Hyperpigmentation/dark spots" })).toBeVisible();
   await expect(page.getByText("Commit مبنا:")).toBeVisible();
   await page.getByRole("button", { name: "بازگشت به دانش پوست" }).click();
@@ -74,6 +86,7 @@ test("Skin encyclopedia reads product identity, evidence and knowledge without i
 
   await expect(page.getByRole("heading", { name: "دانشنامهٔ ویژگی محصولات پوستی" })).toBeVisible();
   await expect(page.getByLabel("انتخاب محصول")).toContainText("Test Moisturizer");
+  await expect(page.getByLabel("انتخاب محصول")).not.toContainText("Test Hair Serum");
   await expect(page.getByRole("heading", { name: "هویت و نسخهٔ محصول" })).toBeVisible();
   await expect(page.getByText("ثبت نشده / نامشخص").first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "دانش تجمیع‌شدهٔ واجد شرایط" })).toBeVisible();
