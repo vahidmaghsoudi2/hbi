@@ -198,9 +198,6 @@ class SkinNextQuestionService:
             factor = definition["factor"]
             if question_id in answers:
                 continue
-            if self._present(supplied.get(factor)):
-                continue
-
             mode = "MISSING_INPUT"
             gap_status = "MISSING"
             gap_detail: Dict[str, Any] = {}
@@ -232,10 +229,6 @@ class SkinNextQuestionService:
                         "profile_fact_id": unknown.get("profile_fact_id"),
                         "value_state": unknown.get("value_state"),
                     }
-                elif self._present(profile.get(FACTOR_KEY)):
-                    mode = "CONFIRM_CURRENT_SESSION"
-                    gap_status = "STALE_PROFILE_REQUIRES_CONFIRMATION"
-
             question = {
                 "question_id": question_id,
                 "case_id": case.case_id,
@@ -287,7 +280,8 @@ class SkinNextQuestionService:
             if "unknown" in parts and len(parts) > 1:
                 raise ValueError("unknown cannot be combined with another option")
             normalized = list(dict.fromkeys(parts))
-            return normalized, "UNKNOWN" if normalized == ["unknown"] else "KNOWN"
+            value = normalized if isinstance(answer, list) or len(normalized) > 1 else normalized[0]
+            return value, "UNKNOWN" if normalized == ["unknown"] else "KNOWN"
 
         if answer_type == "TEXT":
             if isinstance(answer, list):
@@ -378,8 +372,10 @@ class SkinNextQuestionService:
         if primary:
             # Preserve explicit UNKNOWN so legacy Customer/profile values cannot
             # silently replace the current visit's unknown answer.
-            result[FACTOR_KEY] = primary.get("value")
+            value = primary.get("value")
+            result[FACTOR_KEY] = value if isinstance(value, list) else [value]
         skin_type = latest_by_question.get("skin.current_type.v1")
         if skin_type:
-            result["skin_profile"] = skin_type.get("value")
+            value = skin_type.get("value")
+            result["skin_profile"] = value if isinstance(value, list) else [value]
         return result
