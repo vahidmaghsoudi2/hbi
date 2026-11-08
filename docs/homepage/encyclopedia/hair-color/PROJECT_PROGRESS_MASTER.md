@@ -61,7 +61,7 @@
 - شاخهٔ کاری معماری: `docs/hair-color-conceptual-architecture-scenarios-20261102`
 - PR مرجع: [#502](https://github.com/vahidmaghsoudi2/hbi/pull/502)
 - Commit مبنای اعلام‌شده: `cc8b858e75e65f446fb419b7344b2ed8c37b7ac7`
-- در آخرین بررسی این فهرست، PR #502 باز، Draft و ادغام‌نشده بود. وضعیت کنترل‌ها و Commit باید پیش از هر به‌روزرسانی دوباره بررسی شود.
+- **وضعیت فعلی تأییدشده در ۸ نوامبر ۲۰۲۶:** PR #502 باز، Draft و ادغام‌نشده است؛ HEAD شاخه `8d428ad42ee05fb9bc1c4710651a8676d7c48f15` و Base `master` برابر `0126fd43b5062c5e74fe8fa1eab930c57f6910d5` است؛ شاخه ۲۹۹ Commit جلو و ۴۴ Commit عقب است. Compare، علاوه بر دو سند HAIR، تغییرات موجود در `docs/homepage/encyclopedia/README.md`، `docs/homepage/menu-structure.json` و `docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md` را نیز نشان می‌دهد؛ این سه فایل در این نوبت تغییر داده نشدند. ادغام یا بازپایه‌گذاری انجام نشده است؛ پیش از هر merge باید واگرایی و تغییرات خارج از دامنهٔ رنگ مو جداگانه تعیین تکلیف شوند.
 - مرجع یگانهٔ معماری و محتوای تخصصی: `docs/homepage/encyclopedia/hair-color/README.md`
 - دامنهٔ فعال: مشاوره و تصمیم‌یار انتخاب رنگ مو؛ سایر پروژه‌ها خارج از این فهرست‌اند.
 - ۱۸ سناریوی فعال: HC-C01 تا HC-C08 و HC-C12 تا HC-C21. HC-C09 تا HC-C11 کنترل‌های داخلی کاتالوگ‌اند و در شمار ۱۸ سناریوی فعال نیستند.
