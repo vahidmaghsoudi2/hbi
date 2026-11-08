@@ -16,6 +16,12 @@ const PRODUCTS = [
     source: "https://www.neutrogena.co.uk/skincare/cleansers-washes/clear-and-defend-daily-wash",
     marketRegion: "UK",
     claim: "The UK manufacturer page declares 2% salicylic acid and describes Clear & Defend Daily Wash as a rinse-off face wash. The UK source version is not proof of the physical target package or its market.",
+    additionalAssertions: [{
+      claim: "The UK manufacturer page displays this INCI list for Clear & Defend 2% Salicylic Acid Face Wash: Aqua, Cocamidopropyl Hydroxysultaine, Sodium Methyl Cocoyl Taurate, Glycerin, Salicylic Acid, Sodium Hydrolyzed Potato Starch Dodecenylsuccinate, C12-15 Alkyl Lactate, Panthenol, Cocamidopropyl PG-Dimonium Chloride Phosphate, Disodium Tetrapropenyl Succinate, PEG-120 Methyl Glucose Dioleate, Sodium Chloride, Disodium EDTA, Citric Acid, Sodium Hydroxide, Tocopherol, Benzalkonium Chloride, Parfum. The manufacturer warns product and ingredients may change; the physical package label remains authoritative.",
+      field: "ingredients", source_type: "MANUFACTURER",
+      source_reference: "https://www.neutrogena.co.uk/skincare/cleansers-washes/clear-and-defend-daily-wash",
+      claim_type: "MANUFACTURER_CLAIM", market_region: "UK",
+    }],
   },
   {
     dossier: "P3 Garnier",
@@ -23,6 +29,12 @@ const PRODUCTS = [
     source: "https://www.garnier.com.au/about-our-brands/skin-active/garnier-skin-active-vitamin-c-brightening-gel-cleanser-200ml",
     marketRegion: "AU",
     claim: "The Australian manufacturer page identifies a Vitamin C brightening gel cleanser and lists Ascorbyl Glucoside (Vitamin Cg). This is a source-page snapshot; it does not establish the physical target package market or prove treatment efficacy.",
+    additionalAssertions: [{
+      claim: "The Australian manufacturer page displays this INCI list for the 200 ml Vitamin C Brightening Gel Cleanser: AQUA/WATER, SODIUM LAURETH SULFATE, COCO-BETAINE, SODIUM CHLORIDE, GLYCERIN, CITRUS LEMON FRUIT EXTRACT / LEMON FRUIT EXTRACT, PPG5-CETETH-20, SODIUM HYDROXIDE, ASCORBYL GLUCOSIDE, CITRIC ACID, PANTHENOL, POLYQUATERNIUM-7, TOCOPHERYL ACETATE, SODIUM BENZOATE, SALICYLIC ACID, LINALOOL, LIMONENE, BENZYL SALICYLATE, PARFUM / FRAGRANCE. The manufacturer warns ingredient lists are updated regularly and the package label is authoritative.",
+      field: "ingredients", source_type: "MANUFACTURER",
+      source_reference: "https://www.garnier.com.au/about-our-brands/skin-active/garnier-skin-active-vitamin-c-brightening-gel-cleanser-200ml",
+      claim_type: "MANUFACTURER_CLAIM", market_region: "AU",
+    }],
   },
   {
     dossier: "P4 SKIN1004",
@@ -30,6 +42,12 @@ const PRODUCTS = [
     source: "https://www.skin1004.com/products/hyalu-cica-water-fit-sun-serum-spf50-pa?country=GB",
     marketRegion: "INTERNATIONAL_KOREAN",
     claim: "The international manufacturer page identifies Hyalu-Cica Water-Fit Sun Serum as SPF50+ PA++++ and describes its UV-protection formula. Do not transfer the separate US sunscreen-drug formula or claims to this international dossier.",
+    additionalAssertions: [{
+      claim: "The international/Korean manufacturer page displays this INCI list for Hyalu-Cica Water-Fit Sun Serum SPF50+ PA++++: Water, Dibutyl Adipate, Propanediol, Diethylamino Hydroxybenzoyl Hexyl Benzoate, Polymethylsilsesquioxane, Ethylhexyl Triazone, Methylene Bis-Benzotriazolyl Tetramethylbutylphenol, Niacinamide, Coco-Caprylate/Caprate, Caprylyl Methicone, Diethylhexyl Butamido Triazone, Glycerin, 1,2-Hexanediol, Butylene Glycol, Pentylene Glycol, Behenyl Alcohol, Poly C10-30 Alkyl Acrylate, Polyglyceryl-3 Methylglucose Distearate, Decyl Glucoside, Tromethamine, Carbomer, Acrylates/C10-30 Alkyl Acrylate Crosspolymer, Sodium Stearoyl Glutamate, Polyacrylate Crosspolymer-6, Ethylhexylglycerin, Adenosine, Xanthan Gum, Centella Asiatica Extract, t-Butyl Alcohol, Sodium Hyaluronate, Betula Platyphylla Japonica Bark Extract, Tocopherol, Hydrolyzed Hyaluronic Acid, Camellia Sinensis Leaf Extract, Ginkgo Biloba Leaf Extract, Brassica Oleracea Italica (Broccoli) Sprout Extract, Camellia Japonica Leaf Extract, Eruca Sativa Leaf Extract, Medicago Sativa (Alfalfa) Extract, Triticum Vulgare (Wheat) Sprout Extract, Inositol, Hyaluronic Acid. This is the international source-page formula only; keep the US sunscreen-drug formula separate.",
+      field: "ingredients", source_type: "MANUFACTURER",
+      source_reference: "https://www.skin1004.com/products/hyalu-cica-water-fit-sun-serum-spf50-pa?country=GB",
+      claim_type: "MANUFACTURER_CLAIM", market_region: "INTERNATIONAL_KOREAN",
+    }],
   },
   {
     dossier: "P5 ISDIN",
@@ -88,35 +106,41 @@ test("P1-P6 source-bound Evidence drafts persist and read back without Product M
 
   const written = [];
   for (const product of PRODUCTS) {
-    const assertion = {
-      claim: product.claim,
-      field: product.field === undefined ? "manufacturer_claims" : product.field,
-      source_type: product.sourceType || "MANUFACTURER",
-      source_reference: product.source,
-      claim_type: product.claimType || "MANUFACTURER_CLAIM",
-      notes: `Issue #406 approved P1-P6 staged intake; dossier=${product.dossier}; exact physical package/version match remains subject to the recorded dossier limits.`,
-      ...(product.marketRegion ? { market_region: product.marketRegion } : {}),
-    };
+    const assertions = [
+      {
+        claim: product.claim,
+        field: product.field === undefined ? "manufacturer_claims" : product.field,
+        source_type: product.sourceType || "MANUFACTURER",
+        source_reference: product.source,
+        claim_type: product.claimType || "MANUFACTURER_CLAIM",
+        notes: `Issue #406 approved P1-P6 staged intake; dossier=${product.dossier}; exact physical package/version match remains subject to the recorded dossier limits.`,
+        ...(product.marketRegion ? { market_region: product.marketRegion } : {}),
+      },
+      ...(product.additionalAssertions || []),
+    ];
     const saveResponse = await request.post(
       `${api}/products/${encodeURIComponent(product.productId)}/research-draft`,
-      { headers, data: { assertions: [assertion] } },
+      { headers, data: { assertions } },
     );
     expect(saveResponse.status(), `${product.dossier}: ${await saveResponse.text()}`).toBe(200);
     const saved = await saveResponse.json();
-    expect(saved).toHaveLength(1);
-    expect(saved[0]).toMatchObject({
-      product_id: product.productId,
-      field: product.field === undefined ? "manufacturer_claims" : product.field,
-      source_type: product.sourceType || "MANUFACTURER",
-      source_reference: product.source,
-      claim_type: product.claimType || "MANUFACTURER_CLAIM",
-      qa_status: "PENDING",
-      evidence_status: "UNKNOWN",
-    });
-    written.push({ product, evidenceId: saved[0].evidence_id });
+    expect(saved).toHaveLength(assertions.length);
+    for (let index = 0; index < assertions.length; index += 1) {
+      const assertion = assertions[index];
+      expect(saved[index]).toMatchObject({
+        product_id: product.productId,
+        field: assertion.field === undefined ? null : assertion.field,
+        source_type: assertion.source_type,
+        source_reference: assertion.source_reference,
+        claim_type: assertion.claim_type,
+        qa_status: "PENDING",
+        evidence_status: "UNKNOWN",
+      });
+    }
+    written.push({ product, evidenceIds: saved.map((item) => item.evidence_id) });
   }
 
-  for (const { product, evidenceId } of written) {
+  for (const { product, evidenceIds } of written) {
     const evidenceResponse = await request.get(
       `${api}/evidence/?product_id=${encodeURIComponent(product.productId)}`,
       { headers },
@@ -124,17 +148,14 @@ test("P1-P6 source-bound Evidence drafts persist and read back without Product M
     expect(evidenceResponse.status(), await evidenceResponse.text()).toBe(200);
     const evidenceAfter = await evidenceResponse.json();
     const newRows = evidenceAfter.filter((item) => !before.get(`${product.productId}:evidenceIds`).has(item.evidence_id));
-    expect(newRows).toHaveLength(1);
-    expect(newRows[0].evidence_id).toBe(evidenceId);
-    expect(newRows[0]).toMatchObject({
-      product_id: product.productId,
-      field: product.field === undefined ? "manufacturer_claims" : product.field,
-      source_type: product.sourceType || "MANUFACTURER",
-      source_reference: product.source,
-      claim_type: product.claimType || "MANUFACTURER_CLAIM",
-      qa_status: "PENDING",
-      evidence_status: "UNKNOWN",
-    });
+    expect(newRows).toHaveLength(evidenceIds.length);
+    for (const evidenceId of evidenceIds) {
+      const row = newRows.find((item) => item.evidence_id === evidenceId);
+      expect(row, `${product.dossier}: Evidence ${evidenceId} missing from read-back`).toBeTruthy();
+      expect(row.product_id).toBe(product.productId);
+      expect(row.qa_status).toBe("PENDING");
+      expect(row.evidence_status).toBe("UNKNOWN");
+    }
 
     const knowledgeAfterResponse = await request.get(
       `${api}/evidence/knowledge/${encodeURIComponent(product.productId)}`,
