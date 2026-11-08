@@ -3,7 +3,7 @@ const { test, expect } = require("@playwright/test");
 test("Homepage records structured skin consultation answers on the current Case before recommendation", async ({ page, request }) => {
   const api = process.env.HBI_TEST_API_URL || "http://127.0.0.1:8765/api/v1";
   const mobile = `0914${String(Date.now()).slice(-7)}`;
-  // Use the real guest-intake path and a fresh identity; never mutate a seeded pilot customer.
+  // Unique guest identity per run: acceptance proof must not mutate seeded pilot customers.
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-structured-intake-admin-gate");
   });
