@@ -85,7 +85,11 @@ def _is_approved_reference(reference: CatalogReference) -> bool:
         return False
     if parsed.scheme != "https" or parsed.hostname != _APPROVED_HOST:
         return False
-    if parsed.username or parsed.password or parsed.port not in (None, 443):
+    try:
+        port = parsed.port
+    except ValueError:
+        return False
+    if parsed.username or parsed.password or port not in (None, 443):
         return False
     if parsed.query or parsed.fragment:
         return False
@@ -96,10 +100,10 @@ def _valid_capture_timestamp(value: str | None) -> bool:
     if not isinstance(value, str) or not value:
         return False
     try:
-        datetime.fromisoformat(value.replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
     except ValueError:
         return False
-    return True
+    return parsed.tzinfo is not None and parsed.utcoffset() is not None
 
 
 def _valid_sha256(value: str | None) -> bool:
@@ -113,7 +117,7 @@ def _missing_identity_fields(identity: CatalogIdentity) -> tuple[str, ...]:
         field
         for field in _REQUIRED_IDENTITY_FIELDS
         if not isinstance(getattr(identity, field), str)
-        or not getattr(identity, field)
+        or not getattr(identity, field).strip()
     )
 
 
