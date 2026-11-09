@@ -29,13 +29,17 @@ NEED_MATCH_SUFFICIENT = 0.40
 
 
 def _candidate_matches_case_product_line(product, case_type: Optional[str]) -> bool:
-    """Keep explicitly Skin-scoped cases inside the Skin product line.
+    """Keep HAIR products out of the legacy recommendation engine.
 
-    Legacy/non-Skin case types retain their existing candidate behavior until
-    they have an explicit product-line contract.
+    Explicitly Skin-scoped cases remain Skin-only. Other legacy case types keep
+    their existing candidate behavior for non-HAIR product lines.
     """
-    if (case_type or "").strip().upper() == "SKIN":
-        return (getattr(product, "product_line", None) or "").strip().upper() == "SKIN"
+    product_line = (getattr(product, "product_line", None) or "").strip().upper()
+    normalized_case_type = (case_type or "").strip().upper()
+    if product_line == "HAIR":
+        return False
+    if normalized_case_type == "SKIN":
+        return product_line == "SKIN"
     return True
 
 
@@ -378,6 +382,12 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         return conflicts
 
     def generate_recommendations(self, case_id: str, customer_profile: Dict = None) -> List[Recommendation]:
+        case_row = self.db.query(Case).filter(Case.case_id == case_id).first()
+        case_type = getattr(case_row, "case_type", None)
+        if (case_type or "").strip().upper() in {"HAIR", "CATALOG_READY"}:
+            raise ValueError(
+                "HAIR/CATALOG_READY requests are outside the legacy RecommendationService scope."
+            )
         if customer_profile is None:
             customer_profile = {}
         decision_state = self._build_decision_state(case_id, customer_profile)
@@ -389,8 +399,6 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         if decision_state["medical_context_active"]:
             decision_state["decision_status"] = "REFERRAL"
         products = self.product_repo.find_by_identity_status_and_active("VERIFIED")
-        case_row = self.db.query(Case).filter(Case.case_id == case_id).first()
-        case_type = getattr(case_row, "case_type", None)
         products = [
             product for product in products
             if _candidate_matches_case_product_line(product, case_type)
