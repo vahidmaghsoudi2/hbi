@@ -4825,7 +4825,8 @@ Product Owner مجوز محدود ردیف ۶۷ را دقیقاً در دامن�
 | حالت ورودی | نتیجهٔ مورد انتظار |
 |---|---|
 | CATALOG_READY + مرجع تأییدشده + فیلدهای کامل و برابر + نسخه و capture معتبر | MATCH |
-| یک یا چند فیلد هویتی معلوم و متعارض | MISMATCH |
+| یک یا چند فیلد هویتی متعارض در مرجع نسخه‌دار و قابل‌ردیابی | MISMATCH |
+| فیلد متعارض در مرجع بدون نسخهٔ معلوم | INCONCLUSIVE / KNOWLEDGE_GAP (تعارض برای همان صفحه ثبت می‌شود، نه حکم نسخه‌دار) |
 | نسخه نامشخص/مفقود یا capture نامعتبر | INCONCLUSIVE / KNOWLEDGE_GAP |
 | فیلد هویتی ضروری مفقود | STOP / DATA_GAP |
 | service_kind غیر از CATALOG_READY | STOP / OUT_OF_DOMAIN |
