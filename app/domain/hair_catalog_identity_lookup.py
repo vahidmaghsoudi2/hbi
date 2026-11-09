@@ -385,6 +385,8 @@ def assess_output_invalidation(
         for change in changes
         if change.dependency_key in dependencies
     )
+    if any(impact not in ("EFFECTIVE", "NON_EFFECTIVE", "UNKNOWN") for impact in impacts):
+        return "UNRESOLVED"
     if "EFFECTIVE" in impacts:
         return "INVALIDATE"
     if "UNKNOWN" in impacts:
