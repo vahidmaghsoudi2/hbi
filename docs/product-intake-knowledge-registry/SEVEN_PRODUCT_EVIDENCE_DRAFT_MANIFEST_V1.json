@@ -312,13 +312,14 @@
           "notes": "Role mapping is a cautious ingredient/function interpretation, not finished-product clinical efficacy. Existing conflicting evidence rows require review and reclassification before any accepted knowledge rebuild."
         },
         {
-          "field": "manufacturer_claims",
+          "field": "claimed_benefits",
           "claim_type": "MANUFACTURER_CLAIM",
           "source_type": "MANUFACTURER",
           "source_reference": "https://pages.anua.com/solutions/redness-prone-routine-sensitive-skin",
           "market_region": "US",
           "evidence_strength": "UNVERIFIED",
-          "claim": "A separate Anua routine/claim page reports that 90% of participants agreed the appearance of red troubled spots improved, attributed to a 2026 Anua US clinical study. Public methodology, sample details, comparator, validated endpoint and statistical report are not disclosed. Do not transfer evidence from the separate Anua azelaic-acid pads to this serum."
+          "claim": "A separate Anua routine/claim page reports that 90% of participants agreed the appearance of red troubled spots improved, attributed to a 2026 Anua US clinical study. Public methodology, sample details, comparator, validated endpoint and statistical report are not disclosed. Do not transfer evidence from the separate Anua azelaic-acid pads to this serum.",
+          "notes": "Separate official routine-page manufacturer result. Kept in a distinct ProductKnowledge domain from the product-page 10%/tolerability claims to avoid merging unlike assertions into one field. Protocol remains undisclosed."
         }
       ]
     }
