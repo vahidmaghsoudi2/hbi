@@ -537,6 +537,7 @@ def build_catalog_occurred_event(
     actor_kind: str,
     decision_output_id: str,
     evidence_reference_pointer: str,
+    display_decision: CatalogDisplayDecision | None = None,
 ) -> CatalogOccurredEvent:
     """Describe an event only when its occurrence time and evidence are supplied.
 
@@ -545,10 +546,15 @@ def build_catalog_occurred_event(
     one another. A question is not acceptance. A presented output is not proof
     of client acceptance or execution.
     """
-    if event_kind not in _EVENT_ACTOR_RULES:
+    if not isinstance(event_kind, str) or event_kind not in _EVENT_ACTOR_RULES:
         raise ValueError("event_kind is outside the catalog event contract")
-    if actor_kind != _EVENT_ACTOR_RULES[event_kind]:
+    if not isinstance(actor_kind, str) or actor_kind != _EVENT_ACTOR_RULES[event_kind]:
         raise ValueError("actor_kind does not match the event kind")
+    if event_kind == "OUTPUT_PRESENTED" and (
+        not isinstance(display_decision, CatalogDisplayDecision)
+        or not display_decision.display_allowed
+    ):
+        raise ValueError("OUTPUT_PRESENTED requires an explicitly displayable output decision")
     if not _valid_timezone_aware_timestamp(occurred_at):
         raise ValueError("occurred_at must be an explicit timezone-aware timestamp")
     if not isinstance(decision_output_id, str) or not decision_output_id.strip():
