@@ -296,6 +296,7 @@ def catalog_lookup_idempotency_key(
 
 def build_catalog_decision_output(
     *,
+    service_kind: str,
     result: CatalogLookupResult,
     reference_id: str,
     reference: CatalogReference,
@@ -306,6 +307,8 @@ def build_catalog_decision_output(
     prior_output_id: str | None = None,
 ) -> CatalogDecisionOutput:
     """Wrap a completed lookup result with source and dependency lineage."""
+    if service_kind != "CATALOG_READY" or not isinstance(service_kind, str):
+        raise ValueError("service_kind must be the exact CATALOG_READY identifier")
     if not isinstance(reference_id, str) or not reference_id.strip():
         raise ValueError("reference_id must be a non-empty stable reference")
     if not isinstance(result, CatalogLookupResult):
@@ -338,7 +341,7 @@ def build_catalog_decision_output(
         evidence_reference_pointers=tuple(evidence_reference_pointers),
         dependency_keys=dependencies,
         idempotency_key=catalog_lookup_idempotency_key(
-            service_kind="CATALOG_READY",
+            service_kind=service_kind,
             reference_id=reference_id,
             reference=reference,
             expected=expected,
