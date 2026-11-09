@@ -8,7 +8,19 @@ $db = Join-Path $RepoRoot "data\hbi.db"
 if (-not (Test-Path (Join-Path $RepoRoot "app\main.py"))) { throw "HBI repository not found at $RepoRoot" }
 if (-not (Test-Path $db)) { throw "Expected live database not found: $db" }
 $listener = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue
-if ($listener) { throw "Port 8000 is already occupied. Refusing to guess which database the running API uses. Stop only the known HBI backend, then rerun." }
+$backend = $null
+$reuseExistingBackend = [bool]$listener
+
+if ($reuseExistingBackend) {
+  Write-Host "Port 8000 is already serving a process. Checking the existing HBI API; it will not be stopped or replaced."
+  try {
+    $probe = Invoke-WebRequest "$($ApiBase.TrimEnd('/'))/../openapi.json" -UseBasicParsing -TimeoutSec 5
+    if ($probe.StatusCode -ne 200) { throw "Unexpected HTTP status $($probe.StatusCode)" }
+  } catch {
+    throw "Port 8000 is occupied but the existing HBI API could not be verified at $ApiBase. No import attempted. $($_.Exception.Message)"
+  }
+  Write-Host "Existing API responds successfully. The authenticated importer will validate all seven canonical Product IDs before any write."
+}
 
 $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $backup = Join-Path (Split-Path $db) "hbi.pre-seven-product-drafts-$stamp.db"
@@ -38,7 +50,7 @@ for ($i=0; $i -lt 40; $i++) {
   } catch { }
   if ($backend.HasExited) { break }
 }
-if (-not $ready) {
+if (-not $reuseExistingBackend -and -not $ready) {
   $details = if (Test-Path $logErr) { Get-Content $logErr -Raw } else { "No backend log." }
   throw "Backend failed to start. No import was attempted. $details"
 }
@@ -58,5 +70,5 @@ if ($LASTEXITCODE -ne 0) { throw "Import or read-back verification failed. Backe
 Write-Host ""
 Write-Host "SUCCESS: PENDING Evidence drafts were written and read back."
 Write-Host "Backup: $backup"
-Write-Host "Backend PID: $($backend.Id) (left running)"
+if ($backend) { Write-Host "Backend PID: $($backend.Id) (left running)" } else { Write-Host "Backend: existing API reused; no process was stopped or replaced." }
 Write-Host "Logs: $work"
