@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Literal
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 
 LookupOutcome = Literal["MATCH", "MISMATCH", "INCONCLUSIVE", "STOP"]
@@ -21,10 +21,10 @@ LookupStop = Literal["DATA_GAP", "KNOWLEDGE_GAP", "OUT_OF_DOMAIN", "ENGINE_FAIL"
 _APPROVED_SOURCE_KIND = "RAEAKA_BIJOURKA_CATALOG"
 _APPROVED_SOURCE_STATUS = "PO_APPROVED"
 _APPROVED_HOST = "raeaka.com"
-_APPROVED_PATH_PREFIXES = (
+_APPROVED_PATHS = frozenset((
     "/آلبوم-رنگ-مو-بیجورکا/",
-    "/product/",
-)
+    "/product/رنگ-موی-بیجورکا-سِری-طبیعی-شماره-1-مشکی/",
+))
 _REQUIRED_IDENTITY_FIELDS = (
     "brand",
     "series",
@@ -85,7 +85,9 @@ def _is_approved_reference(reference: CatalogReference) -> bool:
         return False
     if parsed.username or parsed.password or parsed.port not in (None, 443):
         return False
-    return any(parsed.path.startswith(prefix) for prefix in _APPROVED_PATH_PREFIXES)
+    if parsed.query or parsed.fragment:
+        return False
+    return unquote(parsed.path) in _APPROVED_PATHS
 
 
 def _missing_identity_fields(identity: CatalogIdentity) -> tuple[str, ...]:
