@@ -26,9 +26,11 @@ class HairServiceScopeDecision:
 def evaluate_hair_service_scope(service_kind: object) -> HairServiceScopeDecision:
     """Allow only the exact in-scope CATALOG_READY service kind.
 
-    Missing values are DATA_GAP. The known but excluded COMBINATION_CONSULT
-    service is OUT_OF_DOMAIN. Unknown values and invalid input types remain
-    UNRESOLVED. No aliases, defaults, or fallback service are inferred.
+    Missing values are DATA_GAP. Only the exact CATALOG_READY identifier is
+    allowed. The exact but excluded COMBINATION_CONSULT identifier is
+    OUT_OF_DOMAIN. Blank values are DATA_GAP; all other non-exact values and
+    invalid input types remain UNRESOLVED. No case folding, trimming-based
+    matching, aliases, defaults, or fallback service are inferred.
     """
     if service_kind is None:
         return HairServiceScopeDecision(
@@ -46,17 +48,7 @@ def evaluate_hair_service_scope(service_kind: object) -> HairServiceScopeDecisio
             reason_code="SERVICE_KIND_INVALID_TYPE",
         )
 
-    try:
-        normalized = service_kind.strip().upper()
-    except Exception:
-        return HairServiceScopeDecision(
-            allowed=False,
-            service_kind=None,
-            stop_class="ENGINE_FAIL",
-            reason_code="SERVICE_KIND_NORMALIZATION_FAILED",
-        )
-
-    if not normalized:
+    if not service_kind.strip():
         return HairServiceScopeDecision(
             allowed=False,
             service_kind=None,
@@ -64,7 +56,7 @@ def evaluate_hair_service_scope(service_kind: object) -> HairServiceScopeDecisio
             reason_code="SERVICE_KIND_BLANK",
         )
 
-    if normalized == "CATALOG_READY":
+    if service_kind == "CATALOG_READY":
         return HairServiceScopeDecision(
             allowed=True,
             service_kind="CATALOG_READY",
@@ -72,17 +64,17 @@ def evaluate_hair_service_scope(service_kind: object) -> HairServiceScopeDecisio
             reason_code="SERVICE_KIND_IN_SCOPE",
         )
 
-    if normalized == "COMBINATION_CONSULT":
+    if service_kind == "COMBINATION_CONSULT":
         return HairServiceScopeDecision(
             allowed=False,
-            service_kind="COMBINATION_CONSULT",
+            service_kind=service_kind,
             stop_class="OUT_OF_DOMAIN",
             reason_code="SERVICE_KIND_OUT_OF_FIRST_RELEASE_SCOPE",
         )
 
     return HairServiceScopeDecision(
         allowed=False,
-        service_kind=normalized,
+        service_kind=service_kind,
         stop_class="UNRESOLVED",
         reason_code="SERVICE_KIND_UNKNOWN",
     )
