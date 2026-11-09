@@ -187,20 +187,23 @@ def lookup_catalog_identity(
         and _valid_sha256(reference.content_sha256)
     )
 
+    if not traceability_complete:
+        reason = (
+            "CATALOG_EDITION_UNKNOWN_FIELD_CONFLICT_UNVERIFIED"
+            if mismatched
+            else "CATALOG_EDITION_OR_CAPTURE_METADATA_INCOMPLETE"
+        )
+        return CatalogLookupResult(
+            "INCONCLUSIVE", "KNOWLEDGE_GAP", reason,
+            matched, mismatched, (), reference.url, reference.edition_label,
+            reference.captured_at, reference.content_sha256, False,
+        )
+
     if mismatched:
         return CatalogLookupResult(
             "MISMATCH", None, "CATALOG_IDENTITY_FIELD_CONFLICT",
             matched, mismatched, (), reference.url, reference.edition_label,
-            reference.captured_at, reference.content_sha256,
-            traceability_complete,
-        )
-
-    if not traceability_complete:
-        return CatalogLookupResult(
-            "INCONCLUSIVE", "KNOWLEDGE_GAP",
-            "CATALOG_EDITION_OR_CAPTURE_METADATA_INCOMPLETE",
-            matched, (), (), reference.url, reference.edition_label,
-            reference.captured_at, reference.content_sha256, False,
+            reference.captured_at, reference.content_sha256, True,
         )
 
     return CatalogLookupResult(
