@@ -32,8 +32,10 @@ $backend = Start-Process -FilePath "python" -ArgumentList @("-m","uvicorn","app.
 $ready = $false
 for ($i=0; $i -lt 40; $i++) {
   Start-Sleep -Seconds 1
-  $tcp = Test-NetConnection 127.0.0.1 -Port 8000 -WarningAction SilentlyContinue
-  if ($tcp.TcpTestSucceeded) { $ready = $true; break }
+  try {
+    $probe = Invoke-WebRequest "http://127.0.0.1:8000/openapi.json" -UseBasicParsing -TimeoutSec 2
+    if ($probe.StatusCode -eq 200) { $ready = $true; break }
+  } catch { }
   if ($backend.HasExited) { break }
 }
 if (-not $ready) {
