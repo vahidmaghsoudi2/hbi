@@ -28,8 +28,18 @@ $backup = Join-Path (Split-Path $db) "hbi.pre-seven-product-drafts-$stamp.db"
 $pyBackup = 'import sqlite3,sys; s=sqlite3.connect(sys.argv[1]); d=sqlite3.connect(sys.argv[2]); s.backup(d); d.close(); s.close()'
 & python -c $pyBackup $db $backup
 if ($LASTEXITCODE -ne 0 -or -not (Test-Path $backup)) { throw "SQLite online backup failed; no import attempted." }
-$pyCheck = 'import sqlite3,sys; c=sqlite3.connect(sys.argv[1]); q=bytes([80,82,65,71,77,65,32,105,110,116,101,103,114,105,116,121,95,99,104,101,99,107]).decode(); print(c.execute(q).fetchone()[0]); c.close()'
-$integrity = & python -c $pyCheck $backup
+$pyCheckFile = Join-Path $env:TEMP "hbi_sqlite_backup_integrity_check.py"
+@'
+import sqlite3
+import sys
+
+connection = sqlite3.connect(sys.argv[1])
+try:
+    print(connection.execute("PRAGMA integrity_check").fetchone()[0])
+finally:
+    connection.close()
+'@ | Set-Content -Path $pyCheckFile -Encoding UTF8
+$integrity = & python $pyCheckFile $backup
 if ($LASTEXITCODE -ne 0 -or ($integrity -join "").Trim() -ne "ok") { throw "Backup integrity check failed: $integrity" }
 Write-Host "Verified backup: $backup"
 
