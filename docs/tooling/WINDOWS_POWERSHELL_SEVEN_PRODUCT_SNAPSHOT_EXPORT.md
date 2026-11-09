@@ -107,7 +107,7 @@ if (@($Snapshot.missing_product_ids).Count -ne 0) {
 if (@($Snapshot.missing_tables).Count -ne 0) {
   throw "One or more required tables are missing."
 }
-if ($Snapshot.missing_columns.Count -ne 0) {
+if (@($Snapshot.missing_columns.PSObject.Properties).Count -ne 0) {
   throw "One or more required columns are missing."
 }
 
