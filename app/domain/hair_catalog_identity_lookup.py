@@ -11,6 +11,8 @@ to a verified match.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
+import re
 from typing import Literal
 from urllib.parse import unquote, urlparse
 
@@ -90,6 +92,22 @@ def _is_approved_reference(reference: CatalogReference) -> bool:
     return unquote(parsed.path) in _APPROVED_PATHS
 
 
+def _valid_capture_timestamp(value: str | None) -> bool:
+    if not isinstance(value, str) or not value:
+        return False
+    try:
+        datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return True
+
+
+def _valid_sha256(value: str | None) -> bool:
+    return value is None or (
+        isinstance(value, str) and re.fullmatch(r"[0-9a-fA-F]{64}", value) is not None
+    )
+
+
 def _missing_identity_fields(identity: CatalogIdentity) -> tuple[str, ...]:
     return tuple(
         field
@@ -157,7 +175,8 @@ def lookup_catalog_identity(
     traceability_complete = bool(
         reference.edition_label
         and reference.edition_label not in ("unknown", "نامشخص")
-        and reference.captured_at
+        and _valid_capture_timestamp(reference.captured_at)
+        and _valid_sha256(reference.content_sha256)
     )
 
     if mismatched:
