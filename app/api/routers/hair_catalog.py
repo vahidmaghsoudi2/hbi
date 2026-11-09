@@ -64,12 +64,23 @@ class HairCatalogLookupResponse(BaseModel):
 
 
 def get_approved_hair_catalog_reference() -> tuple[str, CatalogReference] | None:
-    """Return a server-owned approved reference, never caller-supplied metadata.
+    """Return the PO-approved, server-owned Raeaka Bijourka snapshot reference.
 
-    The primary versioned catalog artifact has not yet been established.
-    Returning None is deliberate and keeps production requests fail-closed.
+    The source snapshot manifest is stored in
+    data/catalogs/hair/bijourka/raeaka_catalog_snapshot_2026-11-09.json.
+    Its snapshot label is a capture identifier, not a publisher-issued edition.
     """
-    return None
+    return (
+        "HBI-HAIR-CATALOG-BIJOURKA-RAEAKA-SNAPSHOT-2026-11-09",
+        CatalogReference(
+            source_kind="RAEAKA_BIJOURKA_CATALOG",
+            approval_status="PO_APPROVED",
+            url="https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/",
+            edition_label="RAEAKA-WEB-CATALOG-SNAPSHOT-2026-11-09",
+            captured_at="2026-11-09T15:00:00+01:00",
+            content_sha256=None,
+        ),
+    )
 
 
 @router.post(
