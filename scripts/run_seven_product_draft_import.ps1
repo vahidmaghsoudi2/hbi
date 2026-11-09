@@ -14,7 +14,8 @@ $reuseExistingBackend = [bool]$listener
 if ($reuseExistingBackend) {
   Write-Host "Port 8000 is already serving a process. Checking the existing HBI API; it will not be stopped or replaced."
   try {
-    $probe = Invoke-WebRequest "$($ApiBase.TrimEnd('/'))/../openapi.json" -UseBasicParsing -TimeoutSec 5
+    $apiRoot = ([uri]$ApiBase).GetLeftPart([System.UriPartial]::Authority)
+    $probe = Invoke-WebRequest "$apiRoot/openapi.json" -UseBasicParsing -TimeoutSec 5
     if ($probe.StatusCode -ne 200) { throw "Unexpected HTTP status $($probe.StatusCode)" }
   } catch {
     throw "Port 8000 is occupied but the existing HBI API could not be verified at $ApiBase. No import attempted. $($_.Exception.Message)"
@@ -40,19 +41,21 @@ Invoke-WebRequest ($raw + "docs/product-intake-knowledge-registry/SEVEN_PRODUCT_
 
 $logOut = Join-Path $work "backend.stdout.log"
 $logErr = Join-Path $work "backend.stderr.log"
-$backend = Start-Process -FilePath "python" -ArgumentList @("-m","uvicorn","app.main:app","--host","127.0.0.1","--port","8000") -WorkingDirectory $RepoRoot -PassThru -RedirectStandardOutput $logOut -RedirectStandardError $logErr
-$ready = $false
-for ($i=0; $i -lt 40; $i++) {
-  Start-Sleep -Seconds 1
-  try {
-    $probe = Invoke-WebRequest "http://127.0.0.1:8000/openapi.json" -UseBasicParsing -TimeoutSec 2
-    if ($probe.StatusCode -eq 200) { $ready = $true; break }
-  } catch { }
-  if ($backend.HasExited) { break }
-}
-if (-not $reuseExistingBackend -and -not $ready) {
-  $details = if (Test-Path $logErr) { Get-Content $logErr -Raw } else { "No backend log." }
-  throw "Backend failed to start. No import was attempted. $details"
+$ready = $reuseExistingBackend
+if (-not $reuseExistingBackend) {
+  $backend = Start-Process -FilePath "python" -ArgumentList @("-m","uvicorn","app.main:app","--host","127.0.0.1","--port","8000") -WorkingDirectory $RepoRoot -PassThru -RedirectStandardOutput $logOut -RedirectStandardError $logErr
+  for ($i=0; $i -lt 40; $i++) {
+    Start-Sleep -Seconds 1
+    try {
+      $probe = Invoke-WebRequest "http://127.0.0.1:8000/openapi.json" -UseBasicParsing -TimeoutSec 2
+      if ($probe.StatusCode -eq 200) { $ready = $true; break }
+    } catch { }
+    if ($backend.HasExited) { break }
+  }
+  if (-not $ready) {
+    $details = if (Test-Path $logErr) { Get-Content $logErr -Raw } else { "No backend log." }
+    throw "Backend failed to start. No import was attempted. $details"
+  }
 }
 
 $importer = Join-Path $work "apply_seven_product_research_drafts.py"
