@@ -211,3 +211,159 @@ def lookup_catalog_identity(
         matched, (), (), reference.url, reference.edition_label,
         reference.captured_at, reference.content_sha256, True,
     )
+
+
+# ---------------------------------------------------------------------------
+# Slice 5: decision-output lineage, dependency invalidation, and idempotency.
+# This remains a pure domain contract: no persistence, events, API, or runtime.
+# ---------------------------------------------------------------------------
+
+DependencyImpact = Literal["EFFECTIVE", "NON_EFFECTIVE", "UNKNOWN"]
+InvalidationDecision = Literal["INVALIDATE", "PRESERVE", "UNRESOLVED"]
+_UNVERSIONED = "UNVERSIONED"
+_UNKNOWN_EDITION_LABELS = frozenset(("unknown", "نامشخص"))
+
+
+@dataclass(frozen=True)
+class DependencyChange:
+    """An assessed change to one logical dependency of a decision output."""
+
+    dependency_key: str
+    impact: DependencyImpact
+
+
+@dataclass(frozen=True)
+class CatalogDecisionOutput:
+    """Immutable logical output envelope; it is not a persisted DB record."""
+
+    service_kind: Literal["CATALOG_READY"]
+    reference_id: str
+    source_kind: str
+    source_url: str
+    version_label: str
+    provenance: tuple[str, ...]
+    outcome: LookupOutcome
+    evidence_reference_pointers: tuple[str, ...]
+    dependency_keys: tuple[str, ...]
+    idempotency_key: tuple[str | None, ...]
+    prior_output_id: str | None = None
+    inherited_approval_state: Literal["NONE"] = "NONE"
+
+
+def _edition_or_unversioned(value: str | None) -> str:
+    if not isinstance(value, str) or not value.strip():
+        return _UNVERSIONED
+    label = value.strip()
+    if label.casefold() in _UNKNOWN_EDITION_LABELS:
+        return _UNVERSIONED
+    return label
+
+
+def catalog_lookup_idempotency_key(
+    *,
+    service_kind: str,
+    reference_id: str,
+    reference: CatalogReference,
+    expected: CatalogIdentity,
+    observed: CatalogIdentity,
+    provenance: tuple[str, ...] = (),
+    evidence_reference_pointers: tuple[str, ...] = (),
+) -> tuple[str | None, ...]:
+    """Return a semantic key; identical inputs yield the same key.
+
+    This key is a logical deduplication contract, not a database uniqueness
+    constraint, generated output ID, or cryptographic content hash.
+    """
+    identity_values = tuple(
+        getattr(identity, field)
+        for identity in (expected, observed)
+        for field in _REQUIRED_IDENTITY_FIELDS
+    )
+    return (
+        service_kind,
+        reference_id,
+        reference.source_kind,
+        reference.approval_status,
+        reference.url,
+        _edition_or_unversioned(reference.edition_label),
+        reference.captured_at,
+        reference.content_sha256,
+        *identity_values,
+        *provenance,
+        *evidence_reference_pointers,
+    )
+
+
+def build_catalog_decision_output(
+    *,
+    result: CatalogLookupResult,
+    reference_id: str,
+    reference: CatalogReference,
+    expected: CatalogIdentity,
+    observed: CatalogIdentity,
+    provenance: tuple[str, ...],
+    evidence_reference_pointers: tuple[str, ...],
+    prior_output_id: str | None = None,
+) -> CatalogDecisionOutput:
+    """Wrap a completed lookup result with source and dependency lineage."""
+    if not isinstance(reference_id, str) or not reference_id.strip():
+        raise ValueError("reference_id must be a non-empty stable reference")
+    if not isinstance(result, CatalogLookupResult):
+        raise TypeError("result must be a CatalogLookupResult")
+    if not isinstance(reference, CatalogReference):
+        raise TypeError("reference must be a CatalogReference")
+    if not isinstance(expected, CatalogIdentity) or not isinstance(observed, CatalogIdentity):
+        raise TypeError("expected and observed must be CatalogIdentity values")
+
+    dependencies = (
+        "service_kind",
+        "catalog_reference.identity",
+        "catalog_reference.version",
+        "catalog_reference.source_and_approval",
+        "catalog_item.brand",
+        "catalog_item.series",
+        "catalog_item.shade_number",
+        "catalog_item.shade_name",
+        "catalog_item.size_value",
+        "catalog_item.size_unit",
+    )
+    return CatalogDecisionOutput(
+        service_kind="CATALOG_READY",
+        reference_id=reference_id,
+        source_kind=reference.source_kind,
+        source_url=reference.url,
+        version_label=_edition_or_unversioned(reference.edition_label),
+        provenance=tuple(provenance),
+        outcome=result.outcome,
+        evidence_reference_pointers=tuple(evidence_reference_pointers),
+        dependency_keys=dependencies,
+        idempotency_key=catalog_lookup_idempotency_key(
+            service_kind="CATALOG_READY",
+            reference_id=reference_id,
+            reference=reference,
+            expected=expected,
+            observed=observed,
+            provenance=tuple(provenance),
+            evidence_reference_pointers=tuple(evidence_reference_pointers),
+        ),
+        prior_output_id=prior_output_id,
+        inherited_approval_state="NONE",
+    )
+
+
+def assess_output_invalidation(
+    output: CatalogDecisionOutput,
+    changes: tuple[DependencyChange, ...],
+) -> InvalidationDecision:
+    """Invalidate only on known effective dependencies; unknown stays unresolved."""
+    dependencies = frozenset(output.dependency_keys)
+    impacts = tuple(
+        change.impact
+        for change in changes
+        if change.dependency_key in dependencies
+    )
+    if "EFFECTIVE" in impacts:
+        return "INVALIDATE"
+    if "UNKNOWN" in impacts:
+        return "UNRESOLVED"
+    return "PRESERVE"
