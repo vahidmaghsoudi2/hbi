@@ -24,10 +24,10 @@ CANONICAL_IDS = {
     "HBI-PROD-70EEE418BE0F4DAB",
     "HBI-PROD-22C55A8223A945A6",
 }
-KNOWLEDGE_FIELDS = (
+KNOWLEDGE_CONTENT_FIELDS = (
     "ingredients", "ingredient_roles", "claimed_benefits", "known_use_cases",
     "contraindications", "usage_instructions", "manufacturer_claims",
-    "other_attributes", "evidence_refs", "evidence_status", "knowledge_confidence",
+    "other_attributes", "evidence_refs",
 )
 
 
@@ -83,7 +83,7 @@ def main() -> int:
         print("No API calls or database writes performed. Re-run with --apply to stage PENDING drafts.")
         return 0
 
-    token_data = request_json(f"{api}/auth/pilot-operator-token", method="POST", payload={})
+    token_data = request_json(f"{api}/auth/pilot-operator-token", method="POST")
     token = token_data.get("access_token") if isinstance(token_data, dict) else None
     if not token:
         raise RuntimeError("Pilot operator token endpoint returned no access_token.")
@@ -165,14 +165,16 @@ def main() -> int:
                 raise RuntimeError(f"{product['dossier']}: Evidence read-back missing {evidence_id}.")
         after_knowledge = knowledge_snapshot(api, token, pid)
         before = before_knowledge[pid]
-        changed = [field for field in KNOWLEDGE_FIELDS if after_knowledge.get(field) != before.get(field)]
+        changed = [field for field in KNOWLEDGE_CONTENT_FIELDS if after_knowledge.get(field) != before.get(field)]
         if changed:
             raise RuntimeError(
-                f"{product['dossier']}: PENDING drafts unexpectedly changed ProductKnowledge fields: {changed}"
+                f"{product['dossier']}: PENDING drafts unexpectedly populated ProductKnowledge content fields: {changed}"
             )
+        if product["dossier"] == "P7" and after_knowledge.get("evidence_status") not in ("CONFLICT", "UNKNOWN", None):
+            raise RuntimeError("P7: existing Evidence conflict was not preserved as a non-approved state.")
 
     print(f"COMPLETE: {total_written} new PENDING Evidence drafts written and read back.")
-    print("ProductKnowledge content, Product Master, QA, lifecycle and inventory were not promoted or edited.")
+    print("No ProductKnowledge content was populated from PENDING drafts. Existing P7 conflict status may be refreshed by the service; Product Master, QA, lifecycle and inventory are not promoted or edited.")
     print("Next gate: explicit human Evidence QA, then authorized ProductKnowledge rebuild/read-back.")
     return 0
 
