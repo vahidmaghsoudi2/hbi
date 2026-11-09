@@ -58,9 +58,7 @@ class TestHairCatalogApiSlice7B:
         )
         assert response.status_code == 403
 
-    def test_po_approved_bijourka_snapshot_allows_exact_identity_lookup(
-        self, client, db_session
-    ):
+    def test_missing_primary_catalog_reference_fails_closed(self, client, db_session):
         _grant_po(db_session)
         response = client.post(
             "/api/v1/hair/catalog-identity/lookup",
@@ -69,9 +67,11 @@ class TestHairCatalogApiSlice7B:
         )
         assert response.status_code == 200
         body = response.json()
-        assert body["status"] == "IDENTITY_MATCH_DISPLAYABLE"
-        assert body["display_allowed"] is True
-        assert "ایمنی" in body["message"]
+        assert body == {
+            "status": "KNOWLEDGE_GAP",
+            "display_allowed": False,
+            "message": "مرجع اصلیِ مصوب و نسخه‌دار کاتالوگ هنوز در سامانه ثبت نشده است؛ نتیجهٔ قطعی ارائه نمی‌شود.",
+        }
 
     def test_caller_cannot_supply_or_override_reference_approval_metadata(
         self, client, db_session
