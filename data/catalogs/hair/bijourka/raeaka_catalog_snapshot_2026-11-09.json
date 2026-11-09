@@ -1,0 +1,47 @@
+{
+  "artifact_id": "HBI-HAIR-CATALOG-BIJOURKA-RAEAKA-SNAPSHOT-2026-11-09",
+  "artifact_type": "catalog_identity_snapshot",
+  "status": "PO_APPROVED_SOURCE_CAPTURE",
+  "brand": "Bijourka",
+  "source": {
+    "source_kind": "RAEAKA_BIJOURKA_CATALOG",
+    "approval_basis": "Product Owner approval recorded in docs/homepage/encyclopedia/hair-color/README.md",
+    "url": "https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/",
+    "publisher": "Raeaka",
+    "published_at": "2023-05-11",
+    "captured_at": "2026-11-09T15:00:00+01:00",
+    "publisher_edition": null,
+    "snapshot_label": "RAEAKA-WEB-CATALOG-SNAPSHOT-2026-11-09",
+    "source_content_sha256": null,
+    "notes": [
+      "Snapshot label identifies the capture date, not a publisher-issued edition.",
+      "The source page lists the catalog ranges and links individual shades to product pages.",
+      "No source-content hash is asserted because a byte-for-byte source archive was not obtained in this capture."
+    ]
+  },
+  "scope": {
+    "service_kind": "CATALOG_READY",
+    "purpose": "Exact identity lookup only",
+    "excluded": [
+      "chemical formulation validation",
+      "hair suitability or expected result",
+      "safety approval",
+      "application instructions",
+      "inventory confirmation"
+    ]
+  },
+  "catalog_items": [
+    {
+      "item_id": "BIJOURKA-NATURAL-001-100ML",
+      "brand": "Bijourka",
+      "series": "سری طبیعی",
+      "shade_number": "1",
+      "shade_name": "مشکی",
+      "size_value": "100",
+      "size_unit": "ml",
+      "product_page_url": "https://raeaka.com/product/%d8%b1%d9%86%da%af-%d9%85%d9%88%db%8c-%d8%a8%db%8c%d8%ac%d9%88%d8%b1%da%a9%d8%a7-%d8%b3%d9%90%d8%b1%db%8c-%d8%b7%d8%a8%db%8c%d8%b9%db%8c-%d8%b4%d9%85%d8%a7%d8%b1%d9%87-1-%d9%85%d8%b4%da%a9%db%8c/",
+      "identity_source": "Raeaka Bijourka catalog page, Natural series, item 1",
+      "identity_status": "catalog_identity_recorded"
+    }
+  ]
+}
