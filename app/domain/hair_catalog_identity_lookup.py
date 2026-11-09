@@ -125,6 +125,12 @@ def lookup_catalog_identity(
             None, None, None, False,
         )
 
+    if not isinstance(reference, CatalogReference) or not _is_approved_reference(reference):
+        return CatalogLookupResult(
+            "STOP", "KNOWLEDGE_GAP", "APPROVED_CATALOG_REFERENCE_NOT_ESTABLISHED",
+            (), (), (), None, None, None, None, False,
+        )
+
     missing = tuple(
         f"expected.{field}" for field in _missing_identity_fields(expected)
     ) + tuple(
@@ -135,12 +141,6 @@ def lookup_catalog_identity(
             "STOP", "DATA_GAP", "REQUIRED_IDENTITY_FIELD_MISSING",
             (), (), missing, reference.url, reference.edition_label,
             reference.captured_at, reference.content_sha256, False,
-        )
-
-    if not isinstance(reference, CatalogReference) or not _is_approved_reference(reference):
-        return CatalogLookupResult(
-            "STOP", "KNOWLEDGE_GAP", "APPROVED_CATALOG_REFERENCE_NOT_ESTABLISHED",
-            (), (), (), None, None, None, None, False,
         )
 
     matched = tuple(
