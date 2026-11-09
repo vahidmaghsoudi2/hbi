@@ -10,8 +10,6 @@ execution occur here.
 from __future__ import annotations
 
 from uuid import uuid4
-import json
-from pathlib import Path
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, ConfigDict
@@ -55,7 +53,7 @@ class HairCatalogLookupRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     service_kind: str
-    catalog_item_id: str
+    expected: CatalogIdentityInput
     observed: CatalogIdentityInput
 
 
@@ -65,74 +63,13 @@ class HairCatalogLookupResponse(BaseModel):
     message: str
 
 
-_CATALOG_SNAPSHOT_PATH = (
-    Path(__file__).resolve().parents[3]
-    / "data/catalogs/hair/bijourka/raeaka_catalog_snapshot_2026-11-09.json"
-)
-
-
-def _read_catalog_snapshot() -> dict | None:
-    """Read the committed server-owned catalog manifest; fail closed on corruption."""
-    try:
-        manifest = json.loads(_CATALOG_SNAPSHOT_PATH.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError):
-        return None
-    if (
-        manifest.get("artifact_id")
-        != "HBI-HAIR-CATALOG-BIJOURKA-RAEAKA-SNAPSHOT-2026-11-09"
-        or manifest.get("status") != "PO_APPROVED_SOURCE_CAPTURE"
-        or manifest.get("brand") != "Bijourka"
-        or not isinstance(manifest.get("catalog_items"), list)
-    ):
-        return None
-    return manifest
-
-
 def get_approved_hair_catalog_reference() -> tuple[str, CatalogReference] | None:
-    """Return a server-owned reference derived from the committed PO-approved manifest."""
-    manifest = _read_catalog_snapshot()
-    if manifest is None:
-        return None
-    source = manifest.get("source", {})
-    return (
-        manifest["artifact_id"],
-        CatalogReference(
-            source_kind=source.get("source_kind"),
-            approval_status="PO_APPROVED",
-            url=source.get("url"),
-            edition_label=source.get("snapshot_label"),
-            captured_at=source.get("captured_at"),
-            content_sha256=source.get("source_content_sha256"),
-        ),
-    )
+    """Return a server-owned approved reference, never caller-supplied metadata.
 
-
-def get_approved_hair_catalog_items() -> dict[str, CatalogIdentity]:
-    """Return catalog identities keyed by server-owned stable item IDs."""
-    manifest = _read_catalog_snapshot()
-    if manifest is None:
-        return {}
-    items: dict[str, CatalogIdentity] = {}
-    for item in manifest["catalog_items"]:
-        if not isinstance(item, dict):
-            return {}
-        item_id = item.get("item_id")
-        values = {
-            key: item.get(key)
-            for key in (
-                "brand", "series", "shade_number", "shade_name",
-                "size_value", "size_unit",
-            )
-        }
-        if (
-            not isinstance(item_id, str)
-            or not item_id
-            or item_id in items
-            or not all(isinstance(value, str) and value.strip() for value in values.values())
-        ):
-            return {}
-        items[item_id] = CatalogIdentity(**values)
-    return items
+    The primary versioned catalog artifact has not yet been established.
+    Returning None is deliberate and keeps production requests fail-closed.
+    """
+    return None
 
 
 @router.post(
@@ -144,9 +81,6 @@ async def lookup_hair_catalog_identity(
     approved_reference: tuple[str, CatalogReference] | None = Depends(
         get_approved_hair_catalog_reference
     ),
-    catalog_items: dict[str, CatalogIdentity] = Depends(
-        get_approved_hair_catalog_items
-    ),
     _auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
 ):
     scope = evaluate_hair_service_scope(payload.service_kind)
@@ -157,23 +91,16 @@ async def lookup_hair_catalog_identity(
             message="این نوع درخواست در محدودهٔ این مسیر نیست؛ نتیجهٔ قطعی ارائه نمی‌شود.",
         )
 
-    # Catalog identity and approval metadata are server-owned, never caller-supplied.
-    if approved_reference is None or not catalog_items:
+    # No request field can create, approve, version, or replace this reference.
+    if approved_reference is None:
         return HairCatalogLookupResponse(
             status="KNOWLEDGE_GAP",
             display_allowed=False,
-            message="Snapshot کاتالوگ مصوب در سامانه قابل بازیابی نیست؛ نتیجهٔ قطعی ارائه نمی‌شود.",
-        )
-
-    expected = catalog_items.get(payload.catalog_item_id)
-    if expected is None:
-        return HairCatalogLookupResponse(
-            status="KNOWLEDGE_GAP",
-            display_allowed=False,
-            message="شناسهٔ قلم در Snapshot کاتالوگ ثبت‌شده وجود ندارد؛ نتیجهٔ قطعی ارائه نمی‌شود.",
+            message="مرجع اصلیِ مصوب و نسخه‌دار کاتالوگ هنوز در سامانه ثبت نشده است؛ نتیجهٔ قطعی ارائه نمی‌شود.",
         )
 
     reference_id, reference = approved_reference
+    expected = payload.expected.to_domain()
     observed = payload.observed.to_domain()
 
     result = lookup_catalog_identity(
