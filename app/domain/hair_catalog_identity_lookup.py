@@ -280,16 +280,17 @@ def catalog_lookup_idempotency_key(
         for field in _REQUIRED_IDENTITY_FIELDS
     )
     return (
-        service_kind,
-        reference_id,
-        reference.source_kind,
-        reference.approval_status,
-        reference.url,
-        _edition_or_unversioned(reference.edition_label),
-        reference.captured_at,
-        reference.content_sha256,
-        *identity_values,
-        *provenance,
+        "service_kind", service_kind,
+        "reference_id", reference_id,
+        "source_kind", reference.source_kind,
+        "approval_status", reference.approval_status,
+        "source_url", reference.url,
+        "version_label", _edition_or_unversioned(reference.edition_label),
+        "captured_at", reference.captured_at,
+        "content_sha256", reference.content_sha256,
+        "identity_values", *identity_values,
+        "provenance_count", str(len(provenance)), *provenance,
+        "evidence_pointer_count", str(len(evidence_reference_pointers)),
         *evidence_reference_pointers,
     )
 
@@ -317,6 +318,25 @@ def build_catalog_decision_output(
         raise TypeError("reference must be a CatalogReference")
     if not isinstance(expected, CatalogIdentity) or not isinstance(observed, CatalogIdentity):
         raise TypeError("expected and observed must be CatalogIdentity values")
+    if not isinstance(provenance, tuple) or not all(isinstance(item, str) for item in provenance):
+        raise TypeError("provenance must be a tuple of strings")
+    if not isinstance(evidence_reference_pointers, tuple) or not all(
+        isinstance(item, str) for item in evidence_reference_pointers
+    ):
+        raise TypeError("evidence_reference_pointers must be a tuple of strings")
+
+    version_label = _edition_or_unversioned(reference.edition_label)
+    if result.outcome in ("MATCH", "MISMATCH") and (
+        version_label == _UNVERSIONED or not result.traceability_complete
+    ):
+        raise ValueError("definitive lookup outcomes require a traceable versioned reference")
+    if result.outcome in ("MATCH", "MISMATCH") and (
+        result.source_url != reference.url
+        or result.source_edition != reference.edition_label
+        or result.source_captured_at != reference.captured_at
+        or result.source_sha256 != reference.content_sha256
+    ):
+        raise ValueError("definitive lookup outcome metadata must match its reference")
 
     dependencies = (
         "service_kind",
@@ -335,7 +355,7 @@ def build_catalog_decision_output(
         reference_id=reference_id,
         source_kind=reference.source_kind,
         source_url=reference.url,
-        version_label=_edition_or_unversioned(reference.edition_label),
+        version_label=version_label,
         provenance=tuple(provenance),
         outcome=result.outcome,
         evidence_reference_pointers=tuple(evidence_reference_pointers),
