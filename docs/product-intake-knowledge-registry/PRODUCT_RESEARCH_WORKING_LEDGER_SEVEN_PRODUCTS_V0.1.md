@@ -1768,3 +1768,51 @@ This review accepts the **classification method and bounded interpretation**, no
 - Product identity matching and the human QA boundary remain mandatory. No P1–P7 dossier label is a Product ID; no research assertion is promoted to approved ProductKnowledge by this note.
 
 **Disposition:** This addendum corrects the stale pass-18 observations using current-master source hashes. It closes no runtime, DB, Product QA, clinical, G8, or PO acceptance gate. No application code, tests, schema, API, UI, database, Product Master, Evidence, ProductKnowledge, lifecycle, Recommendation, or Product↔Problem data was changed.
+
+
+---
+
+## PR #525 implementation reconciliation — 2026-11-09
+
+**Purpose:** supersede the implementation-gap statements in the 2026-11-08 current-master persistence re-audit where a later, still-unmerged implementation PR now contains the fix. This is a branch/PR reconciliation, not a claim that the fixes are in master or that any real product record has been updated.
+
+**Implementation reference:** PR [#525](https://github.com/vahidmaghsoudi2/hbi/pull/525), branch `fix/product-knowledge-intake-evidence-refresh-20261108`, exact HEAD `77451ccf7e0ad0b8b37f8e7e293f0dd8d8257d7f`, OPEN / UNMERGED.
+
+### 1. Gaps addressed in PR #525
+
+| Earlier gap in this ledger | Change present in PR #525 | Current disposition |
+|---|---|---|
+| Universal “سایر ویژگی‌ها” box had no field destination and was saved with `field: undefined`. | `ProductIntakePanel.tsx` now submits `field: "other_attributes"`; the visible label remains in the claim text so the structured catch-all key is retained. The claim remains `claim_type=UNKNOWN` and follows the existing source-bound/PENDING QA boundary. | **IMPLEMENTED IN OPEN PR #525; NOT IN MASTER.** The change does not itself make the draft approved ProductKnowledge. |
+| Frontend ProductKnowledge DTO omitted `other_attributes` and `domain_evidence_status`. | `frontend/src/types/api.ts` adds both fields to `ProductKnowledgeDTO`, matching fields already present in backend DTO/response. | **IMPLEMENTED IN OPEN PR #525; NOT IN MASTER.** This is type/contract alignment, not a new evidence-status policy. |
+| A conflict detected during direct Evidence creation could leave an earlier ProductKnowledge aggregate stale. | After all members of a detected conflict group are marked `CONFLICT`, `EvidenceService.add_evidence()` calls ProductKnowledge rebuild. | **IMPLEMENTED IN OPEN PR #525; NOT IN MASTER.** The regression test verifies the old aggregate claim is removed and overall ProductKnowledge status becomes `CONFLICT`. |
+
+### 2. Exact-head evidence for PR #525
+
+The PR's recorded exact-head validation on `77451ccf7e0ad0b8b37f8e7e293f0dd8d8257d7f` is:
+- HBI CI: SUCCESS — 749 passed, 89% coverage.
+- HBI Auto Tasks: SUCCESS — 749 passed, 89% coverage.
+- Pilot Browser Proof: SUCCESS — 30/30 browser tests; parser conformance 61/61.
+- New regressions passed:
+  - `tests/test_evidence.py::test_add_evidence_rebuilds_product_knowledge_after_conflict`
+  - `tests/test_product_intake_knowledge_completion.py::test_other_attributes_field_rebuilds_structured_catch_all`
+  - Browser proof for the selected SKIN product's generic Other features box.
+
+A focused technical COMMENT review was recorded on PR #525 on 2026-11-09. It is not independent human review, PO acceptance, or merge authorization. PR #525 remains OPEN / UNMERGED.
+
+### 3. Remaining ProductKnowledge limitations
+
+1. **Packaging-version provenance remains unresolved.** Evidence still has no per-assertion `packaging_version`; the Product-level packaging version cannot prove the historical package identity of each Evidence assertion if the Product record is revised in place. Keep this deferred pending an explicit provenance contract and separately authorized schema/migration work.
+2. **No live seven-product persistence has been proven.** PR #525 uses isolated fixtures. It does not establish that P1–P7 research assertions have been attached to the exact seven canonical Product Master IDs, nor that real ProductKnowledge rows have been populated and read back.
+3. **QA and status boundaries remain unchanged.** A saved draft with `claim_type=UNKNOWN`, `qa_status=PENDING`, or `evidence_status=UNKNOWN` is not approved knowledge. Evidence QA is not Product QA, lifecycle approval, safety certification, or recommendation eligibility.
+4. **Confidence remains non-probabilistic.** The weighted `knowledge_confidence` calculation is not a calibrated probability, clinical confidence, safety rating, or product-efficacy score.
+5. **ProductKnowledge status semantics remain a separate governance question.** The source implementation currently derives overall and domain status during rebuild; this source fact does not by itself establish PO acceptance of every semantic edge case or a live database migration/readback.
+
+### 4. Corrected next work
+
+- Do not repeat the three implementation tasks already present in #525.
+- Keep #525 open for required human/PO review and a separate merge decision; do not treat this AI COMMENT as approval.
+- Continue the seven-product path through #523's read-only snapshot exporter and the #504 isolated E2E tracker. The actual local snapshot remains NOT DONE.
+- Keep per-assertion package-version provenance deferred until its contract and implementation scope are separately approved.
+- Do not create Product Master duplicates, attach unsupported research claims, promote QA/lifecycle/inventory, or activate Recommendations to force a positive acceptance result.
+
+**Disposition:** the three implementation gaps above are addressed in an open PR, not yet in master. Packaging-version provenance and real seven-product persistence/readback remain open. No Product Master, Evidence, ProductKnowledge, QA, lifecycle, inventory, Recommendation, or customer data was changed by this ledger update.
