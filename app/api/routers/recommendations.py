@@ -43,6 +43,14 @@ def _assert_case_owned(db: Session, case_id: str, customer_id: str) -> Case:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
     return case
 
+def _assert_not_hair_legacy_path(case: Case) -> None:
+    """Stop HAIR/CATALOG_READY before this Skin-oriented router builds context."""
+    if (case.case_type or "").strip().upper() in {"HAIR", "CATALOG_READY"}:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="HAIR/CATALOG_READY requests are outside the Skin/legacy recommendation path.",
+        )
+
 
 @router.post("/generate")
 async def generate_recommendations(
@@ -51,6 +59,7 @@ async def generate_recommendations(
     customer_id: str = Depends(get_current_customer_id),
 ) -> List[dict]:
     case = _assert_case_owned(db, request.case_id, customer_id)
+    _assert_not_hair_legacy_path(case)
     try:
         # Case-captured answers are current consultation context. Explicit request
         # input remains the highest-precedence current consultation value.
@@ -136,6 +145,7 @@ async def get_next_skin_question(
     customer_id: str = Depends(get_current_customer_id),
 ) -> dict:
     case = _assert_case_owned(db, case_id, customer_id)
+    _assert_not_hair_legacy_path(case)
     question = SkinNextQuestionService(db).get_question(case)
     if question is None:
         return {
@@ -158,6 +168,7 @@ async def answer_next_skin_question(
     customer_id: str = Depends(get_current_customer_id),
 ) -> dict:
     case = _assert_case_owned(db, case_id, customer_id)
+    _assert_not_hair_legacy_path(case)
     try:
         result = SkinNextQuestionService(db).capture_answer(
             case,
