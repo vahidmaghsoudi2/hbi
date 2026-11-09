@@ -192,7 +192,8 @@
       "market_region": "MX",
       "identity_limits": [
         "Mexico official page is the research source; exact target package/market/formula match UNKNOWN",
-        "Do not import Spot Prevent data or EU/IT formula details"
+        "Do not import Spot Prevent data or EU/IT formula details",
+        "No ingredient-role assertion is staged because the exact source-matched INCI is not established for this Product record."
       ],
       "assertions": [
         {
@@ -203,16 +204,6 @@
           "market_region": "MX",
           "evidence_strength": "UNVERIFIED",
           "claim": "The Mexico manufacturer page reports a 22% reduction in spot intensity and a 15% reduction in spot area in 31 subjects aged 35–65 after 28 and 84 days. The public source does not disclose the full protocol, control, blinding, instruments, statistical analysis or original report. These are manufacturer-reported results, not independently verified proof and not transferable to ISDIN Spot Prevent."
-        },
-        {
-          "field": "ingredient_roles",
-          "claim_type": "INFERENCE",
-          "source_type": "ANALYST_REVIEW",
-          "source_reference": "https://www.isdin.com/mx/p/fotoultra-active-unify-spf-50/1160",
-          "market_region": "MX",
-          "evidence_strength": "UNVERIFIED",
-          "claim": "[{\"ingredient\":\"UV-filter system (exact target-market INCI not confirmed)\",\"role\":\"CORE\"},{\"ingredient\":\"Niacinamide / Sclareolide / Pisum Sativum Extract (only where confirmed on the exact source-matched formula)\",\"role\":\"CLAIM-LINK\"}]",
-          "notes": "This role map is conditional on exact formula match. Do not claim these ingredients are present in the physical target unit until its market/INCI is matched."
         },
         {
           "field": "known_use_cases",
