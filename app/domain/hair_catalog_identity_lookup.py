@@ -241,11 +241,16 @@ class CatalogDecisionOutput:
     source_kind: str
     source_url: str
     version_label: str
+    source_approval_status: str
+    source_captured_at: str | None
+    source_content_sha256: str | None
+    traceability_complete: bool
     provenance: tuple[str, ...]
     outcome: LookupOutcome
     evidence_reference_pointers: tuple[str, ...]
     dependency_keys: tuple[str, ...]
     idempotency_key: tuple[str | None, ...]
+    decision_output_id: str
     prior_output_id: str | None = None
     inherited_approval_state: Literal["NONE"] = "NONE"
 
@@ -305,6 +310,7 @@ def build_catalog_decision_output(
     observed: CatalogIdentity,
     provenance: tuple[str, ...],
     evidence_reference_pointers: tuple[str, ...],
+    decision_output_id: str,
     prior_output_id: str | None = None,
 ) -> CatalogDecisionOutput:
     """Wrap a completed lookup result with source and dependency lineage."""
@@ -312,6 +318,8 @@ def build_catalog_decision_output(
         raise ValueError("service_kind must be the exact CATALOG_READY identifier")
     if not isinstance(reference_id, str) or not reference_id.strip():
         raise ValueError("reference_id must be a non-empty stable reference")
+    if not isinstance(decision_output_id, str) or not decision_output_id.strip():
+        raise ValueError("decision_output_id must be a non-empty stable output reference")
     if not isinstance(result, CatalogLookupResult):
         raise TypeError("result must be a CatalogLookupResult")
     if not isinstance(reference, CatalogReference):
@@ -356,6 +364,10 @@ def build_catalog_decision_output(
         source_kind=reference.source_kind,
         source_url=reference.url,
         version_label=version_label,
+        source_approval_status=reference.approval_status,
+        source_captured_at=reference.captured_at,
+        source_content_sha256=reference.content_sha256,
+        traceability_complete=result.traceability_complete,
         provenance=tuple(provenance),
         outcome=result.outcome,
         evidence_reference_pointers=tuple(evidence_reference_pointers),
@@ -369,6 +381,7 @@ def build_catalog_decision_output(
             provenance=tuple(provenance),
             evidence_reference_pointers=tuple(evidence_reference_pointers),
         ),
+        decision_output_id=decision_output_id,
         prior_output_id=prior_output_id,
         inherited_approval_state="NONE",
     )
@@ -392,3 +405,163 @@ def assess_output_invalidation(
     if "UNKNOWN" in impacts:
         return "UNRESOLVED"
     return "PRESERVE"
+
+
+# ---------------------------------------------------------------------------
+# Slice 6: controlled presentation and factual event contracts.
+# Pure domain only: no UI, persistence, event emission, or state transitions.
+# ---------------------------------------------------------------------------
+
+CatalogDisplayStatus = Literal[
+    "IDENTITY_MATCH_DISPLAYABLE",
+    "IDENTITY_MISMATCH_DISPLAYABLE",
+    "WITHHOLD_INCONCLUSIVE",
+    "WITHHOLD_STOP",
+]
+CatalogEventKind = Literal[
+    "LOOKUP_COMPLETED",
+    "OUTPUT_PRESENTED",
+    "CLIENT_QUESTION_RECORDED",
+    "CLIENT_ACCEPTANCE_RECORDED",
+    "CLIENT_REJECTION_RECORDED",
+    "EXECUTION_CONSENT_RECORDED",
+    "SPECIALIST_REVIEW_RECORDED",
+]
+CatalogActorKind = Literal["SYSTEM", "CLIENT", "SPECIALIST", "OPERATOR"]
+
+
+@dataclass(frozen=True)
+class CatalogDisplayDecision:
+    """A minimal customer-facing identity status, never a product recommendation."""
+
+    status: CatalogDisplayStatus
+    display_allowed: bool
+    public_message_code: str
+    public_message_fa: str
+
+
+@dataclass(frozen=True)
+class CatalogOccurredEvent:
+    """A factual event assertion; construction requires explicit occurrence data."""
+
+    event_kind: CatalogEventKind
+    occurred_at: str
+    actor_kind: CatalogActorKind
+    decision_output_id: str
+    evidence_reference_pointer: str
+
+
+def _valid_timezone_aware_timestamp(value: str) -> bool:
+    if not isinstance(value, str) or not value:
+        return False
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return parsed.tzinfo is not None and parsed.utcoffset() is not None
+
+
+def decide_catalog_output_presentation(
+    output: CatalogDecisionOutput,
+) -> CatalogDisplayDecision:
+    """Separate internal lookup detail from the only permitted public identity text.
+
+    A displayable result confirms catalog identity only. It does not assert
+    suitability for a person, chemical safety, expected color result, or
+    authorization to perform a service.
+    """
+    if not isinstance(output, CatalogDecisionOutput):
+        raise TypeError("output must be a CatalogDecisionOutput")
+
+    traceable = (
+        output.service_kind == "CATALOG_READY"
+        and output.source_kind == _APPROVED_SOURCE_KIND
+        and output.source_approval_status == _APPROVED_SOURCE_STATUS
+        and output.version_label != _UNVERSIONED
+        and output.traceability_complete
+        and _valid_capture_timestamp(output.source_captured_at)
+        and _valid_sha256(output.source_content_sha256)
+    )
+    if not traceable:
+        return CatalogDisplayDecision(
+            "WITHHOLD_INCONCLUSIVE",
+            False,
+            "CATALOG_IDENTITY_NOT_VERIFIABLE",
+            "هویت قلم از مرجع نسخه‌دار و قابل‌ردیابی قابل تأیید نیست؛ نتیجهٔ قطعی نمایش داده نمی‌شود.",
+        )
+
+    if output.outcome == "MATCH":
+        return CatalogDisplayDecision(
+            "IDENTITY_MATCH_DISPLAYABLE",
+            True,
+            "CATALOG_IDENTITY_MATCH_ONLY",
+            "مشخصات این قلم با مرجع نسخه‌دار کاتالوگ تطبیق دارد. این نتیجه به‌معنی تأیید تناسب با فرد، ایمنی یا تضمین نتیجه نیست.",
+        )
+    if output.outcome == "MISMATCH":
+        return CatalogDisplayDecision(
+            "IDENTITY_MISMATCH_DISPLAYABLE",
+            True,
+            "CATALOG_IDENTITY_MISMATCH_ONLY",
+            "مشخصات این قلم با مرجع نسخه‌دار کاتالوگ تطبیق ندارد؛ از این تطبیق برای انتخاب یا اجرای خدمت استفاده نشود.",
+        )
+    if output.outcome == "INCONCLUSIVE":
+        return CatalogDisplayDecision(
+            "WITHHOLD_INCONCLUSIVE",
+            False,
+            "CATALOG_LOOKUP_INCONCLUSIVE",
+            "اطلاعات موجود برای تأیید هویت این قلم کافی نیست.",
+        )
+    return CatalogDisplayDecision(
+        "WITHHOLD_STOP",
+        False,
+        "CATALOG_LOOKUP_STOPPED",
+        "فرایند شناسایی این قلم متوقف شده است و خروجی قطعی ارائه نمی‌شود.",
+    )
+
+
+_EVENT_ACTOR_RULES: dict[str, str] = {
+    "LOOKUP_COMPLETED": "SYSTEM",
+    "OUTPUT_PRESENTED": "SYSTEM",
+    "CLIENT_QUESTION_RECORDED": "CLIENT",
+    "CLIENT_ACCEPTANCE_RECORDED": "CLIENT",
+    "CLIENT_REJECTION_RECORDED": "CLIENT",
+    "EXECUTION_CONSENT_RECORDED": "CLIENT",
+    "SPECIALIST_REVIEW_RECORDED": "SPECIALIST",
+}
+
+
+def build_catalog_occurred_event(
+    *,
+    event_kind: str,
+    occurred_at: str,
+    actor_kind: str,
+    decision_output_id: str,
+    evidence_reference_pointer: str,
+) -> CatalogOccurredEvent:
+    """Describe an event only when its occurrence time and evidence are supplied.
+
+    This constructor does not emit, persist, infer, or backfill events. Client
+    acceptance and execution consent are separate event kinds and never imply
+    one another. A question is not acceptance. A presented output is not proof
+    of client acceptance or execution.
+    """
+    if event_kind not in _EVENT_ACTOR_RULES:
+        raise ValueError("event_kind is outside the catalog event contract")
+    if actor_kind != _EVENT_ACTOR_RULES[event_kind]:
+        raise ValueError("actor_kind does not match the event kind")
+    if not _valid_timezone_aware_timestamp(occurred_at):
+        raise ValueError("occurred_at must be an explicit timezone-aware timestamp")
+    if not isinstance(decision_output_id, str) or not decision_output_id.strip():
+        raise ValueError("decision_output_id must be an explicit non-empty reference")
+    if (
+        not isinstance(evidence_reference_pointer, str)
+        or not evidence_reference_pointer.strip()
+    ):
+        raise ValueError("an evidence pointer for the actual occurrence is required")
+    return CatalogOccurredEvent(
+        event_kind=event_kind,
+        occurred_at=occurred_at,
+        actor_kind=actor_kind,
+        decision_output_id=decision_output_id,
+        evidence_reference_pointer=evidence_reference_pointer,
+    )
