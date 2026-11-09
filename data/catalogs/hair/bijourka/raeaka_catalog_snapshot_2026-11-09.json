@@ -15,13 +15,13 @@
     "source_content_sha256": null,
     "notes": [
       "Snapshot label identifies the capture date, not a publisher-issued edition.",
-      "The source page lists the catalog ranges and links individual shades to product pages.",
-      "No source-content hash is asserted because a byte-for-byte source archive was not obtained in this capture."
+      "The 88 catalog entries below are transcribed from the series, shade number, shade name, and 100 ml labels displayed on the source page.",
+      "A byte-for-byte archive of the source page was not obtained; no source-content hash is asserted."
     ]
   },
   "scope": {
     "service_kind": "CATALOG_READY",
-    "purpose": "Exact identity lookup only",
+    "purpose": "Exact catalog identity lookup only",
     "excluded": [
       "chemical formulation validation",
       "hair suitability or expected result",
@@ -32,16 +32,796 @@
   },
   "catalog_items": [
     {
-      "item_id": "BIJOURKA-NATURAL-001-100ML",
       "brand": "Bijourka",
       "series": "سری طبیعی",
       "shade_number": "1",
       "shade_name": "مشکی",
       "size_value": "100",
       "size_unit": "ml",
-      "product_page_url": "https://raeaka.com/product/%d8%b1%d9%86%da%af-%d9%85%d9%88%db%8c-%d8%a8%db%8c%d8%ac%d9%88%d8%b1%da%a9%d8%a7-%d8%b3%d9%90%d8%b1%db%8c-%d8%b7%d8%a8%db%8c%d8%b9%db%8c-%d8%b4%d9%85%d8%a7%d8%b1%d9%87-1-%d9%85%d8%b4%da%a9%db%8c/",
-      "identity_source": "Raeaka Bijourka catalog page, Natural series, item 1",
-      "identity_status": "catalog_identity_recorded"
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری طبیعی",
+      "shade_number": "2",
+      "shade_name": "قهوه ای خیلی تیره",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری طبیعی",
+      "shade_number": "3",
+      "shade_name": "قهوه ای تیره",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری طبیعی",
+      "shade_number": "4",
+      "shade_name": "قهوه ای",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری طبیعی",
+      "shade_number": "5",
+      "shade_name": "قهوه ای روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری طبیعی",
+      "shade_number": "6",
+      "shade_name": "بلوند تیره",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری طبیعی",
+      "shade_number": "7",
+      "shade_name": "بلوند",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری طبیعی",
+      "shade_number": "8",
+      "shade_name": "بلوند روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری طبیعی",
+      "shade_number": "9",
+      "shade_name": "بلوند خیلی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری طبیعی",
+      "shade_number": "10",
+      "shade_name": "بلوند خیلی خیلی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری طبیعی اکسترا",
+      "shade_number": "+05",
+      "shade_name": "قهوه ای روشن اکسترا",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری طبیعی اکسترا",
+      "shade_number": "+06",
+      "shade_name": "بلوند تیره اکسترا",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری طبیعی اکسترا",
+      "shade_number": "+07",
+      "shade_name": "بلوند اکسترا",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری طبیعی اکسترا",
+      "shade_number": "+08",
+      "shade_name": "بلوند روشن اکسترا",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری طبیعی اکسترا",
+      "shade_number": "+09",
+      "shade_name": "بلوند خیلی روشن اکسترا",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری خاکستری",
+      "shade_number": "1.1",
+      "shade_name": "مشکی پر کلاغی",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری خاکستری",
+      "shade_number": "4.1",
+      "shade_name": "قهوه ای خاکستری",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری خاکستری",
+      "shade_number": "5.1",
+      "shade_name": "قهوه ای خاکستری روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری خاکستری",
+      "shade_number": "6.1",
+      "shade_name": "بلوند خاکستری تیره",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری خاکستری",
+      "shade_number": "7.1",
+      "shade_name": "بلوند خاکستری متوسط",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری خاکستری",
+      "shade_number": "8.1",
+      "shade_name": "بلوند خاکستری روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری خاکستری",
+      "shade_number": "9.1",
+      "shade_name": "بلوند خاکستری خیلی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری خاکستری",
+      "shade_number": "10.1",
+      "shade_name": "بلوند نقره ای",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری دودی",
+      "shade_number": "6.2",
+      "shade_name": "بلوند دودی تیره",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری دودی",
+      "shade_number": "7.2",
+      "shade_name": "بلوند دودی متوسط",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری دودی",
+      "shade_number": "8.2",
+      "shade_name": "بلوند دودی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری دودی",
+      "shade_number": "9.2",
+      "shade_name": "بلوند دودی خیلی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری دودی",
+      "shade_number": "10.2",
+      "shade_name": "بلوند دودی نقره ای",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری زیتونی",
+      "shade_number": "5.3",
+      "shade_name": "قهوه ای زیتونی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری زیتونی",
+      "shade_number": "6.3",
+      "shade_name": "بلوند زیتونی تیره",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری زیتونی",
+      "shade_number": "7.3",
+      "shade_name": "بلوند زیتونی متوسط",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری زیتونی",
+      "shade_number": "8.3",
+      "shade_name": "بلوند زیتونی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری زیتونی",
+      "shade_number": "9.3",
+      "shade_name": "بلوند زیتونی خیلی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری زیتونی",
+      "shade_number": "10.3",
+      "shade_name": "بلوند زیتونی پلاتینه",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری طلایی",
+      "shade_number": "5.5",
+      "shade_name": "قهوه ای طلایی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری طلایی",
+      "shade_number": "6.5",
+      "shade_name": "بلوند طلایی تیره",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری طلایی",
+      "shade_number": "7.5",
+      "shade_name": "بلوند طلایی متوسط",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری طلایی",
+      "shade_number": "8.5",
+      "shade_name": "بلوند طلایی",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری طلایی",
+      "shade_number": "9.5",
+      "shade_name": "بلوند طلایی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری طلایی",
+      "shade_number": "10.5",
+      "shade_name": "بلوند طلایی خیلی خیلی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری بژ",
+      "shade_number": "7.31",
+      "shade_name": "بلوند بژ متوسط",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری بژ",
+      "shade_number": "8.31",
+      "shade_name": "بلوند بژ روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری بژ",
+      "shade_number": "9.31",
+      "shade_name": "بلوند بژ خیلی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری بژ",
+      "shade_number": "10.31",
+      "shade_name": "بلوند بژ خیلی خیلی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری نسکافه ای",
+      "shade_number": "6.7",
+      "shade_name": "بلوند نسکافه ای تیره",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری نسکافه ای",
+      "shade_number": "7.7",
+      "shade_name": "بلوند نسکافه ای",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری نسکافه ای",
+      "shade_number": "8.7",
+      "shade_name": "بلوند نسکافه ای روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری نسکافه ای",
+      "shade_number": "9.7",
+      "shade_name": "بلوند نسکافه ای خیلی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری آلبالویی",
+      "shade_number": "5.6",
+      "shade_name": "آلبالویی تیره",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری آلبالویی",
+      "shade_number": "6.6",
+      "shade_name": "آلبالویی",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری آلبالویی",
+      "shade_number": "7.6",
+      "shade_name": "آلبالویی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری شکلاتی",
+      "shade_number": "5.53",
+      "shade_name": "قهوه ای کاکائویی متوسط",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری شکلاتی",
+      "shade_number": "6.53",
+      "shade_name": "قهوه ای کاکائویی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری شکلاتی",
+      "shade_number": "7.53",
+      "shade_name": "بلوند کاکائویی متوسط",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری شکلاتی",
+      "shade_number": "8.53",
+      "shade_name": "بلوند کاکائویی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری عسلی",
+      "shade_number": "6.54",
+      "shade_name": "عسلی تیره",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری عسلی",
+      "shade_number": "7.54",
+      "shade_name": "عسلی متوسط",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری عسلی",
+      "shade_number": "8.54",
+      "shade_name": "عسلی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری فندقی",
+      "shade_number": "5.65",
+      "shade_name": "قهوه ای فندقی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری فندقی",
+      "shade_number": "6.65",
+      "shade_name": "بلوند فندقی تیره",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری فندقی",
+      "shade_number": "7.65",
+      "shade_name": "بلوند فندقی متوسط",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری فندقی",
+      "shade_number": "8.65",
+      "shade_name": "بلوند فندقی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری شرابی",
+      "shade_number": "4.20",
+      "shade_name": "شرابی تیره",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری شرابی",
+      "shade_number": "5.20",
+      "shade_name": "شرابی متوسط",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری شرابی",
+      "shade_number": "6.20",
+      "shade_name": "شرابی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری شرابی",
+      "shade_number": "7.20",
+      "shade_name": "شرابی خیلی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری قرمز",
+      "shade_number": "5.62",
+      "shade_name": "بلوطی",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری قرمز",
+      "shade_number": "6.45",
+      "shade_name": "بلوند مسی آلبالویی تیره",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری قرمز",
+      "shade_number": "6.46",
+      "shade_name": "بلوند مسی قرمز تیره",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری قرمز",
+      "shade_number": "RE.7",
+      "shade_name": "قرمز آتشی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری عروسکی",
+      "shade_number": "8.56",
+      "shade_name": "مینیاتوری- ضد زردی",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری عروسکی",
+      "shade_number": "8.57",
+      "shade_name": "کنفی عروسکی",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری عروسکی",
+      "shade_number": "8.531",
+      "shade_name": "بژ عروسکی",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری بیسکویتی",
+      "shade_number": "6.73",
+      "shade_name": "قهوه ای بیسکویتی تیره",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری بیسکویتی",
+      "shade_number": "8.73",
+      "shade_name": "قهوه ای بیسکویتی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری کاپوچینو",
+      "shade_number": "6.75",
+      "shade_name": "بلوند کاپوچینوی متوسط",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری کاپوچینو",
+      "shade_number": "8.75",
+      "shade_name": "بلوند کاپوچینوی خیلی روشن",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری ترکیبی",
+      "shade_number": "BI.1",
+      "shade_name": "عنابی",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری ترکیبی",
+      "shade_number": "BI.2",
+      "shade_name": "غروب آفتاب",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری ترکیبی",
+      "shade_number": "BI.3",
+      "shade_name": "سولار مسی",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری ترکیبی",
+      "shade_number": "BI.4",
+      "shade_name": "پوست پیازی",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری ترکیبی",
+      "shade_number": "BI.5",
+      "shade_name": "سربی سرامیکی",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری ترکیبی",
+      "shade_number": "BI.6",
+      "shade_name": "پاستل",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری ترکیبی",
+      "shade_number": "BI.7",
+      "shade_name": "صورتی کوارتز",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری ترکیبی",
+      "shade_number": "BI.8",
+      "shade_name": "شامپاینی",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری واریاسیون",
+      "shade_number": "000",
+      "shade_name": "روشن کننده",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری واریاسیون",
+      "shade_number": "002",
+      "shade_name": "واریاسیون سبز- ضد قرمزی",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
+    },
+    {
+      "brand": "Bijourka",
+      "series": "سری واریاسیون",
+      "shade_number": "004",
+      "shade_name": "واریاسیون نقره ای",
+      "size_value": "100",
+      "size_unit": "ml",
+      "identity_source": "Raeaka Bijourka catalog album page"
     }
   ]
 }
