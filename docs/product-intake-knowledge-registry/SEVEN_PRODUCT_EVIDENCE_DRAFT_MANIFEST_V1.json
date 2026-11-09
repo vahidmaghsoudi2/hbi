@@ -281,7 +281,7 @@
           "source_reference": "https://anua.com/products/azelaic-acid-10-hyaluron-redness-soothing-serum",
           "market_region": "US",
           "evidence_strength": "UNVERIFIED",
-          "claim": "Official US serum-page INCI snapshot: Aqua/Water, Azelaic Acid, Glycerin, Propanediol, Butylene Glycol, Methylpropanediol, Niacinamide, Panthenol, Betaine Salicylate, 1,2-Hexanediol, Hydroxyethyl Acrylate/Sodium Acryloyldimethyl Taurate Copolymer, Tromethamine, Allantoin, Dipotassium Glycyrrhizate, Sodium Hyaluronate, Centella Asiatica Extract, Madecassoside, Asiaticoside, Asiatic Acid, Madecassic Acid, Squalane, Ceramide NP, Zinc PCA and other supporting ingredients as declared on the live official page. The product-page snapshot is source-bound but not a physical package label; retain the full package INCI as UNKNOWN until a matched label is available."
+          "claim": "Official US serum-page ingredient declaration includes Azelaic Acid, Panthenol, Betaine Salicylate, Glycerin, Allantoin, Niacinamide, Centella-related ingredients, Sodium Hyaluronate, Squalane, Zinc PCA and Ceramide NP. This is a partial source-bound ingredient summary, not a complete verbatim INCI; the full package INCI remains UNKNOWN until matched to a physical label."
         },
         {
           "field": "manufacturer_claims",
