@@ -75,8 +75,11 @@ class CatalogLookupResult:
 def _is_approved_reference(reference: CatalogReference) -> bool:
     """Accept only the exact PO-approved Raeaka Bijourka catalog URL family."""
     if (
-        reference.source_kind != _APPROVED_SOURCE_KIND
+        not isinstance(reference.source_kind, str)
+        or not isinstance(reference.approval_status, str)
+        or reference.source_kind != _APPROVED_SOURCE_KIND
         or reference.approval_status != _APPROVED_SOURCE_STATUS
+        or not isinstance(reference.url, str)
     ):
         return False
     try:
@@ -177,8 +180,9 @@ def lookup_catalog_identity(
     )
 
     traceability_complete = bool(
-        reference.edition_label
-        and reference.edition_label not in ("unknown", "نامشخص")
+        isinstance(reference.edition_label, str)
+        and reference.edition_label.strip()
+        and reference.edition_label.strip().casefold() not in ("unknown", "نامشخص")
         and _valid_capture_timestamp(reference.captured_at)
         and _valid_sha256(reference.content_sha256)
     )
