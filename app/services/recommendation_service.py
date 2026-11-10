@@ -29,17 +29,14 @@ NEED_MATCH_SUFFICIENT = 0.40
 
 
 def _candidate_matches_case_product_line(product, case_type: Optional[str]) -> bool:
-    """Keep HAIR products out of the legacy recommendation engine.
+    """Restrict explicitly Skin-scoped cases to Skin products.
 
-    Explicitly Skin-scoped cases remain Skin-only. Other legacy case types keep
-    their existing candidate behavior for non-HAIR product lines.
+    Legacy/non-Skin case types retain their pre-existing candidate behavior.
+    HAIR and CATALOG_READY case types are rejected at the service boundary,
+    before candidate matching or recommendation generation.
     """
-    product_line = (getattr(product, "product_line", None) or "").strip().upper()
-    normalized_case_type = (case_type or "").strip().upper()
-    if product_line == "HAIR":
-        return False
-    if normalized_case_type == "SKIN":
-        return product_line == "SKIN"
+    if (case_type or "").strip().upper() == "SKIN":
+        return (getattr(product, "product_line", None) or "").strip().upper() == "SKIN"
     return True
 
 
