@@ -35,8 +35,8 @@ def identity(**changes):
         series="طبیعی",
         shade_number="1",
         shade_name="مشکی",
-        size_value="100",
-        size_unit="ml",
+        product_specification="Synthetic item details",
+        product_volume="100 ml",
     )
     values.update(changes)
     return CatalogIdentity(**values)
@@ -135,7 +135,7 @@ class TestCatalogLookup(unittest.TestCase):
         result = lookup()
         self.assertEqual(result.outcome, "MATCH")
         self.assertTrue(result.traceability_complete)
-        self.assertEqual(len(result.matched_fields), 6)
+        self.assertEqual(result.matched_fields, ("brand", "series", "shade_number", "shade_name"))
 
     def test_versioned_field_conflict_is_mismatch(self):
         result = lookup(observed=identity(shade_name="قهوه‌ای"))
@@ -156,10 +156,45 @@ class TestCatalogLookup(unittest.TestCase):
         self.assertIn("shade_number", result.mismatched_fields)
 
     def test_missing_required_field_stops(self):
-        result = lookup(expected=identity(size_value=" "))
+        result = lookup(expected=identity(shade_number=" "))
         self.assertEqual(result.outcome, "STOP")
         self.assertEqual(result.stop_class, "DATA_GAP")
-        self.assertIn("expected.size_value", result.missing_fields)
+        self.assertIn("expected.shade_number", result.missing_fields)
+
+    def test_product_details_do_not_participate_in_identity_match(self):
+        expected = identity(product_specification="Details A", product_volume="50 ml")
+        observed = identity(product_specification="Details B", product_volume="100 ml")
+        result = lookup(expected=expected, observed=observed)
+        self.assertEqual(result.outcome, "MATCH")
+        self.assertEqual(
+            result.matched_fields,
+            ("brand", "series", "shade_number", "shade_name"),
+        )
+
+    def test_product_details_are_not_required_for_identity_match(self):
+        expected = identity(product_specification=None, product_volume=None)
+        observed = identity(product_specification=None, product_volume=None)
+        result = lookup(expected=expected, observed=observed)
+        self.assertEqual(result.outcome, "MATCH")
+
+    def test_product_volume_is_not_a_lookup_dependency(self):
+        output = output_for()
+        decision = assess_output_invalidation(
+            output,
+            (DependencyChange("catalog_item.product_volume", "EFFECTIVE"),),
+        )
+        self.assertEqual(decision, "PRESERVE")
+
+    def test_product_volume_does_not_change_lookup_idempotency_key(self):
+        first = output_for(
+            expected=identity(product_volume="100 ml"),
+            observed=identity(product_volume="100 ml"),
+        )
+        second = output_for(
+            expected=identity(product_volume="250 ml"),
+            observed=identity(product_volume="250 ml"),
+        )
+        self.assertEqual(first.idempotency_key, second.idempotency_key)
 
     def test_wrong_service_stops_out_of_domain(self):
         result = lookup(service="COMBINATION_CONSULT")
