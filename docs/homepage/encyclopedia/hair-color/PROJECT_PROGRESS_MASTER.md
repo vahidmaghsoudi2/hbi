@@ -1212,3 +1212,18 @@ HEAD کد رابط: `4d69a4629784e8514b3708f4b21181380a71962d`. تغییرات �
 **وضعیت ردیف ۶۹:** PARTIAL — API + UI + OUTPUT/REVIEW CONTRACT IMPLEMENTED & CI-VERIFIED; VERIFIED SPECIALIST AUTHORIZATION / DOMAIN VALIDATION REMAIN.
 
 **مانع باقیمانده:** احراز صلاحیت و انتصاب واقعی Hair Domain Expert و اتصال امن آن به لایهٔ مجوز؛ همچنین اعتبارسنجی تخصصی قواعد/شواهدی که در آینده بخواهند مبنای پیشنهاد رنگ قرار گیرند. تا آن زمان هیچ پیشنهاد شیمیایی فعال نمی‌شود. ردیف ۷۰ و ۷۱ آغاز نمی‌شوند.
+
+
+### تکمیل آزمون‌های ردیف ۶۹ — نتیجهٔ نهایی کد
+
+- آزمون‌های قرارداد به ۳۱ مورد اجرا (۲۸ تابع آزمون به‌همراه پارامتردهی) افزایش یافت.
+- روی HEAD کد `60375c2a6cf25f47730e7a182b0ece2db727a022`:
+  - HBI CI run `42900232139`: SUCCESS؛ ۳ Job موفق؛ ۸۸۱ آزمون موفق، صفر شکست؛ Coverage کل ۸۹٪؛ G8 و Frontend build موفق.
+  - HBI Auto Tasks run `42900232277`: SUCCESS؛ ۸۸۱ آزمون موفق، صفر شکست؛ Coverage کل ۸۹٪.
+  - پوشش خود فایل `app/domain/hair_specialist_contract.py`: **۱۰۰٪**؛ ۱۳۶ statement و صفر خط بدون پوشش.
+  - HBI Pilot Browser Proof run `42900232013`: SUCCESS؛ parser conformance و ۳۰ آزمون مرورگر موفق؛ Artifact ID `13802263218`.
+- آزمون مرورگر اختصاصی برای صفحهٔ پیش‌نمایش متخصص همچنان در این اجرا اضافه نشده است.
+
+**وضعیت ردیف ۶۹:** PARTIAL — SYNTHETIC SPECIALIST PREVIEW API + UI + OUTPUT/REVIEW CONTRACT IMPLEMENTED & CI-VERIFIED; VERIFIED SPECIALIST AUTHORIZATION / DOMAIN VALIDATION REMAIN.
+
+**مانع نهایی:** انتصاب/احراز صلاحیت Hair Domain Expert و اتصال قابل‌راستی‌آزمایی آن به مجوزهای سامانه، به‌علاوهٔ اعتبارسنجی تخصصی قواعد و شواهد پیش از هر توصیهٔ واقعی. این موارد با آزمون نرم‌افزاری قابل‌جایگزینی نیستند. ردیف ۷۰ و ۷۱ شروع نمی‌شوند.
