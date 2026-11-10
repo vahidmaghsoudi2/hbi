@@ -340,3 +340,35 @@ export interface ProductKnowledgeDTO {
   created_at?: string | null;
   updated_at?: string | null;
 }
+
+/** Read-only synthetic specialist preview (POST /api/v1/hair/specialist-preview). */
+export interface HairSpecialistPreviewRequest {
+  case_id: string;
+  case_version: string;
+  goal_version: string;
+  service_kind: string;
+  catalog_identity: {
+    brand: string;
+    series: string;
+    shade_number: string;
+    shade_name: string;
+    product_specification?: string | null;
+    product_volume?: string | null;
+  };
+}
+export interface HairSpecialistPreviewResponse {
+  view_version: string;
+  audience: string;
+  data_class: string;
+  case: { case_id: string; case_version: string; goal_version: string; service_kind: string };
+  decision: { status: string; reason_code?: string | null; summary_fa: string; recommendation: null; display_allowed: false; client_visible: false };
+  evidence: Array<{ evidence_id: string; source_type: string; source_reference: string; qa_status: string }>;
+  lineage: {
+    run_id: string; knowledge_package_id: string; knowledge_package_version: string;
+    rule_id: string; rule_version: string; snapshot_id: string; content_sha256: string;
+    engine_version: string; dependencies: Array<{ kind: string; dependency_id: string; version: string }>;
+    persistence: string;
+  };
+  review_controls: { specialist_review_required_by_this_slice: boolean; specialist_review_recorded: boolean; acceptance_inherited: boolean; execution_consent_inherited: boolean; available_actions: string[] };
+  limitations: string[];
+}
