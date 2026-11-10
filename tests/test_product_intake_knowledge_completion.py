@@ -1,6 +1,7 @@
 """WP-INTAKE-KNOWLEDGE-COMPLETION-001 — approved Evidence rebuild coverage."""
 from __future__ import annotations
 
+import json
 import pytest
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
@@ -190,3 +191,21 @@ def test_manufacturer_claim_field_requires_explicit_manufacturer_claim_type(
         assert "fragrance-free" in knowledge.manufacturer_claims
     else:
         assert knowledge.manufacturer_claims is None
+
+
+
+def test_other_attributes_field_rebuilds_structured_catch_all(db):
+    _product(db)
+    _evidence(
+        db,
+        product_id="P-KC-001",
+        evidence_id="E-OTHER-ATTRIBUTES",
+        field="other_attributes",
+        claim="سایر ویژگی‌ها: ویژگی مستند فاقد باکس اختصاصی",
+    )
+
+    knowledge = ProductKnowledgeService(db).update_from_evidence("P-KC-001")
+
+    assert json.loads(knowledge.other_attributes) == {
+        "سایر ویژگی‌ها": "ویژگی مستند فاقد باکس اختصاصی"
+    }

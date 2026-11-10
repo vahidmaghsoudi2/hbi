@@ -291,6 +291,11 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         ]
         if high_or_critical:
             return "INELIGIBLE_PENDING_REVIEW"
+        # ReasoningEngine marks every unresolved Evidence conflict as NEEDS_REVIEW.
+        # Preserve that decision at the service persistence boundary, including
+        # LOW-severity fields such as ingredients and usage instructions.
+        if engine_result.get("conflicts"):
+            return "INELIGIBLE_PENDING_REVIEW"
         # Business Contract V1: Need Match and Final Score are ranking signals,
         # not eligibility gates. Approved/verified Evidence remains a prerequisite
         # for automatic recommendation.
@@ -333,6 +338,8 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             for c in (engine_result.get("conflicts") or [])
         ):
             return "HIGH_CRITICAL_CONFLICT"
+        if engine_result.get("conflicts"):
+            return "EVIDENCE_CONFLICT_REVIEW_REQUIRED"
         if not decision_state.get("needs"):
             return "NO_CANONICAL_NEED"
         db = getattr(self, "db", None)
