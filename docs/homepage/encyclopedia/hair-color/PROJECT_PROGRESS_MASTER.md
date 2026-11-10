@@ -1030,3 +1030,18 @@ HEAD بررسی‌شده: `971e4472871791e99f8ae971682ae9545d4b0e2d`.
 **وضعیت دروازه:** PRE-FLIGHT ONLY / NOT STARTED. هیچ اتصال به پروندهٔ واقعی مشتری، DB migration، Rule فعال، توصیهٔ فردی یا موتور پیش‌بینی انجام نمی‌شود. PO-66-10 همچنان نسخهٔ نخست را به lookup هویت کاتالوگی محدود می‌کند.
 
 **شرط ورود بعدی:** ابتدا ردیف ۶۷ با CI موفق روی HEAD و معیارهای پذیرش بسته شود؛ سپس برای ردیف ۶۸، دامنهٔ دقیق، سیاست دادهٔ PO-66-09 و مجوز مستقل پیاده‌سازی باید روشن باشد. تا آن زمان فقط طراحی و آماده‌سازی مصنوعی، در صورت مجاز بودن، قابل انجام است.
+
+
+### نتیجهٔ نهایی CI روی HEAD مستندات و کد — ۱۰ نوامبر ۲۰۲۶
+
+HEAD بررسی‌شده: `e9cc2b92ed192b4e7ad77e06834354607f82153e`.
+
+هر سه workflow روی همین SHA با نتیجهٔ نهایی **SUCCESS** تمام شدند:
+
+- HBI CI — run `42882082929`: هر سه Job یعنی `test`، `governance-tests` و `g8-isolated-pilot-smoke` موفق.
+- HBI Auto Tasks — run `42882083107`: Job `Live test evidence` و مرحلهٔ Pytest + coverage موفق.
+- HBI Pilot Browser Proof — run `42882082936`: Job `pilot-browser-proof` موفق، شامل parser conformance و real-browser proof.
+
+این نتایج به SHA فوق تعلق دارند. شکست قبلی Auto Tasks روی SHA پیشین به‌دلیل assertion ناسازگار با قرارداد snapshot بود؛ اصلاح انجام شد و اجرای نهایی هر سه workflow روی HEAD جدید سبز است.
+
+**وضعیت جاری ردیف ۶۷:** پیاده‌سازی Snapshot داخلی، اعتبارسنجی Manifest/Hash، تفکیک validation policy از validation result، انتقال lineage و آزمون‌های Provider روی HEAD دارای CI سبز هستند. با این حال Publisher Edition/Revision و زمان Capture ناشر همچنان نامعلوم‌اند؛ بنابراین lookup قطعی همچنان Fail-Closed می‌ماند. ردیف ۶۷ **PARTIAL** است، نه Complete. ردیف ۶۸ هنوز آغاز نشده است. PR #502 همچنان Open / Draft / Unmerged است.
