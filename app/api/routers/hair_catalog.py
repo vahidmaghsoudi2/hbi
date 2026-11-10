@@ -111,7 +111,10 @@ async def lookup_hair_catalog_identity(
 
     # The baseline must be an exact row in the PO-approved server-side CSV.
     # A caller cannot nominate an arbitrary "expected" identity as canonical.
-    if not approved_catalog_contains_identity(expected):
+    if not approved_catalog_contains_identity(
+        expected,
+        expected_content_sha256=reference.content_sha256,
+    ):
         return HairCatalogLookupResponse(
             status="WITHHOLD_INCONCLUSIVE",
             display_allowed=False,
