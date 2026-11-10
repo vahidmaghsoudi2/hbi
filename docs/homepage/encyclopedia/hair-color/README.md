@@ -5189,3 +5189,24 @@ CI پایه روی commit f9a937a اکنون کامل و سبز است: HBI CI #
 صفحهٔ رسمی آلبوم رائیکا مستقیماً بازبینی شد: https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/ . صفحه تاریخ انتشار «۲۱ اردیبهشت ۱۴۰۲» را نمایش می‌دهد و فهرست اقلام را ارائه می‌کند؛ اما در محتوای قابل مشاهده Edition، Revision یا زمان Capture کاتالوگ درج نشده است. تاریخ انتشار مقاله به‌عنوان نسخهٔ کاتالوگ یا زمان Capture ناشر تفسیر نمی‌شود. بنابراین فیلدهای `publisher_edition`، `publisher_revision` و `publisher_captured_at` در Manifest بدون تغییر و null می‌مانند.
 
 نتیجهٔ وضعیت: CI روی HEAD سبز است؛ ردیف ۶۷ از حیث CI/پیاده‌سازی Snapshot به‌روز شد، اما به علت نبود فرادادهٔ نسخه/زمان ناشر هنوز PARTIAL است و lookup قطعی باید Fail-Closed بماند. ردیف ۶۸ همچنان PRE-FLIGHT ONLY است.
+
+
+### نهایی‌سازی اجرای CI روی HEAD مستنداتی — ۱۰ نوامبر ۲۰۲۶
+
+پس از ثبت نتایج قبلی در این README و Progress Master، HEAD شاخه به `b759500595b5d2a9ebe66fb662a0dbf4a0647269` رسید. اجرای تازهٔ هر سه workflow روی همین HEAD اکنون تکمیل و موفق شده است:
+
+- HBI CI [run #42883520441](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42883520441): `completed / success`؛ Jobهای `test`، `governance-tests` و `g8-isolated-pilot-smoke` همگی موفق.
+- HBI Auto Tasks [run #42883520731](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42883520731): `completed / success`؛ Job مربوط به `Live test evidence` موفق.
+- HBI Pilot Browser Proof [run #42883520487](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42883520487): `completed / success`؛ Job مربوط به `pilot-browser-proof` موفق.
+
+این سه اجرا روی HEAD مستنداتی نهایی‌اند و اجرای مجددشان لازم نیست. تغییرات دو فایل مستندات، منطق کد آزموده‌شده را تغییر نداده‌اند.
+
+### نتیجهٔ نهایی بررسی منبع برای تکمیل ردیف ۶۷
+
+صفحهٔ مرجع موجود در Manifest، صفحهٔ آلبوم در وب‌سایت فروشگاهی رائیکا است: https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/ . بازبینی مستقیم صفحه در ۱۰ نوامبر ۲۰۲۶ نشان می‌دهد عنوان «آلبوم رنگ مو بیجورکا»، نام نویسنده و تاریخ انتشار «۲۱ اردیبهشت ۱۴۰۲» قابل مشاهده‌اند و صفحه فهرستی از اقلام/شماره‌ها را نمایش می‌دهد. در محتوای قابل مشاهده، شناسهٔ Edition، Revision یا زمان Capture رسمی ناشر/تولیدکننده درج نشده است. تاریخ انتشار صفحهٔ فروشگاهی، تاریخ ثبت HBI، یا زمان بازبینی امروز، جایگزین نسخه/Revision ناشر نیست.
+
+**اقدام نهایی و محافظه‌کارانه:** هیچ Edition، Revision یا Publisher Capture Time حدس زده یا جعل نمی‌شود. فیلدهای `publisher_edition`، `publisher_revision` و `publisher_captured_at` در `catalog/raeaka_bijourka_snapshot.json` عمداً null باقی می‌مانند. HBI Snapshot و hash، زمان/شناسهٔ ثبت داخلی و تمامیت فایل را مشخص می‌کنند؛ آن‌ها اثبات نسخهٔ ناشر نیستند.
+
+**حکم ردیف ۶۷:** تمام کارهای قابل انجام در محدودهٔ مجوز فعلی (Provider/API، Manifest و Snapshot lineage، اعتبارسنجی hash/schema در زمان load، idempotency lineage، آزمون‌های مثبت/منفی و CI) تکمیل و روی HEAD مبنا و HEAD مستنداتی با موفقیت آزموده شده‌اند. تنها مورد باقیمانده، دریافت مدرک نسخه/Revision یا ثبت رسمی از ناشر/تولیدکننده است که در صفحهٔ مرجع فعلی منتشر نشده. بنابراین ردیف ۶۷ از نظر اجرای مجاز تکمیل‌شده است، اما معیار منشأ نسخه‌دار ناشر همچنان **EXTERNAL EVIDENCE BLOCKED** است و وضعیت کل ردیف باید **PARTIAL** بماند. lookup قطعی تا ارائهٔ مدرک ناشر همچنان `UNVERSIONED / INCONCLUSIVE / FAIL-CLOSED` است.
+
+**حفظ دامنه:** ثبت و تأیید PO برای ۸۸ شماره‌رنگ دست‌نخورده و قطعی است. این نتیجه نه آن تأیید را بازبینی می‌کند و نه آن را به تأیید شیمیایی/ایمنی تبدیل می‌کند. ردیف ۶۸ همچنان `PRE-FLIGHT ONLY / NOT STARTED` است و این ثبت، مجوز مستقل ساخت، Rule شیمیایی، دادهٔ واقعی مشتری یا پایلوت صادر نمی‌کند.
