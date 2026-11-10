@@ -191,3 +191,67 @@ def test_advice_gate_uses_fail_closed_priority():
     )
     assert gate.advice_allowed is False
     assert gate.reason_codes == ("ENGINE_FAIL",)
+
+
+
+def test_dialogue_contract_rejects_wrong_state_type():
+    with pytest.raises(TypeError):
+        answer_question(object(), question="question", answer="answer")
+
+
+def test_question_and_answer_must_both_be_non_empty():
+    state = _state()
+    with pytest.raises(ValueError):
+        answer_question(state, question=" ", answer="answer")
+    with pytest.raises(ValueError):
+        answer_question(state, question="question", answer=" ")
+
+
+def test_required_data_resolver_rejects_malformed_field_contracts():
+    with pytest.raises(TypeError):
+        resolve_required_data([], ())
+    with pytest.raises(ValueError):
+        resolve_required_data({}, ["brand"])
+    with pytest.raises(ValueError):
+        resolve_required_data({}, ("brand", "brand"))
+
+
+def test_safety_gate_prevents_advice_even_when_other_gates_pass():
+    gate = evaluate_advice_gate(
+        data_complete=True,
+        safety_passed=False,
+        rule_valid=True,
+        evidence_valid=True,
+    )
+    assert gate.advice_allowed is False
+    assert gate.reason_codes == ("SAFETY_STOP",)
+
+
+def test_only_synthetic_proposal_identifiers_can_be_attached():
+    with pytest.raises(ValueError):
+        attach_proposal(_state(), "PROPOSAL-REAL-001")
+
+
+def test_acceptance_and_rejection_must_target_current_active_proposal():
+    state = _active_state()
+    with pytest.raises(ValueError):
+        accept_proposal(state, "SYNTHETIC-OTHER-PROPOSAL")
+    with pytest.raises(ValueError):
+        reject_proposal(state, "SYNTHETIC-OTHER-PROPOSAL")
+
+
+def test_goal_change_requires_a_distinct_non_empty_version():
+    state = _state()
+    with pytest.raises(ValueError):
+        change_goal(state, " ")
+    with pytest.raises(ValueError):
+        change_goal(state, "goal-v1")
+
+
+def test_unknown_dependency_status_fails_closed_and_clears_decisions():
+    state = accept_proposal(_active_state(), "SYNTHETIC-PROPOSAL-001")
+    result = apply_dependency_reassessment(state, "UNRECOGNIZED_IMPACT")
+    assert result.status == "ENGINE_FAIL_CLOSED"
+    assert result.state.active_proposal_id is None
+    assert result.state.client_decision == ClientDecision.NONE
+    assert result.state.execution_consent_for_proposal_id is None
