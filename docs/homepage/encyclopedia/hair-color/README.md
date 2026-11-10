@@ -5016,12 +5016,24 @@ Provider در روتر هنوز مرجع واقعی برنمی‌گرداند و
 
 **یافتهٔ مهم تکمیلی:** مدل فعلی Domain/API، `size_value` و `size_unit` را برای MATCH اجباری می‌کند؛ این با تصمیم قبلی PO که حجم باید در کاتالوگ ثبت شود اما شرط ضروری تطبیق هویت نباشد، ناسازگار است. همچنین فیلد «مشخصات قلم محصول» در مدل API وجود ندارد. نگاشت پیشنهادیِ غیرمصوب برای بررسی بعدی: `product_specification` و `product_volume` به‌عنوان دو فیلد کاتالوگی مستقل؛ ورود حجم به کلید تطبیق و الزام‌آورشدن مشخصات قلم هنوز نباید بدون تطبیق با PO-66-02 فرض شود. جزئیات در Progress Master ثبت شده است.
 
-### وضعیت اصلاح CI و برش‌های ۹ و ۱۰ — ۱۰ نوامبر ۲۰۲۶
+### وضعیت نهایی S2/CI و برش‌های ۹ و ۱۰ — ۱۰ نوامبر ۲۰۲۶
 
-- خطای قبلی CI ناشی از بدنهٔ خالی تست `test_server_owned_synthetic_reference_can_reach_display_gate` در `tests/test_hair_api_slice_7b.py` (حدود خط ۱۱۰) بود؛ خطای `IndentationError` مانع اجرای pytest شد.
-- تست اصلاح و بلوک تکراری از تست اختیاری‌بودن جزئیات محصول حذف شد. Commit رفع: [`e82f6ff`](https://github.com/vahidmaghsoudi2/hbi/commit/e82f6ffdf92a2835a2bd089a23bd380c96285a1e). فقط فایل تست تغییر کرد؛ اتصال CSV، دادهٔ واقعی، Provider و Schema دست‌نخورده‌اند. حجم و مشخصات قلم شرط MATCH نیستند.
-- CI برای SHA اصلاح‌شده در زمان ثبت: HBI CI و HBI Auto Tasks و HBI Pilot Browser Proof در حال اجرا بودند؛ PASS نهایی هنوز تأیید نشده است.
-- **برش ۹:** همچنان `BLOCKED_SOURCE_CONTENT_NOT_CAPTURED`؛ تطبیق منبع رائیکا با CSV اثبات نشده است.
-- **برش ۱۰:** اصلاح قرارداد شش‌فیلدی در کد ثبت شده؛ نتیجه پس از ارزیابی مجدد CI تعیین می‌شود. تا آن زمان PASS نهایی اعلام نمی‌شود.
+اصلاح S2 در Commit [`c90e42d`](https://github.com/vahidmaghsoudi2/hbi/commit/c90e42dcebb4f37bdb9900156b379cf1f55d8ec7) ثبت شد: فیلتر سراسری HAIR از candidate matching برداشته شد؛ محدودیت SKIN حفظ شد؛ و guard مرزی HAIR/CATALOG_READY در ابتدای `generate_recommendations` بدون تغییر باقی ماند.
 
-جزئیات و شناسهٔ اجرای CI در [Progress Master](./PROJECT_PROGRESS_MASTER.md) ثبت شده است. PR #502 باید OPEN/DRAFT/UNMERGED بماند.
+| حالت | رفتار ثبت‌شده |
+|---|---|
+| `OPEN + HAIR` | پذیرش candidate مطابق رفتار legacy |
+| `SKIN + HAIR` | رد candidate |
+| `HAIR / CATALOG_READY` | توقف در مرز سرویس؛ خارج از موتور Skin |
+
+**CI روی SHA دقیق `c90e42dcebb4f37bdb9900156b379cf1f55d8ec7`: هر سه workflow و تمام jobهایشان success شدند.**
+
+- [HBI CI — run 42818422588](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42818422588): شامل `test`، `governance-tests` و `g8-isolated-pilot-smoke`، همگی success.
+- [HBI Auto Tasks — run 42818422595](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42818422595): `Live test evidence`، success.
+- [HBI Pilot Browser Proof — run 42818422581](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42818422581): `pilot-browser-proof`، success.
+
+- **برش ۹:** همچنان `BLOCKED_SOURCE_CONTENT_NOT_CAPTURED`؛ تطبیق مستقل ۸۸ عنوان CSV با محتوای کامل و قابل بازبینی منبع رائیکا اثبات نشده است. CSV به Provider/Resolver متصل نشود.
+- **برش ۱۰:** مغایرت قرارداد فیلد/حجم و بدهی CI مرتبط با Skin رفع/سبز شده‌اند در سطح SHAهای ثبت‌شده؛ این عبارت به معنی PASS عملیاتی کامل نیست. اتصال CSV، Provider واقعی، منبع واقعی، runtime/DB، پایلوت یا تأیید شیمیایی/ایمنی اثبات نشده است.
+- **PR #502:** Open، Draft، Unmerged؛ Merge انجام نشود.
+
+این بند، وضعیت قبلی «CI در حال اجرا» را برای Commit `c90e42d` به‌روزرسانی می‌کند. جزئیات و حدود شواهد در [Progress Master](./PROJECT_PROGRESS_MASTER.md) ثبت شده است.
