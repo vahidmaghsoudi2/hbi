@@ -70,7 +70,7 @@ test("specialist preview renders the five response types and four independent mo
   await expect(contract.getByRole("heading", { name: "پنج نوع پاسخ مشاوره" })).toBeVisible();
   await expect(contract.locator("li")).toHaveCount(9);
   await expect(contract.getByText("CONDITIONAL_SUGGESTION")).toBeVisible();
-  await expect(contract.getByText("پیشنهاد مشروط» حالت موتور است و نوع پاسخ ششم محسوب نمی‌شود.")).toBeVisible();
+  await expect(contract.getByText(/پیشنهاد مشروط.*حالت موتور است و نوع پاسخ ششم محسوب نمی‌شود/)).toBeVisible();
   await expect(contract.getByText("تعیین و احراز صلاحیت متخصص بر عهدهٔ Product Owner است؛ سامانه در این برش صلاحیت حرفه‌ای اشخاص را مستقلاً ارزیابی نمی‌کند.")).toBeVisible();
 });
 
@@ -127,7 +127,7 @@ test("browser form blocks non-synthetic case identifiers before an API request",
 
   await page.getByLabel("شناسهٔ پروندهٔ مصنوعی").fill("REAL-CLIENT-001");
   await page.getByRole("button", { name: "ساخت پیش‌نمایش مصنوعی" }).click();
-  await expect(page.getByLabel("شناسهٔ پروندهٔ مصنوعی")).toHaveJSProperty("validity.valid", false);
+  expect(await page.getByLabel("شناسهٔ پروندهٔ مصنوعی").evaluate((element) => element.checkValidity())).toBe(false);
   await expect(page.getByRole("heading", { name: "وضعیت بررسی" })).toHaveCount(0);
   expect(requestCount).toBe(0);
 });
