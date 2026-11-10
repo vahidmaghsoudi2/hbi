@@ -29,10 +29,10 @@ def _payload(**overrides):
     payload = {
         "service_kind": "CATALOG_READY",
         "expected": {
-            "brand": "Bijourka",
-            "series": "Natural",
-            "shade_number": "1",
-            "shade_name": "Black",
+            "brand": "بیجورکا",
+            "series": "طبیعی",
+            "shade_number": "۱",
+            "shade_name": "مشکی",
             "product_specification": "Synthetic product details",
             "product_volume": "100 ml",
         },
@@ -72,6 +72,23 @@ class TestHairCatalogApiSlice7B:
         assert body["status"] == "WITHHOLD_INCONCLUSIVE"
         assert body["display_allowed"] is False
         assert "نسخه‌دار و قابل‌ردیابی" in body["message"]
+
+    def test_unapproved_expected_identity_is_not_accepted_as_catalog_baseline(
+        self, client, db_session
+    ):
+        _grant_po(db_session)
+        payload = _payload()
+        payload["expected"]["shade_number"] = "NOT-IN-APPROVED-CATALOG"
+        response = client.post(
+            "/api/v1/hair/catalog-identity/lookup",
+            json=payload,
+            headers=_headers(),
+        )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["status"] == "WITHHOLD_INCONCLUSIVE"
+        assert body["display_allowed"] is False
+        assert "کاتالوگ مصوب سمت سرور" in body["message"]
 
     def test_caller_cannot_supply_or_override_reference_approval_metadata(
         self, client, db_session
