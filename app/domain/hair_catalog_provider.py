@@ -12,7 +12,7 @@ import hashlib
 from io import StringIO
 from pathlib import Path
 
-from app.domain.hair_catalog_identity_lookup import CatalogReference
+from app.domain.hair_catalog_identity_lookup import CatalogIdentity, CatalogReference
 
 
 CATALOG_RELATIVE_PATH = Path(
@@ -37,6 +37,51 @@ class HairCatalogProviderError(RuntimeError):
 def _catalog_path() -> Path:
     repository_root = Path(__file__).resolve().parents[2]
     return repository_root / CATALOG_RELATIVE_PATH
+
+
+def approved_catalog_contains_identity(identity: CatalogIdentity) -> bool:
+    """Return True only when all four identity fields exactly match a CSV row.
+
+    No normalization, aliases, fuzzy matching, or caller-provided source
+    metadata are accepted. Invalid/missing catalog data fails closed.
+    """
+    if not isinstance(identity, CatalogIdentity):
+        return False
+    path = _catalog_path()
+    try:
+        raw = path.read_bytes()
+        text = raw.decode("utf-8-sig")
+        rows = list(csv.DictReader(StringIO(text, newline="")))
+    except (OSError, UnicodeDecodeError, csv.Error):
+        return False
+
+    if not rows or len(rows) != EXPECTED_DATA_ROWS:
+        return False
+    if tuple(rows[0].keys()) != EXPECTED_HEADERS:
+        return False
+    if any(tuple(row.keys()) != EXPECTED_HEADERS for row in rows):
+        return False
+
+    required = ("برند", "سری محصول", "شماره رنگ", "نام رنگ")
+    values = (
+        identity.brand,
+        identity.series,
+        identity.shade_number,
+        identity.shade_name,
+    )
+    if any(not isinstance(value, str) or not value.strip() for value in values):
+        return False
+
+    seen: set[tuple[str, ...]] = set()
+    for row in rows:
+        if any(not isinstance(row.get(field), str) or not row[field].strip() for field in required):
+            return False
+        key = tuple(row[field] for field in required)
+        if key in seen:
+            return False
+        seen.add(key)
+
+    return values in seen
 
 
 def load_approved_hair_catalog_reference() -> tuple[str, CatalogReference] | None:
