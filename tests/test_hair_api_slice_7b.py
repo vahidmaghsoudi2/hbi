@@ -107,6 +107,38 @@ class TestHairCatalogApiSlice7B:
     def test_server_owned_synthetic_reference_can_reach_display_gate(
         self, client, db_session
     ):
+        _grant_po(db_session)
+        synthetic_reference = CatalogReference(
+            source_kind="RAEAKA_BIJOURKA_CATALOG",
+            approval_status="PO_APPROVED",
+            url="https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/",
+            edition_label="SYNTHETIC-TEST-EDITION",
+            captured_at="2026-11-09T12:00:00+00:00",
+            content_sha256="a" * 64,
+        )
+        app.dependency_overrides[get_approved_hair_catalog_reference] = (
+            lambda: ("SYNTHETIC-ONLY-REFERENCE", synthetic_reference)
+        )
+        try:
+            response = client.post(
+                "/api/v1/hair/catalog-identity/lookup",
+                json=_payload(),
+                headers=_headers(),
+            )
+        finally:
+            app.dependency_overrides.pop(
+                get_approved_hair_catalog_reference, None
+            )
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["status"] == "IDENTITY_MATCH_DISPLAYABLE"
+        assert body["display_allowed"] is True
+        assert "ایمنی" in body["message"]
+        assert "chemical" not in body
+        assert "source_url" not in body
+        assert "decision_output_id" not in body
+
     def test_product_volume_and_specification_do_not_affect_identity_match(
         self, client, db_session
     ):
@@ -174,34 +206,3 @@ class TestHairCatalogApiSlice7B:
         assert response.status_code == 200
         assert response.json()["status"] == "IDENTITY_MATCH_DISPLAYABLE"
 
-        _grant_po(db_session)
-        synthetic_reference = CatalogReference(
-            source_kind="RAEAKA_BIJOURKA_CATALOG",
-            approval_status="PO_APPROVED",
-            url="https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/",
-            edition_label="SYNTHETIC-TEST-EDITION",
-            captured_at="2026-11-09T12:00:00+00:00",
-            content_sha256="a" * 64,
-        )
-        app.dependency_overrides[get_approved_hair_catalog_reference] = (
-            lambda: ("SYNTHETIC-ONLY-REFERENCE", synthetic_reference)
-        )
-        try:
-            response = client.post(
-                "/api/v1/hair/catalog-identity/lookup",
-                json=_payload(),
-                headers=_headers(),
-            )
-        finally:
-            app.dependency_overrides.pop(
-                get_approved_hair_catalog_reference, None
-            )
-
-        assert response.status_code == 200
-        body = response.json()
-        assert body["status"] == "IDENTITY_MATCH_DISPLAYABLE"
-        assert body["display_allowed"] is True
-        assert "ایمنی" in body["message"]
-        assert "chemical" not in body
-        assert "source_url" not in body
-        assert "decision_output_id" not in body
