@@ -231,3 +231,79 @@ def test_unrecognized_review_decision_is_rejected():
     output = _output()
     with pytest.raises(ValueError):
         _review(output, evaluate_specialist_output(output), decision="APPROVE")
+
+
+
+def test_non_contract_object_is_rejected():
+    with pytest.raises(TypeError):
+        evaluate_specialist_output({"case_id": "SYNTHETIC-001"})
+
+
+@pytest.mark.parametrize("field", ["case_version", "goal_version", "run_id", "proposal_id"])
+def test_missing_version_or_run_identifier_is_data_gap(field):
+    gate = evaluate_specialist_output(_output(**{field: ""}))
+    assert gate.status == GateStatus.DATA_GAP
+
+
+def test_safety_stop_with_invalid_motor_contract_fails_closed():
+    output = _output(
+        response_type=ResponseType.SAFETY_STOP,
+        motor_state=MotorState.REVIEWABLE_SUGGESTION,
+        reason_code="SYNTHETIC_SAFETY_BLOCK",
+    )
+    assert evaluate_specialist_output(output).status == GateStatus.ENGINE_FAIL
+
+
+def test_out_of_scope_with_invalid_motor_contract_fails_closed():
+    output = _output(
+        response_type=ResponseType.OUT_OF_SCOPE,
+        motor_state=MotorState.REVIEWABLE_SUGGESTION,
+        reason_code="SYNTHETIC_OUT_OF_SCOPE",
+    )
+    assert evaluate_specialist_output(output).status == GateStatus.ENGINE_FAIL
+
+
+def test_in_person_review_without_reason_fails_closed():
+    output = _output(
+        response_type=ResponseType.NEEDS_IN_PERSON_REVIEW,
+        motor_state=MotorState.STOP_OR_REFER,
+        reason_code=None,
+    )
+    assert evaluate_specialist_output(output).status == GateStatus.ENGINE_FAIL
+
+
+def test_information_request_without_declared_missing_fields_is_data_gap():
+    output = _output(
+        response_type=ResponseType.NEEDS_MORE_INFORMATION,
+        motor_state=MotorState.REQUEST_MORE_INFORMATION,
+        data_complete=False,
+        missing_data_fields=(),
+        evidence=(),
+    )
+    gate = evaluate_specialist_output(output)
+    assert gate.status == GateStatus.DATA_GAP
+    assert gate.reason_codes == ("REQUIRED_MISSING_DATA_FIELDS_NOT_DECLARED",)
+
+
+def test_reviewable_response_with_stop_motor_state_fails_closed():
+    output = _output(motor_state=MotorState.STOP_OR_REFER)
+    assert evaluate_specialist_output(output).status == GateStatus.ENGINE_FAIL
+
+
+def test_raw_recommendation_payload_is_never_accepted_by_contract():
+    output = _output(recommendation_payload={"chemical_formula": "FORBIDDEN"})
+    assert evaluate_specialist_output(output).status == GateStatus.ENGINE_FAIL
+
+
+def test_ineligible_output_cannot_receive_specialist_review():
+    output = _output()
+    ineligible = evaluate_specialist_output(output, engine_ok=False)
+    with pytest.raises(ValueError):
+        _review(output, ineligible)
+
+
+def test_missing_reviewer_identity_cannot_be_recorded():
+    output = _output()
+    gate = evaluate_specialist_output(output)
+    with pytest.raises(ValueError):
+        _review(output, gate, reviewer_id="")
