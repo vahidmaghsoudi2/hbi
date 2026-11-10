@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from app.core.auth import create_access_token
 from app.main import app
 from app.api.routers.hair_catalog import get_approved_hair_catalog_reference
+from app.domain.hair_catalog_provider import load_approved_hair_catalog_reference
 from app.domain.hair_catalog_identity_lookup import CatalogReference
 from app.models.user_role import ROLE_PO, UserRole
 
@@ -23,6 +24,20 @@ def _grant_po(db_session):
         )
     )
     db_session.commit()
+
+
+def _synthetic_reference():
+    loaded = load_approved_hair_catalog_reference()
+    assert loaded is not None
+    _, approved_reference = loaded
+    return CatalogReference(
+        source_kind="RAEAKA_BIJOURKA_CATALOG",
+        approval_status="PO_APPROVED",
+        url="https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/",
+        edition_label="SYNTHETIC-TEST-EDITION",
+        captured_at="2026-11-09T12:00:00+00:00",
+        content_sha256=approved_reference.content_sha256,
+    )
 
 
 def _payload(**overrides):
@@ -125,14 +140,7 @@ class TestHairCatalogApiSlice7B:
         self, client, db_session
     ):
         _grant_po(db_session)
-        synthetic_reference = CatalogReference(
-            source_kind="RAEAKA_BIJOURKA_CATALOG",
-            approval_status="PO_APPROVED",
-            url="https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/",
-            edition_label="SYNTHETIC-TEST-EDITION",
-            captured_at="2026-11-09T12:00:00+00:00",
-            content_sha256="a" * 64,
-        )
+        synthetic_reference = _synthetic_reference()
         app.dependency_overrides[get_approved_hair_catalog_reference] = (
             lambda: ("SYNTHETIC-ONLY-REFERENCE", synthetic_reference)
         )
@@ -160,14 +168,7 @@ class TestHairCatalogApiSlice7B:
         self, client, db_session
     ):
         _grant_po(db_session)
-        synthetic_reference = CatalogReference(
-            source_kind="RAEAKA_BIJOURKA_CATALOG",
-            approval_status="PO_APPROVED",
-            url="https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/",
-            edition_label="SYNTHETIC-TEST-EDITION",
-            captured_at="2026-11-09T12:00:00+00:00",
-            content_sha256="a" * 64,
-        )
+        synthetic_reference = _synthetic_reference()
         app.dependency_overrides[get_approved_hair_catalog_reference] = (
             lambda: ("SYNTHETIC-ONLY-REFERENCE", synthetic_reference)
         )
@@ -194,14 +195,7 @@ class TestHairCatalogApiSlice7B:
         self, client, db_session
     ):
         _grant_po(db_session)
-        synthetic_reference = CatalogReference(
-            source_kind="RAEAKA_BIJOURKA_CATALOG",
-            approval_status="PO_APPROVED",
-            url="https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/",
-            edition_label="SYNTHETIC-TEST-EDITION",
-            captured_at="2026-11-09T12:00:00+00:00",
-            content_sha256="a" * 64,
-        )
+        synthetic_reference = _synthetic_reference()
         app.dependency_overrides[get_approved_hair_catalog_reference] = (
             lambda: ("SYNTHETIC-ONLY-REFERENCE", synthetic_reference)
         )
