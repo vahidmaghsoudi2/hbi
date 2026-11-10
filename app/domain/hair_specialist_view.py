@@ -40,7 +40,7 @@ def build_hair_specialist_view(run: HairDecisionRun) -> dict[str, Any]:
         case_id=run.case_id,
         synthetic_data=run.case_id.startswith("SYNTHETIC-"),
     )
-    if not synthetic_allowed or run.persistence != "COMPUTED_ONLY":
+    if (not synthetic_allowed or run.persistence != "COMPUTED_ONLY"\n            or run.status == "STOP_DATA_POLICY"):
         raise ValueError("Only synthetic, computed-only Hair runs can be presented")
 
     raw_result = run.reasoning_result or {}
