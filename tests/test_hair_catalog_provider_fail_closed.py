@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import csv
-import hashlib
 
 from app.domain import hair_catalog_provider as provider
 from app.domain.hair_catalog_identity_lookup import CatalogIdentity
