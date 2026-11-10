@@ -16,7 +16,10 @@ from pydantic import BaseModel, ConfigDict
 
 from app.core.authorization import require_any_role
 from app.domain.hair_service_scope import evaluate_hair_service_scope
-from app.domain.hair_catalog_provider import load_approved_hair_catalog_reference
+from app.domain.hair_catalog_provider import (
+    approved_catalog_contains_identity,
+    load_approved_hair_catalog_reference,
+)
 from app.domain.hair_catalog_identity_lookup import (
     CatalogIdentity,
     CatalogReference,
@@ -105,6 +108,15 @@ async def lookup_hair_catalog_identity(
     reference_id, reference = approved_reference
     expected = payload.expected.to_domain()
     observed = payload.observed.to_domain()
+
+    # The baseline must be an exact row in the PO-approved server-side CSV.
+    # A caller cannot nominate an arbitrary "expected" identity as canonical.
+    if not approved_catalog_contains_identity(expected):
+        return HairCatalogLookupResponse(
+            status="WITHHOLD_INCONCLUSIVE",
+            display_allowed=False,
+            message="مشخصات مبنا در ردیف‌های کاتالوگ مصوب سمت سرور یافت نشد؛ نتیجهٔ قطعی ارائه نمی‌شود.",
+        )
 
     result = lookup_catalog_identity(
         service_kind=payload.service_kind,
