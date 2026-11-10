@@ -92,7 +92,6 @@ def test_legacy_migration_preserves_rows_and_does_not_invent_revision_metadata(t
     assert migrate(db).startswith("ALREADY MIGRATED")
 
 
-
 def test_preexisting_history_gets_missing_assertion_index(tmp_path):
     script = Path(__file__).resolve().parents[1] / "scripts" / "migrate_product_problem_link_assessments.py"
     migrate = runpy.run_path(str(script))["migrate"]
