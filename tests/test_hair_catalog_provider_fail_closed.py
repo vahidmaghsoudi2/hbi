@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 
 from app.domain import hair_catalog_provider as provider
+from app.domain.hair_catalog_identity_lookup import CatalogIdentity
 
 
 def _valid_csv(row_count: int = provider.EXPECTED_DATA_ROWS) -> str:
@@ -83,3 +84,46 @@ def test_provider_fails_closed_when_catalog_file_is_missing(tmp_path, monkeypatc
     monkeypatch.setattr(provider, "_catalog_path", lambda: path)
 
     assert provider.load_approved_hair_catalog_reference() is None
+
+
+
+def test_provider_accepts_only_exact_identity_present_in_approved_csv(tmp_path, monkeypatch):
+    path = _write_csv(tmp_path, _valid_csv())
+    monkeypatch.setattr(provider, "_catalog_path", lambda: path)
+
+    assert provider.approved_catalog_contains_identity(
+        CatalogIdentity(
+            brand="Brand-0",
+            series="Series-0",
+            shade_number="1",
+            shade_name="Shade-0",
+        )
+    )
+
+
+def test_provider_rejects_identity_not_present_in_approved_csv(tmp_path, monkeypatch):
+    path = _write_csv(tmp_path, _valid_csv())
+    monkeypatch.setattr(provider, "_catalog_path", lambda: path)
+
+    assert not provider.approved_catalog_contains_identity(
+        CatalogIdentity(
+            brand="brand-0",
+            series="Series-0",
+            shade_number="1",
+            shade_name="Shade-0",
+        )
+    )
+
+
+def test_provider_rejects_identity_when_catalog_is_invalid(tmp_path, monkeypatch):
+    path = _write_csv(tmp_path, _valid_csv(row_count=provider.EXPECTED_DATA_ROWS - 1))
+    monkeypatch.setattr(provider, "_catalog_path", lambda: path)
+
+    assert not provider.approved_catalog_contains_identity(
+        CatalogIdentity(
+            brand="Brand-0",
+            series="Series-0",
+            shade_number="1",
+            shade_name="Shade-0",
+        )
+    )
