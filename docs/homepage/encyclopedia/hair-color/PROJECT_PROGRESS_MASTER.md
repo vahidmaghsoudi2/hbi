@@ -1065,3 +1065,19 @@ HEAD بررسی‌شده: `e9cc2b92ed192b4e7ad77e06834354607f82153e`.
 **وضعیت ردیف ۶۸:** `PRE-FLIGHT ONLY / NOT STARTED`. این الحاقیه مجوز شروع ردیف ۶۸، ورود دادهٔ واقعی مشتری، ساخت Rule شیمیایی/ایمنی، توصیه یا پیش‌بینی نتیجه ایجاد نمی‌کند؛ جزئیات PO-66-09 و مجوز مستقل همچنان لازم‌اند.
 
 **وضعیت PR:** PR #502 همچنان باید Open / Draft / Unmerged بماند؛ هیچ Merge یا تغییر وضعیت PR انجام نشده است.
+
+
+### بستن فعالیت‌های مجاز ردیف ۶۷ و ثبت نتیجهٔ نهایی — ۱۰ نوامبر ۲۰۲۶
+
+**CI روی HEAD مستنداتی فعلی:** `b759500595b5d2a9ebe66fb662a0dbf4a0647269`.
+
+- HBI CI [#42883520441](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42883520441): completed/success؛ سه Job `test`، `governance-tests` و `g8-isolated-pilot-smoke` همگی success.
+- HBI Auto Tasks [#42883520731](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42883520731): completed/success؛ `Live test evidence` موفق.
+- HBI Pilot Browser Proof [#42883520487](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42883520487): completed/success؛ `pilot-browser-proof` موفق.
+- اجرای تازهٔ هر سه Workflow روی HEAD فوق کامل است؛ تکرار آن‌ها لازم نیست.
+
+**ممیزی منبع:** صفحهٔ مرجع فعلی Manifest، صفحهٔ آلبوم بیجورکا در وب‌سایت فروشگاهی رائیکا است: https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/ . در بازبینی مستقیم ۱۰ نوامبر ۲۰۲۶، عنوان صفحه، نویسنده و تاریخ انتشار «۲۱ اردیبهشت ۱۴۰۲» و فهرست اقلام مشاهده شد؛ Edition، Revision یا Publisher Capture Time در محتوای قابل مشاهده اعلام نشده است. تاریخ مقالهٔ فروشگاهی معادل نسخه یا زمان ثبت رسمی ناشر/تولیدکننده نیست. در نتیجه فیلدهای ناشر در Manifest عمداً null باقی می‌مانند و HBI Snapshot صرفاً منشأ/زمان ثبت داخلی و تمامیت Artifact را اثبات می‌کند.
+
+**نتیجهٔ ردیف ۶۷:** فعالیت‌های اجرایی مجاز و تحت کنترل HBI تکمیل‌اند: Domain Guard و جداسازی مسیر HAIR، Provider/API lookup هویت کاتالوگی، Manifest و Snapshot provenance، تطبیق hash، اعتبارسنجی ساختار در هر load، fail-closed، انتقال lineage به خروجی و idempotency، آزمون‌های مثبت/منفی و CI. اجرای تازه روی HEAD مستنداتی نیز سبز است. مورد حل‌نشده فقط مدرک خارجی Edition/Revision یا ثبت نسخه از ناشر/تولیدکننده است؛ این مدرک در صفحهٔ منبع فعلی وجود ندارد و از داخل مخزن قابل تولید نیست. پس وضعیت ردیف ۶۷ **PARTIAL — EXTERNAL EVIDENCE BLOCKED** باقی می‌ماند؛ آن را Complete اعلام نمی‌کنیم و lookup قطعی همچنان `UNVERSIONED / INCONCLUSIVE / FAIL-CLOSED` است.
+
+**موارد ثابت:** تأیید PO برای ۸۸ شماره‌رنگ بدون تغییر معتبر است؛ این تأیید به معنای تأیید شیمیایی/ایمنی نیست. ردیف ۶۸ `PRE-FLIGHT ONLY / NOT STARTED` باقی می‌ماند. این ثبت مجوزی برای شروع ۶۸، ورود دادهٔ واقعی مشتری، Rule شیمیایی/ایمنی، توصیه/پیش‌بینی یا پایلوت ایجاد نمی‌کند. PR #502 باید Open/Draft/Unmerged بماند.
