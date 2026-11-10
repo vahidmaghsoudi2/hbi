@@ -1,9 +1,10 @@
 """Controlled, read-only API boundary for HBI hair catalog identity lookup.
 
-This endpoint is intentionally limited to CATALOG_READY. It accepts observed
-identity fields only; callers cannot submit or assert catalog approval,
-edition, capture metadata, or content hashes. The server-side reference
-provider is fail-closed until a primary approved catalog artifact is wired.
+This endpoint is intentionally limited to CATALOG_READY. The expected
+identity must be an exact row in the PO-approved server-side CSV; the observed
+identity is compared field-by-field. Callers cannot submit or assert catalog
+approval, edition, capture metadata, or content hashes. Definitive output
+remains fail-closed while publisher edition/capture provenance is incomplete.
 No database writes, customer profile reads, event persistence, or service
 execution occur here.
 """
@@ -70,10 +71,10 @@ class HairCatalogLookupResponse(BaseModel):
 def get_approved_hair_catalog_reference() -> tuple[str, CatalogReference] | None:
     """Return the validated server-owned CSV reference, never caller metadata.
 
-    The approved 88-row artifact is loaded and hashed on the server. Its
-    publisher edition and capture provenance remain unknown, so the domain
-    lookup deliberately returns INCONCLUSIVE and withholds a definitive
-    identity result until versioned source metadata is established.
+    The exact 88-row artifact is loaded and hashed on the server. The API also
+    verifies that the submitted expected identity exists in this same
+    content-hash snapshot. Publisher edition and capture provenance remain
+    unknown, so definitive lookup output stays withheld.
     """
     return load_approved_hair_catalog_reference()
 
