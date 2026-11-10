@@ -16,6 +16,7 @@ from pydantic import BaseModel, ConfigDict
 
 from app.core.authorization import require_any_role
 from app.domain.hair_service_scope import evaluate_hair_service_scope
+from app.domain.hair_catalog_provider import load_approved_hair_catalog_reference
 from app.domain.hair_catalog_identity_lookup import (
     CatalogIdentity,
     CatalogReference,
@@ -64,12 +65,14 @@ class HairCatalogLookupResponse(BaseModel):
 
 
 def get_approved_hair_catalog_reference() -> tuple[str, CatalogReference] | None:
-    """Return a server-owned approved reference, never caller-supplied metadata.
+    """Return the validated server-owned CSV reference, never caller metadata.
 
-    The primary versioned catalog artifact has not yet been established.
-    Returning None is deliberate and keeps production requests fail-closed.
+    The approved 88-row artifact is loaded and hashed on the server. Its
+    publisher edition and capture provenance remain unknown, so the domain
+    lookup deliberately returns INCONCLUSIVE and withholds a definitive
+    identity result until versioned source metadata is established.
     """
-    return None
+    return load_approved_hair_catalog_reference()
 
 
 @router.post(
