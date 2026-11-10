@@ -1067,17 +1067,19 @@ HEAD بررسی‌شده: `e9cc2b92ed192b4e7ad77e06834354607f82153e`.
 **وضعیت PR:** PR #502 همچنان باید Open / Draft / Unmerged بماند؛ هیچ Merge یا تغییر وضعیت PR انجام نشده است.
 
 
-### بستن فعالیت‌های مجاز ردیف ۶۷ و ثبت نتیجهٔ نهایی — ۱۰ نوامبر ۲۰۲۶
+### وضعیت نهایی ردیف ۶۷ و ثبت CI روی HEAD — ۱۰ نوامبر ۲۰۲۶
 
-**CI روی HEAD مستنداتی فعلی:** `b759500595b5d2a9ebe66fb662a0dbf4a0647269`.
+**تصمیم قطعی PO:** ثبت و تأیید ۸۸ شماره‌رنگ کاتالوگ بسته و نهایی است. موضوع کاتالوگ دوباره باز نمی‌شود؛ Edition/Revision یا زمان Capture ناشر شرط بازگشایی تأیید ۸۸ قلم یا تکرار کار نیست. فیلدهای ناشر در Manifest فقط با مدرک واقعی قابل مقداردهی‌اند و تا آن زمان null می‌مانند؛ این محدودیت، تأیید قطعی PO برای ۸۸ شماره‌رنگ را تغییر نمی‌دهد.
 
-- HBI CI [#42883520441](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42883520441): completed/success؛ سه Job `test`، `governance-tests` و `g8-isolated-pilot-smoke` همگی success.
-- HBI Auto Tasks [#42883520731](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42883520731): completed/success؛ `Live test evidence` موفق.
-- HBI Pilot Browser Proof [#42883520487](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42883520487): completed/success؛ `pilot-browser-proof` موفق.
-- اجرای تازهٔ هر سه Workflow روی HEAD فوق کامل است؛ تکرار آن‌ها لازم نیست.
+**HEAD بررسی‌شده:** `242fc8a4c1f2422b5bb82d248af97bbe1745ffff` در شاخهٔ `docs/hair-color-conceptual-architecture-scenarios-20261102`.
 
-**ممیزی منبع:** صفحهٔ مرجع فعلی Manifest، صفحهٔ آلبوم بیجورکا در وب‌سایت فروشگاهی رائیکا است: https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/ . در بازبینی مستقیم ۱۰ نوامبر ۲۰۲۶، عنوان صفحه، نویسنده و تاریخ انتشار «۲۱ اردیبهشت ۱۴۰۲» و فهرست اقلام مشاهده شد؛ Edition، Revision یا Publisher Capture Time در محتوای قابل مشاهده اعلام نشده است. تاریخ مقالهٔ فروشگاهی معادل نسخه یا زمان ثبت رسمی ناشر/تولیدکننده نیست. در نتیجه فیلدهای ناشر در Manifest عمداً null باقی می‌مانند و HBI Snapshot صرفاً منشأ/زمان ثبت داخلی و تمامیت Artifact را اثبات می‌کند.
+- HBI CI run [#42886784977](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42886784977): completed/success؛ Jobهای `test`، `governance-tests` و `g8-isolated-pilot-smoke` موفق.
+- HBI Auto Tasks run [#42886784537](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42886784537): completed/success؛ `Live test evidence` موفق.
+- HBI Pilot Browser Proof run [#42886785129](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42886785129): completed/success؛ `pilot-browser-proof` موفق.
+- جمع: ۳ Workflow و ۵ Job موفق. اجرای مجدد همین CI روی همین SHA لازم نیست.
 
-**نتیجهٔ ردیف ۶۷:** فعالیت‌های اجرایی مجاز و تحت کنترل HBI تکمیل‌اند: Domain Guard و جداسازی مسیر HAIR، Provider/API lookup هویت کاتالوگی، Manifest و Snapshot provenance، تطبیق hash، اعتبارسنجی ساختار در هر load، fail-closed، انتقال lineage به خروجی و idempotency، آزمون‌های مثبت/منفی و CI. اجرای تازه روی HEAD مستنداتی نیز سبز است. مورد حل‌نشده فقط مدرک خارجی Edition/Revision یا ثبت نسخه از ناشر/تولیدکننده است؛ این مدرک در صفحهٔ منبع فعلی وجود ندارد و از داخل مخزن قابل تولید نیست. پس وضعیت ردیف ۶۷ **PARTIAL — EXTERNAL EVIDENCE BLOCKED** باقی می‌ماند؛ آن را Complete اعلام نمی‌کنیم و lookup قطعی همچنان `UNVERSIONED / INCONCLUSIVE / FAIL-CLOSED` است.
+**نتیجهٔ ردیف ۶۷:** فعالیت‌های در دامنهٔ مصوب lookup هویت کاتالوگی — Domain Guard، جداسازی HAIR، Provider/API، Manifest و Snapshot lineage، کنترل hash/schema، fail-closed، idempotency و آزمون‌های ثبت‌شده — همراه با CI موفق روی HEAD فوق تکمیل و ثبت شدند. ردیف ۶۷ در همین دامنه بسته است. این وضعیت به معنی تأیید شیمیایی/ایمنی، توصیهٔ فردی، پیش‌بینی نتیجه یا اجرای خدمت نیست.
 
-**موارد ثابت:** تأیید PO برای ۸۸ شماره‌رنگ بدون تغییر معتبر است؛ این تأیید به معنای تأیید شیمیایی/ایمنی نیست. ردیف ۶۸ `PRE-FLIGHT ONLY / NOT STARTED` باقی می‌ماند. این ثبت مجوزی برای شروع ۶۸، ورود دادهٔ واقعی مشتری، Rule شیمیایی/ایمنی، توصیه/پیش‌بینی یا پایلوت ایجاد نمی‌کند. PR #502 باید Open/Draft/Unmerged بماند.
+**نوبت بعدی: ردیف ۶۸ — اتصال موتور استدلال به دانش تأییدشده و پروندهٔ مشتری.** وضعیت ردیف ۶۸ همچنان `PRE-FLIGHT ONLY / NOT STARTED` است؛ پیش‌بررسی قبلی انجام شده و نباید تکرار شود. شروع پیاده‌سازی مستلزم تعیین تکلیف جزئیات باز PO-66-09 و مجوز مستقل ردیف ۶۸ است. تا آن زمان فقط دادهٔ مصنوعی مجاز است و اتصال به پروندهٔ واقعی مشتری یا فعال‌سازی Rule شیمیایی/ایمنی انجام نمی‌شود.
+
+**وضعیت PR:** PR #502 همچنان Open / Draft / Unmerged است؛ Merge انجام نشده است.
