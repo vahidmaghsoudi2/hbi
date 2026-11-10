@@ -190,3 +190,35 @@ def test_information_request_is_a_response_type_with_motor_request_state():
     gate = evaluate_specialist_output(output)
     assert gate.status == GateStatus.DATA_GAP
     assert gate.publishable_to_internal_review is False
+
+
+
+def test_in_person_review_is_not_misclassified_as_a_data_gap():
+    output = _output(
+        response_type=ResponseType.NEEDS_IN_PERSON_REVIEW,
+        motor_state=MotorState.STOP_OR_REFER,
+        reason_code="SYNTHETIC_IN_PERSON_ASSESSMENT_REQUIRED",
+        data_complete=False,
+        missing_data_fields=("in_person_assessment",),
+        evidence=(),
+    )
+    assert evaluate_specialist_output(output).status == GateStatus.REQUIRES_IN_PERSON_REVIEW
+
+
+def test_safety_stop_precedes_generic_data_gap():
+    output = _output(
+        response_type=ResponseType.SAFETY_STOP,
+        motor_state=MotorState.STOP_OR_REFER,
+        reason_code="SYNTHETIC_SAFETY_BLOCK",
+        data_complete=False,
+        missing_data_fields=("history",),
+        evidence=(),
+    )
+    assert evaluate_specialist_output(output).status == GateStatus.SAFETY_STOP
+
+
+def test_unknown_response_type_fails_closed():
+    output = _output(response_type="UNRECOGNIZED_RESPONSE")
+    gate = evaluate_specialist_output(output)
+    assert gate.status == GateStatus.ENGINE_FAIL
+    assert gate.publishable_to_internal_review is False
