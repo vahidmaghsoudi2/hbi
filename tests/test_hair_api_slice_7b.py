@@ -33,16 +33,16 @@ def _payload(**overrides):
             "series": "Natural",
             "shade_number": "1",
             "shade_name": "Black",
-            "size_value": "100",
-            "size_unit": "ml",
+            "product_specification": "Synthetic product details",
+            "product_volume": "100 ml",
         },
         "observed": {
             "brand": "Bijourka",
             "series": "Natural",
             "shade_number": "1",
             "shade_name": "Black",
-            "size_value": "100",
-            "size_unit": "ml",
+            "product_specification": "Synthetic product details",
+            "product_volume": "100 ml",
         },
     }
     payload.update(overrides)
@@ -107,6 +107,73 @@ class TestHairCatalogApiSlice7B:
     def test_server_owned_synthetic_reference_can_reach_display_gate(
         self, client, db_session
     ):
+    def test_product_volume_and_specification_do_not_affect_identity_match(
+        self, client, db_session
+    ):
+        _grant_po(db_session)
+        synthetic_reference = CatalogReference(
+            source_kind="RAEAKA_BIJOURKA_CATALOG",
+            approval_status="PO_APPROVED",
+            url="https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/",
+            edition_label="SYNTHETIC-TEST-EDITION",
+            captured_at="2026-11-09T12:00:00+00:00",
+            content_sha256="a" * 64,
+        )
+        app.dependency_overrides[get_approved_hair_catalog_reference] = (
+            lambda: ("SYNTHETIC-ONLY-REFERENCE", synthetic_reference)
+        )
+        payload = _payload()
+        payload["expected"]["product_specification"] = "Details A"
+        payload["expected"]["product_volume"] = "50 ml"
+        payload["observed"]["product_specification"] = "Details B"
+        payload["observed"]["product_volume"] = "100 ml"
+        try:
+            response = client.post(
+                "/api/v1/hair/catalog-identity/lookup",
+                json=payload,
+                headers=_headers(),
+            )
+        finally:
+            app.dependency_overrides.pop(
+                get_approved_hair_catalog_reference, None
+            )
+
+        assert response.status_code == 200
+        assert response.json()["status"] == "IDENTITY_MATCH_DISPLAYABLE"
+
+    def test_product_details_are_optional_for_identity_lookup(
+        self, client, db_session
+    ):
+        _grant_po(db_session)
+        synthetic_reference = CatalogReference(
+            source_kind="RAEAKA_BIJOURKA_CATALOG",
+            approval_status="PO_APPROVED",
+            url="https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/",
+            edition_label="SYNTHETIC-TEST-EDITION",
+            captured_at="2026-11-09T12:00:00+00:00",
+            content_sha256="a" * 64,
+        )
+        app.dependency_overrides[get_approved_hair_catalog_reference] = (
+            lambda: ("SYNTHETIC-ONLY-REFERENCE", synthetic_reference)
+        )
+        payload = _payload()
+        for side in ("expected", "observed"):
+            payload[side].pop("product_specification")
+            payload[side].pop("product_volume")
+        try:
+            response = client.post(
+                "/api/v1/hair/catalog-identity/lookup",
+                json=payload,
+                headers=_headers(),
+            )
+        finally:
+            app.dependency_overrides.pop(
+                get_approved_hair_catalog_reference, None
+            )
+
+        assert response.status_code == 200
+        assert response.json()["status"] == "IDENTITY_MATCH_DISPLAYABLE"
+
         _grant_po(db_session)
         synthetic_reference = CatalogReference(
             source_kind="RAEAKA_BIJOURKA_CATALOG",
