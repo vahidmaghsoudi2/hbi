@@ -932,3 +932,32 @@
 - تغییرات کد در commitهای `5f5f4ec`، `b72f075`، `d3a1b5e`، `7ce0c45`، `7917537`، `981c28a`، `8163465`، `8f243c9`، `0a4542b`، `cf9e713`، `97589a5`، `eeea831`، `fa6fc83` و `f9a937a` ثبت شدند.
 - **وضعیت آزمون این دور:** برای commit کد `f9a937a`، HBI Auto Tasks run #698 با نتیجهٔ success تکمیل شده و مرحلهٔ Pytest + coverage نیز موفق است؛ HBI Pilot Browser Proof run #1492 نیز با نتیجهٔ success تکمیل شده است (parser conformance، راه‌اندازی API/frontend و real-browser proof). HBI CI run #2753 هنوز در حال اجراست؛ jobهای test، governance و isolated pilot smoke هنوز نتیجهٔ نهایی ندارند. بنابراین دو workflow موفق‌اند، اما CI اصلی هنوز نهایی نشده است.
 - **نقطهٔ ادامه:** اجرای مجموعهٔ آزمون‌های Provider و API روی آخرین HEAD، رفع هر خطای واقعی، سپس بررسی CI. مرجع همچنان UNVERSIONED است و خروجی قطعی تا تعیین منشأ/نسخهٔ معتبر منبع مسدود می‌ماند.
+
+
+### ادامهٔ مجاز ردیف ۶۷ — HBI Snapshot Provenance و CI — ۱۰ نوامبر ۲۰۲۶
+
+دستور صریح و متأخر PO در همین گفت‌وگو، ادامهٔ اجرای فنی ردیف ۶۷ و تکمیل مدل Provenance را مجاز کرده است. این ثبت، وضعیت‌های قدیمی‌تر CI در حال اجرا را برای commit f9a937af382fa281e770b54769d9572695c18229 به‌روزرسانی می‌کند و دامنهٔ دیگر تصمیم‌های PO را تغییر نمی‌دهد.
+
+**CI روی f9a937a:** هر سه workflow و همهٔ jobها success هستند: HBI CI #2753 (test، governance-tests، g8-isolated-pilot-smoke)، HBI Auto Tasks #698 و HBI Pilot Browser Proof #1492. این نتیجه به commitهای بعدی تعمیم داده نمی‌شود.
+
+**تغییرات اجراشده:**
+- CatalogReference، شناسهٔ Snapshot، زمان Snapshot داخلی، شناسهٔ ingestion و وضعیت اعتبارسنجی Snapshot را مستقل از Edition/Revision و زمان Capture ناشر نگه می‌دارد.
+- CatalogDecisionOutput و کلید idempotency نیز lineage مربوط به Snapshot را حمل می‌کنند.
+- Provider اکنون Manifest را می‌خواند و SHA-256 واقعی CSV، URL، مسیر Artifact، شناسه‌های Snapshot/ingestion، timestamp منطقه‌زمان‌دار و سیاست اعتبارسنجی را کنترل می‌کند. نبود Manifest یا هر مغایرتی Fail-Closed است.
+- Manifest: catalog/raeaka_bijourka_snapshot.json
+- Snapshot ID: hbi-hair-catalog-snapshot-20261110-185700z
+- Ingestion ID: hbi-hair-catalog-ingestion-20261110-185700z-01
+- SHA-256 CSV: 1887a7d166164639e2c235a7144fe6b27b4861f5c36fac9af383bef14eec1212
+- HBI snapshot_captured_at: 2026-11-10T18:57:00Z
+- Publisher edition/revision/captured_at: null؛ هیچ نسخه یا تاریخ ناشر جعل نشده است.
+- Manifest با سیاست REVALIDATE_ON_EVERY_LOAD ثبت شده؛ Provider در هر بار بارگذاری ساختار CSV را مجدداً اعتبارسنجی و Hash را تطبیق می‌دهد.
+- چهار آزمون جدید برای metadata داخلی، Hash ناسازگار، Manifest مفقود و timestamp بدون timezone افزوده شدند.
+- migration/DB لازم نبود؛ هیچ دادهٔ مشتری وارد نشده است.
+
+**Commitها:** 8d7b0a55 (مدل Snapshot)، 3fbd1560 (Provider/Manifest validation)، 049ccc1c (Manifest)، b2bcafe4 (آزمون‌ها)، 6b337b3f (lineage خروجی و idempotency).
+
+**وضعیت آزمون جدید:** آزمون‌ها نوشته شده‌اند؛ CI روی HEAD جدید هنوز اجرا/تأیید نشده است. PASS اجرایی برای این تغییرات اعلام نمی‌شود.
+
+**ردیف ۶۷:** Provider/API پیاده‌سازی شده و CI پایه روی f9a937a سبز است؛ مدل Snapshot و Manifest پیاده‌سازی و آزمون‌نویسی شده‌اند، اما CI جدید در انتظار است. احراز Edition/Revision رسمی ناشر همچنان باز است و با زمان Snapshot داخلی جایگزین نمی‌شود. ردیف ۶۷ هنوز Complete نیست.
+
+**گام بعدی:** بررسی CI روی HEAD جدید، رفع هر شکست واقعی، سپس بازبینی معیارهای مجاز باقی‌مانده و آماده‌سازی دروازهٔ ردیف ۶۸ بدون فعال‌سازی توصیه یا پیش‌بینی شیمیایی. PR #502 باز، Draft و Unmerged باقی بماند.
