@@ -125,3 +125,105 @@ def test_unmapped_status_fails_closed_in_presentation():
     view = build_hair_specialist_view(unknown)
     assert "منتشر نمی‌شود" in view["decision"]["summary_fa"]
     assert view["decision"]["display_allowed"] is False
+
+
+# API boundary tests for the specialist-only preview route.
+from app.core.auth import create_access_token
+from app.models.user_role import ROLE_REVIEWER_QA, UserRole
+
+
+def _headers():
+    token = create_access_token({"sub": "hair-row69-test-user"})
+    return {"Authorization": f"Bearer {token}"}
+
+
+def _grant_reviewer_qa(db_session):
+    db_session.add(
+        UserRole(
+            user_role_id="HAIR-ROW69-REVIEWER",
+            subject_id="hair-row69-test-user",
+            role=ROLE_REVIEWER_QA,
+        )
+    )
+    db_session.commit()
+
+
+def _preview_payload(**overrides):
+    payload = {
+        "case_id": "SYNTHETIC-ROW69-API-001",
+        "case_version": "case-v1",
+        "goal_version": "goal-v1",
+        "service_kind": "CATALOG_READY",
+        "catalog_identity": {
+            "brand": "بیجورکا",
+            "series": "طبیعی",
+            "shade_number": "۱",
+            "shade_name": "مشکی",
+        },
+    }
+    payload.update(overrides)
+    return payload
+
+
+def test_specialist_preview_requires_internal_role(client, db_session):
+    response = client.post(
+        "/api/v1/hair/specialist-preview",
+        json=_preview_payload(),
+        headers=_headers(),
+    )
+    assert response.status_code == 403
+
+
+def test_specialist_preview_rejects_non_synthetic_case_id(client, db_session):
+    _grant_reviewer_qa(db_session)
+    response = client.post(
+        "/api/v1/hair/specialist-preview",
+        json=_preview_payload(case_id="CASE-REAL-001"),
+        headers=_headers(),
+    )
+    assert response.status_code == 422
+
+
+def test_specialist_preview_returns_internal_evidence_and_limits_only(client, db_session):
+    _grant_reviewer_qa(db_session)
+    response = client.post(
+        "/api/v1/hair/specialist-preview",
+        json=_preview_payload(),
+        headers=_headers(),
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["audience"] == "INTERNAL_REVIEW_ONLY"
+    assert body["data_class"] == "SYNTHETIC_ONLY"
+    assert body["decision"]["recommendation"] is None
+    assert body["decision"]["display_allowed"] is False
+    assert body["decision"]["client_visible"] is False
+    assert body["evidence"]
+    assert body["lineage"]["persistence"] == "COMPUTED_ONLY"
+    assert body["limitations"]
+
+
+def test_specialist_preview_rejects_client_controlled_policy_fields(client, db_session):
+    _grant_reviewer_qa(db_session)
+    payload = _preview_payload()
+    payload["synthetic_data"] = False
+    response = client.post(
+        "/api/v1/hair/specialist-preview",
+        json=payload,
+        headers=_headers(),
+    )
+    assert response.status_code == 422
+
+
+def test_specialist_preview_fails_closed_for_out_of_scope_service(client, db_session):
+    _grant_reviewer_qa(db_session)
+    response = client.post(
+        "/api/v1/hair/specialist-preview",
+        json=_preview_payload(service_kind="COMBINATION_CONSULT"),
+        headers=_headers(),
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["decision"]["status"] == "STOP_OUT_OF_DOMAIN"
+    assert body["decision"]["recommendation"] is None
+    assert body["decision"]["display_allowed"] is False
