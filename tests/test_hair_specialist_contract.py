@@ -307,3 +307,16 @@ def test_missing_reviewer_identity_cannot_be_recorded():
     gate = evaluate_specialist_output(output)
     with pytest.raises(ValueError):
         _review(output, gate, reviewer_id="")
+
+
+
+def test_specialist_qualification_is_an_explicit_po_attestation_not_an_automated_check():
+    output = _output()
+    gate = evaluate_specialist_output(output)
+    with pytest.raises(PermissionError, match="PO-designated Hair Domain Expert"):
+        _review(
+            output,
+            gate,
+            reviewer_role="HAIR_DOMAIN_EXPERT",
+            professional_qualification_verified=False,
+        )
