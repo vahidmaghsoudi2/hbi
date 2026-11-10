@@ -53,7 +53,7 @@ def build_hair_specialist_view(run: HairDecisionRun) -> dict[str, Any]:
             evidence.append({
                 "evidence_id": str(item.get("evidence_id") or item.get("id") or "UNSPECIFIED"),
                 "source_type": str(item.get("source_type") or "UNSPECIFIED"),
-                "source_reference": str(item.get("source_reference") or "UNSPECIFIED"),
+                "source_reference": str(item.get("source_reference") or item.get("source") or "UNSPECIFIED"),
                 "qa_status": str(item.get("qa_status") or "UNSPECIFIED"),
             })
 
@@ -65,7 +65,7 @@ def build_hair_specialist_view(run: HairDecisionRun) -> dict[str, Any]:
             "case_id": run.case_id,
             "case_version": run.case_version,
             "goal_version": run.goal_version,
-            "service_kind": "CATALOG_READY",
+            "service_kind": ("CATALOG_READY" if run.status != "STOP_OUT_OF_DOMAIN" else "OUT_OF_SCOPE"),
         },
         "decision": {
             "status": run.status,
