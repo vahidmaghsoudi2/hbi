@@ -10,7 +10,7 @@
   "publisher_edition": null,
   "publisher_revision": null,
   "publisher_captured_at": null,
-  "validation_status": "REVALIDATE_ON_EVERY_LOAD",
   "expected_row_count": 88,
-  "expected_column_count": 6
+  "expected_column_count": 6,
+  "validation_policy": "REVALIDATE_ON_EVERY_LOAD"
 }
