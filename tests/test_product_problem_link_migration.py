@@ -158,6 +158,73 @@ def test_preexisting_history_gets_missing_assertion_index(tmp_path):
     conn.close()
 
 
+def test_incomplete_preexisting_history_schema_is_rejected_and_restored(tmp_path):
+    import pytest
+
+    script = Path(__file__).resolve().parents[1] / "scripts" / "migrate_product_problem_link_assessments.py"
+    migrate = runpy.run_path(str(script))["migrate"]
+    db = tmp_path / "incomplete_history.db"
+
+    conn = sqlite3.connect(db)
+    conn.executescript("""
+        CREATE TABLE ProductProblemLink (
+            link_id VARCHAR PRIMARY KEY,
+            feature_basis VARCHAR NULL,
+            outcome VARCHAR NULL,
+            assertion_key VARCHAR NULL,
+            revision_no INTEGER NULL,
+            supersedes_link_id VARCHAR NULL,
+            idempotency_key VARCHAR NULL,
+            request_fingerprint VARCHAR NULL
+        );
+
+        CREATE TABLE ProductProblemLinkAssessmentEvent (
+            event_id VARCHAR PRIMARY KEY,
+            link_id VARCHAR NOT NULL,
+            assertion_key VARCHAR NULL
+        );
+
+        INSERT INTO ProductProblemLink VALUES
+            ('L1', 'basis', 'outcome', 'A1', 1, NULL, NULL, NULL);
+        INSERT INTO ProductProblemLinkAssessmentEvent
+            VALUES ('EV1', 'L1', 'A1');
+    """)
+    conn.commit()
+    original_history_sql = conn.execute(
+        "SELECT sql FROM sqlite_master WHERE type='table' "
+        "AND name='ProductProblemLinkAssessmentEvent'"
+    ).fetchone()[0]
+    original_history_row = conn.execute(
+        "SELECT * FROM ProductProblemLinkAssessmentEvent"
+    ).fetchone()
+    original_link_row = conn.execute(
+        "SELECT * FROM ProductProblemLink"
+    ).fetchone()
+    conn.close()
+
+    with pytest.raises(
+        RuntimeError,
+        match="Incomplete ProductProblemLinkAssessmentEvent schema.*actor_id.*actor_role",
+    ):
+        migrate(db)
+
+    conn = sqlite3.connect(db)
+    restored_history_sql = conn.execute(
+        "SELECT sql FROM sqlite_master WHERE type='table' "
+        "AND name='ProductProblemLinkAssessmentEvent'"
+    ).fetchone()[0]
+    assert restored_history_sql == original_history_sql
+    assert conn.execute(
+        "SELECT * FROM ProductProblemLinkAssessmentEvent"
+    ).fetchone() == original_history_row
+    assert conn.execute(
+        "SELECT * FROM ProductProblemLink"
+    ).fetchone() == original_link_row
+    assert conn.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
+    assert conn.execute("PRAGMA foreign_key_check").fetchall() == []
+    conn.close()
+
+
 def test_failed_migration_restores_original_database(tmp_path):
     import pytest
 
