@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict
 
 from app.core.authorization import require_any_role
@@ -29,6 +29,13 @@ from app.domain.hair_catalog_identity_lookup import (
     lookup_catalog_identity,
 )
 from app.models.user_role import ROLE_ADMIN, ROLE_PO, ROLE_REVIEWER_QA
+from app.domain.hair_knowledge_case_bridge import (
+    HairCaseSnapshot,
+    HairKnowledgeCaseBridge,
+    build_approved_catalog_knowledge_package,
+    build_catalog_identity_rule,
+)
+from app.domain.hair_specialist_view import build_hair_specialist_view
 
 router = APIRouter()
 
@@ -77,6 +84,54 @@ def get_approved_hair_catalog_reference() -> tuple[str, CatalogReference] | None
     unknown, so definitive lookup output stays withheld.
     """
     return load_approved_hair_catalog_reference()
+
+
+
+
+class HairSpecialistPreviewRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    case_id: str
+    case_version: str
+    goal_version: str
+    service_kind: str
+    catalog_identity: CatalogIdentityInput
+
+
+@router.post("/specialist-preview")
+async def preview_hair_specialist_view(
+    payload: HairSpecialistPreviewRequest,
+    _auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
+):
+    """Render a non-persistent, synthetic-only specialist review projection."""
+    if not payload.case_id.startswith("SYNTHETIC-"):
+        raise HTTPException(
+            status_code=422,
+            detail="PO-66-09 permits synthetic case identifiers only.",
+        )
+
+    package = build_approved_catalog_knowledge_package()
+    if package is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Approved HBI catalog snapshot is unavailable; preview withheld.",
+        )
+    rule = build_catalog_identity_rule(package)
+    case = HairCaseSnapshot(
+        case_id=payload.case_id,
+        case_version=payload.case_version,
+        goal_version=payload.goal_version,
+        service_kind=payload.service_kind,
+        catalog_identity=payload.catalog_identity.to_domain(),
+        synthetic_data=True,
+    )
+    run = HairKnowledgeCaseBridge().run(
+        case=case,
+        package=package,
+        rule=rule,
+        run_id=f"hair-specialist-preview-{uuid4()}",
+    )
+    return build_hair_specialist_view(run)
 
 
 @router.post(
