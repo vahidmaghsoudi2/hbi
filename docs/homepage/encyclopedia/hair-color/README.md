@@ -5063,3 +5063,25 @@ Provider در روتر هنوز مرجع واقعی برنمی‌گرداند و
 از ۸۸ پیوند موجود در آلبوم، ۵۰ صفحهٔ اختصاصی با موفقیت واکشی شدند و عنوان/سری/شمارهٔ آن‌ها با آلبوم و CSV سازگار بود. واکشی ۳۸ صفحه با timeout، 403، 502 یا robots-check متوقف شد؛ هیچ پاسخ 404 ثبت نشد، پس این موارد خراب فرض نمی‌شوند و `UNVERIFIED_DIRECT_PAGE_FETCH` می‌مانند.
 
 وضعیت برش ۹: `TEXT_RECONCILIATION_PASS (88/88) / DIRECT_PRODUCT_PAGES_PARTIAL (50/88) / IMAGE_MAPPING_PARTIAL / CATALOG_VERSION_UNVERSIONED`. جزئیات در [Progress Master](./PROJECT_PROGRESS_MASTER.md) ثبت شد.
+
+
+### حکم نهایی PO — قفل بستهٔ CATALOG_READY / هویت کاتالوگی نسخهٔ نخست — ۱۰ نوامبر ۲۰۲۶
+
+**کار اجرایی این بسته متوقف و بسته شد.** وضعیت نهایی قابل استناد: تطبیق متنی آلبوم رائیکا با CSV برابر **۸۸/۸۸**؛ صفحات اختصاصی **جزئی، ۵۰/۸۸**؛ نگاشت تصاویر **جزئی**؛ نسخهٔ کاتالوگ **UNVERSIONED** و Hash فایل خام دریافت/محاسبه‌نشده. CI روی c90e42d سبز است، اما این شاهد به معنی PASS عملیاتی کامل نیست. PR #502 همچنان **Open, Draft, Unmerged** می‌ماند.
+
+| برش | وضعیت نهایی |
+|---|---|
+| ۱ | DOMAIN_GUARD_STATIC_CLOSED |
+| ۲ | SLICE2_STATIC_PASS |
+| ۳ | SLICE3_PASS_STATIC |
+| ۴ | SLICE4_PASS_STATIC |
+| ۵ | SLICE5_PASS_STATIC |
+| ۶ | SLICE6_PASS_STATIC |
+| ۷-الف / ۷-ب | پیاده‌سازی و شواهد آزمون محلی ثبت‌شده؛ Provider واقعی متصل نیست |
+| ۸ | SLICE8_PASS_DOCUMENTATION |
+| ۹ | TEXT_RECONCILIATION_PASS (88/88) / DIRECT_PRODUCT_PAGES_PARTIAL (50/88) / IMAGE_MAPPING_PARTIAL / CATALOG_VERSION_UNVERSIONED |
+| ۱۰ | اصلاح قرارداد فیلد/حجم و بدهی CI مرتبط با Skin در سطح SHA؛ بدون PASS عملیاتی کامل |
+
+**کارهای عمداً باز و خارج از دستور جاری PO:** احراز نسخه/Hash کاتالوگ؛ واکاوی ۳۸ صفحهٔ باقی‌مانده؛ نگاشت تصویر سوم؛ Runtime کامل محصولی. ادامهٔ احراز نسخه/Hash/صفحات باقی‌مانده خارج از دستور جاری PO است. این موارد خودکار از سر گرفته نمی‌شوند.
+
+این حکم فقط مستنداتی است؛ کد، CSV و API تغییر نکرده‌اند. PR #502 بدون دستور مستقل PO از Draft خارج یا Merge نشود. هر عبارت قدیمی‌تر در این README که ادامهٔ این مسیر را گام بعدی معرفی می‌کند، با این حکم نهایی جایگزین است.
