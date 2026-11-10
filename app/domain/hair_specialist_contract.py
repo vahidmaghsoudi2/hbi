@@ -21,6 +21,7 @@ class ResponseType(str, Enum):
     NEEDS_MORE_INFORMATION = "NEEDS_MORE_INFORMATION"
     NEEDS_IN_PERSON_REVIEW = "NEEDS_IN_PERSON_REVIEW"
     SAFETY_STOP = "SAFETY_STOP"
+    REQUIRES_IN_PERSON_REVIEW = "REQUIRES_IN_PERSON_REVIEW"
     OUT_OF_SCOPE = "OUT_OF_SCOPE"
 
 
@@ -148,39 +149,45 @@ def evaluate_specialist_output(output: SpecialistOutput, *, engine_ok: bool = Tr
     if not all((output.case_version.strip(), output.goal_version.strip(), output.run_id.strip(), output.proposal_id.strip())):
         return GateResult(GateStatus.DATA_GAP, False, ("VERSION_OR_RUN_ID_MISSING",))
 
+    if not isinstance(output.response_type, ResponseType) or not isinstance(output.motor_state, MotorState):
+        return GateResult(GateStatus.ENGINE_FAIL, False, ("UNKNOWN_RESPONSE_OR_MOTOR_STATE",))
+
+    # Terminal response classes are handled before generic data completeness:
+    # an active safety stop must never be downgraded to a routine data gap.
+    if output.response_type == ResponseType.SAFETY_STOP:
+        if output.motor_state != MotorState.STOP_OR_REFER or not output.reason_code:
+            return GateResult(GateStatus.ENGINE_FAIL, False, ("SAFETY_STOP_CONTRACT_INVALID",))
+        return GateResult(GateStatus.SAFETY_STOP, False, ("SAFETY_STOP",))
+
+    if output.response_type == ResponseType.OUT_OF_SCOPE:
+        if output.motor_state != MotorState.STOP_OR_REFER or not output.reason_code:
+            return GateResult(GateStatus.ENGINE_FAIL, False, ("OUT_OF_SCOPE_CONTRACT_INVALID",))
+        return GateResult(GateStatus.OUT_OF_SCOPE, False, ("OUT_OF_SCOPE",))
+
+    if output.response_type == ResponseType.NEEDS_IN_PERSON_REVIEW:
+        if output.motor_state != MotorState.STOP_OR_REFER or not output.reason_code:
+            return GateResult(GateStatus.ENGINE_FAIL, False, ("IN_PERSON_REVIEW_CONTRACT_INVALID",))
+        return GateResult(
+            GateStatus.REQUIRES_IN_PERSON_REVIEW,
+            False,
+            ("IN_PERSON_REVIEW_REQUIRED",),
+        )
+
     if output.response_type == ResponseType.NEEDS_MORE_INFORMATION:
         if output.motor_state != MotorState.REQUEST_MORE_INFORMATION or not output.missing_data_fields:
             return GateResult(GateStatus.DATA_GAP, False, ("REQUIRED_MISSING_DATA_FIELDS_NOT_DECLARED",))
         return GateResult(GateStatus.DATA_GAP, False, ("REQUIRED_DATA_MISSING",))
 
+    if output.motor_state not in {
+        MotorState.REVIEWABLE_SUGGESTION,
+        MotorState.CONDITIONAL_SUGGESTION,
+    }:
+        return GateResult(GateStatus.ENGINE_FAIL, False, ("RESPONSE_MOTOR_STATE_MISMATCH",))
+    if output.recommendation_payload is not None:
+        return GateResult(GateStatus.ENGINE_FAIL, False, ("RAW_RECOMMENDATION_PAYLOAD_FORBIDDEN",))
+
     if not output.data_complete:
         return GateResult(GateStatus.DATA_GAP, False, ("REQUIRED_DATA_INCOMPLETE",))
-
-    if output.response_type == ResponseType.REVIEWABLE_SUGGESTION:
-        if output.motor_state not in {
-            MotorState.REVIEWABLE_SUGGESTION,
-            MotorState.CONDITIONAL_SUGGESTION,
-        }:
-            return GateResult(GateStatus.ENGINE_FAIL, False, ("RESPONSE_MOTOR_STATE_MISMATCH",))
-        if output.recommendation_payload is not None:
-            return GateResult(GateStatus.ENGINE_FAIL, False, ("RAW_RECOMMENDATION_PAYLOAD_FORBIDDEN",))
-    elif output.motor_state != MotorState.STOP_OR_REFER:
-        return GateResult(GateStatus.ENGINE_FAIL, False, ("STOP_RESPONSE_MUST_STOP_OR_REFER",))
-
-    if output.response_type == ResponseType.SAFETY_STOP:
-        if not output.reason_code:
-            return GateResult(GateStatus.ENGINE_FAIL, False, ("SAFETY_STOP_REASON_REQUIRED",))
-        return GateResult(GateStatus.SAFETY_STOP, False, ("SAFETY_STOP",))
-
-    if output.response_type == ResponseType.NEEDS_IN_PERSON_REVIEW:
-        if not output.reason_code:
-            return GateResult(GateStatus.DATA_GAP, False, ("IN_PERSON_REVIEW_REASON_REQUIRED",))
-        return GateResult(GateStatus.DATA_GAP, False, ("IN_PERSON_REVIEW_REQUIRED",))
-
-    if output.response_type == ResponseType.OUT_OF_SCOPE:
-        if not output.reason_code:
-            return GateResult(GateStatus.OUT_OF_SCOPE, False, ("OUT_OF_SCOPE_REASON_REQUIRED",))
-        return GateResult(GateStatus.OUT_OF_SCOPE, False, ("OUT_OF_SCOPE",))
 
     required = REQUIRED_EVIDENCE_BY_RESPONSE[output.response_type]
     verified_types = {
