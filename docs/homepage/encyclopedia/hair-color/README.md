@@ -5170,3 +5170,22 @@ CI پایه روی commit f9a937a اکنون کامل و سبز است: HBI CI #
 - HBI Pilot Browser Proof run `42882082936`: real-browser proof موفق.
 
 این CI سبز، صحت فنی همین commit را در دامنهٔ آزمون‌های اجراشده نشان می‌دهد؛ نسخهٔ رسمی ناشر را اثبات نمی‌کند. چون Publisher Edition/Revision و Publisher Capture Time هنوز خالی‌اند، خروجی قطعی همچنان مسدود است. ردیف ۶۷ هنوز PARTIAL است و ردیف ۶۸ آغاز نشده است.
+
+
+### ثبت نتیجهٔ نهایی CI روی HEAD فعلی — ۱۰ نوامبر ۲۰۲۶
+
+بازبینی تازهٔ GitHub نشان داد هر سه Workflow که در ثبت قبلی «در حال اجرا» بودند، روی HEAD زیر با موفقیت تکمیل شده‌اند:
+
+- Branch: `docs/hair-color-conceptual-architecture-scenarios-20261102`
+- HEAD بررسی‌شده: `387e85caf3eba223c0d3acfc77db8524de146e1b`
+- HBI CI run [#42882508618](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42882508618): `success`؛ Jobهای `test`، `governance-tests` و `g8-isolated-pilot-smoke` همگی موفق.
+- HBI Auto Tasks run [#42882508582](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42882508582): `success`؛ Job مربوط به Live test evidence موفق.
+- HBI Pilot Browser Proof run [#42882508558](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42882508558): `success`؛ Job مربوط به pilot-browser-proof موفق.
+
+این سه نتیجه، CI و آزمون‌های خودکار تعریف‌شده برای همین HEAD را تأیید می‌کنند؛ تأیید Edition/Revision ناشر، صحت شیمیایی/ایمنی، توصیهٔ فردی یا اجرای خدمت از آن‌ها نتیجه نمی‌شود.
+
+### بازبینی مستقیم صفحهٔ منبع برای فرادادهٔ ناشر — ۱۰ نوامبر ۲۰۲۶
+
+صفحهٔ رسمی آلبوم رائیکا مستقیماً بازبینی شد: https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/ . صفحه تاریخ انتشار «۲۱ اردیبهشت ۱۴۰۲» را نمایش می‌دهد و فهرست اقلام را ارائه می‌کند؛ اما در محتوای قابل مشاهده Edition، Revision یا زمان Capture کاتالوگ درج نشده است. تاریخ انتشار مقاله به‌عنوان نسخهٔ کاتالوگ یا زمان Capture ناشر تفسیر نمی‌شود. بنابراین فیلدهای `publisher_edition`، `publisher_revision` و `publisher_captured_at` در Manifest بدون تغییر و null می‌مانند.
+
+نتیجهٔ وضعیت: CI روی HEAD سبز است؛ ردیف ۶۷ از حیث CI/پیاده‌سازی Snapshot به‌روز شد، اما به علت نبود فرادادهٔ نسخه/زمان ناشر هنوز PARTIAL است و lookup قطعی باید Fail-Closed بماند. ردیف ۶۸ همچنان PRE-FLIGHT ONLY است.
