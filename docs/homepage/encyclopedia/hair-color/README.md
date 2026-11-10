@@ -5135,3 +5135,19 @@ Provider در روتر هنوز مرجع واقعی برنمی‌گرداند و
 مدل CatalogReference و CatalogDecisionOutput این metadata را جدا از Edition/Revision ناشر نگه می‌دارند و در idempotency lineage را حفظ می‌کنند. چهار آزمون منفی/مثبت برای Manifest افزوده شده‌اند. migration/DB یا دادهٔ مشتری وارد این برش نشده است.
 
 CI پایه روی commit f9a937a اکنون کامل و سبز است: HBI CI #2753، Auto Tasks #698 و Pilot Browser Proof #1492. این موفقیت به تغییرات بعدی Provenance تعمیم داده نمی‌شود؛ CI روی HEAD جدید هنوز باید اجرا و تأیید شود. تا احراز نسخهٔ رسمی ناشر، lookup همچنان UNVERSIONED / INCONCLUSIVE / FAIL-CLOSED می‌ماند. PR #502 همچنان Open/Draft/Unmerged است.
+
+
+### ثبت Snapshot داخلی کاتالوگ و تفکیک آن از نسخهٔ ناشر — ۱۰ نوامبر ۲۰۲۶
+
+برای حفظ منشأ قابل‌ردیابی، فایل `catalog/raeaka_bijourka_snapshot.json` به‌عنوان Manifest ثبت داخلی HBI اضافه شده است. این Manifest به CSV دقیقاً ۸۸ ردیفی و SHA-256 همان بایت‌ها متصل است و شامل Snapshot ID، Ingestion ID، URL منبع، مسیر Artifact، زمان ثبت داخلی HBI و سیاست اعتبارسنجی مجدد است.
+
+**تفکیک الزامی:**
+- `snapshot_captured_at` فقط زمان ثبت Snapshot در HBI است؛ زمان Capture ناشر نیست.
+- `publisher_edition`، `publisher_revision` و `publisher_captured_at` فعلاً خالی‌اند؛ هیچ نسخه یا زمان رسمی ناشر جعل نشده است.
+- `validation_policy=REVALIDATE_ON_EVERY_LOAD` سیاست اعتبارسنجی است؛ `snapshot_validation_status=VALIDATED_ON_LOAD` نتیجهٔ اعتبارسنجی موفق در همان بارگذاری است.
+- Provider در هر بار بارگذاری، Manifest و Hash را دوباره کنترل می‌کند و در صورت هر مغایرت یا نقص، مرجع را Fail-Closed رد می‌کند.
+- Snapshot lineage به CatalogReference، CatalogDecisionOutput و کلید idempotency منتقل می‌شود.
+
+این تغییر، ثبت و تأیید قطعی ۸۸ شماره‌رنگ را تغییر نمی‌دهد؛ اما به‌تنهایی نسخهٔ رسمی ناشر را احراز نمی‌کند. تا زمان وجود Edition/Revision و زمان Capture معتبر ناشر، lookup قطعی و نمایش نتیجه همچنان مسدود است. هیچ migration، تغییر DB، دادهٔ مشتری، توصیهٔ فردی یا قابلیت شیمیایی اضافه نشده است.
+
+جزئیات commitها، آزمون‌ها و وضعیت CI جاری در `PROJECT_PROGRESS_MASTER.md` ثبت می‌شوند. PR #502 باید Open / Draft / Unmerged بماند.
