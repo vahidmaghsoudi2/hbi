@@ -1045,3 +1045,23 @@ HEAD بررسی‌شده: `e9cc2b92ed192b4e7ad77e06834354607f82153e`.
 این نتایج به SHA فوق تعلق دارند. شکست قبلی Auto Tasks روی SHA پیشین به‌دلیل assertion ناسازگار با قرارداد snapshot بود؛ اصلاح انجام شد و اجرای نهایی هر سه workflow روی HEAD جدید سبز است.
 
 **وضعیت جاری ردیف ۶۷:** پیاده‌سازی Snapshot داخلی، اعتبارسنجی Manifest/Hash، تفکیک validation policy از validation result، انتقال lineage و آزمون‌های Provider روی HEAD دارای CI سبز هستند. با این حال Publisher Edition/Revision و زمان Capture ناشر همچنان نامعلوم‌اند؛ بنابراین lookup قطعی همچنان Fail-Closed می‌ماند. ردیف ۶۷ **PARTIAL** است، نه Complete. ردیف ۶۸ هنوز آغاز نشده است. PR #502 همچنان Open / Draft / Unmerged است.
+
+
+### ثبت نتیجهٔ نهایی CI و بازبینی منبع — به‌روزرسانی ۱۰ نوامبر ۲۰۲۶
+
+این الحاقیه، وضعیت «در حال اجرا» در ثبت قبلی را با نتیجهٔ نهایی GitHub جایگزین می‌کند.
+
+- شاخه: `docs/hair-color-conceptual-architecture-scenarios-20261102`
+- HEAD مبنای اجرای CI: `387e85caf3eba223c0d3acfc77db8524de146e1b`
+- HBI CI run [#42882508618](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42882508618): `completed / success`؛ هر سه Job یعنی `test`، `governance-tests` و `g8-isolated-pilot-smoke` موفق.
+- HBI Auto Tasks run [#42882508582](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42882508582): `completed / success`؛ Job مربوط به Live test evidence موفق.
+- HBI Pilot Browser Proof run [#42882508558](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42882508558): `completed / success`؛ Job مربوط به pilot-browser-proof موفق.
+- ثبت تکمیلی در README پس از این اجرای CI فقط مستنداتی است و منطق/کد آزموده‌شده را تغییر نداده است.
+
+**بازبینی منبع ناشر:** صفحهٔ آلبوم رائیکا در ۱۰ نوامبر ۲۰۲۶ مستقیماً بازبینی شد: https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/ . تاریخ انتشار قابل مشاهدهٔ صفحه «۲۱ اردیبهشت ۱۴۰۲» است؛ در محتوای قابل مشاهده Edition، Revision یا زمان Capture کاتالوگ اعلام نشده است. تاریخ انتشار مقاله جایگزین نسخه یا زمان Capture کاتالوگ نیست. بنابراین `publisher_edition`، `publisher_revision` و `publisher_captured_at` در Manifest همچنان null می‌مانند؛ هیچ فراداده‌ای حدس یا جعل نشده است.
+
+**وضعیت ردیف ۶۷:** Provider/API و HBI Snapshot Provenance پیاده‌سازی شده‌اند و CI روی HEAD مبنا سبز است. با این حال فرادادهٔ نسخه/زمان ناشر در منبع قابل مشاهده نیست؛ بنابراین معیار منشأ نسخه‌دار تکمیل نشده و ردیف ۶۷ همچنان **PARTIAL** است، نه Complete. ثبت و تأیید ۸۸ شماره‌رنگ بدون تغییر و قطعی باقی می‌ماند. lookup قطعی تا رفع شکاف منشأ همچنان `UNVERSIONED / INCONCLUSIVE / FAIL-CLOSED` است.
+
+**وضعیت ردیف ۶۸:** `PRE-FLIGHT ONLY / NOT STARTED`. این الحاقیه مجوز شروع ردیف ۶۸، ورود دادهٔ واقعی مشتری، ساخت Rule شیمیایی/ایمنی، توصیه یا پیش‌بینی نتیجه ایجاد نمی‌کند؛ جزئیات PO-66-09 و مجوز مستقل همچنان لازم‌اند.
+
+**وضعیت PR:** PR #502 همچنان باید Open / Draft / Unmerged بماند؛ هیچ Merge یا تغییر وضعیت PR انجام نشده است.
