@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import csv
 import hashlib
+from io import StringIO
 from pathlib import Path
 
 from app.domain.hair_catalog_identity_lookup import CatalogReference
@@ -49,7 +50,7 @@ def load_approved_hair_catalog_reference() -> tuple[str, CatalogReference] | Non
     try:
         raw = path.read_bytes()
         text = raw.decode("utf-8-sig")
-        rows = list(csv.DictReader(text.splitlines()))
+        rows = list(csv.DictReader(StringIO(text, newline="")))
     except (OSError, UnicodeDecodeError, csv.Error):
         return None
 
