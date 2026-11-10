@@ -472,3 +472,66 @@ def test_already_migrated_repairs_run_inside_immediate_transaction(tmp_path):
     ).fetchone()[0] == 1
     assert conn.execute("PRAGMA foreign_key_check").fetchall() == []
     conn.close()
+
+def test_already_migrated_repairs_missing_event_assertion_index(tmp_path):
+    migrate = _migrate()
+    db = tmp_path / "missing_event_assertion_idx.db"
+    conn = sqlite3.connect(db)
+    conn.executescript(_legacy_sql())
+    conn.close()
+
+    assert migrate(db).startswith("MIGRATED")
+
+    conn = sqlite3.connect(db)
+    conn.execute(
+        "DROP INDEX ix_ProductProblemLinkAssessmentEvent_assertion_key"
+    )
+    conn.commit()
+    conn.close()
+
+    result = migrate(db)
+    assert result.startswith("ALREADY MIGRATED")
+
+    conn = sqlite3.connect(db)
+    indexes = {
+        row[1]
+        for row in conn.execute(
+            'PRAGMA index_list("ProductProblemLinkAssessmentEvent")'
+        )
+    }
+    assert "ix_ProductProblemLinkAssessmentEvent_assertion_key" in indexes
+    assert conn.execute("PRAGMA foreign_key_check").fetchall() == []
+    conn.close()
+
+
+def test_legacy_migration_failure_restores_original_schema_and_rows(tmp_path):
+    migrate = _migrate()
+    db = tmp_path / "legacy_failed_migration_restore.db"
+    conn = sqlite3.connect(db)
+    conn.executescript(_legacy_sql())
+
+    # Preserve a deliberately invalid legacy FK so post-migration verification fails.
+    conn.execute("PRAGMA foreign_keys=OFF")
+    conn.execute(
+        "UPDATE ProductProblemLink SET product_id='P_MISSING' WHERE link_id='L1'"
+    )
+    conn.commit()
+    conn.close()
+
+    with pytest.raises(RuntimeError, match="Foreign-key violations"):
+        migrate(db)
+
+    conn = sqlite3.connect(db)
+    columns = {
+        row[1]
+        for row in conn.execute('PRAGMA table_info("ProductProblemLink")')
+    }
+    assert "feature_basis" not in columns
+    assert conn.execute(
+        "SELECT link_id, product_id, relationship_status "
+        "FROM ProductProblemLink WHERE link_id='L1'"
+    ).fetchone() == ("L1", "P_MISSING", "NOT_LINKED")
+    assert conn.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
+    assert conn.execute("PRAGMA foreign_key_check").fetchall()
+    conn.close()
+
