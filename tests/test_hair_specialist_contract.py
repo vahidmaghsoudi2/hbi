@@ -374,3 +374,18 @@ def test_non_contract_gate_is_rejected_for_specialist_review():
             reviewed_case_version=output.case_version,
             reviewed_goal_version=output.goal_version,
         )
+
+
+
+def test_evidence_with_malformed_typed_fields_does_not_satisfy_knowledge_gate():
+    malformed = EvidenceRef(
+        evidence_id=None,
+        evidence_type="PRODUCT_IDENTITY",
+        source_reference="synthetic://evidence/malformed",
+        verification_status="VERIFIED",
+        content_sha256="a" * 64,
+        scope="synthetic-test-scope",
+    )
+    gate = evaluate_specialist_output(_output(evidence=(malformed,)))
+    assert gate.status == GateStatus.KNOWLEDGE_GAP
+    assert "PRODUCT_IDENTITY" in gate.missing_evidence_types
