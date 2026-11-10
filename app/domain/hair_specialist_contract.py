@@ -221,11 +221,16 @@ def record_specialist_review(
     reviewed_case_version: str,
     reviewed_goal_version: str,
 ) -> SpecialistReview:
-    """Validate a one-version specialist review; returns an in-memory record only."""
+    """Validate a one-version specialist review; returns an in-memory record only.
+
+    Product Owner owns specialist designation and qualification attestation.
+    This pure contract checks the explicit attestation flag and designated role;
+    it does not independently investigate or certify a person's credentials.
+    """
     if not gate.publishable_to_internal_review or gate.status != GateStatus.READY_FOR_SPECIALIST_REVIEW:
         raise ValueError("Output is not eligible for specialist review")
     if reviewer_role != "HAIR_DOMAIN_EXPERT" or professional_qualification_verified is not True:
-        raise PermissionError("A verified Hair Domain Expert is required; QA/PO/Admin roles are insufficient")
+        raise PermissionError("A PO-designated Hair Domain Expert with explicit PO qualification attestation is required; operational QA/PO/Admin roles alone are not specialist designation")
     if not isinstance(decision, ReviewDecision):
         raise ValueError("A recognized specialist review decision is required")
     if not reviewer_id.strip() or not reason.strip():
