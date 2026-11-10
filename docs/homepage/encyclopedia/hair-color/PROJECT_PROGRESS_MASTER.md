@@ -961,3 +961,54 @@
 **ردیف ۶۷:** Provider/API پیاده‌سازی شده و CI پایه روی f9a937a سبز است؛ مدل Snapshot و Manifest پیاده‌سازی و آزمون‌نویسی شده‌اند، اما CI جدید در انتظار است. احراز Edition/Revision رسمی ناشر همچنان باز است و با زمان Snapshot داخلی جایگزین نمی‌شود. ردیف ۶۷ هنوز Complete نیست.
 
 **گام بعدی:** بررسی CI روی HEAD جدید، رفع هر شکست واقعی، سپس بازبینی معیارهای مجاز باقی‌مانده و آماده‌سازی دروازهٔ ردیف ۶۸ بدون فعال‌سازی توصیه یا پیش‌بینی شیمیایی. PR #502 باز، Draft و Unmerged باقی بماند.
+
+
+### به‌روزرسانی اجرایی ردیف ۶۷ — ثبت Snapshot داخلی و تفکیک منشأ ناشر، ۱۰ نوامبر ۲۰۲۶
+
+**این الحاقیه وضعیت اجرایی را پس از دستور جدید PO به‌روز می‌کند.** دستور جاری PO ادامهٔ کار فنی مجاز در ردیف ۶۷ را دوباره فعال کرده است؛ بنابراین عبارت قدیمی‌تر «بستهٔ CATALOG_READY قفل و هر ادامه‌ای متوقف است» فقط نسبت به محدوده‌های قبلیِ بسته‌شده و کارهای خارج از مجوز معتبر می‌ماند و مانع ادامهٔ همین فعالیت صریحاً مجازشدهٔ ردیف ۶۷ نیست. تأیید ۸۸ شماره‌رنگ بدون تغییر و قطعی است.
+
+#### مدل منشأ پیاده‌سازی‌شده
+
+- فایل Snapshot داخلی افزوده شد: `docs/homepage/encyclopedia/hair-color/catalog/raeaka_bijourka_snapshot.json`.
+- Snapshot ID: `hbi-hair-catalog-snapshot-20261110-185700z`.
+- Ingestion ID: `hbi-hair-catalog-ingestion-20261110-185700z-01`.
+- زمان ثبت Snapshot در HBI: `2026-11-10T18:57:00Z`؛ این زمان فقط ثبت داخلی HBI است و به‌عنوان زمان Capture ناشر معرفی نمی‌شود.
+- روش ثبت: `HBI_REPOSITORY_ARTIFACT_REGISTRATION`.
+- Hash ثبت‌شده به محتوای CSV متصل است و Provider در هر بار بارگذاری، Hash فایل را مجدداً با Manifest تطبیق می‌دهد.
+- سیاست اعتبارسنجی: `REVALIDATE_ON_EVERY_LOAD`؛ وضعیت اجرای موفق اعتبارسنجی در شیء مرجع `VALIDATED_ON_LOAD` است. این دو مفهوم عمداً از هم جدا شده‌اند.
+- فیلدهای `publisher_edition`، `publisher_revision` و `publisher_captured_at` فعلاً null هستند؛ نسخه یا زمان رسمی ناشر جعل نشده است.
+- Provider در صورت فقدان Manifest، Hash نامنطبق، timestamp بدون timezone، URL/path متفاوت، schema نامعتبر یا فیلدهای لازم ناقص، مرجع را بارگذاری نمی‌کند (Fail-Closed).
+- Snapshot ID، زمان ثبت داخلی، Ingestion ID و وضعیت اعتبارسنجی به `CatalogReference` و سپس به `CatalogDecisionOutput` منتقل شده و در کلید idempotency نیز لحاظ می‌شوند.
+- هیچ migration، تغییر DB، دادهٔ مشتری یا تغییر در CSV انجام نشده است.
+
+#### اصلاحات آزمون
+
+- آزمون Provider اصلاح شد تا شناسهٔ مرجع را با Snapshot ID مقایسه کند، نه اینکه انتظار داشته باشد شناسهٔ داخلی به Hash ختم شود.
+- آزمون Manifest اصلاح شد تا `validation_policy` را از `snapshot_validation_status` جدا کند.
+- یک اجرای Auto Tasks در SHA پیشین به‌دلیل assertion قدیمیِ وضعیت اعتبارسنجی شکست خورد: **809 passed, 1 failed**. علت دقیق شناسایی و assertion اصلاح شد؛ این شکست به‌عنوان شکست تاریخی ثبت می‌شود و نباید پنهان یا به‌عنوان موفقیت گزارش شود.
+- Commitهای این مرحله:
+  - `6b337b3f4b835f82c91d89797d65846c3e8dfc16` — انتقال Snapshot lineage به خروجی تصمیم و idempotency.
+  - `6094adfc41086d3ed3f8e77066e925ad32edc2d7` — اصلاح انتظار شناسهٔ Snapshot در آزمون Provider.
+  - `f8b3264478e9c1c2c2c0345c13692eddb358e409` — اصلاح assertion وضعیت اعتبارسنجی در آزمون Manifest.
+  - `42ba9ae96ab5ccd86f4f4ac40fa1483ccd128efe` — تفکیک validation policy از validation result در Provider.
+  - `d4ed4bf6adb00f64900e7713ec970cf95dffb571` — اصلاح Manifest به فیلد validation_policy.
+  - `971e4472871791e99f8ae971682ae9545d4b0e2d` — اصلاح آزمون برای قرارداد جدید validation policy/result.
+
+#### وضعیت CI روی HEAD فعلی در زمان ثبت
+
+HEAD بررسی‌شده: `971e4472871791e99f8ae971682ae9545d4b0e2d`.
+
+- HBI CI: run `42881784629` — در حال اجرا؛ governance-tests موفق، دو Job دیگر هنوز نهایی نشده‌اند.
+- HBI Pilot Browser Proof: run `42881784639` — در حال اجرا.
+- HBI Auto Tasks: run `42881784778` — در حال اجرای Pytest + coverage.
+- نتیجهٔ CI قبلی روی commit `f9a937af382fa281e770b54769d9572695c18229` اکنون نهایی و موفق است: HBI CI run `42878502106`، Auto Tasks run `42878501922` و Pilot Browser Proof run `42878502069` همگی success شدند. این موفقیت فقط به همان commit تعلق دارد و جایگزین انتظار برای CI روی HEAD جدید نیست.
+
+#### وضعیت ردیف ۶۷ و دروازهٔ ۶۸
+
+- اتصال Provider، API lookup، سخت‌سازی عضویت دقیق و کنترل Hash انجام شده‌اند.
+- مدل Snapshot داخلی و انتقال lineage به خروجی پیاده‌سازی شده است؛ آزمون‌های CI روی HEAD جدید هنوز باید نهایی شوند.
+- نسخه/Revision رسمی ناشر و زمان Capture ناشر هنوز نامعلوم‌اند؛ بنابراین خروجی قطعی همچنان باید Fail-Closed بماند.
+- ردیف ۶۷ هنوز **PARTIAL / IN PROGRESS** است و Complete اعلام نمی‌شود.
+- هیچ migration یا اتصال به پروندهٔ واقعی مشتری انجام نشده است.
+- ردیف ۶۸ هنوز آغاز نشده؛ فقط پس از تکمیل معیارهای ردیف ۶۷ و بررسی دروازه و مجوز مستقل قابل شروع است.
+- PR #502 همچنان Open / Draft / Unmerged باقی می‌ماند.
