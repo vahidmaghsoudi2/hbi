@@ -3,6 +3,21 @@ import { Link } from "react-router-dom";
 import { previewHairSpecialist } from "../api/client";
 import type { HairSpecialistPreviewResponse } from "../types/api";
 
+const specialistResponseTypes = [
+  { code: "REVIEWABLE_SUGGESTION", label: "پیشنهاد قابل بازبینی متخصص" },
+  { code: "NEEDS_MORE_INFORMATION", label: "نیازمند اطلاعات بیشتر" },
+  { code: "NEEDS_IN_PERSON_REVIEW", label: "نیازمند بررسی حضوری" },
+  { code: "SAFETY_STOP", label: "توقف ایمنی" },
+  { code: "OUT_OF_SCOPE", label: "خارج از دامنهٔ نسخهٔ اول" },
+];
+
+const motorStates = [
+  { code: "REVIEWABLE_SUGGESTION", label: "پیشنهاد قابل بازبینی" },
+  { code: "CONDITIONAL_SUGGESTION", label: "پیشنهاد مشروط به شرط مشخص" },
+  { code: "REQUEST_MORE_INFORMATION", label: "درخواست اطلاعات بیشتر" },
+  { code: "STOP_OR_REFER", label: "توقف یا ارجاع با دلیل" },
+];
+
 const initialIdentity = {
   brand: "بیجورکا",
   series: "طبیعی",
@@ -66,6 +81,21 @@ export default function HairSpecialistPreviewPage() {
         <strong>محدودیت قطعی PO-66-09:</strong> فقط دادهٔ مصنوعی مجاز است. دادهٔ واقعی مشتری دریافت یا ذخیره نمی‌شود.
         این صفحه ابزار تصمیم شیمیایی یا تأیید اجرای خدمت نیست.
       </div>
+
+      <section className="card" aria-labelledby="hair-specialist-contract-heading">
+        <h2 id="hair-specialist-contract-heading">قرارداد انواع پاسخ و حالت موتور</h2>
+        <p>این فهرست، قرارداد ثابت سامانه است؛ به معنی تولید توصیه یا فعال‌بودن هیچ قاعدهٔ شیمیایی نیست.</p>
+        <h3>پنج نوع پاسخ مشاوره</h3>
+        <ul className="hair-specialist-contract-list">
+          {specialistResponseTypes.map(item => <li key={item.code}><strong>{item.label}</strong><span className="meta">{item.code}</span></li>)}
+        </ul>
+        <h3>چهار حالت مستقل موتور</h3>
+        <ul className="hair-specialist-contract-list">
+          {motorStates.map(item => <li key={item.code}><strong>{item.label}</strong><span className="meta">{item.code}</span></li>)}
+        </ul>
+        <p className="meta">«پیشنهاد مشروط» حالت موتور است و نوع پاسخ ششم محسوب نمی‌شود.</p>
+        <p className="meta">تعیین و احراز صلاحیت متخصص بر عهدهٔ Product Owner است؛ سامانه در این برش صلاحیت حرفه‌ای اشخاص را مستقلاً ارزیابی نمی‌کند.</p>
+      </section>
 
       {!adminToken && <div className="alert error" role="alert">نشست مدیر در مرورگر موجود نیست. ابتدا وارد سامانه شوید.</div>}
 
