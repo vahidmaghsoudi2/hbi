@@ -5116,4 +5116,4 @@ Provider در روتر هنوز مرجع واقعی برنمی‌گرداند و
 - محدودیت نسخه/منشأ همچنان برقرار است: Hash، هویت بایت‌های فایل را می‌دهد، نه Edition/Revision ناشر یا زمان Capture مستند. خروجی قطعی همچنان ممنوع است.
 
 
-**وضعیت اجرای CI برای سخت‌سازی اخیر:** روی commit کد `f9a937af382fa281e770b54769d9572695c18229`، HBI CI run #2753 در صف، HBI Auto Tasks run #698 در مرحلهٔ Pytest + coverage و HBI Pilot Browser Proof run #1492 در مرحلهٔ نصب frontend/Playwright قرار دارند. نتیجهٔ نهایی هنوز صادر نشده است؛ نتیجهٔ موفق CI قبلی به این commit تعمیم داده نمی‌شود.
+**وضعیت اجرای CI برای سخت‌سازی اخیر:** روی commit کد `f9a937af382fa281e770b54769d9572695c18229`، HBI Auto Tasks run #698 با Pytest + coverage موفق و HBI Pilot Browser Proof run #1492 با real-browser proof موفق تکمیل شده‌اند. HBI CI run #2753 هنوز در حال اجراست و نتیجهٔ نهایی سه job آن صادر نشده است. نتیجهٔ موفق CI قبلی به این commit تعمیم داده نمی‌شود.
