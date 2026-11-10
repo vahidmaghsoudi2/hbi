@@ -227,3 +227,10 @@ def test_specialist_preview_fails_closed_for_out_of_scope_service(client, db_ses
     assert body["decision"]["status"] == "STOP_OUT_OF_DOMAIN"
     assert body["decision"]["recommendation"] is None
     assert body["decision"]["display_allowed"] is False
+
+
+def test_policy_blocked_run_cannot_be_presented_even_with_synthetic_prefix():
+    run = _run(synthetic_data=False)
+    assert run.status == "STOP_DATA_POLICY"
+    with pytest.raises(ValueError):
+        build_hair_specialist_view(run)
