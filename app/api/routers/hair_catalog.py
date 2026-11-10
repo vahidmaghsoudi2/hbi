@@ -35,8 +35,8 @@ class CatalogIdentityInput(BaseModel):
     series: str | None = None
     shade_number: str | None = None
     shade_name: str | None = None
-    size_value: str | None = None
-    size_unit: str | None = None
+    product_specification: str | None = None
+    product_volume: str | None = None
 
     def to_domain(self) -> CatalogIdentity:
         return CatalogIdentity(
@@ -44,8 +44,8 @@ class CatalogIdentityInput(BaseModel):
             series=self.series,
             shade_number=self.shade_number,
             shade_name=self.shade_name,
-            size_value=self.size_value,
-            size_unit=self.size_unit,
+            product_specification=self.product_specification,
+            product_volume=self.product_volume,
         )
 
 
