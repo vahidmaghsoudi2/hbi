@@ -53,6 +53,11 @@ class CatalogReference:
     edition_label: str | None
     captured_at: str | None
     content_sha256: str | None = None
+    # HBI snapshot lineage is independent of publisher-issued edition/capture.
+    snapshot_id: str | None = None
+    snapshot_captured_at: str | None = None
+    ingestion_id: str | None = None
+    snapshot_validation_status: str | None = None
 
 
 @dataclass(frozen=True)
