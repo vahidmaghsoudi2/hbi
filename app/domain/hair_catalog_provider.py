@@ -198,6 +198,6 @@ def load_approved_hair_catalog_reference() -> tuple[str, CatalogReference] | Non
         snapshot_id=str(manifest["snapshot_id"]),
         snapshot_captured_at=str(manifest["snapshot_captured_at"]),
         ingestion_id=str(manifest["ingestion_id"]),
-        snapshot_validation_status=str(manifest["validation_status"]),
+        snapshot_validation_status="VALIDATED_ON_LOAD",
     )
     return reference_id, reference
