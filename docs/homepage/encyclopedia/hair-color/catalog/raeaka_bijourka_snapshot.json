@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "snapshot_id": "hbi-hair-catalog-snapshot-20261110-185700z",
+  "ingestion_id": "hbi-hair-catalog-ingestion-20261110-185700z-01",
+  "source_url": "https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/",
+  "artifact_path": "docs/homepage/encyclopedia/hair-color/catalog/raeaka_bijourka_catalog.csv",
+  "snapshot_captured_at": "2026-11-10T18:57:00Z",
+  "capture_method": "HBI_REPOSITORY_ARTIFACT_REGISTRATION",
+  "content_sha256": "1887a7d166164639e2c235a7144fe6b27b4861f5c36fac9af383bef14eec1212",
+  "publisher_edition": null,
+  "publisher_revision": null,
+  "publisher_captured_at": null,
+  "validation_status": "REVALIDATE_ON_EVERY_LOAD",
+  "expected_row_count": 88,
+  "expected_column_count": 6
+}
