@@ -256,6 +256,10 @@ class CatalogDecisionOutput:
     decision_output_id: str
     prior_output_id: str | None = None
     inherited_approval_state: Literal["NONE"] = "NONE"
+    snapshot_id: str | None = None
+    snapshot_captured_at: str | None = None
+    ingestion_id: str | None = None
+    snapshot_validation_status: str | None = None
 
 
 def _edition_or_unversioned(value: str | None) -> str:
@@ -296,6 +300,10 @@ def catalog_lookup_idempotency_key(
         "version_label", _edition_or_unversioned(reference.edition_label),
         "captured_at", reference.captured_at,
         "content_sha256", reference.content_sha256,
+        "snapshot_id", reference.snapshot_id,
+        "snapshot_captured_at", reference.snapshot_captured_at,
+        "ingestion_id", reference.ingestion_id,
+        "snapshot_validation_status", reference.snapshot_validation_status,
         "identity_values", *identity_values,
         "provenance_count", str(len(provenance)), *provenance,
         "evidence_pointer_count", str(len(evidence_reference_pointers)),
@@ -385,6 +393,10 @@ def build_catalog_decision_output(
         decision_output_id=decision_output_id,
         prior_output_id=prior_output_id,
         inherited_approval_state="NONE",
+        snapshot_id=reference.snapshot_id,
+        snapshot_captured_at=reference.snapshot_captured_at,
+        ingestion_id=reference.ingestion_id,
+        snapshot_validation_status=reference.snapshot_validation_status,
     )
 
 
