@@ -25,6 +25,9 @@ def test_approved_catalog_provider_loads_exact_88_row_artifact():
     assert metadata.approval_status == "PO_APPROVED"
     assert metadata.edition_label is None
     assert metadata.captured_at is None
+    assert metadata.snapshot_captured_at == "2026-11-10T18:57:00Z"
+    assert metadata.ingestion_id == "hbi-hair-catalog-ingestion-20261110-185700z-01"
+    assert metadata.snapshot_validation_status == "VALIDATED_ON_LOAD"
     assert len(raw.decode("utf-8-sig").splitlines()) - 1 == EXPECTED_DATA_ROWS
 
 
