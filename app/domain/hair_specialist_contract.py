@@ -100,6 +100,8 @@ class SpecialistReview:
     # Explicit invariants: a review never means client acceptance or consent.
     client_acceptance: bool = False
     execution_consent: bool = False
+    client_visible: bool = False
+    execution_authorized: bool = False
     persisted: bool = False
 
 
@@ -224,6 +226,8 @@ def record_specialist_review(
         raise ValueError("Output is not eligible for specialist review")
     if reviewer_role != "HAIR_DOMAIN_EXPERT" or professional_qualification_verified is not True:
         raise PermissionError("A verified Hair Domain Expert is required; QA/PO/Admin roles are insufficient")
+    if not isinstance(decision, ReviewDecision):
+        raise ValueError("A recognized specialist review decision is required")
     if not reviewer_id.strip() or not reason.strip():
         raise ValueError("Reviewer identity and decision reason are required")
     if (
