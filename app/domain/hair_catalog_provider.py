@@ -1,9 +1,8 @@
 """Read-only server-side provider for the PO-approved 88-row hair catalog.
 
-The CSV is treated as a catalog identity artifact only. It is not evidence of
-chemical composition, safety, suitability, or an expected result. The source
-edition and capture timestamp are intentionally left unset: the artifact is
-not versioned, so downstream lookup must remain inconclusive/fail-closed.
+The CSV is a catalog identity artifact only. It is not evidence of chemical
+composition, safety, suitability, or an expected result. Publisher edition
+and source-capture provenance remain unset until independently established.
 """
 from __future__ import annotations
 
@@ -27,11 +26,8 @@ EXPECTED_HEADERS = (
     "مشخصات قلم محصول",
     "حجم محصول",
 )
+IDENTITY_COLUMNS = ("برند", "سری محصول", "شماره رنگ", "نام رنگ")
 REFERENCE_URL = "https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/"
-
-
-class HairCatalogProviderError(RuntimeError):
-    """Raised when the approved catalog artifact is missing or malformed."""
 
 
 def _catalog_path() -> Path:
@@ -39,37 +35,60 @@ def _catalog_path() -> Path:
     return repository_root / CATALOG_RELATIVE_PATH
 
 
+def _read_validated_catalog() -> tuple[bytes, list[dict[str, str]]] | None:
+    """Read one byte snapshot and validate its shape and identity uniqueness."""
+    try:
+        raw = _catalog_path().read_bytes()
+        text = raw.decode("utf-8-sig")
+        rows = list(csv.DictReader(StringIO(text, newline="")))
+    except (OSError, UnicodeDecodeError, csv.Error):
+        return None
+
+    if len(rows) != EXPECTED_DATA_ROWS:
+        return None
+    if tuple(rows[0].keys()) != EXPECTED_HEADERS:
+        return None
+    if any(tuple(row.keys()) != EXPECTED_HEADERS for row in rows):
+        return None
+
+    seen: set[tuple[str, ...]] = set()
+    for row in rows:
+        if any(
+            not isinstance(row.get(column), str) or not row[column].strip()
+            for column in IDENTITY_COLUMNS
+        ):
+            return None
+        identity = tuple(row[column] for column in IDENTITY_COLUMNS)
+        if identity in seen:
+            return None
+        seen.add(identity)
+
+    return raw, rows
+
+
 def approved_catalog_contains_identity(
     identity: CatalogIdentity,
     *,
     expected_content_sha256: str | None = None,
 ) -> bool:
-    """Return True only when all four identity fields exactly match a CSV row.
+    """Return True only for an exact identity in the validated server CSV.
 
     No normalization, aliases, fuzzy matching, or caller-provided source
-    metadata are accepted. Invalid/missing catalog data fails closed.
+    metadata are accepted. When supplied, the expected hash binds this
+    membership check to the exact reference snapshot already loaded by API.
     """
     if not isinstance(identity, CatalogIdentity):
         return False
-    path = _catalog_path()
-    try:
-        raw = path.read_bytes()
-        text = raw.decode("utf-8-sig")
-        rows = list(csv.DictReader(StringIO(text, newline="")))
-    except (OSError, UnicodeDecodeError, csv.Error):
+
+    snapshot = _read_validated_catalog()
+    if snapshot is None:
+        return False
+    raw, rows = snapshot
+
+    digest = hashlib.sha256(raw).hexdigest()
+    if expected_content_sha256 is not None and digest != expected_content_sha256:
         return False
 
-    if expected_content_sha256 is not None:
-        if hashlib.sha256(raw).hexdigest() != expected_content_sha256:
-            return False
-    if not rows or len(rows) != EXPECTED_DATA_ROWS:
-        return False
-    if tuple(rows[0].keys()) != EXPECTED_HEADERS:
-        return False
-    if any(tuple(row.keys()) != EXPECTED_HEADERS for row in rows):
-        return False
-
-    required = ("برند", "سری محصول", "شماره رنگ", "نام رنگ")
     values = (
         identity.brand,
         identity.series,
@@ -79,49 +98,23 @@ def approved_catalog_contains_identity(
     if any(not isinstance(value, str) or not value.strip() for value in values):
         return False
 
-    seen: set[tuple[str, ...]] = set()
-    for row in rows:
-        if any(not isinstance(row.get(field), str) or not row[field].strip() for field in required):
-            return False
-        key = tuple(row[field] for field in required)
-        if key in seen:
-            return False
-        seen.add(key)
-
-    return values in seen
+    identities = {
+        tuple(row[column] for column in IDENTITY_COLUMNS)
+        for row in rows
+    }
+    return values in identities
 
 
 def load_approved_hair_catalog_reference() -> tuple[str, CatalogReference] | None:
-    """Load and validate the server-owned CSV; never infer a version label.
+    """Load the validated server-owned CSV reference without inventing a version.
 
-    A missing or malformed artifact returns None so the API can fail closed.
-    The content hash identifies the exact bytes currently loaded; it does not
-    substitute for a publisher-issued edition or capture provenance.
+    The SHA-256 identifies the exact bytes. It does not substitute for a
+    publisher-issued edition/revision or a separately evidenced capture time.
     """
-    path = _catalog_path()
-    try:
-        raw = path.read_bytes()
-        text = raw.decode("utf-8-sig")
-        rows = list(csv.DictReader(StringIO(text, newline="")))
-    except (OSError, UnicodeDecodeError, csv.Error):
+    snapshot = _read_validated_catalog()
+    if snapshot is None:
         return None
-
-    if not rows or len(rows) != EXPECTED_DATA_ROWS:
-        return None
-    if tuple(rows[0].keys()) != EXPECTED_HEADERS:
-        return None
-    if any(tuple(row.keys()) != EXPECTED_HEADERS for row in rows):
-        return None
-
-    required = ("برند", "سری محصول", "شماره رنگ", "نام رنگ")
-    seen: set[tuple[str, ...]] = set()
-    for row in rows:
-        if any(not isinstance(row.get(field), str) or not row[field].strip() for field in required):
-            return None
-        identity = tuple(row[field] for field in required)
-        if identity in seen:
-            return None
-        seen.add(identity)
+    raw, _ = snapshot
 
     digest = hashlib.sha256(raw).hexdigest()
     reference_id = f"raeaka-bijourka-csv-sha256-{digest}"
