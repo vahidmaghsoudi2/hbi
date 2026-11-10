@@ -4,9 +4,9 @@ Scope: compare one catalog item with one PO-approved catalog reference.
 This module does not access Product Master, GTIN, databases, APIs, Skin,
 legacy recommendation services, customer data, or chemical/safety rules.
 
-A MATCH requires complete exact identity fields and a traceable, versioned
-approved reference. An unknown catalog edition is never silently upgraded
-to a verified match.
+A MATCH requires the four exact color-identity fields and a traceable,
+versioned approved reference. Product specification and product volume are
+catalog details only; neither participates in identity matching.
 """
 from __future__ import annotations
 
@@ -32,8 +32,6 @@ _REQUIRED_IDENTITY_FIELDS = (
     "series",
     "shade_number",
     "shade_name",
-    "size_value",
-    "size_unit",
 )
 
 
@@ -43,8 +41,8 @@ class CatalogIdentity:
     series: str | None
     shade_number: str | None
     shade_name: str | None
-    size_value: str | None
-    size_unit: str | None
+    product_specification: str | None = None
+    product_volume: str | None = None
 
 
 @dataclass(frozen=True)
@@ -355,8 +353,6 @@ def build_catalog_decision_output(
         "catalog_item.series",
         "catalog_item.shade_number",
         "catalog_item.shade_name",
-        "catalog_item.size_value",
-        "catalog_item.size_unit",
     )
     return CatalogDecisionOutput(
         service_kind="CATALOG_READY",
