@@ -770,3 +770,31 @@
 **CI برای همین SHA، در زمان ثبت:** HBI CI در حال اجرا؛ HBI Auto Tasks در حال اجرا؛ HBI Pilot Browser Proof در حال اجرا. هنوز نتیجهٔ نهایی PASS/FAIL در دست نیست و PASS نهایی اعلام نمی‌شود.
 
 **وضعیت برش‌ها:** برش ۹ همچنان `BLOCKED_SOURCE_CONTENT_NOT_CAPTURED` است. در برش ۱۰، اصلاح قرارداد شش‌فیلدی در کد ثبت شده است؛ CI پس از رفع خطای نحوی دوباره ارزیابی می‌شود. نتیجهٔ نهایی برش ۱۰ تا دریافت نتیجهٔ معتبر CI باز می‌ماند. PR #502 باید OPEN/DRAFT/UNMERGED بماند.
+
+### ثبت نهایی بدهی CI مربوط به S2 و وضعیت به‌روزشدهٔ برش‌های ۹ و ۱۰ — ۱۰ نوامبر ۲۰۲۶
+
+**مبنای این ثبت:** Commit کد `c90e42dcebb4f37bdb9900156b379cf1f55d8ec7` با پیام `fix(skin): preserve legacy OPEN candidate matching`. این ثبت، وضعیت‌های قدیمی‌تر «CI در حال اجرا» را برای همین SHA جایگزین می‌کند؛ شواهد موفقیت فقط به همین SHA تعلق دارند.
+
+**اصلاح S2:** فیلتر سراسری `product_line=HAIR` از تابع تطبیق candidate در `RecommendationService` برداشته شد؛ محدودیت اختصاصی `SKIN` حفظ شد؛ guard ابتدای `generate_recommendations` برای توقف زودهنگام درخواست‌های `HAIR` و `CATALOG_READY` بدون تغییر باقی ماند. تست‌ها برای سبزشدن دست‌کاری نشدند.
+
+**ماتریس رفتار ثبت‌شده:**
+
+| حالت | رفتار مورد انتظار |
+|---|---|
+| `OPEN + HAIR` | پذیرش candidate مطابق رفتار legacy |
+| `SKIN + HAIR` | رد candidate؛ پروندهٔ SKIN فقط candidate با `product_line=SKIN` می‌پذیرد |
+| مسیر `HAIR` / `CATALOG_READY` | توقف در مرز سرویس؛ خارج از موتور Skin و پیش از تولید recommendation |
+
+**شاهد CI روی SHA دقیق بالا — هر سه workflow و همهٔ jobهای مربوط موفق‌اند:**
+
+- [HBI CI — run 42818422588](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42818422588): `success`; jobهای `test`، `governance-tests` و `g8-isolated-pilot-smoke` همگی `success`.
+- [HBI Auto Tasks — run 42818422595](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42818422595): `success`; job `Live test evidence` نیز `success`.
+- [HBI Pilot Browser Proof — run 42818422581](https://github.com/vahidmaghsoudi2/hbi/actions/runs/42818422581): `success`; job `pilot-browser-proof` نیز `success`.
+
+**وضعیت برش‌ها:**
+
+- **برش ۹:** بدون تغییر، `BLOCKED_SOURCE_CONTENT_NOT_CAPTURED`. متن کامل/قابل بازبینی منبع رائیکا و تطبیق مستقل ۸۸ عنوان CSV هنوز اثبات نشده است؛ CSV به Provider یا Resolver متصل نشود.
+- **برش ۱۰:** مغایرت نگاشت فیلد/حجم در قرارداد شش‌فیلدی و بدهی CI مرتبط با Skin رفع/سبز شده‌اند، در سطح شواهد ثبت‌شده روی SHAهای مربوط و از جمله CI سبز روی `c90e42d`. این وضعیت **PASS عملیاتی کامل برش ۱۰ نیست**؛ اتصال CSV، Provider واقعی، منبع واقعی، اجرای runtime/DB، پایلوت یا تأیید شیمیایی/ایمنی را اثبات نمی‌کند.
+- **PR #502:** همچنان Open، Draft و Unmerged است. Merge انجام نشود.
+
+این ثبت صرفاً مستندسازی بدهی CI و وضعیت موجود است؛ دامنهٔ جدید، کدنویسی تازه یا مجوز اتصال منبع ایجاد نمی‌کند. تصمیم بعدی PO فقط انتخاب میان (الف) رفع انسداد برش ۹ با منبع رائیکا/CSV یا (ب) توقف کنترل‌شده تا اطلاع است.
