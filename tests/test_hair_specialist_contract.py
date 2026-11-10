@@ -149,6 +149,8 @@ def test_review_does_not_create_client_acceptance_consent_or_persistence():
     review = _review(output, evaluate_specialist_output(output))
     assert review.client_acceptance is False
     assert review.execution_consent is False
+    assert review.client_visible is False
+    assert review.execution_authorized is False
     assert review.persisted is False
 
 
@@ -222,3 +224,10 @@ def test_unknown_response_type_fails_closed():
     gate = evaluate_specialist_output(output)
     assert gate.status == GateStatus.ENGINE_FAIL
     assert gate.publishable_to_internal_review is False
+
+
+
+def test_unrecognized_review_decision_is_rejected():
+    output = _output()
+    with pytest.raises(ValueError):
+        _review(output, evaluate_specialist_output(output), decision="APPROVE")
