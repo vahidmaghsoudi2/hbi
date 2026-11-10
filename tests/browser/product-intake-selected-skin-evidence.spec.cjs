@@ -127,12 +127,12 @@ test("selected existing skin product receives source-bound box drafts without cr
   });
   expect(researchPayload.assertions[2]).toMatchObject({
     claim: "سایر ویژگی‌ها: Additional sourced note that has no dedicated box",
+    field: "other_attributes",
     claim_type: "UNKNOWN",
     source_type: "MANUFACTURER",
     source_reference: "https://example.invalid/fixture-source",
     notes: expect.stringContaining("box kind=other"),
   });
-  expect(researchPayload.assertions[2]).not.toHaveProperty("field");
   expect(productCreateCount).toBe(0);
 });
 
