@@ -39,7 +39,11 @@ def _catalog_path() -> Path:
     return repository_root / CATALOG_RELATIVE_PATH
 
 
-def approved_catalog_contains_identity(identity: CatalogIdentity) -> bool:
+def approved_catalog_contains_identity(
+    identity: CatalogIdentity,
+    *,
+    expected_content_sha256: str | None = None,
+) -> bool:
     """Return True only when all four identity fields exactly match a CSV row.
 
     No normalization, aliases, fuzzy matching, or caller-provided source
@@ -55,6 +59,9 @@ def approved_catalog_contains_identity(identity: CatalogIdentity) -> bool:
     except (OSError, UnicodeDecodeError, csv.Error):
         return False
 
+    if expected_content_sha256 is not None:
+        if hashlib.sha256(raw).hexdigest() != expected_content_sha256:
+            return False
     if not rows or len(rows) != EXPECTED_DATA_ROWS:
         return False
     if tuple(rows[0].keys()) != EXPECTED_HEADERS:
