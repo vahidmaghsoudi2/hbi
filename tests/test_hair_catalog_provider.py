@@ -18,7 +18,8 @@ def test_approved_catalog_provider_loads_exact_88_row_artifact():
     reference_id, metadata = reference
     digest = hashlib.sha256(raw).hexdigest()
 
-    assert reference_id.endswith(digest)
+    assert reference_id == metadata.snapshot_id
+    assert reference_id.startswith("hbi-hair-catalog-snapshot-")
     assert metadata.content_sha256 == digest
     assert metadata.source_kind == "RAEAKA_BIJOURKA_CATALOG"
     assert metadata.approval_status == "PO_APPROVED"
