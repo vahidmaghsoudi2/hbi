@@ -90,3 +90,153 @@ def test_legacy_migration_preserves_rows_and_does_not_invent_revision_metadata(t
     assert conn.execute("PRAGMA foreign_key_check").fetchall() == []
     conn.close()
     assert migrate(db).startswith("ALREADY MIGRATED")
+
+
+
+def test_preexisting_history_gets_missing_assertion_index(tmp_path):
+    script = Path(__file__).resolve().parents[1] / "scripts" / "migrate_product_problem_link_assessments.py"
+    migrate = runpy.run_path(str(script))["migrate"]
+    db = tmp_path / "existing_history.db"
+
+    conn = sqlite3.connect(db)
+    conn.executescript("""
+        CREATE TABLE ProductProblemLink (
+            link_id VARCHAR PRIMARY KEY,
+            feature_basis VARCHAR NULL,
+            outcome VARCHAR NULL,
+            assertion_key VARCHAR NULL,
+            revision_no INTEGER NULL,
+            supersedes_link_id VARCHAR NULL,
+            idempotency_key VARCHAR NULL,
+            request_fingerprint VARCHAR NULL
+        );
+
+        CREATE TABLE ProductProblemLinkAssessmentEvent (
+            event_id VARCHAR PRIMARY KEY,
+            link_id VARCHAR NOT NULL,
+            assertion_key VARCHAR NULL,
+            revision_no INTEGER NULL,
+            actor_id VARCHAR NOT NULL,
+            actor_role VARCHAR NULL,
+            event_type VARCHAR NOT NULL,
+            reason TEXT NOT NULL,
+            before_state TEXT NULL,
+            after_state TEXT NOT NULL,
+            correlation_id VARCHAR NULL,
+            timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+
+        INSERT INTO ProductProblemLink VALUES
+            ('L1', 'basis', 'outcome', 'A1', 1, NULL, NULL, NULL);
+
+        INSERT INTO ProductProblemLinkAssessmentEvent (
+            event_id, link_id, assertion_key, revision_no,
+            actor_id, event_type, reason, after_state
+        ) VALUES (
+            'EV1', 'L1', 'A1', 1,
+            'tester', 'ASSESSMENT', 'existing history', '{}'
+        );
+    """)
+    conn.commit()
+    conn.close()
+
+    result = migrate(db)
+    assert result.startswith("ALREADY MIGRATED")
+
+    conn = sqlite3.connect(db)
+    indexes = {
+        row[1]
+        for row in conn.execute(
+            'PRAGMA index_list("ProductProblemLinkAssessmentEvent")'
+        )
+    }
+    assert (
+        "ix_ProductProblemLinkAssessmentEvent_assertion_key" in indexes
+    )
+    assert conn.execute(
+        "SELECT COUNT(*) FROM ProductProblemLinkAssessmentEvent"
+    ).fetchone()[0] == 1
+    conn.close()
+
+
+def test_failed_migration_restores_original_database(tmp_path):
+    import pytest
+
+    script = Path(__file__).resolve().parents[1] / "scripts" / "migrate_product_problem_link_assessments.py"
+    migrate = runpy.run_path(str(script))["migrate"]
+    db = tmp_path / "failed_migration.db"
+
+    conn = sqlite3.connect(db)
+    conn.executescript("""
+        CREATE TABLE Product(product_id VARCHAR PRIMARY KEY);
+        CREATE TABLE Evidence(
+            evidence_id VARCHAR PRIMARY KEY,
+            claim_id VARCHAR UNIQUE,
+            product_id VARCHAR NOT NULL,
+            FOREIGN KEY(product_id) REFERENCES Product(product_id)
+        );
+        CREATE TABLE ProductProblemLink(
+            link_id VARCHAR PRIMARY KEY,
+            product_id VARCHAR NOT NULL,
+            variant VARCHAR NOT NULL DEFAULT 'UNKNOWN',
+            market_region VARCHAR NOT NULL,
+            claim_id VARCHAR NOT NULL,
+            evidence_id VARCHAR NOT NULL,
+            problem_id VARCHAR NOT NULL,
+            problem_type VARCHAR NOT NULL,
+            problem_definition_ref VARCHAR NOT NULL,
+            relationship_role VARCHAR NOT NULL,
+            relationship_status VARCHAR NOT NULL DEFAULT 'CANDIDATE',
+            semantic_basis VARCHAR NOT NULL,
+            limitations VARCHAR NOT NULL,
+            decision_basis VARCHAR NOT NULL,
+            problem_map_version VARCHAR NOT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(
+                product_id, evidence_id, problem_id,
+                relationship_role, variant, market_region
+            ),
+            FOREIGN KEY(product_id) REFERENCES Product(product_id),
+            FOREIGN KEY(claim_id) REFERENCES Evidence(claim_id),
+            FOREIGN KEY(evidence_id) REFERENCES Evidence(evidence_id)
+        );
+    """)
+    conn.execute("INSERT INTO Product VALUES ('P1')")
+    conn.execute("INSERT INTO Evidence VALUES ('E1', 'C1', 'P1')")
+
+    # Deliberately create one broken product reference in the legacy row.
+    conn.execute("PRAGMA foreign_keys=OFF")
+    conn.execute("""
+        INSERT INTO ProductProblemLink(
+            link_id, product_id, variant, market_region,
+            claim_id, evidence_id, problem_id, problem_type,
+            problem_definition_ref, relationship_role,
+            relationship_status, semantic_basis, limitations,
+            decision_basis, problem_map_version
+        ) VALUES (
+            'L1', 'P_MISSING', 'UNKNOWN', 'MEXICO',
+            'C1', 'E1', 'P17', 'presentation',
+            'Map#P17', 'presentation', 'NOT_LINKED',
+            'old basis', 'old limits', 'old decision',
+            'SKIN_PROBLEM_SPACE_MAP_V0.1'
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+    with pytest.raises(RuntimeError, match="Foreign-key violations"):
+        migrate(db)
+
+    # The failed migration must restore the original legacy schema and row.
+    conn = sqlite3.connect(db)
+    columns = {
+        row[1]
+        for row in conn.execute('PRAGMA table_info("ProductProblemLink")')
+    }
+    assert "feature_basis" not in columns
+    assert conn.execute(
+        "SELECT link_id, relationship_status FROM ProductProblemLink"
+    ).fetchone() == ("L1", "NOT_LINKED")
+    assert conn.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
+    conn.close()
