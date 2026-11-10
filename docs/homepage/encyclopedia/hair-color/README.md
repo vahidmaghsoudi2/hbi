@@ -5016,3 +5016,12 @@ Provider در روتر هنوز مرجع واقعی برنمی‌گرداند و
 
 **یافتهٔ مهم تکمیلی:** مدل فعلی Domain/API، `size_value` و `size_unit` را برای MATCH اجباری می‌کند؛ این با تصمیم قبلی PO که حجم باید در کاتالوگ ثبت شود اما شرط ضروری تطبیق هویت نباشد، ناسازگار است. همچنین فیلد «مشخصات قلم محصول» در مدل API وجود ندارد. نگاشت پیشنهادیِ غیرمصوب برای بررسی بعدی: `product_specification` و `product_volume` به‌عنوان دو فیلد کاتالوگی مستقل؛ ورود حجم به کلید تطبیق و الزام‌آورشدن مشخصات قلم هنوز نباید بدون تطبیق با PO-66-02 فرض شود. جزئیات در Progress Master ثبت شده است.
 
+### وضعیت اصلاح CI و برش‌های ۹ و ۱۰ — ۱۰ نوامبر ۲۰۲۶
+
+- خطای قبلی CI ناشی از بدنهٔ خالی تست `test_server_owned_synthetic_reference_can_reach_display_gate` در `tests/test_hair_api_slice_7b.py` (حدود خط ۱۱۰) بود؛ خطای `IndentationError` مانع اجرای pytest شد.
+- تست اصلاح و بلوک تکراری از تست اختیاری‌بودن جزئیات محصول حذف شد. Commit رفع: [`e82f6ff`](https://github.com/vahidmaghsoudi2/hbi/commit/e82f6ffdf92a2835a2bd089a23bd380c96285a1e). فقط فایل تست تغییر کرد؛ اتصال CSV، دادهٔ واقعی، Provider و Schema دست‌نخورده‌اند. حجم و مشخصات قلم شرط MATCH نیستند.
+- CI برای SHA اصلاح‌شده در زمان ثبت: HBI CI و HBI Auto Tasks و HBI Pilot Browser Proof در حال اجرا بودند؛ PASS نهایی هنوز تأیید نشده است.
+- **برش ۹:** همچنان `BLOCKED_SOURCE_CONTENT_NOT_CAPTURED`؛ تطبیق منبع رائیکا با CSV اثبات نشده است.
+- **برش ۱۰:** اصلاح قرارداد شش‌فیلدی در کد ثبت شده؛ نتیجه پس از ارزیابی مجدد CI تعیین می‌شود. تا آن زمان PASS نهایی اعلام نمی‌شود.
+
+جزئیات و شناسهٔ اجرای CI در [Progress Master](./PROJECT_PROGRESS_MASTER.md) ثبت شده است. PR #502 باید OPEN/DRAFT/UNMERGED بماند.
