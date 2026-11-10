@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 
 from app.domain import hair_catalog_provider as provider
 from app.domain.hair_catalog_identity_lookup import CatalogIdentity
@@ -126,4 +127,20 @@ def test_provider_rejects_identity_when_catalog_is_invalid(tmp_path, monkeypatch
             shade_number="1",
             shade_name="Shade-0",
         )
+    )
+
+
+
+def test_provider_rejects_identity_when_reference_hash_differs(tmp_path, monkeypatch):
+    path = _write_csv(tmp_path, _valid_csv())
+    monkeypatch.setattr(provider, "_catalog_path", lambda: path)
+
+    assert not provider.approved_catalog_contains_identity(
+        CatalogIdentity(
+            brand="Brand-0",
+            series="Series-0",
+            shade_number="1",
+            shade_name="Shade-0",
+        ),
+        expected_content_sha256="0" * 64,
     )
