@@ -60,14 +60,14 @@ def test_scenario_02_reason_explanation_returns_only_client_safe_summary():
 def test_scenario_03_use_recorded_data_and_name_exact_missing_fields():
     result = resolve_required_data(
         {"brand": "Synthetic Brand", "shade_number": "1", "history": ""},
-        ("brand", "shade_number", "hair_history"),
+        ("brand", "shade_number", "history", "hair_history"),
     )
 
     assert result.known_values == (
         ("brand", "Synthetic Brand"),
         ("shade_number", "1"),
     )
-    assert result.missing_fields == ("hair_history",)
+    assert result.missing_fields == ("history", "hair_history")
     assert result.complete is False
 
 
