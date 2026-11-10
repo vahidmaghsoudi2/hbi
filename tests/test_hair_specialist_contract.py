@@ -320,3 +320,57 @@ def test_specialist_qualification_is_an_explicit_po_attestation_not_an_automated
             reviewer_role="HAIR_DOMAIN_EXPERT",
             professional_qualification_verified=False,
         )
+
+
+
+def test_non_string_version_fields_fail_as_data_gap_without_raising():
+    assert evaluate_specialist_output(_output(case_version=None)).status == GateStatus.DATA_GAP
+
+
+def test_malformed_evidence_items_are_knowledge_gaps_not_runtime_errors():
+    gate = evaluate_specialist_output(_output(evidence=({"evidence_type": "PRODUCT_IDENTITY"},)))
+    assert gate.status == GateStatus.KNOWLEDGE_GAP
+    assert gate.publishable_to_internal_review is False
+
+
+def test_non_boolean_data_completeness_flag_fails_closed():
+    gate = evaluate_specialist_output(_output(data_complete="yes"))
+    assert gate.status == GateStatus.ENGINE_FAIL
+
+
+def test_malformed_missing_data_field_fails_closed():
+    gate = evaluate_specialist_output(_output(
+        response_type=ResponseType.NEEDS_MORE_INFORMATION,
+        motor_state=MotorState.REQUEST_MORE_INFORMATION,
+        data_complete=False,
+        missing_data_fields=(None,),
+        evidence=(),
+    ))
+    assert gate.status == GateStatus.ENGINE_FAIL
+
+
+def test_non_boolean_engine_health_flag_fails_closed():
+    gate = evaluate_specialist_output(_output(), engine_ok="true")
+    assert gate.status == GateStatus.ENGINE_FAIL
+
+
+def test_non_string_reviewer_identity_is_rejected():
+    output = _output()
+    with pytest.raises(ValueError):
+        _review(output, evaluate_specialist_output(output), reviewer_id=None)
+
+
+def test_non_contract_gate_is_rejected_for_specialist_review():
+    output = _output()
+    with pytest.raises(TypeError):
+        record_specialist_review(
+            output,
+            {"status": "READY_FOR_SPECIALIST_REVIEW"},
+            reviewer_id="synthetic-specialist-reviewer",
+            reviewer_role="HAIR_DOMAIN_EXPERT",
+            professional_qualification_verified=True,
+            decision=ReviewDecision.APPROVE,
+            reason="Synthetic contract test decision",
+            reviewed_case_version=output.case_version,
+            reviewed_goal_version=output.goal_version,
+        )
