@@ -5051,3 +5051,9 @@ Provider در روتر هنوز مرجع واقعی برنمی‌گرداند و
 - PR #502 همچنان Open، Draft و Unmerged است.
 
 جزئیات شمارش سری‌ها، معیارهای S9 و مرز این نتیجه در [Progress Master](./PROJECT_PROGRESS_MASTER.md) ثبت شده است.
+
+### الحاقیهٔ بازبینی تصاویر منبع رائیکا
+
+سه تصویر درج‌شده در [آلبوم رائیکا](https://raeaka.com/%D8%A2%D9%84%D8%A8%D9%88%D9%85-%D8%B1%D9%86%DA%AF-%D9%85%D9%88-%D8%A8%DB%8C%D8%AC%D9%88%D8%B1%DA%A9%D8%A7/) بازبینی شدند. دو تصویر [بیجورکا-1](https://raeaka.com/wp-content/uploads/2023/05/%D8%A8%DB%8C%D8%AC%D9%88%D8%B1%DA%A9%D8%A7-1-scaled.jpg) و [بیجورکا-2](https://raeaka.com/wp-content/uploads/2023/05/%D8%A8%DB%8C%D8%AC%D9%88%D8%B1%DA%A9%D8%A7-2-scaled.jpg) در بخش‌های قابل خواندن با سری‌ها و شماره‌های متناظر CSV هم‌خوان‌اند. تصویر [bijourka-18](https://raeaka.com/wp-content/uploads/2023/05/bijourka-18.jpg) الگوی شماره‌گذاری متفاوتی دارد و نسخه/نگاشت آن به فهرست ۸۸ قلم در صفحه مشخص نشده؛ بنابراین به ردیف‌های CSV حدسی متصل نمی‌شود.
+
+وضعیت دقیق برش ۹: `TEXT_RECONCILIATION_PASS / IMAGE_MAPPING_PARTIAL / CATALOG_VERSION_UNVERSIONED`. تطبیق متنی ۸۸/۸۸ پابرجاست؛ تطبیق کامل تصویری ادعا نمی‌شود. CSV تغییر نکرده است. جزئیات در [Progress Master](./PROJECT_PROGRESS_MASTER.md) ثبت شده است.
