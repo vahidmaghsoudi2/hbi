@@ -122,13 +122,25 @@ REQUIRED_EVIDENCE_BY_RESPONSE: dict[ResponseType, frozenset[str]] = {
 
 
 def _evidence_is_valid(item: EvidenceRef) -> bool:
+    if not isinstance(item, EvidenceRef):
+        return False
+    text_fields = (
+        item.evidence_id,
+        item.evidence_type,
+        item.source_reference,
+        item.verification_status,
+        item.scope,
+        item.content_sha256,
+    )
+    if not all(isinstance(value, str) for value in text_fields):
+        return False
     return bool(
         item.evidence_id.strip()
         and item.evidence_type.strip()
         and item.source_reference.strip()
         and item.scope.strip()
         and item.verification_status == "VERIFIED"
-        and _SHA256_RE.fullmatch(item.content_sha256 or "")
+        and _SHA256_RE.fullmatch(item.content_sha256)
     )
 
 
@@ -138,7 +150,7 @@ def evaluate_specialist_output(output: SpecialistOutput, *, engine_ok: bool = Tr
         raise TypeError("output must be a SpecialistOutput")
 
     # Internal control failure takes precedence over every other state.
-    if not engine_ok:
+    if engine_ok is not True:
         return GateResult(GateStatus.ENGINE_FAIL, False, ("ENGINE_FAIL",))
 
     if (
@@ -148,8 +160,21 @@ def evaluate_specialist_output(output: SpecialistOutput, *, engine_ok: bool = Tr
     ):
         return GateResult(GateStatus.ENGINE_FAIL, False, ("SYNTHETIC_ONLY_POLICY_VIOLATION",))
 
-    if not all((output.case_version.strip(), output.goal_version.strip(), output.run_id.strip(), output.proposal_id.strip())):
+    version_fields = (
+        output.case_version,
+        output.goal_version,
+        output.run_id,
+        output.proposal_id,
+    )
+    if not all(isinstance(value, str) and value.strip() for value in version_fields):
         return GateResult(GateStatus.DATA_GAP, False, ("VERSION_OR_RUN_ID_MISSING",))
+    if not isinstance(output.data_complete, bool):
+        return GateResult(GateStatus.ENGINE_FAIL, False, ("DATA_COMPLETENESS_FLAG_INVALID",))
+    if not isinstance(output.missing_data_fields, tuple) or not all(
+        isinstance(field, str) and field.strip()
+        for field in output.missing_data_fields
+    ):
+        return GateResult(GateStatus.ENGINE_FAIL, False, ("MISSING_DATA_FIELDS_INVALID",))
 
     if not isinstance(output.response_type, ResponseType) or not isinstance(output.motor_state, MotorState):
         return GateResult(GateStatus.ENGINE_FAIL, False, ("UNKNOWN_RESPONSE_OR_MOTOR_STATE",))
@@ -157,17 +182,17 @@ def evaluate_specialist_output(output: SpecialistOutput, *, engine_ok: bool = Tr
     # Terminal response classes are handled before generic data completeness:
     # an active safety stop must never be downgraded to a routine data gap.
     if output.response_type == ResponseType.SAFETY_STOP:
-        if output.motor_state != MotorState.STOP_OR_REFER or not output.reason_code:
+        if output.motor_state != MotorState.STOP_OR_REFER or not isinstance(output.reason_code, str) or not output.reason_code.strip():
             return GateResult(GateStatus.ENGINE_FAIL, False, ("SAFETY_STOP_CONTRACT_INVALID",))
         return GateResult(GateStatus.SAFETY_STOP, False, ("SAFETY_STOP",))
 
     if output.response_type == ResponseType.OUT_OF_SCOPE:
-        if output.motor_state != MotorState.STOP_OR_REFER or not output.reason_code:
+        if output.motor_state != MotorState.STOP_OR_REFER or not isinstance(output.reason_code, str) or not output.reason_code.strip():
             return GateResult(GateStatus.ENGINE_FAIL, False, ("OUT_OF_SCOPE_CONTRACT_INVALID",))
         return GateResult(GateStatus.OUT_OF_SCOPE, False, ("OUT_OF_SCOPE",))
 
     if output.response_type == ResponseType.NEEDS_IN_PERSON_REVIEW:
-        if output.motor_state != MotorState.STOP_OR_REFER or not output.reason_code:
+        if output.motor_state != MotorState.STOP_OR_REFER or not isinstance(output.reason_code, str) or not output.reason_code.strip():
             return GateResult(GateStatus.ENGINE_FAIL, False, ("IN_PERSON_REVIEW_CONTRACT_INVALID",))
         return GateResult(
             GateStatus.REQUIRES_IN_PERSON_REVIEW,
@@ -176,7 +201,11 @@ def evaluate_specialist_output(output: SpecialistOutput, *, engine_ok: bool = Tr
         )
 
     if output.response_type == ResponseType.NEEDS_MORE_INFORMATION:
-        if output.motor_state != MotorState.REQUEST_MORE_INFORMATION or not output.missing_data_fields:
+        if (
+            output.motor_state != MotorState.REQUEST_MORE_INFORMATION
+            or output.data_complete is not False
+            or not output.missing_data_fields
+        ):
             return GateResult(GateStatus.DATA_GAP, False, ("REQUIRED_MISSING_DATA_FIELDS_NOT_DECLARED",))
         return GateResult(GateStatus.DATA_GAP, False, ("REQUIRED_DATA_MISSING",))
 
@@ -227,13 +256,20 @@ def record_specialist_review(
     This pure contract checks the explicit attestation flag and designated role;
     it does not independently investigate or certify a person's credentials.
     """
+    if not isinstance(output, SpecialistOutput) or not isinstance(gate, GateResult):
+        raise TypeError("output and gate must use the specialist contract types")
     if not gate.publishable_to_internal_review or gate.status != GateStatus.READY_FOR_SPECIALIST_REVIEW:
         raise ValueError("Output is not eligible for specialist review")
     if reviewer_role != "HAIR_DOMAIN_EXPERT" or professional_qualification_verified is not True:
         raise PermissionError("A PO-designated Hair Domain Expert with explicit PO qualification attestation is required; operational QA/PO/Admin roles alone are not specialist designation")
     if not isinstance(decision, ReviewDecision):
         raise ValueError("A recognized specialist review decision is required")
-    if not reviewer_id.strip() or not reason.strip():
+    if (
+        not isinstance(reviewer_id, str)
+        or not reviewer_id.strip()
+        or not isinstance(reason, str)
+        or not reason.strip()
+    ):
         raise ValueError("Reviewer identity and decision reason are required")
     if (
         reviewed_case_version != output.case_version
