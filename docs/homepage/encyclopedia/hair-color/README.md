@@ -5117,3 +5117,21 @@ Provider در روتر هنوز مرجع واقعی برنمی‌گرداند و
 
 
 **وضعیت اجرای CI برای سخت‌سازی اخیر:** روی commit کد `f9a937af382fa281e770b54769d9572695c18229`، HBI Auto Tasks run #698 با Pytest + coverage موفق و HBI Pilot Browser Proof run #1492 با real-browser proof موفق تکمیل شده‌اند. HBI CI run #2753 هنوز در حال اجراست و نتیجهٔ نهایی سه job آن صادر نشده است. نتیجهٔ موفق CI قبلی به این commit تعمیم داده نمی‌شود.
+
+
+### HBI Snapshot Provenance — ثبت اجرای ۱۰ نوامبر ۲۰۲۶
+
+دستور متأخر PO، ادامهٔ محدود ردیف ۶۷ برای مدل‌سازی و اتصال HBI Snapshot Provenance را مجاز کرد. Provider اکنون Manifest مستقل را می‌خواند و SHA-256 بایت‌های CSV را با آن تطبیق می‌دهد؛ URL، مسیر Artifact، Snapshot ID، Ingestion ID، زمان Snapshot با timezone و سیاست اعتبارسنجی نیز کنترل می‌شوند. Manifest مفقود یا ناسازگار باعث Fail-Closed می‌شود.
+
+فایل Manifest: catalog/raeaka_bijourka_snapshot.json
+
+- Snapshot ID: hbi-hair-catalog-snapshot-20261110-185700z
+- Ingestion ID: hbi-hair-catalog-ingestion-20261110-185700z-01
+- SHA-256: 1887a7d166164639e2c235a7144fe6b27b4861f5c36fac9af383bef14eec1212
+- HBI snapshot_captured_at: 2026-11-10T18:57:00Z
+- Publisher edition/revision/captured_at: null؛ هیچ نسخه یا تاریخ رسمی ناشر استنتاج یا جعل نشده است.
+- validation_status: REVALIDATE_ON_EVERY_LOAD
+
+مدل CatalogReference و CatalogDecisionOutput این metadata را جدا از Edition/Revision ناشر نگه می‌دارند و در idempotency lineage را حفظ می‌کنند. چهار آزمون منفی/مثبت برای Manifest افزوده شده‌اند. migration/DB یا دادهٔ مشتری وارد این برش نشده است.
+
+CI پایه روی commit f9a937a اکنون کامل و سبز است: HBI CI #2753، Auto Tasks #698 و Pilot Browser Proof #1492. این موفقیت به تغییرات بعدی Provenance تعمیم داده نمی‌شود؛ CI روی HEAD جدید هنوز باید اجرا و تأیید شود. تا احراز نسخهٔ رسمی ناشر، lookup همچنان UNVERSIONED / INCONCLUSIVE / FAIL-CLOSED می‌ماند. PR #502 همچنان Open/Draft/Unmerged است.
