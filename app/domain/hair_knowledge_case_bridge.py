@@ -12,6 +12,7 @@ from typing import Any, Literal, Mapping, Sequence
 import re
 
 from app.domain.hair_catalog_identity_lookup import CatalogIdentity
+from app.domain.hair_data_governance import is_permitted_synthetic_case
 from app.domain.hair_catalog_provider import (
     approved_catalog_contains_identity,
     load_approved_hair_catalog_reference,
@@ -309,7 +310,7 @@ class HairKnowledgeCaseBridge:
                 reason_code="SERVICE_KIND_OUTSIDE_ROW_68_CATALOG_SCOPE",
                 package=package, rule=rule,
             )
-        if case.synthetic_data is not True or not case.case_id.startswith("SYNTHETIC-"):
+        if not is_permitted_synthetic_case(case_id=case.case_id, synthetic_data=case.synthetic_data):
             return _blocked_run(
                 run_id=run_id, case=case, status="STOP_DATA_POLICY",
                 reason_code="REAL_CLIENT_DATA_BLOCKED_BY_PO_66_09",
