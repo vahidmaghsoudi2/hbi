@@ -58,7 +58,9 @@ class TestHairCatalogApiSlice7B:
         )
         assert response.status_code == 403
 
-    def test_missing_primary_catalog_reference_fails_closed(self, client, db_session):
+    def test_server_csv_reference_is_loaded_but_unversioned_lookup_fails_closed(
+        self, client, db_session
+    ):
         _grant_po(db_session)
         response = client.post(
             "/api/v1/hair/catalog-identity/lookup",
@@ -67,11 +69,9 @@ class TestHairCatalogApiSlice7B:
         )
         assert response.status_code == 200
         body = response.json()
-        assert body == {
-            "status": "KNOWLEDGE_GAP",
-            "display_allowed": False,
-            "message": "مرجع اصلیِ مصوب و نسخه‌دار کاتالوگ هنوز در سامانه ثبت نشده است؛ نتیجهٔ قطعی ارائه نمی‌شود.",
-        }
+        assert body["status"] == "WITHHOLD_INCONCLUSIVE"
+        assert body["display_allowed"] is False
+        assert "نسخه‌دار و قابل‌ردیابی" in body["message"]
 
     def test_caller_cannot_supply_or_override_reference_approval_metadata(
         self, client, db_session
