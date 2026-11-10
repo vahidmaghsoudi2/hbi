@@ -285,6 +285,24 @@ class TestOutputAndInvalidation(unittest.TestCase):
         self.assertEqual(decision, "PRESERVE")
 
 
+    def test_snapshot_lineage_is_carried_into_output_and_idempotency_key(self):
+        ref = reference(
+            snapshot_id="snapshot-001",
+            snapshot_captured_at="2026-11-10T18:57:00Z",
+            ingestion_id="ingestion-001",
+            snapshot_validation_status="VALIDATED_ON_LOAD",
+        )
+        output = output_for(ref=ref)
+
+        self.assertEqual(output.snapshot_id, "snapshot-001")
+        self.assertEqual(output.snapshot_captured_at, "2026-11-10T18:57:00Z")
+        self.assertEqual(output.ingestion_id, "ingestion-001")
+        self.assertEqual(output.snapshot_validation_status, "VALIDATED_ON_LOAD")
+        self.assertIn("snapshot_id", output.idempotency_key)
+        self.assertIn("snapshot_captured_at", output.idempotency_key)
+        self.assertIn("ingestion_id", output.idempotency_key)
+
+
 class TestDisplayAndEvents(unittest.TestCase):
     def test_versioned_match_is_displayable_as_identity_only(self):
         decision = decide_catalog_output_presentation(output_for())
