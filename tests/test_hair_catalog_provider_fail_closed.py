@@ -188,7 +188,7 @@ def test_provider_loads_hbi_snapshot_metadata_without_inventing_publisher_editio
     assert reference.snapshot_id == reference_id
     assert reference.ingestion_id == "synthetic-hbi-ingestion-001"
     assert reference.snapshot_captured_at == "2026-11-10T18:57:00Z"
-    assert reference.snapshot_validation_status == "VALIDATED_ON_LOAD"
+    assert reference.snapshot_validation_status == "REVALIDATE_ON_EVERY_LOAD"
     assert reference.content_sha256 == hashlib.sha256(catalog_path.read_bytes()).hexdigest()
     assert reference.edition_label is None
     assert reference.captured_at is None
