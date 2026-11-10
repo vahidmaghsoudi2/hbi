@@ -83,7 +83,7 @@ def _read_validated_snapshot_manifest(content_sha256: str) -> dict[str, object] 
         return None
     if manifest.get("capture_method") != "HBI_REPOSITORY_ARTIFACT_REGISTRATION":
         return None
-    if manifest.get("validation_status") != "REVALIDATE_ON_EVERY_LOAD":
+    if manifest.get("validation_policy") != "REVALIDATE_ON_EVERY_LOAD":
         return None
     if manifest.get("expected_row_count") != EXPECTED_DATA_ROWS:
         return None
