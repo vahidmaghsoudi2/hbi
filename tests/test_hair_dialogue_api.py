@@ -133,6 +133,9 @@ def test_required_data_and_advice_gate_return_explicit_gaps(client, db_session):
         required_fields=["brand", "history", "hair_history"],
     )
     assert resolved.status_code == 200
+    assert resolved.json()["result"]["known_fields"] == ["brand"]
+    assert "known_values" not in resolved.json()["result"]
+    assert "SYNTHETIC_FIXTURE_VALUE" not in resolved.text
     assert resolved.json()["result"]["missing_fields"] == ["history", "hair_history"]
     gate = _turn(
         client, _state(), "EVALUATE_ADVICE_GATE",
@@ -162,3 +165,48 @@ def test_engine_failure_has_priority_and_never_allows_advice(client, db_session)
     assert response.status_code == 200
     assert response.json()["result"] == {"advice_allowed": False, "reason_codes": ["ENGINE_FAIL"]}
     assert response.json()["recommendation"] is None
+
+
+def test_multiturn_http_flow_keeps_acceptance_consent_and_goal_version_separate(client, db_session):
+    _grant_reviewer_qa(db_session)
+    state = _state()
+    proposal_id = "SYNTHETIC-PROPOSAL-MULTITURN-001"
+
+    attached = _turn(client, state, "ATTACH_PROPOSAL", proposal_id=proposal_id)
+    assert attached.status_code == 200
+    state = attached.json()["state"]
+
+    question = _turn(
+        client, state, "ANSWER_QUESTION",
+        question_code="STATUS_REASON", answer_code="STATUS_REASON",
+    )
+    assert question.status_code == 200
+    state = question.json()["state"]
+    assert state["client_decision"] == "NONE"
+    assert state["execution_consent_for_proposal_id"] is None
+
+    accepted = _turn(client, state, "ACCEPT_PROPOSAL", proposal_id=proposal_id)
+    assert accepted.status_code == 200
+    state = accepted.json()["state"]
+    assert state["client_decision"] == "ACCEPTED"
+    assert state["execution_consent_for_proposal_id"] is None
+
+    consent = _turn(
+        client, state, "RECORD_EXECUTION_CONSENT",
+        proposal_id=proposal_id, explicit_consent=True,
+    )
+    assert consent.status_code == 200
+    state = consent.json()["state"]
+    assert state["execution_consent_for_proposal_id"] == proposal_id
+
+    changed = _turn(client, state, "CHANGE_GOAL", new_goal_version="goal-v2")
+    assert changed.status_code == 200
+    body = changed.json()
+    assert body["state"]["goal_version"] == "goal-v2"
+    assert body["state"]["active_proposal_id"] is None
+    assert body["state"]["client_decision"] == "NONE"
+    assert body["state"]["execution_consent_for_proposal_id"] is None
+    assert body["recommendation"] is None
+    assert body["display_allowed"] is False
+    assert body["client_visible"] is False
+    assert body["persistence"] == "COMPUTED_ONLY"
