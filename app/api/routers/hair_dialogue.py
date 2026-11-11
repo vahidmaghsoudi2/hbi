@@ -75,9 +75,9 @@ class HairDialogueTurnRequest(BaseModel):
         "REASSESS_DEPENDENCIES",
     ]
     state: DialogueStateInput
-    question: str | None = None
-    answer: str | None = None
-    client_safe_summary: str | None = None
+    question_code: Literal["STATUS_REASON", "MISSING_DATA", "PROCESS_LIMIT"] | None = None
+    answer_code: Literal["STATUS_REASON", "MISSING_DATA", "PROCESS_LIMIT"] | None = None
+    reason_code: Literal["CATALOG_ONLY", "DATA_GAP", "KNOWLEDGE_GAP", "SAFETY_STOP"] | None = None
     recorded_fields: list[str] | None = None
     required_fields: list[str] | None = None
     data_complete: bool | None = None
@@ -116,10 +116,26 @@ async def run_hair_dialogue_turn(
         action = payload.action
 
         if action == "ANSWER_QUESTION":
-            reply = answer_question(state, question=payload.question or "", answer=payload.answer or "")
+            question_text = {
+                "STATUS_REASON": "وضعیت این پرونده چیست؟",
+                "MISSING_DATA": "چه داده‌ای هنوز موجود نیست؟",
+                "PROCESS_LIMIT": "محدودیت این مسیر چیست؟",
+            }.get(payload.question_code or "", "")
+            answer_text = {
+                "STATUS_REASON": "این پاسخ فقط وضعیت اجرای مصنوعی را توضیح می‌دهد.",
+                "MISSING_DATA": "فیلدهای مفقود فقط به‌صورت نام فیلد گزارش می‌شوند.",
+                "PROCESS_LIMIT": "این مسیر پیشنهاد شیمیایی یا مجوز اجرای خدمت تولید نمی‌کند.",
+            }.get(payload.answer_code or "", "")
+            reply = answer_question(state, question=question_text, answer=answer_text)
             result = {"answer": reply.answer, "decision_changed": reply.decision_changed}
         elif action == "EXPLAIN_REASON":
-            result = {"summary_fa": explain_reason(payload.client_safe_summary or "")}
+            reason_text = {
+                "CATALOG_ONLY": "این خروجی فقط زمینهٔ هویت کاتالوگی مصنوعی را پوشش می‌دهد.",
+                "DATA_GAP": "دادهٔ ضروری کافی نیست؛ نتیجهٔ قطعی ارائه نمی‌شود.",
+                "KNOWLEDGE_GAP": "شاهد یا قاعدهٔ معتبر کافی نیست؛ حدس زده نمی‌شود.",
+                "SAFETY_STOP": "شرط ایمنی تأیید نشده است؛ مسیر متوقف می‌ماند.",
+            }.get(payload.reason_code or "", "")
+            result = {"summary_fa": explain_reason(reason_text)}
         elif action == "RESOLVE_REQUIRED_DATA":
             fields = payload.recorded_fields or []
             if len(set(fields)) != len(fields):
