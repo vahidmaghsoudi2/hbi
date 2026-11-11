@@ -166,7 +166,9 @@ def test_conflicts_are_scoped_to_market_region(db_session):
 
 
 def test_pending_evidence_field_reclassification_is_audited_and_preserves_governance(db_session):
+    import json
     from app.models.evidence_mutation_log import EvidenceMutationLog
+    from app.models.product_knowledge import ProductKnowledge
 
     product_id = _add_product_and_evidence(
         db_session,
@@ -186,6 +188,17 @@ def test_pending_evidence_field_reclassification_is_audited_and_preserves_govern
         ],
     )
 
+    db_session.add(
+        ProductKnowledge(
+            product_knowledge_id=f"PK-{product_id}",
+            product_id=product_id,
+            evidence_status="CONFLICT",
+            domain_evidence_status=json.dumps({"ingredients": "CONFLICT"}),
+            knowledge_confidence=0.0,
+        )
+    )
+    db_session.commit()
+
     result = EvidenceService(db_session).reclassify_field(
         "EV-CONFLICT-CLASS-1",
         "manufacturer_claims",
@@ -201,6 +214,13 @@ def test_pending_evidence_field_reclassification_is_audited_and_preserves_govern
     assert all(row.conflict_status == "NONE" for row in rows)
     assert all(row.qa_status == "PENDING" for row in rows)
     assert all(row.evidence_status == "UNKNOWN" for row in rows)
+
+    knowledge = db_session.query(ProductKnowledge).filter_by(product_id=product_id).one()
+    assert knowledge.evidence_status == "UNKNOWN"
+    assert json.loads(knowledge.domain_evidence_status) == {"ingredients": "UNKNOWN"}
+    assert knowledge.ingredients is None
+    assert knowledge.manufacturer_claims is None
+    assert knowledge.knowledge_confidence == 0.0
 
     audit_rows = (
         db_session.query(EvidenceMutationLog)
