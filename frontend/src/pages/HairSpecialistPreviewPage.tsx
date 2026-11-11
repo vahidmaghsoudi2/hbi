@@ -2,6 +2,7 @@ import { FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import { previewHairSpecialist } from "../api/client";
 import type { HairSpecialistPreviewResponse } from "../types/api";
+import HairDialogueWorkbench from "./HairDialogueWorkbench";
 
 const specialistResponseTypes = [
   { code: "REVIEWABLE_SUGGESTION", label: "پیشنهاد قابل بازبینی متخصص" },
@@ -96,6 +97,8 @@ export default function HairSpecialistPreviewPage() {
         <p className="meta">«پیشنهاد مشروط» حالت موتور است و نوع پاسخ ششم محسوب نمی‌شود.</p>
         <p className="meta">تعیین و احراز صلاحیت متخصص بر عهدهٔ Product Owner است؛ سامانه در این برش صلاحیت حرفه‌ای اشخاص را مستقلاً ارزیابی نمی‌کند.</p>
       </section>
+
+      <HairDialogueWorkbench adminToken={adminToken || ""} />
 
       {!adminToken && <div className="alert error" role="alert">نشست مدیر در مرورگر موجود نیست. ابتدا وارد سامانه شوید.</div>}
 
