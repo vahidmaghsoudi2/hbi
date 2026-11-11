@@ -168,3 +168,40 @@ Phase 1 closed successfully. Project now enters **Technical Improvements** phase
 3. Accept only Artifact-based reports (especially full pytest --cov output)
 4. Products C & D stay UNIDENTIFIED
 5. Track DeepSeek unit tests + Perplexity coverage confirmation
+
+## 2026-11-12 — Seven-product human review and controlled ProductKnowledge content transfer
+
+### Decisions and research disposition carried forward
+- The Product Owner accepted the seven product dossier drafts as the content basis. The seven human-review outcomes remain: Neutrogena, Garnier, COSRX, SKIN1004 and ISDIN accepted with stated limitations; Clinique and Anua accepted with explicit caveats.
+- The product acceptance policy confirmed on 2026-11-11 remains authoritative: sufficiently clear commercial/model identity; collect ingredients, ingredient roles, use cases, evidence, limitations and important precautions; physical barcode/batch/package matching is not a universal acceptance prerequisite; investigate deeply only where ambiguity could materially cause a wrong recommendation or harm.
+- Source hierarchy: manufacturer sources first; reliable distributor/retailer INCI when manufacturer detail is incomplete; scientific/specialist sources for context. Manufacturer claims remain distinct from independent evidence.
+- The 24-assertion source manifest remains the existing research base. Do not regenerate or re-import it.
+- Anua's 10% azelaic-acid concentration is accepted as a manufacturer-declared claim and ingredient assertion for dossier content. The two legacy Evidence rows remain technically conflicted and must not be silently reclassified or edited.
+- Clinique remains the historical UK 100 ml product dossier, separate from its replacement serum. ISDIN's second INCI list remains the temporary reference and must not be merged with the first list.
+
+### Local DB controlled write — 2026-11-12
+The Product Owner explicitly authorized a content-only transfer into the seven existing ProductKnowledge rows. The local operator script reported:
+- Transaction committed; exactly 7 existing ProductKnowledge rows updated.
+- Only these eight columns were written: `ingredients`, `ingredient_roles`, `claimed_benefits`, `known_use_cases`, `usage_instructions`, `manufacturer_claims`, `contraindications`, `evidence_refs`.
+- No Evidence row was promoted: all 25 remain `evidence_status=UNKNOWN` and `qa_status=PENDING`.
+- The two Anua Evidence rows remain `conflict_status=CONFLICT`; Anua ProductKnowledge `evidence_status=CONFLICT` and `domain_evidence_status={"ingredients":"CONFLICT"}` were preserved.
+- Product, Evidence, Inventory, Recommendation and ProductProblemLink were verified unchanged by the controlled-write script. ProductKnowledge status/confidence/domain-status fields were preserved.
+- SQLite integrity check: `ok`; foreign-key violations: 0.
+- Pre-write backup: `E:\\HBI_GitHub_Current\\artifacts\\hbi-before-productknowledge-write-20261112-001331.db`.
+- ISDIN `ingredients` intentionally remains NULL because no ingredients Evidence row was available in the extracted 25-row set. Unsupported fields remain empty rather than being guessed.
+- This transfer is an explicitly authorized content staging step; it does **not** mean Evidence QA, Product identity, lifecycle, inventory, recommendation eligibility, ProductProblemLink acceptance, or the seven-product operational acceptance gates are complete.
+
+### Current roadmap position and next sequence
+Issue #406 remains OPEN. The work is in **Phase 2 — sample product dossier completion**, with Phase 2 Gate 2 not yet closed. Continue in this order:
+1. Read back the seven ProductKnowledge records from the local DB and verify the saved content, evidence references, caveats and intentionally empty fields against the accepted drafts. Do not alter Evidence/QA/conflict fields.
+2. Obtain/inspect the physical product package details that materially resolve remaining identity or recommendation risks: front/back labels, visible INCI, market/region, size and GTIN where available. Keep unresolved market/formula identity as a caveat or NEEDS_REVIEW; do not infer formula from packaging alone.
+3. Complete human QA of the 25 source-bound Evidence assertions individually. Accept/reject/retain caveats per assertion; do not bulk-promote and do not resolve Anua's two conflict rows without a separately authorized audited correction.
+4. Refresh a read-only DB snapshot and verify ProductKnowledge read-back, Evidence/QA/conflict states, Product identity/lifecycle, inventory and protected tables.
+5. Confirm actual sellable stock and quantities with the Product Owner before any inventory write. Current historical baseline had zero stock; do not assume stock has changed.
+6. Only after identity, Evidence QA, knowledge and stock gates are satisfied, run the isolated seven-product Home Page E2E and obtain explicit Product Owner acceptance. Then assess evidence-supported ProductProblemLinks and recommendation acceptance under their own authorization boundaries.
+7. Update Issue #406 with Gate 2/3/4 status based on observed evidence. Keep Issue #406 OPEN until all applicable intake and acceptance gates genuinely pass.
+
+### Safety and continuity
+- No migration, import, code change, Evidence QA promotion, conflict reclassification, Product identity/lifecycle change, inventory adjustment, Recommendation or ProductProblemLink write was performed by the ProductKnowledge content transfer.
+- Do not run the unsafe legacy importer wrapper. Do not merge PR #534; it remains a documentation-only open handoff PR requiring separate PO authorization.
+- The six-chat summary rule remains: after every six separate chats, append one concise summary to this same file. This checkpoint is recorded now so the current work is not lost.
