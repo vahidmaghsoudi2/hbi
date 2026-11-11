@@ -1304,3 +1304,16 @@ Commitهای این برش:
 - **اعتبارسنجی پس از اصلاحات — HEAD کد `bdcb622ee61b14fe4c962b352a1de53a993cce9e`:** HBI CI run `43080910622`، HBI Auto Tasks run `43080910947` و HBI Pilot Browser Proof run `43080910676` هر سه completed/success شدند. Pytest کامل `924 passed, 0 failed` با Coverage کل ۸۹٪؛ G8 regression `55 passed`؛ Frontend build موفق؛ Browser proof `36 passed` و artifact ID `13885275712`. این نتایج روی HEAD کد پیش از ثبت همین به‌روزرسانی مستندات اجرا شده‌اند.
 
 **وضعیت ردیف ۷۱:** همچنان PARTIAL تا زمان تأیید CI جدید و تکمیل/اعتبارسنجی لایهٔ تعامل زبانی و یکپارچگی واقعی محصول. این برش، گردش HTTP مصنوعی را پوشش می‌دهد؛ موتور مکالمهٔ زبانی یا تولید پیشنهاد تخصصی نیست. هیچ دادهٔ واقعی مشتری، پیشنهاد شیمیایی، نمایش مشتری یا مجوز اجرای خدمت فعال نشده است.
+
+
+### تکمیل پوشش آزمون چندمرحله‌ای API گفت‌وگو — ۱۱ نوامبر ۲۰۲۶
+
+- آزمون چندمرحله‌ای در `tests/test_hair_dialogue_api.py` تقویت شد تا envelope ایمنی/عدم انتشار پس از **هر انتقال** بررسی شود، نه فقط در پاسخ نهایی.
+- در همان گردش، پرسش اطلاعاتی پس از پذیرش و رضایت اجرا اضافه شد؛ آزمون ثابت می‌کند سؤال تصمیم مشتری و رضایت اجرای ثبت‌شده را تغییر نمی‌دهد.
+- تغییر نسخهٔ هدف پس از این پرسش، پیشنهاد فعال و پذیرش و رضایت وابسته به نسخهٔ قبلی را پاک می‌کند.
+- کنترل ثابت پاسخ همهٔ مراحل: `recommendation=null`، `display_allowed=false`، `client_visible=false` و `persistence=COMPUTED_ONLY`.
+- Commit آزمون: `b1b9762e6a30275ca1b00a244355fcd0e29d12c5`.
+- اعتبارسنجی دقیق همین Commit: HBI CI run [43084805893](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43084805893)، HBI Auto Tasks run [43084805751](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43084805751) و HBI Pilot Browser Proof run [43084805741](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43084805741) همگی `completed / success` شدند؛ هر سه Job در CI موفق‌اند.
+- خروجی آزمون کامل Python: `924 passed, 0 failed`؛ Coverage کل ۸۹٪؛ G8 و Frontend build موفق؛ Browser proof شامل ۳۶ آزمون موفق. در اجرای pytest تعداد ۷۸۵ warning ثبت شد؛ شکست نیست و برای پاک‌سازی فنی بعدی باقی می‌ماند.
+
+**وضعیت ردیف ۷۱:** PARTIAL — قرارداد pure و آداپتور HTTP چندمرحله‌ای synthetic-only با آزمون و CI موفق پوشش داده شده‌اند؛ موتور مکالمهٔ زبانی، یکپارچگی UI با API گفت‌وگو و تولید پیشنهاد تخصصی همچنان خارج از این برش‌اند. این نتیجه مجوز فعال‌سازی پیشنهاد شیمیایی، پردازش دادهٔ واقعی، پایلوت، انتشار یا شروع ردیف ۷۲ نیست. PO-66-09 و کاتالوگ ۸۸ شماره‌رنگ بسته می‌مانند؛ PR #502 باز، Draft و ادغام‌نشده باقی می‌ماند.
