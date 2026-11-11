@@ -1,5 +1,34 @@
 # HBI Active Session
 
+
+## CURRENT AUTHORITATIVE CORRECTION — 2026-11-12
+
+This section supersedes any conflicting statement in older handoff sections below. Older snapshots and comments remain historical records of what was reported at their timestamps; they are not current-state assertions.
+
+### ProductKnowledge transfer — verified operator report
+- The 2026-11-12 operator report confirms that exactly seven existing ProductKnowledge rows were updated in a content-only transaction, writing only: `ingredients`, `ingredient_roles`, `claimed_benefits`, `known_use_cases`, `usage_instructions`, `manufacturer_claims`, `contraindications`, and `evidence_refs`.
+- The reported transaction passed SQLite integrity (`ok`) with zero FK violations. A pre-write backup was reported at `E:\\HBI_GitHub_Current\\artifacts\\hbi-before-productknowledge-write-20261112-001331.db`.
+- The report states that Product, Evidence, Inventory, Recommendation, ProductProblemLink, and ProductKnowledge status/confidence/domain-status fields were not changed by that transfer.
+- All 25 Evidence rows remained `PENDING / UNKNOWN`; no Evidence QA promotion occurred. ISDIN ProductKnowledge `ingredients` remained empty because no matching ingredients Evidence row was available.
+- This supersedes older handoff wording that ProductKnowledge content fields were empty. That wording describes an earlier snapshot and must not be used as the present post-transfer state. A fresh local read-back is still required before claiming the saved content is currently verified.
+
+### Anua — corrected evidence interpretation and authorized disposition
+- The existing 24-assertion manifest remains the canonical research set; do not regenerate or re-import it. The 25th DB Evidence row is an additional duplicate Anua assertion, not a 25th canonical manifest assertion.
+- Three relevant Anua Evidence records were identified:
+  - `...-1ed73fb7`: the source-backed full INCI assertion in `ingredients`; retain this record.
+  - `...-36d28c8a`: the manufacturer-declared 10% azelaic-acid claim in `manufacturer_claims`; retain this record.
+  - `...-2b4c9e26`: a duplicate 10% manufacturer claim incorrectly classified under `ingredients`; this is the record designated for audited rejection from the active evidence set.
+- Therefore, any earlier instruction or implication to remove `...-1ed73fb7` is incorrect and is superseded. Do not reject or delete the full-INCI record.
+- The user has now requested that the Anua findings and correction be recorded and that inaccurate prior history be corrected. The intended data disposition is to retain `...-1ed73fb7` and `...-36d28c8a`, and reject `...-2b4c9e26` through the existing audited conflict-resolution service (not physical deletion).
+- **Execution status:** this GitHub documentation update does not modify the local SQLite database. The Anua Evidence conflict must not be described as resolved until the local audited service operation is actually run and its post-write read-back confirms the exact intended rows and audit event. Verify the competing set before calling the service; no unrelated Evidence may be changed.
+
+### Protected scope and next steps
+- No Evidence QA promotion, no bulk status change, no migration, no code change, and no Inventory, Recommendation, ProductProblemLink, Product identity, or lifecycle mutation is authorized by this documentation correction.
+- Obtain a fresh read-only local DB snapshot and ProductKnowledge read-back. For Anua, inspect the exact competing set, run only the audited correction described above, and verify the winner, rejected duplicate, audit event, and absence of unrelated changes.
+- Issue #406 remains the single roadmap/source-of-truth issue and stays OPEN until its actual acceptance gates pass.
+- Continue using this file as the sole active-session handoff. Do not create a parallel handoff document.
+
+
 ## Current Operational Handoff — post-merge correction — 2026-11-11
 
 **Current master:** `40d24a37b7ffc8c46b860247d2da86ca856b4593`  
