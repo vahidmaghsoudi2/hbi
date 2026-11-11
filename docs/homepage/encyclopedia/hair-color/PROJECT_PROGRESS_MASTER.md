@@ -1301,6 +1301,6 @@ Commitهای این برش:
 - تمام پاسخ‌های این مسیر همچنان `recommendation=null`، `display_allowed=false`، `client_visible=false` و `persistence=COMPUTED_ONLY` هستند.
 - Commit اصلاح API: `67fabeab8a6cf6645415611d4f4cc9593a839313`.
 - Commit آزمون چندمرحله‌ای و عدم افشای placeholder: `bdcb622ee61b14fe4c962b352a1de53a993cce9e`.
-- آخرین CI پیش از این دو commit روی HEAD قبلی `0a45861ca3a0f636e36c3a909e4f339a97a1e620) موفق بود: ۹۲۳ آزمون Python، ۳۶ آزمون مرورگر و Coverage کل ۸۹٪؛ این نتیجه به commitهای جدید تعمیم داده نمی‌شود و اجرای CI جدید برای تأیید آن‌ها لازم است.
+- **اعتبارسنجی پس از اصلاحات — HEAD کد `bdcb622ee61b14fe4c962b352a1de53a993cce9e`:** HBI CI run `43080910622`، HBI Auto Tasks run `43080910947` و HBI Pilot Browser Proof run `43080910676` هر سه completed/success شدند. Pytest کامل `924 passed, 0 failed` با Coverage کل ۸۹٪؛ G8 regression `55 passed`؛ Frontend build موفق؛ Browser proof `36 passed` و artifact ID `13885275712`. این نتایج روی HEAD کد پیش از ثبت همین به‌روزرسانی مستندات اجرا شده‌اند.
 
 **وضعیت ردیف ۷۱:** همچنان PARTIAL تا زمان تأیید CI جدید و تکمیل/اعتبارسنجی لایهٔ تعامل زبانی و یکپارچگی واقعی محصول. این برش، گردش HTTP مصنوعی را پوشش می‌دهد؛ موتور مکالمهٔ زبانی یا تولید پیشنهاد تخصصی نیست. هیچ دادهٔ واقعی مشتری، پیشنهاد شیمیایی، نمایش مشتری یا مجوز اجرای خدمت فعال نشده است.
