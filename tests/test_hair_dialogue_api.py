@@ -46,7 +46,7 @@ def _turn(client, state, action, **fields):
 def test_dialogue_runtime_requires_internal_role(client, db_session):
     response = client.post(
         "/api/v1/hair/dialogue/turn",
-        json={"action": "ANSWER_QUESTION", "state": _state(), "question": "چرا؟", "answer": "توضیح"},
+        json={"action": "ANSWER_QUESTION", "state": _state(), "question_code": "STATUS_REASON", "answer_code": "STATUS_REASON"},
         headers=_headers(),
     )
     assert response.status_code == 403
@@ -55,9 +55,9 @@ def test_dialogue_runtime_requires_internal_role(client, db_session):
 def test_sequential_questions_preserve_versions_decisions_and_non_persistence(client, db_session):
     _grant_reviewer_qa(db_session)
     state = _state()
-    first = _turn(client, state, "ANSWER_QUESTION", question="سؤال اول", answer="پاسخ اول")
+    first = _turn(client, state, "ANSWER_QUESTION", question_code="STATUS_REASON", answer_code="STATUS_REASON")
     assert first.status_code == 200
-    second = _turn(client, first.json()["state"], "ANSWER_QUESTION", question="سؤال دوم", answer="پاسخ دوم")
+    second = _turn(client, first.json()["state"], "ANSWER_QUESTION", question_code="MISSING_DATA", answer_code="MISSING_DATA")
     assert second.status_code == 200
     body = second.json()
     assert body["state"]["case_version"] == "case-v1"
@@ -147,10 +147,10 @@ def test_required_data_and_advice_gate_return_explicit_gaps(client, db_session):
 def test_runtime_rejects_real_case_ids_and_unrecognized_request_fields(client, db_session):
     _grant_reviewer_qa(db_session)
     real_case = _turn(client, _state(case_id="REAL-CLIENT-001"), "ANSWER_QUESTION",
-                      question="سؤال", answer="پاسخ")
+                      question_code="STATUS_REASON", answer_code="STATUS_REASON")
     assert real_case.status_code == 422
     malformed = _turn(client, _state(), "ANSWER_QUESTION",
-                      question="سؤال", answer="پاسخ", customer_id="must-not-be-accepted")
+                      question_code="STATUS_REASON", answer_code="STATUS_REASON", customer_id="must-not-be-accepted")
     assert malformed.status_code == 422
 
 
