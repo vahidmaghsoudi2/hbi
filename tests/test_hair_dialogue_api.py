@@ -41,6 +41,14 @@ def _turn(client, state, action, **fields):
     )
 
 
+
+def _assert_non_publishing_envelope(body):
+    assert body["recommendation"] is None
+    assert body["display_allowed"] is False
+    assert body["client_visible"] is False
+    assert body["persistence"] == "COMPUTED_ONLY"
+
+
 def test_dialogue_runtime_requires_internal_role(client, db_session):
     response = client.post(
         "/api/v1/hair/dialogue/turn",
@@ -174,6 +182,7 @@ def test_multiturn_http_flow_keeps_acceptance_consent_and_goal_version_separate(
 
     attached = _turn(client, state, "ATTACH_PROPOSAL", proposal_id=proposal_id)
     assert attached.status_code == 200
+    _assert_non_publishing_envelope(attached.json())
     state = attached.json()["state"]
 
     question = _turn(
@@ -181,12 +190,14 @@ def test_multiturn_http_flow_keeps_acceptance_consent_and_goal_version_separate(
         question_code="STATUS_REASON", answer_code="STATUS_REASON",
     )
     assert question.status_code == 200
+    _assert_non_publishing_envelope(question.json())
     state = question.json()["state"]
     assert state["client_decision"] == "NONE"
     assert state["execution_consent_for_proposal_id"] is None
 
     accepted = _turn(client, state, "ACCEPT_PROPOSAL", proposal_id=proposal_id)
     assert accepted.status_code == 200
+    _assert_non_publishing_envelope(accepted.json())
     state = accepted.json()["state"]
     assert state["client_decision"] == "ACCEPTED"
     assert state["execution_consent_for_proposal_id"] is None
@@ -196,17 +207,26 @@ def test_multiturn_http_flow_keeps_acceptance_consent_and_goal_version_separate(
         proposal_id=proposal_id, explicit_consent=True,
     )
     assert consent.status_code == 200
+    _assert_non_publishing_envelope(consent.json())
     state = consent.json()["state"]
+    assert state["execution_consent_for_proposal_id"] == proposal_id
+
+    # A later question is informational: it must preserve both independent decisions.
+    follow_up = _turn(
+        client, state, "ANSWER_QUESTION",
+        question_code="PROCESS_LIMIT", answer_code="PROCESS_LIMIT",
+    )
+    assert follow_up.status_code == 200
+    _assert_non_publishing_envelope(follow_up.json())
+    state = follow_up.json()["state"]
+    assert state["client_decision"] == "ACCEPTED"
     assert state["execution_consent_for_proposal_id"] == proposal_id
 
     changed = _turn(client, state, "CHANGE_GOAL", new_goal_version="goal-v2")
     assert changed.status_code == 200
     body = changed.json()
+    _assert_non_publishing_envelope(body)
     assert body["state"]["goal_version"] == "goal-v2"
     assert body["state"]["active_proposal_id"] is None
     assert body["state"]["client_decision"] == "NONE"
     assert body["state"]["execution_consent_for_proposal_id"] is None
-    assert body["recommendation"] is None
-    assert body["display_allowed"] is False
-    assert body["client_visible"] is False
-    assert body["persistence"] == "COMPUTED_ONLY"
