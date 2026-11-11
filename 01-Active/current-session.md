@@ -1,5 +1,36 @@
 # HBI Active Session
 
+## Current Operational Handoff — post-merge correction — 2026-11-11
+
+**Current master:** `40d24a37b7ffc8c46b860247d2da86ca856b4593`  
+**Primary roadmap:** [Issue #406](https://github.com/vahidmaghsoudi2/hbi/issues/406) — OPEN  
+**Runtime audit:** [Issue #74](https://github.com/vahidmaghsoudi2/hbi/issues/74) — CLOSED as `COMPLETE_WITH_OPERATIONAL_BLOCKERS`.
+
+### PR #533 — merged and verified
+- [PR #533](https://github.com/vahidmaghsoudi2/hbi/pull/533) was explicitly authorized by the PO and merged into `master`.
+- Merge commit: `40d24a37b7ffc8c46b860247d2da86ca856b4593`; GitHub reports the commit signature as verified.
+- Merged head: `2f0a2b7428149cf751d24e917fc9cfe0e91a1fe2`.
+- PR state was re-read from GitHub: `closed`, `merged=true`; `refs/heads/master` points to the merge commit above.
+- Exact PR-head checks before merge: HBI CI SUCCESS (755 passed, 88% coverage), HBI Auto Tasks SUCCESS (755 passed, 88% coverage), Pilot Browser Proof SUCCESS (30/30 browser tests; 61/61 parser conformance).
+- Post-merge push workflows on the exact merge SHA: [HBI CI run 43076211515](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43076211515) and [HBI Auto Tasks run 43076211759](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43076211759). At the time of this handoff correction, both were still `in_progress`; re-read their run metadata before claiming post-merge success.
+- The merge contains the audited ProductKnowledge derived-status refresh fix and this existing handoff file's earlier checkpoint update. The historical section below includes pre-merge wording; this top section supersedes it.
+- No production DB, Evidence, ProductKnowledge content, QA state, inventory, Recommendation or lifecycle data was changed by PR #533.
+
+### Immediate next actions
+1. Recheck both post-merge workflow runs above until completed; record exact conclusions and counts in this file and Issue #406.
+2. Resume the seven-product operational gates: fresh read-only DB snapshot; physical package/market/GTIN/INCI identity verification; human Evidence QA; accepted ProductKnowledge read-back; real sellable-stock confirmation; isolated seven-product Home Page E2E.
+3. Keep Issue #406 OPEN until all product intake and acceptance gates are genuinely complete.
+4. Do not run the unsafe PR #526 importer wrapper, start the app against the main DB, or write production DB, QA, inventory, lifecycle, Recommendation or ProductProblemLink data without explicit authorization and verified evidence.
+
+### Continuity and safety
+- Protect local modifications and all other worktrees; no reset, overwrite or cleanup.
+- PowerShell diagnostics must copy all output via `Set-Clipboard` and also print it.
+- After every six separate chats, append a concise six-chat summary to this same file; do not create parallel handoff documents.
+- If connectivity is interrupted, resume from this file and Issue #406. PR #533 is merged; its merge SHA is `40d24a37b7ffc8c46b860247d2da86ca856b4593`.
+
+---
+
+
 ## Current Operational Handoff — 2026-11-11
 
 **Current master:** `a1176412717b13a680f62cf1b0fabc0e53337c69`  
