@@ -1,6 +1,4 @@
 """HTTP-level conformance for the stateless, synthetic Hair dialogue runtime."""
-from copy import deepcopy
-
 from app.core.auth import create_access_token
 from app.models.user_role import ROLE_REVIEWER_QA, UserRole
 
