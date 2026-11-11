@@ -225,18 +225,23 @@ test("Row 71 synthetic dialogue UI uses the existing dialogue API for all six tr
       default:
         break;
     }
+    const responseBody = {
+      action: body.action,
+      state,
+      result: {},
+      recommendation: null,
+      display_allowed: false,
+      client_visible: false,
+      persistence: "COMPUTED_ONLY",
+    };
+    expect(responseBody.recommendation).toBeNull();
+    expect(responseBody.display_allowed).toBe(false);
+    expect(responseBody.client_visible).toBe(false);
+    expect(responseBody.persistence).toBe("COMPUTED_ONLY");
     await route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify({
-        action: body.action,
-        state,
-        result: {},
-        recommendation: null,
-        display_allowed: false,
-        client_visible: false,
-        persistence: "COMPUTED_ONLY",
-      }),
+      body: JSON.stringify(responseBody),
     });
   });
 
