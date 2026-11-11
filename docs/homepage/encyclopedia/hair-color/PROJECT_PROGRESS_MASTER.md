@@ -1239,7 +1239,7 @@ HEAD کد رابط: `4d69a4629784e8514b3708f4b21181380a71962d`. تغییرات �
 |---|---|---|
 | **۶۹** | **PARTIAL — SYNTHETIC SPECIALIST PREVIEW UI + OUTPUT/REVIEW CONTRACT CI-VERIFIED** | UI پنج نوع پاسخ و چهار حالت موتور را جدا نشان می‌دهد؛ وضعیت، دلیل، شواهد، Lineage و محدودیت‌ها را نمایش می‌دهد. شش آزمون مرورگر اختصاصی موفق است. پیشنهاد رنگ واقعی/شیمیایی عمداً تولید نمی‌شود؛ نمایش پیشنهاد واقعی تا وجود خروجی مجاز و شواهد معتبر باز می‌ماند. احراز صلاحیت متخصص مسئولیت PO است و blocker دستیار نیست. |
 | **۷۰** | **COMPLETE — SYNTHETIC TECHNICAL TESTING** | HBI CI run 42904317198، Auto Tasks run 42904317208 و Pilot Browser Proof run 42904317184 همگی SUCCESS؛ ۹۰۷ آزمون موفق، صفر شکست؛ Coverage کل ۸۹٪؛ G8، Governance و Frontend Build موفق؛ ۳۶ آزمون مرورگر موفق؛ parser conformance برای ۶۱ رکورد موفق؛ Artifact ID 13805035529. |
-| **۷۱** | **PARTIAL — INTERNAL UI → EXISTING DIALOGUE API INTEGRATION + 6-STEP SYNTHETIC BROWSER E2E CI-VERIFIED** | رابط داخلی Admin-gated به POST /api/v1/hair/dialogue/turn متصل شد؛ گردش شش‌مرحله‌ای پرسش، پیشنهاد مصنوعی، پذیرش، رضایت مستقل، پرسش بعدی و تغییر هدف در ۳۷ آزمون مرورگر موفق است. روی کد SHA 603a53d5292d3d3e3df00b882cfee4b7a7fc0120 سه Workflow موفق‌اند؛ ۹۲۴ آزمون Python، Coverage ۸۹٪ و Frontend build موفق. موتور مکالمهٔ زبانی واقعی و تولید پیشنهاد تخصصی همچنان پیاده‌سازی نشده‌اند. |
+| **۷۱** | **PARTIAL — INTERNAL UI → EXISTING DIALOGUE API INTEGRATION + 6-STEP SYNTHETIC BROWSER E2E CI-VERIFIED** | رابط داخلی Admin-gated به POST /api/v1/hair/dialogue/turn متصل شد؛ گردش شش‌مرحله‌ای پرسش، پیشنهاد مصنوعی، پذیرش، رضایت مستقل، پرسش بعدی و تغییر هدف با اتصال واقعی مرورگر به API زنده (بدون route mock) در ۳۷ آزمون موفق است. روی کد SHA 438b14493aca9ef91a234c5921621da53be0bd9c سه Workflow موفق‌اند؛ ۹۲۴ آزمون Python، Coverage ۸۹٪ و Frontend build موفق. موتور مکالمهٔ زبانی واقعی و تولید پیشنهاد تخصصی همچنان پیاده‌سازی نشده‌اند. |
 
 **HEAD کد آزموده‌شده:** 7568209cd50f37995786e73a218bb9fb5f0e4b97.
 
@@ -1321,16 +1321,16 @@ Commitهای این برش:
 
 ### اجرای UI → API و آزمون سرتاسری synthetic-only ردیف ۷۱ — ۱۱ نوامبر ۲۰۲۶
 
-**دامنهٔ تغییر:** رابط داخلی پیش‌نمایش متخصص به همان endpoint موجود `POST /api/v1/hair/dialogue/turn` متصل شد؛ endpoint دوم یا مسیر عمومی مشتری ساخته نشد. فایل رابط جدید `frontend/src/pages/HairDialogueWorkbench.tsx` در صفحهٔ داخلی Admin-gated موجود نصب شد. کلاینت و قرارداد TypeScript در `frontend/src/api/client.ts` و `frontend/src/types/api.ts` افزوده شدند. آزمون مرورگر در `tests/browser/hair-specialist-preview.spec.cjs` گردش شش‌مرحله‌ای را پوشش می‌دهد.
+**دامنهٔ تغییر:** رابط داخلی پیش‌نمایش متخصص به همان endpoint موجود `POST /api/v1/hair/dialogue/turn` متصل شد؛ endpoint دوم یا مسیر عمومی مشتری ساخته نشد. فایل رابط جدید `frontend/src/pages/HairDialogueWorkbench.tsx` در صفحهٔ داخلی Admin-gated موجود نصب شد. کلاینت و قرارداد TypeScript در `frontend/src/api/client.ts` و `frontend/src/types/api.ts` افزوده شدند. آزمون مرورگر در `tests/browser/hair-specialist-preview.spec.cjs` گردش شش‌مرحله‌ای متصل به API زنده را پوشش می‌دهد.
 
-**گردش E2E مصنوعی:** پرسش اطلاعاتی اولیه → اتصال پیشنهاد مصنوعی → پذیرش → رضایت مستقل اجرا → پرسش اطلاعاتی بعدی → تغییر نسخهٔ هدف. آزمون تأیید می‌کند تغییر هدف، پیشنهاد فعال، پذیرش و رضایت وابسته به نسخهٔ قبلی را حذف می‌کند. تمام درخواست‌ها از همان endpoint استفاده می‌کنند و شناسه‌ها با پیشوند `SYNTHETIC-` هستند.
+**گردش E2E مصنوعی با API زنده (بدون route mock):** پرسش اطلاعاتی اولیه → اتصال پیشنهاد مصنوعی → پذیرش → رضایت مستقل اجرا → پرسش اطلاعاتی بعدی → تغییر نسخهٔ هدف. آزمون تأیید می‌کند تغییر هدف، پیشنهاد فعال، پذیرش و رضایت وابسته به نسخهٔ قبلی را حذف می‌کند. تمام درخواست‌ها از همان endpoint استفاده می‌کنند و شناسه‌ها با پیشوند `SYNTHETIC-` هستند.
 
 **قفل عدم انتشار:** پاسخ هر انتقال باید دقیقاً `recommendation=null`، `display_allowed=false`، `client_visible=false` و `persistence=COMPUTED_ONLY` داشته باشد؛ UI در صورت نقض envelope گردش را متوقف می‌کند. هیچ دادهٔ واقعی مشتری، DB persistence، پیشنهاد رنگ/شیمی، COMBINATION_CONSULT واقعی یا مجوز اجرای خدمت فعال نشده است.
 
-**شواهد CI روی HEAD کد `603a53d5292d3d3e3df00b882cfee4b7a7fc0120`:**
-- HBI CI [run 43089779568](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43089779568): completed/success؛ هر سه Job موفق؛ ۹۲۴ آزمون Python موفق، صفر شکست؛ Coverage کل ۸۹٪؛ G8 و Frontend Build موفق.
-- HBI Auto Tasks [run 43089779471](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43089779471): completed/success؛ PyCompile و ۹۲۴ آزمون موفق، صفر شکست؛ Coverage کل ۸۹٪.
-- HBI Pilot Browser Proof [run 43089779311](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43089779311): completed/success؛ parser conformance برای ۶۱ رکورد و **۳۷ آزمون مرورگر موفق**؛ شامل گردش شش‌مرحله‌ای جدید.
+**شواهد CI روی HEAD کد `438b14493aca9ef91a234c5921621da53be0bd9c`:**
+- HBI CI [run 43090360119](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43090360119): completed/success؛ هر سه Job موفق؛ ۹۲۴ آزمون Python موفق، صفر شکست؛ Coverage کل ۸۹٪؛ G8 و Frontend Build موفق.
+- HBI Auto Tasks [run 43090360087](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43090360087): completed/success؛ PyCompile و ۹۲۴ آزمون موفق، صفر شکست؛ Coverage کل ۸۹٪.
+- HBI Pilot Browser Proof [run 43090360116](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43090360116): completed/success؛ parser conformance برای ۶۱ رکورد و **۳۷ آزمون مرورگر موفق**؛ شامل گردش شش‌مرحله‌ای جدید.
 
 **معیارهای تکمیل ردیف ۷۱:**
 
