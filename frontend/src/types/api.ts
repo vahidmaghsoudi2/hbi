@@ -341,6 +341,43 @@ export interface ProductKnowledgeDTO {
   updated_at?: string | null;
 }
 
+/** Stateless synthetic-only dialogue transition (POST /api/v1/hair/dialogue/turn). */
+export interface HairDialogueState {
+  case_id: string;
+  case_version: string;
+  goal_version: string;
+  active_proposal_id: string | null;
+  active_proposal_case_version: string | null;
+  active_proposal_goal_version: string | null;
+  rejected_proposal_ids: string[];
+  client_decision: "NONE" | "ACCEPTED" | "REJECTED";
+  execution_consent_for_proposal_id: string | null;
+}
+export type HairDialogueAction =
+  | "ANSWER_QUESTION"
+  | "ATTACH_PROPOSAL"
+  | "ACCEPT_PROPOSAL"
+  | "RECORD_EXECUTION_CONSENT"
+  | "CHANGE_GOAL";
+export interface HairDialogueTurnRequest {
+  action: HairDialogueAction;
+  state: HairDialogueState;
+  question_code?: "STATUS_REASON" | "MISSING_DATA" | "PROCESS_LIMIT";
+  answer_code?: "STATUS_REASON" | "MISSING_DATA" | "PROCESS_LIMIT";
+  proposal_id?: string;
+  explicit_consent?: boolean;
+  new_goal_version?: string;
+}
+export interface HairDialogueTurnResponse {
+  action: HairDialogueAction;
+  state: HairDialogueState;
+  result: Record<string, unknown>;
+  recommendation: null;
+  display_allowed: false;
+  client_visible: false;
+  persistence: "COMPUTED_ONLY";
+}
+
 /** Read-only synthetic specialist preview (POST /api/v1/hair/specialist-preview). */
 export interface HairSpecialistPreviewRequest {
   case_id: string;
