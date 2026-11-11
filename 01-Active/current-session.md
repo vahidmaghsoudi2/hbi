@@ -12,7 +12,7 @@
 - Merged head: `2f0a2b7428149cf751d24e917fc9cfe0e91a1fe2`.
 - PR state was re-read from GitHub: `closed`, `merged=true`; `refs/heads/master` points to the merge commit above.
 - Exact PR-head checks before merge: HBI CI SUCCESS (755 passed, 88% coverage), HBI Auto Tasks SUCCESS (755 passed, 88% coverage), Pilot Browser Proof SUCCESS (30/30 browser tests; 61/61 parser conformance).
-- Post-merge push workflows on the exact merge SHA: [HBI CI run 43076211515](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43076211515) and [HBI Auto Tasks run 43076211759](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43076211759). At the time of this handoff correction, both were still `in_progress`; re-read their run metadata before claiming post-merge success.
+- Post-merge push workflows on the exact merge SHA both completed SUCCESS: [HBI CI run 43076211515](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43076211515) and [HBI Auto Tasks run 43076211759](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43076211759). CI jobs `test`, `governance-tests` and `g8-isolated-pilot-smoke` all report SUCCESS; Auto Tasks `Live test evidence` reports SUCCESS.
 - The merge contains the audited ProductKnowledge derived-status refresh fix and this existing handoff file's earlier checkpoint update. The historical section below includes pre-merge wording; this top section supersedes it.
 - No production DB, Evidence, ProductKnowledge content, QA state, inventory, Recommendation or lifecycle data was changed by PR #533.
 
