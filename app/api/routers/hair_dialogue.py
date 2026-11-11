@@ -144,7 +144,7 @@ async def run_hair_dialogue_turn(
             synthetic_presence = {field: "SYNTHETIC_FIXTURE_VALUE" for field in fields}
             resolved = resolve_required_data(synthetic_presence, tuple(payload.required_fields or ()))
             result = {
-                "known_values": dict(resolved.known_values),
+                "known_fields": [field for field, _value in resolved.known_values],
                 "missing_fields": list(resolved.missing_fields),
                 "complete": resolved.complete,
             }
