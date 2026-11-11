@@ -10,7 +10,7 @@ from dataclasses import asdict
 from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.authorization import require_any_role
 from app.domain.hair_dialogue_contract import (
@@ -41,7 +41,7 @@ class DialogueStateInput(BaseModel):
     active_proposal_id: str | None = None
     active_proposal_case_version: str | None = None
     active_proposal_goal_version: str | None = None
-    rejected_proposal_ids: list[str] = []
+    rejected_proposal_ids: list[str] = Field(default_factory=list)
     client_decision: Literal["NONE", "ACCEPTED", "REJECTED"] = "NONE"
     execution_consent_for_proposal_id: str | None = None
 
