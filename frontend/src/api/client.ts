@@ -31,6 +31,8 @@ import type {
   ResearchAssertionRequest,
   HairSpecialistPreviewRequest,
   HairSpecialistPreviewResponse,
+  HairDialogueTurnRequest,
+  HairDialogueTurnResponse,
 } from "../types/api";
 
 const BASE = import.meta.env?.VITE_API_BASE ?? "/api/v1";
@@ -563,5 +565,18 @@ export function previewHairSpecialist(
     "/hair/specialist-preview",
     { method: "POST", body: JSON.stringify(body) },
     adminToken,
+  );
+}
+
+
+/** POST /api/v1/hair/dialogue/turn — internal synthetic-only state transition. */
+export function runHairDialogueTurn(
+  body: HairDialogueTurnRequest,
+  internalToken: string,
+): Promise<HairDialogueTurnResponse> {
+  return request<HairDialogueTurnResponse>(
+    "/hair/dialogue/turn",
+    { method: "POST", body: JSON.stringify(body) },
+    internalToken,
   );
 }
