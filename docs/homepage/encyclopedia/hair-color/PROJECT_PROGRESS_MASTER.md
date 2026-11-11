@@ -1327,10 +1327,10 @@ Commitهای این برش:
 
 **قفل عدم انتشار:** پاسخ هر انتقال باید دقیقاً `recommendation=null`، `display_allowed=false`، `client_visible=false` و `persistence=COMPUTED_ONLY` داشته باشد؛ UI در صورت نقض envelope گردش را متوقف می‌کند. هیچ دادهٔ واقعی مشتری، DB persistence، پیشنهاد رنگ/شیمی، COMBINATION_CONSULT واقعی یا مجوز اجرای خدمت فعال نشده است.
 
-**شواهد CI روی HEAD کد `e78c354e9f37ba1ff331acf1a18ea0004a2c6498`:**
-- HBI CI [run 43089373910](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43089373910): completed/success؛ هر سه Job موفق؛ ۹۲۴ آزمون Python موفق، صفر شکست؛ Coverage کل ۸۹٪؛ G8 و Frontend Build موفق.
-- HBI Auto Tasks [run 43089373901](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43089373901): completed/success؛ PyCompile و ۹۲۴ آزمون موفق، صفر شکست؛ Coverage کل ۸۹٪.
-- HBI Pilot Browser Proof [run 43089374060](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43089374060): completed/success؛ parser conformance برای ۶۱ رکورد و **۳۷ آزمون مرورگر موفق**؛ شامل گردش شش‌مرحله‌ای جدید.
+**شواهد CI روی HEAD کد `603a53d5292d3d3e3df00b882cfee4b7a7fc0120`:**
+- HBI CI [run 43089779568](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43089779568): completed/success؛ هر سه Job موفق؛ ۹۲۴ آزمون Python موفق، صفر شکست؛ Coverage کل ۸۹٪؛ G8 و Frontend Build موفق.
+- HBI Auto Tasks [run 43089779471](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43089779471): completed/success؛ PyCompile و ۹۲۴ آزمون موفق، صفر شکست؛ Coverage کل ۸۹٪.
+- HBI Pilot Browser Proof [run 43089779311](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43089779311): completed/success؛ parser conformance برای ۶۱ رکورد و **۳۷ آزمون مرورگر موفق**؛ شامل گردش شش‌مرحله‌ای جدید.
 
 **معیارهای تکمیل ردیف ۷۱:**
 
