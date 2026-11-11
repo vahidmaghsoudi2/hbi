@@ -182,8 +182,16 @@ test("specialist preview API failure is contained and does not display stale out
 });
 
 
-test("Row 71 synthetic dialogue UI uses the existing dialogue API for all six transitions", async ({ page }) => {
-  await openPreview(page);
+test("Row 71 synthetic dialogue UI uses the live existing dialogue API for all six transitions", async ({ page }) => {
+  // Obtain a scoped PO token from the disposable browser-fixture API; no route mock.
+  const tokenResponse = await page.request.post("http://127.0.0.1:8765/api/v1/auth/pilot-po-token");
+  expect(tokenResponse.ok()).toBeTruthy();
+  const tokenBody = await tokenResponse.json();
+  await page.addInitScript((token) => {
+    sessionStorage.setItem("hbi_admin_access_token", token);
+  }, tokenBody.access_token);
+  await page.goto("/hair/specialist-preview");
+
   const expectedActions = [
     "ANSWER_QUESTION",
     "ATTACH_PROPOSAL",
@@ -193,62 +201,29 @@ test("Row 71 synthetic dialogue UI uses the existing dialogue API for all six tr
     "CHANGE_GOAL",
   ];
   const requests = [];
-  let state = {
-    case_id: "SYNTHETIC-ROW71-UI-001",
-    case_version: "case-v1",
-    goal_version: "goal-v1",
-    active_proposal_id: null,
-    active_proposal_case_version: null,
-    active_proposal_goal_version: null,
-    rejected_proposal_ids: [],
-    client_decision: "NONE",
-    execution_consent_for_proposal_id: null,
-  };
-  await page.route("**/api/v1/hair/dialogue/turn", async route => {
-    const body = route.request().postDataJSON();
-    requests.push(body);
-    expect(body.state.case_id).toBe("SYNTHETIC-ROW71-UI-001");
-    expect(body.state.case_id).toMatch(/^SYNTHETIC-/);
-    switch (body.action) {
-      case "ATTACH_PROPOSAL":
-        state = { ...state, active_proposal_id: body.proposal_id, active_proposal_case_version: state.case_version, active_proposal_goal_version: state.goal_version };
-        break;
-      case "ACCEPT_PROPOSAL":
-        state = { ...state, client_decision: "ACCEPTED" };
-        break;
-      case "RECORD_EXECUTION_CONSENT":
-        state = { ...state, execution_consent_for_proposal_id: body.proposal_id };
-        break;
-      case "CHANGE_GOAL":
-        state = { ...state, goal_version: body.new_goal_version, active_proposal_id: null, active_proposal_case_version: null, active_proposal_goal_version: null, client_decision: "NONE", execution_consent_for_proposal_id: null };
-        break;
-      default:
-        break;
-    }
-    const responseBody = {
-      action: body.action,
-      state,
-      result: {},
-      recommendation: null,
-      display_allowed: false,
-      client_visible: false,
-      persistence: "COMPUTED_ONLY",
-    };
-    expect(responseBody.recommendation).toBeNull();
-    expect(responseBody.display_allowed).toBe(false);
-    expect(responseBody.client_visible).toBe(false);
-    expect(responseBody.persistence).toBe("COMPUTED_ONLY");
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify(responseBody),
-    });
-  });
-
+  const responses = [];
   const workbench = page.getByTestId("hair-dialogue-workbench");
   await expect(workbench.getByRole("heading", { name: "گردش داخلی گفت‌وگوی مصنوعی — ردیف ۷۱" })).toBeVisible();
+
   for (let index = 0; index < expectedActions.length; index += 1) {
+    const responsePromise = page.waitForResponse(response =>
+      response.url().includes("/api/v1/hair/dialogue/turn") &&
+      response.request().method() === "POST"
+    );
     await workbench.getByRole("button", { name: `اجرای مرحلهٔ ${index + 1}` }).click();
+    const response = await responsePromise;
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    const requestBody = response.request().postDataJSON();
+    requests.push(requestBody);
+    responses.push(body);
+
+    expect(requestBody.state.case_id).toBe("SYNTHETIC-ROW71-UI-001");
+    expect(requestBody.state.case_id).toMatch(/^SYNTHETIC-/);
+    expect(body.recommendation).toBeNull();
+    expect(body.display_allowed).toBe(false);
+    expect(body.client_visible).toBe(false);
+    expect(body.persistence).toBe("COMPUTED_ONLY");
     await expect(workbench.getByTestId("dialogue-safety-envelope")).toBeVisible();
   }
 
@@ -259,8 +234,18 @@ test("Row 71 synthetic dialogue UI uses the existing dialogue API for all six tr
   expect(requests[3].explicit_consent).toBe(true);
   expect(requests[4].question_code).toBe("PROCESS_LIMIT");
   expect(requests[5].new_goal_version).toBe("goal-v2");
-  expect(requests[3].state.client_decision).toBe("ACCEPTED");
-  expect(requests[3].state.execution_consent_for_proposal_id).toBeNull();
+
+  expect(responses[2].state.client_decision).toBe("ACCEPTED");
+  expect(responses[2].state.execution_consent_for_proposal_id).toBeNull();
+  expect(responses[3].state.client_decision).toBe("ACCEPTED");
+  expect(responses[3].state.execution_consent_for_proposal_id).toBe("SYNTHETIC-PROPOSAL-ROW71-001");
+  expect(responses[4].state.client_decision).toBe("ACCEPTED");
+  expect(responses[4].state.execution_consent_for_proposal_id).toBe("SYNTHETIC-PROPOSAL-ROW71-001");
+  expect(responses[5].state.goal_version).toBe("goal-v2");
+  expect(responses[5].state.client_decision).toBe("NONE");
+  expect(responses[5].state.execution_consent_for_proposal_id).toBeNull();
+  expect(responses[5].state.active_proposal_id).toBeNull();
+
   await expect(workbench.getByTestId("dialogue-goal-version")).toHaveText("goal-v2");
   await expect(workbench.getByTestId("dialogue-client-decision")).toHaveText("NONE");
   await expect(workbench.getByTestId("dialogue-execution-consent")).toHaveText("ثبت نشده");
