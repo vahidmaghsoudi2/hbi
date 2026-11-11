@@ -131,7 +131,7 @@ def test_required_data_and_advice_gate_return_explicit_gaps(client, db_session):
     _grant_reviewer_qa(db_session)
     resolved = _turn(
         client, _state(), "RESOLVE_REQUIRED_DATA",
-        recorded_data={"brand": "Synthetic Brand", "history": ""},
+        recorded_fields=["brand"],
         required_fields=["brand", "history", "hair_history"],
     )
     assert resolved.status_code == 200
