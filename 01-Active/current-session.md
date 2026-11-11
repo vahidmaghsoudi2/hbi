@@ -12,7 +12,7 @@ This section supersedes any conflicting statement in older handoff sections belo
 - All 25 Evidence rows remained `PENDING / UNKNOWN`; no Evidence QA promotion occurred. ISDIN ProductKnowledge `ingredients` remained empty because no matching ingredients Evidence row was available.
 - This supersedes older handoff wording that ProductKnowledge content fields were empty. That wording describes an earlier snapshot and must not be used as the present post-transfer state. A fresh local read-back is still required before claiming the saved content is currently verified.
 
-### Anua — corrected evidence interpretation and authorized disposition
+### Anua — corrected evidence interpretation and proposed disposition
 - The existing 24-assertion manifest remains the canonical research set; do not regenerate or re-import it. The 25th DB Evidence row is an additional duplicate Anua assertion, not a 25th canonical manifest assertion.
 - Three relevant Anua Evidence records were identified:
   - `...-1ed73fb7`: the source-backed full INCI assertion in `ingredients`; retain this record.
