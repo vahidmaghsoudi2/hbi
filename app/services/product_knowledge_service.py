@@ -130,7 +130,10 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
         and confidence exactly as they were.
         """
         knowledge = self.repository.find_by_product(product_id)
-        if not knowledge or (knowledge.evidence_status or "").strip().upper() != "CONFLICT":
+        if (
+            not knowledge
+            or (knowledge.evidence_status or "").strip().upper() != "CONFLICT"
+        ):
             return knowledge
 
         evidences = self.evidence_repo.find_by_product(product_id)
@@ -153,7 +156,11 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
 
         values = {str(value or "").strip().upper() for value in domain_status.values()}
         if "SUPPORTED" in values:
-            overall = "PARTIAL" if values.intersection({"UNKNOWN", "PARTIAL"}) else "SUPPORTED"
+            overall = (
+                "PARTIAL"
+                if values.intersection({"UNKNOWN", "PARTIAL"})
+                else "SUPPORTED"
+            )
         elif "PARTIAL" in values:
             overall = "PARTIAL"
         else:
@@ -162,7 +169,9 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
         return self.repository.update_knowledge(
             product_id,
             evidence_status=overall,
-            domain_evidence_status=json.dumps(domain_status, ensure_ascii=False) if domain_status else None,
+            domain_evidence_status=(
+                json.dumps(domain_status, ensure_ascii=False) if domain_status else None
+            ),
         )
 
     _QA_APPROVED = frozenset({"APPROVED", "VERIFIED"})
