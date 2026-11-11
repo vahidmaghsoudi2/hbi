@@ -78,7 +78,7 @@ class HairDialogueTurnRequest(BaseModel):
     question: str | None = None
     answer: str | None = None
     client_safe_summary: str | None = None
-    recorded_data: dict[str, Any] | None = None
+    recorded_fields: list[str] | None = None
     required_fields: list[str] | None = None
     data_complete: bool | None = None
     safety_passed: bool | None = None
@@ -107,6 +107,8 @@ async def run_hair_dialogue_turn(
     state = payload.state.to_domain()
     if not isinstance(state.case_id, str) or not state.case_id.startswith("SYNTHETIC-"):
         raise HTTPException(status_code=422, detail="PO-66-09 permits synthetic case identifiers only.")
+    if not state.case_version.strip() or not state.goal_version.strip():
+        raise HTTPException(status_code=422, detail="Synthetic case and goal versions must be non-empty.")
 
     try:
         result: Any = None
@@ -119,7 +121,12 @@ async def run_hair_dialogue_turn(
         elif action == "EXPLAIN_REASON":
             result = {"summary_fa": explain_reason(payload.client_safe_summary or "")}
         elif action == "RESOLVE_REQUIRED_DATA":
-            resolved = resolve_required_data(payload.recorded_data or {}, tuple(payload.required_fields or ()))
+            fields = payload.recorded_fields or []
+            if len(set(fields)) != len(fields):
+                raise ValueError("recorded_fields must not contain duplicates")
+            # The HTTP contract accepts field-presence markers only, never client values.
+            synthetic_presence = {field: "SYNTHETIC_FIXTURE_VALUE" for field in fields}
+            resolved = resolve_required_data(synthetic_presence, tuple(payload.required_fields or ()))
             result = {
                 "known_values": dict(resolved.known_values),
                 "missing_fields": list(resolved.missing_fields),
