@@ -234,7 +234,6 @@ def test_pending_evidence_field_reclassification_is_audited_and_preserves_govern
     assert all(row.reason for row in audit_rows)
     assert len({row.correlation_id for row in audit_rows}) == 1
 
-    import json
     field_audit = next(row for row in audit_rows if row.action == "RECLASSIFY_FIELD")
     assert json.loads(field_audit.diff)["field"] == {
         "old": "ingredients",
