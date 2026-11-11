@@ -180,3 +180,85 @@ test("specialist preview API failure is contained and does not display stale out
   await expect(page.getByRole("alert")).toContainText("HTTP 503");
   await expect(page.getByRole("heading", { name: "وضعیت بررسی" })).toHaveCount(0);
 });
+
+
+test("Row 71 synthetic dialogue UI uses the existing dialogue API for all six transitions", async ({ page }) => {
+  await openPreview(page);
+  const expectedActions = [
+    "ANSWER_QUESTION",
+    "ATTACH_PROPOSAL",
+    "ACCEPT_PROPOSAL",
+    "RECORD_EXECUTION_CONSENT",
+    "ANSWER_QUESTION",
+    "CHANGE_GOAL",
+  ];
+  const requests = [];
+  let state = {
+    case_id: "SYNTHETIC-ROW71-UI-001",
+    case_version: "case-v1",
+    goal_version: "goal-v1",
+    active_proposal_id: null,
+    active_proposal_case_version: null,
+    active_proposal_goal_version: null,
+    rejected_proposal_ids: [],
+    client_decision: "NONE",
+    execution_consent_for_proposal_id: null,
+  };
+  await page.route("**/api/v1/hair/dialogue/turn", async route => {
+    const body = route.request().postDataJSON();
+    requests.push(body);
+    expect(body.state.case_id).toBe("SYNTHETIC-ROW71-UI-001");
+    expect(body.state.case_id).toMatch(/^SYNTHETIC-/);
+    switch (body.action) {
+      case "ATTACH_PROPOSAL":
+        state = { ...state, active_proposal_id: body.proposal_id, active_proposal_case_version: state.case_version, active_proposal_goal_version: state.goal_version };
+        break;
+      case "ACCEPT_PROPOSAL":
+        state = { ...state, client_decision: "ACCEPTED" };
+        break;
+      case "RECORD_EXECUTION_CONSENT":
+        state = { ...state, execution_consent_for_proposal_id: body.proposal_id };
+        break;
+      case "CHANGE_GOAL":
+        state = { ...state, goal_version: body.new_goal_version, active_proposal_id: null, active_proposal_case_version: null, active_proposal_goal_version: null, client_decision: "NONE", execution_consent_for_proposal_id: null };
+        break;
+      default:
+        break;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        action: body.action,
+        state,
+        result: {},
+        recommendation: null,
+        display_allowed: false,
+        client_visible: false,
+        persistence: "COMPUTED_ONLY",
+      }),
+    });
+  });
+
+  const workbench = page.getByTestId("hair-dialogue-workbench");
+  await expect(workbench.getByRole("heading", { name: "گردش داخلی گفت‌وگوی مصنوعی — ردیف ۷۱" })).toBeVisible();
+  for (let index = 0; index < expectedActions.length; index += 1) {
+    await workbench.getByRole("button", { name: `اجرای مرحلهٔ ${index + 1}` }).click();
+    await expect(workbench.getByTestId("dialogue-safety-envelope")).toBeVisible();
+  }
+
+  expect(requests.map(item => item.action)).toEqual(expectedActions);
+  expect(requests[0].question_code).toBe("STATUS_REASON");
+  expect(requests[1].proposal_id).toBe("SYNTHETIC-PROPOSAL-ROW71-001");
+  expect(requests[2].proposal_id).toBe("SYNTHETIC-PROPOSAL-ROW71-001");
+  expect(requests[3].explicit_consent).toBe(true);
+  expect(requests[4].question_code).toBe("PROCESS_LIMIT");
+  expect(requests[5].new_goal_version).toBe("goal-v2");
+  expect(requests[3].state.client_decision).toBe("ACCEPTED");
+  expect(requests[3].state.execution_consent_for_proposal_id).toBeNull();
+  await expect(workbench.getByTestId("dialogue-goal-version")).toHaveText("goal-v2");
+  await expect(workbench.getByTestId("dialogue-client-decision")).toHaveText("NONE");
+  await expect(workbench.getByTestId("dialogue-execution-consent")).toHaveText("ثبت نشده");
+  await expect(workbench.getByTestId("dialogue-active-proposal")).toHaveText("ندارد");
+  await expect(workbench.getByRole("button", { name: "گردش کامل شد" })).toBeDisabled();
+});
