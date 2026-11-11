@@ -16,9 +16,24 @@
 - The merge contains the audited ProductKnowledge derived-status refresh fix and this existing handoff file's earlier checkpoint update. The historical section below includes pre-merge wording; this top section supersedes it.
 - No production DB, Evidence, ProductKnowledge content, QA state, inventory, Recommendation or lifecycle data was changed by PR #533.
 
+### Latest conversation checkpoint — 2026-11-11
+
+- User reviewed the low-resolution visual references for all seven canonical products.
+- User confirmed references for products 1, 2, 4, 5, 6 and 7 as correct.
+- User corrected product 3 (Garnier Vitamin C Brightening Gel Cleanser): the required package is **pump-type, not a tube**. A pump-package reference was subsequently shown and explicitly confirmed by the user. Record all seven visual references as user-confirmed, with product 3's pump packaging correction.
+- This is package/visual confirmation only. Do not treat it as proof of exact market, formula, INCI, concentration, GTIN or product-variant identity. Product 3's precise pump SKU/market/formula remains to be independently matched against reliable source evidence.
+- The latest read-only main-DB audit remains the supplied snapshot: SHA256 `c3f5df15fa3c3e15376e7627e43ba7730d9793e50782911ceddece147fceb556`, integrity `ok`, no FK violations, and unchanged before/after. Counts and acceptance blockers are recorded in the current conversation handoff; obtain a fresh read-only snapshot before making present-state claims.
+- PR #533 is merged at `40d24a37b7ffc8c46b860247d2da86ca856b4593`; its post-merge HBI CI run `43076211515` and Auto Tasks run `43076211759` both completed SUCCESS.
+- PR #534 remains OPEN, mergeable and unmerged. Its exact-head HBI CI run `43076543681` and Pilot Browser Proof run `43076543955` completed SUCCESS. It is documentation-only and still requires separate PO authorization to merge.
+- No production DB, Evidence, ProductKnowledge content, QA, inventory, Recommendation or lifecycle data was changed as part of these visual confirmations or documentation updates.
+
 ### Immediate next actions
-1. Recheck both post-merge workflow runs above until completed; record exact conclusions and counts in this file and Issue #406.
-2. Resume the seven-product operational gates: fresh read-only DB snapshot; physical package/market/GTIN/INCI identity verification; human Evidence QA; accepted ProductKnowledge read-back; real sellable-stock confirmation; isolated seven-product Home Page E2E.
+1. Resume the seven-product operational gates: fresh read-only DB snapshot; physical package/market/GTIN/INCI identity verification; human Evidence QA; accepted ProductKnowledge read-back; real sellable-stock confirmation; isolated seven-product Home Page E2E.
+2. Continue resolving product 3's exact pump-package SKU/market/formula from authoritative source evidence; do not infer formula identity from packaging alone.
+3. Keep Issue #406 OPEN until all product intake and acceptance gates are genuinely complete.
+4. Do not run the unsafe PR #526 importer wrapper, start the app against the main DB, or write production DB, QA, inventory, lifecycle, Recommendation or ProductProblemLink data without explicit authorization and verified evidence.
+
+### Continuity and safety fresh read-only DB snapshot; physical package/market/GTIN/INCI identity verification; human Evidence QA; accepted ProductKnowledge read-back; real sellable-stock confirmation; isolated seven-product Home Page E2E.
 3. Keep Issue #406 OPEN until all product intake and acceptance gates are genuinely complete.
 4. Do not run the unsafe PR #526 importer wrapper, start the app against the main DB, or write production DB, QA, inventory, lifecycle, Recommendation or ProductProblemLink data without explicit authorization and verified evidence.
 
