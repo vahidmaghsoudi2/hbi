@@ -1317,3 +1317,34 @@ Commitهای این برش:
 - خروجی آزمون کامل Python: `924 passed, 0 failed`؛ Coverage کل ۸۹٪؛ G8 و Frontend build موفق؛ Browser proof شامل ۳۶ آزمون موفق. در اجرای pytest تعداد ۷۸۵ warning ثبت شد؛ شکست نیست و برای پاک‌سازی فنی بعدی باقی می‌ماند.
 
 **وضعیت ردیف ۷۱:** PARTIAL — قرارداد pure و آداپتور HTTP چندمرحله‌ای synthetic-only با آزمون و CI موفق پوشش داده شده‌اند؛ موتور مکالمهٔ زبانی، یکپارچگی UI با API گفت‌وگو و تولید پیشنهاد تخصصی همچنان خارج از این برش‌اند. این نتیجه مجوز فعال‌سازی پیشنهاد شیمیایی، پردازش دادهٔ واقعی، پایلوت، انتشار یا شروع ردیف ۷۲ نیست. PO-66-09 و کاتالوگ ۸۸ شماره‌رنگ بسته می‌مانند؛ PR #502 باز، Draft و ادغام‌نشده باقی می‌ماند.
+
+
+### اجرای UI → API و آزمون سرتاسری synthetic-only ردیف ۷۱ — ۱۱ نوامبر ۲۰۲۶
+
+**دامنهٔ تغییر:** رابط داخلی پیش‌نمایش متخصص به همان endpoint موجود `POST /api/v1/hair/dialogue/turn` متصل شد؛ endpoint دوم یا مسیر عمومی مشتری ساخته نشد. فایل رابط جدید `frontend/src/pages/HairDialogueWorkbench.tsx` در صفحهٔ داخلی Admin-gated موجود نصب شد. کلاینت و قرارداد TypeScript در `frontend/src/api/client.ts` و `frontend/src/types/api.ts` افزوده شدند. آزمون مرورگر در `tests/browser/hair-specialist-preview.spec.cjs` گردش شش‌مرحله‌ای را پوشش می‌دهد.
+
+**گردش E2E مصنوعی:** پرسش اطلاعاتی اولیه → اتصال پیشنهاد مصنوعی → پذیرش → رضایت مستقل اجرا → پرسش اطلاعاتی بعدی → تغییر نسخهٔ هدف. آزمون تأیید می‌کند تغییر هدف، پیشنهاد فعال، پذیرش و رضایت وابسته به نسخهٔ قبلی را حذف می‌کند. تمام درخواست‌ها از همان endpoint استفاده می‌کنند و شناسه‌ها با پیشوند `SYNTHETIC-` هستند.
+
+**قفل عدم انتشار:** پاسخ هر انتقال باید دقیقاً `recommendation=null`، `display_allowed=false`، `client_visible=false` و `persistence=COMPUTED_ONLY` داشته باشد؛ UI در صورت نقض envelope گردش را متوقف می‌کند. هیچ دادهٔ واقعی مشتری، DB persistence، پیشنهاد رنگ/شیمی، COMBINATION_CONSULT واقعی یا مجوز اجرای خدمت فعال نشده است.
+
+**شواهد CI روی HEAD کد `e78c354e9f37ba1ff331acf1a18ea0004a2c6498`:**
+- HBI CI [run 43089373910](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43089373910): completed/success؛ هر سه Job موفق؛ ۹۲۴ آزمون Python موفق، صفر شکست؛ Coverage کل ۸۹٪؛ G8 و Frontend Build موفق.
+- HBI Auto Tasks [run 43089373901](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43089373901): completed/success؛ PyCompile و ۹۲۴ آزمون موفق، صفر شکست؛ Coverage کل ۸۹٪.
+- HBI Pilot Browser Proof [run 43089374060](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43089374060): completed/success؛ parser conformance برای ۶۱ رکورد و **۳۷ آزمون مرورگر موفق**؛ شامل گردش شش‌مرحله‌ای جدید.
+
+**معیارهای تکمیل ردیف ۷۱:**
+
+| معیار | نتیجه | شاهد/توضیح |
+|---|---|---|
+| استفاده از endpoint موجود و عدم ساخت مسیر دوم | PASS | `POST /api/v1/hair/dialogue/turn` |
+| اتصال UI داخلی Admin-gated به API | PASS | `HairDialogueWorkbench.tsx` |
+| گردش شش‌مرحله‌ای مصنوعی در مرورگر | PASS | Browser Proof: ۳۷ آزمون موفق |
+| جدایی پذیرش از رضایت اجرای خدمت | PASS | آزمون مرحلهٔ مستقل ACCEPT و CONSENT |
+| ابطال پیشنهاد/پذیرش/رضایت با تغییر هدف | PASS | آزمون E2E نسخهٔ هدف |
+| حفظ envelope عدم انتشار در هر انتقال | PASS | کنترل UI و پاسخ API |
+| موتور مکالمهٔ زبانی واقعی و پردازش متن آزاد | NOT PASS | API فعلی کدهای ثابت را به پاسخ ثابت نگاشت می‌کند |
+| تولید پیشنهاد تخصصی مبتنی بر شواهد | NOT PASS | عمداً فعال نیست؛ recommendation همواره null |
+
+**وضعیت ردیف ۷۱: PARTIAL** — یکپارچگی UI داخلی با API موجود و گردش مصنوعی E2E تکمیل و CI-verified شد؛ موتور مکالمهٔ زبانی واقعی و تولید پیشنهاد تخصصی هنوز وجود ندارد.
+
+**قفل‌های دامنه:** کاتالوگ ۸۸ شماره‌رنگ بسته و دست‌نخورده است؛ PO-66-09 برابر SYNTHETIC-ONLY باقی می‌ماند؛ ردیف ۷۲ و پایلوت شروع نشده‌اند؛ PR #502 باز، Draft و ادغام‌نشده است.
