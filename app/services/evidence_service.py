@@ -320,6 +320,12 @@ class EvidenceService(BaseService[Evidence, EvidenceRepository]):
                 resulting_state=updated.qa_status,
                 correlation_id=operation_correlation_id,
             )
+        if not active_conflict_ids:
+            # Reclassification may remove the final conflict without changing QA.
+            # Refresh only derived conflict status; never import PENDING claims.
+            from app.services.product_knowledge_service import ProductKnowledgeService
+
+            ProductKnowledgeService(self.db).refresh_conflict_status_after_reclassification(product_id)
         return self.get_by_id(evidence_id)
 
     def resolve_conflict(
