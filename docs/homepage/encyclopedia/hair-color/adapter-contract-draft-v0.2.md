@@ -373,7 +373,7 @@ All examples are synthetic and structural only. They contain no real customer da
 }
 ```
 
-The response above is explanatory only. The authoritative Orchestrator must verify that the referenced suggestion remains active and has not been rejected before displaying it. The engine does not write a client decision.
+The response above is explanatory only. For S11, the existing suggestion reference is read-only context supplied by the Orchestrator from the authoritative ledger; the engine may echo that reference but may not mint, alter, reactivate, or claim ownership of it. The authoritative Orchestrator must verify that the referenced suggestion remains active and has not been rejected before displaying it. The engine does not write a client decision.
 
 ### 9.5 Orchestrator event — client stop (S14)
 
