@@ -622,6 +622,43 @@ Scope: contract Sections 2–7 and 9.8–9.10, the approved S06/S08/S12 decision
 
 No PO decision was added or changed. No fixture, schema, runner, test, runtime interface, product behavior, evidence status, or client record was changed. See PO Decision Register Section 6.7 and README current-status note.
 
+### 9.12 Static audit — event ordering, concurrency, and stale publication races (2026-11-12)
+
+Scope: contract Sections 2–7 and 9.10–9.11, D-06/D-07, the PO decision register Sections 6.1–6.7, and the current S11–S15 synthetic fixture descriptions. Static design audit only; no event store, evidence registry, ledger, workflow engine, publication gate, or product runtime was executed.
+
+**Authority boundaries already established**
+
+- Case Store/Orchestrator owns the authoritative case and target versions.
+- The authoritative evidence source owns evidence identity, scope, and reviewed status; the engine cannot make an evidence reference current by echoing it.
+- The authoritative decision ledger owns acceptance, rejection, and execution-consent history.
+- Workflow Engine owns stop/restart workflow events and performed-step history.
+- Orchestrator is responsible for deciding whether an engine result may be presented. The Adapter's validation of an echoed response is not, by itself, proof that all authoritative records remain current at publication time.
+
+**Race-condition review and safe conclusions**
+
+1. **Evidence revision after evaluation, before publication:** a result evaluated against an older or no-longer-applicable material evidence reference must not be published as a currently supported suggestion. The affected output requires fresh evaluation against current evidence. The contract does not define an evidence-revision token, dependency snapshot, or atomic check that binds the evidence state used by evaluation to the publication decision.
+2. **Acceptance or execution consent concurrent with evidence revision:** acceptance and consent remain separate historical client events; neither can make invalid, conflicting, unverified, not-applicable, or outdated evidence authoritative. Preserve the historical events, but do not use them as a substitute for current evidence validation. The contract does not decide whether a prior decision is suspended, superseded, or requires reconfirmation.
+3. **Client stop concurrent with evaluation/publication:** a stop is a distinct workflow event and automatic continuation is prohibited. If the authoritative workflow state indicates that the path has been stopped when a pending action is considered, the old run must not be used to continue that path. The precise race boundary—whether a simultaneous stop or publication is considered first—is not specified.
+4. **Restart concurrent with a delayed old response:** restart requires a fresh evaluation. A delayed response from the stopped path must not be treated as the result of the fresh run or used to resume the old path. Existing case/target version checks help, but do not fully identify the workflow generation or evaluation run that a publication belongs to.
+5. **Duplicate delivery, retry, or reordered events:** D-06 preserves the approved invariant that retrying the same logical request uses the same idempotency key and does not create duplicate decision events or a new case version. The exact event identity, ordering, deduplication scope, retention, and handling of out-of-order delivery remain unspecified.
+
+**Minimum conservative publication principle**
+
+A candidate must not be published as current if any authoritative input on which it depends is known to be stale, invalid, or superseded: case/target snapshot, material evidence applicability, suggestion/decision-ledger status, or relevant workflow stop state. A previous successful result is not a fallback answer for a failed or superseded current run. This restates existing fail-closed and ownership boundaries; it does not define an implementation-ready transaction protocol.
+
+**Unresolved concurrency protocol — do not infer**
+
+1. The exact linearization point for publication and the authoritative ordering of concurrent evidence, client-decision, workflow, and publication events.
+2. Whether one atomic compare-and-publish operation must cover case/target versions, evidence revisions/dependencies, suggestion-ledger state, and workflow stop state; the current contract does not specify this.
+3. The authoritative event sequence/version mechanism, clock semantics, or conflict resolution for simultaneous or out-of-order events.
+4. The exact run/correlation identity needed to prevent a delayed response from an earlier evaluation or stopped workflow from being published after restart.
+5. Idempotency-key field, generation/ownership details, uniqueness scope, retention, and the distinction between retrying one logical request and starting a new evaluation.
+6. Treatment of a result already displayed, accepted, consented, or partly acted upon when a later authoritative revision arrives. Historical events must remain auditable; notification, reconfirmation, revocation, rollback, and remediation policies remain undecided.
+
+**Conclusion:** the current design identifies the authoritative owners and several fail-closed outcomes, but it does not define a safe event-ordering or atomic publication protocol for concurrent changes. Do not select a timestamp-wins rule, lock strategy, transaction boundary, new version field, automatic revocation, notification, retry policy, or workflow state by implementation inference. These require a separately reviewed design proposal and PO decision where policy changes.
+
+No PO decision was added or changed. No fixture, schema, runner, test, runtime interface, product behavior, evidence status, or client record was changed. See PO Decision Register Section 6.8 and README current-status note.
+
 ## 10. Remaining design questions before any schema proposal
 
 D-01 through D-08 have been approved at the documentation/design level. The following narrower details remain unresolved and must not be inferred by implementation:
