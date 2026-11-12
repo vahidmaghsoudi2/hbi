@@ -142,6 +142,20 @@ Recommended evidence reference fields:
 
 Only `VERIFIED_APPLICABLE` supports a rule within the exact reviewed scope. Other statuses remain non-authoritative for rule activation.
 
+
+### 6.1 Static audit follow-up — unresolved protocol details (2026-11-12)
+
+A cross-check of D-06 against the current Adapter Contract Draft 0.2 and synthetic fixtures S11–S15 confirmed the approved invariants but identified details that are not yet defined. These remain open; this note does not add a new PO decision:
+
+- The request contract has no normative `idempotency_key` field or definition of logical-request scope, uniqueness, retention, or retry-versus-new-evaluation distinction.
+- The Orchestrator is responsible for publication, but no atomic compare-and-publish/current-version gate is specified for the authoritative `(case_version, target_version)` pair.
+- Request and response examples carry case/target versions, but the normative equality/binding rule and target-only-change behavior are not fully specified.
+- S11 prose requires authoritative ledger validation before display; the fixture does not assert active/not-rejected status at publication. S12 asserts rejection behavior but does not carry a concrete suggestion reference/version tuple.
+- S15 requires suppression of stale output for the failed run, but exact run/correlation scope and the distinction between suppressing publication and retaining historical audit records are unspecified.
+- Retryable failure classification and maximum attempts remain versioned-configuration decisions, as already stated in Section 6; the illustrative `retryable` boolean is not a complete protocol.
+
+The detailed scenario-by-scenario traceability and the single `source` → `source_class` example correction are recorded in Section 7.1 of `adapter-contract-draft-v0.2.md`. The decision register remains a draft record; no runtime schema, engine behavior, or implementation authorization follows from this audit.
+
 ## 8. PO review queue — decision items, not implementation blockers to duplicate
 
 | ID | Recommended disposition | Why |
