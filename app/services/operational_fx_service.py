@@ -7,6 +7,7 @@ StockMovement / SaleReturn / SaleItem money snapshots.
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
 from typing import Optional
 
 from sqlalchemy.orm import Session
@@ -42,9 +43,14 @@ class OperationalFxService:
     ) -> OperationalFxRate:
         rate = validate_fx_rate(fx_rate_usd_to_irr)
         try:
+            # Persist a high-resolution effective timestamp. The database's
+            # CURRENT_TIMESTAMP default may have only second precision, making
+            # two rates written in the same second tie and letting the random
+            # UUID decide which rate is treated as current.
             row = OperationalFxRate(
                 rate_id=str(uuid.uuid4()),
                 fx_rate_usd_to_irr=rate,
+                effective_at=datetime.utcnow(),
                 note=note,
             )
             self.db.add(row)
