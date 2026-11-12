@@ -240,10 +240,11 @@ def test_admin_positive_adjustment_records_adjustment_not_purchase_receipt(clien
     assert inventory.quantity_available == 12
     assert inventory.purchase_price_toman == purchase_price_before
 
-    movements = db_session.query(StockMovement).filter_by(
-        product_id="INV-AUTHZ-P1"
-    ).all()
-    adjustment = movements[-1]
+    adjustment = db_session.query(StockMovement).filter_by(
+        product_id="INV-AUTHZ-P1",
+        movement_type="ADJUSTMENT",
+        quantity_delta=7,
+    ).one()
     assert adjustment.movement_type == "ADJUSTMENT"
     assert adjustment.quantity_delta == 7
     assert adjustment.quantity_after == 12
