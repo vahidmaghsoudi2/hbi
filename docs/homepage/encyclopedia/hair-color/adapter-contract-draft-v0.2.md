@@ -229,6 +229,14 @@ For S08 specifically, the current fixture is the **no-valid-alternative** case. 
 - S15-R1: retrieval failure and rule-engine failure tested separately; both map to `ENGINE_FAIL`.
 - S02/S03/S05/S06 control pairs: remove the specific defect while keeping other inputs constant; confirm the system can move to the appropriate next state when all remaining gates pass.
 
+## 8.1 PO decisions — S06, S08, and S12 (approved 2026-11-12)
+
+The Product Owner explicitly approved the following presentation and ledger rules. These decisions resolve the previously deferred items for these three fixtures; they do not approve the remaining wire enums or authorize implementation.
+
+- **S06 — knowledge gap:** State plainly that no reliable applicable evidence is available. Withhold the suggestion or claim that depends on the missing knowledge. Do not guess, fabricate a rule, or relabel the case as `OUT_OF_V1_SCOPE` unless the requested claim/action is independently and formally outside V1. Refer for specialist review only where that is a justified next step; referral must not be used to disguise the evidence gap.
+- **S08 — no valid alternative:** State that no valid option is available under the current documented constraints and explain the supported reason. Do not invent or display a substitute. A separately evidenced alternative may be considered only in a distinct fresh candidate evaluation if it independently passes all hard constraints; this does not alter S08's no-valid-alternative fixture oracle.
+- **S12 — rejected suggestion:** Keep the exact rejected suggestion/version in the authoritative audit ledger and permanently exclude it from active options for that suggestion/version. Rejection does not force an engine state or consultation response state. If a genuinely independent alternative is possible, evaluate it in a fresh candidate run; otherwise explain that no valid alternative is available. Never reactivate or re-present the rejected suggestion as active.
+
 ## 9. Complete illustrative JSON examples
 
 All examples are synthetic and structural only. They contain no real customer data, scientific claims, shade formulas, or execution instructions. Enum identifiers remain proposed pending PO approval.
