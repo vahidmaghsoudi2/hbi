@@ -945,3 +945,70 @@ The following remain open: literal field names and nullability; ledger reference
 **Control rule:** an item may be marked closed only when its accountable authority, normative meaning, failure behavior, and synthetic counterexample coverage are recorded. A passing documentation validator or CI run does not close a domain-policy or distributed-consistency decision. All items above remain open until that evidence exists.
 
 No fixture, JSON Schema, runner, test, runtime interface, product behavior, PO decision, or scientific/evidence status was changed by this clarification. PR #535 remains Draft and unmerged; implementation, pilot, release, and merge remain unauthorized.
+
+
+### 9.17 Decision-ledger semantics and identity boundaries — design clarification (2026-11-12)
+
+**Status: conceptual clarification of already approved decision boundaries; not a ledger schema, event protocol, or implementation specification.** This section separates the meanings that must not be collapsed. It does not approve literal identifiers, event names, ordering rules, retention, authentication mechanics, or state-transition machinery.
+
+#### A. Keep four identities distinct
+
+| Concept | Meaning | Authority boundary | Design disposition |
+|---|---|---|---|
+| Persistent suggestion identity | The durable identity of one suggestion tracked across consultation interactions | Orchestrator / Case Store / authoritative suggestion ledger | Authority is confirmed; literal reference format and uniqueness scope remain unresolved |
+| Suggestion version | The exact revision of that suggestion to which a decision or display refers | Authoritative suggestion ledger, bound to the case/target context | Exact-version rejection is confirmed; version creation/equality mechanics remain unresolved |
+| Evaluation-run identity | One logical candidate-generation/evaluation attempt and its response lineage | Orchestrator owns correlation; engine output is request/run-local | A run must be distinguishable from a retry and from a fresh evaluation; literal ID and correlation scope remain unresolved |
+| Decision-event identity | One authenticated client decision or interaction fact preserved for audit | Trusted interaction path and authoritative ledger (or the separately authoritative workflow record for workflow events) | Event history is authoritative; event ID, authentication envelope, deduplication, and ordering protocol remain unresolved |
+
+A request-local engine candidate is not yet a persistent suggestion. A response echo, display label, array position, shade name, or candidate text is not a substitute for an authoritative persistent suggestion reference. A suggestion identity must not be silently reused to mean a different case/target version or a different suggestion revision.
+
+#### B. Keep event meanings and effects separate
+
+| Interaction/event meaning | What it records | What it does not mean or authorize |
+|---|---|---|
+| Question / explanation request (S11) | The client asked about a suggestion or its rationale; the interaction may be retained separately | It is not acceptance, rejection, execution consent, or a change to suggestion eligibility |
+| Rejection (S12) | The client rejected the exact persistent suggestion/version in its authoritative case/target context | It does not delete history, force an engine/response state, reject a different version by implication, or authorize a replacement |
+| Acceptance | The client accepted a specific suggestion under the applicable case/target context | It is not execution consent and does not prove that any service step was performed |
+| Explicit execution consent | The client explicitly authorized the relevant service execution under the applicable authorization context | It is not inferred from acceptance, a question, silence, or a displayed suggestion |
+| Stop request (S14) | A request to stop the current multi-step workflow, recorded by the Workflow Engine under the approved workflow boundary | It is not a suggestion rejection, a deletion of prior decisions, or permission to auto-resume |
+
+The ledger must preserve the distinctions above. In particular, a question must leave acceptance and execution consent unchanged; rejection must remain auditable and exclude the exact rejected suggestion/version from active options; acceptance must not be promoted into execution consent. Workflow stop/performed-step history remains owned by the Workflow Engine and must not be silently reclassified as a suggestion-ledger decision.
+
+#### C. Minimum semantic checks before using a ledger record
+
+Before an existing suggestion is described as current or eligible, the Orchestrator must establish, from authoritative sources rather than engine echoes, that:
+
+1. the persistent suggestion identity resolves;
+2. the exact suggestion version resolves;
+3. its case identity and evaluated case/target versions match the current relevant context;
+4. the evaluation-run relationship is resolvable and is not confused with a retry or superseded run;
+5. the relevant decision history is available and does not contain a rejection of that exact suggestion/version;
+6. no already-approved workflow or publication boundary makes the result stale or ineligible.
+
+If a required relationship is missing, conflicting, or cannot be resolved, do not infer eligibility or repair the relationship from descriptive text. Withhold the affected current suggestion reference and follow the applicable clarification/re-evaluation path. This is a semantic fail-closed requirement, not a newly defined response state.
+
+#### D. Append-only history versus current eligibility
+
+Historical decision facts and current display eligibility answer different questions:
+
+- **History:** what interaction or decision was recorded, by whom through the trusted interaction path, and against which exact suggestion/version and case/target context?
+- **Eligibility:** may this exact suggestion/version be treated as current and offered or discussed as active now, given authoritative case/target versions, decision history, evidence dependencies, and workflow/publication controls?
+
+A rejected suggestion/version remains in history even though it is excluded from active options. A later independent candidate does not erase or rewrite that rejection. No automatic reactivation, deletion, or cross-version inheritance is permitted by inference. The precise event-store immutability/retention mechanism is not selected here.
+
+#### E. Still unresolved — no inference permitted
+
+The following are intentionally not decided by this clarification:
+
+- literal suggestion, suggestion-version, run, and decision-event identifiers;
+- whether suggestion versions are immutable snapshots and the exact rule that creates a new suggestion version;
+- ledger event names, payload shape, required fields, and nullability;
+- authenticated actor representation and proof of the trusted interaction path;
+- uniqueness scope, idempotency key, deduplication, event ordering, and out-of-order delivery behavior;
+- whether a repeated identical client action is a duplicate delivery or a new intentional decision, and the evidence needed to distinguish them;
+- cross-store atomicity/linearization and publication-time compare-and-publish mechanism;
+- retention, expiry, revalidation, notification, reconfirmation, revocation, and consequences for partly performed service.
+
+These questions must be resolved by their accountable architecture/engineering or PO authority as classified in Section 9.16. No new PO decision, state, event name, wire field, schema, fixture assertion, runtime behavior, or implementation permission is created here.
+
+No fixture, JSON Schema, runner, test, runtime interface, product behavior, or PO decision was changed. PR #535 remains Draft and unmerged; implementation, pilot, release, and merge remain unauthorized.
