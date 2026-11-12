@@ -55,7 +55,10 @@ async def get_product_knowledge(
     customer_id: str = Depends(get_current_customer_id),
 ):
     facade = ProductKnowledgeFacade(db)
-    dto = facade.get_by_product(product_id)
+    try:
+        dto = facade.get_by_product(product_id)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     return ProductKnowledgeResponse.model_validate(dto.__dict__)
 
 
