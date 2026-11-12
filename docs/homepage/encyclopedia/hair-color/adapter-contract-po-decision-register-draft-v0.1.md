@@ -1,6 +1,6 @@
 # HBI Adapter Contract — PO Decision Register (Draft 0.1)
 
-**Status:** working recommendation for Product Owner evaluation; not an approval record.  
+**Status:** working register with PO decisions D-08/S06/S08/S12 explicitly approved on 2026-11-12; all other recommendations remain unapproved unless separately recorded.  
 **Scope:** documentation/design only. This register proposes defaults so review can be decisive and implementation does not invent semantics.
 
 ## 1. Decision principles already treated as binding
@@ -150,9 +150,19 @@ Only `VERIFIED_APPLICABLE` supports a rule within the exact reviewed scope. Othe
 | D-05 | Accept the exact fixture oracle values as test expectations only; defer ambiguous wire-state mappings for S06, S08, and S12 | Prevents fixture labels from being mistaken for approved engine/response enums |
 | D-06 | Accept Adapter failure and idempotent retry semantics | Prevents stale output and duplicate case events |
 | D-07 | Accept minimum provenance/evidence envelope | Enables auditable exact-scope evidence use |
-| D-08 | Decide presentation-state handling for S06 (knowledge gap) and S08 (no valid alternative), without overloading `OUT_OF_V1_SCOPE`; confirm S12 remains a ledger event | Existing five response states do not directly represent every fixture outcome |
+| D-08 | **APPROVED 2026-11-12:** S06 explicitly reports unavailable applicable evidence and withholds dependent output; S08 explicitly reports no valid option under current constraints and invents no substitute; S12 remains a rejection/ledger event with no forced engine/response state, and any independent alternative requires a fresh candidate run | Explicit PO approval; see decision record below |
 
-No item is recorded as PO-approved by this document.
+### 8.1 Recorded PO approval — 2026-11-12
+
+The Product Owner approved all three decisions below:
+
+1. **S06 / D-08:** Report that no reliable applicable evidence is available; withhold dependent output; do not guess or misuse `OUT_OF_V1_SCOPE`. Specialist referral is appropriate only when independently justified.
+2. **S08 / D-08:** Report that no valid option exists under the current documented constraints, explain the supported reason, and do not invent a substitute. A distinct fresh evaluation may assess an independent alternative only if it passes all hard constraints.
+3. **S12 / D-08:** Record the exact rejected suggestion/version in the authoritative ledger and exclude it from active options. Do not force an engine or response state. Any independent alternative requires a fresh candidate run; otherwise explain that no valid alternative is available.
+
+These approvals resolve only the S06, S08, and S12 decisions. They do not approve the remaining D-01–D-07 items, all proposed wire identifiers, runtime schemas, implementation, pilot, release, or merge.
+
+
 
 ## 9. Work that can proceed without changing product authority
 
