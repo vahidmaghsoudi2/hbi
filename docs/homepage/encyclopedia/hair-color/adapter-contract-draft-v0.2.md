@@ -179,6 +179,41 @@ No guessed repair, silent coercion, or stale-output fallback is permitted. Prese
 - A client stop request is recorded by the workflow layer; only actually performed steps are recorded as performed.
 - Automatic resume is prohibited. A later restart request triggers a fresh evaluation; it does not continue the stopped workflow.
 
+
+### 7.1 Static audit — version ownership, suggestion validity, and stale-output suppression (2026-11-12)
+
+This is a documentation-level consistency audit of Sections 4–7, the D-06/D-07 decision record, and fixtures S11–S15. It does not execute an Adapter, Orchestrator, Case Store, ledger, or product engine.
+
+**Confirmed design invariants**
+
+- Case Store/Orchestrator owns `case_version` and `target_version`; the engine cannot assign or advance either value.
+- The engine response must identify the versions it evaluated. A response whose versions do not match its request is invalid.
+- The Orchestrator must resolve an existing suggestion against the authoritative ledger before presenting it; the engine cannot mint, reactivate, or authoritatively set its status.
+- A rejection remains auditable and excludes that exact suggestion/version from active options.
+- D-06 requires publication-time suppression when the authoritative case or target version has changed, and prohibits publishing a previous successful response as the answer to a failed current run.
+- Retry of the same logical request must preserve the same idempotency key and must not create a new case version or duplicate decision events.
+
+**Gaps that remain open — do not infer**
+
+1. **Idempotency key representation and scope:** Section 6 requires a stable key for a logical request, but Section 4 does not yet define a request field, key-generation owner beyond the Orchestrator boundary, uniqueness scope, retention window, or how a retry is distinguished from a new evaluation. No field name or policy is approved by this audit.
+2. **Publication-time authority and race handling:** the Orchestrator is the publication authority in the call path, but the contract does not define the exact atomicity/compare-and-publish mechanism for checking the current `(case_version, target_version)` immediately before publication. The Adapter cannot independently establish currentness from an echoed response alone.
+3. **Version-pair binding:** request examples include `case_version` and `target_version`; response examples use `evaluated_case_version` and `evaluated_target_version`. The contract does not yet specify a normative equality rule across request, response, authoritative current snapshot, and publication gate, including the handling of a target-only change.
+4. **Suggestion identity and ledger binding:** S11's illustrative response includes `suggestion_ref`, `suggestion_version`, and ledger status, and its prose assigns their authority to the Orchestrator/ledger. The S12 fixture asserts rejection/deactivation but does not carry concrete suggestion and version identifiers. The exact reference shape, ledger lookup result, and binding to case/target versions remain unspecified.
+5. **Stale-output scope in S15:** the fixture requires stale output suppression for the failed run, while D-06 prohibits a previous successful response from being reused as the answer to the failed current run. The exact correlation/run scope and retention of historical output for audit (as distinct from publication) are not defined here.
+6. **Retry envelope details:** D-06 approves the invariant but leaves retryable failure classes and maximum attempts to versioned configuration. The failure example's `retryable` boolean is illustrative, not a complete retry protocol.
+
+**Scenario traceability observations**
+
+- **S11:** ledger validation before display is stated in prose; the fixture checks unchanged acceptance/consent and question-event recording, but does not assert that the referenced suggestion is still active and not rejected at publication time.
+- **S12:** the fixture checks traceable rejection and absence from active options; it does not structurally identify the exact rejected suggestion/version or prove a ledger lookup.
+- **S13:** the fixture checks new version creation, dependency re-evaluation, preservation of independent data, and no carry-forward of acceptance/consent. It does not specify the concrete version tuple or publication gate.
+- **S14:** this is a Workflow Engine event, not an Adapter request. Its case version is shown, but target-version handling on a later fresh restart remains a workflow/orchestration detail.
+- **S15:** the failure envelope correctly has `consultation_result: null` and no options. It does not define the atomic publication check or idempotency-key protocol.
+
+**Conservative correction made during this audit:** one remaining illustrative datum in S01 used `source` instead of the D-07-approved `source_class`; it has been normalized to `source_class`. No fixture oracle, runner, schema, product behavior, or runtime interface was changed.
+
+These are contract-definition gaps, not evidence that the approved invariants are wrong. Keep them open for a separately reviewed contract revision; do not fill them by implementation inference.
+
 ## 8. S01–S15 acceptance mapping
 
 **Important distinction — manifest oracle vs wire state:** the fixture's `expected_status` is a behavioral oracle label from the existing test manifest. It is not automatically one of the four engine-state identifiers, one of the five consultation-response identifiers, or a workflow state. The future adapter must define and PO-approve an explicit mapping; the labels below are reproduced exactly from the canonical manifest and must not be silently renamed or collapsed.
@@ -272,7 +307,7 @@ All examples are synthetic and structural only. They contain no real customer da
       "reported_allergy": {
         "value": null,
         "knowledge_state": "NOT_ASKED",
-        "source": null,
+        "source_class": null,
         "record_ref": null,
         "recorded_at": null
       }
