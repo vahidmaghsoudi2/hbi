@@ -12,7 +12,9 @@ const labels: Array<[keyof ProductKnowledgeDTO, string]> = [
   ["contraindications", "محدودیت‌ها و احتیاط‌ها"],
   ["usage_instructions", "دستور مصرف"],
   ["manufacturer_claims", "ادعاهای سازنده"],
-  ["evidence_status", "وضعیت شواهد"],
+  ["other_attributes", "سایر ویژگی‌های ثبت‌شده"],
+  ["domain_evidence_status", "وضعیت شواهد به تفکیک حوزه"],
+  ["evidence_status", "وضعیت کلی شواهد"],
   ["knowledge_confidence", "اطمینان دانش"],
   ["evidence_refs", "مراجع شواهد"],
 ];

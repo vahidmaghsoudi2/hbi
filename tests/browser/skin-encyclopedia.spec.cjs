@@ -53,6 +53,8 @@ test("Skin encyclopedia reads product identity, evidence and knowledge without i
       contraindications: null,
       usage_instructions: null,
       manufacturer_claims: null,
+      other_attributes: '{"texture":"gel"}',
+      domain_evidence_status: '{"ingredients":"SUPPORTED"}',
       evidence_refs: null,
       evidence_status: "UNKNOWN",
       knowledge_confidence: null,
@@ -78,6 +80,10 @@ test("Skin encyclopedia reads product identity, evidence and knowledge without i
   await expect(page.getByText("ثبت نشده / نامشخص").first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "دانش تجمیع‌شدهٔ واجد شرایط" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "شواهد و منشأ اطلاعات" })).toBeVisible();
+  await expect(page.getByText("سایر ویژگی‌های ثبت‌شده")).toBeVisible();
+  await expect(page.getByText('{"texture":"gel"}')).toBeVisible();
+  await expect(page.getByText("وضعیت شواهد به تفکیک حوزه")).toBeVisible();
+  await expect(page.getByText('{"ingredients":"SUPPORTED"}')).toBeVisible();
   await expect(page.getByText("Water")).toBeVisible();
   await expect(page.getByText(/QA: PENDING · شواهد: UNKNOWN/)).toBeVisible();
   await page.getByRole("button", { name: "بازگشت", exact: true }).click();

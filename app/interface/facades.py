@@ -339,7 +339,10 @@ class ProductKnowledgeFacade:
         self.service = ProductKnowledgeService(db)
 
     def get_by_product(self, product_id: str) -> ProductKnowledgeDTO:
-        knowledge = self.service.get_or_create(product_id)
+        # This facade backs an HTTP GET. Never create ProductKnowledge as a read side effect.
+        knowledge = self.service.repository.find_by_product(product_id)
+        if not knowledge:
+            raise NotFoundError(f"ProductKnowledge for product {product_id} not found")
         return self._to_knowledge_dto(knowledge)
 
     def refresh_from_evidence(self, product_id: str) -> ProductKnowledgeDTO:
