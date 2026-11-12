@@ -18,6 +18,8 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_README = ROOT / "docs/homepage/encyclopedia/hair-color/README.md"
+DEFAULT_MANIFEST = ROOT / "tests/fixtures/hair-color-contract-v1.json"
+DEFAULT_SCHEMA = ROOT / "tests/fixtures/hair-color-contract-v1.schema.json"
 HEADING = "### بستهٔ ساخت‌یافتهٔ آزمون و اعتبارسنجی قرارداد — مرحلهٔ چهارم"
 SCENARIOS = tuple(f"S{i:02d}" for i in range(1, 16))
 REQUIRED = (
@@ -145,6 +147,53 @@ def validate_manifest(manifest: dict[str, Any]) -> list[str]:
     return errors
 
 
+
+def validate_json_schema(instance: Any, schema: dict[str, Any], path: str = "$") -> list[str]:
+    """Validate the small, explicit JSON Schema 2020-12 subset used by this bundle."""
+    errors: list[str] = []
+    expected_type = schema.get("type")
+    type_ok = {
+        "object": isinstance(instance, dict),
+        "array": isinstance(instance, list),
+        "string": isinstance(instance, str),
+        "boolean": isinstance(instance, bool),
+    }.get(expected_type, True)
+    if not type_ok:
+        return [f"{path} must be {expected_type}"]
+    if "const" in schema and instance != schema["const"]:
+        errors.append(f"{path} must equal {schema['const']!r}")
+    if "enum" in schema and instance not in schema["enum"]:
+        errors.append(f"{path} must be one of {schema['enum']!r}")
+    if isinstance(instance, dict):
+        for key in schema.get("required", []):
+            if key not in instance:
+                errors.append(f"{path}.{key} is required")
+        properties = schema.get("properties", {})
+        if schema.get("additionalProperties") is False:
+            extras = sorted(set(instance) - set(properties))
+            if extras:
+                errors.append(f"{path} has additional properties: {', '.join(extras)}")
+        for key, value in instance.items():
+            if key in properties:
+                errors.extend(validate_json_schema(value, properties[key], f"{path}.{key}"))
+    elif isinstance(instance, list):
+        if len(instance) < schema.get("minItems", 0):
+            errors.append(f"{path} has fewer than {schema['minItems']} items")
+        if "maxItems" in schema and len(instance) > schema["maxItems"]:
+            errors.append(f"{path} has more than {schema['maxItems']} items")
+        item_schema = schema.get("items")
+        if isinstance(item_schema, dict):
+            for index, value in enumerate(instance):
+                errors.extend(validate_json_schema(value, item_schema, f"{path}[{index}]"))
+    elif isinstance(instance, str):
+        if len(instance) < schema.get("minLength", 0):
+            errors.append(f"{path} is shorter than {schema['minLength']} characters")
+        pattern = schema.get("pattern")
+        if pattern and re.search(pattern, instance) is None:
+            errors.append(f"{path} does not match required pattern")
+    return errors
+
+
 def _git_value(command: list[str]) -> str:
     try:
         result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, check=False, timeout=5)
@@ -187,14 +236,21 @@ def build_report(manifest: dict[str, Any], errors: list[str], command: list[str]
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--readme", type=Path, default=DEFAULT_README)
+    parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
+    parser.add_argument("--schema", type=Path, default=DEFAULT_SCHEMA)
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args(argv)
     passed_args = argv if argv is not None else sys.argv[1:]
     command = [sys.executable, str(Path(__file__).resolve()), *passed_args]
     try:
-        manifest = extract_manifest(args.readme.read_text(encoding="utf-8"))
-        errors = validate_manifest(manifest)
-    except (OSError, ContractError) as exc:
+        embedded_manifest = extract_manifest(args.readme.read_text(encoding="utf-8"))
+        manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
+        schema = json.loads(args.schema.read_text(encoding="utf-8"))
+        errors = validate_json_schema(manifest, schema)
+        if manifest != embedded_manifest:
+            errors.append("external fixture bundle differs from embedded README manifest")
+        errors.extend(validate_manifest(manifest))
+    except (OSError, ContractError, json.JSONDecodeError) as exc:
         manifest, errors = {}, [str(exc)]
     report = build_report(manifest, errors, command)
     output = args.output
