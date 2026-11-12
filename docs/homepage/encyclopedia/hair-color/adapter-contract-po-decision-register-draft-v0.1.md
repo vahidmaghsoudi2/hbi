@@ -225,6 +225,14 @@ Conservative boundary: if a material evidence dependency is no longer applicable
 
 Open details: event ordering/atomicity between evidence-status revision, acceptance/consent, stop and publication; invalidation when evidence changes without case/target version change; ledger representation preserving historical decisions while blocking unsupported use; notification/reconfirmation policy; treatment/remediation of already displayed or partially performed workflows; and missing combined fixture coverage for evidence revision after acceptance, after rejection, and before/after stop/restart. No automatic revocation, re-consent, notification, rollback, TTL, or workflow state is approved or inferred. No fixture/schema/runner/tests/runtime or PO decision changed. See Adapter Contract Draft 0.2, Section 9.11.
 
+### 6.8 Static audit — event ordering, concurrency, and stale publication races (2026-11-12)
+
+Confirmed authority boundaries: Case Store/Orchestrator owns case/target versions; the authoritative evidence source owns evidence status; the decision ledger owns client decision history; Workflow Engine owns stop/restart and performed-step history; Orchestrator decides publication. Engine/Adapter output alone cannot establish that these records are still current.
+
+Conservative conclusions: (a) evidence revised after evaluation but before publication makes dependent output ineligible until fresh evaluation; (b) acceptance/consent cannot override evidence validity and historical decisions must remain auditable; (c) a stopped workflow must not be continued by an old run; (d) restart requires fresh evaluation and a delayed response from the old run must not be substituted; (e) retries of the same logical request retain D-06 idempotency constraints.
+
+Unresolved: event linearization/order; atomic compare-and-publish across case/target, evidence, ledger, and workflow state; event sequence/version and out-of-order delivery; exact run identity across stop/restart; idempotency key representation/scope/retention; and handling of already displayed or partly acted-on results after later revisions. No timestamp precedence, lock/transaction strategy, new field/state, automatic revocation, notification, reconfirmation, rollback, or remediation policy is approved or inferred. No fixture/schema/runner/tests/runtime or PO decision changed. See Adapter Contract Draft 0.2, Section 9.12.
+
 ## 8. PO review queue — decision items, not implementation blockers to duplicate
 
 | ID | Recommended disposition | Why |
