@@ -120,3 +120,58 @@ PO review is required for the four situations independently. Any selected policy
 
 **Current disposition:** OPEN — awaiting PO decision.  
 **No approval is implied by placing this proposal in PR #535.**
+
+
+## 8. Independent option review — safety, client rights, and operational risk
+
+**Review status:** ANALYSIS ONLY — NO OPTION SELECTED; NO PO DECISION CREATED.
+
+This review assesses the trade-offs visible from the current contract. It does not establish legal requirements, clinical policy, a materiality threshold, or implementation behavior.
+
+### A. Displayed suggestion; decision pending
+
+- **A1 — withhold and re-evaluate:** Strongest advantage is a narrow, low-complexity safety boundary: an unsupported suggestion is not reused, and a new evaluation is required before another suggestion. Main weakness is client transparency: a client who has already seen the old suggestion may not know why it is no longer being relied upon.
+- **A2 — A1 plus client notice:** Improves transparency and reduces the risk that the client continues to rely on a stale displayed suggestion. It introduces unresolved communication questions: who sends the notice, when it is sent, what wording is accurate, and how delivery is recorded. None is defined in the current contract.
+- **A3 — PO alternative:** Any alternative must preserve withholding of unsupported dependent output and must not imply that the prior display remains current.
+
+**Review finding:** A1 is the minimum safety floor already implied by the fixed principles. A2 addresses a separate transparency concern, but its communication mechanics and ownership need an explicit policy. This is a trade-off, not a selection.
+
+### B. Accepted suggestion; no service and no execution consent
+
+- **B1 — historical acceptance plus fresh evaluation and fresh client decision:** Preserves the audit trail and prevents acceptance of the old suggestion from being transferred to a replacement. It avoids confusing acceptance with execution consent. The client still needs a clear explanation that the replacement is a new proposal.
+- **B2 — B1 plus explicit notice:** Adds transparency about why the previously accepted suggestion is no longer current. As with A2, notice content, timing, responsibility, and delivery evidence remain undefined.
+- **B3 — PO alternative:** Must not treat the old acceptance as evidence validation or as consent to execute.
+
+**Review finding:** The fresh client decision for a replacement suggestion is consistent with the existing separation of suggestion acceptance and execution consent. The unresolved choice is whether explicit notice is an additional mandatory step; no current rule settles it.
+
+### C. Execution consent exists; no service step performed
+
+- **C1 — renewed consent only if the suggestion or material service basis changes:** Avoids unnecessary repeated consent when a fresh evaluation genuinely leaves the service proposal unchanged. However, it depends on a reliable decision about what counts as a material change. The contract has no approved materiality threshold, decision owner, or method. Without those, C1 is not sufficiently determinate to become a test oracle or executable rule.
+- **C2 — renewed consent in every case:** Is easier to state and avoids relying on an undefined materiality judgment. It provides a clear opportunity for the client to reconsider after the evidence revision. Its cost is additional consent friction, including cases where the fresh evaluation does not change the proposal.
+- **C3 — PO alternative:** Must preserve the rule that prior consent is historical and cannot validate changed evidence. No affected service step should proceed while its supporting evaluation is unresolved.
+
+**Review finding:** Both C1 and C2 can be expressed without erasing the original consent event, but C1 requires a materiality policy first. C2 is more conservative about client re-authorization but is not automatically approved by that fact. The current contract does not select between them.
+
+### D. One or more service steps performed
+
+- **D1 — hold affected future steps; specialist review and fresh evaluation; separate remediation policy:** Keeps the response scoped to steps whose support may have changed and avoids inventing rollback or compensation. Its critical dependency is reliable identification of affected versus independent remaining steps. If that dependency cannot be established, the contract's existing fail-closed principle does not permit assuming that a step is unaffected.
+- **D2 — broader stop-and-escalate with client notice:** Makes escalation and client communication more explicit and may be easier to govern when the impact is uncertain or spans several steps. Its risk is over-broad interruption of steps that may be independent, and it still needs a named accountable owner and separately approved remediation/customer-care rules.
+- **D3 — PO alternative:** Must preserve the record of performed work, must not imply automatic rollback, and must not infer permission to continue remaining work from the fact that earlier steps occurred.
+
+**Review finding:** D1 and D2 address different scopes of containment. D1 depends on dependable dependency knowledge; D2 avoids relying on narrow dependency classification but may stop more of the case than necessary. The current evidence does not justify selecting one globally. Where dependency impact is unknown, the existing fail-closed boundary remains the minimum constraint; the exact scope and escalation owner require PO/specialist policy.
+
+### Cross-scenario control gaps to resolve before any test oracle
+
+1. **Materiality authority:** Identify who determines whether an evidence revision is material and what evidence that determination relies on. Do not create a numeric or categorical threshold by inference.
+2. **Communication responsibility:** Decide whether notice is required in A, B, C, and D separately; identify the accountable sender and the approved communication policy before defining delivery mechanics.
+3. **Decision separation:** Record acceptance and execution consent as distinct historical decisions. A fresh acceptance decision must not be treated as renewed execution consent.
+4. **Remaining work:** For C and D, define which authority can hold or release a future service step. A prior consent or completed earlier step does not itself authorize continuation after a material evidence change.
+5. **Performed work:** Keep performed steps factual and historical. Remediation, compensation, rollback, and customer-care handling require separate approved policies; they cannot be inferred from this proposal.
+6. **Uncertain dependency:** Do not label an output or step independent merely because its dependency is undocumented or unknown.
+
+### Review disposition
+
+- A1–D3 remain unselected.
+- The safety floor remains: do not present or act on dependent suggestions as currently supported when their material evidence is no longer applicable; preserve historical client decisions; do not infer acceptance, consent, or continuation permission.
+- The remaining choices are policy decisions for the Product Owner, informed by the already approved specialist role where the matter is technical/safety-related.
+- No fixture, schema, runner, test oracle, runtime behavior, PO register decision, or implementation authorization is created by this review.
