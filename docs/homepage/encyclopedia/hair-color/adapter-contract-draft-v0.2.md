@@ -508,6 +508,31 @@ Scope: all six JSON examples in Sections 9.1–9.6 (S01, S02, S07, S11, S14, S15
 
 **Outcome:** no contradictory ownership claim was found in the S11 and S14 explanatory notes; however, S01–S02, S07, and S15 relied on implicit service ownership. This section makes that ownership explicit at design level. No JSON example, fixture, schema, runner, test, runtime interface, product behavior, or PO decision was changed.
 
+### 9.8 Static audit — evidence validity, scope, and citation traceability (2026-11-12)
+
+Scope: the six illustrative JSON examples in Sections 9.1–9.6 and their evidence/product references, checked against D-07, Sections 6, 9.7, and 13. This is a static documentation audit. No external evidence registry, product registry, scientific source, or runtime resolver was queried or executed.
+
+**Findings by example**
+
+- **S01:** `DOC-MOCK-A` is explicitly test-only, not scientific evidence. Its `scope_match: true` is a synthetic fixture value and does not establish scientific applicability or a valid claim-to-source match. Likewise, `PRODUCT-ID-A` with `identity_status: EXACT_MATCH` is a placeholder assertion; exact product/line/shade/market/document-version identity must be resolved by the trusted product registry. The example contains no claim identifier/text, publisher, source locator, publication/revision date, exact passage, review status, or reviewer; it cannot support a product-specific or scientific rule.
+- **S02:** the empty `evidence_refs` list is consistent with a data-gap response that withholds dependent output. `accepted_sources` is a policy-controlled list of permitted provenance classes, not evidence that any source was actually received or verified; the engine cannot expand that allowlist.
+- **S07:** `EVIDENCE-MOCK-SAFETY-01` and `SAFETY_ALERT_TEST` are test tokens only. The safety-alert reference must resolve to an authoritative case/safety record, and any evidence reference must resolve to its exact trusted record. The example's limitation correctly disclaims scientific or medical authority; the mock token itself supplies none.
+- **S11:** `EVIDENCE-MOCK-A` is a placeholder and does not substantiate the existing suggestion. Before display, the Orchestrator must resolve both the suggestion in the authoritative ledger and each material evidence reference in the evidence registry, including current status and scope. The existing S11 fixture traceability gap remains as recorded in Section 7.2.
+- **S14:** this is a Workflow Engine event, not a scientific evidence example. Event and actor provenance must come from trusted workflow/authentication context; no evidence claim is made.
+- **S15:** `correlation_ref` and failure telemetry are operational traceability, not scientific evidence. The Adapter constructs the failure envelope and the Orchestrator controls publication suppression; neither a model-authored failure claim nor a trace identifier validates a scientific source.
+
+**Cross-example controls**
+
+1. A syntactically present or resolvable `evidence_ref` is not, by itself, evidence of applicability. The reference must resolve to an immutable record whose exact claim, publisher/source class, locator, version/date, passage, product/material identity where relevant, scope, limitations, review status, and validity are available for checking.
+2. `scope_match: true`, `identity_status: EXACT_MATCH`, and similarly named flags in synthetic examples are illustrative assertions only. They do not replace trusted registry resolution or review.
+3. Only `VERIFIED_APPLICABLE` may support a rule, and only within its exact reviewed scope. Mock, unverified, partial, conflicting, outdated, or out-of-scope references must not activate a rule or support a product-specific instruction.
+4. The examples contain no real source citations or independently checkable scientific references. This audit does not add, infer, or certify any scientific claim and does not promote a mock token to a verified evidence record.
+5. Product identity and evidence applicability are separate checks: exact product identity does not prove that a source supports a particular claim, and a relevant general source does not prove that it applies to a particular product or market.
+
+**Outcome:** no mock reference in these examples qualifies as scientific evidence. The current documentation already labels the mock items as placeholders; this section makes explicit that the synthetic boolean/status fields cannot be read as verification. Evidence-record completeness, trusted resolution, and scientific applicability remain external prerequisites, not demonstrated test results.
+
+No JSON example, fixture, schema, runner, test, runtime interface, product behavior, evidence status, or PO decision was changed. No new evidence field, validity period, TTL, or review policy is inferred by this audit.
+
 ## 10. Remaining design questions before any schema proposal
 
 D-01 through D-08 have been approved at the documentation/design level. The following narrower details remain unresolved and must not be inferred by implementation:
