@@ -199,6 +199,12 @@ No example contains a complete, independently checkable evidence citation (claim
 
 Conclusion: the examples are structurally illustrative only; none of their mock references is scientific evidence. No JSON, fixture, schema, runner, test, runtime behavior, new evidence field, TTL, review policy, or PO decision was added. See Adapter Contract Draft 0.2, Section 9.8. External evidence verification remains a separate prerequisite.
 
+### 6.5 Static audit — evidence-status vocabulary consistency (2026-11-12)
+
+Cross-document comparison found the six README/D-07 evidence statuses semantically consistent with the Adapter Contract and the D-07 rule-activation boundary. `VERIFIED_APPLICABLE` alone supports a rule within its exact reviewed scope. `PARTIALLY_SUPPORTED` may support only a limited, non-prescriptive explanation of the portion actually supported; this does not activate a rule. `CONFLICTING` blocks operational use while unresolved; `NOT_APPLICABLE` means the source does not match the claim's subject/scope; `UNVERIFIED` means identity/documentation/review is insufficient; `OUTDATED` means the source is not current for the assessment.
+
+Open details, not settled by this audit: status granularity (source vs source–claim vs product/market/version assessment); independent treatment of multiple claims/passages in one document; versioning and propagation of status changes/review/conflicts/supersession; and coexistence of different statuses across scopes. No precedence, automatic transition, expiry, or review timing is inferred. No evidence status was assigned or changed, and no source was externally verified. No fixture/schema/runner/runtime or PO policy decision changed. See Adapter Contract Draft 0.2, Section 9.9.
+
 ## 8. PO review queue — decision items, not implementation blockers to duplicate
 
 | ID | Recommended disposition | Why |
