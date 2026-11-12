@@ -305,3 +305,11 @@ def test_adapter_does_not_mutate_or_expose_engine_owned_mutable_objects():
     result = run(request(), engine_output)
     result["options"].clear()
     assert len(engine_output["options"]) == 1
+
+def test_duplicate_reason_codes_and_evidence_refs_are_rejected():
+    with pytest.raises(AdapterContractError, match="reason_codes must not contain duplicates"):
+        run(request(), response(reason_codes=["DATA_GAP", "DATA_GAP"], options=[]))
+
+    with pytest.raises(AdapterContractError, match="evidence_refs must not contain duplicates"):
+        run(request(), response(evidence_refs=["EVIDENCE-MOCK-A", "EVIDENCE-MOCK-A"]))
+
