@@ -19,20 +19,20 @@ The following are existing project guardrails, not reopened decisions:
 - Synthetic-only GitHub/CI fixtures; real customer data stays in the owner's offline local environment.
 - No change to the 88-color catalogue.
 
-## 2. Recommended wire identifiers
+## 2. PO-approved design-level identifiers (D-01/D-02)
 
 These identifiers are approved design-level names under D-01/D-02. They are not implemented runtime enums, and this approval does not authorize a runtime schema.
 
-### 2.1 Four engine states
+### 2.1 Four engine states — design identifiers approved
 
-| Recommended identifier | Meaning | Recommendation |
+| Approved design identifier | Meaning | PO disposition |
 |---|---|---|
 | `SUGGESTION_REVIEWABLE` | Candidate suggestion can be reviewed | Keep |
 | `CONDITIONAL_SUGGESTION` | Suggestion is valid only under explicit conditions | Keep |
 | `NEEDS_MORE_INFORMATION` | Required data/test is missing or unresolved | Keep |
 | `STOP_OR_REFER_WITH_REASON` | Current run must stop or refer with a reason | Keep |
 
-### 2.2 Five consultation response states
+### 2.2 Five consultation response states — design identifiers approved
 
 | Recommended identifier | Meaning | Recommendation |
 |---|---|---|
@@ -44,7 +44,7 @@ These identifiers are approved design-level names under D-01/D-02. They are not 
 
 **Important semantic boundary:** `KNOWLEDGE_GAP` is a reason code, not a sixth response state. When evidence is unavailable, the response must explicitly say that no reliable answer is available and withhold the dependent suggestion. Use `OUT_OF_V1_SCOPE` only when the requested claim/action is outside V1; do not use it as a generic synonym for every missing source.
 
-## 3. Recommended reason-code registry
+## 3. PO-approved reason-code separation (D-04)
 
 | Code | Use only when | Must not be conflated with |
 |---|---|---|
@@ -56,14 +56,14 @@ These identifiers are approved design-level names under D-01/D-02. They are not 
 | `OUT_OF_SCOPE` | Request is outside approved product scope | A generic evidence gap |
 | `STALE_CASE_VERSION` | Evaluated snapshot no longer matches authoritative current version | A fresh valid evaluation |
 
-Recommendation: preserve these as diagnostic codes separate from all state enums.
+PO approval: preserve these as diagnostic codes separate from all state enums.
 
 **Naming boundary:** `OUT_OF_SCOPE` is the diagnostic reason code in this registry; `OUT_OF_V1_SCOPE` is the approved consultation-response identifier. They serve different layers and must not be substituted for one another. A mapping between them is allowed only when the request is demonstrably outside the approved V1 boundary.
 
 
-## 4. Knowledge-state representation
+## 4. Knowledge-state representation — approved (D-03)
 
-Recommendation: retain the six explicit values in Draft 0.2:
+PO approval: retain the six explicit values in Draft 0.2:
 
 - `KNOWN`: a value is recorded and attributable to a source.
 - `UNKNOWN`: the real-world value is not known.
@@ -102,9 +102,9 @@ The following mapping is a recommended interpretation, not a new test oracle:
 
 **S06/S08/S12 mapping caveat (updated 2026-11-12):** the PO has approved the client-facing handling for all three scenarios (Section 8.1). That approval does not, by itself, settle every wire-state mapping. Keep S12 as a ledger event with no forced engine/response state. For S06 and S08, retain the current provisional engine-state mappings and leave the exact S06/S08 response-state mapping unresolved under D-05, even though D-01/D-02 meanings and identifiers are approved; do not overload `OUT_OF_V1_SCOPE` or invent a sixth response state.
 
-## 6. Adapter response and failure semantics
+## 6. Adapter response and failure semantics — approved design invariants (D-06)
 
-Recommendations:
+PO-approved conceptual rules:
 
 1. Separate transport/adapter validation outcome from the consultation response.
 2. If the engine fails, return a failure envelope with `consultation_result: null`, no options, and a correlation reference.
@@ -115,9 +115,9 @@ Recommendations:
 
 Suggested retry policy: transport timeout / temporary retrieval outage may be retryable; invalid request, unsupported contract, schema violation, version mismatch, safety stop, and evidence-scope mismatch are not automatically retryable. Retry policy and maximum attempts must be versioned configuration, not model discretion.
 
-## 7. Data and evidence envelope
+## 7. Data and evidence envelope — approved minimum (D-07)
 
-Recommended minimum datum envelope:
+PO-approved minimum datum envelope:
 
 - `value` (nullable only when the knowledge state requires it);
 - `knowledge_state`;
