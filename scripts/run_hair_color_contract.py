@@ -26,6 +26,7 @@ REQUIRED = (
     "forbidden", "assertions", "severity_on_violation",
 )
 KEY_ASSERTIONS = {
+    "S07": ("safety_stop_blocks_options",),
     "S09": ("ranking_stable_under_input_permutation",),
     "S11": ("acceptance_snapshot_unchanged", "execution_consent_snapshot_unchanged"),
     "S12": ("rejected_suggestion_absent_from_active_list",),
