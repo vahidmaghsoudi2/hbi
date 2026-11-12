@@ -215,6 +215,16 @@ Conservative impact interpretation: `VERIFIED_APPLICABLE` may enter evaluation b
 
 Open protocol details: normative claim→evidence→candidate→suggestion/version→case/target/run linkage; affected-output computation for shared or multi-source dependencies; authoritative status-revision detection and synchronization with publication gate; revalidation and event handling for already displayed/accepted suggestions; and status transition/precedence/expiry policy. No graph, field, automatic transition, TTL, or review cadence is approved or inferred. No source/status was changed or externally verified; no fixtures/schema/runner/tests/runtime or PO decision changed. See Adapter Contract Draft 0.2, Section 9.10.
 
+### 6.7 Static audit — evidence validity against client decisions and workflow events (2026-11-12)
+
+The cross-check found no contradiction among the approved decision boundaries, but identified missing protocol detail when evidence validity changes after a client event.
+
+Confirmed: S11 questions do not change acceptance or execution consent; acceptance is not execution consent; rejection remains auditable and the exact rejected suggestion/version cannot reactivate; stop blocks automatic continuation; restart requires fresh evaluation; a new target/case version does not inherit acceptance, consent, or specialist review. None of these client events can make invalid or non-applicable evidence authoritative, and evidence availability cannot create client consent.
+
+Conservative boundary: if a material evidence dependency is no longer applicable before a pending service step, the dependent suggestion/output must not be treated as currently supported. Preserve the historical client decision events; do not silently erase, rewrite, or infer their revocation. A fresh evaluation must use current evidence. This does not decide whether prior acceptance/consent is suspended, renewed, superseded, or requires client reconfirmation.
+
+Open details: event ordering/atomicity between evidence-status revision, acceptance/consent, stop and publication; invalidation when evidence changes without case/target version change; ledger representation preserving historical decisions while blocking unsupported use; notification/reconfirmation policy; treatment/remediation of already displayed or partially performed workflows; and missing combined fixture coverage for evidence revision after acceptance, after rejection, and before/after stop/restart. No automatic revocation, re-consent, notification, rollback, TTL, or workflow state is approved or inferred. No fixture/schema/runner/tests/runtime or PO decision changed. See Adapter Contract Draft 0.2, Section 9.11.
+
 ## 8. PO review queue — decision items, not implementation blockers to duplicate
 
 | ID | Recommended disposition | Why |
