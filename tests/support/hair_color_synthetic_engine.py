@@ -10,6 +10,11 @@ from typing import Any, Mapping
 
 
 SCENARIO_IDS = tuple(f"S{i:02d}" for i in range(1, 16))
+SCENARIO_OPERATIONS = {
+    "S11": "ANSWER_QUESTION",
+    "S13": "REEVALUATE",
+    "S14": "REEVALUATE",
+}
 
 
 class SyntheticHairColorEngine:
@@ -20,6 +25,9 @@ class SyntheticHairColorEngine:
         scenario_id = case_context.get("synthetic_scenario_id")
         if scenario_id not in SCENARIO_IDS:
             raise ValueError("unknown synthetic_scenario_id")
+        expected_operation = SCENARIO_OPERATIONS.get(scenario_id, "EVALUATE_CASE")
+        if request["operation"] != expected_operation:
+            raise ValueError("operation does not match the synthetic scenario fixture")
 
         if scenario_id == "S15":
             raise TimeoutError("synthetic engine failure")
