@@ -138,7 +138,11 @@ def validate_manifest(manifest: dict[str, Any]) -> list[str]:
             if not isinstance(value, list) or not value or any(not isinstance(x, str) or not x.strip() for x in value):
                 errors.append(f"{label}.{field} must be a non-empty string array")
         assertions = item.get("assertions")
-        if isinstance(assertions, list) and len(assertions) != len(set(assertions)):
+        if (
+            isinstance(assertions, list)
+            and all(isinstance(value, str) for value in assertions)
+            and len(assertions) != len(set(assertions))
+        ):
             errors.append(f"{label}.assertions contains duplicate entries")
         if item.get("severity_on_violation") not in ("C0", "C1"):
             errors.append(f"{label}.severity_on_violation must be C0 or C1")
