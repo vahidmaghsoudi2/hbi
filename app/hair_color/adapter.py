@@ -187,6 +187,8 @@ def validate_response(request: Mapping[str, Any], response: Mapping[str, Any]) -
         not isinstance(code, str) or code not in REASON_CODES for code in reason_codes
     ):
         raise AdapterContractError("reason_codes contains an unknown or malformed value")
+    if len(reason_codes) != len(set(reason_codes)):
+        raise AdapterContractError("reason_codes must not contain duplicates")
 
     if "ENGINE_FAIL" in reason_codes:
         raise EngineExecutionFailure("engine failure cannot be returned as a successful consultation")
@@ -203,6 +205,8 @@ def validate_response(request: Mapping[str, Any], response: Mapping[str, Any]) -
         raise AdapterContractError("each candidate option must be an object")
     if any(not isinstance(ref, str) or not ref.strip() for ref in response["evidence_refs"]):
         raise AdapterContractError("evidence_refs must contain non-empty strings")
+    if len(response["evidence_refs"]) != len(set(response["evidence_refs"])):
+        raise AdapterContractError("evidence_refs must not contain duplicates")
 
     supplied_evidence_refs = {
         item.get("evidence_ref")
