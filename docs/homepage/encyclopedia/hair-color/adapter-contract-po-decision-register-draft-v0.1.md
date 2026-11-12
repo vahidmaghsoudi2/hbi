@@ -58,6 +58,9 @@ These identifiers are approved design-level names under D-01/D-02. They are not 
 
 Recommendation: preserve these as diagnostic codes separate from all state enums.
 
+**Naming boundary:** `OUT_OF_SCOPE` is the diagnostic reason code in this registry; `OUT_OF_V1_SCOPE` is the approved consultation-response identifier. They serve different layers and must not be substituted for one another. A mapping between them is allowed only when the request is demonstrably outside the approved V1 boundary.
+
+
 ## 4. Knowledge-state representation
 
 Recommendation: retain the six explicit values in Draft 0.2:
