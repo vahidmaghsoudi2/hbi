@@ -60,3 +60,18 @@ def test_report_never_marks_product_behavior_as_pass(manifest):
 def test_malformed_json_block_is_rejected():
     with pytest.raises(ContractError):
         extract_manifest("### stage four\n\n" + chr(96) * 3 + "json\n{bad}\n" + chr(96) * 3)
+
+def test_cli_writes_a_contract_pass_and_runtime_blocked_report(tmp_path, capsys):
+    from scripts.run_hair_color_contract import main
+
+    report_path = tmp_path / "runner-report.json"
+    exit_code = main(["--output", str(report_path)])
+    output = capsys.readouterr().out
+    report = __import__("json").loads(report_path.read_text(encoding="utf-8"))
+
+    assert exit_code == 0
+    assert "CONTRACT_VALIDATION=PASS" in output
+    assert "PRODUCT_BEHAVIOR_SUITE=BLOCKED" in output
+    assert report["contract_validation"] == "PASS"
+    assert report["product_behavior_suite"] == "BLOCKED"
+    assert len(report["scenario_results"]) == 15
