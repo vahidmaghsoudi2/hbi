@@ -213,3 +213,40 @@ def test_inventory_list_and_mutations_still_admin_only(client, db_session):
         headers=_headers("editor-only"),
     ).status_code == 403
     assert client.get("/api/v1/inventory/", headers=_headers("ordinary-customer")).status_code == 403
+
+
+
+def test_admin_positive_adjustment_records_adjustment_not_purchase_receipt(client, db_session):
+    _seed_inventory(db_session)
+    _grant_admin(db_session)
+    inventory = db_session.query(Inventory).filter_by(product_id="INV-AUTHZ-P1").one()
+    purchase_price_before = inventory.purchase_price_toman
+
+    response = client.post(
+        "/api/v1/inventory/adjust",
+        json={
+            "product_id": "INV-AUTHZ-P1",
+            "quantity": 7,
+            "direction": "increase",
+            "note": "PO-confirmed physical stock reconciliation; no purchase receipt asserted",
+        },
+        headers=_headers("admin-user"),
+    )
+
+    assert response.status_code == 200, response.text
+    assert response.json()["quantity_available"] == 12
+    db_session.expire_all()
+    inventory = db_session.query(Inventory).filter_by(product_id="INV-AUTHZ-P1").one()
+    assert inventory.quantity_available == 12
+    assert inventory.purchase_price_toman == purchase_price_before
+
+    adjustment = db_session.query(StockMovement).filter_by(
+        product_id="INV-AUTHZ-P1",
+        movement_type="ADJUSTMENT",
+        quantity_delta=7,
+    ).one()
+    assert adjustment.movement_type == "ADJUSTMENT"
+    assert adjustment.quantity_delta == 7
+    assert adjustment.quantity_after == 12
+    assert adjustment.reference_type is None
+    assert adjustment.reference_id is None
