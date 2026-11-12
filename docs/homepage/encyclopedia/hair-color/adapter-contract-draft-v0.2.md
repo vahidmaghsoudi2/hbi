@@ -5,7 +5,7 @@
 - Repository branch: `docs/hair-color-independent-consultation-20261112`
 - Related PR: #535 (must remain Draft and unmerged)
 - Catalogue: the 88-color catalogue is out of scope and must not be modified
-- Data policy: synthetic fixtures only in GitHub/CI; real customer data remains in the PO's offline local environment
+- Data policy: synthetic data only in every environment for the current version; no real customer data may be processed or retained, including in an offline local environment.
 
 ## 1. Purpose and non-goals
 
