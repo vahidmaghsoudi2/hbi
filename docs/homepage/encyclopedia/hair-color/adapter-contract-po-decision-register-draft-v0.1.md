@@ -84,20 +84,20 @@ The following mapping is a recommended interpretation, not a new test oracle:
 | S03 | `DATA_CONFLICT` | `NEEDS_MORE_INFORMATION` | `NEEDS_INFORMATION_OR_TEST` | Conflicting sources need resolution |
 | S04 | `INSUFFICIENT_DATA` | `NEEDS_MORE_INFORMATION` | `NEEDS_INFORMATION_OR_TEST` | Image-only input cannot establish hidden facts |
 | S05 | `PRODUCT_IDENTITY_UNRESOLVED` | `NEEDS_MORE_INFORMATION` | `NEEDS_INFORMATION_OR_TEST` | Exact product identity/scope absent |
-| S06 | `KNOWLEDGE_GAP` | `STOP_OR_REFER_WITH_REASON` | `OUT_OF_V1_SCOPE` | No applicable reliable rule/evidence; withhold dependent output |
+| S06 | `KNOWLEDGE_GAP` | `STOP_OR_REFER_WITH_REASON` (provisional) | **PO decision required** | Knowledge/evidence gap; withhold dependent output. Do not force `OUT_OF_V1_SCOPE` unless the requested claim/action is formally outside V1 |
 | S07 | `SAFETY_STOP` | `STOP_OR_REFER_WITH_REASON` | `SAFETY_STOP_NO_EXECUTION_SUGGESTION` | Safety gate blocks options |
-| S08 | `NOT_FEASIBLE_OR_UNVERIFIED` | `STOP_OR_REFER_WITH_REASON` | `OUT_OF_V1_SCOPE` | This fixture explicitly has no valid alternative; explain limitation |
+| S08 | `NOT_FEASIBLE_OR_UNVERIFIED` | `STOP_OR_REFER_WITH_REASON` (provisional) | **PO decision required** | No valid alternative under the documented constraint; lack of a valid option does not itself mean the goal is outside V1 |
 | S09 | `TWO_VALID_OPTIONS` | `SUGGESTION_REVIEWABLE` | `SYSTEM_REASONED_SUGGESTION` | Two options pass hard constraints |
 | S10 | `ONE_VALID_OPTION` | `SUGGESTION_REVIEWABLE` | `SYSTEM_REASONED_SUGGESTION` | Exactly one option passes |
 | S11 | `QUESTION_ANSWERED_DECISION_UNCHANGED` | `SUGGESTION_REVIEWABLE` | `SYSTEM_REASONED_SUGGESTION` | Explain existing suggestion; decision ledger unchanged |
-| S12 | `SUGGESTION_REJECTED` | `NEEDS_MORE_INFORMATION`* | `NEEDS_INFORMATION_OR_TEST`* | Rejected item is deactivated; only independently valid alternatives may be evaluated |
+| S12 | `SUGGESTION_REJECTED` | **No forced engine-state mapping** | **No forced response-state mapping** | Rejection is an authoritative ledger event, not inherently a data gap; evaluate any independent alternative in a separate fresh candidate run |
 | S13 | `NEW_CASE_VERSION_REEVALUATION_REQUIRED` | Fresh evaluation | Determined by fresh evaluation | Version transition belongs to Orchestrator/Case Store |
 | S14 | `CLIENT_REQUESTED_STOP` | Not an engine state | Not a consultation response | Workflow event owned by Workflow Engine |
 | S15 | `ENGINE_FAIL` | Not a consultation state | Not a consultation response | Adapter failure envelope; no consultation result |
 
-*For S12, these are only the fallback states when no valid alternative can be produced. If a valid alternative exists, the new run may return a reviewable suggestion. The rejected suggestion itself remains excluded.*
 
-**S06/S08 caveat:** the recommended use of `OUT_OF_V1_SCOPE` is the least misleading fit among the existing five response labels, but the response text must say exactly why the system cannot provide a reliable suggestion. It must not imply the user's goal itself is inherently outside hair-color consultation. If PO prefers, define a separate presentation-level explanation subtype while retaining the five response states.
+
+**S06/S08/S12 mapping caveat:** the five response labels do not unambiguously encode every fixture outcome. Do not resolve this by semantic overloading. S06 needs an explicit PO decision on how a knowledge gap is presented; S08 needs an explicit PO decision for a no-valid-alternative outcome; S12 remains a rejection/ledger event and must not be mislabeled as missing information.
 
 ## 6. Adapter response and failure semantics
 
@@ -147,10 +147,10 @@ Only `VERIFIED_APPLICABLE` supports a rule within the exact reviewed scope. Othe
 | D-02 | Accept the five response-state meanings and proposed identifiers | Preserves the already-approved five-state model |
 | D-03 | Accept the six knowledge states | Prevents false/unknown/missing collapse |
 | D-04 | Accept reason-code separation | Keeps data, knowledge, safety, and engine failures distinct |
-| D-05 | Accept the S01–S15 mapping above, with S12 conditional fallback | Makes the existing fixture oracle implementable without altering it |
+| D-05 | Accept the exact fixture oracle values as test expectations only; defer ambiguous wire-state mappings for S06, S08, and S12 | Prevents fixture labels from being mistaken for approved engine/response enums |
 | D-06 | Accept Adapter failure and idempotent retry semantics | Prevents stale output and duplicate case events |
 | D-07 | Accept minimum provenance/evidence envelope | Enables auditable exact-scope evidence use |
-| D-08 | Confirm `OUT_OF_V1_SCOPE` handling for S06/S08 | Existing five response states lack a dedicated knowledge-gap / infeasible outcome |
+| D-08 | Decide presentation-state handling for S06 (knowledge gap) and S08 (no valid alternative), without overloading `OUT_OF_V1_SCOPE`; confirm S12 remains a ledger event | Existing five response states do not directly represent every fixture outcome |
 
 No item is recorded as PO-approved by this document.
 
