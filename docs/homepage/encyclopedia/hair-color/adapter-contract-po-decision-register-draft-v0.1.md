@@ -348,3 +348,14 @@ The section records existing approved boundaries without creating a new PO decis
 - Engine-local candidate content and echoed references cannot substitute for authoritative persistent identity or ledger history.
 
 Literal identifiers, event payloads, authentication, idempotency/deduplication, event ordering, retention, cross-store atomicity, expiry/revalidation, and post-consent evidence-change policy remain unresolved under Section 9.16. This cross-reference does not add a PO decision, close an open issue, change fixture/schema/runner/tests, or authorize implementation, pilot, release, or merge.
+
+### 6.14 S11/S12 reference-sequence boundaries — cross-reference (2026-11-12)
+
+Adapter Contract Draft 0.2 Section 9.18 records separate conceptual sequences for an explanatory question (S11) and rejection of an exact suggestion version (S12).
+
+- **S11:** resolve the existing suggestion/version and its case/target, ledger, and material evidence relationships before explanation. A question does not alter acceptance, rejection, execution consent, workflow state, suggestion version, or evaluation history merely by being asked.
+- **S12:** preserve the rejection against the exact persistent suggestion/version and exclude that version from active options. Rejection does not force an engine/response/workflow state or create a replacement. An independent alternative requires a fresh candidate evaluation; otherwise no alternative is invented.
+- The examples are conceptual, not executable protocol or ledger schema. They do not define event names, payloads, identifiers, ordering, authentication, or storage behavior.
+- Duplicate delivery/retry and a repeated intentional client action remain distinct but unresolved cases; no deduplication or idempotency mechanism is inferred.
+
+No new PO decision is proposed or recorded. No fixture, schema, runner, test, runtime interface, or product behavior changed. Existing S12 approval and D-01–D-08 remain unchanged. No implementation, pilot, release, or merge authorization is created.
