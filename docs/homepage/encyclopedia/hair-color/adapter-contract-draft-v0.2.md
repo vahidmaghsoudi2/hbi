@@ -1066,3 +1066,37 @@ A focused audit compared all 15 machine-readable fixtures, their README-embedded
 - This is a structural integrity check of synthetic test-oracle declarations. It does not execute any product behavior, prove the truth of an assertion, validate chemical/scientific rules, or close the S11–S13 ledger/version traceability gaps.
 
 The runner and tests remain limited to the synthetic contract harness. No product runtime, adapter, engine, API, database, UI, real-customer data, catalogue, scientific evidence status, state transition, or PO decision was changed. The 15 product-behavior scenarios remain BLOCKED pending separately authorized implementation and validation. This change does not authorize implementation, pilot, release, or merge.
+
+
+### 9.20 Conceptual reference sequence — S13 target change and version lineage (2026-11-12)
+
+**Status: conceptual review sequence only.** This section makes the already approved S13 boundaries operationally legible without defining a wire protocol, version-generation algorithm, dependency schema, ledger event, or automatic workflow transition.
+
+#### Preconditions
+
+Before treating a target change as a new current evaluation context, the responsible authority must be able to resolve the prior case/target context and identify the explicit client-requested goal change. If the prior context or the changed goal cannot be resolved, do not infer a new target or reuse prior output as current; request clarification or specialist handling as independently required.
+
+#### Sequence
+
+1. **Resolve the prior context.** Establish the authoritative prior case and target version to which the currently displayed or previously evaluated outputs belong. A suggestion label, response text, or run-local candidate is not a substitute for that authority.
+2. **Record the changed goal as a distinct target context.** The client-requested change must be distinguishable from the prior goal. The responsible case/target authority establishes the new version relationship. No numeric increment, identifier format, or storage operation is prescribed here.
+3. **Establish the prior/new lineage.** Preserve a resolvable relationship between the prior and new case/target versions so that later review can distinguish historical output from output evaluated for the new goal. If either side or the relationship is missing, conflicting, or mismatched, the lineage is unresolved and dependent output must not be presented as current.
+4. **Assess impact by known dependencies.** Identify which data, claims, evidence, candidate outputs, and suggestions depend on the changed target. Re-evaluate affected dependencies. Preserve independent data and outputs only where their independence is established by the authoritative dependency information; do not assume independence from absence of a recorded link.
+5. **Apply the fresh-evaluation boundary.** A candidate evaluated for the prior target is historical for the new target and cannot be reused as the new target's current result. A fresh evaluation is required for affected outputs. A delayed response from the prior evaluation must remain distinguishable from the new evaluation and must not overwrite or publish as the new target's result.
+6. **Keep prior client decisions and specialist review scoped to the prior version.** Acceptance, explicit execution consent, specialist review, and suggestion eligibility associated with the prior case/target do not automatically carry to the new version. Their historical records remain auditable; this sequence does not decide whether any new confirmation or review is required in a particular case.
+7. **Apply publication controls to the new context.** Before any new-target candidate is presented, the existing publication-gate design must resolve current case/target context, applicable evidence/dependencies, suggestion/ledger eligibility, workflow stop state, and current-run relationship. If a required authority is unavailable or the references do not agree, suppress the affected output rather than falling back to the prior version.
+
+#### Required negative/counterexample coverage for a future separately approved fixture revision
+
+- A prior-target suggestion or delayed prior-run response is offered after the target changes: it must not be represented as current for the new target.
+- A new target exists but the prior/new version relationship cannot be resolved: dependent output remains withheld.
+- A dependency map identifies both affected and independent data: only affected outputs are re-evaluated; independent data is preserved only where its independence is evidenced.
+- The dependency impact cannot be determined: do not claim that all outputs are independent or selectively safe; withhold potentially affected outputs pending resolution.
+- Prior acceptance, execution consent, specialist review, or rejection is associated with the old context: none is silently transferred to the new context, and historical facts are not erased.
+- A response from an earlier evaluation arrives after the new target evaluation: it cannot replace the current new-target result.
+
+#### Explicit exclusions and unresolved items
+
+This sequence does not define literal case/target/version/run references, version numbering, dependency graph representation, invalidation events, run cancellation, event ordering, atomic compare-and-publish mechanics, notification/reconfirmation, rollback, or remediation of partly performed service. Those remain classified under Sections 9.12, 9.13, 9.15–9.17 and require their accountable architecture/engineering or PO decisions. The current S13 fixture and its four assertions are unchanged; this section does not claim that the above counterexamples are already executable tests.
+
+No PO decision, state, event, field, schema, fixture, runner, test, runtime interface, product behavior, scientific evidence status, or implementation permission is created or changed. PR #535 remains Draft and unmerged; implementation, pilot, release, and merge remain unauthorized.
