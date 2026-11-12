@@ -16,7 +16,7 @@ The following are existing project guardrails, not reopened decisions:
 - Fail closed on safety stop, stale/mismatched versions, malformed output, material data conflict, or engine failure.
 - `DATA_GAP`, `KNOWLEDGE_GAP`, and `ENGINE_FAIL` remain distinct.
 - No chemical execution instruction capability is included in V1.
-- Synthetic-only GitHub/CI fixtures; real customer data stays in the owner's offline local environment.
+- Synthetic-only data in every environment for the current version; no real customer data may be processed or retained, including in an offline local environment.
 - No change to the 88-color catalogue.
 
 ## 2. PO-approved design-level identifiers (D-01/D-02)
