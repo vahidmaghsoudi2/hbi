@@ -181,6 +181,28 @@ No guessed repair, silent coercion, or stale-output fallback is permitted. Prese
 
 ## 8. S01–S15 acceptance mapping
 
+**Important distinction — manifest oracle vs wire state:** the fixture's `expected_status` is a behavioral oracle label from the existing test manifest. It is not automatically one of the four engine-state identifiers, one of the five consultation-response identifiers, or a workflow state. The future adapter must define and PO-approve an explicit mapping; the labels below are reproduced exactly from the canonical manifest and must not be silently renamed or collapsed.
+
+| Scenario | Exact manifest `expected_status` | Exact manifest `expected_action` |
+|---|---|---|
+| S01 | `SUGGESTION_REVIEWABLE` | `independent_evidence_bounded_suggestion` |
+| S02 | `DATA_GAP` | `ask_for_missing_material_field` |
+| S03 | `DATA_CONFLICT` | `surface_conflict_and_request_resolution` |
+| S04 | `INSUFFICIENT_DATA` | `limit_visual_description_and_request_data` |
+| S05 | `PRODUCT_IDENTITY_UNRESOLVED` | `request_exact_product_identity` |
+| S06 | `KNOWLEDGE_GAP` | `state_knowledge_gap_and_withhold_dependent_output` |
+| S07 | `SAFETY_STOP` | `fail_closed_and_explain_supported_next_step` |
+| S08 | `NOT_FEASIBLE_OR_UNVERIFIED` | `explain_constraint_without_inventing_alternative` |
+| S09 | `TWO_VALID_OPTIONS` | `show_only_two_valid_options_with_reasoned_ranking` |
+| S10 | `ONE_VALID_OPTION` | `show_only_option_A_and_explain_no_other_valid_option` |
+| S11 | `QUESTION_ANSWERED_DECISION_UNCHANGED` | `answer_explanation_only` |
+| S12 | `SUGGESTION_REJECTED` | `record_rejection_and_deactivate_exact_suggestion_version` |
+| S13 | `NEW_CASE_VERSION_REEVALUATION_REQUIRED` | `create_new_version_and_recompute_only_affected_dependencies` |
+| S14 | `CLIENT_REQUESTED_STOP` | `stop_work_and_record_only_completed_steps` |
+| S15 | `ENGINE_FAIL` | `fail_closed_and_suppress_current_and_stale_output_for_this_run` |
+
+For S08 specifically, the current fixture is the **no-valid-alternative** case. Its expected action is to explain the constraint without inventing a substitute. The general option invariant permits a separately evidenced alternative only in a different case where one actually passes all hard constraints; that possibility does not change S08's fixture oracle.
+
 | Scenario | Expected behavior at contract boundary |
 |---|---|
 | S01 complete, supported case | Independent reasoned suggestion when all applicable data/evidence/safety gates pass; no mandatory human gate |
