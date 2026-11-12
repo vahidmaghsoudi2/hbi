@@ -97,7 +97,7 @@ The following mapping is a recommended interpretation, not a new test oracle:
 
 
 
-**S06/S08/S12 mapping caveat:** the five response labels do not unambiguously encode every fixture outcome. Do not resolve this by semantic overloading. S06 needs an explicit PO decision on how a knowledge gap is presented; S08 needs an explicit PO decision for a no-valid-alternative outcome; S12 remains a rejection/ledger event and must not be mislabeled as missing information.
+**S06/S08/S12 mapping caveat (updated 2026-11-12):** the PO has approved the client-facing handling for all three scenarios (Section 8.1). That approval does not, by itself, settle every wire-state mapping. Keep S12 as a ledger event with no forced engine/response state. For S06 and S08, retain the current provisional engine-state mappings and leave the exact response-state/wire mapping unresolved until D-01/D-02 are reviewed; do not overload `OUT_OF_V1_SCOPE` or invent a sixth response state.
 
 ## 6. Adapter response and failure semantics
 
