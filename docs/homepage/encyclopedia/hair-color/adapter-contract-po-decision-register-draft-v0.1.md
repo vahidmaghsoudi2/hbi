@@ -233,6 +233,20 @@ Conservative conclusions: (a) evidence revised after evaluation but before publi
 
 Unresolved: event linearization/order; atomic compare-and-publish across case/target, evidence, ledger, and workflow state; event sequence/version and out-of-order delivery; exact run identity across stop/restart; idempotency key representation/scope/retention; and handling of already displayed or partly acted-on results after later revisions. No timestamp precedence, lock/transaction strategy, new field/state, automatic revocation, notification, reconfirmation, rollback, or remediation policy is approved or inferred. No fixture/schema/runner/tests/runtime or PO decision changed. See Adapter Contract Draft 0.2, Section 9.12.
 
+### 6.9 Proposed publication-gate design — review only (2026-11-12)
+
+This is a design proposal derived from the Section 6.8 concurrency audit; it is not an approved protocol.
+
+**Separate gates:** (1) advice publication and (2) service authorization. Publishing advice must not imply client acceptance, execution consent, or performed service.
+
+**Logical publication preconditions:** current case/target context; currently applicable material evidence dependencies; same eligible suggestion/version in the authoritative ledger; non-stopped/non-superseded workflow path; response belongs to the current run; and no failed-current-run fallback. Any failed, unavailable, or conflicting required check withholds affected output.
+
+**Concurrency requirement:** all required checks and the publish decision need one logical linearization point. Independent reads followed by an unprotected write leave a time-of-check/time-of-use race. Engineering options are (A) a serialized authoritative Orchestrator boundary, (B) conditional commit across authoritative stores if equivalent atomicity can be demonstrated, or (C) snapshot reads followed by ordinary publish. Option C alone is insufficient. Working recommendation: approve the logical compare-and-publish requirement for architecture review, then evaluate A against the actual topology; no implementation mechanism is selected or approved.
+
+Open technical details: dependency invalidation without case/target version changes; stop/restart run boundary; event identity and idempotency/deduplication scope; audit of suppressed publication; and fail-closed behavior when authorities are unavailable or conflicting. No field names, event IDs, counters, timestamps, TTLs, retry limits, locks, transaction APIs, or states are proposed.
+
+PO policy remains separate: notification/reconfirmation/suspension after evidence revision and remediation of partly performed work are not decided. Eight synthetic test objectives are listed in Adapter Contract Section 9.13; none has been added to fixtures. No PO decision, schema, fixture, runner, test, runtime, or product behavior changed. No implementation/pilot/release/merge authorization is created.
+
 ## 8. PO review queue — decision items, not implementation blockers to duplicate
 
 | ID | Recommended disposition | Why |
