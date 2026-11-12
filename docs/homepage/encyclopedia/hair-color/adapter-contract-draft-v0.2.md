@@ -533,6 +533,27 @@ Scope: the six illustrative JSON examples in Sections 9.1–9.6 and their eviden
 
 No JSON example, fixture, schema, runner, test, runtime interface, product behavior, evidence status, or PO decision was changed. No new evidence field, validity period, TTL, or review policy is inferred by this audit.
 
+### 9.9 Static audit — evidence-status vocabulary consistency (2026-11-12)
+
+The six evidence-status labels used by the hair-color README and D-07 were cross-checked against the Adapter Contract and PO decision register:
+
+- `VERIFIED_APPLICABLE`: the only status that may support a rule, and only within the exact reviewed scope.
+- `PARTIALLY_SUPPORTED`: supports only the explicitly supported portion for limited, non-prescriptive explanation; it does not activate a rule or justify a product-specific execution instruction.
+- `CONFLICTING`: unresolved disagreement among relevant evidence; no operational rule may be published from the conflict.
+- `NOT_APPLICABLE`: the source may be valid, but its subject, product, material, market, or conditions do not match the claim under review.
+- `UNVERIFIED`: required source identity, documentation, or review is insufficient to establish applicability.
+- `OUTDATED`: the source or regulation is not current for the version/date being assessed and requires review.
+
+**Consistency result:** the README definitions, D-07 rule-activation boundary, and Section 9.8 evidence audit are semantically compatible. The register's phrase “other statuses remain non-authoritative for rule activation” is consistent with the README's narrow allowance for `PARTIALLY_SUPPORTED` in limited explanatory text: explanatory use is not rule activation.
+
+**Unresolved design details (not decided here):**
+1. Whether a status attaches to a source record globally, to a source–claim relationship, or to a particular product/market/version evaluation.
+2. How multiple claims supported by different passages in one document are represented and reviewed independently.
+3. How status changes, re-review triggers, conflicts, and superseding/outdated sources are versioned and propagated to dependent suggestions.
+4. Whether and how multiple statuses can coexist for different claims or scopes without a single document-level status obscuring them.
+
+Do not infer status precedence, automatic transitions, expiry, or re-review timing from this audit. These require an explicit design proposal and, where they alter policy, PO decision. No evidence status was assigned or changed; no source was externally verified. No JSON, fixture, schema, runner, test, runtime interface, or product behavior changed.
+
 ## 10. Remaining design questions before any schema proposal
 
 D-01 through D-08 have been approved at the documentation/design level. The following narrower details remain unresolved and must not be inferred by implementation:
