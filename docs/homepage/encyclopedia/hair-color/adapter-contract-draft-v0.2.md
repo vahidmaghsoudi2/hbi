@@ -482,6 +482,32 @@ This is deliberately not an Adapter engine request. It is a workflow event owned
 
 The failure envelope is not a consultation response state. It means no new consultation answer is published for this run.
 
+
+### 9.7 Static audit — field ownership and provenance across illustrative JSON examples (2026-11-12)
+
+Scope: all six JSON examples in Sections 9.1–9.6 (S01, S02, S07, S11, S14, S15), checked against the trust boundary in Sections 2–6 and the PO-approved D-07 minimum. This is a static documentation audit. No runtime component, ledger, evidence store, or workflow event was executed.
+
+**Ownership rule applied:** identifiers, versions, decisions, event history, workflow transitions, evidence identity/status, and publication outcomes must come from their authoritative HBI service/store. The engine may propose consultation content, but it cannot authoritatively create or alter those records. Echoing a trusted value does not transfer its ownership to the engine.
+
+| Example | Fields that must be authoritative/read-only context | Fields that may be engine/Adapter-produced | Provenance and audit finding |
+|---|---|---|---|
+| **S01 request** | `request_id`, `case_ref`, `case_version`, `target_version` (Orchestrator/Case Store); product identity and document references (product/evidence registry); evidence status and scope match (evidence registry/resolver); policy version and constraints (policy source) | No engine-authored fields occur in this request; the engine only consumes the bounded context | The two `KNOWN` case data items include `source_class`, `record_ref`, and `recorded_at`, meeting the D-07 minimum datum envelope. The `NOT_ASKED` safety item correctly does not fabricate a value or source. The mock evidence object contains only a reference, test status, and scope flag; it is deliberately not a complete D-07 evidence record and cannot support a scientific claim. The opaque `product_ref` must resolve outside the model to exact product/line/shade/market/document-version identity; the example alone does not prove that resolution. |
+| **S02 response** | `request_id`, `case_ref`, evaluated versions (trusted request values echoed/validated by Adapter); allowed source classes and evidence references (policy/evidence services) | `engine_state`, `consultation_status`, reason proposal, summary, missing-field explanation, limitations, and proposed next-step type | The example does not define a field-level ownership marker. In particular, `accepted_sources` must be constrained by trusted policy, not invented by the engine. Empty `evidence_refs` is consistent with a data-gap response. |
+| **S07 response** | Request/case/version identifiers; safety-alert reference and evidence identity/status (trusted case/safety/evidence records) | Consultation state/reason proposal and client-readable explanation, subject to Adapter validation | The safety reference in `next_step` must resolve to an existing trusted alert; the engine must not mint it. The mock evidence reference is a test token, not scientific support. |
+| **S11 response** | `request_id`, `case_ref`, evaluated versions; `suggestion_ref`, `suggestion_version`, `status`, and the next-step suggestion reference (Orchestrator/authoritative ledger); evidence references (evidence registry) | Explanatory `summary` and other newly generated explanatory text only | The accompanying prose correctly says this is an Orchestrator-composed response and that ledger fields are read-only. This is the clearest ownership boundary among the examples. The fixture-level S11 ledger assertion gap remains as recorded in Section 7.2. |
+| **S14 workflow event** | `event_id`, `case_ref`, `case_version`, `recorded_at` (Workflow Engine/Case Store); authenticated actor attribution (interaction/authentication context); `workflow_action` and `automatic_resume` (Workflow Engine policy) | No engine-produced field; this is not an Adapter response | The example correctly labels the event as Workflow Engine-owned. `actor: CLIENT` must be assigned from authenticated interaction context, not accepted as an unverified client-supplied string. |
+| **S15 failure envelope** | `request_id` (Orchestrator request); correlation reference and failure telemetry (Adapter/observability layer); publication/suppression outcome (Orchestrator publication gate) | `adapter_result`, failure code/stage, and retry classification are Adapter-controlled results, not model-authored consultation content | The failed engine cannot authoritatively report its own failure envelope. `stale_output_published: false` is a publication-control assertion that must be enforced by the Orchestrator, not trusted from an engine payload. |
+
+**Corrections and limits**
+
+1. No field-level ownership table exists in the illustrative examples themselves. The table above records the intended ownership boundary without changing the examples or creating a runtime field.
+2. D-07's datum minimum is represented for the two known S01 case values. D-07 does not approve an additional mandatory `recorded_by` field; this audit does not add one.
+3. The S01 mock evidence object and S07 mock evidence reference are placeholders only. They do not contain the full recommended evidence-reference metadata (claim, publisher/source class, locator, version/date, exact scope, passage, review status, reviewer, or conflict links).
+4. S01's opaque product reference and the response examples' evidence references require authoritative external resolution. The examples do not demonstrate that resolution or prove scientific applicability.
+5. Ownership and provenance for the examples are now documented, but the unresolved request/response version binding, suggestion-ledger tuple, atomic publication gate, retry protocol, and S11–S13 fixture traceability gaps recorded in Sections 7.1–7.2 remain open.
+
+**Outcome:** no contradictory ownership claim was found in the S11 and S14 explanatory notes; however, S01–S02, S07, and S15 relied on implicit service ownership. This section makes that ownership explicit at design level. No JSON example, fixture, schema, runner, test, runtime interface, product behavior, or PO decision was changed.
+
 ## 10. Remaining design questions before any schema proposal
 
 D-01 through D-08 have been approved at the documentation/design level. The following narrower details remain unresolved and must not be inferred by implementation:
