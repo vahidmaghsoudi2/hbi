@@ -185,6 +185,20 @@ A static review of all six illustrative examples (S01, S02, S07, S11, S14, S15) 
 
 **Conclusion:** no direct contradiction was found, but ownership for S01–S02, S07, and S15 had been implicit. This audit makes the intended ownership explicit in Adapter Contract Draft 0.2, Section 9.7. It does not change JSON, fixtures, schema, runner, tests, runtime interfaces, product behavior, or any PO decision. Existing open protocol and S11–S13 traceability issues remain open.
 
+### 6.4 Static audit — evidence validity, scope, and citation traceability (2026-11-12)
+
+A static review of all six illustrative examples (S01, S02, S07, S11, S14, S15) against D-07 and the evidence-ownership rules found:
+
+- S01's `DOC-MOCK-A` is test-only. Its `scope_match: true` and `PRODUCT-ID-A` / `EXACT_MATCH` values are synthetic placeholders, not proof of scientific applicability or verified product identity.
+- S02's empty `evidence_refs` is appropriate for a data-gap response; `accepted_sources` must remain a trusted policy allowlist, not model-authored evidence.
+- S07's mock safety/evidence tokens require resolution against trusted safety/evidence records and provide no scientific support by themselves.
+- S11's `EVIDENCE-MOCK-A` is not support for the existing suggestion; the Orchestrator must resolve the ledger entry and every material evidence reference before display.
+- S14 is a workflow event, not an evidence claim. S15 correlation/failure telemetry is operational traceability, not scientific evidence.
+
+No example contains a complete, independently checkable evidence citation (claim, publisher/source class, locator, version/date, exact passage, scope, and review status). Only `VERIFIED_APPLICABLE` may support a rule within its exact reviewed scope. A reference identifier, a positive scope flag, or an exact-identity label cannot replace trusted registry resolution. Product identity and claim-level evidence applicability are separate checks.
+
+Conclusion: the examples are structurally illustrative only; none of their mock references is scientific evidence. No JSON, fixture, schema, runner, test, runtime behavior, new evidence field, TTL, review policy, or PO decision was added. See Adapter Contract Draft 0.2, Section 9.8. External evidence verification remains a separate prerequisite.
+
 ## 8. PO review queue — decision items, not implementation blockers to duplicate
 
 | ID | Recommended disposition | Why |
