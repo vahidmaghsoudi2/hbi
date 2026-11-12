@@ -321,3 +321,16 @@ Adapter Contract Draft 0.2 Section 9.15 converts the previously identified gaps 
 - **Still unresolved:** literal fields/nullability, ledger event/reference structure, run identity/correlation, dependency representation, eligibility vocabulary, publication-time version equality, expiry/revalidation, and atomic cross-authority publication. No TTL, automatic transition, notification, revocation, or retry rule is inferred.
 
 This proposal does not alter D-01–D-08 or the approved S12 rejection semantics. It grants no implementation, pilot, release, or merge authorization. Fixture, schema, runner, tests, and product behavior remain unchanged.
+
+
+### 6.12 S11–S13 traceability-gap closure sequence (2026-11-12)
+
+Adapter Contract Draft 0.2 Section 9.16 classifies the remaining S11–S13 traceability gaps by decision authority, closure evidence, and dependency order.
+
+- Contract-design work must follow confirmed source-of-truth ownership; it must not begin by guessing JSON properties or nullability.
+- Ledger identity/event semantics, evaluation-run correlation, and evidence dependencies require explicit architecture definitions and synthetic counterexamples.
+- Publication eligibility and cross-authority consistency require a topology-backed design; a successful CI run alone does not establish atomic publication safety.
+- Evidence changes after acceptance/consent, expiry/revalidation, notification/reconfirmation, and partly performed work remain PO policy questions. No policy outcome is inferred.
+- A wire-contract/schema proposal is a later, separate review gate. Approval of documentation or a schema proposal would not itself authorize implementation.
+
+This is a planning/traceability clarification only. It does not change D-01–D-08, add a PO decision, close any unresolved item, change fixtures/schema/runner/tests, or authorize runtime implementation, pilot, release, or merge. PR #535 remains Draft and unmerged.
