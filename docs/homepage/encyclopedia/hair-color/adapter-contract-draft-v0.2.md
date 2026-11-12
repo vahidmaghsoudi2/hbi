@@ -1100,3 +1100,36 @@ Before treating a target change as a new current evaluation context, the respons
 This sequence does not define literal case/target/version/run references, version numbering, dependency graph representation, invalidation events, run cancellation, event ordering, atomic compare-and-publish mechanics, notification/reconfirmation, rollback, or remediation of partly performed service. Those remain classified under Sections 9.12, 9.13, 9.15–9.17 and require their accountable architecture/engineering or PO decisions. The current S13 fixture and its four assertions are unchanged; this section does not claim that the above counterexamples are already executable tests.
 
 No PO decision, state, event, field, schema, fixture, runner, test, runtime interface, product behavior, scientific evidence status, or implementation permission is created or changed. PR #535 remains Draft and unmerged; implementation, pilot, release, and merge remain unauthorized.
+
+### 9.21 Claim → evidence → rule → candidate traceability — conceptual review (2026-11-12)
+
+**Status: conceptual clarification of existing evidence and publication boundaries only.** This section does not define a data model, field, identifier, dependency algorithm, evidence-status transition, or runtime protocol. It does not approve a new rule or scientific claim.
+
+#### Review chain
+
+For each material proposition used to justify a candidate suggestion, a future review must be able to follow the same conceptual chain:
+
+1. **Claim:** state the bounded proposition being relied upon. A broad paragraph or an entire document is not a substitute for identifying the particular proposition relevant to the candidate.
+2. **Evidence:** resolve the exact source and passage offered in support of that proposition, including the source identity, revision/date, applicable subject/product/market/conditions, limitations, and review status already required by D-07 and Sections 9.8–9.10. A reference token, matching flag, or document-level status alone is insufficient.
+3. **Rule:** identify the existing reviewed rule that uses the proposition and verify that the rule's own scope and conditions do not exceed what the evidence supports. VERIFIED_APPLICABLE supports a rule only within its exact reviewed scope. PARTIALLY_SUPPORTED may support only a bounded, non-prescriptive explanation of the supported portion; it does not activate an operational rule or justify an execution instruction.
+4. **Candidate:** establish which material claims/rules support the candidate and which candidate rationale depends on them. Candidate wording, ranking, or repetition by the engine cannot repair a missing or unsupported link.
+
+This is a review relationship, not a literal four-object schema. It does not require that every explanatory sentence be separately modeled; it does require that every material proposition on which a consequential suggestion depends be traceable within its exact scope.
+
+#### Conservative handling when a link is weak or changes
+
+- If the source does not support the stated claim, the claim cannot support the rule or dependent candidate.
+- If evidence supports only a narrower proposition, do not broaden it to the whole rule, product, market, or candidate.
+- If a candidate has separable supported and unsupported components, only the independently supported component may be considered further, subject to all other gates. If separability cannot be established, withhold the candidate rather than assume the unsupported dependency is irrelevant.
+- If an evidence status or source revision changes, assess impact through the established claim/rule/candidate dependencies. Do not invalidate every claim in the same document or every suggestion in the case; equally, do not call an output independent merely because its dependency is not recorded.
+- If the required relationship or current status cannot be resolved, withhold the potentially affected claim/candidate. Historical acceptance or execution consent does not make the evidence current or restore eligibility.
+
+#### Future review examples — not added to fixtures
+
+A future separately reviewed synthetic test set should include: one source passage supporting one bounded claim but not a broader claim; one document with two claims having different applicability statuses; one rule whose scope exceeds its cited passage; one candidate depending on multiple claims where only one evidence relationship changes; and one candidate whose dependency cannot be resolved. Expected outcomes must be reviewed against the existing six evidence statuses and fail-closed boundary before any fixture oracle is added.
+
+#### Explicit non-decisions
+
+This clarification does not decide whether evidence status is stored per source, source–claim relationship, or product/market/version assessment; how claim/rule/candidate references are represented; how multi-source support is combined; how the affected-output set is computed; or how status revisions are detected and synchronized with publication. Those remain open under Sections 9.9, 9.10, 9.14–9.16. No precedence, expiry, TTL, automatic revalidation, new status, field, event, fixture, schema, runner, test, or PO decision is created.
+
+No external source was verified and no scientific claim was approved. No customer data, product behavior, runtime, adapter, engine, catalogue, pilot, release, or merge authorization is changed.
