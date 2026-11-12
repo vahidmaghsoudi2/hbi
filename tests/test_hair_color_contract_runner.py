@@ -1,6 +1,7 @@
 """Unit tests for the contract-only hair-color test runner."""
 from __future__ import annotations
 
+import copy
 import json
 
 import pytest
@@ -68,6 +69,23 @@ def test_missing_safety_assertion_is_rejected(manifest):
     fixture = next(item for item in manifest["fixtures"] if item["scenario_id"] == "S07")
     fixture["assertions"].remove("safety_stop_blocks_options")
     assert any("S07 missing assertion" in error for error in validate_manifest(manifest))
+
+
+def test_every_fixture_assertion_is_mandatory(manifest):
+    for fixture in manifest["fixtures"]:
+        scenario_id = fixture["scenario_id"]
+        for assertion in tuple(fixture["assertions"]):
+            candidate = copy.deepcopy(manifest)
+            target = next(item for item in candidate["fixtures"] if item["scenario_id"] == scenario_id)
+            target["assertions"].remove(assertion)
+            errors = validate_manifest(candidate)
+            assert f"{scenario_id} missing assertion: {assertion}" in errors
+
+
+def test_duplicate_assertion_is_rejected(manifest):
+    fixture = manifest["fixtures"][0]
+    fixture["assertions"].append(fixture["assertions"][0])
+    assert any("assertions contains duplicate entries" in error for error in validate_manifest(manifest))
 
 
 def test_personal_data_field_names_are_rejected(manifest):
