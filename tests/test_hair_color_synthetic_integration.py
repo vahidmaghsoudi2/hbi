@@ -19,10 +19,10 @@ def make_request(scenario_id, **overrides):
     value = {
         "contract_version": "0.2-draft",
         "request_id": f"REQ-{scenario_id}",
-        "operation": "EVALUATE_CASE",
+        "operation": {"S11": "ANSWER_QUESTION", "S13": "REEVALUATE", "S14": "REEVALUATE"}.get(scenario_id, "EVALUATE_CASE"),
         "case_ref": f"CASE-{scenario_id}",
-        "case_version": 3,
-        "target_version": 2,
+        "case_version": 4 if scenario_id == "S13" else 3,
+        "target_version": 3 if scenario_id == "S13" else 2,
         "case_context": {"synthetic_scenario_id": scenario_id},
         "evidence_context": [{"evidence_ref": "EVIDENCE-MOCK-A"}],
         "policy_context": {"chemical_execution_instructions": "PROHIBITED"},
