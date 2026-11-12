@@ -359,3 +359,14 @@ Adapter Contract Draft 0.2 Section 9.18 records separate conceptual sequences fo
 - Duplicate delivery/retry and a repeated intentional client action remain distinct but unresolved cases; no deduplication or idempotency mechanism is inferred.
 
 No new PO decision is proposed or recorded. No fixture, schema, runner, test, runtime interface, or product behavior changed. Existing S12 approval and D-01–D-08 remain unchanged. No implementation, pilot, release, or merge authorization is created.
+
+
+### 6.15 Static audit — complete fixture assertion enforcement (2026-11-12)
+
+Adapter Contract Draft 0.2 Section 9.19 records the assertion-coverage audit and its limited remediation:
+
+- 15 synthetic fixtures declare 48 assertions; the README-embedded and external JSON manifests are identical.
+- The prior runner required 11 named assertions. The runner now requires all 48 scenario-specific assertions and rejects duplicate assertion entries.
+- Unit tests exercise omission of every declared assertion and duplicate-entry rejection.
+- This strengthens manifest/oracle integrity only. It does not execute product behavior, establish that assertions are scientifically or operationally true, or close S11–S13 identity/ledger/version/publication gaps.
+- No PO decision, product runtime, adapter, engine, API, DB, UI, real-customer data, catalogue, scientific evidence status, or product behavior changed. All 15 product-behavior scenarios remain BLOCKED; no implementation, pilot, release, or merge authorization is created.
