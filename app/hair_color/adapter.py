@@ -133,7 +133,7 @@ def validate_request(request: Mapping[str, Any]) -> None:
     _require_nonempty_string(request["request_id"], "request_id")
     _require_nonempty_string(request["case_ref"], "case_ref")
 
-    if request["operation"] not in OPERATIONS:
+    if not isinstance(request["operation"], str) or request["operation"] not in OPERATIONS:
         raise AdapterContractError("unsupported operation")
 
     _require_version(request["case_version"], "case_version")
@@ -164,14 +164,17 @@ def validate_response(request: Mapping[str, Any], response: Mapping[str, Any]) -
         if response[field] != request[field]:
             raise AdapterContractError(f"engine response {field} does not match request")
 
+    _require_version(response["evaluated_case_version"], "evaluated_case_version")
+    _require_version(response["evaluated_target_version"], "evaluated_target_version")
+
     if response["evaluated_case_version"] != request["case_version"]:
         raise AdapterContractError("engine response case version does not match request")
     if response["evaluated_target_version"] != request["target_version"]:
         raise AdapterContractError("engine response target version does not match request")
 
-    if response["engine_state"] not in ENGINE_STATES:
+    if not isinstance(response["engine_state"], str) or response["engine_state"] not in ENGINE_STATES:
         raise AdapterContractError("unknown engine_state")
-    if response["consultation_status"] not in CONSULTATION_STATES:
+    if not isinstance(response["consultation_status"], str) or response["consultation_status"] not in CONSULTATION_STATES:
         raise AdapterContractError("unknown consultation_status")
 
     reason_codes = response["reason_codes"]
