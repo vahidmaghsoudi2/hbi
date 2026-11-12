@@ -915,3 +915,33 @@ A target change must be traceable from the authoritative prior case/target versi
 #### F. Explicit unresolved decisions and exclusions
 
 The following remain open: literal field names and nullability; ledger reference/event structure; evaluation-run identity and correlation scope; dependency-link representation; exact status/eligibility vocabulary; how version equality is checked at publication; time-based expiry and revalidation; and the atomicity/linearization mechanism across authorities. No TTL, expiry date, automatic revalidation, notification, reconfirmation, revocation, retry policy, or new workflow/response/engine state is introduced. Fixture JSON, JSON Schema, runner, tests, runtime, product behavior, and PO decisions are unchanged. This proposal does not authorize adapter implementation, engine integration, pilot, release, or merge.
+
+
+### 9.16 Closure sequence for the S11–S13 traceability gaps — documentation control (2026-11-12)
+
+**Status: planning clarification only.** This section classifies the open items in Sections 9.14–9.15 by the kind of decision needed and the evidence required to close them. It does not resolve any item, select a service topology, introduce a field/event/status, or authorize schema or implementation work.
+
+| Open item | Decision class / accountable authority | Minimum closure evidence | Explicitly not settled here |
+|---|---|---|---|
+| Literal reference fields, requiredness, and nullability | Contract-design work after source-of-truth ownership is agreed; PO review only where a field changes a client decision or safety boundary | A field-to-owner map; producer/reader list; required/optional rationale; missing/conflict behavior; examples that preserve authoritative ownership | Field names, JSON shape, nullability, defaults, or schema |
+| Suggestion/ledger reference and event structure | Ledger/Orchestrator architecture; PO approval for any change to the meaning or effect of acceptance, rejection, or consent | Exact identity scope for a suggestion/version; case/target binding; authoritative before/after lookup semantics; audit-history preservation; duplicate-event behavior | Event names, event payload, eligibility enum, or a new decision transition |
+| Evaluation-run identity and correlation | Orchestrator/engine integration architecture | A documented definition of one logical evaluation, retry of that evaluation, a genuinely new evaluation, and a delayed result from an earlier run; synthetic sequence examples | Run-ID format, correlation field, idempotency-key field, retention window, or retry count |
+| Evidence/dependency representation | Evidence authority plus Orchestrator architecture; specialist review for claim applicability | A claim-to-evidence-to-candidate dependency example; proof that a changed evidence record identifies affected outputs; proof that unrelated outputs are not invalidated | Graph technology, dependency field names, automatic propagation mechanism, or blanket invalidation |
+| Eligibility vocabulary and publication-time version equality | Ledger/Orchestrator contract design; PO review if vocabulary changes client-visible meaning | A finite set of reviewed eligibility outcomes with definitions; an explicit rule for matching suggestion, case, target, and run references at the publication decision; mismatch and unavailable-authority examples | New status values, precedence rules, expiry behavior, or a compare-and-publish implementation |
+| Atomicity/linearization across authorities | Architecture and engineering decision, informed by the actual deployment topology | A topology-backed design showing one logical publication decision across case/target, evidence, ledger, workflow, and run context; failure-mode analysis; synthetic race cases | Locks, distributed transactions, timestamps, leases, coordinator choice, or any concrete mechanism |
+| Expiry, revalidation, and post-decision consequences of evidence change | PO policy decision for client-facing consequences, supported by evidence/engineering analysis | Explicit decisions for pending suggestions and for already accepted/consented work; separate treatment of not-yet-performed versus partly performed steps; preservation of historical events | TTL, automatic revocation, notification, reconfirmation, suspension, rollback, or remediation policy |
+| Retry and duplicate-delivery details | Orchestrator/Adapter engineering design under the already approved D-06 invariants | Failure-class matrix; same-logical-request versus new-request examples; proof that retry does not create a new case version or duplicate decision event | Retry limit, backoff, transient-error enum, or implementation configuration |
+
+**Recommended closure order (dependency order, not a delivery commitment):**
+
+1. Confirm authoritative owners and the meaning of each reference; do not begin with JSON field design.
+2. Define suggestion/ledger identity and event semantics, including the distinction between a retry and a new evaluation.
+3. Define run correlation and the case/target version relationship needed to reject mismatched or delayed results.
+4. Define evidence dependency semantics and demonstrate selective impact on dependent outputs.
+5. Resolve publication eligibility and the logical consistency requirement across the authorities.
+6. Obtain the separate PO policy decisions identified above for evidence changes after acceptance/consent and for partly performed work.
+7. Only after the preceding design is coherent, prepare a separate wire-contract/schema proposal for review. Schema approval and implementation authorization remain separate gates.
+
+**Control rule:** an item may be marked closed only when its accountable authority, normative meaning, failure behavior, and synthetic counterexample coverage are recorded. A passing documentation validator or CI run does not close a domain-policy or distributed-consistency decision. All items above remain open until that evidence exists.
+
+No fixture, JSON Schema, runner, test, runtime interface, product behavior, PO decision, or scientific/evidence status was changed by this clarification. PR #535 remains Draft and unmerged; implementation, pilot, release, and merge remain unauthorized.
