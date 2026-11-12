@@ -1,6 +1,6 @@
 # HBI Consultation Engine Adapter Contract — Draft 0.2
 
-- Status: design draft; not approved for implementation
+- Status: design draft; D-01–D-08 approved by PO for documentation/design semantics on 2026-11-12; not approved for implementation
 - Scope: conceptual request/response boundary between the HBI Consultation Orchestrator and a consultation engine
 - Repository branch: `docs/hair-color-independent-consultation-20261112`
 - Related PR: #535 (must remain Draft and unmerged)
@@ -43,7 +43,7 @@ These layers must never be collapsed into one `primary_status`.
 
 ### 3.1 Engine/motor state — four conceptual states
 
-The following identifiers are proposed for discussion; the four meanings are the previously agreed model:
+The following four meanings and proposed identifiers were approved by the PO for design-level use on 2026-11-12 (D-01). This does not authorize runtime enum/schema implementation:
 
 | Proposed identifier | Meaning |
 |---|---|
@@ -56,7 +56,7 @@ A conditional suggestion is an engine state, not a sixth consultation response s
 
 ### 3.2 Consultation response state — five approved meanings
 
-The response state is one of the following five meanings, matching the README:
+The response state is one of the following five meanings, matching the README. The meanings and proposed identifiers were approved by the PO for design-level use on 2026-11-12 (D-02); this does not authorize runtime enum/schema implementation:
 
 | Proposed identifier | Meaning |
 |---|---|
@@ -66,7 +66,7 @@ The response state is one of the following five meanings, matching the README:
 | `SAFETY_STOP_NO_EXECUTION_SUGGESTION` | Safety concern blocks an execution suggestion |
 | `OUT_OF_V1_SCOPE` | Request is outside the approved first-version scope |
 
-These identifiers are proposed wire values, not yet PO-approved enums. “Approved for execution” is a workflow decision, not a consultation response state.
+These identifiers are approved design-level names, not yet implemented runtime enums. “Approved for execution” is a workflow decision, not a consultation response state.
 
 ### 3.3 Workflow state — ten states, owned elsewhere
 
@@ -239,7 +239,7 @@ The Product Owner explicitly approved the following presentation and ledger rule
 
 ## 9. Complete illustrative JSON examples
 
-All examples are synthetic and structural only. They contain no real customer data, scientific claims, shade formulas, or execution instructions. Enum identifiers remain proposed pending PO approval.
+All examples are synthetic and structural only. They contain no real customer data, scientific claims, shade formulas, or execution instructions. Design-level identifiers have PO approval; runtime enum/schema implementation remains unauthorized.
 
 ### 9.1 Request — complete evaluation (S01)
 
@@ -420,27 +420,28 @@ This is deliberately not an Adapter engine request. It is a workflow event owned
 
 The failure envelope is not a consultation response state. It means no new consultation answer is published for this run.
 
-## 10. Open decisions before schema approval
+## 10. Remaining design questions before any schema proposal
 
-1. Approve or revise the proposed wire identifiers for the four engine states and five consultation states.
-2. Approve the exact required/optional fields and nullability rules for each datum.
-3. Approve the evidence reference structure and validity/review metadata.
-4. Approve the adapter failure envelope and retry semantics.
-5. Confirm the exact S01–S15 fixture assertions against the existing runner manifest.
-6. Approve the versioning and idempotency rules for request retries.
-7. Confirm whether a successful engine response can contain an empty options list for non-safety explanatory responses.
+D-01 through D-08 have been approved at the documentation/design level. The following narrower details remain unresolved and must not be inferred by implementation:
 
-No open item may be silently decided by implementation.
+1. Exact required/optional fields and nullability rules for each datum.
+2. Final evidence-reference field constraints, validity windows, review-expiry triggers, and conflict-link rules.
+3. Versioned retry policy details, including maximum attempts and precise transient-failure classification; the approved invariants in Sections 6 and 7 remain binding.
+4. Exact S01–S15 fixture assertions against the existing runner manifest, including any edge-case assertions not already captured.
+5. Whether a successful explanatory response may have an empty options list, and the exact conditions for that case.
+6. S06/S08 response-state mapping remains unresolved under D-05. The approved client-facing handling must be preserved without inventing a sixth response state or overloading `OUT_OF_V1_SCOPE`.
+
+No remaining item may be silently decided by implementation.
 
 ## 11. Definition of ready for PO review
 
 - [ ] Responsibility boundary approved.
-- [ ] Four engine states and five consultation response states confirmed.
+- [x] Four engine-state meanings/identifiers and five consultation response-state meanings/identifiers confirmed at design level (D-01/D-02); runtime enums remain unauthorized.
 - [ ] Ten workflow states remain owned by Workflow Engine.
-- [ ] Trust/provenance rules approved.
+- [x] Minimum trust/provenance and evidence-envelope requirements approved at design level (D-07).
 - [ ] Version and decision ownership approved.
-- [ ] Fail-closed invariants approved.
-- [ ] S01–S15 plus boundary/control tests mapped to fixture assertions.
+- [x] Adapter failure, stale-output suppression, and idempotent retry invariants approved at design level (D-06).
+- [ ] Exact S01–S15 plus boundary/control test assertions reconciled against the runner (D-05 approves oracle boundary, not every assertion detail).
 - [ ] Synthetic examples reviewed for semantic and structural consistency.
 - [ ] No product code, schema, stub, catalogue, real customer data, pilot, or release changes included.
 
