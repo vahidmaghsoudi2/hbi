@@ -169,6 +169,22 @@ Cross-check of the approved PO rules against the Adapter Contract, README scenar
 
 Conclusion: no contradiction with D-08/S12 or other recorded PO decisions was found. The gap is machine-readable traceability and unresolved protocol detail, not a reason to alter the approved rejection semantics. Fixture/schema/runner changes are deferred pending a separately reviewed proposal and explicit approval where policy is involved. See Section 7.2 of `adapter-contract-draft-v0.2.md`.
 
+
+### 6.3 Static audit — field ownership and provenance across JSON examples (2026-11-12)
+
+A static review of all six illustrative examples (S01, S02, S07, S11, S14, S15) was completed against the Section 1 authority principles and D-07.
+
+- **S01:** Orchestrator/Case Store owns request/case/version identifiers; product and evidence registries own product identity, document references, evidence status, and scope matching; policy source owns policy version/constraints. The two known case data items include the D-07 minimum `source_class`, `record_ref`, and `recorded_at`. The `NOT_ASKED` safety item does not invent a value/source. Mock evidence is not a complete evidence record; opaque product/evidence references require trusted external resolution.
+- **S02:** request/case/version values are trusted identifiers echoed and validated by the Adapter. Consultation state, explanation, missing-field reason, limitations, and next-step proposal may be engine-produced. The `accepted_sources` list must be constrained by trusted policy, not invented by the engine.
+- **S07:** safety-alert and evidence references must resolve against trusted records. The engine may produce a reasoned stop/explanation proposal but cannot mint the referenced alert or evidence identity.
+- **S11:** ledger identity/version/status and evidence references are trusted read-only fields; explanatory text may be engine-produced. The example's Orchestrator-composed ownership note is consistent. Existing fixture traceability gaps remain as recorded in Section 6.2.
+- **S14:** the event is Workflow Engine-owned. Event/case identifiers and recorded time are service-generated; actor attribution must come from authenticated interaction context; workflow action and no-auto-resume behavior are Workflow Engine-controlled.
+- **S15:** request identity is Orchestrator-owned; failure/correlation telemetry is Adapter/observability-owned; stale-output publication outcome is controlled by the Orchestrator publication gate. These must not be trusted as model-authored fields.
+
+**D-07 boundary:** no new mandatory `recorded_by` field is introduced. The S01/S07 mock evidence references are placeholders and do not satisfy the full recommended evidence-reference metadata. Exact product/evidence resolution remains external to the model. The examples do not themselves prove scientific applicability.
+
+**Conclusion:** no direct contradiction was found, but ownership for S01–S02, S07, and S15 had been implicit. This audit makes the intended ownership explicit in Adapter Contract Draft 0.2, Section 9.7. It does not change JSON, fixtures, schema, runner, tests, runtime interfaces, product behavior, or any PO decision. Existing open protocol and S11–S13 traceability issues remain open.
+
 ## 8. PO review queue — decision items, not implementation blockers to duplicate
 
 | ID | Recommended disposition | Why |
