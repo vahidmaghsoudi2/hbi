@@ -1053,3 +1053,16 @@ No fixture, JSON Schema, runner, test, runtime interface, product behavior, or P
 - No fixture assertion, JSON Schema property, runner behavior, runtime field, state transition, PO policy, or implementation mechanism is added by this section.
 
 **Outcome:** S11 and S12 are now illustrated as separate conceptual sequences with explicit “may be recorded” and “must not change” boundaries. This improves reviewability only; it does not close the machine-traceability gaps or authorize implementation, pilot, release, or merge.
+
+
+### 9.19 Static audit — complete synthetic assertion enforcement (2026-11-12)
+
+A focused audit compared all 15 machine-readable fixtures, their README-embedded manifest, the JSON Schema, the contract runner, and its unit tests.
+
+- The fixture bundle contains **48 declared assertions** across S01–S15, and the external JSON bundle matches the README manifest exactly.
+- Before this change, the runner enforced only **11 named assertions** across seven scenarios. The other 37 declarations were structurally present but could be removed without the runner's required-assertion check detecting the omission.
+- The contract-only runner now requires all 48 declared assertion names in their respective scenarios and rejects duplicate assertion entries within a fixture.
+- Unit-test coverage now removes each of the 48 assertions in turn and verifies that the validator rejects the resulting manifest; a separate test verifies duplicate-assertion rejection.
+- This is a structural integrity check of synthetic test-oracle declarations. It does not execute any product behavior, prove the truth of an assertion, validate chemical/scientific rules, or close the S11–S13 ledger/version traceability gaps.
+
+The runner and tests remain limited to the synthetic contract harness. No product runtime, adapter, engine, API, database, UI, real-customer data, catalogue, scientific evidence status, state transition, or PO decision was changed. The 15 product-behavior scenarios remain BLOCKED pending separately authorized implementation and validation. This change does not authorize implementation, pilot, release, or merge.
