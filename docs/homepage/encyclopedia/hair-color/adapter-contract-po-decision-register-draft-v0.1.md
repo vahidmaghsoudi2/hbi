@@ -21,7 +21,7 @@ The following are existing project guardrails, not reopened decisions:
 
 ## 2. Recommended wire identifiers
 
-These names are recommendations for consistency. They are not approved enums until the PO accepts them.
+These identifiers are approved design-level names under D-01/D-02. They are not implemented runtime enums, and this approval does not authorize a runtime schema.
 
 ### 2.1 Four engine states
 
@@ -97,7 +97,7 @@ The following mapping is a recommended interpretation, not a new test oracle:
 
 
 
-**S06/S08/S12 mapping caveat (updated 2026-11-12):** the PO has approved the client-facing handling for all three scenarios (Section 8.1). That approval does not, by itself, settle every wire-state mapping. Keep S12 as a ledger event with no forced engine/response state. For S06 and S08, retain the current provisional engine-state mappings and leave the exact response-state/wire mapping unresolved until D-01/D-02 are reviewed; do not overload `OUT_OF_V1_SCOPE` or invent a sixth response state.
+**S06/S08/S12 mapping caveat (updated 2026-11-12):** the PO has approved the client-facing handling for all three scenarios (Section 8.1). That approval does not, by itself, settle every wire-state mapping. Keep S12 as a ledger event with no forced engine/response state. For S06 and S08, retain the current provisional engine-state mappings and leave the exact S06/S08 response-state mapping unresolved under D-05, even though D-01/D-02 meanings and identifiers are approved; do not overload `OUT_OF_V1_SCOPE` or invent a sixth response state.
 
 ## 6. Adapter response and failure semantics
 
