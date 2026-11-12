@@ -3,7 +3,7 @@ name: HBI Auto Tasks
 on:
   workflow_dispatch:
   push:
-    branches: [master]
+    branches: [master, docs/hair-color-conceptual-architecture-scenarios-20261102]
     paths:
       - "app/**"
       - "tests/**"
@@ -11,7 +11,7 @@ on:
       - "requirements.txt"
       - ".github/workflows/hbi_auto.yml"
   pull_request:
-    branches: [master]
+    branches: [master, docs/hair-color-conceptual-architecture-scenarios-20261102]
     paths:
       - "app/**"
       - "tests/**"
