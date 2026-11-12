@@ -1,13 +1,18 @@
 """Unit tests for the contract-only hair-color test runner."""
 from __future__ import annotations
 
+import json
+
 import pytest
 
 from scripts.run_hair_color_contract import (
+    DEFAULT_MANIFEST,
     DEFAULT_README,
+    DEFAULT_SCHEMA,
     ContractError,
     build_report,
     extract_manifest,
+    validate_json_schema,
     validate_manifest,
 )
 
@@ -19,6 +24,27 @@ def manifest():
 
 def test_embedded_manifest_is_valid(manifest):
     assert validate_manifest(manifest) == []
+
+
+
+def test_external_fixture_bundle_matches_readme_and_schema(manifest):
+    external = json.loads(DEFAULT_MANIFEST.read_text(encoding="utf-8"))
+    schema = json.loads(DEFAULT_SCHEMA.read_text(encoding="utf-8"))
+    assert external == manifest
+    assert schema["$schema"] == "https://json-schema.org/draft/2020-12/schema"
+    assert validate_json_schema(external, schema) == []
+
+
+def test_schema_rejects_extra_fixture_property(manifest):
+    schema = json.loads(DEFAULT_SCHEMA.read_text(encoding="utf-8"))
+    manifest["fixtures"][0]["customer_phone"] = "synthetic-placeholder"
+    assert any("additional properties" in error for error in validate_json_schema(manifest, schema))
+
+
+def test_schema_rejects_wrong_fixture_count(manifest):
+    schema = json.loads(DEFAULT_SCHEMA.read_text(encoding="utf-8"))
+    manifest["fixtures"].pop()
+    assert any("fewer than 15 items" in error for error in validate_json_schema(manifest, schema))
 
 
 def test_manifest_has_fifteen_unique_scenarios(manifest):
