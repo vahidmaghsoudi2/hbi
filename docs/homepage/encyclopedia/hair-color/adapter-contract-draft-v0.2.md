@@ -214,6 +214,33 @@ This is a documentation-level consistency audit of Sections 4–7, the D-06/D-07
 
 These are contract-definition gaps, not evidence that the approved invariants are wrong. Keep them open for a separately reviewed contract revision; do not fill them by implementation inference.
 
+
+### 7.2 Static audit — suggestion identity, validity, and decision-ledger traceability (2026-11-12)
+
+Scope: conceptual contract Sections 4–7 and 13, PO decisions D-01–D-08, the README scenario definitions, and machine-readable fixtures S11–S13. This is a static documentation audit only; no ledger, case store, adapter, or product behavior was executed.
+
+**Confirmed design rules — internally consistent**
+
+- Persistent suggestion identity and authoritative active/rejected status belong to the Orchestrator/Case Store and decision ledger; the engine may propose request-local candidates but cannot mint persistent references or assert authoritative status.
+- Existing suggestions used in explanatory responses must be resolved from the authoritative ledger before display. The Orchestrator must reject forged, stale, mismatched, or rejected references.
+- Rejection is a durable, auditable event for the exact suggestion/version. That exact rejected suggestion/version is excluded from active options; rejection does not force an engine or consultation response state.
+- A replacement is not a continuation or reactivation of the rejected suggestion. It requires a fresh candidate evaluation and independent validation against current case/target data, constraints, and evidence.
+- A question in S11 leaves acceptance and execution consent unchanged. A new target in S13 requires a new evaluation version; acceptance, execution consent, and specialist review do not automatically carry forward.
+
+**Traceability gaps between human-readable scenarios and machine fixtures**
+
+1. **S11 — existing suggestion reference:** the README scenario describes an existing V1 suggestion awaiting decision, and the illustrative response includes `suggestion_ref`, `suggestion_version`, and ledger-derived status. The machine fixture does not carry an explicit suggestion reference/version or an assertion that the referenced ledger entry is active and not rejected at publication. Its current assertions cover unchanged acceptance/consent and recording the question only.
+2. **S12 — exact rejection target:** the README names a synthetic suggestion (`SUGGESTION-V1-A`) and requires rejection of that exact identifier/version. The machine fixture describes an active suggestion version V1 in `input_profile` and asserts traceability/deactivation, but contains no structured suggestion reference, suggestion version, rejection-event reference, or before/after ledger state. The exact target is therefore human-readable but not machine-bound in the current fixture.
+3. **S13 — version transition:** the README describes `CASE-V1`/`CASE-V2`, a target change, and dependency-aware reevaluation. The machine fixture asserts that a new version is created and dependent outputs are rechecked, but does not provide an explicit prior/new case-version pair or target-version pair. It cannot, as currently shaped, establish exact version lineage.
+4. **Ledger-to-case/target binding:** the contract requires current case/target versions and authoritative ledger resolution, but the design draft does not yet define the normative tuple or reference constraints that bind a suggestion record to its originating case version, target version, evaluation run, and decision events. Do not assume a field layout or retention rule.
+5. **Validity/revalidation boundary:** the contract states that the Orchestrator re-resolves suggestion ledger, rejection state, case/target versions, workflow stop state, and evidence validity before publication. It does not yet define when a previously validated suggestion becomes invalid solely due to elapsed time, a changed datum, changed evidence status, or a changed workflow event beyond the existing dependency/version rules. Do not invent a time-to-live or automatic expiry policy.
+
+**Audit conclusion**
+
+The authority boundary and PO-approved rejection semantics are coherent. The remaining issue is not a conflicting PO decision; it is insufficient structured traceability in S11–S13 fixtures and unresolved ledger-reference/version-binding details. The README currently carries more scenario detail than the machine-readable fixture bundle. Preserve the current fixtures as synthetic contract descriptions, but do not describe them as proving ledger correctness or version-lineage behavior.
+
+**No changes made to fixture JSON, JSON Schema, runner, tests, runtime interfaces, or product behavior.** The open items above require a separately reviewed contract/fixture proposal and, where they define new policy (for example expiry), explicit PO decision before implementation.
+
 ## 8. S01–S15 acceptance mapping
 
 **Important distinction — manifest oracle vs wire state:** the fixture's `expected_status` is a behavioral oracle label from the existing test manifest. It is not automatically one of the four engine-state identifiers, one of the five consultation-response identifiers, or a workflow state. The future adapter must define and PO-approve an explicit mapping; the labels below are reproduced exactly from the canonical manifest and must not be silently renamed or collapsed.
