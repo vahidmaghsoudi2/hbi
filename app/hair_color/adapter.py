@@ -66,11 +66,13 @@ _RESPONSE_FIELDS = (
 
 # The contract explicitly excludes chemical execution instructions and
 # excludes the engine from changing authoritative client/workflow decisions.
-_FORBIDDEN_OUTPUT_KEYS = frozenset({
+_FORBIDDEN_CHEMICAL_KEYS = frozenset({
     "chemical_instruction_allowed",
     "formula",
     "oxidant_percentage",
     "processing_time",
+})
+_FORBIDDEN_DECISION_KEYS = frozenset({
     "acceptance",
     "execution_consent",
     "workflow_state",
@@ -90,13 +92,13 @@ class EngineExecutionFailure(RuntimeError):
     reason_code = "ENGINE_FAIL"
 
 
-def _has_forbidden_key(value: Any) -> str | None:
+def _has_forbidden_key(value: Any, forbidden_keys: frozenset[str]) -> str | None:
     if isinstance(value, Mapping):
         for key, nested in value.items():
             normalized = str(key).strip().lower()
-            if normalized in _FORBIDDEN_OUTPUT_KEYS:
+            if normalized in forbidden_keys:
                 return str(key)
-            found = _has_forbidden_key(nested)
+            found = _has_forbidden_key(nested, forbidden_keys)
             if found is not None:
                 return found
     elif isinstance(value, (list, tuple)):
@@ -146,7 +148,7 @@ def validate_request(request: Mapping[str, Any]) -> None:
     if not isinstance(request["policy_context"], Mapping):
         raise AdapterContractError("policy_context must be an object")
 
-    forbidden = _has_forbidden_key(request)
+    forbidden = _has_forbidden_key(request, _FORBIDDEN_CHEMICAL_KEYS)
     if forbidden is not None:
         raise AdapterContractError(f"request contains prohibited field: {forbidden}")
 
@@ -221,7 +223,7 @@ def validate_response(request: Mapping[str, Any], response: Mapping[str, Any]) -
     if blocking and response["options"]:
         raise AdapterContractError("a blocked consultation response cannot contain candidate options")
 
-    forbidden = _has_forbidden_key(response)
+    forbidden = _has_forbidden_key(response, _FORBIDDEN_CHEMICAL_KEYS | _FORBIDDEN_DECISION_KEYS)
     if forbidden is not None:
         raise AdapterContractError(f"engine response contains prohibited field: {forbidden}")
 
