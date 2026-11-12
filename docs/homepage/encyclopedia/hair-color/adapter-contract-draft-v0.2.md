@@ -659,6 +659,75 @@ A candidate must not be published as current if any authoritative input on which
 
 No PO decision was added or changed. No fixture, schema, runner, test, runtime interface, product behavior, evidence status, or client record was changed. See PO Decision Register Section 6.8 and README current-status note.
 
+### 9.13 Design proposal — publication gate and concurrency control (2026-11-12)
+
+**Status: proposed design for review; not approved, not an implementation contract.** This proposal translates the race findings in Section 9.12 into reviewable requirements while deliberately leaving the concrete transaction mechanism and policy decisions open.
+
+**A. Separate two decisions**
+
+1. **Advice publication:** whether a current, evidence-supported system response may be shown to the client.
+2. **Service authorization:** whether a specific service step may proceed, based on the separately recorded client acceptance, explicit execution consent, current workflow state, and any other required authorization.
+
+Advice publication must never be interpreted as acceptance, execution consent, or proof of performance. A service-authorization check must not be collapsed into the advice-publication check.
+
+**B. Proposed logical publication preconditions**
+
+At the moment the Orchestrator decides to publish a result, it should establish that all applicable authoritative inputs still match the evaluation context:
+
+- the case and target context is still current;
+- every material evidence dependency remains applicable to the exact claim/product/market/version scope used by the evaluation;
+- the referenced suggestion remains the same suggestion/version and is not rejected or otherwise ineligible in the authoritative ledger;
+- the relevant workflow path has not been stopped or superseded;
+- the result belongs to the current evaluation/run, not a delayed response from an earlier run or pre-restart path;
+- the current run has not failed and no previous response is being substituted as its answer.
+
+If any required check fails, is unavailable, or cannot be reconciled, withhold the affected output and return a controlled non-publication/failure outcome; do not fall back to an older successful response. This is a proposed logical acceptance criterion derived from existing fail-closed boundaries, not a new wire state or field definition.
+
+**C. Proposed concurrency requirement**
+
+The checks above must be treated as one logical publication decision with a clearly defined linearization point: either the result is published against a coherent current snapshot, or it is not published. A sequence of independent reads followed by an unprotected publish is insufficient, because an authoritative record could change between the last read and publication.
+
+This proposal does **not** choose the implementation mechanism. Options for engineering review:
+
+| Option | Concept | Main advantage | Main limitation / review need |
+|---|---|---|---|
+| A. Serialized Orchestrator authority | Route relevant state-changing events and publication decisions through one authoritative coordinator/ordered command boundary | Clear ordering and one logical decision point | Requires confirmation that all relevant authorities can participate; potential throughput and availability trade-offs |
+| B. Conditional commit across authoritative stores | Read authoritative revisions and publish only if all required revisions still match at commit | Can preserve separate ownership boundaries | Cross-store atomicity may not be available; requires a concrete consistency/compensation design |
+| C. Snapshot validation followed by ordinary publish | Read current values, then publish without a conditional commit | Simple to implement | **Not sufficient as the safety mechanism**; leaves a time-of-check/time-of-use race |
+
+**Working recommendation for architecture review:** adopt the *logical requirement* of one linearizable compare-and-publish decision, then evaluate Option A against the actual ownership/deployment topology. Do not treat Option A as approved or assume that a distributed transaction, lock, timestamp ordering, lease, or specific data field is already selected. Option B may be viable only if it can demonstrate equivalent atomicity. Option C alone should be rejected for safety-critical publication.
+
+**D. Event and retry handling requirements to resolve**
+
+- Define how a newly authoritative evidence revision invalidates only dependent outputs, including when case/target versions do not change.
+- Define how stop and restart establish a new run boundary so delayed responses from the previous path cannot publish.
+- Define event identity, idempotency scope, and deduplication for retries and duplicate delivery, while preserving D-06's same-logical-request retry invariant.
+- Define the audit record for a rejected publication attempt and the reason it was withheld.
+- Define what happens when an authoritative source is unavailable or returns conflicting revisions: fail closed for affected output; do not invent precedence.
+
+No new field names, event IDs, revision counters, timestamps, TTLs, retry limits, lock types, transaction APIs, or workflow states are proposed here.
+
+**E. Explicitly separate policy questions for PO**
+
+The technical publication gate cannot decide whether an already accepted or consented client decision requires notification, renewed confirmation, suspension, or another client-facing action after material evidence changes. Nor can it decide remediation for work already partly performed. These remain separate PO policy decisions; historical events must remain auditable.
+
+**F. Review acceptance criteria before any implementation proposal**
+
+A future design should demonstrate, using synthetic sequences, at minimum:
+
+1. evidence revision between evaluation and publication suppresses the dependent result;
+2. acceptance/consent concurrent with evidence revision cannot make unsupported evidence publishable;
+3. stop concurrent with evaluation prevents continuation of the stopped path;
+4. restart prevents a delayed pre-restart response from being published as the new result;
+5. duplicate retry does not create duplicate decision events or a new case version;
+6. unrelated outputs remain eligible when only a separate dependency changes;
+7. inability to establish a coherent current snapshot fails closed;
+8. advice publication remains distinct from service authorization.
+
+These are proposed test objectives only. They are not added to the current fixture bundle and are not claims of runtime behavior.
+
+**Decision boundary:** this proposal is ready for architecture/PO review only. No PO decision was added, no schema or fixture was changed, and no implementation, pilot, release, or merge was authorized.
+
 ## 10. Remaining design questions before any schema proposal
 
 D-01 through D-08 have been approved at the documentation/design level. The following narrower details remain unresolved and must not be inferred by implementation:
