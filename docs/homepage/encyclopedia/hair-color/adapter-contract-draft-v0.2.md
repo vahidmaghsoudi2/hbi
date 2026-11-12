@@ -1012,3 +1012,44 @@ The following are intentionally not decided by this clarification:
 These questions must be resolved by their accountable architecture/engineering or PO authority as classified in Section 9.16. No new PO decision, state, event name, wire field, schema, fixture assertion, runtime behavior, or implementation permission is created here.
 
 No fixture, JSON Schema, runner, test, runtime interface, product behavior, or PO decision was changed. PR #535 remains Draft and unmerged; implementation, pilot, release, and merge remain unauthorized.
+
+### 9.18 Conceptual reference sequences — S11 question and S12 rejection (2026-11-12)
+
+**Status and notation:** the sequences below are design-level examples for reviewing ownership and invariants. They are not executable workflows, wire protocols, ledger schemas, event payloads, or approval of runtime behavior. “Record” means that the authoritative owner may preserve the corresponding fact; it does not prescribe a literal event name, field, identifier, ordering mechanism, or storage operation.
+
+#### S11 — client asks about an existing suggestion
+
+**Starting conditions:** an existing suggestion and its exact version are found in the authoritative ledger; its case/target context and material evidence references resolve; it is currently eligible for explanation. If any required relationship is missing, conflicting, stale, or ineligible, the Orchestrator withholds the old suggestion as a current answer and requests the appropriate fresh evaluation or clarification.
+
+| Order | Conceptual action | What may be recorded / relied upon | What must not change merely because of the question |
+|---|---|---|---|
+| 1 | Resolve the question against the current case and target context | The question belongs to the current interaction; authoritative case/target versions are read | No acceptance, rejection, execution consent, workflow transition, or performed step is inferred |
+| 2 | Resolve the referenced suggestion | The persistent suggestion identity, exact version, evaluation relationship, decision history, and material evidence dependencies are checked against their owners | The engine does not mint, reactivate, or redefine the suggestion or its status |
+| 3 | Check current eligibility for explanation | The Orchestrator establishes that the exact version remains eligible and that the evidence/context is still applicable | A previously displayed or accepted record is not automatically treated as currently eligible |
+| 4 | Provide an explanation | The interaction/question and any required audit fact may be preserved by their authoritative owner; explanatory content may be generated | No new suggestion version or evaluation run is created solely to answer the question; acceptance and execution consent remain unchanged |
+| 5 | Publish only if checks remain satisfied | The Orchestrator applies the current publication boundary | No workflow advancement or service authorization follows from the answer |
+
+**S11 invariant:** a question is an information request, not a decision. It must not be converted into acceptance, rejection, consent, a new evaluation, or a workflow transition. If the exact suggestion/version cannot be resolved and shown to be eligible against current authoritative context, do not echo it as the current suggestion.
+
+#### S12 — client rejects an exact suggestion version
+
+**Starting conditions:** the client is responding to a specific persistent suggestion/version. If the exact identity/version or its case/target context cannot be resolved unambiguously, do not guess which suggestion was rejected; retain the interaction for clarification under the applicable authority boundary.
+
+| Order | Conceptual action | What may be recorded / relied upon | What must not change merely because of rejection |
+|---|---|---|---|
+| 1 | Resolve the exact suggestion/version and its context | Authoritative ledger and case/target context identify the precise item | A similar shade, candidate, or newer version is not substituted |
+| 2 | Record the rejection as a decision fact | The authoritative decision ledger preserves that the exact suggestion/version was rejected, with its case/target relationship | Historical suggestion and decision records are not erased or rewritten |
+| 3 | Apply the active-option exclusion | The exact rejected suggestion/version is excluded from active options | Rejection does not force an engine state, consultation response state, workflow state, or service action |
+| 4 | Consider whether an independent alternative exists | Only a separate, fresh candidate evaluation under current data, evidence, and constraints can establish an independent option | Rejection alone does not mint a replacement, reuse a rejected candidate under a new label, or guarantee that an alternative exists |
+| 5 | Respond within the supported result | If no valid independent alternative is established, explain that no valid alternative is currently available | No fabricated option or automatic execution authorization is produced |
+
+**S12 invariant:** rejection is auditable and version-specific. The exact rejected version must not reappear as active. A genuinely independent alternative requires a fresh candidate evaluation; if none passes the constraints, do not invent one. The rejection itself does not prescribe a new engine or consultation response state.
+
+#### Shared unresolved delivery and ordering cases
+
+- A repeated intentional client action and duplicate delivery/retry of one logical action are not necessarily the same event. Their distinction, identity, idempotency/deduplication scope, and retention remain unresolved; do not infer them from these examples.
+- Event ordering, concurrent question/rejection handling, authenticated actor attribution, cross-store atomicity, and publication linearization remain open under Sections 9.12–9.17.
+- These examples do not define whether an explanatory interaction is always stored, nor its event name, payload, timestamp semantics, or delivery guarantee.
+- No fixture assertion, JSON Schema property, runner behavior, runtime field, state transition, PO policy, or implementation mechanism is added by this section.
+
+**Outcome:** S11 and S12 are now illustrated as separate conceptual sequences with explicit “may be recorded” and “must not change” boundaries. This improves reviewability only; it does not close the machine-traceability gaps or authorize implementation, pilot, release, or merge.
