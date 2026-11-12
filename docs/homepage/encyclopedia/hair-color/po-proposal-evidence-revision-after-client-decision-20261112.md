@@ -175,3 +175,45 @@ This review assesses the trade-offs visible from the current contract. It does n
 - The safety floor remains: do not present or act on dependent suggestions as currently supported when their material evidence is no longer applicable; preserve historical client decisions; do not infer acceptance, consent, or continuation permission.
 - The remaining choices are policy decisions for the Product Owner, informed by the already approved specialist role where the matter is technical/safety-related.
 - No fixture, schema, runner, test oracle, runtime behavior, PO register decision, or implementation authorization is created by this review.
+
+
+## 9. PO decision sheet — A–D (pending; no selections recorded)
+
+**How to use:** Select one option for each situation, or write a PO-authored alternative. Decisions are independent: selecting an option in one row does not decide another row. A blank decision cell means **PENDING**, not approval.
+
+| Situation | Option | Policy in brief | Main benefit | Main unresolved cost / dependency | PO decision |
+|---|---|---|---|---|---|
+| A — displayed; client decision pending | A1 | Withhold affected suggestion; fresh evaluation before another suggestion | Minimum safe non-reuse boundary | Client may not be told why the displayed suggestion is no longer current | PENDING |
+| A — displayed; client decision pending | A2 | A1 plus explicit client notice | Better transparency | Notice owner, timing, wording, and delivery record undefined | PENDING |
+| A — displayed; client decision pending | A3 | PO-authored alternative | Can address a different communication policy | Must preserve withholding of unsupported dependent output | PENDING |
+| B — accepted; no service; no execution consent | B1 | Preserve old acceptance as history; fresh evaluation and fresh decision for replacement | Keeps acceptance separate from consent and avoids transferring old approval | Client-facing explanation still needs definition | PENDING |
+| B — accepted; no service; no execution consent | B2 | B1 plus explicit notice of material evidence revision | More transparent about why the accepted suggestion is no longer current | Notice owner, timing, wording, and delivery record undefined | PENDING |
+| B — accepted; no service; no execution consent | B3 | PO-authored alternative | Allows a tailored policy | Must not let old acceptance validate evidence or authorize execution | PENDING |
+| C — consent recorded; no step performed | C1 | Hold affected step; fresh evaluation; renew consent only if suggestion/material service basis changes | Avoids repeated consent if the proposal is unchanged | Requires a defined materiality rule and accountable decision owner; neither exists | PENDING |
+| C — consent recorded; no step performed | C2 | Hold affected step; fresh evaluation; renew consent in every case | Clearer re-authorization boundary; no materiality test needed to decide renewal | Additional client friction, including unchanged proposals | PENDING |
+| C — consent recorded; no step performed | C3 | PO-authored alternative | Allows a tailored consent rule | Must not treat historical consent as evidence validation or proceed while evaluation is unresolved | PENDING |
+| D — one or more steps performed | D1 | Hold affected future steps; specialist review and fresh evaluation; separate remediation policy | Limits intervention to affected future work | Depends on reliable identification of affected vs independent steps | PENDING |
+| D — one or more steps performed | D2 | Broader stop-and-escalate policy for the case, including notice through separate review | More conservative containment when impact is uncertain or broad | May interrupt independent work; accountable owner and remediation policy still needed | PENDING |
+| D — one or more steps performed | D3 | PO-authored alternative | Allows a tailored operational policy | Must preserve performed-step history and must not infer continuation or rollback | PENDING |
+
+### Decisions that must be recorded separately from the option
+
+| Decision field | Required PO clarification | Current status |
+|---|---|---|
+| Materiality authority | Who determines whether an evidence revision is material, with what specialist/operational input? | OPEN |
+| Client notice | For A, B, C, and D separately: mandatory, optional, or governed by an existing communication policy? | OPEN |
+| Fresh acceptance | When must a client decide again about a replacement suggestion? | OPEN |
+| Renewed execution consent | For C and D, when is renewed explicit consent required? | OPEN |
+| Remaining service steps | Who can hold or authorize continuation of each affected future step? | OPEN |
+| Performed work / remediation | Which separately approved policy owner governs safety follow-up, remediation, compensation, or customer care? | OPEN |
+
+### Fixed constraints regardless of selection
+
+- A suggestion dependent on materially inapplicable evidence must not be presented as currently supported for a future publication or service step.
+- Historical acceptance, execution consent, specialist review, and performed work remain auditable; they are not silently erased or rewritten.
+- Acceptance is not execution consent. Neither acceptance nor consent makes evidence valid.
+- Unknown dependency impact is not proof of independence; retain the existing fail-closed boundary.
+- No automatic revocation, notification, reconfirmation, rollback, compensation, remediation, or continuation policy is created unless separately decided and specified.
+- No new state, identifier, field, event protocol, schema, fixture, test oracle, runtime behavior, or implementation permission is created by completing this decision sheet.
+
+**Decision status:** All rows PENDING. This sheet records questions for the Product Owner; it is not an approval form submitted or completed on the PO's behalf.
