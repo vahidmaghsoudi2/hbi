@@ -334,3 +334,17 @@ Adapter Contract Draft 0.2 Section 9.16 classifies the remaining S11–S13 trace
 - A wire-contract/schema proposal is a later, separate review gate. Approval of documentation or a schema proposal would not itself authorize implementation.
 
 This is a planning/traceability clarification only. It does not change D-01–D-08, add a PO decision, close any unresolved item, change fixtures/schema/runner/tests, or authorize runtime implementation, pilot, release, or merge. PR #535 remains Draft and unmerged.
+
+
+### 6.13 Decision-ledger identity and event semantics — cross-reference (2026-11-12)
+
+Adapter Contract Draft 0.2 Section 9.17 separates persistent suggestion identity, suggestion version, evaluation-run identity, and decision-event identity, and distinguishes question, rejection, acceptance, explicit execution consent, and workflow stop.
+
+The section records existing approved boundaries without creating a new PO decision:
+- S11 questions do not mutate acceptance or execution consent.
+- S12 rejection remains auditable and excludes the exact rejected suggestion/version from active options; it does not force a consultation state or authorize a replacement.
+- Acceptance remains distinct from explicit execution consent.
+- Stop/performed-step history remains under Workflow Engine authority.
+- Engine-local candidate content and echoed references cannot substitute for authoritative persistent identity or ledger history.
+
+Literal identifiers, event payloads, authentication, idempotency/deduplication, event ordering, retention, cross-store atomicity, expiry/revalidation, and post-consent evidence-change policy remain unresolved under Section 9.16. This cross-reference does not add a PO decision, close an open issue, change fixture/schema/runner/tests, or authorize implementation, pilot, release, or merge.
