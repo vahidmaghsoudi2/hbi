@@ -307,3 +307,17 @@ Adapter Contract Draft 0.2 Section 9.14 consolidates field-family ownership, pro
 - Exact product/evidence/safety registry deployments, authenticated event protocol, evidence dependency graph, idempotency key protocol, atomic compare-and-publish mechanism, and cross-source audit protocol remain proposed or unresolved as explicitly labeled.
 - The table introduces no runtime fields, enums, schema, database/API, fixture changes, tests, policy transitions, TTL, retry limit, or implementation mechanism. It does not change D-01–D-08 or grant implementation/pilot/release/merge authorization.
 - This is a documentation-only consolidation; no customer data, scientific evidence status, product behavior, fixture, schema, runner, or test changed.
+
+
+### 6.11 Proposed S11–S13 machine-traceability model — review only (2026-11-12)
+
+Adapter Contract Draft 0.2 Section 9.15 converts the previously identified gaps into a reviewable conceptual linkage proposal; it is not an approved wire schema.
+
+- **Shared relationship:** persistent suggestion identity/version must be traceable to authoritative case identity, case/target versions, the evaluation run, relevant decision-ledger history, and material evidence/dependency context. This is a conceptual tuple only; no literal field names or event schema are approved.
+- **S11:** before answering about an existing suggestion, Orchestrator resolves the authoritative suggestion/ledger relationship against current case/target context and verifies eligibility for display. Question/answer history remains separate from acceptance and execution consent.
+- **S12:** rejection must identify the exact persistent suggestion/version in its case/target context; the ledger preserves the historical rejection and excludes that exact version from active options. Any alternative requires a fresh candidate evaluation.
+- **S13:** the prior and new case/target versions must be distinguishable; dependency-based re-evaluation applies to affected outputs, while independent data is preserved. Prior acceptance, consent, specialist review, and suggestions do not automatically transfer.
+- **Future synthetic coverage:** S11 pre-display ledger eligibility; S12 exact-version before/after ledger state; S13 explicit prior/new case-target pair and dependency outcomes; cross-scenario mismatch/stale-reference rejection. No fixture or schema change was made.
+- **Still unresolved:** literal fields/nullability, ledger event/reference structure, run identity/correlation, dependency representation, eligibility vocabulary, publication-time version equality, expiry/revalidation, and atomic cross-authority publication. No TTL, automatic transition, notification, revocation, or retry rule is inferred.
+
+This proposal does not alter D-01–D-08 or the approved S12 rejection semantics. It grants no implementation, pilot, release, or merge authorization. Fixture, schema, runner, tests, and product behavior remain unchanged.
