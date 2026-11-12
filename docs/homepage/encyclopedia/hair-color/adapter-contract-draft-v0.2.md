@@ -433,6 +433,32 @@ D-01 through D-08 have been approved at the documentation/design level. The foll
 
 No remaining item may be silently decided by implementation.
 
+### 10.1 Static audit of runner assertion coverage — 2026-11-12
+
+A source-level comparison was made between the 15 fixture assertion lists and the runner's `KEY_ASSERTIONS` constant. The fixture bundle declares **48 assertions** across S01–S15. The runner explicitly requires **11 of them** as named guard assertions. For the remaining **37 assertions**, the current runner checks only that each fixture has a non-empty string array; it does not evaluate those assertion semantics.
+
+| Scenario | Assertions declared in fixture | Explicitly required by runner |
+|---|---:|---:|
+| S01 | 5 | 0 |
+| S02 | 3 | 0 |
+| S03 | 3 | 0 |
+| S04 | 3 | 0 |
+| S05 | 3 | 0 |
+| S06 | 3 | 0 |
+| S07 | 3 | 1 |
+| S08 | 3 | 0 |
+| S09 | 3 | 1 |
+| S10 | 2 | 0 |
+| S11 | 3 | 2 |
+| S12 | 3 | 1 |
+| S13 | 4 | 2 |
+| S14 | 4 | 2 |
+| S15 | 3 | 2 |
+
+This is an intentional boundary of the current contract-only validator, not a product-behavior test result. The runner's `CONTRACT_VALIDATION=PASS` confirms structural consistency and the selected guard assertions only. All 15 product-behavior scenarios remain `BLOCKED`; no assertion in this table is represented as having been executed against a product engine.
+
+The non-explicit assertions are retained as acceptance criteria for a future, separately authorized adapter/behavior test phase. This audit does not authorize expanding the runner into product logic, creating runtime schemas, or changing the fixture oracle. Any future decision to promote additional assertions into structural guard checks must remain contract-only and be reviewed against the exact scenario semantics first.
+
 ## 11. Definition of ready for PO review
 
 - [ ] Responsibility boundary approved.
