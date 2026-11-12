@@ -66,11 +66,14 @@ _RESPONSE_FIELDS = (
 
 # The contract explicitly excludes chemical execution instructions and
 # excludes the engine from changing authoritative client/workflow decisions.
-_FORBIDDEN_CHEMICAL_KEYS = frozenset({
+_FORBIDDEN_REQUEST_KEYS = frozenset({
     "chemical_instruction_allowed",
     "formula",
     "oxidant_percentage",
     "processing_time",
+})
+_FORBIDDEN_RESPONSE_KEYS = _FORBIDDEN_REQUEST_KEYS | frozenset({
+    "chemical_execution_instructions",
 })
 _FORBIDDEN_DECISION_KEYS = frozenset({
     "acceptance",
@@ -148,7 +151,7 @@ def validate_request(request: Mapping[str, Any]) -> None:
     if not isinstance(request["policy_context"], Mapping):
         raise AdapterContractError("policy_context must be an object")
 
-    forbidden = _has_forbidden_key(request, _FORBIDDEN_CHEMICAL_KEYS)
+    forbidden = _has_forbidden_key(request, _FORBIDDEN_REQUEST_KEYS)
     if forbidden is not None:
         raise AdapterContractError(f"request contains prohibited field: {forbidden}")
 
@@ -201,6 +204,18 @@ def validate_response(request: Mapping[str, Any], response: Mapping[str, Any]) -
     if any(not isinstance(ref, str) or not ref.strip() for ref in response["evidence_refs"]):
         raise AdapterContractError("evidence_refs must contain non-empty strings")
 
+    supplied_evidence_refs = {
+        item.get("evidence_ref")
+        for item in request["evidence_context"]
+        if isinstance(item, Mapping)
+        and isinstance(item.get("evidence_ref"), str)
+        and item.get("evidence_ref").strip()
+    }
+    if response["options"] and not response["evidence_refs"]:
+        raise AdapterContractError("candidate options require traceable evidence references")
+    if any(ref not in supplied_evidence_refs for ref in response["evidence_refs"]):
+        raise AdapterContractError("engine response references evidence absent from the request context")
+
     if not isinstance(response["next_step"], Mapping):
         raise AdapterContractError("next_step must be an object")
 
@@ -223,7 +238,7 @@ def validate_response(request: Mapping[str, Any], response: Mapping[str, Any]) -
     if blocking and response["options"]:
         raise AdapterContractError("a blocked consultation response cannot contain candidate options")
 
-    forbidden = _has_forbidden_key(response, _FORBIDDEN_CHEMICAL_KEYS | _FORBIDDEN_DECISION_KEYS)
+    forbidden = _has_forbidden_key(response, _FORBIDDEN_RESPONSE_KEYS | _FORBIDDEN_DECISION_KEYS)
     if forbidden is not None:
         raise AdapterContractError(f"engine response contains prohibited field: {forbidden}")
 
