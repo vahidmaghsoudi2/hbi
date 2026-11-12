@@ -554,6 +554,40 @@ The six evidence-status labels used by the hair-color README and D-07 were cross
 
 Do not infer status precedence, automatic transitions, expiry, or re-review timing from this audit. These require an explicit design proposal and, where they alter policy, PO decision. No evidence status was assigned or changed; no source was externally verified. No JSON, fixture, schema, runner, test, runtime interface, or product behavior changed.
 
+### 9.10 Static audit — evidence-status impact on dependent suggestions (2026-11-12)
+
+Scope: Sections 6–7 and 9.8–9.9, the README evidence-status definitions and dependency principles, and the S06/S13/S15 scenario oracles. Static documentation audit only; no evidence registry, dependency graph, ledger, publication gate, or engine was executed.
+
+**Confirmed boundaries**
+
+- A datum change invalidates only outputs that depend on that datum; unrelated outputs remain valid, subject to their own current version and validity checks.
+- A candidate without applicable, traceable evidence cannot be returned as an executable suggestion. Missing/invalid/expired/out-of-scope evidence for a material claim is a fail-closed condition for the affected run/output.
+- S06 requires withholding the suggestion or claim dependent on unavailable applicable knowledge. S13 requires fresh evaluation after a target change and rechecking dependent outputs. S15 suppresses output for the failed current run; it does not authorize reuse of a prior response as the current answer.
+- Evidence status is scoped to the claim and its applicable subject/conditions. A status change must not be treated as a blanket verdict on every claim in the same document or every suggestion in the case.
+
+**Impact interpretation for dependency-aware review (not a newly approved transition policy)**
+
+| Evidence finding for a material claim | Safe handling of a suggestion that depends on that claim |
+|---|---|
+| `VERIFIED_APPLICABLE` and still current for exact scope | May remain eligible for evaluation; this status alone does not approve the suggestion or bypass other gates |
+| `PARTIALLY_SUPPORTED` | Do not use the unsupported portion as a rule or execution basis; dependent operational suggestion must be withheld or freshly evaluated using only independently supported content |
+| `CONFLICTING` | Withhold the affected claim and dependent suggestion until the conflict is resolved |
+| `NOT_APPLICABLE` | Do not apply that source to the claim; dependent suggestion requires other independently applicable evidence or must be withheld |
+| `UNVERIFIED` | Do not rely on the source; withhold dependent output pending verification or another applicable source |
+| `OUTDATED` | Do not rely on the source as current; dependent output requires current applicable evidence or must be withheld |
+
+These rows describe conservative consequences of the existing evidence and fail-closed rules. They do not define automatic status transitions, precedence among sources, or an approved status-change event protocol.
+
+**Traceability gaps**
+
+1. No normative dependency graph or reference tuple connects a claim/rule to its evidence record, candidate, persistent suggestion/version, case/target version, and evaluation run.
+2. No rule defines how to compute the affected-output set when one evidence record supports multiple claims or one suggestion depends on multiple sources/claims.
+3. No protocol defines when a status revision becomes authoritative, how the Orchestrator detects it, or how a change is synchronized with the publication-time version gate.
+4. No policy defines treatment of already displayed or client-accepted suggestions after later evidence revision: historical ledger/audit retention is distinct from eligibility for future display, but the exact revalidation/event semantics remain open.
+5. No status-transition, precedence, TTL, automatic expiry, or review-cadence policy is approved. Do not infer one from the table above.
+
+**Conclusion:** the current contract supports dependency-aware withholding in principle, but does not yet prove which exact suggestions are affected by a particular evidence-status change. Treat the table as a conservative interpretation of existing approved boundaries, not as an implementation-ready dependency algorithm. No evidence status was assigned or changed; no external source was verified. No JSON, fixture, schema, runner, test, runtime interface, or product behavior changed.
+
 ## 10. Remaining design questions before any schema proposal
 
 D-01 through D-08 have been approved at the documentation/design level. The following narrower details remain unresolved and must not be inferred by implementation:
