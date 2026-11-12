@@ -370,3 +370,17 @@ Adapter Contract Draft 0.2 Section 9.19 records the assertion-coverage audit and
 - Unit tests exercise omission of every declared assertion and duplicate-entry rejection.
 - This strengthens manifest/oracle integrity only. It does not execute product behavior, establish that assertions are scientifically or operationally true, or close S11–S13 identity/ledger/version/publication gaps.
 - No PO decision, product runtime, adapter, engine, API, DB, UI, real-customer data, catalogue, scientific evidence status, or product behavior changed. All 15 product-behavior scenarios remain BLOCKED; no implementation, pilot, release, or merge authorization is created.
+
+
+### 6.16 S13 target-change reference sequence — cross-reference (2026-11-12)
+
+Adapter Contract Draft 0.2 Section 9.20 records a conceptual sequence for target changes and prior/new version lineage:
+
+- Resolve the authoritative prior case/target context and the explicit changed goal; do not infer either from response text or a run-local candidate.
+- Preserve a traceable prior/new case-target relationship; unresolved or mismatched lineage blocks dependent output from being treated as current.
+- Re-evaluate affected dependencies and preserve independent data only where independence is established by authoritative dependency information. Unknown impact is not proof of independence.
+- Keep prior-target suggestions and delayed prior-run responses historical; they cannot be reused as current for the new target.
+- Prior acceptance, explicit execution consent, specialist review, and suggestion eligibility do not automatically transfer; historical decisions remain auditable.
+- The section supplies future negative-test objectives but does not modify the S13 fixture, its four assertions, schema, runner, or tests. It does not define version IDs, dependency fields, events, ordering, atomic publication, notification, reconfirmation, rollback, or remediation.
+
+This is a conceptual clarification of existing S13/PO boundaries, not a new PO decision or wire contract. No implementation, pilot, release, or merge authorization is created.
