@@ -205,6 +205,16 @@ Cross-document comparison found the six README/D-07 evidence statuses semantical
 
 Open details, not settled by this audit: status granularity (source vs source–claim vs product/market/version assessment); independent treatment of multiple claims/passages in one document; versioning and propagation of status changes/review/conflicts/supersession; and coexistence of different statuses across scopes. No precedence, automatic transition, expiry, or review timing is inferred. No evidence status was assigned or changed, and no source was externally verified. No fixture/schema/runner/runtime or PO policy decision changed. See Adapter Contract Draft 0.2, Section 9.9.
 
+### 6.6 Static audit — evidence-status impact on dependent suggestions (2026-11-12)
+
+The current approved boundaries establish dependency-aware withholding but do not yet define a complete evidence-to-suggestion dependency protocol.
+
+Confirmed: a changed datum invalidates only dependent outputs; material claims without applicable traceable evidence cannot support an executable suggestion; S06 withholds knowledge-dependent output; S13 requires fresh evaluation and dependent-output rechecking after target change; S15 suppresses failed-run and stale output. Evidence status must be evaluated at claim/scope level, not blanket-applied to every claim in a document or every suggestion in a case.
+
+Conservative impact interpretation: `VERIFIED_APPLICABLE` may enter evaluation but does not approve a suggestion by itself; `PARTIALLY_SUPPORTED` cannot support unsupported portions or an operational rule; `CONFLICTING`, `NOT_APPLICABLE`, `UNVERIFIED`, and `OUTDATED` cannot support the affected claim, so dependent suggestions must be withheld unless other independently applicable evidence supports a fresh evaluation. This is an interpretation of existing boundaries, not a newly approved transition policy.
+
+Open protocol details: normative claim→evidence→candidate→suggestion/version→case/target/run linkage; affected-output computation for shared or multi-source dependencies; authoritative status-revision detection and synchronization with publication gate; revalidation and event handling for already displayed/accepted suggestions; and status transition/precedence/expiry policy. No graph, field, automatic transition, TTL, or review cadence is approved or inferred. No source/status was changed or externally verified; no fixtures/schema/runner/tests/runtime or PO decision changed. See Adapter Contract Draft 0.2, Section 9.10.
+
 ## 8. PO review queue — decision items, not implementation blockers to duplicate
 
 | ID | Recommended disposition | Why |
