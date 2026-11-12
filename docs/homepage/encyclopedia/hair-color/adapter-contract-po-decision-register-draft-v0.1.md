@@ -384,3 +384,14 @@ Adapter Contract Draft 0.2 Section 9.20 records a conceptual sequence for target
 - The section supplies future negative-test objectives but does not modify the S13 fixture, its four assertions, schema, runner, or tests. It does not define version IDs, dependency fields, events, ordering, atomic publication, notification, reconfirmation, rollback, or remediation.
 
 This is a conceptual clarification of existing S13/PO boundaries, not a new PO decision or wire contract. No implementation, pilot, release, or merge authorization is created.
+
+### 6.17 Claim-to-candidate evidence chain — conceptual cross-reference (2026-11-12)
+
+Adapter Contract Draft 0.2 Section 9.21 clarifies the review chain from a bounded material claim, to its exact supporting evidence passage, to the reviewed rule within that evidence scope, and then to the candidate component/rationale that depends on the rule.
+
+- A source reference or document-level status alone does not prove that a particular claim is supported.
+- VERIFIED_APPLICABLE supports a rule only within its exact reviewed scope. PARTIALLY_SUPPORTED remains limited to non-prescriptive explanation of the supported portion; it does not activate an operational rule.
+- A candidate with an unresolved material dependency is not presumed independent. If a supported component cannot be separated from an unsupported dependency, withhold the candidate.
+- The clarification does not define fields, identifiers, graph representation, multi-source aggregation, status-change propagation, fixture assertions, or publication mechanics. Those remain open under Adapter Contract Sections 9.9, 9.10, and 9.14–9.16.
+
+This is not a new PO decision, evidence approval, wire contract, or implementation authorization. No fixture, schema, runner, test, runtime, product behavior, pilot, release, or merge authorization changed.
