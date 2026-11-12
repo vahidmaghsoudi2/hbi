@@ -2,7 +2,7 @@ name: HBI Pilot Browser Proof
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [master, docs/hair-color-conceptual-architecture-scenarios-20261102]
   workflow_dispatch:
 
 permissions:

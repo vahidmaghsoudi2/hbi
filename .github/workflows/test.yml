@@ -2,9 +2,9 @@ name: HBI CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [master, docs/hair-color-conceptual-architecture-scenarios-20261102]
   pull_request:
-    branches: [ master ]
+    branches: [master, docs/hair-color-conceptual-architecture-scenarios-20261102]
 
 jobs:
   test:
