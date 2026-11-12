@@ -140,7 +140,7 @@ These are diagnostic/reason codes, not additional consultation states. `DATA_GAP
 - Only valid options that pass all hard constraints may be ranked.
 - If three valid options exist, no more than three are returned; if only one is valid, return exactly one; never invent options to fill a quota.
 - Ranking must not depend on input array order.
-- Each option has a stable suggestion identifier and evaluated target/case version.
+- Each candidate option is bound to the evaluated target/case version. The engine may return candidate content and a request-local candidate key, but it cannot mint or assert an authoritative suggestion_ref, suggestion history, or active/rejected status. The Orchestrator/Case Store assigns the persistent suggestion identifier and records the candidate only after validation. For an explanatory question such as S11, any referenced existing suggestion must be resolved from the authoritative ledger; the engine cannot create or reactivate it.
 - Rejected suggestions are filtered using the authoritative suggestion ledger, not by trusting the engine to remember rejections.
 - A question does not change acceptance or execution consent.
 - Acceptance of a suggestion is not execution consent.
@@ -447,3 +447,47 @@ This draft does not authorize:
 - merging PR #535.
 
 PO approval is required before the next implementation phase.
+
+## 13. Field ownership and traceability matrix (design control)
+
+This matrix makes the trust boundary explicit. It is a documentation control only; it does not define a runtime schema or authorize implementation.
+
+| Field / data group | Authoritative owner | Engine/Adapter permission | Validation and publication rule |
+|---|---|---|---|
+| `contract_version` | Adapter contract registry / Orchestrator configuration | Read only | Reject unsupported versions; never infer or silently upgrade |
+| `request_id`, `operation` | Orchestrator | Read only | Validate format and allowed operation; retries retain the same idempotency identity |
+| `case_ref`, `case_version`, `target_version` | Case Store | Read only | Must match the authoritative snapshot at request and publication time |
+| `case_context` and datum values | Case Store / originating record owner | Read only, minimum necessary subset | Preserve each datum's knowledge state, source, record reference, and timestamp; no model-generated overwrite |
+| `question` | Client interaction captured by Orchestrator | Interpret and answer; no decision mutation | A question event may be recorded by Orchestrator; it cannot mutate acceptance or consent |
+| Prior suggestions, rejection, acceptance, execution consent | Case Store / Audit Log | Read-only context; no creation or mutation | Resolve active/rejected status from ledger; reject forged, stale, or mismatched references |
+| Workflow state, stop events, performed steps | Workflow Engine / Audit Log | Read-only context; no transition or event authoring | Only Workflow Engine records stop/transition/performed-step events; restart requires fresh evaluation |
+| `evidence_context`, evidence status and scope | Evidence Registry / approved evidence record | Retrieve/reference only | Resolve immutable evidence refs; exact claim, product identity, market, version, passage, scope, review status, and validity must match |
+| `policy_context`, policy version | Policy Registry / Orchestrator | Read only | Apply only the policy version attached to the request; unsupported policy version fails closed |
+| `engine_state`, `consultation_status` | Engine proposes; Adapter validates against PO-approved enums | Candidate output only | Validate enum membership, state compatibility, and reasons; do not treat as case/workflow state |
+| `reason_codes` | Engine proposes from controlled registry; Adapter validates | Candidate output only | Reject unknown codes; keep diagnostic reasons separate from state enums |
+| `summary`, limitations, explanation | Engine drafts; Orchestrator owns publication | Draft text only | Validate against evidence, scope, safety, and prohibited-instruction rules before display |
+| Candidate option content and rationale | Engine proposes; Orchestrator validates | Candidate only | Every material claim needs applicable evidence; hard constraints precede ranking; no unsupported substitute |
+| Persistent `suggestion_ref`, version, active/rejected status | Orchestrator / Case Store | Engine cannot mint or assert | Assign and record only after validation; existing references must resolve through the authoritative ledger |
+| `missing_information` | Engine proposes; Orchestrator validates against case schema | Candidate list only | Request only material missing fields; do not ask again for known, irrelevant, or already-resolved data |
+| `next_step` | Orchestrator / Workflow Engine | Engine may suggest a bounded action type | Validate against allowed action registry and current workflow; only owner performs the action |
+| Adapter failure code, stage, retryability, correlation reference | Adapter / Orchestrator | Engine error may be diagnostic input | Adapter constructs the failure envelope; retryability follows versioned policy, never model discretion |
+| Output suppression / stale-output decision | Orchestrator, using Case Store version | No engine authority | Recheck current version immediately before publication; suppress stale or failed-run output |
+
+### 13.1 Mandatory provenance rule
+
+A datum or evidence reference is not decision-grade merely because a model supplies a confidence value. Free-form model confidence is not a source, measurement, validation status, or substitute for provenance. A confidence field may be used only when its measurement method, calibration, scope, and owner are explicitly defined. Otherwise omit it.
+
+For product-specific claims, the evidence registry must resolve the exact brand, line/series, product/shade, market, document revision, and applicable passage. A brand or shade code alone is not an identity match.
+
+### 13.2 Publication-time ownership check
+
+Before any candidate is shown, the Orchestrator must re-resolve the authoritative case/target versions, suggestion ledger, rejection state, workflow stop state, and evidence validity. If any relevant authority changed since evaluation, suppress the candidate and require a fresh evaluation or controlled revalidation. The engine response itself is never the source of truth for these records.
+
+### 13.3 Mapping caveat — fixture oracle is not a wire-state decision
+
+The S01–S15 manifest values remain the acceptance-test oracle. They do not prove a one-to-one mapping to the four engine states or five consultation response states. In particular:
+
+- S06 is a knowledge/evidence gap, not a client-data gap. `KNOWLEDGE_GAP` must remain the reason code. `OUT_OF_V1_SCOPE` is permissible only if the specific requested claim/action is formally outside V1; otherwise the current five response labels do not express this outcome cleanly and PO must decide the presentation mapping.
+- S08 is a documented-constraint/no-valid-alternative fixture. Do not label it `OUT_OF_V1_SCOPE` merely because no valid option exists; the requested goal may still be within the hair-color domain. Preserve `NOT_FEASIBLE_OR_UNVERIFIED` as the fixture oracle and defer response-state mapping to PO.
+- S12 is a rejection event and ledger transition, not inherently a request for more information. `NEEDS_MORE_INFORMATION` is not a default mapping. If a valid independent alternative exists, a fresh candidate may be evaluated; if none exists, the response-state mapping remains a PO decision rather than being inferred from the rejection event.
+- S13–S15 remain version/workflow/failure boundary events; they are not forced into consultation response states.
