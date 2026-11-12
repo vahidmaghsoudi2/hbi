@@ -28,13 +28,21 @@ REQUIRED = (
     "forbidden", "assertions", "severity_on_violation",
 )
 KEY_ASSERTIONS = {
-    "S07": ("safety_stop_blocks_options",),
-    "S09": ("ranking_stable_under_input_permutation",),
-    "S11": ("acceptance_snapshot_unchanged", "execution_consent_snapshot_unchanged"),
-    "S12": ("rejected_suggestion_absent_from_active_list",),
-    "S13": ("new_version_created", "prior_acceptance_and_consent_not_carried"),
-    "S14": ("resume_blocked", "uncompleted_steps_remain_uncompleted"),
-    "S15": ("engine_failure_classified", "stale_output_suppressed"),
+    "S01": ("all_required_case_fields_present", "no_unresolved_safety_stop", "suggestion_has_traceable_rationale", "acceptance_unchanged", "execution_consent_unchanged"),
+    "S02": ("only_material_missing_field_requested", "dependent_output_withheld", "case_waits_for_information"),
+    "S03": ("both_values_preserved", "both_sources_preserved", "dependent_decision_withheld"),
+    "S04": ("image_scope_limited", "no_hidden_trait_inference", "no_executable_suggestion"),
+    "S05": ("identity_gap_detected", "market_and_line_requested", "no_product_specific_output"),
+    "S06": ("knowledge_gap_distinguished_from_data_gap", "mock_evidence_rejected", "dependent_output_withheld"),
+    "S07": ("safety_stop_blocks_options", "no_execution_suggestion", "stop_reason_traceable"),
+    "S08": ("constraint_has_applicable_support_or_is_marked_unverified", "no_unsupported_alternative", "limitation_explained"),
+    "S09": ("exactly_two_options_shown", "hard_constraints_applied_first", "ranking_stable_under_input_permutation"),
+    "S10": ("exactly_one_option_shown", "rejected_options_not_active"),
+    "S11": ("acceptance_snapshot_unchanged", "execution_consent_snapshot_unchanged", "question_event_recorded"),
+    "S12": ("rejection_traceable", "rejected_suggestion_absent_from_active_list", "replacement_requires_independent_validity"),
+    "S13": ("new_version_created", "dependent_outputs_rechecked", "independent_data_preserved", "prior_acceptance_and_consent_not_carried"),
+    "S14": ("stop_event_recorded", "completed_steps_accurate", "uncompleted_steps_remain_uncompleted", "resume_blocked"),
+    "S15": ("engine_failure_classified", "stale_output_suppressed", "run_id_and_failure_stage_logged"),
 }
 PERSONAL_KEY = re.compile(
     r"(customer_name|client_name|phone_number|email_address|real_client_id|"
@@ -129,6 +137,9 @@ def validate_manifest(manifest: dict[str, Any]) -> list[str]:
             value = item.get(field)
             if not isinstance(value, list) or not value or any(not isinstance(x, str) or not x.strip() for x in value):
                 errors.append(f"{label}.{field} must be a non-empty string array")
+        assertions = item.get("assertions")
+        if isinstance(assertions, list) and len(assertions) != len(set(assertions)):
+            errors.append(f"{label}.assertions contains duplicate entries")
         if item.get("severity_on_violation") not in ("C0", "C1"):
             errors.append(f"{label}.severity_on_violation must be C0 or C1")
 
