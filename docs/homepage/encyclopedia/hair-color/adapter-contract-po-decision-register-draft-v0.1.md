@@ -296,3 +296,14 @@ These approvals resolve the S06, S08, and S12 presentation/ledger decisions. D-0
 ## 10. Explicit stop line
 
 This register does not authorize runtime JSON Schema changes, adapter stub, engine integration, product behavior, chemical instructions, customer-data processing in cloud, catalogue changes, pilot, release, or PR merge. Those remain outside the current authorized scope.
+
+
+### 6.10 Consolidated field ownership and traceability matrix (2026-11-12)
+
+Adapter Contract Draft 0.2 Section 9.14 consolidates field-family ownership, producer/transport boundaries, validation authority, and missing/conflict/stale handling.
+
+- The matrix explicitly separates source-of-truth ownership from data entry, transport, echo, validation, and publication.
+- Confirmed conceptual boundaries include: Case Store/Orchestrator for case identity and versions; trusted policy source for `accepted_sources`; authoritative evidence source for evidence identity/scope/status; Orchestrator/Case Store/decision ledger for persistent suggestion identity and client decision history; Workflow Engine for stop/restart and performed-step history; Adapter/observability for failure envelope/telemetry; and Orchestrator for publication outcome.
+- Exact product/evidence/safety registry deployments, authenticated event protocol, evidence dependency graph, idempotency key protocol, atomic compare-and-publish mechanism, and cross-source audit protocol remain proposed or unresolved as explicitly labeled.
+- The table introduces no runtime fields, enums, schema, database/API, fixture changes, tests, policy transitions, TTL, retry limit, or implementation mechanism. It does not change D-01–D-08 or grant implementation/pilot/release/merge authorization.
+- This is a documentation-only consolidation; no customer data, scientific evidence status, product behavior, fixture, schema, runner, or test changed.
