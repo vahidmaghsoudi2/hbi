@@ -1,3 +1,7 @@
+> **HISTORICAL SNAPSHOT — NOT CURRENT EXECUTION STATUS (2026-10-13).** Last reconciled 2026-09-07. The baseline, phase labels, and “PR #33 as next action” below are historical and must not be treated as current authorization. Current master is cc7848e472b837746e99103ea94ff4bb28eb0c2b; the approved Skin Product Intake contract is docs/architecture/SKIN_PRODUCT_INTAKE_EXECUTION_CONTRACT_v1.1.md; current mission/gap status is in Issues #283 and #278. Original content is retained for traceability. This warning is proposed on a draft branch only; it has not changed master.
+
+---
+
 # PRODUCT INTAKE — LIVE PROJECT LEDGER
 
 **Project:** HBI — Health & Beauty Intelligence  
