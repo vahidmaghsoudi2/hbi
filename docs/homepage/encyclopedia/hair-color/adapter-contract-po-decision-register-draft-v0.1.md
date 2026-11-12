@@ -84,9 +84,9 @@ The following mapping is a recommended interpretation, not a new test oracle:
 | S03 | `DATA_CONFLICT` | `NEEDS_MORE_INFORMATION` | `NEEDS_INFORMATION_OR_TEST` | Conflicting sources need resolution |
 | S04 | `INSUFFICIENT_DATA` | `NEEDS_MORE_INFORMATION` | `NEEDS_INFORMATION_OR_TEST` | Image-only input cannot establish hidden facts |
 | S05 | `PRODUCT_IDENTITY_UNRESOLVED` | `NEEDS_MORE_INFORMATION` | `NEEDS_INFORMATION_OR_TEST` | Exact product identity/scope absent |
-| S06 | `KNOWLEDGE_GAP` | `STOP_OR_REFER_WITH_REASON` (provisional) | **PO decision required** | Knowledge/evidence gap; withhold dependent output. Do not force `OUT_OF_V1_SCOPE` unless the requested claim/action is formally outside V1 |
+| S06 | `KNOWLEDGE_GAP` | `STOP_OR_REFER_WITH_REASON` (provisional) | **Client-facing handling approved; wire mapping pending** | State that applicable reliable evidence is unavailable and withhold dependent output. Do not force `OUT_OF_V1_SCOPE` unless the requested claim/action is formally outside V1 |
 | S07 | `SAFETY_STOP` | `STOP_OR_REFER_WITH_REASON` | `SAFETY_STOP_NO_EXECUTION_SUGGESTION` | Safety gate blocks options |
-| S08 | `NOT_FEASIBLE_OR_UNVERIFIED` | `STOP_OR_REFER_WITH_REASON` (provisional) | **PO decision required** | No valid alternative under the documented constraint; lack of a valid option does not itself mean the goal is outside V1 |
+| S08 | `NOT_FEASIBLE_OR_UNVERIFIED` | `STOP_OR_REFER_WITH_REASON` (provisional) | **Client-facing handling approved; wire mapping pending** | State that no valid option exists under documented constraints and explain the supported reason; lack of a valid option does not itself mean the goal is outside V1 |
 | S09 | `TWO_VALID_OPTIONS` | `SUGGESTION_REVIEWABLE` | `SYSTEM_REASONED_SUGGESTION` | Two options pass hard constraints |
 | S10 | `ONE_VALID_OPTION` | `SUGGESTION_REVIEWABLE` | `SYSTEM_REASONED_SUGGESTION` | Exactly one option passes |
 | S11 | `QUESTION_ANSWERED_DECISION_UNCHANGED` | `SUGGESTION_REVIEWABLE` | `SYSTEM_REASONED_SUGGESTION` | Explain existing suggestion; decision ledger unchanged |
