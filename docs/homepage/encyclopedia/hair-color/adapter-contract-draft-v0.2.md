@@ -874,3 +874,44 @@ The S01–S15 manifest values remain the acceptance-test oracle. They do not pro
 4. The exact product/evidence registry, safety-record service, authenticated event protocol, dependency graph, idempotency protocol, atomic publication mechanism, and cross-source audit protocol remain unresolved where marked above.
 5. No new JSON property, enum, wire state, database table, API, runtime schema, fixture assertion, test, policy transition, TTL, retry limit, or implementation mechanism is introduced or approved by this matrix.
 6. No customer data, product chemistry, scientific evidence status, 88-color catalogue entry, fixture, schema, runner, or product behavior was changed. This section is a documentation-only traceability aid and does not authorize implementation, pilot, release, or merge.
+
+
+### 9.15 Proposed S11–S13 traceability model — review only (2026-11-12)
+
+**Status: proposed documentation model; not an approved wire contract or implementation specification.** This section makes the missing relationships explicit without introducing JSON properties, enums, ledger events, expiry rules, or runtime behavior. The terms below describe the minimum conceptual references that a future machine-readable contract would need to bind. Their final representation, requiredness, and validation protocol remain subject to separate design review and PO approval where policy is affected.
+
+#### A. Shared suggestion-to-case relationship
+
+A persistent suggestion must be traceable, as one coherent relationship, to:
+
+1. the authoritative case identity;
+2. the case version and target version evaluated;
+3. the persistent suggestion identity and its own version;
+4. the evaluation-run identity that produced the candidate;
+5. the authoritative decision-ledger history relevant to that exact suggestion/version (including acceptance or rejection, where present); and
+6. the material evidence/dependency context used to assess that candidate, where applicable.
+
+This is a conceptual reference tuple, not a proposed literal field list. The Case Store/Orchestrator remains authoritative for case and target versions; the authoritative ledger remains authoritative for persistent suggestion identity and decision status; the evaluation system owns only its run-local output; and the evidence authority owns evidence records and status. No component may substitute its own echo for another authority's record.
+
+#### B. S11 — question about an existing suggestion
+
+Before answering a question about an existing suggestion, the Orchestrator must resolve the suggestion relationship against the authoritative ledger and current case/target context. The suggestion may be referenced as current only if its identity/version belongs to the relevant case/target version and the ledger confirms it is eligible for display (not rejected or otherwise superseded under an already approved rule). The question and answer are separate interaction history; neither changes acceptance, rejection, or execution consent. If the authoritative relationship or status cannot be resolved, do not present the suggestion as currently active; explain the limitation or request the necessary review. The exact wire representation and any additional eligibility statuses remain unresolved.
+
+#### C. S12 — rejection of an exact suggestion version
+
+The rejection record must unambiguously identify the exact persistent suggestion and suggestion version, with enough authoritative case/target context to prevent a rejection from being applied to a different version or case. The ledger must preserve the rejection as historical decision evidence and exclude that exact suggestion/version from active options. A fresh alternative, if any, is a new candidate evaluation; it must not reuse the rejected suggestion as though it were active. The before/after ledger lookup and the precise event/reference representation are design requirements for future fixtures, not fields approved here. This section does not prescribe a new event name, ledger schema, or automatic transition.
+
+#### D. S13 — target change and version pair
+
+A target change must be traceable from the authoritative prior case/target version to the new case/target version created for the changed goal. The relationship must make it possible to distinguish: (a) the prior evaluated version; (b) the new target and its corresponding version; (c) dependent outputs requiring fresh evaluation; and (d) independent data/outputs that remain valid under existing dependency rules. Acceptance, execution consent, specialist review, and suggestions from the prior version do not automatically transfer to the new version. The exact version-generation mechanism and the required representation of the prior/new pair remain unresolved; no new version field or numbering algorithm is approved here.
+
+#### E. Required future fixture coverage — not added in this revision
+
+- **S11:** a synthetic existing suggestion is linked to a specific case/target version and evaluation run; ledger eligibility is checked immediately before display; a question/answer event leaves acceptance and execution consent unchanged.
+- **S12:** a synthetic suggestion identity/version is resolved before rejection; the exact same identity/version is rejected; a subsequent active-options lookup excludes it while the historical rejection remains traceable.
+- **S13:** synthetic prior and new case/target versions are explicit; the goal change creates a fresh evaluation boundary; dependent outputs are re-evaluated, independent data remains unchanged, and prior acceptance/consent/review are not carried forward.
+- **Cross-scenario:** references that disagree on case, target, suggestion, or evaluation version are treated as unresolved/stale and cannot be repaired by inference.
+
+#### F. Explicit unresolved decisions and exclusions
+
+The following remain open: literal field names and nullability; ledger reference/event structure; evaluation-run identity and correlation scope; dependency-link representation; exact status/eligibility vocabulary; how version equality is checked at publication; time-based expiry and revalidation; and the atomicity/linearization mechanism across authorities. No TTL, expiry date, automatic revalidation, notification, reconfirmation, revocation, retry policy, or new workflow/response/engine state is introduced. Fixture JSON, JSON Schema, runner, tests, runtime, product behavior, and PO decisions are unchanged. This proposal does not authorize adapter implementation, engine integration, pilot, release, or merge.
