@@ -588,6 +588,40 @@ These rows describe conservative consequences of the existing evidence and fail-
 
 **Conclusion:** the current contract supports dependency-aware withholding in principle, but does not yet prove which exact suggestions are affected by a particular evidence-status change. Treat the table as a conservative interpretation of existing approved boundaries, not as an implementation-ready dependency algorithm. No evidence status was assigned or changed; no external source was verified. No JSON, fixture, schema, runner, test, runtime interface, or product behavior changed.
 
+### 9.11 Static audit — evidence validity against client decisions and workflow events (2026-11-12)
+
+Scope: contract Sections 2–7 and 9.8–9.10, the approved S06/S08/S12 decisions, README S01/S06/S07/S11–S14 scenarios, and the synthetic S11–S14 fixture oracles. Documentation-only consistency audit; no client ledger, workflow engine, evidence registry, or product runtime was executed.
+
+**Confirmed invariants**
+
+- A client question is not acceptance, rejection, execution consent, or a workflow transition. Answering S11 must leave the authoritative acceptance and execution-consent records unchanged.
+- Acceptance of a suggestion is not execution consent; neither event proves that service steps were performed.
+- Explicit rejection remains an auditable event for the exact suggestion/version, which must not return as an active option. An independent alternative requires a fresh candidate evaluation.
+- A client stop is a separate workflow event. It blocks automatic continuation; only actually performed steps remain recorded as performed. A restart request requires a fresh evaluation using the current case, goal, safety information, rules, and evidence.
+- A new target/case version does not inherit prior acceptance, execution consent, or specialist review.
+- A suggestion or material claim without currently applicable, traceable evidence cannot be made publishable merely because the client previously accepted it or consented to a service. Evidence availability likewise does not create consent or authorize execution.
+
+**Cross-event consistency findings**
+
+1. **Question (S11):** explanatory text may be returned only after the existing suggestion and its material evidence dependencies are re-resolved. The question itself must not change acceptance, rejection, consent, or workflow state. The fixture does not yet assert evidence-currentness and ledger-currentness together at the exact publication point.
+2. **Acceptance / execution consent:** these remain distinct authoritative events and must not be inferred, rewritten, or silently carried to a new version. If a material evidence dependency is found invalid, conflicting, unverified, not applicable, or outdated before a pending service step, the dependent suggestion/output must not be treated as currently supported. The contract does not yet define whether/how the prior acceptance or consent is suspended, re-confirmed, superseded, or otherwise represented in the ledger. Do not silently erase or revoke historical client events.
+3. **Rejection (S12):** evidence-status changes do not authorize reactivation of the exact rejected suggestion/version. A fresh independent candidate may be evaluated only under current evidence and constraints. The machine fixture still lacks structured evidence-dependency and ledger references to prove this interaction.
+4. **Stop / restart (S14):** a stop remains authoritative and automatic resume remains prohibited. Any later restart is a fresh evaluation against current evidence; an old accepted suggestion, old evidence snapshot, or old consent must not be assumed to authorize the new run. The fixture does not assert that the restart evaluation re-resolves evidence-status revisions and suggestion history.
+5. **Already performed steps:** the record of steps actually performed is historical workflow evidence, not a reason to publish an unsupported future recommendation. This audit does not define rollback, remediation, or retrospective service policy.
+
+**Unresolved protocol and policy questions**
+
+- How is an evidence-status revision ordered against acceptance, execution consent, stop, and publication events? No event-ordering or atomic transaction protocol is specified.
+- When evidence changes but case/target versions do not, what authoritative event or version boundary makes affected suggestions stale and forces re-evaluation?
+- What exact ledger representation preserves historical acceptance/consent while preventing them from authorizing a suggestion whose material evidence is no longer applicable?
+- Does the client need to be notified or asked to reconfirm after re-evaluation? No notification, re-consent, or revocation policy is approved here.
+- How are already displayed, accepted, consented, or partially performed workflows handled when a later evidence revision is discovered? Only future unsupported publication must be withheld under existing fail-closed principles; remediation policy remains outside this audit.
+- Fixture-level proof is missing for the combined sequences: evidence status changes after acceptance but before execution; rejection followed by evidence revision; stop followed by restart after evidence revision; and client question after a material evidence reference becomes invalid.
+
+**Conclusion:** the existing decision and workflow boundaries are mutually compatible, but they do not yet specify event ordering and ledger semantics when evidence validity changes after a client decision. Preserve client events as historical records; do not infer that those events validate evidence or authorize an unsupported current suggestion. Do not invent automatic revocation, notification, re-consent, rollback, TTL, or a new workflow state.
+
+No PO decision was added or changed. No fixture, schema, runner, test, runtime interface, product behavior, evidence status, or client record was changed. See PO Decision Register Section 6.7 and README current-status note.
+
 ## 10. Remaining design questions before any schema proposal
 
 D-01 through D-08 have been approved at the documentation/design level. The following narrower details remain unresolved and must not be inferred by implementation:
