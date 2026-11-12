@@ -287,6 +287,19 @@ def test_chemical_execution_fields_are_rejected_recursively():
         run(request(), unsafe)
 
 
+
+def test_candidate_requires_evidence_refs_bound_to_the_request_context():
+    with pytest.raises(AdapterContractError, match="require traceable evidence"):
+        run(request(), response(evidence_refs=[]))
+    with pytest.raises(AdapterContractError, match="absent from the request context"):
+        run(request(), response(evidence_refs=["EVIDENCE-NOT-SUPPLIED"]))
+
+
+def test_engine_cannot_emit_chemical_execution_instruction_payload():
+    unsafe = response(chemical_execution_instructions="synthetic instruction")
+    with pytest.raises(AdapterContractError, match="prohibited field"):
+        run(request(), unsafe)
+
 def test_adapter_does_not_mutate_or_expose_engine_owned_mutable_objects():
     engine_output = response()
     result = run(request(), engine_output)
