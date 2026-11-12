@@ -365,6 +365,379 @@
 - **تکرارپذیری:** آزمون‌های قطعی با ورودی و نسخهٔ یکسان باید وضعیت، گزینه‌های معتبر و تغییرات پروندهٔ یکسان بدهند. تفاوت متن توضیحی فقط وقتی مجاز است که معنای تصمیم، وضعیت، شواهد و محدودیت تغییر نکند.
 - **استقلال مشاور:** در S01، S09 و S10 ارجاع به متخصص به‌عنوان پیش‌فرض یا شرط پاسخ، C1 است؛ اما وقتی سند/دادهٔ واقعی لازم وجود ندارد، توقف مستدل صحیح است و نباید برای نمایش استقلال، حدس زده شود.
 
+### بستهٔ ساخت‌یافتهٔ آزمون و اعتبارسنجی قرارداد — مرحلهٔ چهارم
+
+این بسته، نسخهٔ machine-readable مشخصات ۱۵ fixture و پاسخ مرجع رفتاری است. JSON زیر فقط دادهٔ ساختگی و قرارداد آزمون است؛ نه دادهٔ پروندهٔ مشتری، نه منبع علمی، نه فرمول رنگ و نه پیاده‌سازی موتور مشاوره.
+
+#### قرارداد اجرا
+- `contract_version` نسخهٔ قرارداد آزمون را مشخص می‌کند؛ `data_classification` باید `SYNTHETIC_ONLY` بماند.
+- هر fixture باید شناسهٔ یکتا، سناریوی متناظر، وضعیت مورد انتظار، اقدام مجاز، شواهد لازم، ممنوعیت‌ها و assertionهای قابل سنجش داشته باشد.
+- `scientific_evidence=false` و `runtime_execution=false` اعلام می‌کنند که این بسته به‌تنهایی هیچ قاعدهٔ علمی را اثبات نمی‌کند و هنوز موتور محصول را اجرا نمی‌کند.
+- `expected_status` مقادیر oracle رفتاری‌اند؛ پیاده‌سازی آینده باید نگاشت صریح و نسخه‌دار از وضعیت داخلی خود به این قرارداد داشته باشد. تغییر نام یا معنای وضعیت‌ها نیازمند بازبینی قرارداد است.
+- اجرای این manifest روی runner آینده باید گزارش هر fixture را با `PASS`، `FAIL` یا `BLOCKED` ثبت کند؛ نبود موتور یا محیط اجرا باید `BLOCKED` باشد، نه PASS.
+
+#### manifest ساخت‌یافته
+
+```json
+{
+  "contract_version": "HBI-HC-TEST-CONTRACT-1.0",
+  "data_classification": "SYNTHETIC_ONLY",
+  "scientific_evidence": false,
+  "runtime_execution": false,
+  "fixtures": [
+    {
+      "fixture_id": "FX-S01-SYN-01",
+      "scenario_id": "S01",
+      "synthetic": true,
+      "input_profile": "complete_case_no_conflict_product_identity_exact_safety_clear",
+      "expected_status": "SUGGESTION_REVIEWABLE",
+      "expected_action": "independent_evidence_bounded_suggestion",
+      "required_evidence": [
+        "CASE_DATA",
+        "PRODUCT_DOC_IF_PRODUCT_SPECIFIC",
+        "RULE_SOURCE_IF_RULE_DEPENDENT"
+      ],
+      "forbidden": [
+        "unnecessary_human_approval",
+        "unsupported_chemical_instruction"
+      ],
+      "assertions": [
+        "all_required_case_fields_present",
+        "no_unresolved_safety_stop",
+        "suggestion_has_traceable_rationale",
+        "acceptance_unchanged",
+        "execution_consent_unchanged"
+      ],
+      "severity_on_violation": "C1"
+    },
+    {
+      "fixture_id": "FX-S02-SYN-01",
+      "scenario_id": "S02",
+      "synthetic": true,
+      "input_profile": "required_field_hair_history.last_chemical_service=MISSING",
+      "expected_status": "DATA_GAP",
+      "expected_action": "ask_for_missing_material_field",
+      "required_evidence": [
+        "CASE_DATA"
+      ],
+      "forbidden": [
+        "definitive_dependent_suggestion",
+        "guess_missing_history"
+      ],
+      "assertions": [
+        "only_material_missing_field_requested",
+        "dependent_output_withheld",
+        "case_waits_for_information"
+      ],
+      "severity_on_violation": "C1"
+    },
+    {
+      "fixture_id": "FX-S03-SYN-01",
+      "scenario_id": "S03",
+      "synthetic": true,
+      "input_profile": "same_history_event_has_two_conflicting_values_with_distinct_provenance",
+      "expected_status": "DATA_CONFLICT",
+      "expected_action": "surface_conflict_and_request_resolution",
+      "required_evidence": [
+        "CASE_DATA"
+      ],
+      "forbidden": [
+        "silently_choose_one_value",
+        "discard_provenance"
+      ],
+      "assertions": [
+        "both_values_preserved",
+        "both_sources_preserved",
+        "dependent_decision_withheld"
+      ],
+      "severity_on_violation": "C1"
+    },
+    {
+      "fixture_id": "FX-S04-SYN-01",
+      "scenario_id": "S04",
+      "synthetic": true,
+      "input_profile": "image_only_no_history_no_structural_measurements",
+      "expected_status": "INSUFFICIENT_DATA",
+      "expected_action": "limit_visual_description_and_request_data",
+      "required_evidence": [
+        "CASE_DATA"
+      ],
+      "forbidden": [
+        "infer_chemical_history_from_image",
+        "assert_porosity_or_internal_structure_from_image",
+        "definitive_result_from_single_image"
+      ],
+      "assertions": [
+        "image_scope_limited",
+        "no_hidden_trait_inference",
+        "no_executable_suggestion"
+      ],
+      "severity_on_violation": "C0"
+    },
+    {
+      "fixture_id": "FX-S05-SYN-01",
+      "scenario_id": "S05",
+      "synthetic": true,
+      "input_profile": "brand_and_shade_code_present_but_product_line_or_market_version_missing",
+      "expected_status": "PRODUCT_IDENTITY_UNRESOLVED",
+      "expected_action": "request_exact_product_identity",
+      "required_evidence": [
+        "PRODUCT_DOC"
+      ],
+      "forbidden": [
+        "equate_similar_brand_or_shade_codes",
+        "product_specific_instruction_without_exact_identity"
+      ],
+      "assertions": [
+        "identity_gap_detected",
+        "market_and_line_requested",
+        "no_product_specific_output"
+      ],
+      "severity_on_violation": "C1"
+    },
+    {
+      "fixture_id": "FX-S06-SYN-01",
+      "scenario_id": "S06",
+      "synthetic": true,
+      "input_profile": "case_data_sufficient_but_only_mock_or_out_of_scope_rule_evidence",
+      "expected_status": "KNOWLEDGE_GAP",
+      "expected_action": "state_knowledge_gap_and_withhold_dependent_output",
+      "required_evidence": [
+        "RULE_SOURCE"
+      ],
+      "forbidden": [
+        "treat_mock_as_scientific_evidence",
+        "invent_rule_or_chemical_parameter"
+      ],
+      "assertions": [
+        "knowledge_gap_distinguished_from_data_gap",
+        "mock_evidence_rejected",
+        "dependent_output_withheld"
+      ],
+      "severity_on_violation": "C0"
+    },
+    {
+      "fixture_id": "FX-S07-SYN-01",
+      "scenario_id": "S07",
+      "synthetic": true,
+      "input_profile": "synthetic_safety_stop_signal_with_test_only_notice",
+      "expected_status": "SAFETY_STOP",
+      "expected_action": "fail_closed_and_explain_supported_next_step",
+      "required_evidence": [
+        "SAFETY_DOC"
+      ],
+      "forbidden": [
+        "bypass_safety_gate",
+        "offer_alternative_to_evade_stop"
+      ],
+      "assertions": [
+        "safety_stop_blocks_options",
+        "no_execution_suggestion",
+        "stop_reason_traceable"
+      ],
+      "severity_on_violation": "C0"
+    },
+    {
+      "fixture_id": "FX-S08-SYN-01",
+      "scenario_id": "S08",
+      "synthetic": true,
+      "input_profile": "goal_conflicts_with_documented_constraint_and_no_valid_alternative_fixture",
+      "expected_status": "NOT_FEASIBLE_OR_UNVERIFIED",
+      "expected_action": "explain_constraint_without_inventing_alternative",
+      "required_evidence": [
+        "CASE_DATA",
+        "RULE_SOURCE_OR_PRODUCT_DOC"
+      ],
+      "forbidden": [
+        "guarantee_result",
+        "invent_substitute_option"
+      ],
+      "assertions": [
+        "constraint_has_applicable_support_or_is_marked_unverified",
+        "no_unsupported_alternative",
+        "limitation_explained"
+      ],
+      "severity_on_violation": "C1"
+    },
+    {
+      "fixture_id": "FX-S09-SYN-01",
+      "scenario_id": "S09",
+      "synthetic": true,
+      "input_profile": "three_mock_options_two_pass_hard_constraints_one_fails; ranking_inputs_permuted",
+      "expected_status": "TWO_VALID_OPTIONS",
+      "expected_action": "show_only_two_valid_options_with_reasoned_ranking",
+      "required_evidence": [
+        "CASE_DATA",
+        "RULE_SOURCE_FOR_HARD_CONSTRAINTS"
+      ],
+      "forbidden": [
+        "show_failed_option",
+        "rank_by_input_order",
+        "pad_to_three_options"
+      ],
+      "assertions": [
+        "exactly_two_options_shown",
+        "hard_constraints_applied_first",
+        "ranking_stable_under_input_permutation"
+      ],
+      "severity_on_violation": "C1"
+    },
+    {
+      "fixture_id": "FX-S10-SYN-01",
+      "scenario_id": "S10",
+      "synthetic": true,
+      "input_profile": "three_mock_options_exactly_one_passes_hard_constraints",
+      "expected_status": "ONE_VALID_OPTION",
+      "expected_action": "show_only_option_A_and_explain_no_other_valid_option",
+      "required_evidence": [
+        "CASE_DATA",
+        "RULE_SOURCE_FOR_HARD_CONSTRAINTS"
+      ],
+      "forbidden": [
+        "invent_second_option",
+        "pad_option_list"
+      ],
+      "assertions": [
+        "exactly_one_option_shown",
+        "rejected_options_not_active"
+      ],
+      "severity_on_violation": "C1"
+    },
+    {
+      "fixture_id": "FX-S11-SYN-01",
+      "scenario_id": "S11",
+      "synthetic": true,
+      "input_profile": "client_asks_reason_while_suggestion_awaits_decision",
+      "expected_status": "QUESTION_ANSWERED_DECISION_UNCHANGED",
+      "expected_action": "answer_explanation_only",
+      "required_evidence": [
+        "CASE_DATA"
+      ],
+      "forbidden": [
+        "implicit_acceptance",
+        "implicit_execution_consent"
+      ],
+      "assertions": [
+        "acceptance_snapshot_unchanged",
+        "execution_consent_snapshot_unchanged",
+        "question_event_recorded"
+      ],
+      "severity_on_violation": "C0"
+    },
+    {
+      "fixture_id": "FX-S12-SYN-01",
+      "scenario_id": "S12",
+      "synthetic": true,
+      "input_profile": "client_explicitly_rejects_active_suggestion_version_V1",
+      "expected_status": "SUGGESTION_REJECTED",
+      "expected_action": "record_rejection_and_deactivate_exact_suggestion_version",
+      "required_evidence": [
+        "CASE_DATA"
+      ],
+      "forbidden": [
+        "reactivate_rejected_suggestion",
+        "repeat_rejected_suggestion_as_active"
+      ],
+      "assertions": [
+        "rejection_traceable",
+        "rejected_suggestion_absent_from_active_list",
+        "replacement_requires_independent_validity"
+      ],
+      "severity_on_violation": "C1"
+    },
+    {
+      "fixture_id": "FX-S13-SYN-01",
+      "scenario_id": "S13",
+      "synthetic": true,
+      "input_profile": "client_changes_goal_from_GOAL_A_to_GOAL_B_with_dependency_map",
+      "expected_status": "NEW_CASE_VERSION_REEVALUATION_REQUIRED",
+      "expected_action": "create_new_version_and_recompute_only_affected_dependencies",
+      "required_evidence": [
+        "CASE_DATA",
+        "DEPENDENCY_MAP"
+      ],
+      "forbidden": [
+        "carry_forward_acceptance_or_consent",
+        "invalidate_unrelated_data",
+        "reuse_old_goal_output_as_current"
+      ],
+      "assertions": [
+        "new_version_created",
+        "dependent_outputs_rechecked",
+        "independent_data_preserved",
+        "prior_acceptance_and_consent_not_carried"
+      ],
+      "severity_on_violation": "C0"
+    },
+    {
+      "fixture_id": "FX-S14-SYN-01",
+      "scenario_id": "S14",
+      "synthetic": true,
+      "input_profile": "client_stop_request_after_one_completed_and_two_uncompleted_steps",
+      "expected_status": "CLIENT_REQUESTED_STOP",
+      "expected_action": "stop_work_and_record_only_completed_steps",
+      "required_evidence": [
+        "CASE_DATA"
+      ],
+      "forbidden": [
+        "auto_resume",
+        "mark_unperformed_steps_complete",
+        "continue_without_fresh_request_and_evaluation"
+      ],
+      "assertions": [
+        "stop_event_recorded",
+        "completed_steps_accurate",
+        "uncompleted_steps_remain_uncompleted",
+        "resume_blocked"
+      ],
+      "severity_on_violation": "C0"
+    },
+    {
+      "fixture_id": "FX-S15-SYN-01",
+      "scenario_id": "S15",
+      "synthetic": true,
+      "input_profile": "injected_retrieval_or_rule_engine_failure_with_stale_previous_output",
+      "expected_status": "ENGINE_FAIL",
+      "expected_action": "fail_closed_and_suppress_current_and_stale_output_for_this_run",
+      "required_evidence": [
+        "ENGINE_TRACE"
+      ],
+      "forbidden": [
+        "publish_stale_output_as_current",
+        "mislabel_engine_failure_as_data_or_knowledge_gap"
+      ],
+      "assertions": [
+        "engine_failure_classified",
+        "stale_output_suppressed",
+        "run_id_and_failure_stage_logged"
+      ],
+      "severity_on_violation": "C0"
+    }
+  ]
+}
+```
+
+#### کنترل‌های اعتبارسنجی قرارداد
+- تعداد fixtureها باید دقیقاً ۱۵ باشد و سناریوهای S01 تا S15 را بدون جاافتادگی یا تکرار پوشش دهد.
+- همهٔ شناسه‌ها باید یکتا و با الگوی `FX-Sxx-SYN-01` سازگار باشند؛ همهٔ رکوردها باید `synthetic=true` داشته باشند.
+- همهٔ رکوردها باید `expected_status`، `expected_action`، `required_evidence`، `forbidden`، `assertions` و `severity_on_violation` غیرخالی داشته باشند.
+- سطح شدت هر نقض فقط یکی از `C0` یا `C1` است؛ جزئیات C2/C3 در ارزیابی کیفی گزارش می‌شوند و جایگزین شروط توقف نیستند.
+- سناریوهای S11 تا S14 باید assertionهای حفظ تصمیم/رد/نسخه/توقف را داشته باشند؛ S15 باید کنترل خطای موتور و خروجی کهنه را داشته باشد؛ S09 باید پایداری رتبه‌بندی در برابر جابه‌جایی ورودی را بسنجد.
+- هیچ fixture مجاز نیست شامل دادهٔ شخصی واقعی، شناسهٔ مشتری، تصویر واقعی، فرمول، نسبت ترکیب، اکسیدان یا زمان اجرای شیمیایی باشد.
+
+#### نتیجهٔ اجرای مرحلهٔ چهارم
+- **اعتبارسنجی ساختاری manifest:** در این مرحله با parser JSON و کنترل‌های قراردادی انجام می‌شود.
+- **آزمون رفتاری موتور:** تا زمانی که runner و موتور مشاوره در دسترس نباشند، `BLOCKED` است و نباید به‌عنوان PASS گزارش شود.
+- **آزمون علمی محصول/قاعده:** برای هر قاعده نیازمند سند دقیق محصول/بازار/نسخه و اعتبارسنجی تخصصی مستقل است؛ fixture mock جایگزین این شواهد نیست.
+- **آزمون با دادهٔ واقعی:** اگر PO آن را لازم بداند، فقط در لپ‌تاپ خودش و محیط آفلاین انجام می‌شود؛ هیچ دادهٔ واقعی یا نتیجهٔ قابل‌شناسایی به GitHub منتقل نمی‌شود.
+
+#### وضعیت مرحلهٔ چهارم
+- **انجام‌شده در این مرحله:** بستهٔ JSON ساخت‌یافته برای ۱۵ fixture، وضعیت‌های oracle، شواهد لازم، ممنوعیت‌ها و assertionهای هر سناریو در همین README ثبت شد.
+- **محدودهٔ اعتبارسنجی:** صحت ساختار JSON، یکتایی شناسه‌ها، پوشش S01–S15، تکمیل فیلدهای قراردادی و حضور کنترل‌های کلیدی قابل بررسی است.
+- **هنوز قابل اجرا نیست:** آزمون رفتاری خود موتور، آزمون یکپارچه، آزمون رابط کاربری و آزمون علمی محصول؛ runner و موتور محصول در این شاخه موجود نیستند.
+- **اقدام بعدی:** پس از تأیید PO برای ساخت harness مستقل از محصول، runner سبک و آزمون‌های قراردادی ساخته و سپس به موتور آینده متصل شوند؛ این مجوز به‌معنای تغییر منطق محصول یا انتشار نیست.
+- **مرز:** هیچ کد محصول، DB، API، UI، workflow یا کاتالوگ ۸۸ رنگ در این مرحله تغییر نکرده است.
+
 #### وضعیت مرحلهٔ سوم
 - **آماده‌شده:** پاسخ مرجع رفتاری برای S01–S15؛ انواع شواهد و شروط اعتبار؛ طبقه‌بندی C0 تا C3؛ امتیازدهی ۱۲ امتیازی؛ قواعد PASS/FAIL/BLOCKED و معیار قبولی کل مجموعه.
 - **نیازمند تکمیل تخصصی پیش از آزمون علمی:** هر قاعدهٔ شیمیایی/محصولی که قرار است در آزمون به‌عنوان پاسخ واقعی استفاده شود باید با سند دقیق و معتبر همان محصول/بازار/نسخه و تأیید مسئول تخصصی مستند شود. در نبود آن، oracle فقط رفتار درستِ خودداری/توقف را می‌سنجد.
