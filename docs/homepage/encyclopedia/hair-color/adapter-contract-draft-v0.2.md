@@ -255,7 +255,7 @@ All examples are synthetic and structural only. They contain no real customer da
     "client_goal": {
       "value": "GOAL-A",
       "knowledge_state": "KNOWN",
-      "source": "CLIENT_REPORTED",
+      "source_class": "CLIENT_REPORTED",
       "record_ref": "REC-GOAL-001",
       "recorded_at": "2026-11-12T10:00:00Z"
     },
@@ -263,7 +263,7 @@ All examples are synthetic and structural only. They contain no real customer da
       "last_chemical_service": {
         "value": "HISTORY-A",
         "knowledge_state": "KNOWN",
-        "source": "CLIENT_REPORTED",
+        "source_class": "CLIENT_REPORTED",
         "record_ref": "REC-HIST-001",
         "recorded_at": "2026-11-12T10:01:00Z"
       }
@@ -381,7 +381,7 @@ All examples are synthetic and structural only. They contain no real customer da
 }
 ```
 
-The response above is explanatory only. For S11, the existing suggestion reference is read-only context supplied by the Orchestrator from the authoritative ledger; the engine may echo that reference but may not mint, alter, reactivate, or claim ownership of it. The authoritative Orchestrator must verify that the referenced suggestion remains active and has not been rejected before displaying it. The engine does not write a client decision.
+The response above is an Orchestrator-composed illustrative response, not a raw engine-authored payload. For S11, `suggestion_ref`, `suggestion_version`, and `status` are read-only fields sourced from the authoritative suggestion ledger and supplied by the Orchestrator; the engine may receive and echo the existing reference as context, but may not mint, alter, reactivate, or assert the authoritative status of that suggestion. The Orchestrator must verify that the referenced suggestion remains active and has not been rejected before displaying it. The engine supplies only the explanatory content and does not write a client decision.
 
 ### 9.5 Orchestrator event — client stop (S14)
 
@@ -442,7 +442,7 @@ No remaining item may be silently decided by implementation.
 - [ ] Version and decision ownership approved.
 - [x] Adapter failure, stale-output suppression, and idempotent retry invariants approved at design level (D-06).
 - [ ] Exact S01–S15 plus boundary/control test assertions reconciled against the runner (D-05 approves oracle boundary, not every assertion detail).
-- [ ] Synthetic examples reviewed for semantic and structural consistency.
+- [x] Synthetic examples reviewed for semantic and structural consistency (six examples checked; provenance and S11 ledger-ownership wording aligned).
 - [ ] No product code, schema, stub, catalogue, real customer data, pilot, or release changes included.
 
 ## 12. Explicit non-authorization
