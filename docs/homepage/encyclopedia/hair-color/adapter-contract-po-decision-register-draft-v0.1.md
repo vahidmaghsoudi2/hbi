@@ -1,6 +1,6 @@
 # HBI Adapter Contract — PO Decision Register (Draft 0.1)
 
-**Status:** working register with PO decisions D-08/S06/S08/S12 explicitly approved on 2026-11-12; all other recommendations remain unapproved unless separately recorded.  
+**Status:** PO decisions D-01–D-08 explicitly approved on 2026-11-12. Approval is limited to the documented meanings, design controls, and recommendations recorded below; it does not authorize implementation.  
 **Scope:** documentation/design only. This register proposes defaults so review can be decisive and implementation does not invent semantics.
 
 ## 1. Decision principles already treated as binding
@@ -143,14 +143,28 @@ Only `VERIFIED_APPLICABLE` supports a rule within the exact reviewed scope. Othe
 
 | ID | Recommended disposition | Why |
 |---|---|---|
-| D-01 | Accept the four engine-state meanings and proposed identifiers | Preserves the already-approved four-state model |
-| D-02 | Accept the five response-state meanings and proposed identifiers | Preserves the already-approved five-state model |
-| D-03 | Accept the six knowledge states | Prevents false/unknown/missing collapse |
-| D-04 | Accept reason-code separation | Keeps data, knowledge, safety, and engine failures distinct |
-| D-05 | Accept the exact fixture oracle values as test expectations only; defer ambiguous wire-state mappings for S06, S08, and S12 | Prevents fixture labels from being mistaken for approved engine/response enums |
-| D-06 | Accept Adapter failure and idempotent retry semantics | Prevents stale output and duplicate case events |
-| D-07 | Accept minimum provenance/evidence envelope | Enables auditable exact-scope evidence use |
+| D-01 | **APPROVED 2026-11-12** — accept the four engine-state meanings and proposed identifiers in Section 2.1 | Preserves the four-state model; design approval only |
+| D-02 | **APPROVED 2026-11-12** — accept the five consultation response meanings and proposed identifiers in Section 2.2 | Preserves the five-state model; no sixth response state |
+| D-03 | **APPROVED 2026-11-12** — accept the six knowledge states and definitions in Section 4 | Prevents false/unknown/missing collapse |
+| D-04 | **APPROVED 2026-11-12** — keep diagnostic reason codes separate from engine, response, and workflow states | Prevents semantic overloading |
+| D-05 | **APPROVED 2026-11-12** — S01–S15 labels are test oracles only, not wire enums; S06/S08 response mapping remains unresolved and S12 remains a ledger event | Prevents fixture labels from being mistaken for wire enums |
+| D-06 | **APPROVED 2026-11-12** — accept the failure-envelope, stale-output suppression, and idempotent retry semantics in Section 6 | Prevents stale output and duplicate case events |
+| D-07 | **APPROVED 2026-11-12** — accept minimum datum provenance and evidence-reference requirements in Section 7; free-form model confidence is not evidence | Enables auditable exact-scope evidence use |
 | D-08 | **APPROVED 2026-11-12:** S06 explicitly reports unavailable applicable evidence and withholds dependent output; S08 explicitly reports no valid option under current constraints and invents no substitute; S12 remains a rejection/ledger event with no forced engine/response state, and any independent alternative requires a fresh candidate run | Explicit PO approval; see decision record below |
+
+### 8.2 Recorded PO approval — D-01 through D-07 (2026-11-12)
+
+The Product Owner explicitly approved all seven recommendations:
+
+1. **D-01 — engine states:** approve the four meanings and proposed identifiers in Section 2.1.
+2. **D-02 — consultation response states:** approve the five meanings and proposed identifiers in Section 2.2. No sixth response state is created.
+3. **D-03 — knowledge states:** approve the six distinct values in Section 4. Unknown, not asked, and missing remain distinct; an unknown safety answer is never coerced to false.
+4. **D-04 — reason-code separation:** approve keeping diagnostic reason codes distinct from all state layers, including data gap, knowledge gap, conflict, safety, scope, stale version, and engine failure.
+5. **D-05 — fixture-oracle boundary:** approve S01–S15 labels as test expectations only, not wire enums. S06/S08 response mapping remains unresolved rather than inferred; S12 remains a ledger event with no forced engine/response state.
+6. **D-06 — failure and retry semantics:** approve the conceptual failure envelope, publication-time stale-output suppression, and idempotent retry constraints in Section 6.
+7. **D-07 — provenance/evidence envelope:** approve the minimum provenance and evidence-reference requirements in Section 7; free-form model confidence is not evidence.
+
+Together with Section 8.1, D-01–D-08 are now approved at the documentation/design level. This does **not** approve runtime schemas, code, adapter implementation, engine integration, product behavior, pilot, release, or merge. The unresolved S06/S08 response mapping is deliberately retained under D-05.
 
 ### 8.1 Recorded PO approval — 2026-11-12
 
@@ -160,7 +174,7 @@ The Product Owner approved all three decisions below:
 2. **S08 / D-08:** Report that no valid option exists under the current documented constraints, explain the supported reason, and do not invent a substitute. A distinct fresh evaluation may assess an independent alternative only if it passes all hard constraints.
 3. **S12 / D-08:** Record the exact rejected suggestion/version in the authoritative ledger and exclude it from active options. Do not force an engine or response state. Any independent alternative requires a fresh candidate run; otherwise explain that no valid alternative is available.
 
-These approvals resolve only the S06, S08, and S12 decisions. They do not approve the remaining D-01–D-07 items, all proposed wire identifiers, runtime schemas, implementation, pilot, release, or merge.
+These approvals resolve the S06, S08, and S12 presentation/ledger decisions. D-01–D-07 are separately approved in Section 8.2. No approval authorizes runtime schemas, implementation, pilot, release, or merge.
 
 
 
