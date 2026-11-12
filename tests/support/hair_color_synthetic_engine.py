@@ -71,7 +71,7 @@ class SyntheticHairColorEngine:
             )
         elif scenario_id == "S09":
             result["options"] = [{}, {}]
-        elif scenario_id in {"S10", "S11", "S12", "S14"}:
+        elif scenario_id in {"S11", "S12", "S14"}:
             result["options"] = []
         elif scenario_id == "S13":
             result["summary"] = "Fresh synthetic evaluation for the supplied case and target versions."
