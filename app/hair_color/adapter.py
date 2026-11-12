@@ -103,7 +103,7 @@ def _has_forbidden_key(value: Any, forbidden_keys: frozenset[str]) -> str | None
                 return found
     elif isinstance(value, (list, tuple)):
         for nested in value:
-            found = _has_forbidden_key(nested)
+            found = _has_forbidden_key(nested, forbidden_keys)
             if found is not None:
                 return found
     return None
