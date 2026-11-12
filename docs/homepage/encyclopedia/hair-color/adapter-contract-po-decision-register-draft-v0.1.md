@@ -156,6 +156,19 @@ A cross-check of D-06 against the current Adapter Contract Draft 0.2 and synthet
 
 The detailed scenario-by-scenario traceability and the single `source` → `source_class` example correction are recorded in Section 7.1 of `adapter-contract-draft-v0.2.md`. The decision register remains a draft record; no runtime schema, engine behavior, or implementation authorization follows from this audit.
 
+
+### 6.2 Static audit — suggestion ledger and version traceability (2026-11-12)
+
+Cross-check of the approved PO rules against the Adapter Contract, README scenario definitions, and S11–S13 machine fixtures:
+
+- **Confirmed:** Orchestrator/Case Store and the authoritative ledger own persistent suggestion references and active/rejected status. The engine cannot mint or reactivate a suggestion. Rejection remains auditable and excludes the exact rejected suggestion/version. An independent alternative requires a fresh candidate run.
+- **S11 gap:** the README and illustrative response identify an existing V1 suggestion, but the machine fixture does not contain a structured suggestion reference/version or assert that the ledger still marks it active and not rejected immediately before display.
+- **S12 gap:** the README identifies the exact synthetic suggestion/version, while the machine fixture stores only a descriptive input profile and generic rejection assertions; no structured target reference/version or before/after ledger state is present.
+- **S13 gap:** the README describes CASE-V1 to CASE-V2, but the machine fixture does not bind an explicit prior/new case-version and target-version pair.
+- **Open design detail:** the contract has not yet defined the normative ledger reference tuple binding a suggestion to case/target version, evaluation run, and decision events, nor a time-based expiry/revalidation policy. No TTL or new field is approved by this audit.
+
+Conclusion: no contradiction with D-08/S12 or other recorded PO decisions was found. The gap is machine-readable traceability and unresolved protocol detail, not a reason to alter the approved rejection semantics. Fixture/schema/runner changes are deferred pending a separately reviewed proposal and explicit approval where policy is involved. See Section 7.2 of `adapter-contract-draft-v0.2.md`.
+
 ## 8. PO review queue — decision items, not implementation blockers to duplicate
 
 | ID | Recommended disposition | Why |
