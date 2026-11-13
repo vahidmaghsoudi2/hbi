@@ -37,12 +37,12 @@
 | اطلاعات مو، تصویربرداری، ایمنی و شواهد | بخش‌های «پروندهٔ استاندارد مو و تصویربرداری» و «قواعد داده، شواهد، ایمنی و یادگیری» |
 | نقش افراد و مسئولیت تخصصی | بخش «تیم تصمیم‌گیری و مسئولیت تخصصی» |
 | وضعیت واقعی، موانع، وابستگی‌ها و گام بعدی | بخش «مرکز کنترل مدیریتی» در انتهای همین صفحه |
-| قرارداد فنی ارتباط ارکستراتور و موتور (Draft 0.2) | [قرارداد Adapter](${base}docs/homepage/encyclopedia/hair-color/adapter-contract-draft-v0.2.md) |
-| ثبت تصمیم‌های طراحی Adapter | [دفتر تصمیم‌های Adapter](${base}docs/homepage/encyclopedia/hair-color/adapter-contract-po-decision-register-draft-v0.1.md) |
-| پیشنهاد سیاست دربارهٔ تغییر اعتبار شواهد پس از تصمیم مشتری | [پیشنهاد سیاست — پیش‌نویس و تأییدنشده](${base}docs/homepage/encyclopedia/hair-color/po-proposal-evidence-revision-after-client-decision-20261112.md) |
-| ۱۵ سناریوی مصنوعی قابل‌ماشین‌خوانی | [بستهٔ fixtureها](${base}tests/fixtures/hair-color-contract-v1.json) |
-| ساختار مجاز بستهٔ fixtureها | [JSON Schema](${base}tests/fixtures/hair-color-contract-v1.schema.json) |
-| اعتبارسنج ساختاری قرارداد (نه اجرای موتور محصول) | [Runner](${base}scripts/run_hair_color_contract.py) و [آزمون‌های Runner](${base}tests/test_hair_color_contract_runner.py) |
+| قرارداد فنی ارتباط ارکستراتور و موتور (Draft 0.2) | [قرارداد Adapter](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/docs/homepage/encyclopedia/hair-color/adapter-contract-draft-v0.2.md) |
+| ثبت تصمیم‌های طراحی Adapter | [دفتر تصمیم‌های Adapter](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/docs/homepage/encyclopedia/hair-color/adapter-contract-po-decision-register-draft-v0.1.md) |
+| پیشنهاد سیاست دربارهٔ تغییر اعتبار شواهد پس از تصمیم مشتری | [پیشنهاد سیاست — پیش‌نویس و تأییدنشده](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/docs/homepage/encyclopedia/hair-color/po-proposal-evidence-revision-after-client-decision-20261112.md) |
+| ۱۵ سناریوی مصنوعی قابل‌ماشین‌خوانی | [بستهٔ fixtureها](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/tests/fixtures/hair-color-contract-v1.json) |
+| ساختار مجاز بستهٔ fixtureها | [JSON Schema](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/tests/fixtures/hair-color-contract-v1.schema.json) |
+| اعتبارسنج ساختاری قرارداد (نه اجرای موتور محصول) | [Runner](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/scripts/run_hair_color_contract.py) و [آزمون‌های Runner](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/tests/test_hair_color_contract_runner.py) |
 
 **مرز اعتبار لینک‌ها:** فایل‌های فنی بالا در شاخهٔ Draft مربوط به PR #535 و در commit ثابت `bde6dd7142ba` قرار دارند؛ آن‌ها مرجع مستقل تصمیم یا وضعیت پروژه نیستند. تصمیم‌های PO، وضعیت جاری و تقدم قواعد فقط از همین README پیگیری می‌شوند. پیشنهاد سیاست شواهد همچنان پیش‌نویس است. هیچ‌یک از این لینک‌ها به معنی ادغام یا مجوز اجرا نیست.
 
@@ -529,8 +529,8 @@
 
 ### وضعیت کلان
 - **مرجع مدیریتی:** همین README؛ آخرین اصلاحات در شاخهٔ PR #542 ثبت شده‌اند، نه در master.
-- **PR #542:** باز و Draft؛ سه فایل مستنداتیِ مرجع رنگ مو، فهرست دانشنامه و هاب مستندات هوم‌پیج را تغییر می‌دهد. شاخه نسبت به master، ۱۳ commit جلو و صفر commit عقب است.
-- **PR #535:** باز و Draft؛ ۹ فایل مرتبط با قرارداد Adapter، دفتر تصمیم، پیشنهاد سیاست، fixture/schema و runner/tests دارد. شاخه نسبت به master، ۱۲۱ commit جلو و ۲۱ commit عقب است؛ بنابراین واگرایی آن باید پیش از هر ادغام یا انتقال تغییر بررسی شود.
+- **PR #542:** باز و Draft؛ سه فایل مستنداتیِ مرجع رنگ مو، فهرست دانشنامه و هاب مستندات هوم‌پیج را تغییر می‌دهد. شاخه از master منشعب شده و هنوز ادغام نشده است.
+- **PR #535:** باز و Draft؛ ۹ فایل مرتبط با قرارداد Adapter، دفتر تصمیم، پیشنهاد سیاست، fixture/schema و runner/tests دارد. در مقایسهٔ ۱۳ نوامبر ۲۰۲۶، شاخه ۱۲۱ commit جلو و ۲۱ commit عقب بود؛ بنابراین واگرایی آن باید پیش از هر ادغام یا انتقال تغییر بررسی شود.
 - **تصمیم بسته:** PO-66-09 — فقط دادهٔ مصنوعی؛ هیچ پردازش یا نگهداری دادهٔ واقعی مشتری، حتی محلی/آفلاین، مجاز نیست.
 - **وضعیت محصول:** هیچ موتور مشاورهٔ رنگ موی پذیرفته‌شده، اعتبارسنجی تخصصی کامل، پایلوت واقعی یا انتشار عملیاتی اثبات نشده است.
 - **مرز اختیار:** هیچ‌یک از این ثبت‌ها مجوز Merge، تغییر کد محصول/runtime، UI، DB، پردازش دادهٔ واقعی، پایلوت یا انتشار ایجاد نمی‌کند.
