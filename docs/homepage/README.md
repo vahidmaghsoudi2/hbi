@@ -13,6 +13,7 @@
 - **[هاب مدیریت محصولات](product-management/README.md)** — product-management menu documentation space
 - **[دانشنامه — مرجع مستندات](encyclopedia/README.md)** — هاب هفت زیرمنو و مسیرهای محتوایی دانشنامه
 - **[دانش پوست — فهرست محصولات](encyclopedia/skin/PRODUCTS.md)** — دفتر مرکزی نمونه‌ها و تغییرات محتوای دانش پوست
+- **[دانشنامه ← رنگ مو — مرجع اصلی پروژه](encyclopedia/hair-color/README.md)** — هدف، تصمیم‌ها، قرارداد مشاوره، نقشهٔ دسترسی، وضعیت و گام بعدی؛ تغییرات فعلی در PR #542 و هنوز ادغام‌نشده
 
 > The prototype edits only a browser-local draft. To persist changes in the repository, export the JSON, review it, then submit the revised `menu-structure.json` through a Pull Request. The prototype does not write to GitHub automatically. The interactive preview uses a third-party static preview service and is not GitHub Pages or a production deployment. `menu-structure.json` remains the canonical menu data; the embedded fallback in `index.html` must be refreshed whenever that JSON changes.
 
