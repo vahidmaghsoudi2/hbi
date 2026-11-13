@@ -816,7 +816,17 @@ runner فقط صحت ساختاری قرارداد و fixtureها را می‌س
           }
         ],
         "dependency_outcomes": [],
-        "decision_transfer": "NOT_APPLICABLE"
+        "decision_transfer": "NOT_APPLICABLE",
+        "interaction_event_refs": [
+          "SYN-EVENT-S11-QUESTION-01"
+        ],
+        "eligibility_checks": [
+          {
+            "phase": "PRE_DISPLAY",
+            "suggestion_version_ref": "SYN-SUGGESTION-V1",
+            "outcome": "ELIGIBLE_FOR_DISPLAY"
+          }
+        ]
       }
     },
     {
@@ -887,7 +897,22 @@ runner فقط صحت ساختاری قرارداد و fixtureها را می‌س
           }
         ],
         "dependency_outcomes": [],
-        "decision_transfer": "NOT_APPLICABLE"
+        "decision_transfer": "NOT_APPLICABLE",
+        "interaction_event_refs": [
+          "SYN-EVENT-S12-REJECTION-01"
+        ],
+        "eligibility_checks": [
+          {
+            "phase": "PRE_REJECTION",
+            "suggestion_version_ref": "SYN-SUGGESTION-V1",
+            "outcome": "ELIGIBLE_FOR_DISPLAY"
+          },
+          {
+            "phase": "POST_REJECTION",
+            "suggestion_version_ref": "SYN-SUGGESTION-V1",
+            "outcome": "INELIGIBLE_REJECTED"
+          }
+        ]
       }
     },
     {
@@ -981,7 +1006,17 @@ runner فقط صحت ساختاری قرارداد و fixtureها را می‌س
             "expected_treatment": "PRESERVE"
           }
         ],
-        "decision_transfer": "NOT_CARRIED_FORWARD"
+        "decision_transfer": "NOT_CARRIED_FORWARD",
+        "interaction_event_refs": [
+          "SYN-EVENT-S13-TARGET-CHANGE-01"
+        ],
+        "eligibility_checks": [
+          {
+            "phase": "NEW_TARGET_CONTEXT",
+            "suggestion_version_ref": "SYN-SUGGESTION-V1",
+            "outcome": "HISTORICAL_NOT_CURRENT"
+          }
+        ]
       }
     },
     {
