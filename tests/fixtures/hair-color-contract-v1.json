@@ -133,7 +133,8 @@
         "mock_evidence_rejected",
         "dependent_output_withheld"
       ],
-      "severity_on_violation": "C0"
+      "severity_on_violation": "C0",
+      "wire_mapping_boundary": "UNRESOLVED_NOT_ASSERTED"
     },
     {
       "fixture_id": "FX-S07-SYN-01",
@@ -176,7 +177,8 @@
         "no_unsupported_alternative",
         "limitation_explained"
       ],
-      "severity_on_violation": "C1"
+      "severity_on_violation": "C1",
+      "wire_mapping_boundary": "UNRESOLVED_NOT_ASSERTED"
     },
     {
       "fixture_id": "FX-S09-SYN-01",
@@ -241,7 +243,57 @@
         "execution_consent_snapshot_unchanged",
         "question_event_recorded"
       ],
-      "severity_on_violation": "C0"
+      "severity_on_violation": "C0",
+      "traceability_oracle": {
+        "scope": "TEST_ORACLE_ONLY_NOT_WIRE_CONTRACT",
+        "scenario": "S11",
+        "case_lineage": [
+          {
+            "role": "CASE",
+            "ref": "SYN-CASE-S11-V1",
+            "version_ref": "SYN-S11-V1"
+          }
+        ],
+        "target_lineage": [
+          {
+            "role": "TARGET",
+            "ref": "SYN-TARGET-S11-V1",
+            "version_ref": "SYN-S11-V1"
+          }
+        ],
+        "evaluation_run_refs": [
+          "SYN-RUN-S11-01"
+        ],
+        "suggestion_refs": [
+          {
+            "ref": "SYN-SUGGESTION-S11-01",
+            "version_ref": "SYN-SUGGESTION-V1",
+            "evaluation_run_ref": "SYN-RUN-S11-01"
+          }
+        ],
+        "ledger_snapshots": [
+          {
+            "phase": "BEFORE_QUESTION",
+            "acceptance": "PENDING",
+            "execution_consent": "NOT_GRANTED",
+            "active_suggestion_version_refs": [
+              "SYN-SUGGESTION-V1"
+            ],
+            "rejected_suggestion_version_refs": []
+          },
+          {
+            "phase": "AFTER_QUESTION",
+            "acceptance": "PENDING",
+            "execution_consent": "NOT_GRANTED",
+            "active_suggestion_version_refs": [
+              "SYN-SUGGESTION-V1"
+            ],
+            "rejected_suggestion_version_refs": []
+          }
+        ],
+        "dependency_outcomes": [],
+        "decision_transfer": "NOT_APPLICABLE"
+      }
     },
     {
       "fixture_id": "FX-S12-SYN-01",
@@ -262,7 +314,57 @@
         "rejected_suggestion_absent_from_active_list",
         "replacement_requires_independent_validity"
       ],
-      "severity_on_violation": "C1"
+      "severity_on_violation": "C1",
+      "traceability_oracle": {
+        "scope": "TEST_ORACLE_ONLY_NOT_WIRE_CONTRACT",
+        "scenario": "S12",
+        "case_lineage": [
+          {
+            "role": "CASE",
+            "ref": "SYN-CASE-S12-V1",
+            "version_ref": "SYN-S12-V1"
+          }
+        ],
+        "target_lineage": [
+          {
+            "role": "TARGET",
+            "ref": "SYN-TARGET-S12-V1",
+            "version_ref": "SYN-S12-V1"
+          }
+        ],
+        "evaluation_run_refs": [
+          "SYN-RUN-S12-01"
+        ],
+        "suggestion_refs": [
+          {
+            "ref": "SYN-SUGGESTION-S12-01",
+            "version_ref": "SYN-SUGGESTION-V1",
+            "evaluation_run_ref": "SYN-RUN-S12-01"
+          }
+        ],
+        "ledger_snapshots": [
+          {
+            "phase": "BEFORE_REJECTION",
+            "acceptance": "PENDING",
+            "execution_consent": "NOT_GRANTED",
+            "active_suggestion_version_refs": [
+              "SYN-SUGGESTION-V1"
+            ],
+            "rejected_suggestion_version_refs": []
+          },
+          {
+            "phase": "AFTER_REJECTION",
+            "acceptance": "PENDING",
+            "execution_consent": "NOT_GRANTED",
+            "active_suggestion_version_refs": [],
+            "rejected_suggestion_version_refs": [
+              "SYN-SUGGESTION-V1"
+            ]
+          }
+        ],
+        "dependency_outcomes": [],
+        "decision_transfer": "NOT_APPLICABLE"
+      }
     },
     {
       "fixture_id": "FX-S13-SYN-01",
@@ -286,7 +388,77 @@
         "independent_data_preserved",
         "prior_acceptance_and_consent_not_carried"
       ],
-      "severity_on_violation": "C0"
+      "severity_on_violation": "C0",
+      "traceability_oracle": {
+        "scope": "TEST_ORACLE_ONLY_NOT_WIRE_CONTRACT",
+        "scenario": "S13",
+        "case_lineage": [
+          {
+            "role": "CASE",
+            "ref": "SYN-CASE-S13-OLD",
+            "version_ref": "SYN-S13-OLD"
+          },
+          {
+            "role": "CASE",
+            "ref": "SYN-CASE-S13-NEW",
+            "version_ref": "SYN-S13-NEW"
+          }
+        ],
+        "target_lineage": [
+          {
+            "role": "TARGET",
+            "ref": "SYN-TARGET-S13-OLD",
+            "version_ref": "SYN-S13-OLD"
+          },
+          {
+            "role": "TARGET",
+            "ref": "SYN-TARGET-S13-NEW",
+            "version_ref": "SYN-S13-NEW"
+          }
+        ],
+        "evaluation_run_refs": [
+          "SYN-RUN-S13-OLD",
+          "SYN-RUN-S13-NEW"
+        ],
+        "suggestion_refs": [
+          {
+            "ref": "SYN-SUGGESTION-S13-OLD-01",
+            "version_ref": "SYN-SUGGESTION-V1",
+            "evaluation_run_ref": "SYN-RUN-S13-OLD"
+          }
+        ],
+        "ledger_snapshots": [
+          {
+            "phase": "PRIOR_VERSION_HISTORY",
+            "acceptance": "ACCEPTED",
+            "execution_consent": "GRANTED",
+            "active_suggestion_version_refs": [
+              "SYN-SUGGESTION-V1"
+            ],
+            "rejected_suggestion_version_refs": []
+          },
+          {
+            "phase": "NEW_VERSION_DEFAULT",
+            "acceptance": "PENDING",
+            "execution_consent": "NOT_GRANTED",
+            "active_suggestion_version_refs": [],
+            "rejected_suggestion_version_refs": []
+          }
+        ],
+        "dependency_outcomes": [
+          {
+            "output_ref": "SYN-OUTPUT-DEPENDENT-01",
+            "dependency_class": "DEPENDENT",
+            "expected_treatment": "REEVALUATE"
+          },
+          {
+            "output_ref": "SYN-DATA-INDEPENDENT-01",
+            "dependency_class": "INDEPENDENT",
+            "expected_treatment": "PRESERVE"
+          }
+        ],
+        "decision_transfer": "NOT_CARRIED_FORWARD"
+      }
     },
     {
       "fixture_id": "FX-S14-SYN-01",
