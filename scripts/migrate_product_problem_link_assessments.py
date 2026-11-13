@@ -76,6 +76,7 @@ def migrate(db_path: str | Path) -> str:
                 )
             """)
             conn.execute("CREATE INDEX IF NOT EXISTS ix_ppl_event_link_time ON ProductProblemLinkAssessmentEvent(link_id, timestamp)")
+            conn.execute("CREATE INDEX IF NOT EXISTS ix_ProductProblemLinkAssessmentEvent_assertion_key ON ProductProblemLinkAssessmentEvent(assertion_key)")
             conn.commit()
             conn.execute("PRAGMA foreign_keys=ON")
             return "ALREADY MIGRATED: assessment columns and history table are present."
@@ -121,7 +122,7 @@ def migrate(db_path: str | Path) -> str:
         conn.execute('CREATE INDEX ix_productproblemlink_status ON ProductProblemLink(relationship_status)')
         conn.execute('CREATE INDEX ix_productproblemlink_assertion ON ProductProblemLink(assertion_key)')
         conn.execute("""
-            CREATE TABLE ProductProblemLinkAssessmentEvent (
+            CREATE TABLE IF NOT EXISTS ProductProblemLinkAssessmentEvent (
                 event_id VARCHAR PRIMARY KEY, link_id VARCHAR NOT NULL,
                 assertion_key VARCHAR NULL, revision_no INTEGER NULL,
                 actor_id VARCHAR NOT NULL, actor_role VARCHAR NULL,
@@ -130,7 +131,8 @@ def migrate(db_path: str | Path) -> str:
                 correlation_id VARCHAR NULL, timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
         """)
-        conn.execute('CREATE INDEX ix_ppl_event_link_time ON ProductProblemLinkAssessmentEvent(link_id, timestamp)')
+        conn.execute('CREATE INDEX IF NOT EXISTS ix_ppl_event_link_time ON ProductProblemLinkAssessmentEvent(link_id, timestamp)')
+        conn.execute('CREATE INDEX IF NOT EXISTS ix_ProductProblemLinkAssessmentEvent_assertion_key ON ProductProblemLinkAssessmentEvent(assertion_key)')
         after_count = conn.execute('SELECT COUNT(*) FROM ProductProblemLink').fetchone()[0]
         if before_count != after_count:
             raise RuntimeError(f"Legacy row count changed: {before_count} -> {after_count}")
