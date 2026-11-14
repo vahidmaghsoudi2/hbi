@@ -127,6 +127,9 @@ def _validate_state(state: DialogueCaseState) -> None:
         if state.client_decision == ClientDecision.REJECTED:
             raise ValueError("A rejected decision cannot retain an active proposal")
 
+    if state.client_decision == ClientDecision.REJECTED and not state.rejected_proposal_ids:
+        raise ValueError("A rejected decision must retain a traceable rejected proposal identifier")
+
     if state.execution_consent_for_proposal_id is not None:
         validate_proposal_id(state.execution_consent_for_proposal_id)
         if (
