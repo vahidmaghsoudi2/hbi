@@ -148,6 +148,7 @@ def test_required_data_and_advice_gate_return_explicit_gaps(client, db_session):
     gate = _turn(
         client, _state(), "EVALUATE_ADVICE_GATE",
         data_complete=False, safety_passed=True, rule_valid=True, evidence_valid=True,
+        engine_ok=True,
     )
     assert gate.status_code == 200
     assert gate.json()["result"] == {"advice_allowed": False, "reason_codes": ["DATA_GAP"]}
@@ -413,7 +414,7 @@ def test_every_successful_http_action_preserves_non_publishing_envelope(client, 
         }),
         ("EVALUATE_ADVICE_GATE", _state(), {
             "data_complete": True, "safety_passed": True,
-            "rule_valid": True, "evidence_valid": True,
+            "rule_valid": True, "evidence_valid": True, "engine_ok": True,
         }),
         ("ATTACH_PROPOSAL", _state(), {
             "proposal_id": "SYNTHETIC-PROPOSAL-ENVELOPE-1",
@@ -651,6 +652,7 @@ def test_http_missing_evidence_returns_knowledge_gap_without_advice(client, db_s
         safety_passed=True,
         rule_valid=True,
         evidence_valid=False,
+        engine_ok=True,
     )
     assert response.status_code == 200
     body = response.json()
