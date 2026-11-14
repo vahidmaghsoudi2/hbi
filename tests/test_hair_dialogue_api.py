@@ -602,3 +602,21 @@ def test_hair_dialogue_runtime_has_no_alternate_http_method_entrypoint(client):
     for method in ["GET", "PUT", "PATCH", "DELETE"]:
         response = client.request(method, path)
         assert response.status_code == 405, (method, response.text)
+
+def test_http_rejects_action_irrelevant_fields_instead_of_silently_ignoring_them(client, db_session):
+    _grant_reviewer_qa(db_session)
+    cases = [
+        ("ANSWER_QUESTION", {"question_code": "STATUS_REASON", "answer_code": "STATUS_REASON", "proposal_id": "SYNTHETIC-UNRELATED"}),
+        ("EXPLAIN_REASON", {"reason_code": "DATA_GAP", "explicit_consent": True}),
+        ("RESOLVE_REQUIRED_DATA", {"recorded_fields": ["brand"], "required_fields": ["brand"], "new_goal_version": "goal-v2"}),
+        ("EVALUATE_ADVICE_GATE", {"data_complete": True, "safety_passed": True, "rule_valid": True, "evidence_valid": True, "invalidation_status": "INVALIDATE"}),
+        ("ATTACH_PROPOSAL", {"proposal_id": "SYNTHETIC-UNRELATED", "explicit_consent": True}),
+        ("ACCEPT_PROPOSAL", {"proposal_id": "SYNTHETIC-UNRELATED", "question_code": "STATUS_REASON"}),
+        ("REJECT_PROPOSAL", {"proposal_id": "SYNTHETIC-UNRELATED", "new_goal_version": "goal-v2"}),
+        ("RECORD_EXECUTION_CONSENT", {"proposal_id": "SYNTHETIC-UNRELATED", "explicit_consent": True, "reason_code": "DATA_GAP"}),
+        ("CHANGE_GOAL", {"new_goal_version": "goal-v2", "answer_code": "STATUS_REASON"}),
+        ("REASSESS_DEPENDENCIES", {"invalidation_status": "INVALIDATE", "proposal_id": "SYNTHETIC-UNRELATED"}),
+    ]
+    for action, fields in cases:
+        response = _turn(client, _state(), action, **fields)
+        assert response.status_code == 422, (action, response.text)
