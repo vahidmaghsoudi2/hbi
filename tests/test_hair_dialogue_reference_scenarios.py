@@ -155,9 +155,11 @@ def test_scenario_10_effective_or_unresolved_change_invalidates_dependent_decisi
         explicit_consent=True,
     )
 
-    preserved = apply_dependency_reassessment(accepted, "PRESERVE")
-    assert preserved.status == "PRESERVED"
-    assert preserved.state is accepted
+    unverified_preservation = apply_dependency_reassessment(accepted, "PRESERVE")
+    assert unverified_preservation.status == "ENGINE_FAIL_CLOSED"
+    assert unverified_preservation.state.active_proposal_id is None
+    assert unverified_preservation.state.client_decision == ClientDecision.NONE
+    assert unverified_preservation.state.execution_consent_for_proposal_id is None
 
     invalidated = apply_dependency_reassessment(accepted, "INVALIDATE")
     assert invalidated.status == "INVALIDATED"
