@@ -149,4 +149,5 @@ def test_each_chained_transition_returns_a_valid_immutable_state():
     assert snapshots[0].active_proposal_id is None
     assert snapshots[1].client_decision == ClientDecision.NONE
     assert snapshots[2].client_decision == ClientDecision.ACCEPTED
-    assert snapshots[2].execution_consent_for_proposal_id == "SYNTHETIC-PROPOSAL-CHAIN-1"
+    assert snapshots[2].execution_consent_for_proposal_id is None
+    assert snapshots[3].execution_consent_for_proposal_id == "SYNTHETIC-PROPOSAL-CHAIN-1"
