@@ -106,8 +106,8 @@ async def run_hair_dialogue_turn(
     _auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
 ):
     """Apply one approved dialogue transition to a synthetic state, without persistence."""
-    state = payload.state.to_domain()
     try:
+        state = payload.state.to_domain()
         # Validate every caller-supplied state reference before any action can echo it.
         validate_dialogue_state(state)
         if payload.proposal_id is not None:
