@@ -338,3 +338,15 @@ def test_stale_or_out_of_scope_response_cannot_publish_candidate_options(overrid
     """Approved stale/scope boundaries must suppress candidate options."""
     with pytest.raises(AdapterContractError, match="blocked consultation"):
         run(request(), response(**overrides))
+
+def test_engine_mutation_is_confined_to_a_deep_copied_request_snapshot():
+    supplied = request()
+    before = deepcopy(supplied)
+
+    def mutating_engine(engine_request):
+        engine_request["case_context"]["client_goal"]["value"] = "ENGINE-MUTATION"
+        engine_request["evidence_context"].clear()
+        return response(options=[])
+
+    HairColorAdapter(mutating_engine).evaluate(supplied)
+    assert supplied == before
