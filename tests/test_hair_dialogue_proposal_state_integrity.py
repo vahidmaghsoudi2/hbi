@@ -51,7 +51,7 @@ def test_proposal_identifier_rejects_blank_padded_or_malformed_values(value):
 ])
 def test_state_validation_rejects_invalid_proposal_references(field, value):
     with pytest.raises((TypeError, ValueError)):
-        validate_dialogue_state(_state(**{field: value}))
+        _state(**{field: value})
 
 
 def test_state_rejects_mutable_rejected_id_container_during_construction():
@@ -75,7 +75,7 @@ def test_state_rejects_mutable_rejected_id_container_during_construction():
 ])
 def test_state_rejects_inconsistent_proposal_decision_and_consent_combinations(overrides):
     with pytest.raises((TypeError, ValueError)):
-        validate_dialogue_state(_state(**overrides))
+        _state(**overrides)
 
 
 def test_valid_accepted_and_consented_state_passes_validation():
@@ -105,12 +105,11 @@ def test_all_proposal_transitions_reject_invalid_request_ids(bad_id):
 
 
 def test_rejected_decision_requires_traceable_rejected_proposal_id():
-    rejected_without_trace = _state(
-        active_proposal_id=None,
-        active_proposal_case_version=None,
-        active_proposal_goal_version=None,
-        client_decision=ClientDecision.REJECTED,
-        rejected_proposal_ids=(),
-    )
     with pytest.raises(ValueError, match="traceable rejected proposal"):
-        validate_dialogue_state(rejected_without_trace)
+        _state(
+            active_proposal_id=None,
+            active_proposal_case_version=None,
+            active_proposal_goal_version=None,
+            client_decision=ClientDecision.REJECTED,
+            rejected_proposal_ids=(),
+        )
