@@ -10,6 +10,7 @@ from dataclasses import asdict
 from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import SQLAlchemyError
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.authorization import get_roles_for_subject
@@ -117,7 +118,14 @@ async def require_hair_dialogue_internal_role(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    roles = get_roles_for_subject(db, subject_id)
+    try:
+        roles = get_roles_for_subject(db, subject_id)
+    except SQLAlchemyError as exc:
+        # Authorization must fail closed without exposing database diagnostics.
+        raise HTTPException(
+            status_code=503,
+            detail="Internal authorization service is temporarily unavailable",
+        ) from exc
     allowed_roles = {ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN}
     if not roles.intersection(allowed_roles):
         raise HTTPException(
