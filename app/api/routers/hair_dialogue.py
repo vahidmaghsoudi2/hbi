@@ -88,7 +88,7 @@ class HairDialogueTurnRequest(BaseModel):
     safety_passed: bool | None = None
     rule_valid: bool | None = None
     evidence_valid: bool | None = None
-    engine_ok: bool = True
+    engine_ok: bool | None = None
     proposal_id: str | None = None
     explicit_consent: bool = False
     new_goal_version: str | None = None
@@ -145,7 +145,7 @@ async def require_hair_dialogue_internal_role(
 
     try:
         roles = get_roles_for_subject(db, subject_id)
-    except SQLAlchemyError as exc:
+    except Exception as exc:
         # Authorization must fail closed without exposing database diagnostics.
         raise HTTPException(
             status_code=503,
@@ -230,7 +230,13 @@ async def run_hair_dialogue_turn(
                 "complete": resolved.complete,
             }
         elif action == "EVALUATE_ADVICE_GATE":
-            if None in (payload.data_complete, payload.safety_passed, payload.rule_valid, payload.evidence_valid):
+            if None in (
+                payload.data_complete,
+                payload.safety_passed,
+                payload.rule_valid,
+                payload.evidence_valid,
+                payload.engine_ok,
+            ):
                 raise ValueError("All advice gate inputs must be explicit.")
             gate = evaluate_advice_gate(
                 data_complete=payload.data_complete,
