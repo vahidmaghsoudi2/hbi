@@ -105,8 +105,8 @@ def _validate_state(state: DialogueCaseState) -> None:
 
     _validate_optional_version(state.active_proposal_case_version, field="active_proposal_case_version")
     _validate_optional_version(state.active_proposal_goal_version, field="active_proposal_goal_version")
-    if state.client_decision not in (ClientDecision.NONE, ClientDecision.ACCEPTED, ClientDecision.REJECTED):
-        raise ValueError("client_decision must be a valid ClientDecision")
+    if not isinstance(state.client_decision, ClientDecision):
+        raise ValueError("client_decision must be a ClientDecision enum value")
 
     if state.active_proposal_id is None:
         if state.active_proposal_case_version is not None or state.active_proposal_goal_version is not None:
