@@ -30,6 +30,10 @@ class DialogueCaseState:
     client_decision: ClientDecision = ClientDecision.NONE
     execution_consent_for_proposal_id: str | None = None
 
+    def __post_init__(self) -> None:
+        # Fail at construction, not only when a later transition consumes the state.
+        _validate_state(self)
+
 
 @dataclass(frozen=True)
 class DialogueReply:
