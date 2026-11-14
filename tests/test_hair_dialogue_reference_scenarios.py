@@ -260,6 +260,14 @@ def test_goal_change_requires_a_distinct_non_empty_version():
         change_goal(state, "goal-v1")
 
 
+def test_goal_change_rejects_padded_new_version_identifiers():
+    state = _state()
+    with pytest.raises(ValueError, match="unpadded"):
+        change_goal(state, " goal-v2")
+    with pytest.raises(ValueError, match="unpadded"):
+        change_goal(state, "goal-v2 ")
+
+
 def test_unknown_dependency_status_fails_closed_and_clears_decisions():
     state = accept_proposal(_active_state(), "SYNTHETIC-PROPOSAL-001")
     result = apply_dependency_reassessment(state, "UNRECOGNIZED_IMPACT")
