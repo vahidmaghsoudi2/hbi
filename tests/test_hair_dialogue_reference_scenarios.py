@@ -275,9 +275,17 @@ def test_goal_change_rejects_padded_new_version_identifiers():
         change_goal(state, "goal-v2 ")
 
 
-def test_unknown_dependency_status_fails_closed_and_clears_decisions():
-    state = accept_proposal(_active_state(), "SYNTHETIC-PROPOSAL-001")
-    result = apply_dependency_reassessment(state, "UNRECOGNIZED_IMPACT")
+@pytest.mark.parametrize(
+    "unverified_status",
+    ["PRESERVE", "UNRECOGNIZED_IMPACT", "INVALIDATE ", None, 123],
+)
+def test_unverified_dependency_status_fails_closed_and_clears_decisions(unverified_status):
+    state = record_execution_consent(
+        accept_proposal(_active_state(), "SYNTHETIC-PROPOSAL-001"),
+        "SYNTHETIC-PROPOSAL-001",
+        explicit_consent=True,
+    )
+    result = apply_dependency_reassessment(state, unverified_status)
     assert result.status == "ENGINE_FAIL_CLOSED"
     assert result.state.active_proposal_id is None
     assert result.state.client_decision == ClientDecision.NONE
