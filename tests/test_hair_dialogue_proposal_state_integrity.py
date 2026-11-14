@@ -135,3 +135,15 @@ def test_state_rejects_duplicate_rejected_proposal_identifiers():
 def test_state_rejects_blank_or_padded_current_versions(field, value):
     with pytest.raises(ValueError):
         _state(**{field: value})
+
+
+@pytest.mark.parametrize("case_id", [
+    "SYNTHETIC-",
+    "SYNTHETIC- REAL-CLIENT",
+    "SYNTHETIC-CASE/REAL",
+    "SYNTHETIC-CASE WITH SPACE",
+    "SYNTHETIC-CASE ",
+])
+def test_state_rejects_malformed_synthetic_case_identifiers(case_id):
+    with pytest.raises(ValueError, match="synthetic dialogue state"):
+        _state(case_id=case_id)
