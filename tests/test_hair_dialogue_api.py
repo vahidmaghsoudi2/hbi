@@ -315,3 +315,28 @@ def test_valid_synthetic_state_preserves_non_publishing_envelope_after_new_guard
     )
     assert response.status_code == 200
     _assert_non_publishing_envelope(response.json())
+
+def test_http_rejects_padded_or_empty_recorded_field_identifiers(client, db_session):
+    _grant_reviewer_qa(db_session)
+    for recorded_fields in [[" brand"], ["brand "], [""], [" "]]:
+        response = _turn(
+            client,
+            _state(),
+            "RESOLVE_REQUIRED_DATA",
+            recorded_fields=recorded_fields,
+            required_fields=["brand"],
+        )
+        assert response.status_code == 422
+
+
+def test_http_rejects_padded_goal_version_identifiers(client, db_session):
+    _grant_reviewer_qa(db_session)
+    for new_goal_version in [" goal-v2", "goal-v2 "]:
+        response = _turn(
+            client,
+            _state(),
+            "CHANGE_GOAL",
+            new_goal_version=new_goal_version,
+        )
+        assert response.status_code == 422
+
