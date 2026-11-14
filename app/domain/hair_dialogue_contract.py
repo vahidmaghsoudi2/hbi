@@ -339,8 +339,6 @@ def apply_dependency_reassessment(
 ) -> ReassessmentResult:
     """Invalidate dependent decisions on effective or unresolved changes."""
     _validate_state(state)
-    if invalidation_status == "PRESERVE":
-        return ReassessmentResult(state=state, status="PRESERVED")
     if invalidation_status == "INVALIDATE":
         status = "INVALIDATED"
     elif invalidation_status == "UNRESOLVED":
