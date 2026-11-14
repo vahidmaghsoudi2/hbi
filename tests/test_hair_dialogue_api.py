@@ -340,3 +340,15 @@ def test_http_rejects_padded_goal_version_identifiers(client, db_session):
         )
         assert response.status_code == 422
 
+def test_http_required_data_resolution_rejects_missing_or_empty_required_fields(client, db_session):
+    _grant_reviewer_qa(db_session)
+    for required_fields in [None, []]:
+        response = _turn(
+            client,
+            _state(),
+            "RESOLVE_REQUIRED_DATA",
+            recorded_fields=["brand"],
+            required_fields=required_fields,
+        )
+        assert response.status_code == 422
+\n
