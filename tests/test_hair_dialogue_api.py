@@ -237,6 +237,10 @@ def test_http_rejects_malformed_proposal_references_inside_supplied_state(client
     invalid_states = [
         _state(case_id="SYNTHETIC-CASE WITH SPACE"),
         _state(case_id="SYNTHETIC-CASE/REAL"),
+        _state(case_version=""),
+        _state(case_version=" case-v1"),
+        _state(goal_version=""),
+        _state(goal_version="goal-v1 "),
         _state(active_proposal_id=""),
         _state(rejected_proposal_ids=["SYNTHETIC-OK", "REAL-PROPOSAL"]),
         _state(rejected_proposal_ids=["SYNTHETIC-"]),
