@@ -92,7 +92,8 @@ class HairDialogueTurnRequest(BaseModel):
     proposal_id: str | None = None
     explicit_consent: bool = False
     new_goal_version: str | None = None
-    invalidation_status: str | None = None
+    # PRESERVE is intentionally excluded at the HTTP boundary: callers cannot prove dependencies are unchanged.
+    invalidation_status: Literal["INVALIDATE", "UNRESOLVED"] | None = None
 
 
 def _state_payload(state: DialogueCaseState) -> dict[str, Any]:
@@ -228,7 +229,11 @@ async def run_hair_dialogue_turn(
         elif action == "CHANGE_GOAL":
             next_state = change_goal(state, payload.new_goal_version or "")
         elif action == "REASSESS_DEPENDENCIES":
-            reassessment = apply_dependency_reassessment(state, payload.invalidation_status or "")
+            if payload.invalidation_status is None:
+                raise ValueError("A dependency reassessment outcome is required.")
+            reassessment = apply_dependency_reassessment(
+                state, payload.invalidation_status
+            )
             next_state = reassessment.state
             result = {"status": reassessment.status}
         if result is None:
