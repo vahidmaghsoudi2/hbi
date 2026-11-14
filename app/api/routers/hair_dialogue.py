@@ -11,7 +11,7 @@ from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import SQLAlchemyError
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.core.authorization import get_roles_for_subject
 from app.core.deps import get_current_customer_id, get_db
@@ -94,6 +94,30 @@ class HairDialogueTurnRequest(BaseModel):
     new_goal_version: str | None = None
     # PRESERVE is intentionally excluded at the HTTP boundary: callers cannot prove dependencies are unchanged.
     invalidation_status: Literal["INVALIDATE", "UNRESOLVED"] | None = None
+
+    @model_validator(mode="after")
+    def reject_action_irrelevant_fields(self):
+        """Reject cross-action fields instead of silently ignoring caller intent."""
+        allowed_fields = {
+            "ANSWER_QUESTION": {"question_code", "answer_code"},
+            "EXPLAIN_REASON": {"reason_code"},
+            "RESOLVE_REQUIRED_DATA": {"recorded_fields", "required_fields"},
+            "EVALUATE_ADVICE_GATE": {
+                "data_complete", "safety_passed", "rule_valid", "evidence_valid", "engine_ok"
+            },
+            "ATTACH_PROPOSAL": {"proposal_id"},
+            "ACCEPT_PROPOSAL": {"proposal_id"},
+            "REJECT_PROPOSAL": {"proposal_id"},
+            "RECORD_EXECUTION_CONSENT": {"proposal_id", "explicit_consent"},
+            "CHANGE_GOAL": {"new_goal_version"},
+            "REASSESS_DEPENDENCIES": {"invalidation_status"},
+        }
+        supplied = self.model_fields_set - {"action", "state"}
+        irrelevant = supplied - allowed_fields[self.action]
+        if irrelevant:
+            names = ", ".join(sorted(irrelevant))
+            raise ValueError(f"Fields not valid for {self.action}: {names}")
+        return self
 
 
 def _state_payload(state: DialogueCaseState) -> dict[str, Any]:
