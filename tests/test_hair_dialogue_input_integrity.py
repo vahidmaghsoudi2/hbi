@@ -129,3 +129,68 @@ def test_advice_gate_rejects_partial_boolean_input_set(client, db_session):
 
     assert response.status_code == 422
     assert "All advice gate inputs must be explicit" in response.json()["detail"]
+
+
+from itertools import product
+
+
+@pytest.mark.parametrize(
+    ("data_complete", "safety_passed", "rule_valid", "evidence_valid"),
+    list(product((False, True), repeat=4)),
+)
+def test_advice_gate_truth_table_never_allows_advice_with_a_failed_precondition(
+    client, db_session, data_complete, safety_passed, rule_valid, evidence_valid
+):
+    headers = _headers(
+        db_session,
+        f"truth-{int(data_complete)}-{int(safety_passed)}-{int(rule_valid)}-{int(evidence_valid)}",
+    )
+    response = client.post(
+        ENDPOINT,
+        headers=headers,
+        json={
+            "action": "EVALUATE_ADVICE_GATE",
+            "state": _state(),
+            "data_complete": data_complete,
+            "safety_passed": safety_passed,
+            "rule_valid": rule_valid,
+            "evidence_valid": evidence_valid,
+            "engine_ok": True,
+        },
+    )
+
+    assert response.status_code == 200
+    result = response.json()["result"]
+    if not safety_passed:
+        expected_reasons = ["SAFETY_STOP"]
+    else:
+        expected_reasons = []
+        if not data_complete:
+            expected_reasons.append("DATA_GAP")
+        if not rule_valid or not evidence_valid:
+            expected_reasons.append("KNOWLEDGE_GAP")
+    assert result["reason_codes"] == expected_reasons
+    assert result["advice_allowed"] is (not expected_reasons)
+
+
+def test_advice_gate_engine_failure_overrides_otherwise_valid_inputs(client, db_session):
+    headers = _headers(db_session, "engine-failure-precedence")
+    response = client.post(
+        ENDPOINT,
+        headers=headers,
+        json={
+            "action": "EVALUATE_ADVICE_GATE",
+            "state": _state(),
+            "data_complete": True,
+            "safety_passed": True,
+            "rule_valid": True,
+            "evidence_valid": True,
+            "engine_ok": False,
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["result"] == {
+        "advice_allowed": False,
+        "reason_codes": ["ENGINE_FAIL"],
+    }
