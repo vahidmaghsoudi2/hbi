@@ -506,7 +506,8 @@ test("Home Page captures all six Case-owned Needs before generating an eligible 
 
   expect(generateResponse.status(), await generateResponse.text()).toBe(200);
   const generatePayload = generateRequest.postDataJSON();
-  expect(generatePayload.customer_profile.concerns).toBe(selectedNeeds.join(", "));
+  // Current Case answers are the source of truth; do not duplicate them in profile payload.
+  expect(generatePayload.customer_profile).toEqual({});
   const generated = await generateResponse.json();
   expect(Array.isArray(generated)).toBeTruthy();
   expect(generated.length).toBeGreaterThan(0);
@@ -520,10 +521,25 @@ test("Home Page captures all six Case-owned Needs before generating an eligible 
   await expect(page.getByRole("heading", { name: "نتایج ارزیابی برای اپراتور" })).toBeVisible();
   const session = await page.evaluate(() => ({
     caseId: sessionStorage.getItem("hbi_case_id"),
+    customerId: sessionStorage.getItem("hbi_customer_id"),
     token: sessionStorage.getItem("hbi_access_token"),
   }));
   expect(session.caseId).toBeTruthy();
+  expect(session.customerId).toBeTruthy();
   expect(session.token).toBeTruthy();
+
+  const caseRead = await request.get(
+    `${api}/cases/customer/${encodeURIComponent(session.customerId)}`,
+    { headers: { Authorization: `Bearer ${session.token}` } }
+  );
+  expect(caseRead.status()).toBe(200);
+  const caseRows = await caseRead.json();
+  const currentCase = caseRows.find(row => row.case_id === session.caseId);
+  expect(currentCase).toBeTruthy();
+  const caseEvidence = JSON.parse(currentCase.evidence_gaps);
+  const primaryAnswer = caseEvidence.answers.find(item => item.question_id === "skin.primary_need.v2");
+  expect(primaryAnswer.value).toEqual(selectedNeeds);
+  expect(primaryAnswer.source).toBe("CURRENT_CASE_CONSULTATION");
 
   const nextQuestion = await request.get(
     `${api}/recommendations/next-question/${encodeURIComponent(session.caseId)}`,

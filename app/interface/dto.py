@@ -30,6 +30,8 @@ class CaseDTO:
     case_id: str
     customer_id: str
     case_type: str
+    # Customer-owned consultation answers; returned only with the Case.
+    evidence_gaps: Optional[str] = None
 
 @dataclass
 class RecommendationDTO:

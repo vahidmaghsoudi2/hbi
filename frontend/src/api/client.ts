@@ -142,6 +142,11 @@ export interface SkinNextQuestionResponse {
   status: "QUESTION_REQUIRED" | "NO_QUESTION";
   question: null | {
     question_id: string;
+    factor: string;
+    answer_type?: "SINGLE_SELECT" | "MULTI_SELECT" | "TEXT";
+    prompt?: string;
+    helper?: string;
+    max_length?: number;
     options: Array<{ value: string; label: string }>;
   };
 }

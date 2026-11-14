@@ -52,6 +52,37 @@ const CONCERN_OPTIONS = [
 ] as const;
 
 const SKIN_OPTIONS = ["خشک", "چرب", "مختلط", "معمولی", "حساس"] as const;
+const DURATION_OPTIONS = [
+  { value: "less_than_week", label: "کمتر از یک هفته" },
+  { value: "one_to_four_weeks", label: "۱ تا ۴ هفته" },
+  { value: "one_to_three_months", label: "۱ تا ۳ ماه" },
+  { value: "over_three_months", label: "بیش از ۳ ماه" },
+  { value: "unknown", label: "نامشخص" },
+] as const;
+const SEVERITY_OPTIONS = [
+  { value: "mild", label: "کم" },
+  { value: "moderate", label: "متوسط" },
+  { value: "high", label: "زیاد" },
+  { value: "unknown", label: "نامشخص" },
+] as const;
+const AREA_OPTIONS = [
+  { value: "face", label: "صورت" },
+  { value: "body", label: "بدن" },
+  { value: "face_and_body", label: "صورت و بدن" },
+  { value: "scalp", label: "پوست سر" },
+  { value: "hands", label: "دست‌ها" },
+  { value: "other", label: "ناحیه دیگر" },
+  { value: "unknown", label: "نامشخص" },
+] as const;
+const AGGRAVATING_OPTIONS = [
+  { value: "sun_exposure", label: "آفتاب" },
+  { value: "heat", label: "گرما" },
+  { value: "cold_weather", label: "هوای سرد" },
+  { value: "friction", label: "اصطکاک" },
+  { value: "sweat", label: "تعریق" },
+  { value: "cosmetics", label: "برخی محصولات آرایشی/بهداشتی" },
+  { value: "other", label: "عامل دیگر" },
+] as const;
 const CONSULTATION_LINES = [{ id: "SKIN", label: "پوست" }] as const;
 const INITIAL_RECOMMENDATION_LIMIT = 5;
 
@@ -74,6 +105,11 @@ export default function NewHomePage() {
   const [consultationLine, setConsultationLine] = useState<string>("SKIN");
   const [concerns, setConcerns] = useState<string[]>([]);
   const [skin, setSkin] = useState<string[]>([]);
+  const [duration, setDuration] = useState("unknown");
+  const [severity, setSeverity] = useState("unknown");
+  const [affectedArea, setAffectedArea] = useState("unknown");
+  const [aggravatingFactors, setAggravatingFactors] = useState<string[]>([]);
+  const [productHistory, setProductHistory] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
@@ -357,6 +393,11 @@ export default function NewHomePage() {
       setMobile(customer.mobile ?? "");
       setConcerns(customer.concerns ? customer.concerns.split(",").map((x) => x.trim()).filter(Boolean) : []);
       setSkin(customer.skin_profile ? customer.skin_profile.split(",").map((x) => x.trim()).filter(Boolean) : []);
+      setDuration("unknown");
+      setSeverity("unknown");
+      setAffectedArea("unknown");
+      setAggravatingFactors([]);
+      setProductHistory("");
       setNote("");
       setRecs([]);
       setRecDone(false);
@@ -569,6 +610,11 @@ export default function NewHomePage() {
     setConsultationLine("SKIN");
     setConcerns([]);
     setSkin([]);
+    setDuration("unknown");
+    setSeverity("unknown");
+    setAffectedArea("unknown");
+    setAggravatingFactors([]);
+    setProductHistory("");
     setNote("");
     setRecs([]);
     setRecDone(false);
@@ -616,26 +662,40 @@ export default function NewHomePage() {
       sessionStorage.setItem("hbi_case_id", newCaseId);
       setCaseId(newCaseId);
       setStatusMsg("مراجعه ثبت شد. در حال دریافت پیشنهاد…");
-      // Every selected Need must first be captured as explicit Case-owned evidence.
-      const nextQuestion = await getSkinNextQuestion(newCaseId, currentToken);
-      if (nextQuestion.status !== "QUESTION_REQUIRED" || !nextQuestion.question) {
-        throw new Error("سؤال ثبت شواهد مشاوره برای این پرونده در دسترس نیست.");
+      // Persist all eight customer-reported factors on this Case before generating.
+      const answerForFactor = (factor: string): string[] => {
+        switch (factor) {
+          case "concerns": return concerns;
+          case "skin_profile": return skin.length ? skin : ["unknown"];
+          case "duration": return [duration || "unknown"];
+          case "self_reported_severity": return [severity || "unknown"];
+          case "affected_area": return [affectedArea || "unknown"];
+          case "aggravating_factors": return aggravatingFactors.length ? aggravatingFactors : ["unknown"];
+          case "product_history": return [productHistory.trim() || "unknown"];
+          case "additional_context": return [note.trim() || "unknown"];
+          default: throw new Error(`پرسش پشتیبانی‌نشده در گردش مشاوره: ${factor}`);
+        }
+      };
+      let nextQuestion = await getSkinNextQuestion(newCaseId, currentToken);
+      let answeredQuestions = 0;
+      while (nextQuestion.status === "QUESTION_REQUIRED" && nextQuestion.question) {
+        if (answeredQuestions >= 8) throw new Error("تعداد پرسش‌های مشاوره از حد مجاز بیشتر شد.");
+        const question = nextQuestion.question;
+        await answerSkinNextQuestion(
+          newCaseId,
+          question.question_id,
+          answerForFactor(question.factor),
+          currentToken
+        );
+        answeredQuestions += 1;
+        nextQuestion = await getSkinNextQuestion(newCaseId, currentToken);
       }
-      await answerSkinNextQuestion(
-        newCaseId,
-        nextQuestion.question.question_id,
-        concerns,
-        currentToken
-      );
+      if (nextQuestion.status !== "NO_QUESTION") {
+        throw new Error("پاسخ‌های مشاوره در پرونده همین جلسه کامل ثبت نشدند؛ پیشنهاد محصول اجرا نشد.");
+      }
+      setStatusMsg("پاسخ‌های همین جلسه در پرونده ذخیره شد. در حال دریافت پیشنهاد…");
       const list = await generateRecommendations(
-        {
-          case_id: newCaseId,
-          customer_profile: {
-            concerns: concernsText,
-            skin_profile: skin.join(",") || undefined,
-            operator_notes: note.trim() || undefined,
-          },
-        },
+        { case_id: newCaseId, customer_profile: {} },
         currentToken
       );
       const publicList = Array.isArray(list) ? list : [];
@@ -1149,11 +1209,49 @@ export default function NewHomePage() {
                 </div>
               </fieldset>
               <fieldset className="pro-fieldset">
-                <legend>۵) توضیح</legend>
-                <textarea className="pro-input pro-textarea" value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder="نکته اختیاری…" />
+                <legend>۵) مدت وجود نگرانی</legend>
+                <label className="pro-label" htmlFor="consult-duration">مدت</label>
+                <select id="consult-duration" className="pro-input" value={duration} onChange={(e) => setDuration(e.target.value)}>
+                  {DURATION_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                </select>
+              </fieldset>
+              <fieldset className="pro-fieldset">
+                <legend>۶) شدت از نگاه مشتری</legend>
+                <label className="pro-label" htmlFor="consult-severity">شدت خوداظهاری</label>
+                <select id="consult-severity" className="pro-input" value={severity} onChange={(e) => setSeverity(e.target.value)}>
+                  {SEVERITY_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                </select>
+                <p className="pro-muted">این پاسخ برداشت شخصی مشتری است و ارزیابی شدت بالینی محسوب نمی‌شود.</p>
+              </fieldset>
+              <fieldset className="pro-fieldset">
+                <legend>۷) ناحیه درگیر از نگاه مشتری</legend>
+                <label className="pro-label" htmlFor="consult-area">ناحیه</label>
+                <select id="consult-area" className="pro-input" value={affectedArea} onChange={(e) => setAffectedArea(e.target.value)}>
+                  {AREA_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                </select>
+              </fieldset>
+              <fieldset className="pro-fieldset">
+                <legend>۸) عوامل تشدیدکننده گزارش‌شده</legend>
+                <div className="pro-checks">
+                  {AGGRAVATING_OPTIONS.map((item) => (
+                    <label key={item.value} className="pro-check-card">
+                      <input type="checkbox" checked={aggravatingFactors.includes(item.value)} onChange={() => toggleIn(aggravatingFactors, item.value, setAggravatingFactors)} />
+                      <span>{item.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              <fieldset className="pro-fieldset">
+                <legend>۹) سابقه مصرف محصولات پوستی</legend>
+                <textarea id="consult-product-history" className="pro-input pro-textarea" value={productHistory} onChange={(e) => setProductHistory(e.target.value)} rows={3} maxLength={600} placeholder="نام محصول و واکنش گزارش‌شده توسط مشتری…" />
+                <p className="pro-muted">این متن گزارش مشتری است؛ علت یا حساسیت از آن استنتاج نمی‌شود.</p>
+              </fieldset>
+              <fieldset className="pro-fieldset">
+                <legend>۱۰) توضیح تکمیلی مشتری</legend>
+                <textarea id="consult-additional-context" className="pro-input pro-textarea" value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={600} placeholder="توضیح اختیاری مشتری…" />
                 {concernsText ? (
                   <p className="pro-summary">
-                    خلاصه: <strong>{concernsText}</strong>
+                    موضوع‌های انتخاب‌شده: <strong>{concernsText}</strong>
                   </p>
                 ) : null}
               </fieldset>
