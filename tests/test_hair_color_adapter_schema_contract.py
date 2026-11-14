@@ -77,7 +77,7 @@ def test_schema_string_and_version_definitions_keep_runtime_minimums():
 
     assert nonempty["type"] == "string"
     assert nonempty["minLength"] == 1
-    assert nonempty["pattern"] == r"\\S"
+    assert nonempty["pattern"] == r"\S"
     assert version["type"] == "integer"
     assert version["minimum"] == 1
 
