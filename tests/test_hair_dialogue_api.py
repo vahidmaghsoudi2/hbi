@@ -569,3 +569,30 @@ def test_hair_dialogue_accepts_only_exact_internal_role_values(client, db_sessio
             headers=_headers_for_claims({"sub": subject_id}),
         )
         assert response.status_code == 403, (role, response.text)
+
+
+def test_hair_dialogue_rejects_client_supplied_identity_or_role_claims(client, db_session):
+    _grant_reviewer_qa(db_session)
+    for field, value in [
+        ("role", "Admin"),
+        ("roles", ["Admin"]),
+        ("actor_id", "another-user"),
+        ("subject_id", "another-user"),
+        ("is_admin", True),
+    ]:
+        response = _turn(
+            client,
+            _state(),
+            "ANSWER_QUESTION",
+            question_code="STATUS_REASON",
+            answer_code="STATUS_REASON",
+            **{field: value},
+        )
+        assert response.status_code == 422, (field, response.text)
+
+
+def test_hair_dialogue_runtime_has_no_alternate_http_method_entrypoint(client):
+    path = "/api/v1/hair/dialogue/turn"
+    for method in ["GET", "PUT", "PATCH", "DELETE"]:
+        response = client.request(method, path)
+        assert response.status_code == 405, (method, response.text)
