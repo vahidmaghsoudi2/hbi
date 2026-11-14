@@ -7,6 +7,7 @@ import AccountingHomePage from "./pages/AccountingHomePage";
 import InventoryHomePage from "./pages/InventoryHomePage";
 import PurchasePage from "./pages/PurchasePage";
 import AdminLoginPage from "./pages/AdminLoginPage";
+import HairSpecialistPreviewPage from "./pages/HairSpecialistPreviewPage";
 
 function AdminGate({ children }: { children: ReactNode }) {
   const token = sessionStorage.getItem("hbi_admin_access_token");
@@ -17,6 +18,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<AdminLoginPage />} />
+      <Route path="/hair/specialist-preview" element={<AdminGate><HairSpecialistPreviewPage /></AdminGate>} />
       <Route path="/" element={<AdminGate><NewHomePage /></AdminGate>} />
       <Route path="/catalog" element={<Navigate to="/" replace />} />
       {/* HBI has one system user: the Admin/Operator. Customer records do not

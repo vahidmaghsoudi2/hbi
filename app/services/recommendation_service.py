@@ -401,6 +401,12 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         return conflicts
 
     def generate_recommendations(self, case_id: str, customer_profile: Dict = None) -> List[Recommendation]:
+        case_row = self.db.query(Case).filter(Case.case_id == case_id).first()
+        case_type = getattr(case_row, "case_type", None)
+        if (case_type or "").strip().upper() in {"HAIR", "CATALOG_READY"}:
+            raise ValueError(
+                "HAIR/CATALOG_READY requests are outside the legacy RecommendationService scope."
+            )
         if customer_profile is None:
             customer_profile = {}
         decision_state = self._build_decision_state(case_id, customer_profile)
@@ -412,8 +418,6 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         if decision_state["medical_context_active"]:
             decision_state["decision_status"] = "REFERRAL"
         products = self.product_repo.find_by_identity_status_and_active("VERIFIED")
-        case_row = self.db.query(Case).filter(Case.case_id == case_id).first()
-        case_type = getattr(case_row, "case_type", None)
         products = [
             product for product in products
             if _candidate_matches_case_product_line(product, case_type)
