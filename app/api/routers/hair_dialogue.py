@@ -12,7 +12,8 @@ from typing import Any, Literal
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.core.authorization import require_any_role
+from app.core.authorization import get_roles_for_subject
+from app.core.deps import get_current_customer_id, get_db
 from app.domain.hair_dialogue_contract import (
     ClientDecision,
     DialogueCaseState,
@@ -100,10 +101,36 @@ def _state_payload(state: DialogueCaseState) -> dict[str, Any]:
     return result
 
 
+async def require_hair_dialogue_internal_role(
+    subject_id=Depends(get_current_customer_id),
+    db=Depends(get_db),
+):
+    """Require a canonical authenticated actor and an exact internal role."""
+    if (
+        not isinstance(subject_id, str)
+        or not subject_id
+        or subject_id != subject_id.strip()
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="A non-empty canonical authenticated actor is required",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    roles = get_roles_for_subject(db, subject_id)
+    allowed_roles = {ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN}
+    if not roles.intersection(allowed_roles):
+        raise HTTPException(
+            status_code=403,
+            detail="Hair dialogue runtime requires an authorized internal role",
+        )
+    return subject_id, roles
+
+
 @router.post("/dialogue/turn")
 async def run_hair_dialogue_turn(
     payload: HairDialogueTurnRequest,
-    _auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
+    _auth=Depends(require_hair_dialogue_internal_role),
 ):
     """Apply one approved dialogue transition to a synthetic state, without persistence."""
     try:
