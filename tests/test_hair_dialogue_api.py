@@ -351,4 +351,4 @@ def test_http_required_data_resolution_rejects_missing_or_empty_required_fields(
             required_fields=required_fields,
         )
         assert response.status_code == 422
-\n
+
