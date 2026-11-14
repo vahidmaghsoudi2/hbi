@@ -150,6 +150,15 @@ async def run_hair_dialogue_turn(
             result = {"summary_fa": explain_reason(reason_text)}
         elif action == "RESOLVE_REQUIRED_DATA":
             fields = payload.recorded_fields or []
+            if any(
+                not isinstance(field, str)
+                or not field.strip()
+                or field != field.strip()
+                for field in fields
+            ):
+                raise ValueError(
+                    "recorded_fields must contain non-empty, unpadded field names"
+                )
             if len(set(fields)) != len(fields):
                 raise ValueError("recorded_fields must not contain duplicates")
             # The HTTP contract accepts field-presence markers only, never client values.
