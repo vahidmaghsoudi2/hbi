@@ -3,6 +3,7 @@ import pytest
 
 from app.domain.hair_dialogue_contract import (
     ClientDecision,
+    DialogueCaseState,
     accept_proposal,
     attach_proposal,
     record_execution_consent,
