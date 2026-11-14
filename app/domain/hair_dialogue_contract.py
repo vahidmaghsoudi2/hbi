@@ -310,8 +310,12 @@ def change_goal(
 ) -> DialogueCaseState:
     """Create a fresh goal version and clear only the proposal/decisions it invalidates."""
     _validate_state(state)
-    if not isinstance(new_goal_version, str) or not new_goal_version.strip():
-        raise ValueError("A non-empty new goal version is required")
+    if (
+        not isinstance(new_goal_version, str)
+        or not new_goal_version.strip()
+        or new_goal_version != new_goal_version.strip()
+    ):
+        raise ValueError("A non-empty, unpadded new goal version is required")
     if new_goal_version == state.goal_version:
         raise ValueError("A changed goal requires a new goal version")
     return replace(
