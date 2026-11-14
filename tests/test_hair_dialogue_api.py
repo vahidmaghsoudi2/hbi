@@ -472,3 +472,100 @@ def test_http_dependency_reassessment_preserves_or_clears_prior_consent_correctl
         assert response.json()["state"]["active_proposal_id"] is None
         assert response.json()["state"]["client_decision"] == "NONE"
         assert response.json()["state"]["execution_consent_for_proposal_id"] is None
+
+
+def _headers_for_claims(claims):
+    token = create_access_token(claims)
+    return {"Authorization": f"Bearer {token}"}
+
+
+def test_hair_dialogue_rejects_missing_or_noncanonical_actor_identity(client, db_session):
+    from app.models.user_role import ROLE_REVIEWER_QA, UserRole
+
+    # Even a mistakenly provisioned blank/whitespace subject must not authorize a caller.
+    for index, subject_id in enumerate(["", " ", "  actor  "]):
+        db_session.add(UserRole(
+            user_role_id=f"HAIR-DIALOGUE-BLANK-ACTOR-{index}",
+            subject_id=subject_id,
+            role=ROLE_REVIEWER_QA,
+        ))
+    db_session.commit()
+
+    cases = [
+        ({}, 401),
+        ({"sub": ""}, 401),
+        ({"sub": " "}, 401),
+        ({"sub": "  actor  "}, 401),
+        ({"sub": 12345}, 401),
+    ]
+    for claims, expected_status in cases:
+        response = client.post(
+            "/api/v1/hair/dialogue/turn",
+            json={
+                "action": "ANSWER_QUESTION",
+                "state": _state(),
+                "question_code": "STATUS_REASON",
+                "answer_code": "STATUS_REASON",
+            },
+            headers=_headers_for_claims(claims),
+        )
+        assert response.status_code == expected_status, (claims, response.text)
+
+    unauthenticated = client.post(
+        "/api/v1/hair/dialogue/turn",
+        json={"action": "ANSWER_QUESTION", "state": _state()},
+    )
+    assert unauthenticated.status_code == 401
+
+
+def test_hair_dialogue_accepts_only_exact_internal_role_values(client, db_session):
+    from app.models.user_role import ROLE_ADMIN, ROLE_PO, ROLE_REVIEWER_QA, UserRole
+
+    allowed = [ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN]
+    for index, role in enumerate(allowed):
+        subject_id = f"hair-dialogue-canonical-role-{index}"
+        db_session.add(UserRole(
+            user_role_id=f"HAIR-DIALOGUE-CANONICAL-ROLE-{index}",
+            subject_id=subject_id,
+            role=role,
+        ))
+    db_session.commit()
+
+    for index, role in enumerate(allowed):
+        subject_id = f"hair-dialogue-canonical-role-{index}"
+        response = client.post(
+            "/api/v1/hair/dialogue/turn",
+            json={
+                "action": "ANSWER_QUESTION",
+                "state": _state(),
+                "question_code": "STATUS_REASON",
+                "answer_code": "STATUS_REASON",
+            },
+            headers=_headers_for_claims({"sub": subject_id}),
+        )
+        assert response.status_code == 200, (role, response.text)
+        _assert_non_publishing_envelope(response.json())
+
+    denied_roles = ["reviewer/qa", "reviewer_qa", "REVIEWER/QA", "Reviewer/QA ", "Editor"]
+    for index, role in enumerate(denied_roles):
+        subject_id = f"hair-dialogue-noncanonical-role-{index}"
+        db_session.add(UserRole(
+            user_role_id=f"HAIR-DIALOGUE-NONCANONICAL-ROLE-{index}",
+            subject_id=subject_id,
+            role=role,
+        ))
+    db_session.commit()
+
+    for index, role in enumerate(denied_roles):
+        subject_id = f"hair-dialogue-noncanonical-role-{index}"
+        response = client.post(
+            "/api/v1/hair/dialogue/turn",
+            json={
+                "action": "ANSWER_QUESTION",
+                "state": _state(),
+                "question_code": "STATUS_REASON",
+                "answer_code": "STATUS_REASON",
+            },
+            headers=_headers_for_claims({"sub": subject_id}),
+        )
+        assert response.status_code == 403, (role, response.text)
