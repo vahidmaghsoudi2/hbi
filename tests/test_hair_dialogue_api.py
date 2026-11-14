@@ -230,3 +230,86 @@ def test_multiturn_http_flow_keeps_acceptance_consent_and_goal_version_separate(
     assert body["state"]["active_proposal_id"] is None
     assert body["state"]["client_decision"] == "NONE"
     assert body["state"]["execution_consent_for_proposal_id"] is None
+
+
+def test_http_rejects_malformed_proposal_references_inside_supplied_state(client, db_session):
+    import pytest
+
+    _grant_reviewer_qa(db_session)
+    invalid_states = [
+        _state(active_proposal_id=""),
+        _state(rejected_proposal_ids=["SYNTHETIC-OK", "REAL-PROPOSAL"]),
+        _state(rejected_proposal_ids=["SYNTHETIC-"]),
+        _state(
+            active_proposal_id="SYNTHETIC-PROPOSAL-1",
+            active_proposal_case_version="case-v1",
+            active_proposal_goal_version="goal-v1",
+            client_decision="ACCEPTED",
+            execution_consent_for_proposal_id="REAL-PROPOSAL",
+        ),
+        _state(
+            active_proposal_id=None,
+            active_proposal_case_version=None,
+            active_proposal_goal_version=None,
+            client_decision="ACCEPTED",
+        ),
+        _state(
+            active_proposal_id="SYNTHETIC-PROPOSAL-1",
+            active_proposal_case_version="stale-case",
+        ),
+    ]
+    for malformed_state in invalid_states:
+        response = _turn(
+            client, malformed_state, "ANSWER_QUESTION",
+            question_code="STATUS_REASON", answer_code="STATUS_REASON",
+        )
+        assert response.status_code == 422
+
+
+def test_http_rejects_invalid_request_proposal_id_for_every_lifecycle_action(client, db_session):
+    import pytest
+
+    _grant_reviewer_qa(db_session)
+    valid_active = _state(
+        active_proposal_id="SYNTHETIC-PROPOSAL-1",
+        active_proposal_case_version="case-v1",
+        active_proposal_goal_version="goal-v1",
+        client_decision="ACCEPTED",
+    )
+    valid_empty = _state()
+    cases = [
+        ("ATTACH_PROPOSAL", valid_empty),
+        ("ACCEPT_PROPOSAL", valid_active),
+        ("REJECT_PROPOSAL", valid_active),
+        ("RECORD_EXECUTION_CONSENT", valid_active),
+    ]
+    for action, state in cases:
+        for proposal_id in ["", " ", "SYNTHETIC-", " SYNTHETIC-X", "SYNTHETIC-X ", "REAL-X"]:
+            response = _turn(
+                client, state, action, proposal_id=proposal_id,
+                explicit_consent=True,
+            )
+            assert response.status_code == 422
+
+
+def test_http_rejects_missing_request_proposal_id_for_lifecycle_actions(client, db_session):
+    _grant_reviewer_qa(db_session)
+    for action in ["ATTACH_PROPOSAL", "ACCEPT_PROPOSAL", "REJECT_PROPOSAL",
+                   "RECORD_EXECUTION_CONSENT"]:
+        response = _turn(client, _state(), action, explicit_consent=True)
+        assert response.status_code == 422
+
+
+def test_valid_synthetic_state_preserves_non_publishing_envelope_after_new_guards(client, db_session):
+    _grant_reviewer_qa(db_session)
+    response = _turn(
+        client,
+        _state(active_proposal_id="SYNTHETIC-PROPOSAL-VALID",
+               active_proposal_case_version="case-v1",
+               active_proposal_goal_version="goal-v1"),
+        "ANSWER_QUESTION",
+        question_code="STATUS_REASON",
+        answer_code="STATUS_REASON",
+    )
+    assert response.status_code == 200
+    _assert_non_publishing_envelope(response.json())
