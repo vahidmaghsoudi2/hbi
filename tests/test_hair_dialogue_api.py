@@ -265,8 +265,6 @@ def test_http_rejects_malformed_proposal_references_inside_supplied_state(client
 
 
 def test_http_rejects_invalid_request_proposal_id_for_every_lifecycle_action(client, db_session):
-    import pytest
-
     _grant_reviewer_qa(db_session)
     valid_active = _state(
         active_proposal_id="SYNTHETIC-PROPOSAL-1",
