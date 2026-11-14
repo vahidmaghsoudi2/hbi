@@ -147,3 +147,21 @@ def test_state_rejects_blank_or_padded_current_versions(field, value):
 def test_state_rejects_malformed_synthetic_case_identifiers(case_id):
     with pytest.raises(ValueError, match="synthetic dialogue state"):
         _state(case_id=case_id)
+
+
+def test_replacing_or_rejecting_consented_proposal_clears_execution_consent():
+    accepted = accept_proposal(_state(), "SYNTHETIC-PROPOSAL-1")
+    consented = record_execution_consent(
+        accepted, "SYNTHETIC-PROPOSAL-1", explicit_consent=True
+    )
+
+    replacement = attach_proposal(consented, "SYNTHETIC-PROPOSAL-2")
+    assert replacement.active_proposal_id == "SYNTHETIC-PROPOSAL-2"
+    assert replacement.client_decision == ClientDecision.NONE
+    assert replacement.execution_consent_for_proposal_id is None
+
+    rejected = reject_proposal(consented, "SYNTHETIC-PROPOSAL-1")
+    assert rejected.active_proposal_id is None
+    assert rejected.client_decision == ClientDecision.REJECTED
+    assert rejected.execution_consent_for_proposal_id is None
+    assert "SYNTHETIC-PROPOSAL-1" in rejected.rejected_proposal_ids
