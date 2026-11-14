@@ -3,7 +3,6 @@ import pytest
 
 from app.domain.hair_dialogue_contract import (
     ClientDecision,
-    DialogueCaseState,
     accept_proposal,
     attach_proposal,
     record_execution_consent,
@@ -72,6 +71,7 @@ def test_state_rejects_mutable_rejected_id_container_even_when_dataclass_is_froz
     {"execution_consent_for_proposal_id": "SYNTHETIC-PROPOSAL-1"},
     {"active_proposal_id": "SYNTHETIC-PROPOSAL-1",
      "rejected_proposal_ids": ("SYNTHETIC-PROPOSAL-1",)},
+    {"client_decision": "ACCEPTED"},
 ])
 def test_state_rejects_inconsistent_proposal_decision_and_consent_combinations(overrides):
     with pytest.raises((TypeError, ValueError)):
