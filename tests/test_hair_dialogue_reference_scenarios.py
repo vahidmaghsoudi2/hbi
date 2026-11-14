@@ -214,6 +214,20 @@ def test_required_data_resolver_rejects_malformed_field_contracts():
         resolve_required_data({}, ("brand", "brand"))
 
 
+def test_required_data_resolver_rejects_padded_field_identifiers():
+    with pytest.raises(ValueError, match="unpadded"):
+        resolve_required_data({"brand": "SYNTHETIC"}, (" brand",))
+    with pytest.raises(ValueError, match="unpadded"):
+        resolve_required_data({"brand": "SYNTHETIC"}, ("brand ",))
+
+
+def test_required_data_resolver_uses_exact_field_keys_without_normalizing():
+    result = resolve_required_data({" brand ": "SYNTHETIC"}, ("brand",))
+    assert result.known_values == ()
+    assert result.missing_fields == ("brand",)
+    assert result.complete is False
+
+
 def test_safety_gate_prevents_advice_even_when_other_gates_pass():
     gate = evaluate_advice_gate(
         data_complete=True,
