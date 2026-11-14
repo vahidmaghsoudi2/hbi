@@ -178,12 +178,16 @@ def resolve_required_data(
     """Use recorded values only; report exact missing fields and never infer them."""
     if not isinstance(recorded_data, Mapping):
         raise TypeError("recorded_data must be a mapping")
-    if not isinstance(required_fields, tuple) or not all(
-        isinstance(field, str) and field.strip() and field == field.strip()
-        for field in required_fields
+    if (
+        not isinstance(required_fields, tuple)
+        or not required_fields
+        or not all(
+            isinstance(field, str) and field.strip() and field == field.strip()
+            for field in required_fields
+        )
     ):
         raise ValueError(
-            "required_fields must be a tuple of non-empty, unpadded field names"
+            "required_fields must be a non-empty tuple of non-empty, unpadded field names"
         )
     if len(set(required_fields)) != len(required_fields):
         raise ValueError("required_fields must not contain duplicates")
