@@ -620,3 +620,43 @@ def test_http_rejects_action_irrelevant_fields_instead_of_silently_ignoring_them
     for action, fields in cases:
         response = _turn(client, _state(), action, **fields)
         assert response.status_code == 422, (action, response.text)
+
+
+def test_http_reason_explanations_are_client_safe_and_explicit(client, db_session):
+    _grant_reviewer_qa(db_session)
+    expected = {
+        "CATALOG_ONLY": "این خروجی فقط زمینهٔ هویت کاتالوگی مصنوعی را پوشش می‌دهد.",
+        "DATA_GAP": "دادهٔ ضروری کافی نیست؛ نتیجهٔ قطعی ارائه نمی‌شود.",
+        "KNOWLEDGE_GAP": "شاهد یا قاعدهٔ معتبر کافی نیست؛ حدس زده نمی‌شود.",
+        "SAFETY_STOP": "شرط ایمنی تأیید نشده است؛ مسیر متوقف می‌ماند.",
+    }
+    for reason_code, summary in expected.items():
+        response = _turn(client, _state(), "EXPLAIN_REASON", reason_code=reason_code)
+        assert response.status_code == 200, (reason_code, response.text)
+        body = response.json()
+        _assert_non_publishing_envelope(body)
+        assert body["result"] == {"summary_fa": summary}
+
+    invalid = _turn(client, _state(), "EXPLAIN_REASON", reason_code="ENGINE_FAIL")
+    assert invalid.status_code == 422
+
+
+def test_http_missing_evidence_returns_knowledge_gap_without_advice(client, db_session):
+    _grant_reviewer_qa(db_session)
+    response = _turn(
+        client,
+        _state(),
+        "EVALUATE_ADVICE_GATE",
+        data_complete=True,
+        safety_passed=True,
+        rule_valid=True,
+        evidence_valid=False,
+    )
+    assert response.status_code == 200
+    body = response.json()
+    _assert_non_publishing_envelope(body)
+    assert body["result"] == {
+        "advice_allowed": False,
+        "reason_codes": ["KNOWLEDGE_GAP"],
+    }
+    assert body["recommendation"] is None
