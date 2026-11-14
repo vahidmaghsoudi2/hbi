@@ -113,3 +113,25 @@ def test_rejected_decision_requires_traceable_rejected_proposal_id():
             client_decision=ClientDecision.REJECTED,
             rejected_proposal_ids=(),
         )
+
+
+def test_state_rejects_duplicate_rejected_proposal_identifiers():
+    with pytest.raises(ValueError, match="must not contain duplicates"):
+        _state(
+            active_proposal_id=None,
+            active_proposal_case_version=None,
+            active_proposal_goal_version=None,
+            rejected_proposal_ids=("SYNTHETIC-REJECTED-1", "SYNTHETIC-REJECTED-1"),
+            client_decision=ClientDecision.REJECTED,
+        )
+
+
+@pytest.mark.parametrize("field,value", [
+    ("case_version", ""),
+    ("case_version", " case-v2"),
+    ("goal_version", ""),
+    ("goal_version", "goal-v2 "),
+])
+def test_state_rejects_blank_or_padded_current_versions(field, value):
+    with pytest.raises(ValueError):
+        _state(**{field: value})
