@@ -438,7 +438,7 @@ def test_every_successful_http_action_preserves_non_publishing_envelope(client, 
         _assert_non_publishing_envelope(response.json())
 
 
-def test_http_dependency_reassessment_preserves_or_clears_prior_consent_correctly(client, db_session):
+def test_http_dependency_reassessment_cannot_caller_assert_preservation(client, db_session):
     _grant_reviewer_qa(db_session)
     consented = _state(
         active_proposal_id="SYNTHETIC-PROPOSAL-REASSESS-1",
@@ -448,19 +448,19 @@ def test_http_dependency_reassessment_preserves_or_clears_prior_consent_correctl
         execution_consent_for_proposal_id="SYNTHETIC-PROPOSAL-REASSESS-1",
     )
 
+    # PRESERVE is not an HTTP option: the request cannot prove dependencies are unchanged.
     preserved = _turn(
         client, consented, "REASSESS_DEPENDENCIES",
         invalidation_status="PRESERVE",
     )
-    assert preserved.status_code == 200
-    _assert_non_publishing_envelope(preserved.json())
-    assert preserved.json()["result"]["status"] == "PRESERVED"
-    assert preserved.json()["state"]["execution_consent_for_proposal_id"] == "SYNTHETIC-PROPOSAL-REASSESS-1"
+    assert preserved.status_code == 422
+
+    missing = _turn(client, consented, "REASSESS_DEPENDENCIES")
+    assert missing.status_code == 422
 
     for status, expected in [
         ("INVALIDATE", "INVALIDATED"),
         ("UNRESOLVED", "REASSESSMENT_REQUIRED"),
-        ("UNRECOGNIZED_IMPACT", "ENGINE_FAIL_CLOSED"),
     ]:
         response = _turn(
             client, consented, "REASSESS_DEPENDENCIES",
@@ -473,6 +473,11 @@ def test_http_dependency_reassessment_preserves_or_clears_prior_consent_correctl
         assert response.json()["state"]["client_decision"] == "NONE"
         assert response.json()["state"]["execution_consent_for_proposal_id"] is None
 
+    malformed = _turn(
+        client, consented, "REASSESS_DEPENDENCIES",
+        invalidation_status="UNRECOGNIZED_IMPACT",
+    )
+    assert malformed.status_code == 422
 
 def _headers_for_claims(claims):
     token = create_access_token(claims)
