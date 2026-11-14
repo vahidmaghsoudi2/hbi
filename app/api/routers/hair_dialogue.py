@@ -35,7 +35,7 @@ router = APIRouter()
 
 
 class DialogueStateInput(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", strict=True)
 
     case_id: str
     case_version: str
@@ -62,7 +62,7 @@ class DialogueStateInput(BaseModel):
 
 
 class HairDialogueTurnRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", strict=True)
 
     action: Literal[
         "ANSWER_QUESTION",
