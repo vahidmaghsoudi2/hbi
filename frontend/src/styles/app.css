@@ -108,3 +108,54 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   gap: 1rem;
   margin-top: 1.5rem;
 }
+
+
+/* Hair specialist preview — synthetic-only internal workspace */
+.hair-specialist-page { max-width: 1180px; }
+.hair-specialist-page .hair-specialist-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0 1rem;
+}
+.hair-specialist-page .hair-specialist-dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0.8rem 1.2rem;
+  margin: 0;
+}
+.hair-specialist-page .hair-specialist-dl > div {
+  min-width: 0;
+  padding: 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+.hair-specialist-page dt { color: var(--muted); font-size: 0.82rem; }
+.hair-specialist-page dd { margin: 0.25rem 0 0; overflow-wrap: anywhere; }
+.hair-specialist-page .hash-value { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.78rem; }
+.hair-specialist-page li { margin: 0.45rem 0; }
+.hair-specialist-page pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 640px) {
+  .hair-specialist-page { padding: 1rem; }
+  .hair-specialist-page .row { align-items: stretch; }
+  .hair-specialist-page .row > * { max-width: 100%; }
+}
+.hair-specialist-page .hair-specialist-contract-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 0.45rem 1rem;
+  list-style: none;
+  padding: 0;
+}
+.hair-specialist-page .hair-specialist-contract-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  padding: 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  margin: 0;
+}
+.hair-specialist-page .hair-specialist-contract-list .meta { overflow-wrap: anywhere; }

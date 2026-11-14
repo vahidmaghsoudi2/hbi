@@ -813,6 +813,7 @@ export default function NewHomePage() {
             </div>
           </div>
           <div className="pro-actions" style={{ alignItems: "center", justifyContent: "flex-end" }}>
+            <Link className="pro-btn-secondary" to="/hair/specialist-preview">نمای متخصص رنگ مو</Link>
             {pageView !== "main" ? (
               <button type="button" className="pro-btn-secondary" onClick={() => { setError(null); setReturnToDashboard(false); setReturnToCatalog(false); setPageView("main"); }}>منوی اصلی</button>
             ) : null}
