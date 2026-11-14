@@ -216,3 +216,13 @@ def test_http_advice_gate_requires_explicit_engine_health(client, db_session):
     assert engine_failure["result"] == {
         "advice_allowed": False, "reason_codes": ["ENGINE_FAIL"]
     }
+
+    explicitly_healthy = _assert_envelope(
+        _turn(
+            client, _state(), "EVALUATE_ADVICE_GATE",
+            **required, engine_ok=True,
+        )
+    )
+    assert explicitly_healthy["result"] == {
+        "advice_allowed": True, "reason_codes": []
+    }
