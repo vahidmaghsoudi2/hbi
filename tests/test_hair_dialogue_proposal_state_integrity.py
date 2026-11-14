@@ -54,10 +54,9 @@ def test_state_validation_rejects_invalid_proposal_references(field, value):
         validate_dialogue_state(_state(**{field: value}))
 
 
-def test_state_rejects_mutable_rejected_id_container_even_when_dataclass_is_frozen():
-    injected = _state(rejected_proposal_ids=["SYNTHETIC-REJECTED"])
+def test_state_rejects_mutable_rejected_id_container_during_construction():
     with pytest.raises(TypeError, match="immutable tuple"):
-        validate_dialogue_state(injected)
+        _state(rejected_proposal_ids=["SYNTHETIC-REJECTED"])
 
 
 @pytest.mark.parametrize("overrides", [
