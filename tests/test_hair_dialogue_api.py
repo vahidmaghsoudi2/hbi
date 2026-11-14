@@ -388,3 +388,87 @@ def test_http_rejects_non_string_state_identifiers_without_coercion(client, db_s
             answer_code="STATUS_REASON",
         )
         assert response.status_code == 422, (field, response.text)
+
+
+def test_every_successful_http_action_preserves_non_publishing_envelope(client, db_session):
+    _grant_reviewer_qa(db_session)
+    active = _state(
+        active_proposal_id="SYNTHETIC-PROPOSAL-ENVELOPE-1",
+        active_proposal_case_version="case-v1",
+        active_proposal_goal_version="goal-v1",
+    )
+    accepted = _state(
+        active_proposal_id="SYNTHETIC-PROPOSAL-ENVELOPE-1",
+        active_proposal_case_version="case-v1",
+        active_proposal_goal_version="goal-v1",
+        client_decision="ACCEPTED",
+    )
+    actions = [
+        ("ANSWER_QUESTION", _state(), {
+            "question_code": "STATUS_REASON", "answer_code": "STATUS_REASON",
+        }),
+        ("EXPLAIN_REASON", _state(), {"reason_code": "DATA_GAP"}),
+        ("RESOLVE_REQUIRED_DATA", _state(), {
+            "recorded_fields": ["brand"], "required_fields": ["brand", "history"],
+        }),
+        ("EVALUATE_ADVICE_GATE", _state(), {
+            "data_complete": True, "safety_passed": True,
+            "rule_valid": True, "evidence_valid": True,
+        }),
+        ("ATTACH_PROPOSAL", _state(), {
+            "proposal_id": "SYNTHETIC-PROPOSAL-ENVELOPE-1",
+        }),
+        ("ACCEPT_PROPOSAL", active, {
+            "proposal_id": "SYNTHETIC-PROPOSAL-ENVELOPE-1",
+        }),
+        ("REJECT_PROPOSAL", active, {
+            "proposal_id": "SYNTHETIC-PROPOSAL-ENVELOPE-1",
+        }),
+        ("RECORD_EXECUTION_CONSENT", accepted, {
+            "proposal_id": "SYNTHETIC-PROPOSAL-ENVELOPE-1",
+            "explicit_consent": True,
+        }),
+        ("CHANGE_GOAL", _state(), {"new_goal_version": "goal-v2"}),
+        ("REASSESS_DEPENDENCIES", _state(), {"invalidation_status": "PRESERVE"}),
+    ]
+
+    for action, state, fields in actions:
+        response = _turn(client, state, action, **fields)
+        assert response.status_code == 200, (action, response.text)
+        _assert_non_publishing_envelope(response.json())
+
+
+def test_http_dependency_reassessment_preserves_or_clears_prior_consent_correctly(client, db_session):
+    _grant_reviewer_qa(db_session)
+    consented = _state(
+        active_proposal_id="SYNTHETIC-PROPOSAL-REASSESS-1",
+        active_proposal_case_version="case-v1",
+        active_proposal_goal_version="goal-v1",
+        client_decision="ACCEPTED",
+        execution_consent_for_proposal_id="SYNTHETIC-PROPOSAL-REASSESS-1",
+    )
+
+    preserved = _turn(
+        client, consented, "REASSESS_DEPENDENCIES",
+        invalidation_status="PRESERVE",
+    )
+    assert preserved.status_code == 200
+    _assert_non_publishing_envelope(preserved.json())
+    assert preserved.json()["result"]["status"] == "PRESERVED"
+    assert preserved.json()["state"]["execution_consent_for_proposal_id"] == "SYNTHETIC-PROPOSAL-REASSESS-1"
+
+    for status, expected in [
+        ("INVALIDATE", "INVALIDATED"),
+        ("UNRESOLVED", "REASSESSMENT_REQUIRED"),
+        ("UNRECOGNIZED_IMPACT", "ENGINE_FAIL_CLOSED"),
+    ]:
+        response = _turn(
+            client, consented, "REASSESS_DEPENDENCIES",
+            invalidation_status=status,
+        )
+        assert response.status_code == 200, (status, response.text)
+        _assert_non_publishing_envelope(response.json())
+        assert response.json()["result"]["status"] == expected
+        assert response.json()["state"]["active_proposal_id"] is None
+        assert response.json()["state"]["client_decision"] == "NONE"
+        assert response.json()["state"]["execution_consent_for_proposal_id"] is None
