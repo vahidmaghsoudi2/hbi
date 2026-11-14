@@ -65,6 +65,7 @@ class ReassessmentResult:
 
 
 _SYNTHETIC_PROPOSAL_ID = re.compile(r"^SYNTHETIC-[A-Za-z0-9][A-Za-z0-9._:-]*$")
+_SYNTHETIC_CASE_ID = re.compile(r"^SYNTHETIC-[A-Za-z0-9][A-Za-z0-9._:-]*$")
 
 
 def validate_proposal_id(proposal_id: str) -> None:
@@ -88,9 +89,7 @@ def _validate_state(state: DialogueCaseState) -> None:
         raise TypeError("state must be a DialogueCaseState")
     if (
         not isinstance(state.case_id, str)
-        or not state.case_id.startswith("SYNTHETIC-")
-        or state.case_id == "SYNTHETIC-"
-        or state.case_id != state.case_id.strip()
+        or _SYNTHETIC_CASE_ID.fullmatch(state.case_id) is None
         or not isinstance(state.case_version, str)
         or not state.case_version.strip()
         or state.case_version != state.case_version.strip()
