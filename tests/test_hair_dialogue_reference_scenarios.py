@@ -172,13 +172,12 @@ def test_scenario_10_effective_or_unresolved_change_invalidates_dependent_decisi
 
 
 def test_dialogue_contract_rejects_non_synthetic_case_state():
-    invalid = DialogueCaseState(
-        case_id="REAL-CLIENT-001",
-        case_version="case-v1",
-        goal_version="goal-v1",
-    )
     with pytest.raises(ValueError, match="synthetic"):
-        answer_question(invalid, question="question", answer="answer")
+        DialogueCaseState(
+            case_id="REAL-CLIENT-001",
+            case_version="case-v1",
+            goal_version="goal-v1",
+        )
 
 
 def test_advice_gate_uses_fail_closed_priority():
@@ -191,7 +190,6 @@ def test_advice_gate_uses_fail_closed_priority():
     )
     assert gate.advice_allowed is False
     assert gate.reason_codes == ("ENGINE_FAIL",)
-
 
 
 def test_dialogue_contract_rejects_wrong_state_type():
