@@ -214,6 +214,11 @@ def test_required_data_resolver_rejects_malformed_field_contracts():
         resolve_required_data({}, ("brand", "brand"))
 
 
+def test_required_data_resolver_rejects_empty_required_field_contract():
+    with pytest.raises(ValueError, match="non-empty tuple"):
+        resolve_required_data({"brand": "SYNTHETIC"}, ())
+
+
 def test_required_data_resolver_rejects_padded_field_identifiers():
     with pytest.raises(ValueError, match="unpadded"):
         resolve_required_data({"brand": "SYNTHETIC"}, (" brand",))
