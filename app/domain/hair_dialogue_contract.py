@@ -6,9 +6,9 @@ All state is immutable and must use a SYNTHETIC- case identifier.
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, replace
 from enum import Enum
-import re
 from typing import Any, Mapping
 
 
