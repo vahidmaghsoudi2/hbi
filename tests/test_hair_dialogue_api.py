@@ -233,8 +233,6 @@ def test_multiturn_http_flow_keeps_acceptance_consent_and_goal_version_separate(
 
 
 def test_http_rejects_malformed_proposal_references_inside_supplied_state(client, db_session):
-    import pytest
-
     _grant_reviewer_qa(db_session)
     invalid_states = [
         _state(active_proposal_id=""),
