@@ -103,3 +103,15 @@ def test_all_proposal_transitions_reject_invalid_request_ids(bad_id):
             bad_id,
             explicit_consent=True,
         )
+
+
+def test_rejected_decision_requires_traceable_rejected_proposal_id():
+    rejected_without_trace = _state(
+        active_proposal_id=None,
+        active_proposal_case_version=None,
+        active_proposal_goal_version=None,
+        client_decision=ClientDecision.REJECTED,
+        rejected_proposal_ids=(),
+    )
+    with pytest.raises(ValueError, match="traceable rejected proposal"):
+        validate_dialogue_state(rejected_without_trace)
