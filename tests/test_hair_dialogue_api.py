@@ -429,7 +429,7 @@ def test_every_successful_http_action_preserves_non_publishing_envelope(client, 
             "explicit_consent": True,
         }),
         ("CHANGE_GOAL", _state(), {"new_goal_version": "goal-v2"}),
-        ("REASSESS_DEPENDENCIES", _state(), {"invalidation_status": "PRESERVE"}),
+        ("REASSESS_DEPENDENCIES", _state(), {"invalidation_status": "INVALIDATE"}),
     ]
 
     for action, state, fields in actions:
@@ -473,11 +473,12 @@ def test_http_dependency_reassessment_cannot_caller_assert_preservation(client, 
         assert response.json()["state"]["client_decision"] == "NONE"
         assert response.json()["state"]["execution_consent_for_proposal_id"] is None
 
-    malformed = _turn(
-        client, consented, "REASSESS_DEPENDENCIES",
-        invalidation_status="UNRECOGNIZED_IMPACT",
-    )
-    assert malformed.status_code == 422
+    for invalid_value in ["PRESERVE", "UNRECOGNIZED_IMPACT", "INVALIDATE ", 123, True, []]:
+        malformed = _turn(
+            client, consented, "REASSESS_DEPENDENCIES",
+            invalidation_status=invalid_value,
+        )
+        assert malformed.status_code == 422, (invalid_value, malformed.text)
 
 def _headers_for_claims(claims):
     token = create_access_token(claims)
