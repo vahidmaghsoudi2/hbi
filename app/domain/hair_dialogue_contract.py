@@ -179,9 +179,12 @@ def resolve_required_data(
     if not isinstance(recorded_data, Mapping):
         raise TypeError("recorded_data must be a mapping")
     if not isinstance(required_fields, tuple) or not all(
-        isinstance(field, str) and field.strip() for field in required_fields
+        isinstance(field, str) and field.strip() and field == field.strip()
+        for field in required_fields
     ):
-        raise ValueError("required_fields must be a tuple of non-empty field names")
+        raise ValueError(
+            "required_fields must be a tuple of non-empty, unpadded field names"
+        )
     if len(set(required_fields)) != len(required_fields):
         raise ValueError("required_fields must not contain duplicates")
 
