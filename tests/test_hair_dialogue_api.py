@@ -133,7 +133,7 @@ def test_rejected_proposal_cannot_be_reactivated(client, db_session):
     assert reactivated.status_code == 422
 
 
-def test_required_data_is_reported_and_unavailable_engine_blocks_advice(client, db_session):
+def test_unavailable_engine_preempts_required_data_gate(client, db_session):
     _grant_reviewer_qa(db_session)
     resolved = _turn(
         client, _state(), "RESOLVE_REQUIRED_DATA",
