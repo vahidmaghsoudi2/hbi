@@ -72,6 +72,16 @@ def test_specialist_output_gate_defaults_to_engine_fail_closed():
     assert _evaluate_specialist_output(_output()).status == GateStatus.ENGINE_FAIL
 
 
+@pytest.mark.parametrize(
+    "readiness",
+    [EngineReadiness.UNHEALTHY, EngineReadiness.STALE, "HEALTHY", None],
+)
+def test_specialist_output_gate_accepts_only_typed_healthy_readiness(readiness):
+    gate = _evaluate_specialist_output(_output(), engine_readiness=readiness)
+    assert gate.status == GateStatus.ENGINE_FAIL
+    assert gate.publishable_to_internal_review is False
+
+
 def test_complete_evidence_opens_internal_review_only():
     gate = evaluate_specialist_output(_output())
     assert gate.status == GateStatus.READY_FOR_SPECIALIST_REVIEW
