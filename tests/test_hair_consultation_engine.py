@@ -367,7 +367,7 @@ def test_synthetic_engine_failure_does_not_echo_caller_version_tokens():
         {"facts": (_fact("goal"),)},
         {"specialist_assessment_required": True},
         {"product_identity_ref": None},
-        {"evidence": (_evidence(status="SECONDARY_ONLY"),)},
+        {"evidence": (_evidence(evidence_ref="SYNTHETIC-EVIDENCE-PRIVATE-MARKER", status="SECONDARY_ONLY"),)},
         {"rules": (_rule(status="REVIEWED"),)},
         {"no_option_cause": "NEEDS_INFORMATION"},
         {"no_option_cause": "NEEDS_IN_PERSON_REVIEW"},
@@ -399,14 +399,15 @@ def test_blocked_outputs_do_not_echo_caller_identifiers_versions_or_evidence_ref
     private_case_version = "private-case-version-marker"
     private_target_version = "private-target-version-marker"
     private_evidence_ref = "SYNTHETIC-EVIDENCE-PRIVATE-MARKER"
-    request = _request(
-        case_id=private_case_id,
-        case_version=private_case_version,
-        target_version=private_target_version,
-        evidence=(_evidence(evidence_ref=private_evidence_ref),),
-        rules=(_rule(evidence_refs=(private_evidence_ref,)),),
-        **changes,
-    )
+    request_values = {
+        "case_id": private_case_id,
+        "case_version": private_case_version,
+        "target_version": private_target_version,
+        "evidence": (_evidence(evidence_ref=private_evidence_ref),),
+        "rules": (_rule(evidence_refs=(private_evidence_ref,)),),
+    }
+    request_values.update(changes)
+    request = _request(**request_values)
 
     result = evaluate_hair_consultation(request)
 
