@@ -1,9 +1,9 @@
 """Fail-closed, computed-only HBI Hair consultation decision kernel.
 
 This is a safety-gate kernel, not a product-selection or colour-formula engine.
-It evaluates synthetic case completeness, current service scope, safety,
-and evidence/rule traceability. Candidate selection is deliberately disabled:
-no product options, chemical instructions, or client recommendations are returned.
+It evaluates synthetic case completeness, current service scope, and safety.
+Any supplied candidate payload is immediately blocked as out of scope; no
+product options, chemical instructions, or client recommendations are returned.
 """
 from __future__ import annotations
 
@@ -151,7 +151,6 @@ class HairConsultationResult:
 
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _ALLOWED_RULE_SCOPE = "HAIR_COLOR_RECOMMENDATION"
-_MAX_OPTIONS = 3
 CANDIDATE_SELECTION_ENABLED = False
 _ALLOWED_NO_OPTION_CAUSES = frozenset({
     "NEEDS_INFORMATION",
@@ -160,10 +159,6 @@ _ALLOWED_NO_OPTION_CAUSES = frozenset({
     "OUT_OF_SCOPE",
     "NOT_FEASIBLE_REQUIRES_SPECIALIST",
 })
-_FORBIDDEN_INSTRUCTION_PATTERN = re.compile(
-    r"(?:formula|developer|oxidant|peroxide|mixing|ratio|minutes|%|فرمول|اکسیدان|درصد|نسبت|دقیقه|زمان مکث)",
-    re.IGNORECASE,
-)
 
 
 def _failure(request: HairConsultationRequest, summary: str) -> HairConsultationResult:
@@ -418,8 +413,8 @@ def evaluate_hair_consultation(request: HairConsultationRequest) -> HairConsulta
     """Evaluate a synthetic case through ordered, fail-closed decision gates.
 
     The function does not generate colour formulas or application directions.
-    Candidate options must come from an internal rule evaluator and must be
-    bound to active specialist-reviewed rules and VERIFIED_APPLICABLE evidence.
+    Candidate selection is disabled. Any candidate payload is withheld as
+    OUT_OF_V1_SCOPE; this function only handles safety and information gates.
     """
     if not isinstance(request, HairConsultationRequest):
         raise TypeError("request must be a HairConsultationRequest")
@@ -450,6 +445,16 @@ def evaluate_hair_consultation(request: HairConsultationRequest) -> HairConsulta
             reason_code="OUT_OF_SCOPE",
             summary="This service kind is outside the currently enabled Hair service scope.",
             next_step="Do not route this request through the catalog-only service.",
+        )
+
+    if request.candidates:
+        return _blocked(
+            request,
+            engine_state="STOP_OR_REFER_WITH_REASON",
+            consultation_status="OUT_OF_V1_SCOPE",
+            reason_code="OUT_OF_SCOPE",
+            summary="Product-option selection is disabled in this non-operational safety kernel.",
+            next_step="Do not present or rank product options; use only safety, data-gap, and referral handling.",
         )
 
     try:
@@ -511,17 +516,6 @@ def evaluate_hair_consultation(request: HairConsultationRequest) -> HairConsulta
             next_step="Obtain and review the exact product documents and applicable rule evidence; do not infer chemistry.",
         )
 
-    if request.candidates:
-        return _blocked(
-            request,
-            engine_state="STOP_OR_REFER_WITH_REASON",
-            consultation_status="OUT_OF_V1_SCOPE",
-            reason_code="OUT_OF_SCOPE",
-            summary="Product-option selection is disabled in this non-operational safety kernel.",
-            evidence_refs=tuple(sorted(verified_evidence)),
-            next_step="Do not present or rank product options; use only safety, data-gap, and referral handling.",
-        )
-
     if request.no_option_cause is not None:
         return _no_option_result(
             request,
@@ -529,71 +523,12 @@ def evaluate_hair_consultation(request: HairConsultationRequest) -> HairConsulta
             tuple(sorted(verified_evidence)),
         )
 
-    if len(request.candidates) > _MAX_OPTIONS:
-        return _failure(request, "Candidate selection is disabled in this safety-only kernel.")
-
-    option_refs: set[str] = set()
-    output_options: list[HairConsultationOption] = []
-    all_evidence_refs: set[str] = set()
-    active_rule_refs = set(active_rules)
-    expected_ranks = list(range(1, len(request.candidates) + 1))
-    actual_ranks = [option.rank for option in request.candidates]
-    if actual_ranks != expected_ranks:
-        return _failure(request, "Candidate ranks must be unique and sequential from one.")
-
-    for option in request.candidates:
-        if (
-            not isinstance(option.option_ref, str)
-            or not option.option_ref.strip()
-            or option.option_ref in option_refs
-            or not isinstance(option.summary, str)
-            or not option.summary.strip()
-            or _FORBIDDEN_INSTRUCTION_PATTERN.search(option.summary)
-            or isinstance(option.rank, bool)
-            or not isinstance(option.rank, int)
-            or not isinstance(option.rule_refs, tuple)
-            or not option.rule_refs
-            or not all(isinstance(ref, str) and ref.strip() for ref in option.rule_refs)
-            or len(set(option.rule_refs)) != len(option.rule_refs)
-            or not isinstance(option.evidence_refs, tuple)
-            or not option.evidence_refs
-            or not all(isinstance(ref, str) and ref.strip() for ref in option.evidence_refs)
-            or len(set(option.evidence_refs)) != len(option.evidence_refs)
-            or not set(option.rule_refs).issubset(active_rule_refs)
-            or not set(option.evidence_refs).issubset(verified_evidence)
-        ):
-            return _failure(request, "Candidate option is not fully bound to active rules and verified evidence, or contains prohibited instruction text.")
-        option_refs.add(option.option_ref)
-        all_evidence_refs.update(option.evidence_refs)
-        output_options.append(
-            HairConsultationOption(
-                option_ref=option.option_ref,
-                summary=option.summary,
-                rank=option.rank,
-                rule_refs=option.rule_refs,
-                evidence_refs=option.evidence_refs,
-            )
-        )
-
-    return HairConsultationResult(
-        run_outcome="SUCCESS",
-        case_id=request.case_id,
-        case_version=request.case_version,
-        target_version=request.target_version,
-        engine_state="SUGGESTION_REVIEWABLE",
-        consultation_status="SYSTEM_REASONED_SUGGESTION",
-        reason_codes=(),
-        summary="A candidate set passed the current synthetic evidence and rule gates; it remains a proposal, not execution authorization.",
-        options=tuple(output_options),
-        missing_information=(),
-        evidence_refs=tuple(sorted(all_evidence_refs)),
-        limitations=(
-            "No chemical formula, developer selection, processing time, or application instruction is generated.",
-            "No final colour or damage outcome is guaranteed.",
-            "The result is computed-only and is not published by this engine.",
-        ),
-        next_step="Resolve current case/target versions and publication eligibility in the Orchestrator.",
+    return _failure(
+        request,
+        "No candidate payload or explicit blocking cause was supplied; no valid outcome can be determined.",
     )
+
+
 
 
 __all__ = [
