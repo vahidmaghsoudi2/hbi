@@ -534,3 +534,15 @@ Acceptance evidence required from CI:
 - Run `pytest -q tests/test_hair_case_contract.py`.
 - Run the repository's full required CI workflow on the exact PR merge ref.
 - Confirm no schema/migration or customer-storage paths are introduced by this package.
+
+
+### 18.1 Exact PR verification evidence
+
+- PR: [#580](https://github.com/vahidmaghsoudi2/hbi/pull/580), Draft and unmerged.
+- Tested PR merge ref: `1936daeff300c6a4e68c4d6db08b6a0421f2717e`; branch head at the time: `4eaa85d84fffe992a5357d497e04b2bc8ec7aca2`.
+- HBI CI run `43758694445`: success; test, governance and isolated smoke jobs all succeeded.
+- HBI Auto Tasks run `43758694458`: success; `1046 passed, 801 warnings` in 56.28 seconds.
+- HBI Pilot Browser Proof run `43758694456`: success.
+- Artifacts: coverage `14179551540`, G8 regression `14178932996`, isolated smoke `14178563815`, browser proof `14179466870`, Auto Tasks evidence `14179371428`.
+- The earlier test-fixture failure on a previous merge ref was corrected before this successful verification.
+- These results establish only synthetic software conformance. They do not approve the logical contract on behalf of the PO, authorize persistence, or validate scientific/product-specific hair-colour rules.
