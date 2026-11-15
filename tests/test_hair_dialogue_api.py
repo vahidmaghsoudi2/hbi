@@ -158,6 +158,7 @@ def test_runtime_rejects_real_case_ids_and_unrecognized_request_fields(client, d
     real_case = _turn(client, _state(case_id="REAL-CLIENT-001"), "ANSWER_QUESTION",
                       question_code="STATUS_REASON", answer_code="STATUS_REASON")
     assert real_case.status_code == 422
+    assert "REAL-CLIENT-001" not in real_case.text
     malformed = _turn(client, _state(), "ANSWER_QUESTION",
                       question_code="STATUS_REASON", answer_code="STATUS_REASON", customer_id="must-not-be-accepted")
     assert malformed.status_code == 422
