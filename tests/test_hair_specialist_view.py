@@ -213,6 +213,7 @@ def test_specialist_preview_returns_internal_evidence_and_limits_only(client, db
     assert body["decision"]["client_visible"] is False
     assert body["evidence"]
     assert body["lineage"]["persistence"] == "COMPUTED_ONLY"
+    assert body["lineage"]["run_id"].startswith("SYNTHETIC-")
     assert body["limitations"]
 
 
