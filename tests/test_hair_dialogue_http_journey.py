@@ -42,7 +42,10 @@ def _assert_envelope(response):
     return body
 
 
-def test_all_ten_dialogue_scenarios_complete_as_one_http_journey(client, db_session):
+def test_all_ten_dialogue_scenarios_complete_as_one_http_journey(client, db_session, monkeypatch):
+    import app.api.routers.hair_dialogue as hair_dialogue
+    from app.domain.hair_dialogue_contract import EngineReadiness
+    monkeypatch.setattr(hair_dialogue, "get_hair_dialogue_engine_readiness", lambda: EngineReadiness.HEALTHY)
     db_session.add(
         UserRole(
             user_role_id="HAIR-DIALOGUE-HTTP-JOURNEY-ROLE",
@@ -100,7 +103,7 @@ def test_all_ten_dialogue_scenarios_complete_as_one_http_journey(client, db_sess
         _turn(
             client, second_question, "EVALUATE_ADVICE_GATE",
             data_complete=False, safety_passed=True, rule_valid=True,
-            evidence_valid=True, engine_ok=True,
+            evidence_valid=True,
         )
     )
     assert data_gap["result"] == {
@@ -163,7 +166,7 @@ def test_all_ten_dialogue_scenarios_complete_as_one_http_journey(client, db_sess
         _turn(
             client, consented, "EVALUATE_ADVICE_GATE",
             data_complete=True, safety_passed=True, rule_valid=True,
-            evidence_valid=False, engine_ok=True,
+            evidence_valid=False,
         )
     )
     assert knowledge_gap["result"] == {
@@ -183,7 +186,7 @@ def test_all_ten_dialogue_scenarios_complete_as_one_http_journey(client, db_sess
     assert reassessed["state"]["execution_consent_for_proposal_id"] is None
 
 
-def test_http_advice_gate_requires_explicit_engine_health(client, db_session):
+def test_http_advice_gate_uses_server_readiness_and_rejects_caller_override(client, db_session, monkeypatch):
     db_session.add(
         UserRole(
             user_role_id="HAIR-DIALOGUE-HTTP-ENGINE-ROLE",
@@ -199,30 +202,25 @@ def test_http_advice_gate_requires_explicit_engine_health(client, db_session):
         "evidence_valid": True,
     }
 
-    omitted = _turn(client, _state(), "EVALUATE_ADVICE_GATE", **required)
-    assert omitted.status_code == 422
-
-    explicit_null = _turn(
-        client, _state(), "EVALUATE_ADVICE_GATE", **required, engine_ok=None
+    unavailable = _assert_envelope(
+        _turn(client, _state(), "EVALUATE_ADVICE_GATE", **required)
     )
-    assert explicit_null.status_code == 422
-
-    engine_failure = _assert_envelope(
-        _turn(
-            client, _state(), "EVALUATE_ADVICE_GATE",
-            **required, engine_ok=False,
-        )
-    )
-    assert engine_failure["result"] == {
+    assert unavailable["result"] == {
         "advice_allowed": False, "reason_codes": ["ENGINE_FAIL"]
     }
 
-    explicitly_healthy = _assert_envelope(
-        _turn(
-            client, _state(), "EVALUATE_ADVICE_GATE",
-            **required, engine_ok=True,
-        )
+    caller_override = _turn(
+        client, _state(), "EVALUATE_ADVICE_GATE", **required, engine_ok=True
     )
-    assert explicitly_healthy["result"] == {
-        "advice_allowed": True, "reason_codes": []
-    }
+    assert caller_override.status_code == 422
+
+    import app.api.routers.hair_dialogue as hair_dialogue
+    from app.domain.hair_dialogue_contract import EngineReadiness
+    monkeypatch.setattr(
+        hair_dialogue, "get_hair_dialogue_engine_readiness",
+        lambda: EngineReadiness.HEALTHY,
+    )
+    healthy = _assert_envelope(
+        _turn(client, _state(), "EVALUATE_ADVICE_GATE", **required)
+    )
+    assert healthy["result"] == {"advice_allowed": True, "reason_codes": []}
