@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "brand": "Bijourka",
+  "catalog_id": "88",
+  "scope": "SERIES_LABELS_ONLY",
+  "purpose": "Preserve the Persian and English series labels as separately recorded names. English labels are not inferred chemical families, shade-code aliases, or authorization for fuzzy identity matching.",
+  "source_context": {
+    "catalog_reference": "https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/",
+    "label_decision": "Product Owner confirmed the Persian/English pairs Matt / زیتونی and Violet / شرابی and confirmed the remaining previously listed series labels.",
+    "source_class": "SECONDARY_CATALOG_IMAGE_WITH_PO_LABEL_CONFIRMATION",
+    "publisher_official_catalog_verified": false
+  },
+  "series": [
+    {"series_name_fa": "طبیعی", "series_name_en": "Natural"},
+    {"series_name_fa": "طبیعی اکسترا", "series_name_en": "Natural Extra"},
+    {"series_name_fa": "خاکستری", "series_name_en": "Ash"},
+    {"series_name_fa": "دودی", "series_name_en": "Smoky"},
+    {"series_name_fa": "زیتونی", "series_name_en": "Matt"},
+    {"series_name_fa": "طلایی", "series_name_en": "Golden"},
+    {"series_name_fa": "نسکافه‌ای", "series_name_en": "Nescaffee"},
+    {"series_name_fa": "شرابی", "series_name_en": "Violet"},
+    {"series_name_fa": "بژ", "series_name_en": "Beige"},
+    {"series_name_fa": "آلبالویی", "series_name_en": "Mahogani"},
+    {"series_name_fa": "عسلی", "series_name_en": "Honey"},
+    {"series_name_fa": "شکلاتی", "series_name_en": "Cacao"},
+    {"series_name_fa": "قرمز", "series_name_en": "Red"},
+    {"series_name_fa": "بیسکویتی", "series_name_en": "Biscuit"},
+    {"series_name_fa": "فندقی", "series_name_en": "Tobacco"},
+    {"series_name_fa": "کاپوچینو", "series_name_en": "Cappuccino"},
+    {"series_name_fa": "عروسکی", "series_name_en": "Puppet"},
+    {"series_name_fa": "کنسانتره", "series_name_en": "Concentrate"},
+    {"series_name_fa": "ترکیبی", "series_name_en": "Composition"}
+  ],
+  "identity_policy": {
+    "canonical_catalog_series_field": "Persian label as stored in the 88-row catalog CSV",
+    "english_label_role": "Display and source-label preservation only",
+    "fuzzy_matching": false,
+    "chemical_interpretation": false,
+    "shade_code_changes": false
+  }
+}
