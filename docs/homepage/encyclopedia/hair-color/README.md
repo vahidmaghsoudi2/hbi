@@ -40,6 +40,7 @@
 | قرارداد فنی قبلی Adapter (Draft 0.2) | [نسخهٔ تاریخی قرارداد](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/docs/homepage/encyclopedia/hair-color/adapter-contract-draft-v0.2.md) |
 | قرارداد یکپارچه و مدل داده HC-N01/N02 | [پیشنهاد نسخهٔ ۱٫۰ برای تصویب PO](hc-n01-n02-contract-data-model-v1.0-proposal.md) |
 | دانش محصول و قواعد تخصصی HC-N03 تا HC-N05 | [پروندهٔ شواهد و قواعد تخصصی نسخهٔ ۱٫۰](hc-n03-n05-product-evidence-and-specialist-rules-v1.0.md) |
+| هستهٔ تصمیم‌گیری HC-N06 و آزمون‌های مصنوعی HC-N08 | [کد هستهٔ تصمیم‌گیری](../../../../app/domain/hair_consultation_engine.py) و [آزمون‌های هسته](../../../../tests/test_hair_consultation_engine.py) |
 | ثبت تصمیم‌های طراحی Adapter | [دفتر تصمیم‌های Adapter](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/docs/homepage/encyclopedia/hair-color/adapter-contract-po-decision-register-draft-v0.1.md) |
 | پیشنهاد سیاست دربارهٔ تغییر اعتبار شواهد پس از تصمیم مشتری | [پیشنهاد سیاست — پیش‌نویس و تأییدنشده](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/docs/homepage/encyclopedia/hair-color/po-proposal-evidence-revision-after-client-decision-20261112.md) |
 | ۱۵ سناریوی مصنوعی قابل‌ماشین‌خوانی | [بستهٔ fixtureها](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/tests/fixtures/hair-color-contract-v1.json) |
@@ -583,7 +584,7 @@
 | ۵ | دانش محصول Magic Color (HC-N04) | **هویت دقیق برند/سازنده هنوز مبهم است؛ نتایج هم‌نام خارجی و فهرست‌های فروشگاهی به‌عنوان محصول HBI پذیرفته نشده‌اند.** | احراز برند و سازنده از روی بسته‌بندی/سند رسمی، سپس ایجاد dossier مستقل. |
 | ۶ | قواعد تخصصی و Oracleها (HC-N05) | **۶ قاعدهٔ عمومی مبتنی بر منابع رسمی تدوین و ۱۵ oracle مصنوعی مشخص شد؛ هیچ قاعدهٔ شیمیایی محصول‌محور فعال نیست.** | بازبینی مسئول تخصصی و تبدیل oracleها به fixture/test؛ موفقیت آزمون مصنوعی معادل اعتبار علمی نیست. |
 | ۷ | موتور و یکپارچگی (HC-N06/N07) | **هستهٔ تصمیم‌گیری fail-closed و computed-only در شاخهٔ PR #577 اضافه شد؛ فقط در برش مصنوعی، با ورودی rule/evidence نسخه‌دار و بدون تولید دستور شیمیایی.** | هنوز candidate generator تخصصی، Orchestrator کامل، API یکپارچه و هرگونه persistence وجود ندارد؛ دامنهٔ فعلی کد فقط CATALOG_READY را می‌پذیرد. |
-| ۸ | اعتبارسنجی موتور (HC-N08) | **۲۳ آزمون/Oracle مصنوعی در فایل جدید تعریف شده؛ CI دقیق PR در حال اجرا و بازبینی تخصصی انجام‌نشده است.** | CI باید سبز شود؛ سپس oracleهای تخصصی نسخه‌دار، تست‌های مرزی/رگرسیون و بازبینی مسئول تخصصی لازم‌اند. |
+| ۸ | اعتبارسنجی موتور (HC-N08) | **۲۵ تابع آزمون (۲۹ مورد با احتساب پارامتردهی) در فایل جدید تعریف شده؛ CI دقیق PR پس از retarget هنوز اجرا نشده و بازبینی تخصصی انجام‌نشده است.** | CI باید سبز شود؛ سپس oracleهای تخصصی نسخه‌دار، تست‌های مرزی/رگرسیون و بازبینی مسئول تخصصی لازم‌اند. |
 | ۹ | پایلوت و انتشار | **آغازنشده و مسدود.** | مجوز مستقل، سیاست داده/حریم خصوصی، عبور از اعتبارسنجی و آمادگی عملیاتی لازم است. |
 
 ### اقدام فعال بعدی
