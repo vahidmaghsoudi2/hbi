@@ -11,6 +11,8 @@ from dataclasses import dataclass, replace
 from enum import Enum
 from typing import Any, Mapping
 
+from app.domain.hair_engine_readiness import EngineReadiness
+
 
 class ClientDecision(str, Enum):
     NONE = "NONE"
@@ -209,10 +211,10 @@ def evaluate_advice_gate(
     safety_passed: bool,
     rule_valid: bool,
     evidence_valid: bool,
-    engine_ok: bool = True,
+    engine_readiness: EngineReadiness = EngineReadiness.UNAVAILABLE,
 ) -> AdviceGate:
-    """Binary advice gate; any unmet precondition withholds definitive advice."""
-    if engine_ok is not True:
+    """Fail-closed advice gate; readiness must come from a trusted server provider."""
+    if engine_readiness is not EngineReadiness.HEALTHY:
         return AdviceGate(False, ("ENGINE_FAIL",))
     if safety_passed is not True:
         return AdviceGate(False, ("SAFETY_STOP",))
@@ -372,6 +374,7 @@ __all__ = [
     "AdviceGate",
     "ClientDecision",
     "DialogueCaseState",
+    "EngineReadiness",
     "DialogueReply",
     "ReassessmentResult",
     "RequiredDataResolution",
