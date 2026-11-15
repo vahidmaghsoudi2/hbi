@@ -288,3 +288,31 @@ def test_domain_bridge_rejects_and_redacts_untrusted_case_identity_and_version_t
     assert result.goal_version == ""
     for marker in private_markers:
         assert marker not in repr(result)
+
+
+@pytest.mark.parametrize(
+    ("changes", "private_markers"),
+    [
+        (
+            {"service_kind": "COMBINATION_CONSULT", "case_id": "REAL-CLIENT-SCOPE-BYPASS"},
+            ("REAL-CLIENT-SCOPE-BYPASS",),
+        ),
+        (
+            {"service_kind": "COMBINATION_CONSULT", "case_version": "PRIVATE-CASE-SCOPE-BYPASS"},
+            ("PRIVATE-CASE-SCOPE-BYPASS",),
+        ),
+        (
+            {"service_kind": "COMBINATION_CONSULT", "goal_version": "PRIVATE-GOAL-SCOPE-BYPASS"},
+            ("PRIVATE-GOAL-SCOPE-BYPASS",),
+        ),
+    ],
+)
+def test_data_policy_redaction_precedes_out_of_domain_classification(changes, private_markers):
+    result = _run(_case(**changes))
+
+    assert result.status == "STOP_DATA_POLICY"
+    assert result.case_id == ""
+    assert result.case_version == ""
+    assert result.goal_version == ""
+    for marker in private_markers:
+        assert marker not in repr(result)
