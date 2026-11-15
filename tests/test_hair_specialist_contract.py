@@ -371,7 +371,7 @@ def test_malformed_missing_data_field_fails_closed():
     assert gate.status == GateStatus.ENGINE_FAIL
 
 
-def test_non_boolean_engine_health_flag_fails_closed():
+def test_untyped_engine_readiness_fails_closed():
     gate = evaluate_specialist_output(_output(), engine_readiness="HEALTHY")
     assert gate.status == GateStatus.ENGINE_FAIL
 
