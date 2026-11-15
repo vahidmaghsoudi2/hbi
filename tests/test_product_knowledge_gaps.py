@@ -3,6 +3,7 @@ from types import SimpleNamespace
 from app.domain.product_knowledge_gaps import (
     build_product_knowledge_gap_report,
     consultation_gap_warnings,
+    evaluate_product_knowledge_completeness,
 )
 
 
@@ -39,9 +40,18 @@ def test_missing_pk_reports_all_five_fields_without_excluding_candidate():
     report = build_product_knowledge_gap_report(None, [])
     assert len(report) == 5
     assert all(item["status"] == "MISSING" for item in report)
-    warnings = consultation_gap_warnings(report)
-    assert len(warnings) == 5
-    assert all("تکمیل بعدی ثبت شده" in item for item in warnings)
+    evaluation = evaluate_product_knowledge_completeness(None, [])
+    warnings = consultation_gap_warnings(
+        report, pk_record_missing=evaluation["pk_record_missing"]
+    )
+    assert evaluation["status"] == "partial"
+    assert evaluation["missing_domains"] == [
+        "ingredients", "known_use_cases", "usage_instructions",
+        "contraindications", "evidence_refs",
+    ]
+    assert evaluation["contraindications_unreviewed"] is True
+    assert any("هشدار جدی PK" in item for item in warnings)
+    assert any("موارد منع مصرف" in item for item in warnings)
 
 
 def test_each_knowledge_field_is_reported_when_missing():
@@ -115,3 +125,52 @@ def test_evidence_reference_report_discloses_packaging_traceability_limit():
     report = build_product_knowledge_gap_report(_pk(), evidence)
     item = next(entry for entry in report if entry["field"] == "evidence_refs")
     assert "نسخه بسته‌بندی" in item["message"]
+
+
+
+def test_completeness_evaluator_returns_complete_status_for_supported_pk():
+    evidence = [SimpleNamespace(
+        claim_id="claim-1", product_id="synthetic-product",
+        market_region="EU", conflict_status="NONE"
+    )]
+    result = evaluate_product_knowledge_completeness(_pk(), evidence)
+    assert result["status"] == "complete"
+    assert result["missing_domains"] == []
+    assert result["contraindications_unreviewed"] is False
+    assert result["pk_record_missing"] is False
+
+
+def test_one_missing_domain_is_partial_and_does_not_mark_contraindications_unreviewed():
+    evidence = [SimpleNamespace(
+        claim_id="claim-1", product_id="synthetic-product",
+        market_region="EU", conflict_status="NONE"
+    )]
+    result = evaluate_product_knowledge_completeness(
+        _pk(ingredients=None), evidence
+    )
+    assert result["status"] == "partial"
+    assert result["missing_domains"] == ["ingredients"]
+    assert result["contraindications_unreviewed"] is False
+
+
+def test_two_missing_domains_are_reported_without_candidate_policy():
+    evidence = [SimpleNamespace(
+        claim_id="claim-1", product_id="synthetic-product",
+        market_region="EU", conflict_status="NONE"
+    )]
+    result = evaluate_product_knowledge_completeness(
+        _pk(ingredients=None, usage_instructions=""), evidence
+    )
+    assert result["status"] == "partial"
+    assert result["missing_domains"] == ["ingredients", "usage_instructions"]
+    assert len(result["incomplete_domains"]) == 2
+    assert result["contraindications_unreviewed"] is False
+
+
+def test_missing_contraindications_sets_unreviewed_flag_not_safety_clearance():
+    result = evaluate_product_knowledge_completeness(
+        _pk(contraindications=None), []
+    )
+    assert result["contraindications_unreviewed"] is True
+    warnings = consultation_gap_warnings(result["domain_report"])
+    assert any("موارد منع مصرف هنوز بررسی/تأیید نشده‌اند" in item for item in warnings)
