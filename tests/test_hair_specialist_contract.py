@@ -1,6 +1,6 @@
 import pytest
 
-from app.domain.hair_dialogue_contract import EngineReadiness
+from app.domain.hair_engine_readiness import EngineReadiness
 from app.domain.hair_specialist_contract import (
     EvidenceRef,
     GateStatus,
