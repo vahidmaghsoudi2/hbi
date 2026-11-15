@@ -236,6 +236,9 @@ class CaseEvent:
             EventType.SUGGESTION_REJECTED,
             EventType.SUGGESTION_ACCEPTED,
             EventType.EXECUTION_CONSENT_GIVEN,
+            EventType.SPECIALIST_REVIEW_RECORDED,
+            EventType.SERVICE_EXECUTION_STARTED,
+            EventType.SERVICE_EXECUTION_COMPLETED,
         } and self.suggestion is None:
             raise ValueError("client decision events require an exact suggestion version")
 
