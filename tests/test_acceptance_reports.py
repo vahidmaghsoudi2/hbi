@@ -245,3 +245,55 @@ def test_cohort_rejects_duplicate_ids_and_reports_missing_products(client, db_se
     assert body["found"] == 0
     assert body["missing"] == 1
     assert body["missing_product_ids"] == ["AR-MISSING-001"]
+
+
+def test_conflict_resolution_side_effect_without_per_row_qa_audit_is_disclosed(db_session):
+    product_id = "AR-AUDIT-GAP-001"
+    db_session.add(_product(product_id))
+    db_session.add(Evidence(
+        evidence_id="EV-AR-AUDIT-GAP-001",
+        product_id=product_id,
+        source_type="MANUFACTURER",
+        source_reference="source-1",
+        claim="Competing claim rejected by conflict resolution",
+        field="ingredients",
+        claim_type="MANUFACTURER_CLAIM",
+        market_region="US",
+        conflict_status="NONE",
+        qa_status="REJECTED",
+        notes="[REJECTED_BY_CONFLICT_RESOLUTION winner=EV-WINNER] resolution note",
+    ))
+    db_session.commit()
+
+    reports, _, errors = build_acceptance_reports(db_session, [product_id])
+
+    assert errors == {}
+    item = reports[product_id]["evidence"][0]
+    assert item["qa_decision_history"] == []
+    assert item["qa_decision_history_status"] == "INCOMPLETE"
+    assert any("no matching per-row QA decision audit record" in note for note in reports[product_id]["limitations"])
+
+
+def test_invalid_claim_type_is_not_eligible(db_session):
+    product_id = "AR-CLAIM-TAXONOMY-001"
+    db_session.add(_product(product_id))
+    db_session.add(Evidence(
+        evidence_id="EV-AR-CLAIM-TAXONOMY-001",
+        product_id=product_id,
+        source_type="MANUFACTURER",
+        source_reference="source-1",
+        claim="Claim",
+        field="ingredients",
+        claim_type="MADE_UP_TYPE",
+        market_region="US",
+        conflict_status="NONE",
+        qa_status="VERIFIED",
+    ))
+    db_session.commit()
+
+    reports, _, errors = build_acceptance_reports(db_session, [product_id])
+
+    assert errors == {}
+    item = reports[product_id]["evidence"][0]
+    assert item["eligible"] is False
+    assert "CLAIM_TYPE_INVALID" in item["eligibility_reasons"]
