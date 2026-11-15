@@ -294,3 +294,13 @@ def test_unverified_dependency_status_fails_closed_and_clears_decisions(unverifi
     assert result.state.active_proposal_id is None
     assert result.state.client_decision == ClientDecision.NONE
     assert result.state.execution_consent_for_proposal_id is None
+
+
+def test_domain_advice_gate_defaults_to_unavailable_and_fails_closed():
+    gate = evaluate_advice_gate(
+        data_complete=True,
+        safety_passed=True,
+        rule_valid=True,
+        evidence_valid=True,
+    )
+    assert gate == AdviceGate(False, ("ENGINE_FAIL",))
