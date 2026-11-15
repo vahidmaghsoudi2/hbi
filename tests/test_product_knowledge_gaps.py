@@ -186,3 +186,61 @@ def test_missing_contraindications_sets_unreviewed_flag_not_safety_clearance():
     assert result["contraindications_unreviewed"] is True
     warnings = consultation_gap_warnings(result["domain_report"])
     assert any("موارد منع مصرف هنوز بررسی/تأیید نشده‌اند" in item for item in warnings)
+
+
+def test_comma_separated_production_evidence_refs_are_resolved():
+    evidence = [SimpleNamespace(
+        claim_id="claim-1", product_id="synthetic-product",
+        market_region="EU", conflict_status="NONE", qa_status="APPROVED"
+    )]
+    report = build_product_knowledge_gap_report(
+        _pk(evidence_refs="claim-1"), evidence
+    )
+    item = next(entry for entry in report if entry["field"] == "evidence_refs")
+    assert item["status"] == "SUPPORTED"
+
+
+def test_malformed_evidence_refs_are_reported_as_partial_not_silently_trusted():
+    report = build_product_knowledge_gap_report(_pk(evidence_refs='["claim-1"'), [])
+    item = next(entry for entry in report if entry["field"] == "evidence_refs")
+    assert item["status"] == "PARTIAL"
+    assert "قابل‌خواندن نیستند" in item["message"]
+
+
+def test_domain_aliases_map_to_canonical_statuses():
+    cases = [
+        ("use_case", "known_use_cases"),
+        ("usage_instruction", "usage_instructions"),
+        ("usage", "usage_instructions"),
+    ]
+    for alias, canonical in cases:
+        report = build_product_knowledge_gap_report(
+            _pk(domain_evidence_status=__import__("json").dumps({
+                alias: "SUPPORTED",
+                "ingredients": "SUPPORTED",
+                "contraindications": "SUPPORTED",
+            }))
+        )
+        item = next(entry for entry in report if entry["field"] == canonical)
+        assert item["status"] == "SUPPORTED"
+
+
+def test_in_scope_conflict_precedes_pending_qa_status():
+    evidence = [SimpleNamespace(
+        claim_id="claim-1", product_id="synthetic-product",
+        market_region="EU", conflict_status="CONFLICT", qa_status="PENDING"
+    )]
+    report = build_product_knowledge_gap_report(_pk(), evidence)
+    item = next(entry for entry in report if entry["field"] == "evidence_refs")
+    assert item["status"] == "CONFLICT"
+
+
+def test_out_of_scope_conflict_does_not_contaminate_product_market():
+    evidence = [SimpleNamespace(
+        claim_id="claim-1", product_id="synthetic-product",
+        market_region="US", conflict_status="CONFLICT", qa_status="PENDING"
+    )]
+    report = build_product_knowledge_gap_report(_pk(), evidence)
+    item = next(entry for entry in report if entry["field"] == "evidence_refs")
+    assert item["status"] == "PARTIAL"
+    assert item["status"] != "CONFLICT"
