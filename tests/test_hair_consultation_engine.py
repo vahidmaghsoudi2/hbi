@@ -457,3 +457,17 @@ def test_engine_rejects_unsafe_versions_fields_and_evidence_identifiers_without_
         assert result.publication_eligible is False
         for marker in private_markers:
             assert marker not in repr(result)
+
+
+def test_engine_failure_redacts_overlong_synthetic_case_identifier():
+    oversized_case_id = "SYNTHETIC-" + "X" * 130
+    result = evaluate_hair_consultation(
+        _request(case_id=oversized_case_id, case_version="invalid-version")
+    )
+    assert result.run_outcome == "ENGINE_FAILURE"
+    assert result.case_id == ""
+    assert result.case_version == ""
+    assert result.target_version == ""
+    assert oversized_case_id not in repr(result)
+    assert result.persistence == "COMPUTED_ONLY"
+    assert result.publication_eligible is False
