@@ -346,31 +346,31 @@ def test_recommendation_service_scopes_evidence_and_conflicts_to_product_market(
     svc.evidence_repo.find_by_product.return_value = [
         SimpleNamespace(
             evidence_id="EV-EU-APPROVED", claim_id="CLM-EU",
-            market_region="EU", qa_status="APPROVED", conflict_status="NONE",
+            market_region="EU", qa_status="APPROVED", claim_type="FACT", evidence_strength="HIGH", conflict_status="NONE",
             source_type="PEER_REVIEWED", field="ingredients", claim="glycerin",
             source_reference="synthetic://eu",
         ),
         SimpleNamespace(
             evidence_id="EV-US-APPROVED", claim_id="CLM-US",
-            market_region="US", qa_status="APPROVED", conflict_status="NONE",
+            market_region="US", qa_status="APPROVED", claim_type="FACT", evidence_strength="HIGH", conflict_status="NONE",
             source_type="OFFICIAL_MANUFACTURER", field="ingredients", claim="retinol",
             source_reference="synthetic://us",
         ),
         SimpleNamespace(
             evidence_id="EV-UNKNOWN-APPROVED", claim_id="CLM-UNKNOWN",
-            market_region=None, qa_status="APPROVED", conflict_status="NONE",
+            market_region=None, qa_status="APPROVED", claim_type="FACT", evidence_strength="HIGH", conflict_status="NONE",
             source_type="SECONDARY", field="ingredients", claim="niacinamide",
             source_reference="synthetic://unknown",
         ),
         SimpleNamespace(
             evidence_id="EV-US-CONFLICT", claim_id="CLM-US-CONFLICT",
-            market_region="US", qa_status="APPROVED", conflict_status="CONFLICT",
+            market_region="US", qa_status="APPROVED", claim_type="FACT", evidence_strength="HIGH", conflict_status="CONFLICT",
             source_type="PEER_REVIEWED", field="ingredients", claim="foreign conflict",
             source_reference="synthetic://us-conflict",
         ),
         SimpleNamespace(
             evidence_id="EV-EU-CONFLICT", claim_id="CLM-EU-CONFLICT",
-            market_region="EU", qa_status="APPROVED", conflict_status="CONFLICT",
+            market_region="EU", qa_status="APPROVED", claim_type="FACT", evidence_strength="HIGH", conflict_status="CONFLICT",
             source_type="PEER_REVIEWED", field="ingredients", claim="local conflict",
             source_reference="synthetic://eu-conflict",
         ),
