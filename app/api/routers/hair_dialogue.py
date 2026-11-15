@@ -88,7 +88,6 @@ class HairDialogueTurnRequest(BaseModel):
     safety_passed: bool | None = None
     rule_valid: bool | None = None
     evidence_valid: bool | None = None
-    engine_ok: bool | None = None
     proposal_id: str | None = None
     explicit_consent: bool = False
     new_goal_version: str | None = None
