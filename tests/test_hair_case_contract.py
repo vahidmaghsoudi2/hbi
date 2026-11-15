@@ -340,7 +340,12 @@ def test_authorized_fresh_restart_clears_only_the_resume_block():
         ),
         actor_kind="OPERATOR",
     )
-    restarted = append_case_event(stopped.events, restart, stopped.workflow_control)
+    restarted = append_case_event(
+        stopped.events,
+        restart,
+        stopped.workflow_control,
+        fresh_evaluation=_run(run_id="SYNTHETIC-RUN-002"),
+    )
     assert restarted.workflow_control.resume_blocked is False
     assert restarted.workflow_control.stop_event_id is None
 
@@ -417,7 +422,12 @@ def test_old_acceptance_consent_and_review_do_not_survive_restart():
         ),
         actor_kind="OPERATOR",
     )
-    restarted = append_case_event(stopped.events, restart, stopped.workflow_control)
+    restarted = append_case_event(
+        stopped.events,
+        restart,
+        stopped.workflow_control,
+        fresh_evaluation=_run(run_id="SYNTHETIC-RUN-002"),
+    )
     started = _event(
         EventType.SERVICE_EXECUTION_STARTED,
         event_id="SYNTHETIC-EVENT-006",
@@ -471,3 +481,28 @@ def test_performed_step_requires_a_prior_execution_start():
     )
     with pytest.raises(ValueError, match="prior execution-start"):
         append_case_event((accepted, consent, reviewed), step)
+
+
+
+def test_restart_rejects_a_fresh_evaluation_for_another_version_pair():
+    stop = _event(EventType.CLIENT_STOP_REQUESTED)
+    stopped = append_case_event((), stop)
+    restart = _event(
+        EventType.WORKFLOW_RESTART_AUTHORIZED,
+        event_id="SYNTHETIC-EVENT-002",
+        payload=(
+            ("fresh_evaluation_ref", "SYNTHETIC-RUN-002"),
+            ("authorization_ref", "SYNTHETIC-AUTH-001"),
+        ),
+        actor_kind="OPERATOR",
+    )
+    with pytest.raises(ValueError, match="exact current case/target versions"):
+        append_case_event(
+            stopped.events,
+            restart,
+            stopped.workflow_control,
+            fresh_evaluation=_run(
+                run_id="SYNTHETIC-RUN-002",
+                target_version="target-v2",
+            ),
+        )
