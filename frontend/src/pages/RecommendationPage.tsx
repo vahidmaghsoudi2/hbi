@@ -179,6 +179,14 @@ export default function RecommendationPage() {
               {(r.reasoning || r.ranking_reasons) && (
                 <p>{r.reasoning || r.ranking_reasons}</p>
               )}
+              {r.pk_completeness?.domain_report && (
+                <details>
+                  <summary>گزارش ساختاریافتهٔ Product Knowledge · {r.pk_completeness.status}</summary>
+                  <ul>{r.pk_completeness.domain_report.map((item) => (
+                    <li key={item.field}><strong>{item.label}</strong> · {item.status}: {item.message}</li>
+                  ))}</ul>
+                </details>
+              )}
               {Array.isArray(r.warnings) && r.warnings.length > 0 && (
                 <aside className="alert" role="status" aria-label="هشدارهای مشاوره">
                   <strong>هشدارهای لازم برای اپراتور / پزشک</strong>
