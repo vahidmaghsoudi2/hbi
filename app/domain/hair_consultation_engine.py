@@ -248,13 +248,16 @@ def _validate_envelope(request: HairConsultationRequest) -> tuple[bool, str]:
         isinstance(item, HairCandidateOption) for item in request.candidates
     ):
         return False, "candidates must contain HairCandidateOption records"
-    if request.safety_state not in {"CLEAR", "STOP", "UNKNOWN"}:
+    if not isinstance(request.safety_state, str) or request.safety_state not in {"CLEAR", "STOP", "UNKNOWN"}:
         return False, "safety_state is invalid"
     if not isinstance(request.engine_ok, bool):
         return False, "engine_ok must be a boolean"
     if not isinstance(request.specialist_assessment_required, bool):
         return False, "specialist_assessment_required must be a boolean"
-    if request.no_option_cause is not None and request.no_option_cause not in _ALLOWED_NO_OPTION_CAUSES:
+    if request.no_option_cause is not None and (
+        not isinstance(request.no_option_cause, str)
+        or request.no_option_cause not in _ALLOWED_NO_OPTION_CAUSES
+    ):
         return False, "no_option_cause is invalid"
     return True, ""
 
@@ -544,9 +547,11 @@ def evaluate_hair_consultation(request: HairConsultationRequest) -> HairConsulta
             or not isinstance(option.rule_refs, tuple)
             or not option.rule_refs
             or not all(isinstance(ref, str) and ref.strip() for ref in option.rule_refs)
+            or len(set(option.rule_refs)) != len(option.rule_refs)
             or not isinstance(option.evidence_refs, tuple)
             or not option.evidence_refs
             or not all(isinstance(ref, str) and ref.strip() for ref in option.evidence_refs)
+            or len(set(option.evidence_refs)) != len(option.evidence_refs)
             or not set(option.rule_refs).issubset(active_rule_refs)
             or not set(option.evidence_refs).issubset(verified_evidence)
         ):
