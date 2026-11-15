@@ -351,23 +351,23 @@ def test_http_required_data_resolution_rejects_missing_or_empty_required_fields(
 
 
 
-def test_http_rejects_type_coercion_for_boolean_contract_fields(client, db_session):
+def test_http_rejects_caller_supplied_advice_gate_facts(client, db_session):
     _grant_reviewer_qa(db_session)
-    malformed_values = ["true", "false", "1", "0", 1, 0]
-    for field in [
-        "explicit_consent",
-        "explicit_consent",
-    ]:
-        for value in malformed_values:
-            response = _turn(
-                client,
-                _state(),
-                "ANSWER_QUESTION",
-                question_code="STATUS_REASON",
-                answer_code="STATUS_REASON",
-                **{field: value},
-            )
-            assert response.status_code == 422, (field, value, response.text)
+    for field, value in (
+        ("data_complete", True),
+        ("safety_passed", True),
+        ("rule_valid", True),
+        ("evidence_valid", True),
+        ("engine_ok", True),
+        ("engine_readiness", "HEALTHY"),
+    ):
+        response = _turn(
+            client,
+            _state(),
+            "EVALUATE_ADVICE_GATE",
+            **{field: value},
+        )
+        assert response.status_code == 422, (field, response.text)
 
 
 def test_http_rejects_non_string_state_identifiers_without_coercion(client, db_session):
