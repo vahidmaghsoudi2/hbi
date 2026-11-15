@@ -33,8 +33,10 @@ def version_scope_key(
     product_market: Optional[str],
     packaging_version: Optional[str],
 ) -> str:
-    """Build a non-guessing scope key. Empty segments stay empty (not defaulted to IR)."""
-    market = (evidence_market or "").strip().upper() or (product_market or "").strip().upper()
+    """Build an Evidence-owned scope key; never infer its market from Product."""
+    # product_market remains in the signature for compatibility with existing
+    # callers, but is deliberately not a fallback for missing Evidence scope.
+    market = (evidence_market or "").strip().upper()
     pack = (packaging_version or "").strip()
     return f"market={market}|pack={pack}"
 
@@ -217,8 +219,10 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
             scopes.setdefault(key, []).append(ev)
 
         preferred = version_scope_key(
-            evidence_market=None,
-            product_market=product_market,
+            # The Product's own market defines the preferred target scope; an
+            # Evidence row must independently carry that same market to join it.
+            evidence_market=product_market,
+            product_market=None,
             packaging_version=packaging_version,
         )
         if preferred in scopes:
