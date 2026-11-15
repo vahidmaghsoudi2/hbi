@@ -1,0 +1,40 @@
+name: apply-homepage-dashboard-fix
+on:
+  workflow_dispatch:
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/remove-admin-logout-button
+          fetch-depth: 0
+      - name: Restore NewHomePage from master and apply edits
+        run: |
+          git fetch origin master
+          git checkout origin/master -- frontend/src/pages/NewHomePage.tsx
+          python3 << 'PY'
+          from pathlib import Path
+          path = Path("frontend/src/pages/NewHomePage.tsx")
+          text = path.read_text(encoding="utf-8")
+          text = text.replace('import { Link, useNavigate } from "react-router-dom";', 'import { Link } from "react-router-dom";', 1)
+          text = text.replace("  const navigate = useNavigate();\n", "", 1)
+          old_logout = """  function logout() {\n    sessionStorage.clear();\n    navigate(\"/login\", { replace: true });\n  }\n\n"""
+          text = text.replace(old_logout, "", 1)
+          text = text.replace('            <button type="button" className="pro-btn-secondary" onClick={logout}>خروج از حساب مدیر</button>\n', "", 1)
+          assert "خروج از حساب مدیر" not in text
+          assert "function logout" not in text
+          assert "useNavigate" not in text
+          path.write_text(text, encoding="utf-8")
+          print("logout removal applied")
+          PY
+      - name: Commit and push
+        run: |
+          git config user.name "homepage-bot"
+          git config user.email "homepage-bot@users.noreply.github.com"
+          git add frontend/src/pages/NewHomePage.tsx
+          git status
+          git commit -m "fix(homepage): remove admin logout button (applied by workflow)" || echo "no change"
+          git push origin fix/remove-admin-logout-button
