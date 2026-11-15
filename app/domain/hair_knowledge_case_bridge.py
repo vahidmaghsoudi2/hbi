@@ -7,12 +7,15 @@ hair-color outcomes. The existing reasoning engine remains COMPUTED_ONLY.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Literal, Mapping, Sequence
 import re
 
 from app.domain.hair_catalog_identity_lookup import CatalogIdentity
-from app.domain.hair_data_governance import is_permitted_synthetic_case
+from app.domain.hair_data_governance import (
+    is_permitted_synthetic_case,
+    is_permitted_synthetic_version,
+)
 from app.domain.hair_catalog_provider import (
     approved_catalog_contains_identity,
     load_approved_hair_catalog_reference,
@@ -280,6 +283,25 @@ def _blocked_run(
         reasoning_result=None,
     )
 
+def _blocked_data_policy_run(
+    *,
+    run_id: str,
+    case: HairCaseSnapshot,
+    reason_code: str,
+    package: HairKnowledgePackage,
+    rule: HairRuleDefinition,
+) -> HairDecisionRun:
+    # Never echo caller-controlled identity/version tokens from a rejected case.
+    safe_case = replace(case, case_id="", case_version="", goal_version="")
+    return _blocked_run(
+        run_id=run_id,
+        case=safe_case,
+        status="STOP_DATA_POLICY",
+        reason_code=reason_code,
+        package=package,
+        rule=rule,
+    )
+
 
 class HairKnowledgeCaseBridge:
     """Connect one synthetic HAIR case to approved catalog knowledge and ReasoningEngine."""
@@ -311,16 +333,32 @@ class HairKnowledgeCaseBridge:
                 package=package, rule=rule,
             )
         if not is_permitted_synthetic_case(case_id=case.case_id, synthetic_data=case.synthetic_data):
-            return _blocked_run(
-                run_id=run_id, case=case, status="STOP_DATA_POLICY",
+            return _blocked_data_policy_run(
+                run_id=run_id,
+                case=case,
                 reason_code="REAL_CLIENT_DATA_BLOCKED_BY_PO_66_09",
-                package=package, rule=rule,
+                package=package,
+                rule=rule,
             )
         if not case.case_version.strip() or not case.goal_version.strip():
             return _blocked_run(
-                run_id=run_id, case=case, status="STOP_DATA_GAP",
+                run_id=run_id,
+                case=replace(case, case_version="", goal_version=""),
+                status="STOP_DATA_GAP",
                 reason_code="CASE_OR_GOAL_VERSION_MISSING",
-                package=package, rule=rule,
+                package=package,
+                rule=rule,
+            )
+        if (
+            not is_permitted_synthetic_version(case.case_version, kind="case")
+            or not is_permitted_synthetic_version(case.goal_version, kind="goal")
+        ):
+            return _blocked_data_policy_run(
+                run_id=run_id,
+                case=case,
+                reason_code="UNSAFE_CASE_OR_GOAL_VERSION_TOKEN",
+                package=package,
+                rule=rule,
             )
 
         package_ok, package_reason = _validate_package(package)
