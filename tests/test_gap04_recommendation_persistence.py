@@ -214,7 +214,7 @@ def test_evaluated_ineligible_candidate_records_first_gate_without_changing_stat
 
 
 
-def _run_candidate_with_pk_gaps(db_session, missing_fields):
+def _run_candidate_with_pk_gaps(db_session, missing_fields, evidence_refs='["claim-1"]'):
     import json
 
     _seed_case_and_products(db_session, ["PROD_PK_GAP"])
@@ -235,7 +235,7 @@ def _run_candidate_with_pk_gaps(db_session, missing_fields):
         "claimed_benefits": "hydrating",
         "usage_instructions": "apply daily",
         "contraindications": "avoid eye area",
-        "evidence_refs": '["claim-1"]',
+        "evidence_refs": evidence_refs,
         "domain_evidence_status": json.dumps({
             "ingredients": "SUPPORTED",
             "known_use_cases": "SUPPORTED",
@@ -321,3 +321,73 @@ def test_t3_absent_pk_record_keeps_candidate_with_explicit_severe_warning(db_ses
     warnings = json.loads(recs[0].warnings)
     assert any("هشدار جدی PK" in warning for warning in warnings)
     assert "contraindications_unreviewed=True" in recs[0].ranking_reasons
+
+
+
+def test_malformed_pk_evidence_refs_warn_but_do_not_remove_candidate(db_session):
+    recs = _run_candidate_with_pk_gaps(
+        db_session, [], evidence_refs='["claim-1"'
+    )
+    assert len(recs) == 1
+    assert recs[0].eligibility_status == "ELIGIBLE"
+    warnings = json.loads(recs[0].warnings)
+    assert any("مراجع شواهد" in warning for warning in warnings)
+
+
+def test_recommendation_service_scopes_evidence_and_conflicts_to_product_market(db_session):
+    _seed_case_and_products(db_session, ["PROD_MARKET_SCOPE"])
+    svc = _svc_with_real_db(db_session)
+    product = SimpleNamespace(product_id="PROD_MARKET_SCOPE", market_region="EU")
+    svc.product_repo.find_by_identity_status_and_active.return_value = [product]
+    svc.inventory_repo.find_by_product.return_value = SimpleNamespace(
+        quantity_available=3, quantity_reserved=0, stock_status="AVAILABLE"
+    )
+    svc.pk_repo.find_by_product.return_value = SimpleNamespace(known_use_cases="dry skin")
+    svc.evidence_repo.find_by_product.return_value = [
+        SimpleNamespace(
+            evidence_id="EV-EU-APPROVED", claim_id="CLM-EU",
+            market_region="EU", qa_status="APPROVED", conflict_status="NONE",
+            source_type="PEER_REVIEWED", field="ingredients", claim="glycerin",
+            source_reference="synthetic://eu",
+        ),
+        SimpleNamespace(
+            evidence_id="EV-US-APPROVED", claim_id="CLM-US",
+            market_region="US", qa_status="APPROVED", conflict_status="NONE",
+            source_type="OFFICIAL_MANUFACTURER", field="ingredients", claim="retinol",
+            source_reference="synthetic://us",
+        ),
+        SimpleNamespace(
+            evidence_id="EV-UNKNOWN-APPROVED", claim_id="CLM-UNKNOWN",
+            market_region=None, qa_status="APPROVED", conflict_status="NONE",
+            source_type="SECONDARY", field="ingredients", claim="niacinamide",
+            source_reference="synthetic://unknown",
+        ),
+        SimpleNamespace(
+            evidence_id="EV-US-CONFLICT", claim_id="CLM-US-CONFLICT",
+            market_region="US", qa_status="APPROVED", conflict_status="CONFLICT",
+            source_type="PEER_REVIEWED", field="ingredients", claim="foreign conflict",
+            source_reference="synthetic://us-conflict",
+        ),
+        SimpleNamespace(
+            evidence_id="EV-EU-CONFLICT", claim_id="CLM-EU-CONFLICT",
+            market_region="EU", qa_status="APPROVED", conflict_status="CONFLICT",
+            source_type="PEER_REVIEWED", field="ingredients", claim="local conflict",
+            source_reference="synthetic://eu-conflict",
+        ),
+    ]
+    svc.reasoning_engine.run.return_value = {
+        "unknowns": [], "conflicts": [], "claim_boundary_violations": [],
+        "eligibility": "ELIGIBLE", "final_score": 0.8, "rationale": "synthetic",
+        "evidence_refs": ["EV-EU-APPROVED"], "warnings": [],
+    }
+
+    svc.generate_recommendations("CASE1", {"concerns": "dry skin"})
+
+    kwargs = svc.reasoning_engine.run.call_args.kwargs
+    assert kwargs["evidence_score"] == 1.0
+    assert [item["evidence_id"] for item in kwargs["evidence_list"]] == [
+        "EV-EU-APPROVED", "EV-EU-CONFLICT"
+    ]
+    assert [item["evidence_refs"][0] for item in kwargs["existing_conflicts"]] == [
+        "EV-EU-CONFLICT"
+    ]
