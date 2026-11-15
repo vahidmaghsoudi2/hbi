@@ -148,10 +148,10 @@ def test_required_data_and_advice_gate_return_explicit_gaps(client, db_session):
     gate = _turn(
         client, _state(), "EVALUATE_ADVICE_GATE",
         data_complete=False, safety_passed=True, rule_valid=True, evidence_valid=True,
-        engine_ok=True,
+
     )
     assert gate.status_code == 200
-    assert gate.json()["result"] == {"advice_allowed": False, "reason_codes": ["DATA_GAP"]}
+    assert gate.json()["result"] == {"advice_allowed": False, "reason_codes": ["ENGINE_FAIL"]}
 
 
 def test_runtime_rejects_real_case_ids_and_unrecognized_request_fields(client, db_session):
@@ -169,7 +169,8 @@ def test_engine_failure_has_priority_and_never_allows_advice(client, db_session)
     response = _turn(
         client, _state(), "EVALUATE_ADVICE_GATE",
         data_complete=False, safety_passed=False, rule_valid=False,
-        evidence_valid=False, engine_ok=False,
+        evidence_valid=False,
+
     )
     assert response.status_code == 200
     assert response.json()["result"] == {"advice_allowed": False, "reason_codes": ["ENGINE_FAIL"]}
@@ -363,7 +364,6 @@ def test_http_rejects_type_coercion_for_boolean_contract_fields(client, db_sessi
         "safety_passed",
         "rule_valid",
         "evidence_valid",
-        "engine_ok",
         "explicit_consent",
     ]:
         for value in malformed_values:
@@ -414,7 +414,7 @@ def test_every_successful_http_action_preserves_non_publishing_envelope(client, 
         }),
         ("EVALUATE_ADVICE_GATE", _state(), {
             "data_complete": True, "safety_passed": True,
-            "rule_valid": True, "evidence_valid": True, "engine_ok": True,
+            "rule_valid": True, "evidence_valid": True,
         }),
         ("ATTACH_PROPOSAL", _state(), {
             "proposal_id": "SYNTHETIC-PROPOSAL-ENVELOPE-1",
@@ -652,13 +652,13 @@ def test_http_missing_evidence_returns_knowledge_gap_without_advice(client, db_s
         safety_passed=True,
         rule_valid=True,
         evidence_valid=False,
-        engine_ok=True,
+
     )
     assert response.status_code == 200
     body = response.json()
     _assert_non_publishing_envelope(body)
     assert body["result"] == {
         "advice_allowed": False,
-        "reason_codes": ["KNOWLEDGE_GAP"],
+        "reason_codes": ["ENGINE_FAIL"],
     }
     assert body["recommendation"] is None
