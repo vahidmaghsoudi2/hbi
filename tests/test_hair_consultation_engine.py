@@ -83,17 +83,15 @@ def _request(**changes):
     return HairConsultationRequest(**values)
 
 
-def test_valid_synthetic_candidate_is_reviewable_but_not_published_or_executable():
+def test_product_candidate_selection_is_disabled_in_safety_kernel():
     result = evaluate_hair_consultation(_request())
     assert result.run_outcome == "SUCCESS"
-    assert result.engine_state == "SUGGESTION_REVIEWABLE"
-    assert result.consultation_status == "SYSTEM_REASONED_SUGGESTION"
-    assert [item.option_ref for item in result.options] == ["SYNTHETIC-OPTION-001"]
+    assert result.engine_state == "STOP_OR_REFER_WITH_REASON"
+    assert result.consultation_status == "OUT_OF_V1_SCOPE"
+    assert result.reason_codes == ("OUT_OF_SCOPE",)
+    assert result.options == ()
     assert result.persistence == "COMPUTED_ONLY"
     assert result.publication_eligible is False
-    assert not hasattr(result, "formula")
-    assert not hasattr(result, "oxidant_percentage")
-    assert not hasattr(result, "processing_time")
 
 
 def test_engine_failure_has_no_consultation_state_or_options():
@@ -223,26 +221,26 @@ def test_no_candidate_without_explicit_reason_is_engine_failure():
     assert result.reason_codes == ("ENGINE_FAIL",)
 
 
-def test_candidate_and_no_option_cause_cannot_coexist():
+def test_candidate_payload_is_withheld_even_if_no_option_cause_is_present():
     result = evaluate_hair_consultation(_request(no_option_cause="NEEDS_INFORMATION"))
-    assert result.run_outcome == "ENGINE_FAILURE"
+    assert result.consultation_status == "OUT_OF_V1_SCOPE"
     assert result.options == ()
 
 
-def test_candidate_rank_must_be_sequential_and_unique():
+def test_candidate_rank_is_never_used_to_rank_products():
     result = evaluate_hair_consultation(_request(candidates=(_candidate(rank=2),)))
-    assert result.run_outcome == "ENGINE_FAILURE"
-    assert result.reason_codes == ("ENGINE_FAIL",)
+    assert result.consultation_status == "OUT_OF_V1_SCOPE"
+    assert result.options == ()
 
 
-def test_candidate_must_reference_only_verified_evidence_and_active_rules():
+def test_candidate_evidence_is_not_used_to_enable_product_selection():
     candidate = _candidate(evidence_refs=("SYNTHETIC-UNVERIFIED-EVIDENCE",))
     result = evaluate_hair_consultation(_request(candidates=(candidate,)))
-    assert result.run_outcome == "ENGINE_FAILURE"
-    assert result.reason_codes == ("ENGINE_FAIL",)
+    assert result.consultation_status == "OUT_OF_V1_SCOPE"
+    assert result.options == ()
 
 
-def test_more_than_three_candidates_is_engine_failure():
+def test_multiple_candidate_options_are_withheld_not_ranked():
     candidates = tuple(
         _candidate(
             option_ref=f"SYNTHETIC-OPTION-{index}",
@@ -251,7 +249,7 @@ def test_more_than_three_candidates_is_engine_failure():
         for index in range(1, 5)
     )
     result = evaluate_hair_consultation(_request(candidates=candidates))
-    assert result.run_outcome == "ENGINE_FAILURE"
+    assert result.consultation_status == "OUT_OF_V1_SCOPE"
     assert result.options == ()
 
 
@@ -262,11 +260,11 @@ def test_question_or_acceptance_state_is_not_part_of_engine_output():
     assert not hasattr(result, "workflow_state")
 
 
-def test_candidate_summary_cannot_smuggle_chemical_execution_instructions():
+def test_candidate_summary_cannot_be_returned_by_safety_kernel():
     candidate = _candidate(summary="Use developer at 6% for 30 minutes")
     result = evaluate_hair_consultation(_request(candidates=(candidate,)))
-    assert result.run_outcome == "ENGINE_FAILURE"
-    assert result.reason_codes == ("ENGINE_FAIL",)
+    assert result.consultation_status == "OUT_OF_V1_SCOPE"
+    assert result.options == ()
 
 
 def test_unknown_no_option_cause_is_not_mislabelled_as_out_of_scope():
