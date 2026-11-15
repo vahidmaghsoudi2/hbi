@@ -48,6 +48,7 @@ class RecommendationDTO:
     evidence_score: Optional[float] = None
     evidence_refs: Optional[list] = None
     warnings: Optional[list] = None
+    pk_completeness: Optional[dict] = None
     exclusion_reasons: Optional[list] = None
     availability: Optional[str] = None
     price: Optional[int] = None
