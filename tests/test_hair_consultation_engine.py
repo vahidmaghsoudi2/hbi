@@ -102,10 +102,23 @@ def test_engine_failure_has_no_consultation_state_or_options():
     assert result.options == ()
 
 
-def test_real_case_is_blocked_by_synthetic_only_policy():
-    result = evaluate_hair_consultation(_request(case_id="REAL-CLIENT-001", synthetic_data=False))
+def test_real_case_is_blocked_and_non_synthetic_identifiers_are_not_echoed():
+    result = evaluate_hair_consultation(
+        _request(
+            case_id="REAL-CLIENT-CONFIDENTIAL-001",
+            synthetic_data=False,
+            case_version="private-version-token",
+            target_version="private-target-token",
+        )
+    )
     assert result.run_outcome == "ENGINE_FAILURE"
     assert result.reason_codes == ("ENGINE_FAIL",)
+    assert result.case_id == ""
+    assert result.case_version == ""
+    assert result.target_version == ""
+    assert "REAL-CLIENT-CONFIDENTIAL-001" not in repr(result)
+    assert "private-version-token" not in repr(result)
+    assert "private-target-token" not in repr(result)
 
 
 def test_safety_stop_precedes_missing_data():
