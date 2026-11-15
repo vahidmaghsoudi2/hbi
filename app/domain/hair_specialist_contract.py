@@ -144,7 +144,7 @@ def _evidence_is_valid(item: EvidenceRef) -> bool:
     )
 
 
-def evaluate_specialist_output(output: SpecialistOutput, *, engine_ok: bool = True) -> GateResult:
+def evaluate_specialist_output(output: SpecialistOutput, *, engine_ok: bool = False) -> GateResult:
     """Apply ordered gates; internal review is the maximum permitted exposure."""
     if not isinstance(output, SpecialistOutput):
         raise TypeError("output must be a SpecialistOutput")
