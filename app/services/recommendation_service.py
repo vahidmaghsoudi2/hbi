@@ -491,7 +491,9 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             trace_warnings = list(engine_result.get("warnings", []))
             # PK incompleteness is disclosed and retained for later completion;
             # it never changes eligibility or bypasses existing independent gates.
-            pk_gap_report = build_product_knowledge_gap_report(pk, evidences)
+            pk_gap_report = build_product_knowledge_gap_report(
+                pk, evidences, product_market_region=getattr(product, "market_region", None)
+            )
             trace_warnings.extend(consultation_gap_warnings(pk_gap_report))
             if eligibility != "ELIGIBLE" and not trace_warnings:
                 trace_warnings.append(f"Recommendation gated: {eligibility}")
