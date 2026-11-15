@@ -137,7 +137,7 @@ async def preview_hair_specialist_view(
         case=case,
         package=package,
         rule=rule,
-        run_id=f"hair-specialist-preview-{uuid4()}",
+        run_id=f"SYNTHETIC-HAIR-PREVIEW-{uuid4()}",
     )
     return build_hair_specialist_view(run)
 
