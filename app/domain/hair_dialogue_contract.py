@@ -13,6 +13,7 @@ from typing import Any, Mapping
 from app.domain.hair_data_governance import (
     is_permitted_synthetic_identifier,
     is_permitted_synthetic_version,
+    is_permitted_field_name,
 )
 
 
@@ -132,10 +133,12 @@ def resolve_required_data(
     """Use recorded values only; report exact missing fields and never infer them."""
     if not isinstance(recorded_data, Mapping):
         raise TypeError("recorded_data must be a mapping")
+    if any(not is_permitted_field_name(field) for field in recorded_data):
+        raise ValueError("recorded_data keys must be bounded schema field names")
     if not isinstance(required_fields, tuple) or not all(
-        isinstance(field, str) and field.strip() for field in required_fields
+        is_permitted_field_name(field) for field in required_fields
     ):
-        raise ValueError("required_fields must be a tuple of non-empty field names")
+        raise ValueError("required_fields must be a tuple of bounded schema field names")
     if len(set(required_fields)) != len(required_fields):
         raise ValueError("required_fields must not contain duplicates")
 
@@ -177,8 +180,8 @@ def attach_proposal(
 ) -> DialogueCaseState:
     """Attach a version-bound synthetic proposal unless its ID was rejected."""
     validate_dialogue_state(state)
-    if not isinstance(proposal_id, str) or not proposal_id.startswith("SYNTHETIC-"):
-        raise ValueError("Only synthetic proposal identifiers are permitted")
+    if not is_permitted_synthetic_identifier(proposal_id):
+        raise ValueError("Only bounded synthetic proposal identifiers are permitted")
     if proposal_id in state.rejected_proposal_ids:
         raise ValueError("A rejected proposal cannot be reactivated")
     return replace(
@@ -259,8 +262,8 @@ def change_goal(
 ) -> DialogueCaseState:
     """Create a fresh goal version and clear only the proposal/decisions it invalidates."""
     validate_dialogue_state(state)
-    if not isinstance(new_goal_version, str) or not new_goal_version.strip():
-        raise ValueError("A non-empty new goal version is required")
+    if not is_permitted_synthetic_version(new_goal_version, kind="goal"):
+        raise ValueError("A bounded synthetic goal version token is required")
     if new_goal_version == state.goal_version:
         raise ValueError("A changed goal requires a new goal version")
     return replace(
