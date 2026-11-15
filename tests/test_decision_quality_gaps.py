@@ -106,10 +106,12 @@ def test_recommendation_dto_exposes_persisted_trace():
         warnings=json.dumps(["TRACE_WARNING"]),
         exclusion_reasons=json.dumps(["NO_APPROVED_EVIDENCE"]),
     )
-    with patch("app.interface.facades._get_availability", return_value="AVAILABLE"), patch("app.interface.facades._get_price", return_value=100):
+    with patch("app.interface.facades._get_availability", return_value="AVAILABLE"), patch("app.interface.facades._get_price", return_value=100), patch("app.interface.facades.evaluate_product_knowledge_completeness", return_value={"status": "partial", "missing_domains": ["ingredients"], "incomplete_domains": [{"field": "ingredients", "status": "MISSING"}], "contraindications_unreviewed": False, "pk_record_missing": False, "domain_report": []}):
         dto = _to_recommendation_dto(recommendation, MagicMock())
 
     assert isinstance(dto, RecommendationDTO)
     assert dto.evidence_refs == [{"evidence_id": "E1"}]
     assert dto.warnings == ["TRACE_WARNING"]
+    assert dto.pk_completeness["status"] == "partial"
+    assert dto.pk_completeness["missing_domains"] == ["ingredients"]
     assert dto.exclusion_reasons == ["NO_APPROVED_EVIDENCE"]
