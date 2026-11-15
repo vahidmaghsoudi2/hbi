@@ -113,17 +113,32 @@ def _scope_status(evidence: Evidence, product: Product) -> Tuple[str, List[str]]
     product_market = _text(getattr(product, "market_region", None)).upper()
     if not evidence_market or not product_market:
         reasons.append("MARKET_SCOPE_UNKNOWN")
-        market_known = False
     elif evidence_market != product_market:
         reasons.append("MARKET_SCOPE_MISMATCH")
         return "MIXED", reasons
-    else:
-        market_known = True
 
     # Evidence currently has no formula/version column. Product.packaging_version
     # is not proof that a claim applies to that exact formula or package version.
     reasons.append("EVIDENCE_VERSION_SCOPE_UNAVAILABLE")
-    return ("UNKNOWN" if not market_known or not hasattr(evidence, "formula_version") else "UNKNOWN"), reasons
+    return "UNKNOWN", reasons
+
+
+def _canonical_field(evidence: Evidence) -> str:
+    field = _text(getattr(evidence, "field", None)).lower()
+    aliases = {
+        "ingredient_role": "ingredient_roles",
+        "claimed_benefit": "claimed_benefits",
+        "benefit": "claimed_benefits",
+        "known_use_case": "known_use_cases",
+        "use_case": "known_use_cases",
+        "usage_instruction": "usage_instructions",
+        "usage": "usage_instructions",
+        "manufacturer_claim": "manufacturer_claims",
+        "other_attribute": "other_attributes",
+    }
+    if field == "claim" and _text(getattr(evidence, "claim_type", None)).upper() == "MANUFACTURER_CLAIM":
+        return "manufacturer_claims"
+    return aliases.get(field, field)
 
 
 def _eligibility(evidence: Evidence, product: Product) -> Tuple[bool, List[str], str]:
@@ -174,11 +189,14 @@ def _audit_history(rows: Iterable[Any], *, product_qa: bool = False) -> List[Dic
 
 
 def _max_timestamp(values: Iterable[Any]) -> Optional[str]:
-    valid = [value for value in values if isinstance(value, datetime)]
+    valid = []
+    for value in values:
+        if isinstance(value, datetime):
+            normalized = value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value.astimezone(timezone.utc)
+            valid.append(normalized)
     if not valid:
         return None
-    latest = max(valid)
-    return _iso(latest)
+    return _iso(max(valid))
 
 
 def _product_report(
@@ -224,7 +242,7 @@ def _product_report(
         counts["ineligible"] += not eligible
         counts["unknown_scope"] += scope_status == "UNKNOWN"
         if eligible:
-            verified_fields.add(_text(ev.field).lower())
+            verified_fields.add(_canonical_field(ev))
 
         history = _audit_history(evidence_logs_by_id.get(ev.evidence_id, []))
         latest = history[-1] if history else None
@@ -355,7 +373,10 @@ def build_acceptance_reports(db: Session, product_ids: Sequence[str]) -> Tuple[D
     if product_audit_available:
         product_logs = (
             db.query(ProductMutationLog)
-            .filter(ProductMutationLog.target_id.in_(found_ids))
+            .filter(
+                ProductMutationLog.target_entity == "Product",
+                ProductMutationLog.target_id.in_(found_ids),
+            )
             .order_by(ProductMutationLog.timestamp.asc(), ProductMutationLog.log_id.asc())
             .all()
         )
