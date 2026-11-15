@@ -256,6 +256,23 @@ def test_dialogue_http_rejects_untrusted_nested_identifiers_and_version_tokens(c
         _state(execution_consent_for_proposal_id="REAL-CLIENT-PROPOSAL-MARKER"),
         _state(active_proposal_case_version="PRIVATE-CASE-VERSION-MARKER"),
         _state(active_proposal_goal_version="PRIVATE-GOAL-VERSION-MARKER"),
+        _state(
+            active_proposal_id="SYNTHETIC-PROPOSAL-STALE-CASE",
+            active_proposal_case_version="case-v2",
+            active_proposal_goal_version="goal-v1",
+        ),
+        _state(
+            active_proposal_id="SYNTHETIC-PROPOSAL-STALE-GOAL",
+            active_proposal_case_version="case-v1",
+            active_proposal_goal_version="goal-v2",
+        ),
+        _state(
+            active_proposal_id="SYNTHETIC-PROPOSAL-ORPHANED-CONSENT",
+            active_proposal_case_version="case-v1",
+            active_proposal_goal_version="goal-v1",
+            execution_consent_for_proposal_id="SYNTHETIC-OTHER-PROPOSAL",
+            client_decision="ACCEPTED",
+        ),
     ]
 
     for invalid_state in invalid_states:
