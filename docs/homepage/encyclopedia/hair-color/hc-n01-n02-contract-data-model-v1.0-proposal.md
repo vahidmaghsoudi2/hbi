@@ -538,12 +538,24 @@ Acceptance evidence required from CI:
 
 ### 18.1 Exact PR verification evidence
 
-- PR: [#580](https://github.com/vahidmaghsoudi2/hbi/pull/580), Draft and unmerged.
-- Latest verified PR merge ref before this documentation correction: `7369ff0a46050dc764002d69ed9f02b8665de5c1`; branch head: `5ce39cb3b4721cf6476784d2978105c7f45fd4c4`.
-- HBI CI run `43758962846`: success; test, governance and isolated smoke jobs all succeeded.
-- HBI Auto Tasks run `43758962767`: success; `1046 passed, 801 warnings` in 51.31 seconds.
-- HBI Pilot Browser Proof run `43758962736`: success.
-- Artifacts: coverage `14179860819`, G8 smoke `14178958333`, G8 regression `14178908458`, browser proof `14179552007`, Auto Tasks evidence `14179596659`.
-- All three runs checked out `refs/pull/580/merge` at merge SHA `7369ff0a46050dc764002d69ed9f02b8665de5c1`.
-- The earlier test-fixture failure on a previous merge ref was corrected before this successful verification.
-- These results establish only synthetic software conformance. They do not approve the logical contract on behalf of the PO, authorize persistence, or validate scientific/product-specific hair-colour rules.
+- PR: [#580](https://github.com/vahidmaghsoudi2/hbi/pull/580), remains Draft and unmerged.
+- Verified branch head: `29693fb9dba218ba6cc7e30634ef377ac3154d00`.
+- Exact PR merge ref used by the three latest workflows: `5fa3ed3c2fdd8d41524e70d09988fcc6ca47cf82`.
+- HBI CI run [43761034436](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43761034436): SUCCESS; `test`, `governance-tests`, and `g8-isolated-pilot-smoke` jobs all succeeded. Pytest: **1046 passed, 801 warnings**; total coverage **89%**.
+- HBI Auto Tasks run [43761034486](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43761034486): SUCCESS; **1046 passed, 801 warnings** in 42.17 seconds; total coverage **89%**.
+- HBI Pilot Browser Proof run [43761034450](https://github.com/vahidmaghsoudi2/hbi/actions/runs/43761034450): SUCCESS; the 61-record parser-conformance step and real-browser proof both succeeded.
+- The three workflows are associated with the exact latest PR merge ref above. Job summaries and the Auto Tasks / CI test logs were inspected; no failed jobs were reported.
+- Warnings are non-failing diagnostics and are not represented as test failures.
+- These results establish synthetic software/test conformance only. They do not validate scientific or product-specific hair-colour rules, chemistry, formulae, real-case advice, or operational readiness.
+
+### 18.2 PO acceptance record — 2026-11-16
+
+The Product Owner explicitly accepted the **HC-N01/HC-N02 logical contract and the bounded synthetic in-memory implementation** after review of the three successful exact-merge-ref workflows listed in §18.1.
+
+This acceptance is limited to the logical contract and synthetic implementation tested by this PR. It does **not**:
+- authorize merge, conversion from Draft to Ready, release, deployment, pilot, or customer-facing activation;
+- authorize a database, ORM, migration, durable event store, real-customer data, or linkage to a generic customer case;
+- approve product-specific chemistry, specialist rules, formula generation, feasibility claims, or colour-result predictions;
+- replace the required product-by-product evidence validation and specialist approval.
+
+PO-66-09 remains in force: synthetic data only; persistence and real-customer data remain DEFERRED. Any expansion beyond this bounded acceptance requires a separate explicit PO decision.
