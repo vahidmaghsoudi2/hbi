@@ -70,7 +70,7 @@ Each claim must be stored independently:
 HBI currently holds:
 - CSV: docs/homepage/encyclopedia/hair-color/catalog/raeaka_bijourka_catalog.csv
 - Snapshot: docs/homepage/encyclopedia/hair-color/catalog/raeaka_bijourka_snapshot.json
-- Source URL: https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/
+- Source: retailer album already captured in the HBI repository; external commercial listing is not linked here.
 - Capture timestamp: 2026-11-10T18:57:00Z
 - Expected rows/columns: 88 / 6
 - Snapshot ID: hbi-hair-catalog-snapshot-20261110-185700z
@@ -84,13 +84,12 @@ HBI currently holds:
 
 | Source | What was found | Class / status | Permitted use |
 |---|---|---|---|
-| Raeaka Bijourka album | Retailer album with shade rows and product descriptions | RETAILER_CATALOGUE / CAPTURED_UNVERIFIED | Historical secondary identity snapshot only |
-| Technolife Bijourka brand page | Retail listing with 101 displayed items and variants | RETAILER_CATALOGUE / SECONDARY_ONLY | Discovery/cross-check leads; not official catalogue completeness |
-| Technolife product pages | Examples include BI1/BI8, 100 ml, and a repeated licence-number field | RETAILER_CATALOGUE / SECONDARY_ONLY | Record exact retailer assertion; not product identity or proof of authenticity |
-| Iranmadex Emad Ara directory | Attributes Bijourka among brands marketed by Emad Ara | SECONDARY_BUSINESS_DIRECTORY / SECONDARY_ONLY | Manufacturer-identity lead only |
-| Telegram @EmadAraProducts | Channel titled “محصولات شرکت عمادآرا”; posts include Bijourka media and a Bijourka hair-colour video | SOCIAL_OR_USER_GENERATED until ownership authenticated | Lead for original documents; not official by name alone |
-| Emad Ara website | Previously inaccessible to the audit (403); no official Bijourka technical dossier retrieved | MANUFACTURER_PRIMARY not obtained | No product claim supported from unavailable site |
-| Retailer/distributor marketing pages | Claims include 24K gold, argan, keratin, low ammonia, coverage, durability, and biological/therapeutic effects | MARKETING_CLAIM / SECONDARY_ONLY | Do not activate; health/therapeutic claims excluded absent appropriate evidence |
+| Captured retailer album | Retailer album with shade rows and product descriptions | RETAILER_CATALOGUE / CAPTURED_UNVERIFIED | Historical secondary identity snapshot only |
+| Other retailer listings | Retail listings with additional shade/product variants | RETAILER_CATALOGUE / SECONDARY_ONLY | Discovery/cross-check evidence only; not official catalogue completeness |
+| Secondary business directory | Attributes Bijourka to a named manufacturer | SECONDARY_BUSINESS_DIRECTORY / SECONDARY_ONLY | Manufacturer-identity lead only |
+| Unauthenticated social channel | Channel using the manufacturer's name contains promotional media | SOCIAL_OR_USER_GENERATED until ownership authenticated | Not official by name alone |
+| Manufacturer public site | Previously inaccessible to the audit; no official Bijourka technical dossier retrieved | MANUFACTURER_PRIMARY not obtained | No product claim supported from unavailable site |
+| Retailer/distributor marketing claims | Claims include added ingredients, low-ammonia positioning, coverage, durability, and biological/therapeutic effects | MARKETING_CLAIM / SECONDARY_ONLY | Do not activate; health/therapeutic claims excluded absent appropriate evidence |
 
 ### 3.3 Bijourka claim disposition
 
@@ -123,12 +122,7 @@ A catalogue is not an INCI list; an INCI list is not an application instruction;
 
 ### 4.1 Identity ambiguity
 
-Public searches for “Magic Color” return multiple unrelated products and companies. Examples include:
-- A product page for “Magic Color” by Nicka K / Hair & Beauty Corp, a foreign boxed permanent colour system.
-- A German Safety Data Sheet titled “MAGIC COLOR COLORATIONSCREME”, reference 17101–17155, for a separate oxidation hair-colour cream.
-- Iranian retailer pages using “مجیک” / “مجیکالر” for 100 ml colour lines and marketing ingredient/mixing claims, without enough primary evidence to tie the listing to the exact HBI-intended manufacturer and product.
-
-These are homonyms, not proof of shared brand ownership, formulation, or product family. The foreign product page and German SDS are excluded from HBI Magic Color evidence unless exact package identity later proves they are the same product—which has not been established.
+Public discovery returned multiple unrelated products and similarly named companies, including foreign products and third-party technical documents. None could be tied reliably to the exact HBI-intended product identity. These are homonyms, not proof of shared brand ownership, formulation, or product family. No unrelated document is accepted as HBI Magic Color evidence.
 
 ### 4.2 Current disposition
 
@@ -356,17 +350,14 @@ Never overwrite a formula revision. Append a new revision and invalidate only de
     https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/  
     Retailer catalogue source for the 88-row HBI identity snapshot; not manufacturer-primary.
 
-14. **NDBinahayat — Iranian “Magic” product listing**  
-    https://ndbinahayat.com/product/رنگ-مو-مجیک-سری-طلایی-5-3-قهوه-ای-طلایی-روش/  
-    Retailer/distributor listing. Does not establish this is the HBI-intended Magic Color brand or authenticate formula/instructions.
+14. **Unverified secondary listing using a similar “Magic” name**  
+    Retailer/distributor source; not authenticated as the HBI-intended product and not used to support product-specific claims.
 
-15. **Hair & Beauty Corp — Magic Color by Nicka K**  
-    https://hairandbeautycorp.com/products/magic-color  
-    Foreign product page; treated as potentially unrelated homonym until exact package identity proves otherwise.
+15. **Foreign similarly named product page**  
+    Excluded as a potential homonym; no identity link to the HBI-intended product was established.
 
-16. **German SDS — MAGIC COLOR COLORATIONSCREME**  
-    https://www.friseurversand.com/media/7f/40/2d/1752664154/26023-3.pdf  
-    SDS for named product/reference 17101–17155; not linked to HBI Magic Color identity and excluded from HBI product rules.
+16. **Third-party technical document for a similarly named product**  
+    Excluded because its product identity and manufacturer were not linked to HBI Magic Color.
 
 ## 10. Package B exit criteria
 
@@ -402,4 +393,4 @@ This package does not:
 - authorize a production database, pilot, deployment, release, or PR merge;
 - claim synthetic oracle success is specialist or scientific validation.
 
-**Current result:** general evidence-backed safety and scientific principles are documented for review; both brand-specific product dossiers remain blocked by primary source identity/document gaps.
+**Current result:** general evidence-backed safety and scientific principles are documented for review; both brand-specific product dossiers remain blocked by primary source identity/document gaps. Commercial product-discovery links are intentionally not reproduced in this project record.
