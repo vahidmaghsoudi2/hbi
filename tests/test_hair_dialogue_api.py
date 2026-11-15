@@ -161,6 +161,27 @@ def test_runtime_rejects_real_case_ids_and_unrecognized_request_fields(client, d
     malformed = _turn(client, _state(), "ANSWER_QUESTION",
                       question_code="STATUS_REASON", answer_code="STATUS_REASON", customer_id="must-not-be-accepted")
     assert malformed.status_code == 422
+    assert "must-not-be-accepted" not in malformed.text
+    assert "input" not in malformed.json()
+
+
+def test_dialogue_rejects_oversized_identifier_and_excessive_field_lists_without_echo(client, db_session):
+    _grant_reviewer_qa(db_session)
+    oversized_id = _turn(
+        client, _state(case_id="SYNTHETIC-" + ("X" * 100)), "ANSWER_QUESTION",
+        question_code="STATUS_REASON", answer_code="STATUS_REASON",
+    )
+    assert oversized_id.status_code == 422
+    assert "SYNTHETIC-" not in oversized_id.text
+
+    too_many_fields = _turn(
+        client, _state(), "RESOLVE_REQUIRED_DATA",
+        recorded_fields=[f"field_{i}" for i in range(51)],
+        required_fields=["PRIVATE-FIELD-SENTINEL"],
+    )
+    assert too_many_fields.status_code == 422
+    assert "PRIVATE-FIELD-SENTINEL" not in too_many_fields.text
+    assert "input" not in too_many_fields.json()
 
 
 def test_engine_failure_has_priority_and_never_allows_advice(client, db_session):
