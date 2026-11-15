@@ -260,3 +260,32 @@ def test_question_or_acceptance_state_is_not_part_of_engine_output():
     assert not hasattr(result, "client_decision")
     assert not hasattr(result, "execution_consent")
     assert not hasattr(result, "workflow_state")
+
+
+def test_candidate_summary_cannot_smuggle_chemical_execution_instructions():
+    candidate = _candidate(summary="Use developer at 6% for 30 minutes")
+    result = evaluate_hair_consultation(_request(candidates=(candidate,)))
+    assert result.run_outcome == "ENGINE_FAILURE"
+    assert result.reason_codes == ("ENGINE_FAIL",)
+
+
+def test_unknown_no_option_cause_is_not_mislabelled_as_out_of_scope():
+    result = evaluate_hair_consultation(
+        _request(candidates=(), no_option_cause="UNKNOWN_CAUSE")
+    )
+    assert result.run_outcome == "ENGINE_FAILURE"
+    assert result.consultation_status is None
+
+
+def test_known_fact_without_provenance_fails_closed():
+    bad_fact = HairFact(
+        field_key="hair_history",
+        value="synthetic-value",
+        knowledge_state="KNOWN",
+        source_ref=None,
+    )
+    result = evaluate_hair_consultation(
+        _request(facts=(_fact("goal"), bad_fact))
+    )
+    assert result.run_outcome == "ENGINE_FAILURE"
+    assert result.reason_codes == ("ENGINE_FAIL",)
