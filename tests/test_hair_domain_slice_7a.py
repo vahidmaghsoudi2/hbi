@@ -227,6 +227,11 @@ class TestCatalogLookup(unittest.TestCase):
         result = lookup(ref=reference(content_sha256="not-a-hash"))
         self.assertEqual(result.outcome, "INCONCLUSIVE")
 
+    def test_missing_hash_is_inconclusive(self):
+        result = lookup(ref=reference(content_sha256=None))
+        self.assertEqual(result.outcome, "INCONCLUSIVE")
+        self.assertFalse(result.traceability_complete)
+
     def test_album_reference_is_accepted(self):
         result = lookup(ref=reference(url=ALBUM_URL))
         self.assertEqual(result.outcome, "MATCH")
@@ -313,6 +318,14 @@ class TestDisplayAndEvents(unittest.TestCase):
     def test_inconclusive_output_is_withheld(self):
         ref = reference(edition_label=None)
         output = output_for(ref=ref, result=lookup(ref=ref))
+        decision = decide_catalog_output_presentation(output)
+        self.assertFalse(decision.display_allowed)
+        self.assertEqual(decision.status, "WITHHOLD_INCONCLUSIVE")
+
+    def test_output_without_content_digest_is_withheld(self):
+        ref = reference(content_sha256=None)
+        result = lookup(ref=ref)
+        output = output_for(ref=ref, result=result)
         decision = decide_catalog_output_presentation(output)
         self.assertFalse(decision.display_allowed)
         self.assertEqual(decision.status, "WITHHOLD_INCONCLUSIVE")
