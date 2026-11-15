@@ -63,7 +63,7 @@ export default function SkinProductEncyclopedia({ onBack }: Props) {
       return;
     }
     let alive = true;
-    setLoadingDetail(true); setError(null); setKnowledgeError(null);
+    setLoadingDetail(true); setError(null); setKnowledgeError(null); setCompleteness(null);
     setProduct(null); setKnowledge(null); setEvidence([]);
     const token = sessionStorage.getItem("hbi_admin_access_token") ?? sessionStorage.getItem("hbi_access_token") ?? "";
     Promise.all([
@@ -125,7 +125,7 @@ export default function SkinProductEncyclopedia({ onBack }: Props) {
           {knowledgeError ? <p className="pro-muted">ProductKnowledge قابل دریافت نیست: {knowledgeError}</p> : null}
           <aside className="pro-product-card pro-pk-gap-panel" aria-label="نواقص اطلاعات محصول">
             <h3>نواقص اطلاعات و تکمیل بعدی</h3>
-            <p className="pro-muted">کمبود این موارد به‌تنهایی مانع ارزیابی محصول نیست؛ در مشاوره، موارد ناقص به مشتری اعلام می‌شود.</p>
+            <p className="pro-muted">کمبود این موارد به‌تنهایی مانع ارزیابی محصول نیست؛ در مشاوره، موارد ناقص به اپراتور/پزشک اعلام می‌شود.</p>
             {completeness ? <ul className="pro-ol">{completeness.domain_report.map((item) => (
               <li key={item.field}><strong>{item.label}</strong> · {item.status}<p className="pro-muted">{item.message}</p></li>
             ))}</ul> : <p className="pro-muted">گزارش ارزیابی سمت سرور در دسترس نیست؛ وضعیت حوزه‌ها حدس زده نمی‌شود.</p>}
