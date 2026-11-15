@@ -209,10 +209,15 @@ def test_http_advice_gate_uses_server_readiness_and_rejects_caller_override(clie
         "advice_allowed": False, "reason_codes": ["ENGINE_FAIL"]
     }
 
-    caller_override = _turn(
-        client, _state(), "EVALUATE_ADVICE_GATE", **required, engine_ok=True
-    )
-    assert caller_override.status_code == 422
+    for forbidden_override in (
+        {"engine_ok": True},
+        {"engine_readiness": "HEALTHY"},
+    ):
+        caller_override = _turn(
+            client, _state(), "EVALUATE_ADVICE_GATE",
+            **required, **forbidden_override,
+        )
+        assert caller_override.status_code == 422
 
     import app.api.routers.hair_dialogue as hair_dialogue
     from app.domain.hair_dialogue_contract import EngineReadiness
