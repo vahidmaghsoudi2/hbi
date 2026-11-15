@@ -539,10 +539,11 @@ Acceptance evidence required from CI:
 ### 18.1 Exact PR verification evidence
 
 - PR: [#580](https://github.com/vahidmaghsoudi2/hbi/pull/580), Draft and unmerged.
-- Tested PR merge ref: `1936daeff300c6a4e68c4d6db08b6a0421f2717e`; branch head at the time: `4eaa85d84fffe992a5357d497e04b2bc8ec7aca2`.
-- HBI CI run `43758694445`: success; test, governance and isolated smoke jobs all succeeded.
-- HBI Auto Tasks run `43758694458`: success; `1046 passed, 801 warnings` in 56.28 seconds.
-- HBI Pilot Browser Proof run `43758694456`: success.
-- Artifacts: coverage `14179551540`, G8 regression `14178932996`, isolated smoke `14178563815`, browser proof `14179466870`, Auto Tasks evidence `14179371428`.
+- Latest verified PR merge ref before this documentation correction: `7369ff0a46050dc764002d69ed9f02b8665de5c1`; branch head: `5ce39cb3b4721cf6476784d2978105c7f45fd4c4`.
+- HBI CI run `43758962846`: success; test, governance and isolated smoke jobs all succeeded.
+- HBI Auto Tasks run `43758962767`: success; `1046 passed, 801 warnings` in 51.31 seconds.
+- HBI Pilot Browser Proof run `43758962736`: success.
+- Artifacts: coverage `14179860819`, G8 smoke `14178958333`, G8 regression `14178908458`, browser proof `14179552007`, Auto Tasks evidence `14179596659`.
+- All three runs checked out `refs/pull/580/merge` at merge SHA `7369ff0a46050dc764002d69ed9f02b8665de5c1`.
 - The earlier test-fixture failure on a previous merge ref was corrected before this successful verification.
 - These results establish only synthetic software conformance. They do not approve the logical contract on behalf of the PO, authorize persistence, or validate scientific/product-specific hair-colour rules.
