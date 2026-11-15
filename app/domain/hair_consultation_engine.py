@@ -152,6 +152,17 @@ class HairConsultationResult:
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _ALLOWED_RULE_SCOPE = "HAIR_COLOR_RECOMMENDATION"
 _MAX_OPTIONS = 3
+_ALLOWED_NO_OPTION_CAUSES = frozenset({
+    "NEEDS_INFORMATION",
+    "NEEDS_IN_PERSON_REVIEW",
+    "SAFETY_CONCERN",
+    "OUT_OF_SCOPE",
+    "NOT_FEASIBLE_REQUIRES_SPECIALIST",
+})
+_FORBIDDEN_INSTRUCTION_PATTERN = re.compile(
+    r"(?:formula|developer|oxidant|peroxide|mixing|ratio|minutes|%|فرمول|اکسیدان|درصد|نسبت|دقیقه|زمان مکث)",
+    re.IGNORECASE,
+)
 
 
 def _failure(request: HairConsultationRequest, summary: str) -> HairConsultationResult:
@@ -243,6 +254,8 @@ def _validate_envelope(request: HairConsultationRequest) -> tuple[bool, str]:
         return False, "engine_ok must be a boolean"
     if not isinstance(request.specialist_assessment_required, bool):
         return False, "specialist_assessment_required must be a boolean"
+    if request.no_option_cause is not None and request.no_option_cause not in _ALLOWED_NO_OPTION_CAUSES:
+        return False, "no_option_cause is invalid"
     return True, ""
 
 
@@ -273,11 +286,28 @@ def _verified_evidence(request: HairConsultationRequest) -> dict[str, HairProduc
     result: dict[str, HairProductEvidence] = {}
     for item in request.evidence:
         if (
-            not item.evidence_ref.strip()
+            not isinstance(item.evidence_ref, str)
+            or not item.evidence_ref.strip()
             or item.evidence_ref in result
+            or not isinstance(item.source_ref, str)
             or not item.source_ref.strip()
+            or not isinstance(item.claim_id, str)
             or not item.claim_id.strip()
+            or item.status not in {
+                "DISCOVERED", "IDENTITY_UNCONFIRMED", "SECONDARY_ONLY",
+                "CAPTURED_UNVERIFIED", "VERIFIED_SOURCE", "VERIFIED_APPLICABLE",
+                "CONFLICTED", "SUPERSEDED", "REJECTED",
+            }
+            or not isinstance(item.content_sha256, str)
             or not _SHA256_RE.fullmatch(item.content_sha256)
+            or not all(
+                isinstance(value, str) and value.strip()
+                for value in (
+                    item.product_identity_ref,
+                    item.product_version,
+                    item.market_region,
+                )
+            )
         ):
             raise ValueError("evidence record is malformed or duplicated")
         if item.status == "VERIFIED_APPLICABLE" and (
@@ -298,12 +328,27 @@ def _active_rules(
     result: dict[str, HairSpecialistRule] = {}
     for rule in request.rules:
         if (
-            not rule.rule_ref.strip()
+            not isinstance(rule.rule_ref, str)
+            or not rule.rule_ref.strip()
+            or not isinstance(rule.rule_version, str)
             or not rule.rule_version.strip()
             or rule.rule_ref in result
+            or rule.status not in {"DRAFT", "REVIEWED", "APPROVED", "ACTIVE", "RETIRED"}
+            or not isinstance(rule.scope, str)
+            or not isinstance(rule.specialist_review_ref, str)
             or not rule.specialist_review_ref.strip()
+            or not isinstance(rule.evidence_refs, tuple)
             or not rule.evidence_refs
+            or not all(isinstance(ref, str) and ref.strip() for ref in rule.evidence_refs)
             or len(set(rule.evidence_refs)) != len(rule.evidence_refs)
+            or not all(
+                isinstance(value, str) and value.strip()
+                for value in (
+                    rule.product_identity_ref,
+                    rule.product_version,
+                    rule.market_region,
+                )
+            )
         ):
             raise ValueError("rule record is malformed or duplicated")
         if (
@@ -488,15 +533,24 @@ def evaluate_hair_consultation(request: HairConsultationRequest) -> HairConsulta
 
     for option in request.candidates:
         if (
-            not option.option_ref.strip()
+            not isinstance(option.option_ref, str)
+            or not option.option_ref.strip()
             or option.option_ref in option_refs
+            or not isinstance(option.summary, str)
             or not option.summary.strip()
+            or _FORBIDDEN_INSTRUCTION_PATTERN.search(option.summary)
+            or isinstance(option.rank, bool)
+            or not isinstance(option.rank, int)
+            or not isinstance(option.rule_refs, tuple)
             or not option.rule_refs
+            or not all(isinstance(ref, str) and ref.strip() for ref in option.rule_refs)
+            or not isinstance(option.evidence_refs, tuple)
             or not option.evidence_refs
+            or not all(isinstance(ref, str) and ref.strip() for ref in option.evidence_refs)
             or not set(option.rule_refs).issubset(active_rule_refs)
             or not set(option.evidence_refs).issubset(verified_evidence)
         ):
-            return _failure(request, "Candidate option is not fully bound to active rules and verified evidence.")
+            return _failure(request, "Candidate option is not fully bound to active rules and verified evidence, or contains prohibited instruction text.")
         option_refs.add(option.option_ref)
         all_evidence_refs.update(option.evidence_refs)
         output_options.append(
