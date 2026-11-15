@@ -522,7 +522,8 @@ Implemented contract slices:
 - Immutable event values and tuple-append API for in-memory history. Question, rejection, acceptance, execution consent, specialist review, stop, restart and execution events remain distinct.
 - Rejection is bound to an exact suggestion version; acceptance does not imply execution consent.
 - Execution start requires prior specialist approval, client acceptance and separate explicit consent for the same suggestion version.
-- Client stop sets a separate resume block; workflow changes and performed-step events are blocked until a fresh evaluation and explicit workflow authorization are supplied.
+- Client stop sets a separate resume block; only explanatory questions and a fresh authorized restart are accepted while blocked. Restart requires a successful evaluation object matching the exact case/target version pair and a separate workflow authorization. Prior acceptance, consent, and specialist review are not carried across restart.
+- Event payloads contain bounded synthetic references and controlled tokens, not free-form customer text. Execution steps and completion require a prior execution-start event.
 
 Non-implemented by design:
 - No database, ORM, migration, durable event store, customer record link, or storage of real customer data.
