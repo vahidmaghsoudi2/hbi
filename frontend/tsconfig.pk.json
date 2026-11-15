@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "include": [
+    "src/vite-env.d.ts",
     "src/types/api.ts",
     "src/pages/RecommendationPage.tsx"
   ]
