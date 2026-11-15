@@ -102,6 +102,40 @@ def test_engine_failure_has_no_consultation_state_or_options():
     assert result.options == ()
 
 
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"safety_state": "UNRECOGNIZED"},
+        {"engine_ok": 1},
+        {"specialist_assessment_required": 1},
+        {"required_fields": ("goal", "goal")},
+        {"facts": [_fact("goal"), _fact("hair_history")]},
+        {"facts": (_fact("goal"), HairFact("hair_history", None, "UNRECOGNIZED", None))},
+    ],
+)
+def test_malformed_envelope_fails_closed_without_publishable_output(changes):
+    result = evaluate_hair_consultation(_request(**changes))
+    assert result.run_outcome == "ENGINE_FAILURE"
+    assert result.reason_codes == ("ENGINE_FAIL",)
+    assert result.consultation_status is None
+    assert result.options == ()
+    assert result.publication_eligible is False
+
+
+def test_safety_stop_precedes_candidate_scope_gate_and_withholds_candidate_text():
+    marker = "SYNTHETIC-CANDIDATE-PRIVATE-MARKER"
+    result = evaluate_hair_consultation(
+        _request(
+            safety_state="STOP",
+            candidates=(_candidate(summary=marker),),
+        )
+    )
+    assert result.consultation_status == "SAFETY_STOP_NO_EXECUTION_SUGGESTION"
+    assert result.reason_codes == ("SAFETY_CONCERN",)
+    assert result.options == ()
+    assert marker not in repr(result)
+
+
 def test_real_case_is_blocked_and_non_synthetic_identifiers_are_not_echoed():
     result = evaluate_hair_consultation(
         _request(
