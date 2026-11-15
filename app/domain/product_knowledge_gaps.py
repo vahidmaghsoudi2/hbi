@@ -81,7 +81,7 @@ def build_product_knowledge_gap_report(
                     "message": f"{len(unresolved)} مرجع به شاهد همین محصول متصل نشد؛ ردیابی منبع نیازمند تکمیل است.",
                 })
                 continue
-            product_market = (product_market_region or "").strip().casefold()
+            product_market = (product_market_region or getattr(pk, "market_region", None) or "").strip().casefold()
             scope_unknown = False
             scope_mismatch = False
             for ref in refs:
