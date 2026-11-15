@@ -12,6 +12,10 @@ from app.interface.dto import (
     InventoryDTO, SaleDTO, SaleItemDTO
 )
 from app.interface.errors import NotFoundError, ValidationError, BusinessRuleError
+from app.models.product import Product
+from app.models.product_knowledge import ProductKnowledge
+from app.models.evidence import Evidence
+from app.domain.product_knowledge_gaps import evaluate_product_knowledge_completeness
 
 def _to_product_dto(p) -> ProductDTO:
     return ProductDTO(
@@ -79,6 +83,13 @@ def _to_recommendation_dto(r, db: Session) -> RecommendationDTO:
     need = r.need_match_score or 0.0
     ev = getattr(r, 'evidence_score', None) or 0.0
     confidence = round(min(1.0, 0.4 * need + 0.6 * ev), 2)
+    product = db.query(Product).filter(Product.product_id == r.product_id).first()
+    knowledge = db.query(ProductKnowledge).filter(ProductKnowledge.product_id == r.product_id).first()
+    product_evidence = db.query(Evidence).filter(Evidence.product_id == r.product_id).all()
+    pk_completeness = evaluate_product_knowledge_completeness(
+        knowledge, product_evidence,
+        product_market_region=getattr(product, "market_region", None),
+    )
 
     return RecommendationDTO(
         recommendation_id=r.recommendation_id,
@@ -95,6 +106,7 @@ def _to_recommendation_dto(r, db: Session) -> RecommendationDTO:
         evidence_score=getattr(r, 'evidence_score', None),
         evidence_refs=_decode_json_list(getattr(r, 'evidence_refs', None)),
         warnings=_decode_json_list(getattr(r, 'warnings', None)),
+        pk_completeness=pk_completeness,
         exclusion_reasons=_decode_json_list(getattr(r, 'exclusion_reasons', None)),
         availability=_get_availability(db, r.product_id),
         price=_get_price(db, r.product_id),
