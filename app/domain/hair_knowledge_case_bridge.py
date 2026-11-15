@@ -15,6 +15,7 @@ from app.domain.hair_catalog_identity_lookup import CatalogIdentity
 from app.domain.hair_data_governance import (
     is_permitted_synthetic_case,
     is_permitted_synthetic_version,
+    is_permitted_synthetic_identifier,
 )
 from app.domain.hair_catalog_provider import (
     approved_catalog_contains_identity,
@@ -317,8 +318,8 @@ class HairKnowledgeCaseBridge:
         rule: HairRuleDefinition,
         run_id: str,
     ) -> HairDecisionRun:
-        if not isinstance(run_id, str) or not run_id.strip():
-            raise ValueError("run_id must be a non-empty stable identifier")
+        if not is_permitted_synthetic_identifier(run_id):
+            raise ValueError("run_id must be a bounded synthetic identifier")
         if not isinstance(case, HairCaseSnapshot):
             raise TypeError("case must be a HairCaseSnapshot")
         if not isinstance(package, HairKnowledgePackage):
