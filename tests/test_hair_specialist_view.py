@@ -348,3 +348,34 @@ def test_specialist_view_rejects_unrecognized_or_duplicate_evidence_records():
     raw_result["evidence_refs"] = evidence
     with pytest.raises(ValueError):
         build_hair_specialist_view(replace(run, reasoning_result=raw_result))
+
+
+def test_specialist_view_rejects_forged_package_rule_and_dependency_lineage():
+    run = _run()
+    invalid_runs = [
+        replace(run, package_id="PRIVATE-PACKAGE-ID"),
+        replace(run, package_version="PRIVATE-PACKAGE-VERSION"),
+        replace(run, rule_id="PRIVATE-RULE-ID"),
+        replace(run, rule_version="PRIVATE-RULE-VERSION"),
+        replace(run, snapshot_id="PRIVATE-SNAPSHOT-ID"),
+        replace(run, content_sha256="0" * 64),
+        replace(run, engine_version="PRIVATE-ENGINE-VERSION"),
+        replace(
+            run,
+            dependencies=(
+                replace(run.dependencies[0], dependency_id="PRIVATE-CASE-REFERENCE"),
+                *run.dependencies[1:],
+            ),
+        ),
+    ]
+    for invalid_run in invalid_runs:
+        with pytest.raises(ValueError):
+            build_hair_specialist_view(invalid_run)
+
+
+def test_specialist_view_never_echoes_unknown_reason_code():
+    run = _run()
+    private_reason = "PRIVATE-CLIENT-REASON-CODE"
+    view = build_hair_specialist_view(replace(run, reason_code=private_reason))
+    assert view["decision"]["reason_code"] == "UNRECOGNIZED_REASON_CODE"
+    assert private_reason not in repr(view)
