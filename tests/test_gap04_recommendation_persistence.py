@@ -1,4 +1,5 @@
 """GAP-04: Current Recommendation Persistence + Uniqueness (Option B)."""
+import json
 import pytest
 from unittest.mock import MagicMock
 from types import SimpleNamespace
