@@ -1,9 +1,9 @@
 """Fail-closed, computed-only HBI Hair consultation decision kernel.
 
-This is a first functional engine boundary, not a colour-formula generator.
+This is a safety-gate kernel, not a product-selection or colour-formula engine.
 It evaluates synthetic case completeness, current service scope, safety,
-product/evidence/rule traceability, and candidate eligibility. It never
-creates chemical instructions, persists a case, or publishes a client result.
+and evidence/rule traceability. Candidate selection is deliberately disabled:
+no product options, chemical instructions, or client recommendations are returned.
 """
 from __future__ import annotations
 
@@ -152,6 +152,7 @@ class HairConsultationResult:
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _ALLOWED_RULE_SCOPE = "HAIR_COLOR_RECOMMENDATION"
 _MAX_OPTIONS = 3
+CANDIDATE_SELECTION_ENABLED = False
 _ALLOWED_NO_OPTION_CAUSES = frozenset({
     "NEEDS_INFORMATION",
     "NEEDS_IN_PERSON_REVIEW",
@@ -510,20 +511,26 @@ def evaluate_hair_consultation(request: HairConsultationRequest) -> HairConsulta
             next_step="Obtain and review the exact product documents and applicable rule evidence; do not infer chemistry.",
         )
 
-    if not request.candidates:
-        if request.no_option_cause is None:
-            return _failure(request, "No candidate and no explicit no-option cause were supplied.")
+    if request.candidates:
+        return _blocked(
+            request,
+            engine_state="STOP_OR_REFER_WITH_REASON",
+            consultation_status="OUT_OF_V1_SCOPE",
+            reason_code="OUT_OF_SCOPE",
+            summary="Product-option selection is disabled in this non-operational safety kernel.",
+            evidence_refs=tuple(sorted(verified_evidence)),
+            next_step="Do not present or rank product options; use only safety, data-gap, and referral handling.",
+        )
+
+    if request.no_option_cause is not None:
         return _no_option_result(
             request,
             request.no_option_cause,
             tuple(sorted(verified_evidence)),
         )
 
-    if request.no_option_cause is not None:
-        return _failure(request, "A run cannot contain both candidate options and a no-option cause.")
-
     if len(request.candidates) > _MAX_OPTIONS:
-        return _failure(request, "The candidate generator returned more than three options.")
+        return _failure(request, "Candidate selection is disabled in this safety-only kernel.")
 
     option_refs: set[str] = set()
     output_options: list[HairConsultationOption] = []
