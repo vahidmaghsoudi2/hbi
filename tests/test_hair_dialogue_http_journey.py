@@ -44,8 +44,16 @@ def _assert_envelope(response):
 
 def test_all_ten_dialogue_scenarios_complete_as_one_http_journey(client, db_session, monkeypatch):
     import app.api.routers.hair_dialogue as hair_dialogue
+    from app.api.routers.hair_dialogue import AdviceGateInputs
     from app.domain.hair_dialogue_contract import EngineReadiness
-    monkeypatch.setattr(hair_dialogue, "get_hair_dialogue_engine_readiness", lambda: EngineReadiness.HEALTHY)
+    gate_inputs = iter((
+        AdviceGateInputs(False, True, True, True, EngineReadiness.HEALTHY),
+        AdviceGateInputs(True, True, True, False, EngineReadiness.HEALTHY),
+    ))
+    monkeypatch.setattr(
+        hair_dialogue, "get_hair_dialogue_advice_gate_inputs",
+        lambda: next(gate_inputs),
+    )
     db_session.add(
         UserRole(
             user_role_id="HAIR-DIALOGUE-HTTP-JOURNEY-ROLE",
@@ -102,8 +110,6 @@ def test_all_ten_dialogue_scenarios_complete_as_one_http_journey(client, db_sess
     data_gap = _assert_envelope(
         _turn(
             client, second_question, "EVALUATE_ADVICE_GATE",
-            data_complete=False, safety_passed=True, rule_valid=True,
-            evidence_valid=True,
         )
     )
     assert data_gap["result"] == {
@@ -165,8 +171,6 @@ def test_all_ten_dialogue_scenarios_complete_as_one_http_journey(client, db_sess
     knowledge_gap = _assert_envelope(
         _turn(
             client, consented, "EVALUATE_ADVICE_GATE",
-            data_complete=True, safety_passed=True, rule_valid=True,
-            evidence_valid=False,
         )
     )
     assert knowledge_gap["result"] == {
@@ -195,38 +199,36 @@ def test_http_advice_gate_uses_server_readiness_and_rejects_caller_override(clie
         )
     )
     db_session.commit()
-    required = {
-        "data_complete": True,
-        "safety_passed": True,
-        "rule_valid": True,
-        "evidence_valid": True,
-    }
-
     unavailable = _assert_envelope(
-        _turn(client, _state(), "EVALUATE_ADVICE_GATE", **required)
+        _turn(client, _state(), "EVALUATE_ADVICE_GATE")
     )
     assert unavailable["result"] == {
         "advice_allowed": False, "reason_codes": ["ENGINE_FAIL"]
     }
 
     for forbidden_override in (
+        {"data_complete": True},
+        {"safety_passed": True},
+        {"rule_valid": True},
+        {"evidence_valid": True},
         {"engine_ok": True},
         {"engine_readiness": "HEALTHY"},
     ):
         caller_override = _turn(
             client, _state(), "EVALUATE_ADVICE_GATE",
-            **required, **forbidden_override,
+            **forbidden_override,
         )
         assert caller_override.status_code == 422
 
     import app.api.routers.hair_dialogue as hair_dialogue
     from app.domain.hair_dialogue_contract import EngineReadiness
+    from app.api.routers.hair_dialogue import AdviceGateInputs
     monkeypatch.setattr(
-        hair_dialogue, "get_hair_dialogue_engine_readiness",
-        lambda: EngineReadiness.HEALTHY,
+        hair_dialogue, "get_hair_dialogue_advice_gate_inputs",
+        lambda: AdviceGateInputs(True, True, True, True, EngineReadiness.HEALTHY),
     )
     healthy = _assert_envelope(
-        _turn(client, _state(), "EVALUATE_ADVICE_GATE", **required)
+        _turn(client, _state(), "EVALUATE_ADVICE_GATE")
     )
     assert healthy["result"] == {"advice_allowed": True, "reason_codes": []}
 
@@ -243,19 +245,14 @@ def test_unhealthy_and_stale_server_readiness_fail_closed(client, db_session, mo
     import app.api.routers.hair_dialogue as hair_dialogue
     from app.domain.hair_dialogue_contract import EngineReadiness
 
-    required = {
-        "data_complete": True,
-        "safety_passed": True,
-        "rule_valid": True,
-        "evidence_valid": True,
-    }
+    from app.api.routers.hair_dialogue import AdviceGateInputs
     for status in (EngineReadiness.UNHEALTHY, EngineReadiness.STALE):
         monkeypatch.setattr(
-            hair_dialogue, "get_hair_dialogue_engine_readiness",
-            lambda status=status: status,
+            hair_dialogue, "get_hair_dialogue_advice_gate_inputs",
+            lambda status=status: AdviceGateInputs(True, True, True, True, status),
         )
         response = _assert_envelope(
-            _turn(client, _state(), "EVALUATE_ADVICE_GATE", **required)
+            _turn(client, _state(), "EVALUATE_ADVICE_GATE")
         )
         assert response["result"] == {
             "advice_allowed": False, "reason_codes": ["ENGINE_FAIL"]
