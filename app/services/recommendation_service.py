@@ -239,6 +239,18 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         product_ids = set(product_compatibility_ids(known_use_cases))
         return round(len(generated_ids & product_ids) / max(len(generated_ids), 1), 4)
 
+    @staticmethod
+    def _evidence_matches_product_market(evidence: Evidence, product_market: Optional[str]) -> bool:
+        """Keep Evidence and Product in the same explicit market scope.
+
+        Two genuinely unscoped records retain the legacy unscoped path. A known
+        Product market never inherits an Evidence row with an unknown market.
+        """
+        product_scope = product_market.strip().upper() if isinstance(product_market, str) else ""
+        evidence_market = getattr(evidence, "market_region", None)
+        evidence_scope = evidence_market.strip().upper() if isinstance(evidence_market, str) else ""
+        return product_scope == evidence_scope
+
     def _compute_evidence_score(self, evidences: List[Evidence]) -> float:
         """Score only Evidence explicitly approved by QA for decision use."""
         approved_evidences = [
@@ -434,6 +446,11 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             pk = self.pk_repo.find_by_product(product.product_id)
             known_use_cases = pk.known_use_cases if pk else None
             evidences = self.evidence_repo.find_by_product(product.product_id)
+            product_market = getattr(product, "market_region", None)
+            decision_evidences = [
+                ev for ev in evidences
+                if self._evidence_matches_product_market(ev, product_market)
+            ]
             inv = self.inventory_repo.find_by_product(product.product_id)
             # Inventory is a V1 entry gate. Keep the service-level check as a
             # defense-in-depth invariant for alternate/test candidate providers.
@@ -452,7 +469,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             # Inventory quantity is availability-only and must not influence ranking.
             inventory_score = 1.0
             need_match = self._calculate_need_match(needs, known_use_cases)
-            evidence_score = self._compute_evidence_score(evidences)
+            evidence_score = self._compute_evidence_score(decision_evidences)
             evidence_list = [{
                 "evidence_id": ev.evidence_id,
                 "claim_id": ev.claim_id,
@@ -464,8 +481,8 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 "qa_status": ev.qa_status,
                 "claim": ev.claim,
                 "conflict_status": getattr(ev, "conflict_status", None),
-            } for ev in evidences]
-            existing_conflicts = self._existing_conflicts_from_evidence(evidences, product.product_id)
+            } for ev in decision_evidences]
+            existing_conflicts = self._existing_conflicts_from_evidence(decision_evidences, product.product_id)
             pk_snapshot = {}
             if pk:
                 pk_snapshot = {"known_use_cases": pk.known_use_cases, "claimed_benefits": pk.claimed_benefits, "contraindications": pk.contraindications, "ingredients": pk.ingredients}
