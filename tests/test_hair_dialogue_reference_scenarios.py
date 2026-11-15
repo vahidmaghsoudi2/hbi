@@ -10,6 +10,7 @@ from app.domain.hair_dialogue_contract import (
     AdviceGate,
     ClientDecision,
     DialogueCaseState,
+    EngineReadiness,
     accept_proposal,
     answer_question,
     apply_dependency_reassessment,
@@ -77,6 +78,7 @@ def test_scenario_04_insufficient_required_data_withholds_definitive_advice():
         safety_passed=True,
         rule_valid=True,
         evidence_valid=True,
+        engine_readiness=EngineReadiness.HEALTHY,
     )
     assert gate == AdviceGate(False, ("DATA_GAP",))
 
@@ -143,6 +145,7 @@ def test_scenario_09_missing_evidence_is_explicit_knowledge_gap_not_a_guess():
         safety_passed=True,
         rule_valid=True,
         evidence_valid=False,
+        engine_readiness=EngineReadiness.HEALTHY,
     )
     assert gate.advice_allowed is False
     assert gate.reason_codes == ("KNOWLEDGE_GAP",)
@@ -188,7 +191,7 @@ def test_advice_gate_uses_fail_closed_priority():
         safety_passed=False,
         rule_valid=False,
         evidence_valid=False,
-        engine_ok=False,
+        engine_readiness=EngineReadiness.UNHEALTHY,
     )
     assert gate.advice_allowed is False
     assert gate.reason_codes == ("ENGINE_FAIL",)
@@ -241,6 +244,7 @@ def test_safety_gate_prevents_advice_even_when_other_gates_pass():
         safety_passed=False,
         rule_valid=True,
         evidence_valid=True,
+        engine_readiness=EngineReadiness.HEALTHY,
     )
     assert gate.advice_allowed is False
     assert gate.reason_codes == ("SAFETY_STOP",)
