@@ -338,6 +338,8 @@ def append_case_event(
     existing_events: tuple[CaseEvent, ...],
     event: CaseEvent,
     workflow_control: WorkflowControl = WorkflowControl(),
+    *,
+    fresh_evaluation: HairEvaluationRun | None = None,
 ) -> EventAppendResult:
     """Return a new event tuple; never mutates or persists the supplied history."""
     if not isinstance(existing_events, tuple) or not all(
@@ -348,6 +350,10 @@ def append_case_event(
         raise TypeError("event must be a CaseEvent")
     if not isinstance(workflow_control, WorkflowControl):
         raise TypeError("workflow_control must be a WorkflowControl")
+    if fresh_evaluation is not None and not isinstance(fresh_evaluation, HairEvaluationRun):
+        raise TypeError("fresh_evaluation must be a HairEvaluationRun or None")
+    if event.event_type != EventType.WORKFLOW_RESTART_AUTHORIZED and fresh_evaluation is not None:
+        raise ValueError("fresh_evaluation is accepted only for an authorized restart")
     if existing_events and any(item.case_id != event.case_id for item in existing_events):
         raise ValueError("one in-memory event sequence must belong to one synthetic case")
     if event.event_id in {item.event_id for item in existing_events}:
@@ -474,8 +480,17 @@ def append_case_event(
             not workflow_control.resume_blocked
             or not payload.get("fresh_evaluation_ref")
             or not payload.get("authorization_ref")
+            or fresh_evaluation is None
         ):
             raise ValueError("restart requires a fresh evaluation and explicit workflow authorization")
+        if (
+            fresh_evaluation.run_id != payload["fresh_evaluation_ref"]
+            or fresh_evaluation.case_id != event.case_id
+            or fresh_evaluation.case_version != event.case_version
+            or fresh_evaluation.target_version != event.target_version
+            or fresh_evaluation.outcome != "SUCCESS"
+        ):
+            raise ValueError("restart evaluation must be successful and match the exact current case/target versions")
 
     next_control = workflow_control
     if event.event_type == EventType.CLIENT_STOP_REQUESTED:
