@@ -7,7 +7,7 @@ service execution. All state is supplied and returned by the caller.
 from __future__ import annotations
 
 from dataclasses import asdict
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
@@ -42,9 +42,9 @@ class DialogueStateInput(BaseModel):
     active_proposal_id: str | None = Field(default=None, max_length=64)
     active_proposal_case_version: str | None = Field(default=None, max_length=32)
     active_proposal_goal_version: str | None = Field(default=None, max_length=32)
-    rejected_proposal_ids: list[str] = Field(default_factory=list, max_length=20)
+    rejected_proposal_ids: list[Annotated[str, Field(max_length=64)]] = Field(default_factory=list, max_length=20)
     client_decision: Literal["NONE", "ACCEPTED", "REJECTED"] = "NONE"
-    execution_consent_for_proposal_id: str | None = None
+    execution_consent_for_proposal_id: str | None = Field(default=None, max_length=64)
 
     def to_domain(self) -> DialogueCaseState:
         return DialogueCaseState(
@@ -79,8 +79,8 @@ class HairDialogueTurnRequest(BaseModel):
     question_code: Literal["STATUS_REASON", "MISSING_DATA", "PROCESS_LIMIT"] | None = None
     answer_code: Literal["STATUS_REASON", "MISSING_DATA", "PROCESS_LIMIT"] | None = None
     reason_code: Literal["CATALOG_ONLY", "DATA_GAP", "KNOWLEDGE_GAP", "SAFETY_STOP"] | None = None
-    recorded_fields: list[str] | None = Field(default=None, max_length=50)
-    required_fields: list[str] | None = Field(default=None, max_length=50)
+    recorded_fields: list[Annotated[str, Field(max_length=64)]] | None = Field(default=None, max_length=50)
+    required_fields: list[Annotated[str, Field(max_length=64)]] | None = Field(default=None, max_length=50)
     data_complete: bool | None = None
     safety_passed: bool | None = None
     rule_valid: bool | None = None
