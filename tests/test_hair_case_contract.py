@@ -66,7 +66,16 @@ def _run(**overrides):
     return HairEvaluationRun(**values)
 
 
-def _event(event_type, *, event_id="SYNTHETIC-EVENT-001", suggestion=None, payload=()):
+def _event(
+    event_type,
+    *,
+    event_id="SYNTHETIC-EVENT-001",
+    suggestion=None,
+    payload=(),
+    actor_kind="CLIENT",
+):
+    if event_type == EventType.QUESTION_ASKED and not payload:
+        payload = (("question_ref", "SYNTHETIC-QUESTION-001"),)
     return CaseEvent(
         event_id=event_id,
         case_id="SYNTHETIC-CASE-001",
@@ -74,7 +83,7 @@ def _event(event_type, *, event_id="SYNTHETIC-EVENT-001", suggestion=None, paylo
         target_version="target-v1",
         event_type=event_type,
         actor_ref="SYNTHETIC-ACTOR-CLIENT",
-        actor_kind="CLIENT",
+        actor_kind=actor_kind,
         occurred_at="2026-11-15T10:00:00Z",
         correlation_ref="SYNTHETIC-CORRELATION-001",
         suggestion=suggestion,
@@ -269,12 +278,18 @@ def test_service_execution_requires_review_acceptance_and_separate_consent():
         EventType.SPECIALIST_REVIEW_RECORDED,
         event_id="SYNTHETIC-EVENT-003",
         suggestion=suggestion,
-        payload=(("decision", "APPROVED"),),
+        payload=(
+            ("review_ref", "SYNTHETIC-REVIEW-001"),
+            ("decision", "APPROVED"),
+        ),
+        actor_kind="SPECIALIST",
     )
     started = _event(
         EventType.SERVICE_EXECUTION_STARTED,
         event_id="SYNTHETIC-EVENT-004",
         suggestion=suggestion,
+        payload=(("service_record_ref", "SYNTHETIC-SERVICE-001"),),
+        actor_kind="SPECIALIST",
     )
     with pytest.raises(ValueError, match="specialist approval"):
         append_case_event((accepted, consent), started)
@@ -289,7 +304,13 @@ def test_client_stop_blocks_workflow_transition_and_execution_steps():
     with pytest.raises(ValueError, match="fresh authorized restart"):
         append_case_event(
             stopped.events,
-            _event(EventType.PERFORMED_STEP_RECORDED, event_id="SYNTHETIC-EVENT-002"),
+            _event(
+                EventType.PERFORMED_STEP_RECORDED,
+                event_id="SYNTHETIC-EVENT-002",
+                suggestion=_suggestion(),
+                payload=(("step_ref", "SYNTHETIC-STEP-001"),),
+                actor_kind="SPECIALIST",
+            ),
             stopped.workflow_control,
         )
 
@@ -301,6 +322,7 @@ def test_restart_requires_fresh_evaluation_and_authorization():
         EventType.WORKFLOW_RESTART_AUTHORIZED,
         event_id="SYNTHETIC-EVENT-002",
         payload=(("authorization_ref", "SYNTHETIC-AUTH-001"),),
+        actor_kind="OPERATOR",
     )
     with pytest.raises(ValueError, match="fresh evaluation"):
         append_case_event(stopped.events, invalid_restart, stopped.workflow_control)
@@ -316,6 +338,7 @@ def test_authorized_fresh_restart_clears_only_the_resume_block():
             ("fresh_evaluation_ref", "SYNTHETIC-RUN-002"),
             ("authorization_ref", "SYNTHETIC-AUTH-001"),
         ),
+        actor_kind="OPERATOR",
     )
     restarted = append_case_event(stopped.events, restart, stopped.workflow_control)
     assert restarted.workflow_control.resume_blocked is False
