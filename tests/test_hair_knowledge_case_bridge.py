@@ -316,3 +316,14 @@ def test_data_policy_redaction_precedes_out_of_domain_classification(changes, pr
     assert result.goal_version == ""
     for marker in private_markers:
         assert marker not in repr(result)
+
+
+def test_domain_bridge_rejects_caller_controlled_run_identifier():
+    package, rule = _package_and_rule()
+    with pytest.raises(ValueError, match="synthetic identifier"):
+        HairKnowledgeCaseBridge().run(
+            case=_case(),
+            package=package,
+            rule=rule,
+            run_id="PRIVATE-RUN-IDENTIFIER",
+        )
