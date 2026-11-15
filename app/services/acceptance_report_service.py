@@ -7,9 +7,11 @@ from datetime import datetime, timezone
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from sqlalchemy import inspect
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.governance import ACTION_QA_CHANGE
+from app.domain.claim_taxonomy import ALLOWED_CLAIM_TYPES
 from app.models.evidence import Evidence
 from app.models.evidence_mutation_log import EvidenceMutationLog
 from app.models.product import Product
@@ -157,8 +159,11 @@ def _eligibility(evidence: Evidence, product: Product) -> Tuple[bool, List[str],
         reasons.append("INVALID_OR_UNKNOWN_FIELD")
     if not _nonempty(getattr(evidence, "claim", None)):
         reasons.append("CLAIM_MISSING")
-    if not _nonempty(getattr(evidence, "claim_type", None)):
+    claim_type = _text(getattr(evidence, "claim_type", None)).upper()
+    if not claim_type:
         reasons.append("CLAIM_TYPE_MISSING")
+    elif claim_type not in ALLOWED_CLAIM_TYPES:
+        reasons.append("CLAIM_TYPE_INVALID")
     if not _nonempty(getattr(evidence, "source_type", None)):
         reasons.append("SOURCE_TYPE_MISSING")
     if not _nonempty(getattr(evidence, "source_reference", None)):
@@ -246,6 +251,19 @@ def _product_report(
 
         history = _audit_history(evidence_logs_by_id.get(ev.evidence_id, []))
         latest = history[-1] if history else None
+        current_notes = _text(getattr(ev, "notes", None))
+        if not audit_tables["evidence"]:
+            history_status = "UNAVAILABLE"
+        elif "[REJECTED_BY_CONFLICT_RESOLUTION" in current_notes:
+            history_status = "INCOMPLETE"
+        elif history and latest and latest.get("decision") == qa:
+            history_status = "CONSISTENT"
+        elif history:
+            history_status = "INCOMPLETE"
+        elif qa in {"VERIFIED", "REJECTED", "NEEDS_REVIEW", "APPROVED"}:
+            history_status = "NO_RECORDED_DECISION"
+        else:
+            history_status = "NO_DECISION_RECORDED"
         evidence_items.append({
             "evidence_id": ev.evidence_id,
             "field": ev.field,
@@ -261,6 +279,7 @@ def _product_report(
             "eligibility_reasons": reasons,
             "qa_decision_history": history,
             "latest_qa_decision": latest,
+            "qa_decision_history_status": history_status,
         })
         source_timestamps.append(getattr(ev, "created_at", None))
         for row in evidence_logs_by_id.get(ev.evidence_id, []):
@@ -294,6 +313,10 @@ def _product_report(
     limitations.append(
         "Evidence model has no evidence-level formula/version scope; Product packaging_version cannot prove Evidence applicability."
     )
+    if any(item.get("qa_decision_history_status") in {"INCOMPLETE", "NO_RECORDED_DECISION"} for item in evidence_items):
+        limitations.append(
+            "At least one current Evidence QA state has no matching per-row QA decision audit record; the report does not fabricate missing history."
+        )
 
     source_timestamp = _max_timestamp(source_timestamps)
     return {
@@ -364,22 +387,30 @@ def build_acceptance_reports(db: Session, product_ids: Sequence[str]) -> Tuple[D
     evidence_logs: List[Any] = []
     product_logs: List[Any] = []
     if evidence_audit_available:
-        evidence_logs = (
-            db.query(EvidenceMutationLog)
-            .filter(EvidenceMutationLog.product_id.in_(found_ids))
-            .order_by(EvidenceMutationLog.timestamp.asc(), EvidenceMutationLog.log_id.asc())
-            .all()
-        )
-    if product_audit_available:
-        product_logs = (
-            db.query(ProductMutationLog)
-            .filter(
-                ProductMutationLog.target_entity == "Product",
-                ProductMutationLog.target_id.in_(found_ids),
+        try:
+            evidence_logs = (
+                db.query(EvidenceMutationLog)
+                .filter(EvidenceMutationLog.product_id.in_(found_ids))
+                .order_by(EvidenceMutationLog.timestamp.asc(), EvidenceMutationLog.log_id.asc())
+                .all()
             )
-            .order_by(ProductMutationLog.timestamp.asc(), ProductMutationLog.log_id.asc())
-            .all()
-        )
+        except SQLAlchemyError:
+            db.rollback()
+            evidence_audit_available = False
+    if product_audit_available:
+        try:
+            product_logs = (
+                db.query(ProductMutationLog)
+                .filter(
+                    ProductMutationLog.target_entity == "Product",
+                    ProductMutationLog.target_id.in_(found_ids),
+                )
+                .order_by(ProductMutationLog.timestamp.asc(), ProductMutationLog.log_id.asc())
+                .all()
+            )
+        except SQLAlchemyError:
+            db.rollback()
+            product_audit_available = False
 
     evidence_by_product: Dict[str, List[Evidence]] = {pid: [] for pid in found_ids}
     evidence_logs_by_product: Dict[str, List[Any]] = {pid: [] for pid in found_ids}
