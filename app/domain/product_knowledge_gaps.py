@@ -129,10 +129,60 @@ def build_product_knowledge_gap_report(
     return report
 
 
-def consultation_gap_warnings(report: List[Dict[str, str]]) -> List[str]:
-    """Customer-consultation disclosure for missing/unassessed/partial PK only."""
-    return [
+def evaluate_product_knowledge_completeness(
+    pk: Any,
+    evidences: Optional[List[Any]] = None,
+    product_market_region: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Return completeness and field-level gaps; never decide candidate eligibility."""
+    report = build_product_knowledge_gap_report(
+        pk, evidences, product_market_region=product_market_region
+    )
+    incomplete = [item for item in report if item["status"] != "SUPPORTED"]
+    missing_domains = [
+        item["field"] for item in report
+        if item["status"] in {"MISSING", "NOT_ASSESSED", "PARTIAL"}
+    ]
+    contraindications = next(
+        item for item in report if item["field"] == "contraindications"
+    )
+    return {
+        "status": "complete" if not incomplete else "partial",
+        "missing_domains": missing_domains,
+        "incomplete_domains": [
+            {"field": item["field"], "status": item["status"]}
+            for item in incomplete
+        ],
+        "contraindications_unreviewed": contraindications["status"] in {
+            "MISSING", "NOT_ASSESSED", "PARTIAL"
+        },
+        "pk_record_missing": pk is None,
+        "domain_report": report,
+    }
+
+
+def consultation_gap_warnings(
+    report: List[Dict[str, str]], *, pk_record_missing: bool = False
+) -> List[str]:
+    """Customer-consultation disclosure through the existing warnings channel."""
+    warnings = []
+    if pk_record_missing:
+        warnings.append(
+            "هشدار جدی PK: برای این محصول هیچ پرونده Product Knowledge ثبت نشده است؛ "
+            "هر پنج حوزه نامعلوم‌اند. محصول صرفاً به‌دلیل نبود PK از candidate حذف نشده، "
+            "اما ایمنی و موارد منع مصرف تأیید نشده‌اند و تکمیل پرونده ضروری است."
+        )
+    warnings.extend(
         f"اطلاعات ناقص محصول ({item['label']}): این پاسخ بر پایه اطلاعات موجود ارائه شده و این مورد برای تکمیل بعدی ثبت شده است."
         for item in report
         if item["status"] in {"MISSING", "NOT_ASSESSED", "PARTIAL"}
-    ]
+    )
+    if any(
+        item["field"] == "contraindications"
+        and item["status"] in {"MISSING", "NOT_ASSESSED", "PARTIAL"}
+        for item in report
+    ):
+        warnings.append(
+            "موارد منع مصرف هنوز بررسی/تأیید نشده‌اند؛ خالی بودن این بخش به‌معنی نبود منع مصرف نیست."
+        )
+    return warnings
