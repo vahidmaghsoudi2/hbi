@@ -40,6 +40,7 @@
 | قرارداد فنی ارتباط ارکستراتور و موتور (Draft 0.2) | [قرارداد Adapter](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/docs/homepage/encyclopedia/hair-color/adapter-contract-draft-v0.2.md) |
 | ثبت تصمیم‌های طراحی Adapter | [دفتر تصمیم‌های Adapter](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/docs/homepage/encyclopedia/hair-color/adapter-contract-po-decision-register-draft-v0.1.md) |
 | پیشنهاد سیاست دربارهٔ تغییر اعتبار شواهد پس از تصمیم مشتری | [پیشنهاد سیاست — پیش‌نویس و تأییدنشده](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/docs/homepage/encyclopedia/hair-color/po-proposal-evidence-revision-after-client-decision-20261112.md) |
+| نگاشت نام فارسی/انگلیسی ۱۹ سری کاتالوگ Bijourka | [نگاشت نام سری‌ها](catalog/raeaka_bijourka_series_labels.json) — فقط برچسب نمایشی؛ بدون تغییر شناسهٔ هویتی یا استنباط شیمیایی |
 | ۱۵ سناریوی مصنوعی قابل‌ماشین‌خوانی | [بستهٔ fixtureها](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/tests/fixtures/hair-color-contract-v1.json) |
 | ساختار مجاز بستهٔ fixtureها | [JSON Schema](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/tests/fixtures/hair-color-contract-v1.schema.json) |
 | اعتبارسنج ساختاری قرارداد (نه اجرای موتور محصول) | [Runner](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/scripts/run_hair_color_contract.py) و [آزمون‌های Runner](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/tests/test_hair_color_contract_runner.py) |
@@ -476,6 +477,7 @@
 - **خروجی:** بستهٔ دانش تأییدشده و محدود به دامنهٔ نسخهٔ نخست، همراه با خلأهای باقی‌مانده.
 - **معیار عبور:** اطلاعات ضروری برای پیشنهادهای اجرایی در دامنه قابل ردیابی و بازبینی تخصصی باشد. هدف، تکمیل تمام کاتالوگ‌های بازار نیست.
 - **وضعیت:** فقط Snapshot هویت کاتالوگی ۸۸ ردیفی بیجورکا ثبت شده است؛ این داده، مرجع ترکیب شیمیایی، ایمنی، سازگاری یا نتیجهٔ رنگ نیست. پژوهش شیمیایی محصول‌به‌محصول همچنان باز و اعتبارسنجی‌نشده است.
+- **نام‌گذاری سری‌ها:** نگاشت دو‌زبانهٔ ۱۹ سری در `catalog/raeaka_bijourka_series_labels.json` ثبت شده است. نام فارسی و انگلیسی هر سری جداگانه حفظ می‌شوند؛ به‌ویژه `Matt / زیتونی` و `Violet / شرابی`. نام انگلیسی صرفاً برچسب نمایشی/مرجع تصویر است و به‌عنوان alias برای تطبیق هویت، قاعدهٔ شیمیایی یا معادل‌سازی کدها استفاده نمی‌شود.
 
 ### طراحی فنی و برنامهٔ اجرا
 - **کار:** انتخاب معماری، فناوری و مدل؛ طراحی ذخیره‌سازی پرونده، دانش، منابع و نسخهٔ قواعد؛ رابط متخصص، کنترل دسترسی و ثبت تغییرات؛ کنترل پیشنهاد خارج از دامنه و عبور از نقاط توقف؛ برنامهٔ آزمون، هزینه، زمان، استقرار و بازگشت.
