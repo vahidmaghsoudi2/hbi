@@ -12,7 +12,7 @@ from enum import Enum
 import re
 from typing import Iterable
 
-from app.domain.hair_dialogue_contract import EngineReadiness
+from app.domain.hair_engine_readiness import EngineReadiness
 
 
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
