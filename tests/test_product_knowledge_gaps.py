@@ -27,7 +27,7 @@ def _pk(**overrides):
 
 def test_complete_synthetic_pk_has_no_ordinary_gaps():
     evidence = [SimpleNamespace(
-        claim_id="claim-1", product_id="synthetic-product", market_region="EU", conflict_status="NONE"
+        claim_id="claim-1", product_id="synthetic-product", market_region="EU", conflict_status="NONE", qa_status="APPROVED"
     )]
     report = build_product_knowledge_gap_report(_pk(), evidence)
     assert [item["status"] for item in report] == [
@@ -88,17 +88,29 @@ def test_wrong_product_evidence_reference_is_reported_as_partial():
 
 def test_unresolved_conflict_is_not_hidden_in_evidence_refs():
     evidence = [SimpleNamespace(
-        claim_id="claim-1", product_id="synthetic-product", market_region="EU", conflict_status="CONFLICT"
+        claim_id="claim-1", product_id="synthetic-product", market_region="EU", conflict_status="CONFLICT", qa_status="APPROVED"
     )]
     report = build_product_knowledge_gap_report(_pk(), evidence)
     item = next(entry for entry in report if entry["field"] == "evidence_refs")
     assert item["status"] == "CONFLICT"
 
 
+
+def test_pending_qa_evidence_is_not_reported_as_supported():
+    evidence = [SimpleNamespace(
+        claim_id="claim-1", product_id="synthetic-product",
+        market_region="EU", conflict_status="NONE", qa_status="PENDING"
+    )]
+    report = build_product_knowledge_gap_report(_pk(), evidence)
+    item = next(entry for entry in report if entry["field"] == "evidence_refs")
+    assert item["status"] == "PARTIAL"
+    assert "QA تأییدشده ندارد" in item["message"]
+
+
 def test_evidence_market_mismatch_is_reported_as_partial():
     evidence = [SimpleNamespace(
         claim_id="claim-1", product_id="synthetic-product",
-        market_region="US", conflict_status="NONE"
+        market_region="US", conflict_status="NONE", qa_status="APPROVED"
     )]
     report = build_product_knowledge_gap_report(_pk(), evidence)
     item = next(entry for entry in report if entry["field"] == "evidence_refs")
@@ -109,7 +121,7 @@ def test_evidence_market_mismatch_is_reported_as_partial():
 def test_unknown_market_scope_is_not_assumed_compatible():
     evidence = [SimpleNamespace(
         claim_id="claim-1", product_id="synthetic-product",
-        market_region=None, conflict_status="NONE"
+        market_region=None, conflict_status="NONE", qa_status="APPROVED"
     )]
     report = build_product_knowledge_gap_report(_pk(), evidence)
     item = next(entry for entry in report if entry["field"] == "evidence_refs")
