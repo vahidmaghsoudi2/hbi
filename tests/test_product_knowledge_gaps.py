@@ -79,7 +79,7 @@ def test_text_without_domain_review_is_not_assessed():
 
 def test_wrong_product_evidence_reference_is_reported_as_partial():
     evidence = [SimpleNamespace(
-        claim_id="claim-1", product_id="another-product", market_region="EU", conflict_status="NONE"
+        claim_id="claim-1", product_id="another-product", market_region="EU", conflict_status="NONE", qa_status="APPROVED"
     )]
     report = build_product_knowledge_gap_report(_pk(), evidence)
     item = next(entry for entry in report if entry["field"] == "evidence_refs")
@@ -132,7 +132,7 @@ def test_unknown_market_scope_is_not_assumed_compatible():
 def test_evidence_reference_report_discloses_packaging_traceability_limit():
     evidence = [SimpleNamespace(
         claim_id="claim-1", product_id="synthetic-product",
-        market_region="EU", conflict_status="NONE"
+        market_region="EU", conflict_status="NONE", qa_status="APPROVED"
     )]
     report = build_product_knowledge_gap_report(_pk(), evidence)
     item = next(entry for entry in report if entry["field"] == "evidence_refs")
@@ -143,7 +143,7 @@ def test_evidence_reference_report_discloses_packaging_traceability_limit():
 def test_completeness_evaluator_returns_complete_status_for_supported_pk():
     evidence = [SimpleNamespace(
         claim_id="claim-1", product_id="synthetic-product",
-        market_region="EU", conflict_status="NONE"
+        market_region="EU", conflict_status="NONE", qa_status="APPROVED"
     )]
     result = evaluate_product_knowledge_completeness(_pk(), evidence)
     assert result["status"] == "complete"
@@ -155,7 +155,7 @@ def test_completeness_evaluator_returns_complete_status_for_supported_pk():
 def test_one_missing_domain_is_partial_and_does_not_mark_contraindications_unreviewed():
     evidence = [SimpleNamespace(
         claim_id="claim-1", product_id="synthetic-product",
-        market_region="EU", conflict_status="NONE"
+        market_region="EU", conflict_status="NONE", qa_status="APPROVED"
     )]
     result = evaluate_product_knowledge_completeness(
         _pk(ingredients=None), evidence
@@ -168,7 +168,7 @@ def test_one_missing_domain_is_partial_and_does_not_mark_contraindications_unrev
 def test_two_missing_domains_are_reported_without_candidate_policy():
     evidence = [SimpleNamespace(
         claim_id="claim-1", product_id="synthetic-product",
-        market_region="EU", conflict_status="NONE"
+        market_region="EU", conflict_status="NONE", qa_status="APPROVED"
     )]
     result = evaluate_product_knowledge_completeness(
         _pk(ingredients=None, usage_instructions=""), evidence
