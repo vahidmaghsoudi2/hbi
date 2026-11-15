@@ -61,18 +61,6 @@ WORKFLOW_STATES = (
 )
 
 _SYNTHETIC_PREFIX = "SYNTHETIC-"
-_EXECUTION_BLOCKED_WHILE_STOPPED = frozenset(
-    {
-        EventType.WORKFLOW_STATE_CHANGED,
-        EventType.PERFORMED_STEP_RECORDED,
-        EventType.SERVICE_EXECUTION_STARTED,
-        EventType.SERVICE_EXECUTION_COMPLETED,
-        EventType.FOLLOW_UP_RECORDED,
-        EventType.CASE_CLOSED,
-    }
-)
-
-
 @dataclass(frozen=True)
 class FactRecord:
     fact_id: str
@@ -179,6 +167,10 @@ class HairEvaluationRun:
             isinstance(item, DependencyRef) for item in self.dependencies
         ):
             raise ValueError("dependencies must be a tuple of DependencyRef values")
+        if len({item.key for item in self.dependencies}) != len(self.dependencies):
+            raise ValueError("run dependency keys must be unique")
+        if self.outcome not in {"SUCCESS", "ENGINE_FAIL"}:
+            raise ValueError("outcome must be SUCCESS or ENGINE_FAIL")
         if self.persistence != "COMPUTED_ONLY" or self.display_allowed is not False:
             raise ValueError("runs must remain COMPUTED_ONLY and non-displayable")
         if self.recommendation is not None:
@@ -269,6 +261,12 @@ class CaseEvent:
 class WorkflowControl:
     resume_blocked: bool = False
     stop_event_id: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.resume_blocked:
+            _require_synthetic(self.stop_event_id, "stop_event_id")
+        elif self.stop_event_id is not None:
+            raise ValueError("an unblocked workflow cannot retain a stop_event_id")
 
 
 @dataclass(frozen=True)
