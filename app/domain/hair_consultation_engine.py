@@ -170,10 +170,7 @@ def _failure(request: HairConsultationRequest, summary: str) -> HairConsultation
     # Invalid/non-synthetic envelopes must not echo caller-supplied identifiers.
     # Keep trace identifiers only when the case itself passes the synthetic
     # namespace check; this kernel never returns real-client identifiers.
-    synthetic_case = (
-        isinstance(request.case_id, str)
-        and request.case_id.startswith("SYNTHETIC-")
-    )
+    synthetic_case = is_permitted_synthetic_identifier(request.case_id)
     return HairConsultationResult(
         run_outcome="ENGINE_FAILURE",
         case_id=request.case_id if synthetic_case else "",
