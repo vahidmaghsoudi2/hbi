@@ -264,3 +264,27 @@ def test_engine_context_is_not_a_customer_record_or_persisted_case():
     assert result.reasoning_result["persistence"] == "COMPUTED_ONLY"
     assert result.reasoning_result["display_allowed"] is False
     assert result.reasoning_result["recommendations"] == []
+
+
+@pytest.mark.parametrize(
+    ("changes", "private_markers"),
+    [
+        ({"case_id": "REAL-CLIENT-IDENTIFIER"}, ("REAL-CLIENT-IDENTIFIER",)),
+        ({"case_id": "SYNTHETIC-" + "X" * 130}, ("SYNTHETIC-" + "X" * 130,)),
+        ({"case_version": "PRIVATE-CASE-VERSION"}, ("PRIVATE-CASE-VERSION",)),
+        ({"goal_version": "PRIVATE-GOAL-VERSION"}, ("PRIVATE-GOAL-VERSION",)),
+        ({"case_version": "case-v1234567"}, ("case-v1234567",)),
+    ],
+)
+def test_domain_bridge_rejects_and_redacts_untrusted_case_identity_and_version_tokens(
+    changes, private_markers
+):
+    result = _run(_case(**changes))
+
+    assert result.status == "STOP_DATA_POLICY"
+    assert result.reasoning_result is None
+    assert result.case_id == ""
+    assert result.case_version == ""
+    assert result.goal_version == ""
+    for marker in private_markers:
+        assert marker not in repr(result)
