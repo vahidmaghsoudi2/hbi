@@ -357,3 +357,26 @@ def test_synthetic_engine_failure_does_not_echo_caller_version_tokens():
     assert result.target_version == ""
     assert private_case_version not in repr(result)
     assert private_target_version not in repr(result)
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"engine_ok": False},
+        {"safety_state": "STOP"},
+        {"service_kind": "COMBINATION_CONSULT"},
+        {"facts": (_fact("goal"),)},
+        {"specialist_assessment_required": True},
+        {"product_identity_ref": None},
+        {"evidence": (_evidence(status="SECONDARY_ONLY"),)},
+        {"rules": (_rule(status="REVIEWED"),)},
+        {"no_option_cause": "NEEDS_INFORMATION"},
+        {"no_option_cause": "NEEDS_IN_PERSON_REVIEW"},
+        {"no_option_cause": "SAFETY_CONCERN"},
+        {"no_option_cause": "OUT_OF_SCOPE"},
+    ],
+)
+def test_all_blocked_or_failed_paths_are_non_publishable_and_computed_only(changes):
+    result = evaluate_hair_consultation(_request(**changes))
+    assert result.persistence == "COMPUTED_ONLY"
+    assert result.publication_eligible is False
+    assert result.options == ()
