@@ -11,12 +11,7 @@ from dataclasses import dataclass, replace
 from enum import Enum
 from typing import Any, Mapping
 
-
-class EngineReadiness(str, Enum):
-    HEALTHY = "HEALTHY"
-    UNHEALTHY = "UNHEALTHY"
-    UNAVAILABLE = "UNAVAILABLE"
-    STALE = "STALE"
+from app.domain.hair_engine_readiness import EngineReadiness
 
 
 class ClientDecision(str, Enum):
