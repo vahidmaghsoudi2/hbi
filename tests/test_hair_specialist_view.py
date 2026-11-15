@@ -292,3 +292,25 @@ def test_specialist_preview_is_computed_only_and_has_no_database_side_effects(
 
     db_session.expire_all()
     assert _database_snapshot(db_session) == before
+
+
+def test_specialist_view_rejects_caller_controlled_run_and_version_lineage():
+    run = _run()
+    invalid_runs = (
+        replace(run, run_id="PRIVATE-RUN-IDENTIFIER"),
+        replace(run, case_version="PRIVATE-CASE-VERSION"),
+        replace(run, goal_version="PRIVATE-GOAL-VERSION"),
+        replace(run, case_version="case-v1234567"),
+    )
+    for invalid_run in invalid_runs:
+        with pytest.raises(ValueError):
+            build_hair_specialist_view(invalid_run)
+
+
+def test_specialist_view_allows_empty_versions_only_for_data_gap_runs():
+    run = _run(case_version="")
+    assert run.status == "STOP_DATA_GAP"
+    view = build_hair_specialist_view(run)
+    assert view["case"]["case_version"] == ""
+    assert view["case"]["goal_version"] == ""
+    assert view["lineage"]["persistence"] == "COMPUTED_ONLY"
