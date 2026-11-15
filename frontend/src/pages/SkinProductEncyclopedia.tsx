@@ -19,6 +19,32 @@ const labels: Array<[keyof ProductKnowledgeDTO, string]> = [
   ["evidence_refs", "مراجع شواهد"],
 ];
 
+
+const gapFields: Array<[keyof ProductKnowledgeDTO, string]> = [
+  ["ingredients", "ترکیبات"],
+  ["known_use_cases", "موارد کاربرد"],
+  ["usage_instructions", "دستور مصرف"],
+  ["contraindications", "موارد منع مصرف و احتیاط"],
+  ["evidence_refs", "مراجع شواهد"],
+];
+
+function gapStatus(knowledge: ProductKnowledgeDTO | null, field: keyof ProductKnowledgeDTO): string {
+  const value = knowledge?.[field];
+  if (value === null || value === undefined || String(value).trim() === "") return "MISSING";
+  if (field === "evidence_refs") return "NOT_ASSESSED";
+  let domainStatuses: Record<string, string> = {};
+  try {
+    const parsed = typeof knowledge?.domain_evidence_status === "string"
+      ? JSON.parse(knowledge.domain_evidence_status)
+      : knowledge?.domain_evidence_status;
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) domainStatuses = parsed;
+  } catch {
+    return "NOT_ASSESSED";
+  }
+  const status = String(domainStatuses[String(field)] ?? "").trim().toUpperCase();
+  return ["SUPPORTED", "PARTIAL", "CONFLICT"].includes(status) ? status : "NOT_ASSESSED";
+}
+
 function valueOrUnknown(value: unknown): string {
   if (value === null || value === undefined || value === "") return "ثبت نشده / نامشخص";
   if (typeof value === "number") return String(value);
@@ -120,6 +146,19 @@ export default function SkinProductEncyclopedia({ onBack }: Props) {
         <section className="pro-product-card" aria-labelledby="skin-product-knowledge">
           <h2 id="skin-product-knowledge">دانش تجمیع‌شدهٔ واجد شرایط</h2>
           {knowledgeError ? <p className="pro-muted">ProductKnowledge قابل دریافت نیست: {knowledgeError}</p> : null}
+          <aside className="pro-product-card pro-pk-gap-panel" aria-label="نواقص اطلاعات محصول">
+            <h3>نواقص اطلاعات و تکمیل بعدی</h3>
+            <p className="pro-muted">کمبود این موارد به‌تنهایی مانع ارزیابی محصول نیست؛ در مشاوره، موارد ناقص به مشتری اعلام می‌شود.</p>
+            <ul className="pro-ol">{gapFields.map(([key, label]) => {
+              const state = gapStatus(knowledge, key);
+              const action = state === "MISSING" ? "اطلاعات ثبت نشده؛ برای تکمیل بعدی پیگیری شود."
+                : state === "NOT_ASSESSED" ? "متن موجود است، اما ارزیابی این حوزه ثبت نشده است."
+                : state === "PARTIAL" ? "اطلاعات یا ردیابی شواهد ناقص است؛ تکمیل شود."
+                : state === "CONFLICT" ? "تعارض ثبت شده؛ نیازمند بررسی است."
+                : "وضعیت پشتیبانی در ارزیابی حوزه ثبت شده است.";
+              return <li key={String(key)}><strong>{label}</strong> · {state}<p className="pro-muted">{action}</p></li>;
+            })}</ul>
+          </aside>
           {knowledge ? <dl>{labels.map(([key, label]) => <div key={key}><dt><strong>{label}</strong></dt><dd>{valueOrUnknown(knowledge[key])}</dd></div>)}</dl> : <p className="pro-muted">رکورد ProductKnowledge موجود یا قابل خواندن نیست؛ داده‌ای حدس زده نمی‌شود.</p>}
         </section>
         <section className="pro-product-card" aria-labelledby="skin-product-evidence">
