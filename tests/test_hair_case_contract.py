@@ -254,6 +254,7 @@ def test_rejected_suggestion_version_cannot_be_accepted_later():
 def test_execution_consent_requires_prior_acceptance_of_exact_version():
     consent = _event(
         EventType.EXECUTION_CONSENT_GIVEN,
+        event_id="SYNTHETIC-EVENT-002",
         suggestion=_suggestion(),
     )
     with pytest.raises(ValueError, match="prior acceptance"):
