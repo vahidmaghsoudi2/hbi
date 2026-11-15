@@ -427,3 +427,35 @@ def test_blocked_outputs_do_not_echo_caller_identifiers_versions_or_evidence_ref
     assert result.options == ()
     assert result.persistence == "COMPUTED_ONLY"
     assert result.publication_eligible is False
+
+
+def test_engine_rejects_unsafe_versions_fields_and_evidence_identifiers_without_echo():
+    private_markers = (
+        "PRIVATE-CASE-VERSION",
+        "PRIVATE-TARGET-VERSION",
+        "customer@example.com",
+        "PRIVATE-FACT-FIELD",
+        "PRIVATE-EVIDENCE-REFERENCE",
+        "PRIVATE-RULE-REFERENCE",
+    )
+    requests = (
+        _request(case_version="PRIVATE-CASE-VERSION"),
+        _request(target_version="PRIVATE-TARGET-VERSION"),
+        _request(required_fields=("customer@example.com",)),
+        _request(facts=(_fact("PRIVATE-FACT-FIELD"),)),
+        _request(evidence=(_evidence(evidence_ref="PRIVATE-EVIDENCE-REFERENCE"),)),
+        _request(rules=(_rule(rule_ref="PRIVATE-RULE-REFERENCE"),)),
+    )
+
+    for request in requests:
+        result = evaluate_hair_consultation(request)
+        assert result.run_outcome == "FAILURE"
+        assert result.case_id == ""
+        assert result.case_version == ""
+        assert result.target_version == ""
+        assert result.evidence_refs == ()
+        assert result.options == ()
+        assert result.persistence == "COMPUTED_ONLY"
+        assert result.publication_eligible is False
+        for marker in private_markers:
+            assert marker not in repr(result)
