@@ -15,8 +15,11 @@ from app.domain.hair_data_governance import (
 )
 from app.domain.hair_knowledge_case_bridge import (
     HairDecisionRun,
+    HairDependency,
     build_approved_catalog_knowledge_package,
+    build_catalog_identity_rule,
 )
+from app.reasoning.reasoning_engine import ENGINE_VERSION
 
 
 _VIEW_VERSION = "1"
@@ -27,6 +30,36 @@ _LIMITATIONS = (
     "نسخه/ویرایش رسمی ناشر و زمان ثبت رسمی ناشر در این برش احراز نشده‌اند.",
     "هیچ دادهٔ واقعی مشتری دریافت یا ذخیره نمی‌شود؛ خروجی فقط محاسبه‌ای و موقت است.",
 )
+_SAFE_REASON_CODES = frozenset({
+    "REAL_CLIENT_DATA_BLOCKED_BY_PO_66_09",
+    "CASE_OR_GOAL_VERSION_MISSING",
+    "UNSAFE_CASE_OR_GOAL_VERSION_TOKEN",
+    "SERVICE_KIND_OUTSIDE_ROW_68_CATALOG_SCOPE",
+    "APPROVED_CATALOG_SNAPSHOT_UNAVAILABLE",
+    "KNOWLEDGE_PACKAGE_NOT_APPROVED_OR_VERSIONED",
+    "KNOWLEDGE_PACKAGE_SNAPSHOT_MISMATCH",
+    "KNOWLEDGE_PACKAGE_HAS_NO_CLAIMS",
+    "KNOWLEDGE_CLAIM_NOT_APPROVED_OR_TRACEABLE",
+    "RULE_NOT_ACTIVE_WITHIN_APPROVED_CATALOG_SCOPE",
+    "CASE_CATALOG_IDENTITY_INVALID",
+    "CASE_IDENTITY_NOT_IN_PO_APPROVED_CATALOG_SNAPSHOT",
+    "SYNTHETIC_CASE_BOUND_TO_APPROVED_CATALOG_KNOWLEDGE",
+    "CATALOG_IDENTITY_REASONING_ENGINE_FAILED",
+})
+_REQUIRED_IDENTITY_FIELDS = ("brand", "series", "shade_number", "shade_name")
+
+
+def _safe_reason_code(value: object) -> str:
+    if isinstance(value, str) and value in _SAFE_REASON_CODES:
+        return value
+    prefix = "CASE_CATALOG_IDENTITY_INCOMPLETE:"
+    if isinstance(value, str) and value.startswith(prefix):
+        fields = value[len(prefix):].split(",")
+        if fields and all(field in _REQUIRED_IDENTITY_FIELDS for field in fields):
+            return prefix + ",".join(fields)
+    return "UNRECOGNIZED_REASON_CODE"
+
+
 _STATUS_MESSAGES = {
     "CONTEXT_READY_FOR_CATALOG_IDENTITY_REASONING": (
         "زمینهٔ مصنوعی به Snapshot کاتالوگ متصل شد؛ این نتیجه صرفاً آماده‌بودن زمینه برای بررسی هویت کاتالوگی را نشان می‌دهد."
@@ -66,6 +99,36 @@ def build_hair_specialist_view(run: HairDecisionRun) -> dict[str, Any]:
         or run.status == "STOP_DATA_POLICY"
     ):
         raise ValueError("Only synthetic, computed-only Hair runs can be presented")
+
+    package = build_approved_catalog_knowledge_package()
+    if package is None:
+        raise ValueError("Approved package lineage is unavailable")
+    rule = build_catalog_identity_rule(package)
+    expected_dependencies = (
+        ("CASE", run.case_id, run.case_version),
+        ("GOAL", run.case_id, run.goal_version),
+        ("KNOWLEDGE_PACKAGE", package.package_id, package.version),
+        ("RULE", rule.rule_id, rule.version),
+        ("CATALOG_SNAPSHOT", package.snapshot_id, package.content_sha256),
+    )
+    actual_dependencies = tuple(
+        (dependency.kind, dependency.dependency_id, dependency.version)
+        for dependency in run.dependencies
+        if isinstance(dependency, HairDependency)
+    ) if isinstance(run.dependencies, tuple) else ()
+    expected_lineage = (
+        run.package_id == package.package_id
+        and run.package_version == package.version
+        and run.rule_id == rule.rule_id
+        and run.rule_version == rule.version
+        and run.snapshot_id == package.snapshot_id
+        and run.content_sha256 == package.content_sha256
+        and run.engine_version == ENGINE_VERSION
+        and actual_dependencies == expected_dependencies
+        and len(actual_dependencies) == len(run.dependencies)
+    )
+    if not expected_lineage:
+        raise ValueError("Specialist package and dependency lineage failed validation")
 
     evidence = []
     if run.status == "CONTEXT_READY_FOR_CATALOG_IDENTITY_REASONING" and run.reasoning_result is None:
@@ -129,7 +192,7 @@ def build_hair_specialist_view(run: HairDecisionRun) -> dict[str, Any]:
         },
         "decision": {
             "status": run.status,
-            "reason_code": run.reason_code,
+            "reason_code": _safe_reason_code(run.reason_code),
             "summary_fa": _STATUS_MESSAGES.get(
                 run.status,
                 "وضعیت این اجرا در قرارداد نمایش تعریف نشده است؛ نتیجه منتشر نمی‌شود.",
