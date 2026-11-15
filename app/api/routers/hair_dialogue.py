@@ -16,6 +16,7 @@ from app.core.authorization import get_roles_for_subject
 from app.core.deps import get_current_customer_id, get_db
 from app.domain.hair_dialogue_contract import (
     ClientDecision,
+    EngineReadiness,
     DialogueCaseState,
     accept_proposal,
     answer_question,
@@ -102,7 +103,7 @@ class HairDialogueTurnRequest(BaseModel):
             "EXPLAIN_REASON": {"reason_code"},
             "RESOLVE_REQUIRED_DATA": {"recorded_fields", "required_fields"},
             "EVALUATE_ADVICE_GATE": {
-                "data_complete", "safety_passed", "rule_valid", "evidence_valid", "engine_ok"
+                "data_complete", "safety_passed", "rule_valid", "evidence_valid"
             },
             "ATTACH_PROPOSAL": {"proposal_id"},
             "ACCEPT_PROPOSAL": {"proposal_id"},
@@ -117,6 +118,11 @@ class HairDialogueTurnRequest(BaseModel):
             names = ", ".join(sorted(irrelevant))
             raise ValueError(f"Fields not valid for {self.action}: {names}")
         return self
+
+
+def get_hair_dialogue_engine_readiness() -> EngineReadiness:
+    """Server-owned readiness; unavailable until a real engine health provider is wired."""
+    return EngineReadiness.UNAVAILABLE
 
 
 def _state_payload(state: DialogueCaseState) -> dict[str, Any]:
@@ -234,15 +240,14 @@ async def run_hair_dialogue_turn(
                 payload.safety_passed,
                 payload.rule_valid,
                 payload.evidence_valid,
-                payload.engine_ok,
             ):
-                raise ValueError("All advice gate inputs must be explicit.")
+                raise ValueError("All client-independent advice gate inputs must be explicit.")
             gate = evaluate_advice_gate(
                 data_complete=payload.data_complete,
                 safety_passed=payload.safety_passed,
                 rule_valid=payload.rule_valid,
                 evidence_valid=payload.evidence_valid,
-                engine_ok=payload.engine_ok,
+                engine_readiness=get_hair_dialogue_engine_readiness(),
             )
             result = {"advice_allowed": gate.advice_allowed, "reason_codes": list(gate.reason_codes)}
         elif action == "ATTACH_PROPOSAL":
