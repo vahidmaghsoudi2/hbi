@@ -9,6 +9,7 @@ from app.domain.product_knowledge_gaps import (
 def _pk(**overrides):
     values = {
         "product_id": "synthetic-product",
+        "market_region": "EU",
         "ingredients": "glycerin",
         "known_use_cases": "hydration",
         "usage_instructions": "apply daily",
@@ -25,7 +26,7 @@ def _pk(**overrides):
 
 def test_complete_synthetic_pk_has_no_ordinary_gaps():
     evidence = [SimpleNamespace(
-        claim_id="claim-1", product_id="synthetic-product", conflict_status="NONE"
+        claim_id="claim-1", product_id="synthetic-product", market_region="EU", conflict_status="NONE"
     )]
     report = build_product_knowledge_gap_report(_pk(), evidence)
     assert [item["status"] for item in report] == [
@@ -68,7 +69,7 @@ def test_text_without_domain_review_is_not_assessed():
 
 def test_wrong_product_evidence_reference_is_reported_as_partial():
     evidence = [SimpleNamespace(
-        claim_id="claim-1", product_id="another-product", conflict_status="NONE"
+        claim_id="claim-1", product_id="another-product", market_region="EU", conflict_status="NONE"
     )]
     report = build_product_knowledge_gap_report(_pk(), evidence)
     item = next(entry for entry in report if entry["field"] == "evidence_refs")
@@ -77,8 +78,40 @@ def test_wrong_product_evidence_reference_is_reported_as_partial():
 
 def test_unresolved_conflict_is_not_hidden_in_evidence_refs():
     evidence = [SimpleNamespace(
-        claim_id="claim-1", product_id="synthetic-product", conflict_status="CONFLICT"
+        claim_id="claim-1", product_id="synthetic-product", market_region="EU", conflict_status="CONFLICT"
     )]
     report = build_product_knowledge_gap_report(_pk(), evidence)
     item = next(entry for entry in report if entry["field"] == "evidence_refs")
     assert item["status"] == "CONFLICT"
+
+
+def test_evidence_market_mismatch_is_reported_as_partial():
+    evidence = [SimpleNamespace(
+        claim_id="claim-1", product_id="synthetic-product",
+        market_region="US", conflict_status="NONE"
+    )]
+    report = build_product_knowledge_gap_report(_pk(), evidence)
+    item = next(entry for entry in report if entry["field"] == "evidence_refs")
+    assert item["status"] == "PARTIAL"
+    assert "بازار" in item["message"]
+
+
+def test_unknown_market_scope_is_not_assumed_compatible():
+    evidence = [SimpleNamespace(
+        claim_id="claim-1", product_id="synthetic-product",
+        market_region=None, conflict_status="NONE"
+    )]
+    report = build_product_knowledge_gap_report(_pk(), evidence)
+    item = next(entry for entry in report if entry["field"] == "evidence_refs")
+    assert item["status"] == "PARTIAL"
+    assert "قابل تأیید نیست" in item["message"]
+
+
+def test_evidence_reference_report_discloses_packaging_traceability_limit():
+    evidence = [SimpleNamespace(
+        claim_id="claim-1", product_id="synthetic-product",
+        market_region="EU", conflict_status="NONE"
+    )]
+    report = build_product_knowledge_gap_report(_pk(), evidence)
+    item = next(entry for entry in report if entry["field"] == "evidence_refs")
+    assert "نسخه بسته‌بندی" in item["message"]
