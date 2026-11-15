@@ -7,7 +7,7 @@ from app.domain.hair_specialist_contract import (
     ResponseType,
     ReviewDecision,
     SpecialistOutput,
-    evaluate_specialist_output,
+    evaluate_specialist_output as _evaluate_specialist_output,
     record_specialist_review,
     rejected_proposal_may_be_reactivated,
     revision_requires_new_proposal_id,
@@ -23,6 +23,12 @@ def _evidence(kind):
         content_sha256="a" * 64,
         scope="synthetic-test-scope",
     )
+
+
+
+def evaluate_specialist_output(output, *, engine_ok=True):
+    """Test helper: successful fixture runs must opt in explicitly."""
+    return _evaluate_specialist_output(output, engine_ok=engine_ok)
 
 
 def _output(**changes):
@@ -58,6 +64,11 @@ def _review(output, gate, **changes):
     }
     values.update(changes)
     return record_specialist_review(output, gate, **values)
+
+
+
+def test_specialist_output_gate_defaults_to_engine_fail_closed():
+    assert _evaluate_specialist_output(_output()).status == GateStatus.ENGINE_FAIL
 
 
 def test_complete_evidence_opens_internal_review_only():
