@@ -380,3 +380,49 @@ def test_all_blocked_or_failed_paths_are_non_publishable_and_computed_only(chang
     assert result.persistence == "COMPUTED_ONLY"
     assert result.publication_eligible is False
     assert result.options == ()
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"safety_state": "STOP"},
+        {"service_kind": "COMBINATION_CONSULT"},
+        {"facts": (_fact("goal"),)},
+        {"specialist_assessment_required": True},
+        {"product_identity_ref": None},
+        {"evidence": (_evidence(status="SECONDARY_ONLY"),)},
+        {"no_option_cause": "NEEDS_INFORMATION"},
+    ],
+)
+def test_blocked_outputs_do_not_echo_caller_identifiers_versions_or_evidence_refs(changes):
+    private_case_id = "SYNTHETIC-CASE-PRIVATE-MARKER"
+    private_case_version = "private-case-version-marker"
+    private_target_version = "private-target-version-marker"
+    private_evidence_ref = "SYNTHETIC-EVIDENCE-PRIVATE-MARKER"
+    request = _request(
+        case_id=private_case_id,
+        case_version=private_case_version,
+        target_version=private_target_version,
+        evidence=(_evidence(evidence_ref=private_evidence_ref),),
+        rules=(_rule(evidence_refs=(private_evidence_ref,)),),
+        **changes,
+    )
+
+    result = evaluate_hair_consultation(request)
+
+    assert result.run_outcome == "SUCCESS"
+    assert result.consultation_status is not None
+    assert result.case_id == ""
+    assert result.case_version == ""
+    assert result.target_version == ""
+    assert result.evidence_refs == ()
+    for marker in (
+        private_case_id,
+        private_case_version,
+        private_target_version,
+        private_evidence_ref,
+    ):
+        assert marker not in repr(result)
+    assert result.options == ()
+    assert result.persistence == "COMPUTED_ONLY"
+    assert result.publication_eligible is False
