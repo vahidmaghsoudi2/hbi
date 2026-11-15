@@ -182,6 +182,7 @@ def test_specialist_preview_rejects_non_synthetic_case_id(client, db_session):
         headers=_headers(),
     )
     assert response.status_code == 422
+    assert "CASE-REAL-001" not in response.text
 
 
 def test_specialist_preview_rejects_oversized_fields_without_echo(client, db_session):
