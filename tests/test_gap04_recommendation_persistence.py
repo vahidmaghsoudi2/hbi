@@ -342,7 +342,7 @@ def test_recommendation_service_scopes_evidence_and_conflicts_to_product_market(
     svc.inventory_repo.find_by_product.return_value = SimpleNamespace(
         quantity_available=3, quantity_reserved=0, stock_status="AVAILABLE"
     )
-    svc.pk_repo.find_by_product.return_value = SimpleNamespace(known_use_cases="dry skin")
+    svc.pk_repo.find_by_product.return_value = SimpleNamespace(known_use_cases="dry skin", claimed_benefits=None, contraindications=None, ingredients=None)
     svc.evidence_repo.find_by_product.return_value = [
         SimpleNamespace(
             evidence_id="EV-EU-APPROVED", claim_id="CLM-EU",
