@@ -68,7 +68,9 @@ def build_hair_specialist_view(run: HairDecisionRun) -> dict[str, Any]:
         raise ValueError("Only synthetic, computed-only Hair runs can be presented")
 
     evidence = []
-    if run.status == "CONTEXT_READY_FOR_CATALOG_IDENTITY_REASONING":
+    if run.status == "CONTEXT_READY_FOR_CATALOG_IDENTITY_REASONING" and run.reasoning_result is None:
+        raise ValueError("Successful specialist runs must carry approved evidence lineage")
+    if run.reasoning_result is not None:
         package = build_approved_catalog_knowledge_package()
         if package is None or not isinstance(run.reasoning_result, dict):
             raise ValueError("Approved evidence package is unavailable for specialist projection")
@@ -106,11 +108,14 @@ def build_hair_specialist_view(run: HairDecisionRun) -> dict[str, Any]:
         for expected in expected_evidence:
             actual = actual_by_id[expected["evidence_id"]]
             for field in ("source_type", "source_reference", "qa_status"):
-                if actual.get(field) != expected[field]:
+                actual_value = (
+                    actual.get("source_reference") or actual.get("source")
+                    if field == "source_reference"
+                    else actual.get(field)
+                )
+                if actual_value != expected[field]:
                     raise ValueError("Specialist evidence lineage failed validation")
             evidence.append(expected)
-    elif run.reasoning_result is not None:
-        raise ValueError("Blocked specialist runs must not carry evidence payloads")
 
     return {
         "view_version": _VIEW_VERSION,
