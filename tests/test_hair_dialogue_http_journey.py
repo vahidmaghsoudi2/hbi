@@ -257,3 +257,48 @@ def test_unhealthy_and_stale_server_readiness_fail_closed(client, db_session, mo
         assert response["result"] == {
             "advice_allowed": False, "reason_codes": ["ENGINE_FAIL"]
         }
+
+def test_advice_gate_provider_exception_and_malformed_values_fail_closed(client, db_session, monkeypatch):
+    import app.api.routers.hair_dialogue as hair_dialogue
+    from app.api.routers.hair_dialogue import AdviceGateInputs
+    from app.domain.hair_dialogue_contract import EngineReadiness
+
+    db_session.add(
+        UserRole(
+            user_role_id="HAIR-DIALOGUE-PROVIDER-FAIL-CLOSED-ROLE",
+            subject_id="hair-dialogue-http-journey-user",
+            role=ROLE_REVIEWER_QA,
+        )
+    )
+    db_session.commit()
+
+    def broken_provider():
+        raise RuntimeError("synthetic provider failure")
+
+    monkeypatch.setattr(
+        hair_dialogue, "get_hair_dialogue_advice_gate_inputs", broken_provider
+    )
+    failed = _assert_envelope(_turn(client, _state(), "EVALUATE_ADVICE_GATE"))
+    assert failed["result"] == {
+        "advice_allowed": False, "reason_codes": ["ENGINE_FAIL"]
+    }
+
+    malformed_providers = (
+        lambda: None,
+        lambda: {"data_complete": True, "safety_passed": True,
+                 "rule_valid": True, "evidence_valid": True,
+                 "engine_readiness": EngineReadiness.HEALTHY},
+        lambda: AdviceGateInputs(1, True, True, True, EngineReadiness.HEALTHY),
+        lambda: AdviceGateInputs(True, True, True, True, "HEALTHY"),
+    )
+    for provider in malformed_providers:
+        monkeypatch.setattr(
+            hair_dialogue, "get_hair_dialogue_advice_gate_inputs", provider
+        )
+        response = _assert_envelope(
+            _turn(client, _state(), "EVALUATE_ADVICE_GATE")
+        )
+        assert response["result"] == {
+            "advice_allowed": False, "reason_codes": ["ENGINE_FAIL"]
+        }
+
