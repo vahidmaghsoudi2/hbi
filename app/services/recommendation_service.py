@@ -20,6 +20,10 @@ from app.services.need_normalization import normalize_needs_from_factors, CANONI
 from app.services.product_compatibility import product_compatibility_ids
 from app.reasoning.reasoning_engine import ReasoningEngine
 from app.reasoning.conflict_analyzer import ConflictSeverity
+from app.domain.product_knowledge_gaps import (
+    build_product_knowledge_gap_report,
+    consultation_gap_warnings,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -485,6 +489,10 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             rationale = engine_result.get("rationale", "")
             trace_evidence_refs = list(engine_result.get("evidence_refs", []))
             trace_warnings = list(engine_result.get("warnings", []))
+            # PK incompleteness is disclosed and retained for later completion;
+            # it never changes eligibility or bypasses existing independent gates.
+            pk_gap_report = build_product_knowledge_gap_report(pk, evidences)
+            trace_warnings.extend(consultation_gap_warnings(pk_gap_report))
             if eligibility != "ELIGIBLE" and not trace_warnings:
                 trace_warnings.append(f"Recommendation gated: {eligibility}")
             profile_fact_context = decision_state.get("profile_fact_context") or {}
