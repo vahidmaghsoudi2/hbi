@@ -39,6 +39,7 @@ def _domain_statuses(pk: Any) -> Dict[str, str]:
 def build_product_knowledge_gap_report(
     pk: Any,
     evidences: Optional[List[Any]] = None,
+    product_market_region: Optional[str] = None,
 ) -> List[Dict[str, str]]:
     """Return field-level status records without mutating any model or data."""
     evidences = evidences or []
@@ -80,13 +81,30 @@ def build_product_knowledge_gap_report(
                     "message": f"{len(unresolved)} مرجع به شاهد همین محصول متصل نشد؛ ردیابی منبع نیازمند تکمیل است.",
                 })
                 continue
+            product_market = (product_market_region or "").strip().casefold()
+            scope_unknown = False
+            scope_mismatch = False
+            for ref in refs:
+                evidence_market = (getattr(by_claim[ref], "market_region", None) or "").strip().casefold()
+                if not product_market or not evidence_market:
+                    scope_unknown = True
+                elif product_market != evidence_market:
+                    scope_mismatch = True
+            if scope_mismatch or scope_unknown:
+                detail = "بازار شاهد با بازار محصول هم‌خوان نیست." if scope_mismatch else "دامنه بازار محصول یا شاهد مشخص نیست؛ هم‌خوانی قابل تأیید نیست."
+                report.append({
+                    "field": field, "label": label, "status": "PARTIAL",
+                    "message": f"{detail} ردیابی نسخه بسته‌بندی نیز در مدل فعلی Evidence قابل اثبات نیست.",
+                })
+                continue
             if any((getattr(by_claim[ref], "conflict_status", "") or "").upper() == "CONFLICT" for ref in refs):
                 status = "CONFLICT"
             else:
                 status = "SUPPORTED"
             report.append({
                 "field": field, "label": label, "status": status,
-                "message": "مراجع به شواهد همین محصول متصل شدند." if status == "SUPPORTED" else "در مراجع شواهد تعارض ثبت شده است.",
+                "message": ("مراجع به شواهد همین محصول و بازار متصل شدند؛ ردیابی نسخه بسته‌بندی در مدل فعلی قابل اثبات نیست."
+                            if status == "SUPPORTED" else "در مراجع شواهد تعارض ثبت شده است."),
             })
             continue
 
