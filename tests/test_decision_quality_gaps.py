@@ -91,7 +91,10 @@ def test_eligible_recommendation_persists_trace():
     assert len(result) == 1
     kwargs = service.repository.create.call_args.kwargs
     assert json.loads(kwargs["evidence_refs"])[0]["evidence_id"] == "E1"
-    assert json.loads(kwargs["warnings"]) == ["TRACE_WARNING"]
+    persisted_warnings = json.loads(kwargs["warnings"])
+    assert persisted_warnings[0] == "TRACE_WARNING"
+    assert any("اطلاعات ناقص محصول (ترکیبات)" in warning for warning in persisted_warnings)
+    assert any("موارد منع مصرف هنوز بررسی/تأیید نشده‌اند" in warning for warning in persisted_warnings)
 
 
 def test_recommendation_dto_exposes_persisted_trace():
