@@ -179,6 +179,14 @@ export default function RecommendationPage() {
               {(r.reasoning || r.ranking_reasons) && (
                 <p>{r.reasoning || r.ranking_reasons}</p>
               )}
+              {Array.isArray(r.warnings) && r.warnings.length > 0 && (
+                <aside className="alert" role="status" aria-label="هشدارهای مشاوره">
+                  <strong>هشدارهای لازم برای اپراتور / پزشک</strong>
+                  <ul>{r.warnings.map((warning, index) => (
+                    <li key={index}>{typeof warning === "string" ? warning : JSON.stringify(warning)}</li>
+                  ))}</ul>
+                </aside>
+              )}
               <div className="actions" style={{ marginTop: "0.5rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
                 <button type="button" onClick={() => onOverride(r, "ACCEPT")}>
                   Override: Accept
