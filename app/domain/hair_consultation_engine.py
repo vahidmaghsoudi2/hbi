@@ -162,11 +162,18 @@ _ALLOWED_NO_OPTION_CAUSES = frozenset({
 
 
 def _failure(request: HairConsultationRequest, summary: str) -> HairConsultationResult:
+    # Invalid/non-synthetic envelopes must not echo caller-supplied identifiers.
+    # Keep trace identifiers only when the case itself passes the synthetic
+    # namespace check; this kernel never returns real-client identifiers.
+    synthetic_case = (
+        isinstance(request.case_id, str)
+        and request.case_id.startswith("SYNTHETIC-")
+    )
     return HairConsultationResult(
         run_outcome="ENGINE_FAILURE",
-        case_id=request.case_id if isinstance(request.case_id, str) else "",
-        case_version=request.case_version if isinstance(request.case_version, str) else "",
-        target_version=request.target_version if isinstance(request.target_version, str) else "",
+        case_id=request.case_id if synthetic_case else "",
+        case_version=request.case_version if synthetic_case and isinstance(request.case_version, str) else "",
+        target_version=request.target_version if synthetic_case and isinstance(request.target_version, str) else "",
         engine_state=None,
         consultation_status=None,
         reason_codes=("ENGINE_FAIL",),
