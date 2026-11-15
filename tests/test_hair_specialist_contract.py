@@ -1,5 +1,6 @@
 import pytest
 
+from app.domain.hair_dialogue_contract import EngineReadiness
 from app.domain.hair_specialist_contract import (
     EvidenceRef,
     GateStatus,
@@ -26,9 +27,9 @@ def _evidence(kind):
 
 
 
-def evaluate_specialist_output(output, *, engine_ok=True):
-    """Test helper: successful fixture runs must opt in explicitly."""
-    return _evaluate_specialist_output(output, engine_ok=engine_ok)
+def evaluate_specialist_output(output, *, engine_readiness=EngineReadiness.HEALTHY):
+    """Test helper: synthetic success explicitly injects trusted test readiness."""
+    return _evaluate_specialist_output(output, engine_readiness=engine_readiness)
 
 
 def _output(**changes):
@@ -110,7 +111,7 @@ def test_invalid_hash_or_unverified_evidence_does_not_satisfy_gate():
 
 
 def test_engine_failure_is_fail_closed_and_takes_precedence():
-    gate = evaluate_specialist_output(_output(data_complete=False), engine_ok=False)
+    gate = evaluate_specialist_output(_output(data_complete=False), engine_readiness=EngineReadiness.UNHEALTHY)
     assert gate.status == GateStatus.ENGINE_FAIL
     assert gate.publishable_to_internal_review is False
 
@@ -361,7 +362,7 @@ def test_malformed_missing_data_field_fails_closed():
 
 
 def test_non_boolean_engine_health_flag_fails_closed():
-    gate = evaluate_specialist_output(_output(), engine_ok="true")
+    gate = evaluate_specialist_output(_output(), engine_readiness="HEALTHY")
     assert gate.status == GateStatus.ENGINE_FAIL
 
 
