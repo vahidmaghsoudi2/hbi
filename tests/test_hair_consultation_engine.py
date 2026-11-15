@@ -448,7 +448,7 @@ def test_engine_rejects_unsafe_versions_fields_and_evidence_identifiers_without_
     for request in requests:
         result = evaluate_hair_consultation(request)
         assert result.run_outcome == "ENGINE_FAILURE"
-        assert result.case_id == ""
+        assert result.case_id == "SYNTHETIC-HAIR-ENGINE-001"
         assert result.case_version == ""
         assert result.target_version == ""
         assert result.evidence_refs == ()
