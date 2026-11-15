@@ -234,3 +234,25 @@ def test_policy_blocked_run_cannot_be_presented_even_with_synthetic_prefix():
     assert run.status == "STOP_DATA_POLICY"
     with pytest.raises(ValueError):
         build_hair_specialist_view(run)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("case_version", "PRIVATE-CLIENT-VERSION-MARKER"),
+        ("goal_version", "PRIVATE-GOAL-VERSION-MARKER"),
+        ("case_version", "case-v9999999"),
+        ("case_id", "SYNTHETIC-" + "X" * 130),
+    ],
+)
+def test_specialist_preview_rejects_unbounded_or_non_synthetic_case_tokens(
+    client, db_session, field, value
+):
+    _grant_reviewer_qa(db_session)
+    response = client.post(
+        "/api/v1/hair/specialist-preview",
+        json=_preview_payload(**{field: value}),
+        headers=_headers(),
+    )
+    assert response.status_code == 422
+    assert "PRIVATE-" not in response.text
