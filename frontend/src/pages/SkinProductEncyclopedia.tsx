@@ -59,7 +59,7 @@ export default function SkinProductEncyclopedia({ onBack }: Props) {
 
   useEffect(() => {
     if (!selectedId) {
-      setProduct(null); setKnowledge(null); setEvidence([]); setCompleteness(null); setCompleteness(null);
+      setProduct(null); setKnowledge(null); setEvidence([]); setCompleteness(null);
       return;
     }
     let alive = true;
