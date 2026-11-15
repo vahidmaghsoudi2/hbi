@@ -1,6 +1,6 @@
 # HBI Hair Consultation — HC-N01 / HC-N02 Contract and Case Data Model v1.0
 
-- **Status:** consolidated implementation-ready design proposal; awaiting the explicit PO decisions listed in §15.
+- **Status:** consolidated HC-N01/N02 design baseline. Conditional mappings below resolve the approved client-facing behavior without inventing states; no runtime implementation or release authorization is implied.
 - **Work items:** HC-N01 (consultation/adapter contract), HC-N02 (case data model and traceability).
 - **Input baseline:** current `master` at `74d9d80fb4392d09f283b63be1a435a8547cde15`; approved README contract/workflow; Adapter Contract Draft 0.2 and D-01–D-08; synthetic fixture contract S01–S15; current synthetic Adapter and dialogue state machine.
 - **Authority:** this document consolidates accepted semantics and proposes the minimum explicit data structures needed to implement them. It does not silently promote unresolved PO decisions.
@@ -411,6 +411,17 @@ This package does not:
 
 The existing 88-row Bijourka snapshot remains identity-only and is not modified by HC-N01/N02.
 
+## 12A. Current implementation scope — do not overstate engine readiness
+
+The current repository contains distinct synthetic slices, not a complete real consultation engine:
+
+- `/hair/catalog-identity/lookup` is guarded by `evaluate_hair_service_scope` and currently accepts only the exact `CATALOG_READY` service kind. Other service kinds, including `COMBINATION_CONSULT`, are returned as out-of-domain by that guard.
+- `/hair/dialogue/turn` exercises synthetic dialogue transitions and state integrity. It does not evaluate hair chemistry, feasibility, product-specific rules, or generate real colour recommendations.
+- The specialist preview and catalog knowledge bridge are synthetic, computed-only, and identity-scope only.
+- The 88-row Bijourka snapshot is a retailer-derived identity artifact. Its HBI content digest identifies the repository artifact; it does not authenticate a manufacturer edition, publisher capture, formula, or safety claim.
+
+Therefore, the operation names in §7 are logical target operations for the eventual consultation boundary, not a statement that the current HTTP API implements them. Extending service scope to actual combination consultation belongs to HC-N06 and must remain blocked until the evidence and rule gates in Package B and the oracle/validation gates in HC-N08 are satisfied.
+
 ## 13. Mapping to current implementation and required migration
 
 | Existing implementation | Gap against this proposal | Required treatment |
@@ -445,19 +456,40 @@ HC-N02 is ready for PO acceptance when:
 - [ ] synthetic-only and non-persistence restrictions are explicit;
 - [ ] the stop-request mapping in §15 is decided.
 
-## 15. Required PO decisions before the contract can be marked final
+## 15. Resolved semantic mappings and workflow-stop control
 
-### 15.1 S06/S08 response-state mapping
+This section applies the already approved client-facing semantics in D-08 and the exact five response-state vocabulary in D-02. It does not add a sixth response state, change the ten workflow states, or reinterpret a test-fixture label as a wire enum.
 
-The existing D-05 decision record explicitly leaves the exact wire-state mapping for S06 (knowledge gap) and S08 (no feasible or verified option) unresolved. Their approved client-facing handling must be preserved, but neither may be forced into `OUT_OF_V1_SCOPE` unless the request is demonstrably outside V1. Do not invent a sixth consultation response state. This proposal therefore leaves these two wire mappings unresolved pending an explicit PO decision.
+### 15.1 S06 — knowledge gap
 
-### 15.2 Client-requested stop vs ten workflow states
+- Engine state: `STOP_OR_REFER_WITH_REASON`.
+- Reason code: `KNOWLEDGE_GAP`.
+- Consultation response state: `NEEDS_INFORMATION_OR_TEST` only when a specific missing authoritative document, source revision, applicability record, or other resolvable information can be requested or retrieved.
+- The requested information may be product/evidence information; it must not be misrepresented as missing customer data.
+- If no reliable applicable evidence can be obtained, withhold every dependent suggestion and state that no reliable answer is available. Do not guess and do not refer to a human merely to disguise the evidence gap. Referral is allowed only when independently justified by the case.
+- `OUT_OF_V1_SCOPE` is permitted only if the requested claim/action is actually outside the approved V1 boundary.
+
+### 15.2 S08 — no feasible or verified option
+
+S08 is a test-oracle outcome, not one fixed wire response. The response state is selected from the actual supported cause:
+- `NEEDS_INFORMATION_OR_TEST` when a defined missing fact, product document, or verification can resolve the uncertainty;
+- `NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW` when physical hair assessment or qualified professional assessment is independently required;
+- `SAFETY_STOP_NO_EXECUTION_SUGGESTION` when a safety constraint is the blocking cause;
+- `OUT_OF_V1_SCOPE` only when the requested action is demonstrably outside V1.
+
+In every branch, no unsupported option is invented. Return zero options unless a separate fresh evaluation establishes an independently valid alternative that passes every hard constraint. Record the concrete reason and next step. This conditional mapping preserves all five approved response states and avoids mislabelling infeasibility as scope exclusion.
+
+### 15.3 S12 — rejected suggestion
+
+S12 remains an authoritative client-decision/ledger event, not an engine or consultation response state. The exact rejected suggestion/version remains historical and ineligible for active display. An alternative requires a fresh candidate run and independent validation.
+
+### 15.4 Client-requested stop vs ten workflow states
 
 The accepted PO rule requires a customer-requested stop to be recorded, forbids automatic resume, and requires a fresh evaluation before any restart. The existing approved workflow vocabulary contains ten states, including **متوقف ایمنی**, but does not contain a separate **متوقف به درخواست مشتری** state. These meanings must not be conflated: a client stop is not automatically a safety stop.
 
-**Recommended resolution (no eleventh workflow state):** keep the current workflow state unchanged at the instant the stop request is recorded; append a distinct `CLIENT_STOP_REQUESTED` workflow event and set an authoritative workflow-control flag `resume_blocked=true`. No subsequent workflow transition or execution step is permitted while the block is active. A restart request clears the block only after a fresh evaluation and the required workflow authorization; it never resumes the old plan. The flag is control metadata, not a workflow state.
+**Chosen control mapping (no eleventh workflow state):** keep the current workflow state unchanged at the instant the stop request is recorded; append a distinct `CLIENT_STOP_REQUESTED` workflow event and set an authoritative workflow-control flag `resume_blocked=true`. No subsequent workflow transition or execution step is permitted while the block is active. A restart request clears the block only after a fresh evaluation against current case data, target, safety, rules, and evidence, followed by required workflow authorization. The old plan is never resumed. The flag is control metadata, not a workflow state.
 
-**PO confirmation required:** accept this mapping, or specify a different mapping to the existing ten states. Until confirmed, the case model can record the stop event but must not implement the state mapping or restart transition.
+The engine cannot set or clear this flag. The Workflow Engine owns the event, block, restart decision, and performed-step history.
 
 ## 16. Additional engineering choices — recommended defaults, not product-policy changes
 
