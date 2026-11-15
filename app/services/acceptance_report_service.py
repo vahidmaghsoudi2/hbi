@@ -334,7 +334,7 @@ def build_acceptance_reports(db: Session, product_ids: Sequence[str]) -> Tuple[D
     product_map = {row.product_id: row for row in products}
     found_ids = list(product_map)
     if not found_ids:
-        return {}, {"evidence": False, "product": False}
+        return {}, {"evidence": False, "product": False}, {}
 
     evidences = db.query(Evidence).filter(Evidence.product_id.in_(found_ids)).all()
     knowledge_rows = db.query(ProductKnowledge).filter(ProductKnowledge.product_id.in_(found_ids)).all()
@@ -374,14 +374,19 @@ def build_acceptance_reports(db: Session, product_ids: Sequence[str]) -> Tuple[D
         "evidence": evidence_audit_available,
         "product": product_audit_available,
     }
-    reports = {}
+    reports: Dict[str, Dict[str, Any]] = {}
+    errors: Dict[str, str] = {}
     for product_id, product in product_map.items():
-        reports[product_id] = _product_report(
-            product,
-            evidence_by_product.get(product_id, []),
-            knowledge_map.get(product_id),
-            evidence_logs_by_product.get(product_id, []),
-            product_logs_by_product.get(product_id, []),
-            audit_tables=audit_tables,
-        )
-    return reports, audit_tables
+        try:
+            reports[product_id] = _product_report(
+                product,
+                evidence_by_product.get(product_id, []),
+                knowledge_map.get(product_id),
+                evidence_logs_by_product.get(product_id, []),
+                product_logs_by_product.get(product_id, []),
+                audit_tables=audit_tables,
+            )
+        except Exception as exc:
+            # Isolate a malformed row/product so a cohort report can continue.
+            errors[product_id] = type(exc).__name__
+    return reports, audit_tables, errors
