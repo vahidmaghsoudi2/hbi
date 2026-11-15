@@ -320,7 +320,7 @@ def test_specialist_view_allows_empty_versions_only_for_data_gap_runs():
 def test_specialist_view_rejects_caller_controlled_evidence_lineage():
     run = _run()
     for field, marker in (
-        ("source_reference", "PRIVATE-CLIENT-EVIDENCE-REFERENCE"),
+        ("source", "PRIVATE-CLIENT-EVIDENCE-REFERENCE"),
         ("source_type", "PRIVATE-CLIENT-EVIDENCE-TYPE"),
         ("qa_status", "PRIVATE-CLIENT-EVIDENCE-STATUS"),
     ):
