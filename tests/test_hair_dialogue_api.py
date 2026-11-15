@@ -147,7 +147,6 @@ def test_unavailable_engine_preempts_required_data_gate(client, db_session):
     assert resolved.json()["result"]["missing_fields"] == ["history", "hair_history"]
     gate = _turn(
         client, _state(), "EVALUATE_ADVICE_GATE",
-        data_complete=False, safety_passed=True, rule_valid=True, evidence_valid=True,
     )
     assert gate.status_code == 200
     assert gate.json()["result"] == {"advice_allowed": False, "reason_codes": ["ENGINE_FAIL"]}
@@ -167,8 +166,6 @@ def test_engine_failure_has_priority_and_never_allows_advice(client, db_session)
     _grant_reviewer_qa(db_session)
     response = _turn(
         client, _state(), "EVALUATE_ADVICE_GATE",
-        data_complete=False, safety_passed=False, rule_valid=False,
-        evidence_valid=False,
     )
     assert response.status_code == 200
     assert response.json()["result"] == {"advice_allowed": False, "reason_codes": ["ENGINE_FAIL"]}
@@ -358,10 +355,7 @@ def test_http_rejects_type_coercion_for_boolean_contract_fields(client, db_sessi
     _grant_reviewer_qa(db_session)
     malformed_values = ["true", "false", "1", "0", 1, 0]
     for field in [
-        "data_complete",
-        "safety_passed",
-        "rule_valid",
-        "evidence_valid",
+        "explicit_consent",
         "explicit_consent",
     ]:
         for value in malformed_values:
@@ -410,10 +404,7 @@ def test_every_successful_http_action_preserves_non_publishing_envelope(client, 
         ("RESOLVE_REQUIRED_DATA", _state(), {
             "recorded_fields": ["brand"], "required_fields": ["brand", "history"],
         }),
-        ("EVALUATE_ADVICE_GATE", _state(), {
-            "data_complete": True, "safety_passed": True,
-            "rule_valid": True, "evidence_valid": True,
-        }),
+        ("EVALUATE_ADVICE_GATE", _state(), {}),
         ("ATTACH_PROPOSAL", _state(), {
             "proposal_id": "SYNTHETIC-PROPOSAL-ENVELOPE-1",
         }),
@@ -646,10 +637,6 @@ def test_http_unavailable_engine_preempts_missing_evidence(client, db_session):
         client,
         _state(),
         "EVALUATE_ADVICE_GATE",
-        data_complete=True,
-        safety_passed=True,
-        rule_valid=True,
-        evidence_valid=False,
 
     )
     assert response.status_code == 200
