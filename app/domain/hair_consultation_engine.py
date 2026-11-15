@@ -373,9 +373,10 @@ def _no_option_result(
             engine_state="STOP_OR_REFER_WITH_REASON",
             consultation_status="NEEDS_INFORMATION_OR_TEST",
             reason_code="KNOWLEDGE_GAP",
-            summary="No defensible option is available until the specified evidence or information is resolved.",
+            summary="No defensible option is available until the applicable information or evidence gap is resolved.",
+            missing=("applicable_information_or_evidence",),
             evidence_refs=evidence_refs,
-            next_step="Obtain the exact missing product evidence or information, then run a fresh evaluation.",
+            next_step="Resolve the identified information or evidence gap, then run a fresh evaluation.",
         )
     if cause == "NEEDS_IN_PERSON_REVIEW" or cause == "NOT_FEASIBLE_REQUIRES_SPECIALIST":
         return _blocked(
