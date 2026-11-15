@@ -14,7 +14,7 @@ _SYNTHETIC_IDENTIFIER_RE = re.compile(r"^SYNTHETIC-[A-Za-z0-9][A-Za-z0-9._:-]{0,
 _CASE_VERSION_RE = re.compile(r"^case-v[1-9][0-9]{0,5}$")
 _GOAL_VERSION_RE = re.compile(r"^goal-v[1-9][0-9]{0,5}$")
 _FIELD_NAME_RE = re.compile(r"^[a-z][a-z0-9_]{0,63}$")
-_NUMERIC_VERSION_RE = re.compile(r"^[1-9][0-9]{0,5}(?:\\.[0-9]{1,5})?$")
+_NUMERIC_VERSION_RE = re.compile(r"^[1-9][0-9]{0,5}(?:\.[0-9]{1,5})?$")
 
 
 @dataclass(frozen=True)
