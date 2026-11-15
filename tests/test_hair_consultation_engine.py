@@ -339,3 +339,21 @@ def test_known_fact_without_provenance_fails_closed():
     )
     assert result.run_outcome == "ENGINE_FAILURE"
     assert result.reason_codes == ("ENGINE_FAIL",)
+
+
+def test_synthetic_engine_failure_does_not_echo_caller_version_tokens():
+    private_case_version = "private-case-version-token"
+    private_target_version = "private-target-version-token"
+    result = evaluate_hair_consultation(
+        _request(
+            engine_ok=False,
+            case_version=private_case_version,
+            target_version=private_target_version,
+        )
+    )
+    assert result.run_outcome == "ENGINE_FAILURE"
+    assert result.case_id == "SYNTHETIC-HAIR-ENGINE-001"
+    assert result.case_version == ""
+    assert result.target_version == ""
+    assert private_case_version not in repr(result)
+    assert private_target_version not in repr(result)
