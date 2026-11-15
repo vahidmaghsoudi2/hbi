@@ -187,6 +187,7 @@ def lookup_catalog_identity(
         and reference.edition_label.strip()
         and reference.edition_label.strip().casefold() not in ("unknown", "نامشخص")
         and _valid_capture_timestamp(reference.captured_at)
+        and isinstance(reference.content_sha256, str)
         and _valid_sha256(reference.content_sha256)
     )
 
@@ -493,6 +494,7 @@ def decide_catalog_output_presentation(
         and output.version_label != _UNVERSIONED
         and output.traceability_complete
         and _valid_capture_timestamp(output.source_captured_at)
+        and isinstance(output.source_content_sha256, str)
         and _valid_sha256(output.source_content_sha256)
         and _is_approved_reference(CatalogReference(
             source_kind=output.source_kind,
