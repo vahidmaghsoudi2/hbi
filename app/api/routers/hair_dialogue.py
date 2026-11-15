@@ -6,7 +6,7 @@ service execution. All state is supplied and returned by the caller.
 """
 from __future__ import annotations
 
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -84,10 +84,6 @@ class HairDialogueTurnRequest(BaseModel):
     reason_code: Literal["CATALOG_ONLY", "DATA_GAP", "KNOWLEDGE_GAP", "SAFETY_STOP"] | None = None
     recorded_fields: list[str] | None = None
     required_fields: list[str] | None = None
-    data_complete: bool | None = None
-    safety_passed: bool | None = None
-    rule_valid: bool | None = None
-    evidence_valid: bool | None = None
     proposal_id: str | None = None
     explicit_consent: bool = False
     new_goal_version: str | None = None
@@ -101,9 +97,7 @@ class HairDialogueTurnRequest(BaseModel):
             "ANSWER_QUESTION": {"question_code", "answer_code"},
             "EXPLAIN_REASON": {"reason_code"},
             "RESOLVE_REQUIRED_DATA": {"recorded_fields", "required_fields"},
-            "EVALUATE_ADVICE_GATE": {
-                "data_complete", "safety_passed", "rule_valid", "evidence_valid"
-            },
+            "EVALUATE_ADVICE_GATE": set(),
             "ATTACH_PROPOSAL": {"proposal_id"},
             "ACCEPT_PROPOSAL": {"proposal_id"},
             "REJECT_PROPOSAL": {"proposal_id"},
@@ -119,9 +113,26 @@ class HairDialogueTurnRequest(BaseModel):
         return self
 
 
-def get_hair_dialogue_engine_readiness() -> EngineReadiness:
-    """Server-owned readiness; unavailable until a real engine health provider is wired."""
-    return EngineReadiness.UNAVAILABLE
+@dataclass(frozen=True)
+class AdviceGateInputs:
+    """Trusted server-side gate facts; never populated from an HTTP request."""
+
+    data_complete: bool
+    safety_passed: bool
+    rule_valid: bool
+    evidence_valid: bool
+    engine_readiness: EngineReadiness
+
+
+def get_hair_dialogue_advice_gate_inputs() -> AdviceGateInputs:
+    """Fail closed until independently implemented server-side evaluators exist."""
+    return AdviceGateInputs(
+        data_complete=False,
+        safety_passed=False,
+        rule_valid=False,
+        evidence_valid=False,
+        engine_readiness=EngineReadiness.UNAVAILABLE,
+    )
 
 
 def _state_payload(state: DialogueCaseState) -> dict[str, Any]:
@@ -234,19 +245,22 @@ async def run_hair_dialogue_turn(
                 "complete": resolved.complete,
             }
         elif action == "EVALUATE_ADVICE_GATE":
-            if None in (
-                payload.data_complete,
-                payload.safety_passed,
-                payload.rule_valid,
-                payload.evidence_valid,
+            inputs = get_hair_dialogue_advice_gate_inputs()
+            if (
+                not isinstance(inputs, AdviceGateInputs)
+                or any(type(value) is not bool for value in (
+                    inputs.data_complete, inputs.safety_passed,
+                    inputs.rule_valid, inputs.evidence_valid,
+                ))
+                or not isinstance(inputs.engine_readiness, EngineReadiness)
             ):
-                raise ValueError("All client-independent advice gate inputs must be explicit.")
+                inputs = AdviceGateInputs(False, False, False, False, EngineReadiness.UNAVAILABLE)
             gate = evaluate_advice_gate(
-                data_complete=payload.data_complete,
-                safety_passed=payload.safety_passed,
-                rule_valid=payload.rule_valid,
-                evidence_valid=payload.evidence_valid,
-                engine_readiness=get_hair_dialogue_engine_readiness(),
+                data_complete=inputs.data_complete,
+                safety_passed=inputs.safety_passed,
+                rule_valid=inputs.rule_valid,
+                evidence_valid=inputs.evidence_valid,
+                engine_readiness=inputs.engine_readiness,
             )
             result = {"advice_allowed": gate.advice_allowed, "reason_codes": list(gate.reason_codes)}
         elif action == "ATTACH_PROPOSAL":
