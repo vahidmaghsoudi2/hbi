@@ -293,3 +293,39 @@ def test_required_data_contract_rejects_caller_text_as_field_names():
         )
     with pytest.raises(ValueError):
         resolve_required_data({}, ("field name with spaces",))
+
+
+def test_dialogue_state_rejects_stale_proposals_and_orphaned_execution_consent():
+    from dataclasses import replace
+
+    stale_case = replace(_active_state(), active_proposal_case_version="case-v2")
+    stale_goal = replace(_active_state(), active_proposal_goal_version="goal-v2")
+    missing_binding = replace(_active_state(), active_proposal_goal_version=None)
+    orphaned_consent = replace(
+        _active_state(),
+        client_decision=ClientDecision.ACCEPTED,
+        execution_consent_for_proposal_id="SYNTHETIC-OTHER-PROPOSAL",
+    )
+    consent_without_acceptance = replace(
+        _active_state(),
+        execution_consent_for_proposal_id="SYNTHETIC-PROPOSAL-001",
+    )
+    accepted_without_active = replace(
+        _state(),
+        client_decision=ClientDecision.ACCEPTED,
+    )
+
+    for invalid_state in (
+        stale_case,
+        stale_goal,
+        missing_binding,
+        orphaned_consent,
+        consent_without_acceptance,
+        accepted_without_active,
+    ):
+        with pytest.raises(ValueError):
+            answer_question(
+                invalid_state,
+                question="Synthetic question",
+                answer="Synthetic answer",
+            )
