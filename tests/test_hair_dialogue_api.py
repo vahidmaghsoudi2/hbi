@@ -230,3 +230,28 @@ def test_multiturn_http_flow_keeps_acceptance_consent_and_goal_version_separate(
     assert body["state"]["active_proposal_id"] is None
     assert body["state"]["client_decision"] == "NONE"
     assert body["state"]["execution_consent_for_proposal_id"] is None
+
+
+def test_dialogue_http_rejects_untrusted_nested_identifiers_and_version_tokens(client, db_session):
+    _grant_reviewer_qa(db_session)
+    invalid_states = [
+        _state(case_version="PRIVATE-CLIENT-VERSION-MARKER"),
+        _state(goal_version="PRIVATE-GOAL-VERSION-MARKER"),
+        _state(active_proposal_id="REAL-CLIENT-PROPOSAL-MARKER"),
+        _state(rejected_proposal_ids=["REAL-CLIENT-PROPOSAL-MARKER"]),
+        _state(execution_consent_for_proposal_id="REAL-CLIENT-PROPOSAL-MARKER"),
+        _state(active_proposal_case_version="PRIVATE-CASE-VERSION-MARKER"),
+        _state(active_proposal_goal_version="PRIVATE-GOAL-VERSION-MARKER"),
+    ]
+
+    for invalid_state in invalid_states:
+        response = _turn(
+            client,
+            invalid_state,
+            "ANSWER_QUESTION",
+            question_code="STATUS_REASON",
+            answer_code="STATUS_REASON",
+        )
+        assert response.status_code == 422
+        assert "PRIVATE-" not in response.text
+        assert "REAL-CLIENT-" not in response.text
