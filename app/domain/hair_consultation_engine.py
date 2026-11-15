@@ -172,8 +172,10 @@ def _failure(request: HairConsultationRequest, summary: str) -> HairConsultation
     return HairConsultationResult(
         run_outcome="ENGINE_FAILURE",
         case_id=request.case_id if synthetic_case else "",
-        case_version=request.case_version if synthetic_case and isinstance(request.case_version, str) else "",
-        target_version=request.target_version if synthetic_case and isinstance(request.target_version, str) else "",
+        # Failure envelopes carry no caller-controlled version tokens.
+        # This prevents accidental echo of opaque/private values on failed runs.
+        case_version="",
+        target_version="",
         engine_state=None,
         consultation_status=None,
         reason_codes=("ENGINE_FAIL",),
