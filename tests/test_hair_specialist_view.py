@@ -315,3 +315,36 @@ def test_specialist_view_allows_empty_versions_only_for_data_gap_runs():
     assert view["case"]["case_version"] == ""
     assert view["case"]["goal_version"] == ""
     assert view["lineage"]["persistence"] == "COMPUTED_ONLY"
+
+
+def test_specialist_view_rejects_caller_controlled_evidence_lineage():
+    run = _run()
+    for field, marker in (
+        ("source_reference", "PRIVATE-CLIENT-EVIDENCE-REFERENCE"),
+        ("source_type", "PRIVATE-CLIENT-EVIDENCE-TYPE"),
+        ("qa_status", "PRIVATE-CLIENT-EVIDENCE-STATUS"),
+    ):
+        raw_result = dict(run.reasoning_result)
+        evidence = [dict(item) for item in raw_result["evidence_refs"]]
+        evidence[0][field] = marker
+        raw_result["evidence_refs"] = evidence
+        tampered = replace(run, reasoning_result=raw_result)
+        with pytest.raises(ValueError):
+            build_hair_specialist_view(tampered)
+
+
+def test_specialist_view_rejects_unrecognized_or_duplicate_evidence_records():
+    run = _run()
+    raw_result = dict(run.reasoning_result)
+    evidence = [dict(item) for item in raw_result["evidence_refs"]]
+    evidence[-1]["evidence_id"] = "PRIVATE-EVIDENCE-ID"
+    raw_result["evidence_refs"] = evidence
+    with pytest.raises(ValueError):
+        build_hair_specialist_view(replace(run, reasoning_result=raw_result))
+
+    raw_result = dict(run.reasoning_result)
+    evidence = [dict(item) for item in raw_result["evidence_refs"]]
+    evidence[-1] = dict(evidence[0])
+    raw_result["evidence_refs"] = evidence
+    with pytest.raises(ValueError):
+        build_hair_specialist_view(replace(run, reasoning_result=raw_result))
