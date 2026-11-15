@@ -1,6 +1,7 @@
 from dataclasses import replace
 
 import pytest
+from sqlalchemy import inspect, text
 
 from app.domain.hair_catalog_identity_lookup import CatalogIdentity
 from app.domain.hair_data_governance import (
@@ -165,6 +166,18 @@ def _preview_payload(**overrides):
     return payload
 
 
+def _database_snapshot(db_session):
+    table_names = inspect(db_session.get_bind()).get_table_names()
+    snapshot = {}
+    for table_name in table_names:
+        quoted_name = '"' + table_name.replace('"', '""') + '"'
+        rows = db_session.execute(text(f"SELECT * FROM {quoted_name}")).all()
+        snapshot[table_name] = tuple(
+            sorted(tuple(repr(value) for value in row) for row in rows)
+        )
+    return snapshot
+
+
 def test_specialist_preview_requires_internal_role(client, db_session):
     response = client.post(
         "/api/v1/hair/specialist-preview",
@@ -256,3 +269,26 @@ def test_specialist_preview_rejects_unbounded_or_non_synthetic_case_tokens(
     )
     assert response.status_code == 422
     assert "PRIVATE-" not in response.text
+
+
+def test_specialist_preview_is_computed_only_and_has_no_database_side_effects(
+    client, db_session
+):
+    _grant_reviewer_qa(db_session)
+    before = _database_snapshot(db_session)
+
+    response = client.post(
+        "/api/v1/hair/specialist-preview",
+        json=_preview_payload(),
+        headers=_headers(),
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["lineage"]["persistence"] == "COMPUTED_ONLY"
+    assert body["decision"]["recommendation"] is None
+    assert body["decision"]["display_allowed"] is False
+    assert body["decision"]["client_visible"] is False
+
+    db_session.expire_all()
+    assert _database_snapshot(db_session) == before
