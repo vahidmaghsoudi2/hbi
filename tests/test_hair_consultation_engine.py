@@ -77,14 +77,14 @@ def _request(**changes):
         "market_region": "IR",
         "evidence": (_evidence(),),
         "rules": (_rule(),),
-        "candidates": (_candidate(),),
+        "candidates": (),
     }
     values.update(changes)
     return HairConsultationRequest(**values)
 
 
 def test_product_candidate_selection_is_disabled_in_safety_kernel():
-    result = evaluate_hair_consultation(_request())
+    result = evaluate_hair_consultation(_request(candidates=(_candidate(),)))
     assert result.run_outcome == "SUCCESS"
     assert result.engine_state == "STOP_OR_REFER_WITH_REASON"
     assert result.consultation_status == "OUT_OF_V1_SCOPE"
@@ -222,7 +222,9 @@ def test_no_candidate_without_explicit_reason_is_engine_failure():
 
 
 def test_candidate_payload_is_withheld_even_if_no_option_cause_is_present():
-    result = evaluate_hair_consultation(_request(no_option_cause="NEEDS_INFORMATION"))
+    result = evaluate_hair_consultation(
+        _request(candidates=(_candidate(),), no_option_cause="NEEDS_INFORMATION")
+    )
     assert result.consultation_status == "OUT_OF_V1_SCOPE"
     assert result.options == ()
 
