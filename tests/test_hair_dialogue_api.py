@@ -255,3 +255,34 @@ def test_dialogue_http_rejects_untrusted_nested_identifiers_and_version_tokens(c
         assert response.status_code == 422
         assert "PRIVATE-" not in response.text
         assert "REAL-CLIENT-" not in response.text
+
+
+def test_dialogue_http_rejects_untrusted_action_tokens_and_field_names(client, db_session):
+    _grant_reviewer_qa(db_session)
+
+    oversized_proposal = _turn(
+        client,
+        _state(),
+        "ATTACH_PROPOSAL",
+        proposal_id="SYNTHETIC-" + "P" * 130,
+    )
+    assert oversized_proposal.status_code == 422
+
+    unsafe_goal = _turn(
+        client,
+        _state(),
+        "CHANGE_GOAL",
+        new_goal_version="PRIVATE-CLIENT-GOAL-VERSION",
+    )
+    assert unsafe_goal.status_code == 422
+    assert "PRIVATE-" not in unsafe_goal.text
+
+    unsafe_field = _turn(
+        client,
+        _state(),
+        "RESOLVE_REQUIRED_DATA",
+        recorded_fields=["customer@example.com"],
+        required_fields=["customer@example.com"],
+    )
+    assert unsafe_field.status_code == 422
+    assert "customer@example.com" not in unsafe_field.text
