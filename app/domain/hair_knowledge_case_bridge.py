@@ -326,12 +326,8 @@ class HairKnowledgeCaseBridge:
         if not isinstance(rule, HairRuleDefinition):
             raise TypeError("rule must be a HairRuleDefinition")
 
-        if case.service_kind != "CATALOG_READY":
-            return _blocked_run(
-                run_id=run_id, case=case, status="STOP_OUT_OF_DOMAIN",
-                reason_code="SERVICE_KIND_OUTSIDE_ROW_68_CATALOG_SCOPE",
-                package=package, rule=rule,
-            )
+        # Data-policy validation precedes scope classification so an out-of-domain
+        # request cannot bypass identity/version redaction.
         if not is_permitted_synthetic_case(case_id=case.case_id, synthetic_data=case.synthetic_data):
             return _blocked_data_policy_run(
                 run_id=run_id,
@@ -357,6 +353,16 @@ class HairKnowledgeCaseBridge:
                 run_id=run_id,
                 case=case,
                 reason_code="UNSAFE_CASE_OR_GOAL_VERSION_TOKEN",
+                package=package,
+                rule=rule,
+            )
+
+        if case.service_kind != "CATALOG_READY":
+            return _blocked_run(
+                run_id=run_id,
+                case=case,
+                status="STOP_OUT_OF_DOMAIN",
+                reason_code="SERVICE_KIND_OUTSIDE_ROW_68_CATALOG_SCOPE",
                 package=package,
                 rule=rule,
             )
