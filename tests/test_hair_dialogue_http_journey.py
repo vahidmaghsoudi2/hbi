@@ -224,3 +224,34 @@ def test_http_advice_gate_uses_server_readiness_and_rejects_caller_override(clie
         _turn(client, _state(), "EVALUATE_ADVICE_GATE", **required)
     )
     assert healthy["result"] == {"advice_allowed": True, "reason_codes": []}
+
+
+def test_unhealthy_and_stale_server_readiness_fail_closed(client, db_session, monkeypatch):
+    db_session.add(
+        UserRole(
+            user_role_id="HAIR-DIALOGUE-HTTP-READINESS-EDGE-ROLE",
+            subject_id="hair-dialogue-http-journey-user",
+            role=ROLE_REVIEWER_QA,
+        )
+    )
+    db_session.commit()
+    import app.api.routers.hair_dialogue as hair_dialogue
+    from app.domain.hair_dialogue_contract import EngineReadiness
+
+    required = {
+        "data_complete": True,
+        "safety_passed": True,
+        "rule_valid": True,
+        "evidence_valid": True,
+    }
+    for status in (EngineReadiness.UNHEALTHY, EngineReadiness.STALE):
+        monkeypatch.setattr(
+            hair_dialogue, "get_hair_dialogue_engine_readiness",
+            lambda status=status: status,
+        )
+        response = _assert_envelope(
+            _turn(client, _state(), "EVALUATE_ADVICE_GATE", **required)
+        )
+        assert response["result"] == {
+            "advice_allowed": False, "reason_codes": ["ENGINE_FAIL"]
+        }
