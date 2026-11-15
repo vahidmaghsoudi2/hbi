@@ -205,20 +205,21 @@ Keep these separate:
 
 The engine cannot set `suggestion_ref`, `suggestion_version`, accepted/rejected status, active status, or display eligibility. A rejected exact suggestion version remains in history and cannot reappear as active. A replacement is a new independently validated candidate and persistent suggestion, never reactivation of the rejected one.
 
-### 6.3 DecisionEvent
+### 6.3 InteractionEvent and ClientDecisionEvent
 
-Decision history is append-only at the logical contract level. A current projection may be recomputed, but must not erase the event history.
+Event history is append-only at the logical contract level. A current projection may be recomputed, but must not erase the event history. An explanatory interaction is not a client decision.
 
-Event meanings remain separate:
-- `QUESTION_ASKED`: explanatory interaction; no acceptance, rejection, or consent change.
-- `SUGGESTION_REJECTED`: exact persistent suggestion/version rejected.
-- `SUGGESTION_ACCEPTED`: exact suggestion/version accepted; no execution consent implied.
+**Interaction event:**
+- `QUESTION_ASKED`: records the question and its context; it never changes acceptance, rejection, or execution consent.
+
+**Client decision events:**
+- `SUGGESTION_REJECTED`: rejects the exact persistent suggestion/version.
+- `SUGGESTION_ACCEPTED`: accepts the exact suggestion/version; no execution consent is implied.
 - `EXECUTION_CONSENT_GIVEN`: explicit consent for the specified service/proposal/version context.
-- `EXECUTION_CONSENT_WITHDRAWN`: explicit withdrawal where supported by the trusted interaction process; no automatic inference.
-- `SPECIALIST_REVIEW_RECORDED`: professional review against exact case/target/suggestion version.
-- `TARGET_CHANGED`: target version transition; fresh evaluation required.
 
-Common event attributes:
+Specialist review, case-version changes, and workflow stop/performed-step records are separate event/entity types; they are not client decision events.
+
+Common event-envelope attributes:
 - event identity;
 - case and target version context;
 - event type;
@@ -232,9 +233,9 @@ Common event attributes:
 
 The exact authentication mechanism, deduplication window, ordering/linearization mechanism, and retention policy are not selected by this logical model.
 
-### 6.4 WorkflowEvent and StopRequest
+### 6.4 CaseVersionEvent, WorkflowEvent and StopRequest
 
-Workflow events are separate from suggestion decisions:
+Case-version and workflow events are separate from client decisions. A target change is a case-version event, not a client decision. Workflow events include:
 - client stop request;
 - workflow state transition;
 - performed-step record;
@@ -427,6 +428,7 @@ No migration or destructive rewrite is proposed. The existing tested slices rema
 
 HC-N01 is ready for PO acceptance when:
 - [ ] request/response ownership and boundaries are accepted;
+- [ ] the unresolved S06/S08 wire-state mapping is explicitly decided without inventing a sixth response state or overloading `OUT_OF_V1_SCOPE`;
 - [ ] four motor and five response states remain separate;
 - [ ] all ten workflow states remain owned by Workflow Engine;
 - [ ] reason codes and failure envelope remain separate from consultation outcomes;
@@ -443,7 +445,13 @@ HC-N02 is ready for PO acceptance when:
 - [ ] synthetic-only and non-persistence restrictions are explicit;
 - [ ] the stop-request mapping in §15 is decided.
 
-## 15. One required PO decision — client-requested stop vs ten workflow states
+## 15. Required PO decisions before the contract can be marked final
+
+### 15.1 S06/S08 response-state mapping
+
+The existing D-05 decision record explicitly leaves the exact wire-state mapping for S06 (knowledge gap) and S08 (no feasible or verified option) unresolved. Their approved client-facing handling must be preserved, but neither may be forced into `OUT_OF_V1_SCOPE` unless the request is demonstrably outside V1. Do not invent a sixth consultation response state. This proposal therefore leaves these two wire mappings unresolved pending an explicit PO decision.
+
+### 15.2 Client-requested stop vs ten workflow states
 
 The accepted PO rule requires a customer-requested stop to be recorded, forbids automatic resume, and requires a fresh evaluation before any restart. The existing approved workflow vocabulary contains ten states, including **متوقف ایمنی**, but does not contain a separate **متوقف به درخواست مشتری** state. These meanings must not be conflated: a client stop is not automatically a safety stop.
 
