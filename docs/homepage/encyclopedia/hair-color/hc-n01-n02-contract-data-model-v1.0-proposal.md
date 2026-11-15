@@ -1,6 +1,6 @@
 # HBI Hair Consultation — HC-N01 / HC-N02 Contract and Case Data Model v1.0
 
-- **Status:** consolidated implementation-ready design proposal; awaiting explicit PO acceptance of the one workflow-stop mapping decision in §15.
+- **Status:** consolidated implementation-ready design proposal; awaiting the explicit PO decisions listed in §15.
 - **Work items:** HC-N01 (consultation/adapter contract), HC-N02 (case data model and traceability).
 - **Input baseline:** current `master` at `74d9d80fb4392d09f283b63be1a435a8547cde15`; approved README contract/workflow; Adapter Contract Draft 0.2 and D-01–D-08; synthetic fixture contract S01–S15; current synthetic Adapter and dialogue state machine.
 - **Authority:** this document consolidates accepted semantics and proposes the minimum explicit data structures needed to implement them. It does not silently promote unresolved PO decisions.
