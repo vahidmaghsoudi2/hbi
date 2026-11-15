@@ -232,6 +232,7 @@ def _run_candidate_with_pk_gaps(db_session, missing_fields):
         "market_region": "EU",
         "ingredients": "glycerin",
         "known_use_cases": "dry skin",
+        "claimed_benefits": "hydrating",
         "usage_instructions": "apply daily",
         "contraindications": "avoid eye area",
         "evidence_refs": '["claim-1"]',
