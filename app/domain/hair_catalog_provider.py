@@ -83,6 +83,13 @@ def _read_validated_snapshot_manifest(content_sha256: str) -> dict[str, object] 
         return None
     if manifest.get("capture_method") != "HBI_REPOSITORY_ARTIFACT_REGISTRATION":
         return None
+    # The current artifact is registered inside HBI; no publisher-origin byte
+    # capture has been implemented. Never let repository artifact hashing be
+    # promoted implicitly into publisher-source provenance.
+    if manifest.get("publisher_source_capture_status") != "NOT_CAPTURED":
+        return None
+    if manifest.get("publisher_source_sha256") is not None:
+        return None
     if manifest.get("validation_policy") != "REVALIDATE_ON_EVERY_LOAD":
         return None
     if manifest.get("expected_row_count") != EXPECTED_DATA_ROWS:
@@ -174,8 +181,11 @@ def approved_catalog_contains_identity(
 def load_approved_hair_catalog_reference() -> tuple[str, CatalogReference] | None:
     """Load the validated server-owned CSV reference without inventing a version.
 
-    The SHA-256 identifies the exact bytes. It does not substitute for a
-    publisher-issued edition/revision or a separately evidenced capture time.
+    The SHA-256 identifies the exact repository artifact bytes. It does not
+    prove publisher origin, substitute for a publisher-issued edition/revision,
+    or establish a publisher-source capture time. The manifest explicitly
+    records publisher-source capture as NOT_CAPTURED until a trusted capture
+    workflow exists.
     """
     snapshot = _read_validated_catalog()
     if snapshot is None:
