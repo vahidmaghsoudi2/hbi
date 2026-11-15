@@ -245,7 +245,10 @@ async def run_hair_dialogue_turn(
                 "complete": resolved.complete,
             }
         elif action == "EVALUATE_ADVICE_GATE":
-            inputs = get_hair_dialogue_advice_gate_inputs()
+            try:
+                inputs = get_hair_dialogue_advice_gate_inputs()
+            except Exception:
+                inputs = None
             if (
                 not isinstance(inputs, AdviceGateInputs)
                 or any(type(value) is not bool for value in (
