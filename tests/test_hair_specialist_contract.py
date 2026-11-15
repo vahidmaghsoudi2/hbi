@@ -319,7 +319,7 @@ def test_raw_recommendation_payload_is_never_accepted_by_contract():
 
 def test_ineligible_output_cannot_receive_specialist_review():
     output = _output()
-    ineligible = evaluate_specialist_output(output, engine_ok=False)
+    ineligible = evaluate_specialist_output(output, engine_readiness=EngineReadiness.UNHEALTHY)
     with pytest.raises(ValueError):
         _review(output, ineligible)
 
