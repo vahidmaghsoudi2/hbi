@@ -103,6 +103,28 @@ def validate_dialogue_state(state: DialogueCaseState) -> None:
     ):
         raise ValueError("Active proposal goal version must be a synthetic version token")
 
+    if state.active_proposal_id is None:
+        if (
+            state.active_proposal_case_version is not None
+            or state.active_proposal_goal_version is not None
+            or state.execution_consent_for_proposal_id is not None
+            or state.client_decision == ClientDecision.ACCEPTED
+        ):
+            raise ValueError("Proposal versions and consent require an active proposal")
+    else:
+        if (
+            state.active_proposal_case_version != state.case_version
+            or state.active_proposal_goal_version != state.goal_version
+            or state.client_decision == ClientDecision.REJECTED
+        ):
+            raise ValueError("Stale or rejected proposals cannot remain active")
+
+    if state.execution_consent_for_proposal_id is not None and (
+        state.execution_consent_for_proposal_id != state.active_proposal_id
+        or state.client_decision != ClientDecision.ACCEPTED
+    ):
+        raise ValueError("Execution consent must match the accepted active proposal")
+
 
 def answer_question(
     state: DialogueCaseState,
