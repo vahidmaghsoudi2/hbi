@@ -8,7 +8,11 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.domain.hair_data_governance import is_permitted_synthetic_case
+from app.domain.hair_data_governance import (
+    is_permitted_synthetic_case,
+    is_permitted_synthetic_identifier,
+    is_permitted_synthetic_version,
+)
 from app.domain.hair_knowledge_case_bridge import HairDecisionRun
 
 
@@ -35,6 +39,19 @@ def build_hair_specialist_view(run: HairDecisionRun) -> dict[str, Any]:
     """Create a safe, specialist-internal projection from a computed-only run."""
     if not isinstance(run, HairDecisionRun):
         raise TypeError("run must be a HairDecisionRun")
+    if not is_permitted_synthetic_identifier(run.run_id):
+        raise ValueError("Only bounded synthetic run identifiers can be presented")
+
+    version_values = (
+        (run.case_version, "case"),
+        (run.goal_version, "goal"),
+    )
+    for value, kind in version_values:
+        if value in ("", None):
+            if run.status != "STOP_DATA_GAP":
+                raise ValueError("Only data-gap runs may omit case or goal version tokens")
+        elif not is_permitted_synthetic_version(value, kind=kind):
+            raise ValueError("Only typed synthetic version tokens can be presented")
 
     synthetic_allowed = is_permitted_synthetic_case(
         case_id=run.case_id,
