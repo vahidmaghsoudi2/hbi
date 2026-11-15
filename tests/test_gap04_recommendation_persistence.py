@@ -1,6 +1,7 @@
 """GAP-04: Current Recommendation Persistence + Uniqueness (Option B)."""
 import pytest
 from unittest.mock import MagicMock
+from types import SimpleNamespace
 
 from app.models.customer import Customer
 from app.models.case import Case
@@ -173,7 +174,9 @@ def test_evaluated_ineligible_candidate_is_persisted_with_reason_and_survives_re
     first_id = row.recommendation_id
     assert row.eligibility_status == "INELIGIBLE_PENDING_REVIEW"
     assert json.loads(row.exclusion_reasons) == ["NO_APPROVED_EVIDENCE"]
-    assert json.loads(row.warnings) == ["Evidence requires QA"]
+    persisted_warnings = json.loads(row.warnings)
+    assert persisted_warnings[0] == "Evidence requires QA"
+    assert any("اطلاعات ناقص محصول" in warning for warning in persisted_warnings)
     assert json.loads(row.evidence_refs) == ["EV-PENDING"]
 
     second = svc.generate_recommendations("CASE1", {"concerns": "dry skin"})
@@ -207,3 +210,112 @@ def test_evaluated_ineligible_candidate_records_first_gate_without_changing_stat
     row = db_session.query(Recommendation).filter_by(case_id="CASE1", product_id="PROD_MEDICAL").one()
     assert row.eligibility_status == "INELIGIBLE_PENDING_REVIEW"
     assert json.loads(row.exclusion_reasons) == ["MEDICAL_CONTEXT_REVIEW_REQUIRED"]
+
+
+
+def _run_candidate_with_pk_gaps(db_session, missing_fields):
+    import json
+
+    _seed_case_and_products(db_session, ["PROD_PK_GAP"])
+    svc = _svc_with_real_db(db_session)
+    product = MagicMock()
+    product.product_id = "PROD_PK_GAP"
+    product.market_region = "EU"
+    svc.product_repo.find_by_identity_status_and_active.return_value = [product]
+    svc.inventory_repo.find_by_product.return_value = SimpleNamespace(
+        quantity_available=3, quantity_reserved=0, stock_status="AVAILABLE"
+    )
+
+    pk_values = {
+        "product_id": "PROD_PK_GAP",
+        "market_region": "EU",
+        "ingredients": "glycerin",
+        "known_use_cases": "dry skin",
+        "usage_instructions": "apply daily",
+        "contraindications": "avoid eye area",
+        "evidence_refs": '["claim-1"]',
+        "domain_evidence_status": json.dumps({
+            "ingredients": "SUPPORTED",
+            "known_use_cases": "SUPPORTED",
+            "usage_instructions": "SUPPORTED",
+            "contraindications": "SUPPORTED",
+        }),
+    }
+    for field in missing_fields:
+        pk_values[field] = None
+    svc.pk_repo.find_by_product.return_value = SimpleNamespace(**pk_values)
+    svc.evidence_repo.find_by_product.return_value = [SimpleNamespace(
+        evidence_id="EV-PK-GAP",
+        claim_id="claim-1",
+        product_id="PROD_PK_GAP",
+        market_region="EU",
+        field="ingredients",
+        claim_type="FACT",
+        source_reference="synthetic://evidence",
+        source_type="PEER_REVIEWED",
+        evidence_strength="HIGH",
+        qa_status="APPROVED",
+        claim="glycerin",
+        conflict_status="NONE",
+    )]
+    svc.reasoning_engine.run.return_value = {
+        "unknowns": [], "conflicts": [], "claim_boundary_violations": [],
+        "eligibility": "ELIGIBLE", "final_score": 0.85, "rationale": "synthetic eligible",
+        "evidence_refs": ["EV-PK-GAP"], "warnings": [],
+    }
+    recs = svc.generate_recommendations("CASE1", {"concerns": "dry skin"})
+    return recs
+
+
+def test_t1_one_missing_pk_domain_keeps_candidate_and_discloses_gap(db_session):
+    recs = _run_candidate_with_pk_gaps(db_session, ["ingredients"])
+    assert len(recs) == 1
+    assert recs[0].eligibility_status == "ELIGIBLE"
+    warnings = json.loads(recs[0].warnings)
+    assert any("ترکیبات" in warning for warning in warnings)
+    assert "pk_completeness=partial" in recs[0].ranking_reasons
+    assert '"ingredients"' in recs[0].ranking_reasons
+
+
+def test_t2_two_missing_pk_domains_keep_candidate_and_return_warnings(db_session):
+    recs = _run_candidate_with_pk_gaps(
+        db_session, ["ingredients", "usage_instructions"]
+    )
+    assert len(recs) == 1
+    assert recs[0].eligibility_status == "ELIGIBLE"
+    warnings = json.loads(recs[0].warnings)
+    assert any("ترکیبات" in warning for warning in warnings)
+    assert any("دستور مصرف" in warning for warning in warnings)
+    assert "pk_missing_domains=" in recs[0].ranking_reasons
+
+
+def test_t3_absent_pk_record_keeps_candidate_with_explicit_severe_warning(db_session):
+    import json
+
+    _seed_case_and_products(db_session, ["PROD_NO_PK"])
+    svc = _svc_with_real_db(db_session)
+    product = MagicMock()
+    product.product_id = "PROD_NO_PK"
+    product.market_region = "EU"
+    svc.product_repo.find_by_identity_status_and_active.return_value = [product]
+    svc.inventory_repo.find_by_product.return_value = SimpleNamespace(
+        quantity_available=2, quantity_reserved=0, stock_status="AVAILABLE"
+    )
+    svc.pk_repo.find_by_product.return_value = None
+    svc.evidence_repo.find_by_product.return_value = [SimpleNamespace(
+        evidence_id="EV-NO-PK", claim_id="claim-1", product_id="PROD_NO_PK",
+        market_region="EU", field="ingredients", claim_type="FACT",
+        source_reference="synthetic://evidence", source_type="PEER_REVIEWED",
+        evidence_strength="HIGH", qa_status="APPROVED", claim="glycerin",
+        conflict_status="NONE",
+    )]
+    svc.reasoning_engine.run.return_value = {
+        "unknowns": [], "conflicts": [], "claim_boundary_violations": [],
+        "eligibility": "ELIGIBLE", "final_score": 0.8, "rationale": "synthetic eligible",
+        "evidence_refs": ["EV-NO-PK"], "warnings": [],
+    }
+    recs = svc.generate_recommendations("CASE1", {"concerns": "dry skin"})
+    assert len(recs) == 1
+    warnings = json.loads(recs[0].warnings)
+    assert any("هشدار جدی PK" in warning for warning in warnings)
+    assert "contraindications_unreviewed=True" in recs[0].ranking_reasons
