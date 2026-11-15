@@ -13,6 +13,7 @@ import re
 _SYNTHETIC_IDENTIFIER_RE = re.compile(r"^SYNTHETIC-[A-Za-z0-9][A-Za-z0-9._:-]{0,115}$")
 _CASE_VERSION_RE = re.compile(r"^case-v[1-9][0-9]{0,5}$")
 _GOAL_VERSION_RE = re.compile(r"^goal-v[1-9][0-9]{0,5}$")
+_FIELD_NAME_RE = re.compile(r"^[a-z][a-z0-9_]{0,63}$")
 
 
 @dataclass(frozen=True)
@@ -55,6 +56,11 @@ def is_permitted_synthetic_version(value: object, *, kind: str) -> bool:
     return isinstance(value, str) and pattern is not None and pattern.fullmatch(value) is not None
 
 
+def is_permitted_field_name(value: object) -> bool:
+    """Accept bounded schema-style field names, never arbitrary caller text."""
+    return isinstance(value, str) and _FIELD_NAME_RE.fullmatch(value) is not None
+
+
 def is_permitted_synthetic_case(*, case_id: object, synthetic_data: object) -> bool:
     return (
         HAIR_DATA_GOVERNANCE_POLICY.data_class == "SYNTHETIC_ONLY"
@@ -72,4 +78,5 @@ __all__ = [
     "is_permitted_synthetic_case",
     "is_permitted_synthetic_identifier",
     "is_permitted_synthetic_version",
+    "is_permitted_field_name",
 ]
