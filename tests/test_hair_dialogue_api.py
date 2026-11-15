@@ -148,7 +148,6 @@ def test_unavailable_engine_preempts_required_data_gate(client, db_session):
     gate = _turn(
         client, _state(), "EVALUATE_ADVICE_GATE",
         data_complete=False, safety_passed=True, rule_valid=True, evidence_valid=True,
-
     )
     assert gate.status_code == 200
     assert gate.json()["result"] == {"advice_allowed": False, "reason_codes": ["ENGINE_FAIL"]}
@@ -170,7 +169,6 @@ def test_engine_failure_has_priority_and_never_allows_advice(client, db_session)
         client, _state(), "EVALUATE_ADVICE_GATE",
         data_complete=False, safety_passed=False, rule_valid=False,
         evidence_valid=False,
-
     )
     assert response.status_code == 200
     assert response.json()["result"] == {"advice_allowed": False, "reason_codes": ["ENGINE_FAIL"]}
