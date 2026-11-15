@@ -261,7 +261,7 @@ def test_question_or_acceptance_state_is_not_part_of_engine_output():
 
 
 def test_candidate_summary_cannot_be_returned_by_safety_kernel():
-    candidate = _candidate(summary="Use developer at 6% for 30 minutes")
+    candidate = _candidate(summary="Prohibited chemical-use instruction text")
     result = evaluate_hair_consultation(_request(candidates=(candidate,)))
     assert result.consultation_status == "OUT_OF_V1_SCOPE"
     assert result.options == ()
