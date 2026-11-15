@@ -13,7 +13,10 @@ from app.domain.hair_data_governance import (
     is_permitted_synthetic_identifier,
     is_permitted_synthetic_version,
 )
-from app.domain.hair_knowledge_case_bridge import HairDecisionRun
+from app.domain.hair_knowledge_case_bridge import (
+    HairDecisionRun,
+    build_approved_catalog_knowledge_package,
+)
 
 
 _VIEW_VERSION = "1"
@@ -64,19 +67,50 @@ def build_hair_specialist_view(run: HairDecisionRun) -> dict[str, Any]:
     ):
         raise ValueError("Only synthetic, computed-only Hair runs can be presented")
 
-    raw_result = run.reasoning_result or {}
-    raw_evidence = raw_result.get("evidence_refs", ())
     evidence = []
-    if isinstance(raw_evidence, (list, tuple)):
+    if run.status == "CONTEXT_READY_FOR_CATALOG_IDENTITY_REASONING":
+        package = build_approved_catalog_knowledge_package()
+        if package is None or not isinstance(run.reasoning_result, dict):
+            raise ValueError("Approved evidence package is unavailable for specialist projection")
+
+        expected_evidence = []
+        for claim in package.claims:
+            expected_evidence.append({
+                "evidence_id": claim.claim_id,
+                "source_type": "APPROVED_HBI_KNOWLEDGE_PACKAGE",
+                "source_reference": claim.source_url,
+                "qa_status": claim.status,
+            })
+        for field in ("brand", "series", "shade_number", "shade_name"):
+            expected_evidence.append({
+                "evidence_id": f"{run.case_id}:{field}:{run.case_version}",
+                "source_type": "SYNTHETIC_CASE_SNAPSHOT",
+                "source_reference": f"synthetic://{run.case_id}/{field}",
+                "qa_status": "SYNTHETIC_ONLY",
+            })
+
+        raw_evidence = run.reasoning_result.get("evidence_refs")
+        if not isinstance(raw_evidence, (list, tuple)) or len(raw_evidence) != len(expected_evidence):
+            raise ValueError("Specialist evidence lineage is incomplete or unexpected")
+        actual_by_id = {}
         for item in raw_evidence:
             if not isinstance(item, dict):
-                continue
-            evidence.append({
-                "evidence_id": str(item.get("evidence_id") or item.get("id") or "UNSPECIFIED"),
-                "source_type": str(item.get("source_type") or "UNSPECIFIED"),
-                "source_reference": str(item.get("source_reference") or item.get("source") or "UNSPECIFIED"),
-                "qa_status": str(item.get("qa_status") or "UNSPECIFIED"),
-            })
+                raise ValueError("Specialist evidence entries must be structured records")
+            evidence_id = item.get("evidence_id") or item.get("id")
+            if not isinstance(evidence_id, str) or evidence_id in actual_by_id:
+                raise ValueError("Specialist evidence identifiers must be unique strings")
+            actual_by_id[evidence_id] = item
+
+        if set(actual_by_id) != {item["evidence_id"] for item in expected_evidence}:
+            raise ValueError("Specialist evidence identifiers do not match the approved lineage")
+        for expected in expected_evidence:
+            actual = actual_by_id[expected["evidence_id"]]
+            for field in ("source_type", "source_reference", "qa_status"):
+                if actual.get(field) != expected[field]:
+                    raise ValueError("Specialist evidence lineage failed validation")
+            evidence.append(expected)
+    elif run.reasoning_result is not None:
+        raise ValueError("Blocked specialist runs must not carry evidence payloads")
 
     return {
         "view_version": _VIEW_VERSION,
