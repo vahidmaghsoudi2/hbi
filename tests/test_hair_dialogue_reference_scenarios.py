@@ -276,3 +276,20 @@ def test_dialogue_state_rejects_unbounded_or_non_synthetic_nested_identifiers(st
     state = replace(_state(), **state_changes)
     with pytest.raises(ValueError):
         answer_question(state, question="Synthetic question", answer="Synthetic answer")
+
+
+def test_dialogue_contract_rejects_unbounded_proposal_and_goal_version_tokens():
+    with pytest.raises(ValueError):
+        attach_proposal(_state(), "SYNTHETIC-" + "P" * 130)
+    with pytest.raises(ValueError):
+        change_goal(_state(), "PRIVATE-CLIENT-GOAL-VERSION")
+
+
+def test_required_data_contract_rejects_caller_text_as_field_names():
+    with pytest.raises(ValueError):
+        resolve_required_data(
+            {"customer@example.com": "SYNTHETIC-VALUE"},
+            ("customer@example.com",),
+        )
+    with pytest.raises(ValueError):
+        resolve_required_data({}, ("field name with spaces",))
