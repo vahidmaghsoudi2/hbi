@@ -23,6 +23,7 @@ import type {
   StockMovementDTO,
   EvidenceDTO,
   ProductKnowledgeDTO,
+  ProductKnowledgeCompletenessDTO,
   MutationLogDTO,
   DuplicateCheckRequest,
   DuplicateCheckResponse,
@@ -229,6 +230,11 @@ export function getProductEvidence(
 /** Read the existing QA-eligible ProductKnowledge projection. Read-only. */
 export function getProductKnowledge(productId: string, token: string): Promise<ProductKnowledgeDTO> {
   return request<ProductKnowledgeDTO>(`/evidence/knowledge/${encodeURIComponent(productId)}`, {}, token);
+}
+
+/** Server-evaluated, product-scoped PK completeness report. Read-only. */
+export function getProductKnowledgeCompleteness(productId: string, token: string): Promise<ProductKnowledgeCompletenessDTO> {
+  return request<ProductKnowledgeCompletenessDTO>(`/evidence/knowledge/${encodeURIComponent(productId)}/completeness`, {}, token);
 }
 
 /** Create source-traceable research assertions; they remain PENDING/UNKNOWN until reviewed. */

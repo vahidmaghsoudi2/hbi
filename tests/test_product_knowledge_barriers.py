@@ -347,9 +347,21 @@ def test_single_foreign_market_is_not_inferred_as_product_scope(db):
 
 
 
-def test_blank_evidence_market_falls_back_to_normalized_product_market():
+def test_blank_evidence_market_remains_unknown_in_scope_key():
     assert version_scope_key(
         evidence_market="   ",
         product_market=" us ",
         packaging_version=" v1 ",
-    ) == "market=US|pack=v1"
+    ) == "market=|pack=v1"
+
+
+def test_evidence_without_market_is_not_assigned_to_product_market(db):
+    _seed_product(db, pid="P-UNKNOWN-MARKET", market="EU", packaging="v1")
+    _ev(
+        db, pid="P-UNKNOWN-MARKET", eid="E-UNKNOWN-MARKET",
+        field="ingredients", claim="Glycerin", market=None, qa="VERIFIED",
+    )
+    pk = ProductKnowledgeService(db).update_from_evidence("P-UNKNOWN-MARKET")
+    assert pk.ingredients is None
+    domains = json.loads(pk.domain_evidence_status or "{}")
+    assert domains["ingredients"] == "PARTIAL"

@@ -61,6 +61,7 @@ export interface RecommendationDTO {
   evidence_score?: number | null;
   evidence_refs?: unknown[] | null;
   warnings?: unknown[] | null;
+  pk_completeness?: ProductKnowledgeCompletenessDTO | null;
   exclusion_reasons?: string[] | null;
   availability?: string | null;
   price?: number | null;
@@ -343,6 +344,15 @@ export interface ProductKnowledgeDTO {
   updated_at?: string | null;
 }
 
+
+export interface ProductKnowledgeCompletenessDTO {
+  status: "complete" | "partial";
+  missing_domains: string[];
+  incomplete_domains: Array<{ field: string; status: string }>;
+  contraindications_unreviewed: boolean;
+  pk_record_missing: boolean;
+  domain_report: Array<{ field: string; label: string; status: string; message: string }>;
+}
 
 /** Stateless synthetic-only dialogue transition. */
 export interface HairDialogueState {

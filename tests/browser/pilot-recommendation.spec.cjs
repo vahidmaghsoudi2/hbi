@@ -43,9 +43,18 @@ test("Pilot browser: generate, persisted readback, reload, and fail closed", asy
   const postRows = await genResp.json();
   expect(Array.isArray(postRows)).toBeTruthy();
   expect(postRows.length).toBeGreaterThan(0);
+  for (const row of postRows) {
+    expect(row.pk_completeness).toBeTruthy();
+    expect(Array.isArray(row.pk_completeness.domain_report)).toBeTruthy();
+    expect(Array.isArray(row.warnings)).toBeTruthy();
+  }
   const expected = postRows.filter(r => r.recommendation_id && r.product_id).map(r => ({ recommendation_id: r.recommendation_id, product_id: r.product_id }));
   expect(expected.length).toBeGreaterThan(0);
   await expect(page.getByText(expected[0].product_id, { exact: true })).toBeVisible();
+  await expect(page.getByText(/گزارش ساختاریافتهٔ Product Knowledge/)).toBeVisible();
+  if (postRows[0].warnings.length > 0) {
+    await expect(page.getByText("هشدارهای لازم برای اپراتور / پزشک")).toBeVisible();
+  }
 
   const firstRead = await request.get(`${api}/recommendations/case/${encodeURIComponent(caseId)}`, {
     headers: { Authorization: `Bearer ${await page.evaluate(() => sessionStorage.getItem("hbi_access_token"))}` }

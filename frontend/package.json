@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "typecheck": "tsc --noEmit -p tsconfig.pk.json",
     "preview": "vite preview",
     "test:browser": "playwright test --config=../playwright.config.cjs"
   },
