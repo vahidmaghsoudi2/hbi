@@ -11,7 +11,12 @@ from dataclasses import dataclass
 from typing import Literal
 import re
 
-from app.domain.hair_data_governance import is_permitted_synthetic_case
+from app.domain.hair_data_governance import (
+    is_permitted_synthetic_case,
+    is_permitted_synthetic_identifier,
+    is_permitted_field_name,
+    is_permitted_numeric_version,
+)
 from app.domain.hair_service_scope import evaluate_hair_service_scope
 
 
@@ -227,17 +232,16 @@ def _validate_envelope(request: HairConsultationRequest) -> tuple[bool, str]:
         synthetic_data=request.synthetic_data,
     ):
         return False, "PO-66-09 permits synthetic case data only"
-    for name, value in (
-        ("case_version", request.case_version),
-        ("target_version", request.target_version),
-        ("service_kind", request.service_kind),
-    ):
-        if not isinstance(value, str) or not value.strip():
-            return False, f"{name} must be a non-empty string"
+    if not is_permitted_numeric_version(request.case_version):
+        return False, "case_version must be a bounded numeric version token"
+    if not is_permitted_numeric_version(request.target_version):
+        return False, "target_version must be a bounded numeric version token"
+    if not isinstance(request.service_kind, str) or not request.service_kind.strip():
+        return False, "service_kind must be a non-empty string"
     if not isinstance(request.required_fields, tuple) or not all(
-        isinstance(item, str) and item.strip() for item in request.required_fields
+        is_permitted_field_name(item) for item in request.required_fields
     ):
-        return False, "required_fields must be a tuple of non-empty field keys"
+        return False, "required_fields must contain bounded schema field names"
     if len(set(request.required_fields)) != len(request.required_fields):
         return False, "required_fields must not contain duplicates"
     if not isinstance(request.facts, tuple) or not all(
@@ -275,8 +279,7 @@ def _known_fields(request: HairConsultationRequest) -> set[str]:
     seen: set[str] = set()
     for fact in request.facts:
         if (
-            not isinstance(fact.field_key, str)
-            or not fact.field_key.strip()
+            not is_permitted_field_name(fact.field_key)
             or fact.field_key in seen
             or fact.knowledge_state not in {
                 "KNOWN", "UNKNOWN", "NOT_ASKED", "MISSING", "CONFLICT", "NOT_APPLICABLE"
@@ -297,8 +300,7 @@ def _verified_evidence(request: HairConsultationRequest) -> dict[str, HairProduc
     result: dict[str, HairProductEvidence] = {}
     for item in request.evidence:
         if (
-            not isinstance(item.evidence_ref, str)
-            or not item.evidence_ref.strip()
+            not is_permitted_synthetic_identifier(item.evidence_ref)
             or item.evidence_ref in result
             or not isinstance(item.source_ref, str)
             or not item.source_ref.strip()
@@ -346,11 +348,10 @@ def _active_rules(
             or rule.rule_ref in result
             or rule.status not in {"DRAFT", "REVIEWED", "APPROVED", "ACTIVE", "RETIRED"}
             or not isinstance(rule.scope, str)
-            or not isinstance(rule.specialist_review_ref, str)
-            or not rule.specialist_review_ref.strip()
+            or not is_permitted_synthetic_identifier(rule.specialist_review_ref)
             or not isinstance(rule.evidence_refs, tuple)
             or not rule.evidence_refs
-            or not all(isinstance(ref, str) and ref.strip() for ref in rule.evidence_refs)
+            or not all(is_permitted_synthetic_identifier(ref) for ref in rule.evidence_refs)
             or len(set(rule.evidence_refs)) != len(rule.evidence_refs)
             or not all(
                 isinstance(value, str) and value.strip()
