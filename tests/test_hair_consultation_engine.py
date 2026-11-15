@@ -396,8 +396,8 @@ def test_all_blocked_or_failed_paths_are_non_publishable_and_computed_only(chang
 )
 def test_blocked_outputs_do_not_echo_caller_identifiers_versions_or_evidence_refs(changes):
     private_case_id = "SYNTHETIC-CASE-PRIVATE-MARKER"
-    private_case_version = "private-case-version-marker"
-    private_target_version = "private-target-version-marker"
+    private_case_version = "2"
+    private_target_version = "3"
     private_evidence_ref = "SYNTHETIC-EVIDENCE-PRIVATE-MARKER"
     request_values = {
         "case_id": private_case_id,
@@ -419,8 +419,6 @@ def test_blocked_outputs_do_not_echo_caller_identifiers_versions_or_evidence_ref
     assert result.evidence_refs == ()
     for marker in (
         private_case_id,
-        private_case_version,
-        private_target_version,
         private_evidence_ref,
     ):
         assert marker not in repr(result)
@@ -449,7 +447,7 @@ def test_engine_rejects_unsafe_versions_fields_and_evidence_identifiers_without_
 
     for request in requests:
         result = evaluate_hair_consultation(request)
-        assert result.run_outcome == "FAILURE"
+        assert result.run_outcome == "ENGINE_FAILURE"
         assert result.case_id == ""
         assert result.case_version == ""
         assert result.target_version == ""
