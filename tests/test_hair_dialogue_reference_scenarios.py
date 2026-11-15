@@ -255,3 +255,24 @@ def test_unknown_dependency_status_fails_closed_and_clears_decisions():
     assert result.state.active_proposal_id is None
     assert result.state.client_decision == ClientDecision.NONE
     assert result.state.execution_consent_for_proposal_id is None
+
+
+@pytest.mark.parametrize(
+    "state_changes",
+    [
+        {"case_id": "SYNTHETIC-" + "X" * 130},
+        {"case_version": "PRIVATE-CLIENT-VERSION"},
+        {"goal_version": "goal-v0"},
+        {"active_proposal_id": "REAL-CLIENT-PROPOSAL"},
+        {"rejected_proposal_ids": ("REAL-CLIENT-PROPOSAL",)},
+        {"execution_consent_for_proposal_id": "REAL-CLIENT-PROPOSAL"},
+        {"active_proposal_case_version": "PRIVATE-CASE-VERSION"},
+        {"active_proposal_goal_version": "PRIVATE-GOAL-VERSION"},
+    ],
+)
+def test_dialogue_state_rejects_unbounded_or_non_synthetic_nested_identifiers(state_changes):
+    from dataclasses import replace
+
+    state = replace(_state(), **state_changes)
+    with pytest.raises(ValueError):
+        answer_question(state, question="Synthetic question", answer="Synthetic answer")
