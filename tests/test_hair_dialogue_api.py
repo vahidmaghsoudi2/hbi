@@ -133,7 +133,7 @@ def test_rejected_proposal_cannot_be_reactivated(client, db_session):
     assert reactivated.status_code == 422
 
 
-def test_required_data_and_advice_gate_return_explicit_gaps(client, db_session):
+def test_required_data_is_reported_and_unavailable_engine_blocks_advice(client, db_session):
     _grant_reviewer_qa(db_session)
     resolved = _turn(
         client, _state(), "RESOLVE_REQUIRED_DATA",
@@ -642,7 +642,7 @@ def test_http_reason_explanations_are_client_safe_and_explicit(client, db_sessio
     assert invalid.status_code == 422
 
 
-def test_http_missing_evidence_returns_knowledge_gap_without_advice(client, db_session):
+def test_http_unavailable_engine_preempts_missing_evidence(client, db_session):
     _grant_reviewer_qa(db_session)
     response = _turn(
         client,
