@@ -13,9 +13,10 @@ from __future__ import annotations
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.authorization import require_any_role
+from app.core.hair_request_limits import HairSafeValidationRoute
 from app.domain.hair_service_scope import evaluate_hair_service_scope
 from app.domain.hair_catalog_provider import (
     approved_catalog_contains_identity,
@@ -37,18 +38,18 @@ from app.domain.hair_knowledge_case_bridge import (
 )
 from app.domain.hair_specialist_view import build_hair_specialist_view
 
-router = APIRouter()
+router = APIRouter(route_class=HairSafeValidationRoute)
 
 
 class CatalogIdentityInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    brand: str | None = None
-    series: str | None = None
-    shade_number: str | None = None
-    shade_name: str | None = None
-    product_specification: str | None = None
-    product_volume: str | None = None
+    brand: str | None = Field(default=None, max_length=120)
+    series: str | None = Field(default=None, max_length=120)
+    shade_number: str | None = Field(default=None, max_length=40)
+    shade_name: str | None = Field(default=None, max_length=120)
+    product_specification: str | None = Field(default=None, max_length=120)
+    product_volume: str | None = Field(default=None, max_length=40)
 
     def to_domain(self) -> CatalogIdentity:
         return CatalogIdentity(
@@ -64,7 +65,7 @@ class CatalogIdentityInput(BaseModel):
 class HairCatalogLookupRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    service_kind: str
+    service_kind: str = Field(max_length=40)
     expected: CatalogIdentityInput
     observed: CatalogIdentityInput
 
@@ -91,10 +92,10 @@ def get_approved_hair_catalog_reference() -> tuple[str, CatalogReference] | None
 class HairSpecialistPreviewRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    case_id: str
-    case_version: str
-    goal_version: str
-    service_kind: str
+    case_id: str = Field(max_length=64)
+    case_version: str = Field(max_length=32)
+    goal_version: str = Field(max_length=32)
+    service_kind: str = Field(max_length=40)
     catalog_identity: CatalogIdentityInput
 
 
