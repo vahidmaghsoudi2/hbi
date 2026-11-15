@@ -1,4 +1,6 @@
 """HTTP-level conformance for the stateless, synthetic Hair dialogue runtime."""
+from sqlalchemy import inspect, text
+
 from app.core.auth import create_access_token
 from app.models.user_role import ROLE_REVIEWER_QA, UserRole
 
@@ -39,6 +41,18 @@ def _turn(client, state, action, **fields):
         json={"action": action, "state": state, **fields},
         headers=_headers(),
     )
+
+
+def _database_snapshot(db_session):
+    table_names = inspect(db_session.get_bind()).get_table_names()
+    snapshot = {}
+    for table_name in table_names:
+        quoted_name = '"' + table_name.replace('"', '""') + '"'
+        rows = db_session.execute(text(f"SELECT * FROM {quoted_name}")).all()
+        snapshot[table_name] = tuple(
+            sorted(tuple(repr(value) for value in row) for row in rows)
+        )
+    return snapshot
 
 
 
@@ -286,3 +300,30 @@ def test_dialogue_http_rejects_untrusted_action_tokens_and_field_names(client, d
     )
     assert unsafe_field.status_code == 422
     assert "customer@example.com" not in unsafe_field.text
+
+
+def test_dialogue_http_success_and_rejection_have_no_database_side_effects(client, db_session):
+    _grant_reviewer_qa(db_session)
+    before = _database_snapshot(db_session)
+
+    success = _turn(
+        client,
+        _state(),
+        "ANSWER_QUESTION",
+        question_code="STATUS_REASON",
+        answer_code="STATUS_REASON",
+    )
+    assert success.status_code == 200
+    _assert_non_publishing_envelope(success.json())
+
+    rejected = _turn(
+        client,
+        _state(case_id="REAL-CLIENT-NOT-PERMITTED"),
+        "ANSWER_QUESTION",
+        question_code="STATUS_REASON",
+        answer_code="STATUS_REASON",
+    )
+    assert rejected.status_code == 422
+
+    db_session.expire_all()
+    assert _database_snapshot(db_session) == before
