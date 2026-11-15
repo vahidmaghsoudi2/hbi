@@ -81,6 +81,17 @@ def build_product_knowledge_gap_report(
                     "message": f"{len(unresolved)} مرجع به شاهد همین محصول متصل نشد؛ ردیابی منبع نیازمند تکمیل است.",
                 })
                 continue
+            unreviewed_refs = [
+                ref for ref in refs
+                if (getattr(by_claim[ref], "qa_status", None) or "").strip().upper()
+                not in {"APPROVED", "VERIFIED"}
+            ]
+            if unreviewed_refs:
+                report.append({
+                    "field": field, "label": label, "status": "PARTIAL",
+                    "message": f"{len(unreviewed_refs)} شاهد هنوز QA تأییدشده ندارد؛ وضعیت شواهد تا تکمیل بازبینی قابل اتکا نیست.",
+                })
+                continue
             product_market = (product_market_region or getattr(pk, "market_region", None) or "").strip().casefold()
             scope_unknown = False
             scope_mismatch = False
