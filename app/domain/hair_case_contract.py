@@ -91,7 +91,7 @@ class FactRecord:
         _require_text(self.field_key, "field_key")
         _require_text(self.source_ref, "source_ref")
         _require_text(self.recorded_at, "recorded_at")
-        _require_text(self.recorded_by, "recorded_by")
+        _require_synthetic(self.recorded_by, "recorded_by")
         if not isinstance(self.knowledge_state, KnowledgeState):
             raise ValueError("knowledge_state must be a KnowledgeState")
         if not isinstance(self.source_class, SourceClass):
@@ -237,10 +237,32 @@ class CaseEvent:
             EventType.SUGGESTION_ACCEPTED,
             EventType.EXECUTION_CONSENT_GIVEN,
             EventType.SPECIALIST_REVIEW_RECORDED,
+            EventType.PERFORMED_STEP_RECORDED,
             EventType.SERVICE_EXECUTION_STARTED,
             EventType.SERVICE_EXECUTION_COMPLETED,
         } and self.suggestion is None:
-            raise ValueError("client decision events require an exact suggestion version")
+            raise ValueError("decision, review and execution events require an exact suggestion version")
+        allowed_payload_keys = {
+            "question_ref", "review_ref", "decision", "reason_code",
+            "new_target_version", "from_state", "to_state", "step_ref",
+            "service_record_ref", "fresh_evaluation_ref", "authorization_ref",
+            "fact_ref", "follow_up_ref", "closure_ref",
+        }
+        for key, value in self.payload:
+            if key not in allowed_payload_keys:
+                raise ValueError("event payload contains an unsupported field")
+            if key.endswith("_ref"):
+                _require_synthetic(value, key)
+            elif key == "decision" and value not in {"APPROVED", "REJECTED", "REVISION_REQUIRED"}:
+                raise ValueError("specialist decision is not an approved value")
+            elif key in {"from_state", "to_state"} and value not in WORKFLOW_STATES:
+                raise ValueError("workflow event contains an unknown workflow state")
+            elif key == "new_target_version":
+                _require_text(value, key)
+            elif key == "reason_code" and (
+                not value or not value.replace("_", "").isalnum() or value.upper() != value
+            ):
+                raise ValueError("reason_code must be a controlled uppercase token")
 
 
 @dataclass(frozen=True)
@@ -299,9 +321,11 @@ def assess_dependency_changes(
     changed = tuple(sorted(key for key in set(old) | set(new) if old.get(key) != new.get(key)))
     if not changed:
         return DependencyAssessment("PRESERVE", (), ())
+    missing_edges = tuple(key for key in changed if key not in old or key not in new)
     invalidating = tuple(key for key in changed if impact_by_key.get(key) == "EFFECTIVE")
     unresolved = tuple(
-        key for key in changed if impact_by_key.get(key) not in {"EFFECTIVE", "NON_EFFECTIVE"}
+        key for key in changed
+        if key in missing_edges or impact_by_key.get(key) not in {"EFFECTIVE", "NON_EFFECTIVE"}
     )
     if invalidating:
         return DependencyAssessment("INVALIDATE", changed, unresolved)
@@ -332,6 +356,56 @@ def append_case_event(
     if workflow_control.resume_blocked and event.event_type in _EXECUTION_BLOCKED_WHILE_STOPPED:
         raise ValueError("workflow is stopped; a fresh authorized restart is required")
 
+    client_decisions = {
+        EventType.SUGGESTION_REJECTED,
+        EventType.SUGGESTION_ACCEPTED,
+        EventType.EXECUTION_CONSENT_GIVEN,
+        EventType.CLIENT_STOP_REQUESTED,
+    }
+    if event.event_type in client_decisions and event.actor_kind != "CLIENT":
+        raise ValueError("client decision and stop events require a CLIENT actor")
+    if event.event_type == EventType.SPECIALIST_REVIEW_RECORDED and event.actor_kind != "SPECIALIST":
+        raise ValueError("specialist review events require a SPECIALIST actor")
+    if event.event_type in {
+        EventType.PERFORMED_STEP_RECORDED,
+        EventType.SERVICE_EXECUTION_STARTED,
+        EventType.SERVICE_EXECUTION_COMPLETED,
+    } and event.actor_kind != "SPECIALIST":
+        raise ValueError("service execution events require a SPECIALIST actor")
+    if event.event_type == EventType.WORKFLOW_RESTART_AUTHORIZED and event.actor_kind not in {"OPERATOR", "SYSTEM"}:
+        raise ValueError("restart authorization requires an OPERATOR or SYSTEM actor")
+
+    payload = dict(event.payload)
+    if event.event_type == EventType.QUESTION_ASKED and not payload.get("question_ref"):
+        raise ValueError("question events require a synthetic question_ref")
+    if event.event_type == EventType.SPECIALIST_REVIEW_RECORDED and not (
+        payload.get("review_ref") and payload.get("decision")
+    ):
+        raise ValueError("specialist review requires review_ref and decision")
+    if event.event_type == EventType.TARGET_CHANGED and not payload.get("new_target_version"):
+        raise ValueError("target changes require new_target_version")
+    if event.event_type == EventType.WORKFLOW_STATE_CHANGED and not (
+        payload.get("from_state") and payload.get("to_state")
+    ):
+        raise ValueError("workflow transitions require from_state and to_state")
+    if event.event_type == EventType.PERFORMED_STEP_RECORDED and not payload.get("step_ref"):
+        raise ValueError("performed steps require a synthetic step_ref")
+    if event.event_type in {
+        EventType.SERVICE_EXECUTION_STARTED,
+        EventType.SERVICE_EXECUTION_COMPLETED,
+    } and not payload.get("service_record_ref"):
+        raise ValueError("service execution events require a synthetic service_record_ref")
+    if event.event_type == EventType.CASE_DATA_CHANGED and not payload.get("fact_ref"):
+        raise ValueError("case data changes require a synthetic fact_ref")
+    if event.event_type == EventType.FOLLOW_UP_RECORDED and not payload.get("follow_up_ref"):
+        raise ValueError("follow-up events require a synthetic follow_up_ref")
+    if event.event_type == EventType.CASE_CLOSED and not payload.get("closure_ref"):
+        raise ValueError("case closure requires a synthetic closure_ref")
+    if event.event_type == EventType.WORKFLOW_STATE_CHANGED and (
+        payload["from_state"] not in WORKFLOW_STATES or payload["to_state"] not in WORKFLOW_STATES
+    ):
+        raise ValueError("workflow transitions must use the ten approved states")
+
     same_suggestion = tuple(
         item for item in existing_events if item.suggestion == event.suggestion
     ) if event.suggestion is not None else ()
@@ -350,14 +424,22 @@ def append_case_event(
         raise ValueError("a rejected suggestion version can never be accepted again")
     if event.event_type == EventType.EXECUTION_CONSENT_GIVEN and (rejected or not accepted):
         raise ValueError("execution consent requires prior acceptance of the exact suggestion version")
+    execution_started = any(
+        item.event_type == EventType.SERVICE_EXECUTION_STARTED
+        for item in same_suggestion
+    )
     if event.event_type == EventType.SERVICE_EXECUTION_STARTED and not (
         accepted and consented and specialist_approved and not rejected
     ):
         raise ValueError(
             "execution requires specialist approval, client acceptance, and separate explicit consent"
         )
+    if event.event_type in {
+        EventType.PERFORMED_STEP_RECORDED,
+        EventType.SERVICE_EXECUTION_COMPLETED,
+    } and not execution_started:
+        raise ValueError("performed steps and completion require a prior execution-start event")
     if event.event_type == EventType.WORKFLOW_RESTART_AUTHORIZED:
-        payload = dict(event.payload)
         if (
             not workflow_control.resume_blocked
             or not payload.get("fresh_evaluation_ref")
