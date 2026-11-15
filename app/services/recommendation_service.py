@@ -21,7 +21,7 @@ from app.services.product_compatibility import product_compatibility_ids
 from app.reasoning.reasoning_engine import ReasoningEngine
 from app.reasoning.conflict_analyzer import ConflictSeverity
 from app.domain.product_knowledge_gaps import (
-    build_product_knowledge_gap_report,
+    evaluate_product_knowledge_completeness,
     consultation_gap_warnings,
 )
 
@@ -491,10 +491,13 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             trace_warnings = list(engine_result.get("warnings", []))
             # PK incompleteness is disclosed and retained for later completion;
             # it never changes eligibility or bypasses existing independent gates.
-            pk_gap_report = build_product_knowledge_gap_report(
+            pk_completeness = evaluate_product_knowledge_completeness(
                 pk, evidences, product_market_region=getattr(product, "market_region", None)
             )
-            trace_warnings.extend(consultation_gap_warnings(pk_gap_report))
+            pk_gap_report = pk_completeness["domain_report"]
+            trace_warnings.extend(consultation_gap_warnings(
+                pk_gap_report, pk_record_missing=pk_completeness["pk_record_missing"]
+            ))
             if eligibility != "ELIGIBLE" and not trace_warnings:
                 trace_warnings.append(f"Recommendation gated: {eligibility}")
             profile_fact_context = decision_state.get("profile_fact_context") or {}
@@ -506,6 +509,9 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 f"inferences={len(inferences)} | need_mappings={len(decision_state.get('need_mappings') or [])} | "
                 f"unmapped_need_factors={len(decision_state.get('unmapped_need_factors') or [])} | "
                 f"ambiguous_need_factors={len(decision_state.get('ambiguous_need_factors') or [])} | "
+                f"pk_completeness={pk_completeness['status']} | "
+                f"pk_missing_domains={json.dumps(pk_completeness['missing_domains'], ensure_ascii=False)} | "
+                f"contraindications_unreviewed={pk_completeness['contraindications_unreviewed']} | "
                 f"profile_fact_trace={json.dumps(profile_fact_context, ensure_ascii=False, sort_keys=True)}"
             )
             exclusion_reasons = ""
