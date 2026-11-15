@@ -201,16 +201,19 @@ def _blocked(
 ) -> HairConsultationResult:
     return HairConsultationResult(
         run_outcome="SUCCESS",
-        case_id=request.case_id,
-        case_version=request.case_version,
-        target_version=request.target_version,
+        # Blocked outputs are non-publishable and must not echo caller-controlled
+        # identifiers, version tokens, or evidence references. Internal trace
+        # correlation belongs in a separately governed audit channel, not here.
+        case_id="",
+        case_version="",
+        target_version="",
         engine_state=engine_state,
         consultation_status=consultation_status,
         reason_codes=(reason_code,),
         summary=summary,
         options=(),
         missing_information=missing,
-        evidence_refs=evidence_refs,
+        evidence_refs=(),
         limitations=("No execution instruction or guaranteed colour outcome is produced.",),
         next_step=next_step,
     )
