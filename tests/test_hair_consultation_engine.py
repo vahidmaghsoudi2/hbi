@@ -213,6 +213,9 @@ def test_no_option_scenario_maps_by_actual_cause(cause, status, reason):
     assert result.consultation_status == status
     assert result.reason_codes == (reason,)
     assert result.options == ()
+    assert result.publication_eligible is False
+    if cause == "NEEDS_INFORMATION":
+        assert result.missing_information == ("applicable_information_or_evidence",)
 
 
 def test_no_candidate_without_explicit_reason_is_engine_failure():
