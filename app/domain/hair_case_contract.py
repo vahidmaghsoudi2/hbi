@@ -353,8 +353,30 @@ def append_case_event(
     if event.event_id in {item.event_id for item in existing_events}:
         raise ValueError("duplicate event_id is not allowed")
 
-    if workflow_control.resume_blocked and event.event_type in _EXECUTION_BLOCKED_WHILE_STOPPED:
+    if workflow_control.resume_blocked and event.event_type not in {
+        EventType.QUESTION_ASKED,
+        EventType.CLIENT_STOP_REQUESTED,
+        EventType.WORKFLOW_RESTART_AUTHORIZED,
+    }:
         raise ValueError("workflow is stopped; a fresh authorized restart is required")
+
+    restart_events = tuple(
+        item for item in existing_events
+        if item.event_type == EventType.WORKFLOW_RESTART_AUTHORIZED
+    )
+    latest_restart = restart_events[-1] if restart_events else None
+    if (
+        latest_restart is not None
+        and event.event_type not in {
+            EventType.QUESTION_ASKED,
+            EventType.WORKFLOW_RESTART_AUTHORIZED,
+        }
+        and (
+            event.case_version != latest_restart.case_version
+            or event.target_version != latest_restart.target_version
+        )
+    ):
+        raise ValueError("event version pair changed; a fresh authorized restart is required")
 
     client_decisions = {
         EventType.SUGGESTION_REJECTED,
@@ -406,8 +428,16 @@ def append_case_event(
     ):
         raise ValueError("workflow transitions must use the ten approved states")
 
+    active_history = (
+        existing_events[existing_events.index(latest_restart) + 1:]
+        if latest_restart is not None
+        else existing_events
+    )
     same_suggestion = tuple(
-        item for item in existing_events if item.suggestion == event.suggestion
+        item for item in active_history
+        if item.suggestion == event.suggestion
+        and item.case_version == event.case_version
+        and item.target_version == event.target_version
     ) if event.suggestion is not None else ()
     rejected = any(item.event_type == EventType.SUGGESTION_REJECTED for item in same_suggestion)
     accepted = any(item.event_type == EventType.SUGGESTION_ACCEPTED for item in same_suggestion)
