@@ -244,3 +244,26 @@ def test_out_of_scope_conflict_does_not_contaminate_product_market():
     item = next(entry for entry in report if entry["field"] == "evidence_refs")
     assert item["status"] == "PARTIAL"
     assert item["status"] != "CONFLICT"
+
+
+def test_unreviewed_contraindications_has_one_prioritized_warning():
+    evidence = [SimpleNamespace(
+        claim_id="claim-1", product_id="synthetic-product",
+        market_region="EU", conflict_status="NONE", qa_status="APPROVED"
+    )]
+    report = build_product_knowledge_gap_report(
+        _pk(contraindications=None), evidence
+    )
+    warnings = consultation_gap_warnings(report)
+    assert len(warnings) == 1
+    assert "موارد منع مصرف هنوز بررسی/تأیید نشده‌اند" in warnings[0]
+    assert "به‌معنی نبود منع مصرف نیست" in warnings[0]
+
+
+def test_absent_pk_record_uses_one_severe_warning_with_safety_meaning():
+    report = build_product_knowledge_gap_report(None, [])
+    warnings = consultation_gap_warnings(report, pk_record_missing=True)
+    assert len(warnings) == 1
+    assert "هشدار جدی PK" in warnings[0]
+    assert "هر پنج حوزه نامعلوم‌اند" in warnings[0]
+    assert "این به معنی نبود منع مصرف نیست" in warnings[0]
