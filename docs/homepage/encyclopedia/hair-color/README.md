@@ -544,6 +544,8 @@
 - **PR #549:** ادغام‌شده؛ وضعیت نهایی مهاجرت انتخابی، بسته‌شدن PRهای superseded و شواهد دقیق CI را در همین README ثبت کرد. Merge commit: `ae1c729c361bc265c713b1cd546f30df104d2b2a`.
 - **PR #550:** ادغام‌شده؛ شناسهٔ PR #549 و commit نهایی آن را در همین مرجع ثبت کرد. Merge commit: `fa583cfbbf2eed062040bd92416488110c38d3ae`.
 - **PR #551:** ادغام‌شده؛ snapshot وضعیت قدیمی PR را از README حذف کرد تا وضعیت جاری با تاریخچهٔ PRهای superseded اشتباه نشود. Merge commit و HEAD فعلی این مرحله: `cc567099a5d66e8656e55ca4436213e285094219`.
+- **PR #584:** باز و Draft؛ نگاشت دوزبانهٔ ۱۹ سری و هم‌راستاسازی تصمیم PO دربارهٔ کاتالوگ Bijourka. همهٔ چهار بررسی CI روی HEAD `43ebde526dfc7cf4ae0166f89f68f29b60d4b3fd` موفق‌اند؛ ادغام نشده است.
+- **PR #587:** باز و Draft؛ اصلاح اجرای تطبیق هویت کاتالوگ بر اساس نشانگر تأیید PO و زنجیرهٔ Snapshot در HBI، بدون الزام به نسخه/میزبان ناشر. همهٔ پنج بررسی CI روی HEAD `7bac7186dfc6f42e65b544298c977cb3f2b84a91` موفق‌اند؛ ادغام نشده است.
 - **CI دقیق PR #548:** HBI Auto Tasks `43595086350`، HBI CI `43595086335` و HBI Pilot Browser Proof `43595086419` همگی completed/success روی HEAD `a8705cf7ad26aeead627f4825dde41bca528ac4c`.
 - **شواهد خام PR #548:** Coverage artifact `14113998341`؛ G8 regression `14113688866`؛ isolated pilot smoke `14113154800`؛ browser proof `14114315114`؛ Auto Tasks evidence `14114270238`. همه در GitHub Actions موجود و منقضی‌نشده‌اند.
 - **PR #541:** بسته‌شده بدون ادغام به‌عنوان superseded؛ محتوای Adapter آن از commit ثابت به PR #547 منتقل و ادغام شد.
