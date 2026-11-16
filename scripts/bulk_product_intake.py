@@ -412,6 +412,8 @@ def _same_identity(left: dict[str, Any], right: dict[str, Any]) -> bool:
         "size_unit", "market_region", "packaging_version",
     )
     for field in string_fields:
+        if field == "product_id" and left.get(field) is None:
+            continue
         if _norm(left.get(field)) != _norm(right.get(field)):
             return False
     left_size, right_size = left.get("size_value"), right.get("size_value")
