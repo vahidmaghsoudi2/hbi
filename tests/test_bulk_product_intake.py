@@ -11,6 +11,7 @@ from scripts.bulk_product_intake import (
     FINAL_STATES,
     load_source,
     _product_payload,
+    load_decisions,
 )
 
 
@@ -238,6 +239,33 @@ class BulkProductIntakeTests(unittest.TestCase):
         self.assertNotIn("_source_line", payload)
         self.assertNotIn("_row_hash", payload)
         self.assertNotIn("product_id", payload)
+
+    def test_decision_file_requires_explicit_reason_and_known_fields(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "decisions.json"
+            path.write_text(json.dumps({"sku-1": {"decision": "NEW"}}), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "requires an explicit reason"):
+                load_decisions(path)
+            path.write_text(json.dumps({"sku-1": {"decision": "NEW", "reason": "reviewed", "status": "ACTIVE"}}), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "unsupported fields"):
+                load_decisions(path)
+
+    def test_duplicate_headers_and_extra_csv_values_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "products.csv"
+            path.write_text("brand,product_name,product_line,brand\\nA,B,SKIN,A\\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "duplicate column names"):
+                load_source(path)
+            path.write_text("brand,product_name,product_line\\nA,B,SKIN,EXTRA\\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "more values than declared columns"):
+                load_source(path)
+
+    def test_non_finite_size_value_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "products.csv"
+            self.write_csv(path, [{**self.make_row(), "size_value": "NaN"}])
+            with self.assertRaisesRegex(ValueError, "finite and greater than zero"):
+                load_source(path)
 
 
 if __name__ == "__main__":
