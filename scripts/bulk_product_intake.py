@@ -49,6 +49,16 @@ def _norm(value: Any) -> str:
     return " ".join(str(value or "").strip().casefold().split())
 
 
+def _safe_response_summary(body: Any) -> Any:
+    if not isinstance(body, dict):
+        return str(body)[:2000]
+    allowed = {
+        "detail", "error", "check_id", "result", "reason", "candidates",
+        "operator_decision", "product_id", "status", "qa_verdict", "identity_status",
+    }
+    return {key: body[key] for key in allowed if key in body}
+
+
 def _canonical_hash(value: Any) -> str:
     raw = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
@@ -442,7 +452,11 @@ class BatchRunner:
 
     def _duplicate_check(self, row: dict[str, Any]):
         key = row["source_key"]
-        self.checkpoint.set_row(key, "PREFLIGHT_IN_FLIGHT", preflight_started_at=utc_now())
+        started_at = utc_now()
+        self.checkpoint.set_row(
+            key, "PREFLIGHT_IN_FLIGHT", preflight_started_at=started_at,
+            last_request={"method": "POST", "path": "/api/v1/products/duplicate-check/", "started_at": started_at},
+        )
         try:
             status, body = self.api.request(
                 "POST", "/api/v1/products/duplicate-check/", _identity_payload(row)
@@ -452,7 +466,10 @@ class BatchRunner:
             return
         if status != 200:
             state = "UNKNOWN_OUTCOME" if status >= 500 else "PREFLIGHT_FAILED"
-            self.checkpoint.set_row(key, state, http_status=status, response=body)
+            self.checkpoint.set_row(
+                key, state, http_status=status, response=_safe_response_summary(body),
+                last_response={"status": status, "received_at": utc_now(), "body": _safe_response_summary(body)},
+            )
             return
         result = str(body.get("result", "")).upper()
         check_id = body.get("check_id")
@@ -464,15 +481,19 @@ class BatchRunner:
             "operator_decision_required": body.get("operator_decision_required"),
         }
         if not check_id or result not in {"NEW", "EXISTING", "POSSIBLE_MATCH"}:
-            self.checkpoint.set_row(key, "UNKNOWN_OUTCOME", error="DuplicateCheck returned an incomplete or unknown response", response=response_summary)
+            self.checkpoint.set_row(
+                key, "UNKNOWN_OUTCOME", error="DuplicateCheck returned an incomplete or unknown response",
+                response=response_summary,
+                last_response={"status": status, "received_at": utc_now(), "body": response_summary},
+            )
             return
         if result == "EXISTING":
-            self.checkpoint.set_row(key, "EXISTING", duplicate_check_id=check_id, candidates=body.get("candidates", []), response=response_summary)
+            self.checkpoint.set_row(key, "EXISTING", duplicate_check_id=check_id, candidates=body.get("candidates", []), response=response_summary, last_response={"status": status, "received_at": utc_now(), "body": response_summary})
         elif result == "POSSIBLE_MATCH":
-            self.checkpoint.set_row(key, "POSSIBLE_MATCH_REVIEW", duplicate_check_id=check_id, candidates=body.get("candidates", []), response=response_summary)
+            self.checkpoint.set_row(key, "POSSIBLE_MATCH_REVIEW", duplicate_check_id=check_id, candidates=body.get("candidates", []), response=response_summary, last_response={"status": status, "received_at": utc_now(), "body": response_summary})
             self._apply_decision(row, self.checkpoint.data["rows"][key])
         else:
-            self.checkpoint.set_row(key, "DUPLICATE_CHECKED_NEW", duplicate_check_id=check_id, response=response_summary)
+            self.checkpoint.set_row(key, "DUPLICATE_CHECKED_NEW", duplicate_check_id=check_id, response=response_summary, last_response={"status": status, "received_at": utc_now(), "body": response_summary})
             self._create(row, self.checkpoint.data["rows"][key])
 
     def _apply_decision(self, row: dict[str, Any], item: dict[str, Any]):
@@ -500,11 +521,16 @@ class BatchRunner:
             self.checkpoint.set_row(key, "POSSIBLE_MATCH_REVIEW", decision_error="RENAME decision requires final_product_name")
             return
 
-        self.checkpoint.set_row(key, "DECISION_IN_FLIGHT", pending_decision=payload)
+        decision_path = f"/api/v1/products/duplicate-check/audit/{item['duplicate_check_id']}/decision"
+        decision_started_at = utc_now()
+        self.checkpoint.set_row(
+            key, "DECISION_IN_FLIGHT", pending_decision=payload,
+            last_request={"method": "POST", "path": decision_path, "started_at": decision_started_at},
+        )
         try:
             status, body = self.api.request(
                 "POST",
-                f"/api/v1/products/duplicate-check/audit/{item['duplicate_check_id']}/decision",
+                decision_path,
                 payload,
             )
         except Exception as exc:
@@ -512,18 +538,22 @@ class BatchRunner:
             return
         if status != 200:
             state = "UNKNOWN_OUTCOME" if status >= 500 else "POSSIBLE_MATCH_REVIEW"
-            self.checkpoint.set_row(key, state, decision_http_status=status, decision_response=body)
+            self.checkpoint.set_row(key, state, decision_http_status=status, decision_response=_safe_response_summary(body), last_response={"status": status, "received_at": utc_now(), "body": _safe_response_summary(body)})
             return
         if choice == "NEW":
-            self.checkpoint.set_row(key, "DECISION_RECORDED", operator_decision=body.get("operator_decision", payload))
+            self.checkpoint.set_row(key, "DECISION_RECORDED", operator_decision=body.get("operator_decision", payload), last_response={"status": status, "received_at": utc_now(), "body": _safe_response_summary(body)})
             self._create(row, self.checkpoint.data["rows"][key])
         else:
-            self.checkpoint.set_row(key, "HUMAN_RESOLVED_SKIP", operator_decision=body.get("operator_decision", payload))
+            self.checkpoint.set_row(key, "HUMAN_RESOLVED_SKIP", operator_decision=body.get("operator_decision", payload), last_response={"status": status, "received_at": utc_now(), "body": _safe_response_summary(body)})
 
     def _create(self, row: dict[str, Any], item: dict[str, Any]):
         key = row["source_key"]
         check_id = item.get("duplicate_check_id")
-        self.checkpoint.set_row(key, "CREATE_IN_FLIGHT", create_started_at=utc_now())
+        create_started_at = utc_now()
+        self.checkpoint.set_row(
+            key, "CREATE_IN_FLIGHT", create_started_at=create_started_at,
+            last_request={"method": "POST", "path": "/api/v1/products/", "started_at": create_started_at},
+        )
         try:
             status, body = self.api.request(
                 "POST",
@@ -538,11 +568,12 @@ class BatchRunner:
                 key, "CREATED", product_id=body["product_id"], product_status=body.get("status"),
                 qa_verdict=body.get("qa_verdict"), identity_status=body.get("identity_status"),
                 http_status=status,
+                last_response={"status": status, "received_at": utc_now(), "body": _safe_response_summary(body)},
             )
         elif status >= 500:
-            self.checkpoint.set_row(key, "UNKNOWN_OUTCOME", http_status=status, response=body)
+            self.checkpoint.set_row(key, "UNKNOWN_OUTCOME", http_status=status, response=_safe_response_summary(body), last_response={"status": status, "received_at": utc_now(), "body": _safe_response_summary(body)})
         else:
-            self.checkpoint.set_row(key, "CREATE_REJECTED", http_status=status, response=body)
+            self.checkpoint.set_row(key, "CREATE_REJECTED", http_status=status, response=_safe_response_summary(body), last_response={"status": status, "received_at": utc_now(), "body": _safe_response_summary(body)})
 
 
 def _same_identity(left: dict[str, Any], right: dict[str, Any]) -> bool:
@@ -624,7 +655,12 @@ def main(argv: list[str] | None = None) -> int:
             raise ValueError("--base-url must be an origin only; do not include credentials, path, query, or fragment")
         if parts.scheme != "https" and parts.hostname not in {"localhost", "127.0.0.1", "::1"}:
             raise ValueError("HTTPS is required for non-local API targets")
-        print(f"Validated {len(rows)} product rows; input_sha256={input_hash}")
+        plan = [
+            {"source_key": row["source_key"], "brand": row["brand"],
+             "product_name": row["product_name"], "product_line": row["product_line"]}
+            for row in rows
+        ]
+        print(json.dumps({"validated_rows": len(rows), "input_sha256": input_hash, "plan": plan}, ensure_ascii=False, indent=2))
         if args.reconcile and (not args.resume or args.apply):
             raise ValueError("--reconcile requires --resume and must not be combined with --apply")
         if not args.apply and not args.reconcile:
