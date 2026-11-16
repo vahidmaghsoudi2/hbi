@@ -43,21 +43,6 @@
           "limitations": [
             "این گزاره فقط هویت کاتالوگی را تأیید می‌کند و درباره ترکیب شیمیایی، کاربرد، ایمنی، سازگاری یا نتیجه رنگ چیزی اثبات نمی‌کند."
           ]
-        },
-        {
-          "claim_id": "RETAIL-LISTING-IDENTITY-10-3-100ML",
-          "claim_type": "EVIDENCE_SUPPORTED_CLAIM",
-          "claim_scope": "IDENTITY",
-          "statement": "فهرست فروشگاهی تکنولایف کالایی را با عنوان رنگ مو بیجورکا شماره ۱۰/۳، رنگ زیتونی پلاتینه و حجم ۱۰۰ میلی‌لیتر معرفی می‌کند؛ در مشخصات همان صفحه شماره رنگ ۱۰/۳ و شماره مجوز ۱۷۶۶۲۰۳۳۵۲ درج شده است.",
-          "evidence_status": "SUPPORTED_WITHIN_SCOPE",
-          "evidence_ids": [
-            "BIJOURKA-RETAIL-LISTING-TECHNOLIFE-10-3-100ML"
-          ],
-          "limitations": [
-            "این شاهد صرفاً محتوای یک فهرست فروشگاهی را ثبت می‌کند و اصالت کالای عرضه‌شده یا انطباق فیزیکی بسته را مستقلاً تأیید نمی‌کند.",
-            "شماره مجوز فقط همان‌طور که فروشگاه درج کرده ثبت شده و در این رکورد استعلام مستقل از مرجع صادرکننده محسوب نمی‌شود.",
-            "این شاهد هیچ اطلاعاتی درباره فهرست INCI، فرمول، روش مصرف، ایمنی، سازگاری یا نتیجه رنگ اثبات نمی‌کند."
-          ]
         }
       ],
       "evidence": [
@@ -74,32 +59,470 @@
           },
           "description": "کاتالوگ مرجع مورد تأیید مالک محصول؛ تنها برای اثبات هویت و نام‌گذاری شماره رنگ استفاده شده است.",
           "content_sha256": "1887a7d166164639e2c235a7144fe6b27b4861f5c36fac9af383bef14eec1212"
+        }
+      ],
+      "expert_review": {
+        "status": "NOT_REVIEWED",
+        "scope": [],
+        "reviewed_claim_ids": [],
+        "reviewed_at": null,
+        "limitations": [
+          "هیچ ارزیابی تخصصی محصول‌محور انجام یا ثبت نشده است."
+        ]
+      },
+      "evidence_gaps": [
+        {
+          "gap_type": "DATA_GAP",
+          "field": "product_context.market_region/product_variant/package_identifier/gtin/lot/formula_version",
+          "description": "بازار عرضه، گونه محصول، شناسه بسته، GTIN، بچ و نسخه فرمول برای این رکورد مشخص نشده‌اند.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION",
+            "PROCESSING_PARAMETERS",
+            "COLOR_OUTCOME_PREDICTION"
+          ]
         },
         {
-          "evidence_id": "BIJOURKA-OFFICIAL-BRAND-PRODUCT-FAMILY-HAIR-COLOR-GOLD",
+          "gap_type": "KNOWLEDGE_GAP",
+          "field": "formulation.ingredient_list",
+          "description": "فهرست ترکیبات کامل و قابل انتساب به همین گونه/نسخه محصول در دسترس نیست.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION"
+          ]
+        },
+        {
+          "gap_type": "DATA_GAP",
+          "field": "evidence.package_label_or_manufacturer_document",
+          "description": "تصویر خوانا از برچسب ترکیبات یا سند سازنده که دقیقاً به همین محصول و نسخه مربوط باشد ثبت نشده است.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION",
+            "PROCESSING_PARAMETERS"
+          ]
+        },
+        {
+          "gap_type": "EXPERT_REVIEW_REQUIRED",
+          "field": "expert_review",
+          "description": "هر ادعای فراتر از هویت کاتالوگی باید پس از دریافت شواهد محصول‌محور توسط متخصص بررسی شود.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION",
+            "PROCESSING_PARAMETERS",
+            "COLOR_OUTCOME_PREDICTION"
+          ]
+        }
+      ],
+      "record_status": "DRAFT"
+    },
+    {
+      "record_id": "BIJOURKA-KNOWLEDGE-6-3-OLIVE",
+      "catalog_identity": {
+        "brand": "بیجورکا",
+        "series": "زیتونی",
+        "shade_number": "۶.۳",
+        "shade_name": "بلوند زیتونی تیره"
+      },
+      "product_context": {
+        "market_region": null,
+        "product_variant": null,
+        "package_identifier": null,
+        "gtin": null,
+        "lot": null,
+        "formula_version": null
+      },
+      "formulation": {
+        "status": "UNKNOWN",
+        "ingredient_list": [],
+        "notes": [
+          "فهرست ترکیبات قابل انتساب به همین محصول/نسخه در شواهد ثبت‌شده موجود نیست؛ فهرست INCI عمداً خالی مانده است."
+        ]
+      },
+      "claims": [
+        {
+          "claim_id": "IDENTITY-6-3",
+          "claim_type": "IDENTITY_FACT",
+          "claim_scope": "IDENTITY",
+          "statement": "در کاتالوگ مرجع مورد تأیید مالک محصول، شماره ۶.۳ در سری زیتونی با نام «بلوند زیتونی تیره» ثبت شده است.",
+          "evidence_status": "SUPPORTED_WITHIN_SCOPE",
+          "evidence_ids": [
+            "CATALOG-SNAPSHOT-20261110"
+          ],
+          "limitations": [
+            "این گزاره فقط هویت کاتالوگی را تأیید می‌کند و درباره ترکیب شیمیایی، کاربرد، ایمنی، سازگاری یا نتیجه رنگ چیزی اثبات نمی‌کند."
+          ]
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "CATALOG-SNAPSHOT-20261110",
           "source_type": "OTHER",
-          "source_reference": "https://www.emperkperfumes.com/product/hair-color/ (Emper Kish official product page; indexed result identifies Brand: Bijourka)",
-          "captured_at": null,
+          "source_reference": "docs/homepage/encyclopedia/hair-color/catalog/raeaka_bijourka_catalog.csv; snapshot hbi-hair-catalog-snapshot-20261110-185700z; SHA-256 1887a7d166164639e2c235a7144fe6b27b4861f5c36fac9af383bef14eec1212",
+          "captured_at": "2026-11-10T18:57:00Z",
           "applies_to": {
             "market_region": null,
             "product_variant": null,
             "lot": null,
             "formula_version": null
           },
-          "description": "شاهد سطح خانواده محصول: صفحه محصول در وب‌سایت رسمی Emper Kish، محصول Hair Color را با برند Bijourka معرفی می‌کند. این شاهد فقط وجود پیوند برند با خانواده محصول رنگ مو را پشتیبانی می‌کند؛ به شماره ۱۰.۳، سری زیتونی، بسته مشخص، بازار، بچ یا نسخه فرمول قابل انتساب نیست و هیچ ادعای سازنده‌بودن Emper Kish، ترکیب، روش مصرف، ایمنی، سازگاری یا نتیجه رنگ را اثبات نمی‌کند."
+          "description": "کاتالوگ مرجع مورد تأیید مالک محصول؛ فقط برای اثبات هویت و نام‌گذاری شماره رنگ استفاده شده است.",
+          "content_sha256": "1887a7d166164639e2c235a7144fe6b27b4861f5c36fac9af383bef14eec1212"
+        }
+      ],
+      "expert_review": {
+        "status": "NOT_REVIEWED",
+        "scope": [],
+        "reviewed_claim_ids": [],
+        "reviewed_at": null,
+        "limitations": [
+          "هیچ ارزیابی تخصصی محصول‌محور انجام یا ثبت نشده است."
+        ]
+      },
+      "evidence_gaps": [
+        {
+          "gap_type": "DATA_GAP",
+          "field": "product_context.market_region/product_variant/package_identifier/gtin/lot/formula_version",
+          "description": "بازار عرضه، گونه محصول، شناسه بسته، GTIN، بچ و نسخه فرمول برای این رکورد مشخص نشده‌اند.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION",
+            "PROCESSING_PARAMETERS",
+            "COLOR_OUTCOME_PREDICTION"
+          ]
         },
         {
-          "evidence_id": "BIJOURKA-RETAIL-LISTING-TECHNOLIFE-10-3-100ML",
+          "gap_type": "KNOWLEDGE_GAP",
+          "field": "formulation.ingredient_list",
+          "description": "فهرست ترکیبات کامل و قابل انتساب به همین گونه/نسخه محصول در دسترس نیست.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION"
+          ]
+        },
+        {
+          "gap_type": "DATA_GAP",
+          "field": "evidence.package_label_or_manufacturer_document",
+          "description": "تصویر خوانا از برچسب ترکیبات یا سند سازنده که دقیقاً به همین محصول و نسخه مربوط باشد ثبت نشده است.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION",
+            "PROCESSING_PARAMETERS"
+          ]
+        },
+        {
+          "gap_type": "EXPERT_REVIEW_REQUIRED",
+          "field": "expert_review",
+          "description": "هر ادعای فراتر از هویت کاتالوگی باید پس از دریافت شواهد محصول‌محور توسط متخصص بررسی شود.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION",
+            "PROCESSING_PARAMETERS",
+            "COLOR_OUTCOME_PREDICTION"
+          ]
+        }
+      ],
+      "record_status": "DRAFT"
+    },
+    {
+      "record_id": "BIJOURKA-KNOWLEDGE-7-3-OLIVE",
+      "catalog_identity": {
+        "brand": "بیجورکا",
+        "series": "زیتونی",
+        "shade_number": "۷.۳",
+        "shade_name": "بلوند زیتونی متوسط"
+      },
+      "product_context": {
+        "market_region": null,
+        "product_variant": null,
+        "package_identifier": null,
+        "gtin": null,
+        "lot": null,
+        "formula_version": null
+      },
+      "formulation": {
+        "status": "UNKNOWN",
+        "ingredient_list": [],
+        "notes": [
+          "فهرست ترکیبات قابل انتساب به همین محصول/نسخه در شواهد ثبت‌شده موجود نیست؛ فهرست INCI عمداً خالی مانده است."
+        ]
+      },
+      "claims": [
+        {
+          "claim_id": "IDENTITY-7-3",
+          "claim_type": "IDENTITY_FACT",
+          "claim_scope": "IDENTITY",
+          "statement": "در کاتالوگ مرجع مورد تأیید مالک محصول، شماره ۷.۳ در سری زیتونی با نام «بلوند زیتونی متوسط» ثبت شده است.",
+          "evidence_status": "SUPPORTED_WITHIN_SCOPE",
+          "evidence_ids": [
+            "CATALOG-SNAPSHOT-20261110"
+          ],
+          "limitations": [
+            "این گزاره فقط هویت کاتالوگی را تأیید می‌کند و درباره ترکیب شیمیایی، کاربرد، ایمنی، سازگاری یا نتیجه رنگ چیزی اثبات نمی‌کند."
+          ]
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "CATALOG-SNAPSHOT-20261110",
           "source_type": "OTHER",
-          "source_reference": "https://www.technolife.com/product-355762/ (Technolife retail listing; product title and technical specifications)",
-          "captured_at": "2026-11-16T07:52:00Z",
+          "source_reference": "docs/homepage/encyclopedia/hair-color/catalog/raeaka_bijourka_catalog.csv; snapshot hbi-hair-catalog-snapshot-20261110-185700z; SHA-256 1887a7d166164639e2c235a7144fe6b27b4861f5c36fac9af383bef14eec1212",
+          "captured_at": "2026-11-10T18:57:00Z",
           "applies_to": {
-            "market_region": "فهرست خرده‌فروشی آنلاین ایران",
-            "product_variant": "فهرست محصول ۱۰۰ میلی‌لیتری با شماره رنگ ۱۰/۳",
+            "market_region": null,
+            "product_variant": null,
             "lot": null,
             "formula_version": null
           },
-          "description": "شاهد خرده‌فروشی برای هویت درج‌شده در صفحه: عنوان کالا «رنگ مو بیجورکا شماره 10-3 ... رنگ زیتونی پلاتینه» است؛ مشخصات فنی حجم ۱۰۰ میلی‌لیتر، شماره رنگ 10/3 و شماره مجوز 1766203352 را درج می‌کند. این صفحه سند سازنده یا تصویر خوانای برچسب بسته نیست و فقط محتوای فهرست فروشگاه را اثبات می‌کند."
+          "description": "کاتالوگ مرجع مورد تأیید مالک محصول؛ فقط برای اثبات هویت و نام‌گذاری شماره رنگ استفاده شده است.",
+          "content_sha256": "1887a7d166164639e2c235a7144fe6b27b4861f5c36fac9af383bef14eec1212"
+        }
+      ],
+      "expert_review": {
+        "status": "NOT_REVIEWED",
+        "scope": [],
+        "reviewed_claim_ids": [],
+        "reviewed_at": null,
+        "limitations": [
+          "هیچ ارزیابی تخصصی محصول‌محور انجام یا ثبت نشده است."
+        ]
+      },
+      "evidence_gaps": [
+        {
+          "gap_type": "DATA_GAP",
+          "field": "product_context.market_region/product_variant/package_identifier/gtin/lot/formula_version",
+          "description": "بازار عرضه، گونه محصول، شناسه بسته، GTIN، بچ و نسخه فرمول برای این رکورد مشخص نشده‌اند.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION",
+            "PROCESSING_PARAMETERS",
+            "COLOR_OUTCOME_PREDICTION"
+          ]
+        },
+        {
+          "gap_type": "KNOWLEDGE_GAP",
+          "field": "formulation.ingredient_list",
+          "description": "فهرست ترکیبات کامل و قابل انتساب به همین گونه/نسخه محصول در دسترس نیست.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION"
+          ]
+        },
+        {
+          "gap_type": "DATA_GAP",
+          "field": "evidence.package_label_or_manufacturer_document",
+          "description": "تصویر خوانا از برچسب ترکیبات یا سند سازنده که دقیقاً به همین محصول و نسخه مربوط باشد ثبت نشده است.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION",
+            "PROCESSING_PARAMETERS"
+          ]
+        },
+        {
+          "gap_type": "EXPERT_REVIEW_REQUIRED",
+          "field": "expert_review",
+          "description": "هر ادعای فراتر از هویت کاتالوگی باید پس از دریافت شواهد محصول‌محور توسط متخصص بررسی شود.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION",
+            "PROCESSING_PARAMETERS",
+            "COLOR_OUTCOME_PREDICTION"
+          ]
+        }
+      ],
+      "record_status": "DRAFT"
+    },
+    {
+      "record_id": "BIJOURKA-KNOWLEDGE-8-3-OLIVE",
+      "catalog_identity": {
+        "brand": "بیجورکا",
+        "series": "زیتونی",
+        "shade_number": "۸.۳",
+        "shade_name": "بلوند زیتونی روشن"
+      },
+      "product_context": {
+        "market_region": null,
+        "product_variant": null,
+        "package_identifier": null,
+        "gtin": null,
+        "lot": null,
+        "formula_version": null
+      },
+      "formulation": {
+        "status": "UNKNOWN",
+        "ingredient_list": [],
+        "notes": [
+          "فهرست ترکیبات قابل انتساب به همین محصول/نسخه در شواهد ثبت‌شده موجود نیست؛ فهرست INCI عمداً خالی مانده است."
+        ]
+      },
+      "claims": [
+        {
+          "claim_id": "IDENTITY-8-3",
+          "claim_type": "IDENTITY_FACT",
+          "claim_scope": "IDENTITY",
+          "statement": "در کاتالوگ مرجع مورد تأیید مالک محصول، شماره ۸.۳ در سری زیتونی با نام «بلوند زیتونی روشن» ثبت شده است.",
+          "evidence_status": "SUPPORTED_WITHIN_SCOPE",
+          "evidence_ids": [
+            "CATALOG-SNAPSHOT-20261110"
+          ],
+          "limitations": [
+            "این گزاره فقط هویت کاتالوگی را تأیید می‌کند و درباره ترکیب شیمیایی، کاربرد، ایمنی، سازگاری یا نتیجه رنگ چیزی اثبات نمی‌کند."
+          ]
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "CATALOG-SNAPSHOT-20261110",
+          "source_type": "OTHER",
+          "source_reference": "docs/homepage/encyclopedia/hair-color/catalog/raeaka_bijourka_catalog.csv; snapshot hbi-hair-catalog-snapshot-20261110-185700z; SHA-256 1887a7d166164639e2c235a7144fe6b27b4861f5c36fac9af383bef14eec1212",
+          "captured_at": "2026-11-10T18:57:00Z",
+          "applies_to": {
+            "market_region": null,
+            "product_variant": null,
+            "lot": null,
+            "formula_version": null
+          },
+          "description": "کاتالوگ مرجع مورد تأیید مالک محصول؛ فقط برای اثبات هویت و نام‌گذاری شماره رنگ استفاده شده است.",
+          "content_sha256": "1887a7d166164639e2c235a7144fe6b27b4861f5c36fac9af383bef14eec1212"
+        }
+      ],
+      "expert_review": {
+        "status": "NOT_REVIEWED",
+        "scope": [],
+        "reviewed_claim_ids": [],
+        "reviewed_at": null,
+        "limitations": [
+          "هیچ ارزیابی تخصصی محصول‌محور انجام یا ثبت نشده است."
+        ]
+      },
+      "evidence_gaps": [
+        {
+          "gap_type": "DATA_GAP",
+          "field": "product_context.market_region/product_variant/package_identifier/gtin/lot/formula_version",
+          "description": "بازار عرضه، گونه محصول، شناسه بسته، GTIN، بچ و نسخه فرمول برای این رکورد مشخص نشده‌اند.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION",
+            "PROCESSING_PARAMETERS",
+            "COLOR_OUTCOME_PREDICTION"
+          ]
+        },
+        {
+          "gap_type": "KNOWLEDGE_GAP",
+          "field": "formulation.ingredient_list",
+          "description": "فهرست ترکیبات کامل و قابل انتساب به همین گونه/نسخه محصول در دسترس نیست.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION"
+          ]
+        },
+        {
+          "gap_type": "DATA_GAP",
+          "field": "evidence.package_label_or_manufacturer_document",
+          "description": "تصویر خوانا از برچسب ترکیبات یا سند سازنده که دقیقاً به همین محصول و نسخه مربوط باشد ثبت نشده است.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION",
+            "PROCESSING_PARAMETERS"
+          ]
+        },
+        {
+          "gap_type": "EXPERT_REVIEW_REQUIRED",
+          "field": "expert_review",
+          "description": "هر ادعای فراتر از هویت کاتالوگی باید پس از دریافت شواهد محصول‌محور توسط متخصص بررسی شود.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION",
+            "PROCESSING_PARAMETERS",
+            "COLOR_OUTCOME_PREDICTION"
+          ]
+        }
+      ],
+      "record_status": "DRAFT"
+    },
+    {
+      "record_id": "BIJOURKA-KNOWLEDGE-9-3-OLIVE",
+      "catalog_identity": {
+        "brand": "بیجورکا",
+        "series": "زیتونی",
+        "shade_number": "۹.۳",
+        "shade_name": "بلوند زیتونی خیلی روشن"
+      },
+      "product_context": {
+        "market_region": null,
+        "product_variant": null,
+        "package_identifier": null,
+        "gtin": null,
+        "lot": null,
+        "formula_version": null
+      },
+      "formulation": {
+        "status": "UNKNOWN",
+        "ingredient_list": [],
+        "notes": [
+          "فهرست ترکیبات قابل انتساب به همین محصول/نسخه در شواهد ثبت‌شده موجود نیست؛ فهرست INCI عمداً خالی مانده است."
+        ]
+      },
+      "claims": [
+        {
+          "claim_id": "IDENTITY-9-3",
+          "claim_type": "IDENTITY_FACT",
+          "claim_scope": "IDENTITY",
+          "statement": "در کاتالوگ مرجع مورد تأیید مالک محصول، شماره ۹.۳ در سری زیتونی با نام «بلوند زیتونی خیلی روشن» ثبت شده است.",
+          "evidence_status": "SUPPORTED_WITHIN_SCOPE",
+          "evidence_ids": [
+            "CATALOG-SNAPSHOT-20261110"
+          ],
+          "limitations": [
+            "این گزاره فقط هویت کاتالوگی را تأیید می‌کند و درباره ترکیب شیمیایی، کاربرد، ایمنی، سازگاری یا نتیجه رنگ چیزی اثبات نمی‌کند."
+          ]
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "CATALOG-SNAPSHOT-20261110",
+          "source_type": "OTHER",
+          "source_reference": "docs/homepage/encyclopedia/hair-color/catalog/raeaka_bijourka_catalog.csv; snapshot hbi-hair-catalog-snapshot-20261110-185700z; SHA-256 1887a7d166164639e2c235a7144fe6b27b4861f5c36fac9af383bef14eec1212",
+          "captured_at": "2026-11-10T18:57:00Z",
+          "applies_to": {
+            "market_region": null,
+            "product_variant": null,
+            "lot": null,
+            "formula_version": null
+          },
+          "description": "کاتالوگ مرجع مورد تأیید مالک محصول؛ فقط برای اثبات هویت و نام‌گذاری شماره رنگ استفاده شده است.",
+          "content_sha256": "1887a7d166164639e2c235a7144fe6b27b4861f5c36fac9af383bef14eec1212"
         }
       ],
       "expert_review": {
