@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hbi.example/schemas/bijourka-product-knowledge-v1.json",
+  "$id": "urn:hbi:schema:bijourka-product-knowledge:v1",
   "title": "HBI Bijourka Product Knowledge Record",
   "description": "Evidence-linked, product-specific knowledge records for Bijourka. Catalog identity is referenced exactly; chemical, safety, compatibility and outcome claims require product-specific evidence and specialist review.",
   "type": "object",
