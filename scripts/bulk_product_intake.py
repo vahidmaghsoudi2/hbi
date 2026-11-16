@@ -583,6 +583,12 @@ def load_decisions(path: Path | None) -> dict[str, dict[str, Any]]:
     return data
 
 
+def validate_decision_keys(decisions: dict[str, dict[str, Any]], rows: list[dict[str, Any]]):
+    unknown = set(decisions) - {row["source_key"] for row in rows}
+    if unknown:
+        raise ValueError(f"Decision file contains unknown source_key values: {sorted(unknown)}")
+
+
 def build_parser():
     parser = argparse.ArgumentParser(
         description="Resumable HBI Product intake. Dry-run by default; no blind retries."
@@ -626,9 +632,7 @@ def main(argv: list[str] | None = None) -> int:
                     raise ValueError("--reconcile requires an existing checkpoint")
                 checkpoint = Checkpoint.create(args.checkpoint, rows, input_hash, base_url)
             decisions = load_decisions(args.decision_file)
-            unknown_decision_keys = set(decisions) - {row["source_key"] for row in rows}
-            if unknown_decision_keys:
-                raise ValueError(f"Decision file contains unknown source_key values: {sorted(unknown_decision_keys)}")
+            validate_decision_keys(decisions, rows)
             runner = BatchRunner(rows, checkpoint, ApiClient(base_url, token), decisions)
             if args.reconcile:
                 runner.reconcile()
