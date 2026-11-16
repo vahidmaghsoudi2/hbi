@@ -163,8 +163,8 @@ class BulkProductIntakeTests(unittest.TestCase):
 
     def test_existing_or_rename_decision_never_creates(self):
         for decision in (
-            {"decision": "EXISTING", "selected_product_id": "P1"},
-            {"decision": "RENAME", "final_product_name": "New name"},
+            {"decision": "EXISTING", "selected_product_id": "P1", "reason": "Operator selected existing Product P1"},
+            {"decision": "RENAME", "final_product_name": "New name", "reason": "Operator requested identity rename"},
         ):
             with self.subTest(decision=decision), tempfile.TemporaryDirectory() as tmp:
                 directory = Path(tmp)
