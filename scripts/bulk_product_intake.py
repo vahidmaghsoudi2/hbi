@@ -421,28 +421,6 @@ class BatchRunner:
             )
 
 
-def _same_identity(left: dict[str, Any], right: dict[str, Any]) -> bool:
-    """Compare only the existing duplicate-check identity fields."""
-    string_fields = (
-        "product_id", "barcode_gtin", "brand", "product_name", "variant",
-        "size_unit", "market_region", "packaging_version",
-    )
-    for field in string_fields:
-        if field == "product_id" and left.get(field) is None:
-            continue
-        if _norm(left.get(field)) != _norm(right.get(field)):
-            return False
-    left_size, right_size = left.get("size_value"), right.get("size_value")
-    if left_size is None and right_size is None:
-        return True
-    if left_size is None or right_size is None:
-        return False
-    try:
-        return float(left_size) == float(right_size)
-    except (TypeError, ValueError):
-        return _norm(left_size) == _norm(right_size)
-
-
     def _duplicate_check(self, row: dict[str, Any]):
         key = row["source_key"]
         self.checkpoint.set_row(key, "PREFLIGHT_IN_FLIGHT", preflight_started_at=utc_now())
@@ -546,6 +524,28 @@ def _same_identity(left: dict[str, Any], right: dict[str, Any]) -> bool:
             self.checkpoint.set_row(key, "UNKNOWN_OUTCOME", http_status=status, response=body)
         else:
             self.checkpoint.set_row(key, "CREATE_REJECTED", http_status=status, response=body)
+
+
+def _same_identity(left: dict[str, Any], right: dict[str, Any]) -> bool:
+    """Compare only the existing duplicate-check identity fields."""
+    string_fields = (
+        "product_id", "barcode_gtin", "brand", "product_name", "variant",
+        "size_unit", "market_region", "packaging_version",
+    )
+    for field in string_fields:
+        if field == "product_id" and left.get(field) is None:
+            continue
+        if _norm(left.get(field)) != _norm(right.get(field)):
+            return False
+    left_size, right_size = left.get("size_value"), right.get("size_value")
+    if left_size is None and right_size is None:
+        return True
+    if left_size is None or right_size is None:
+        return False
+    try:
+        return float(left_size) == float(right_size)
+    except (TypeError, ValueError):
+        return _norm(left_size) == _norm(right_size)
 
 
 def load_decisions(path: Path | None) -> dict[str, dict[str, Any]]:
