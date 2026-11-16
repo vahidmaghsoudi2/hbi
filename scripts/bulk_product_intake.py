@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import Any
 
 
-PRODUCT_LINES = {"SKIN", "HAIR", "BEAUTY", "TOOLS", "OTHER"}
+PRODUCT_LINES = {"SKIN"}  # Mission #283 is explicitly Skin-only; never infer the line.
 REQUIRED_COLUMNS = {"brand", "product_name", "product_line"}
 OPTIONAL_COLUMNS = {
     "source_key", "variant", "size_value", "size_unit", "barcode_gtin",
