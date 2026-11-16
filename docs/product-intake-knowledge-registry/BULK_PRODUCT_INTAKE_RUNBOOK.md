@@ -1,0 +1,94 @@
+# Bulk Product Intake Runbook (100–500 rows)
+
+This utility submits Product identity rows through the existing HBI API. It does not connect to SQLite or any database directly.
+
+## Source CSV
+
+Required columns:
+
+- \`brand\`
+- \`product_name\`
+- \`product_line\` — explicit operator choice: \`SKIN\`, \`HAIR\`, \`BEAUTY\`, \`TOOLS\`, or \`OTHER\`
+
+Optional columns:
+
+- \`source_key\` — stable row label; if omitted, the CSV line number is used
+- \`variant\`
+- \`size_value\`
+- \`size_unit\`
+- \`barcode_gtin\`
+- \`market_region\`
+- \`country_of_origin\`
+- \`packaging_version\`
+
+Do not include \`product_id\`, lifecycle, identity, QA, inventory, price, Evidence, or ProductKnowledge fields. The backend generates Product IDs and controls governance state. A batch is limited to 500 rows. All rows are validated before any API request; repeated identities in the same source file are rejected.
+
+## Dry run
+
+From the repository root:
+
+\`\`\`powershell
+python scripts/bulk_product_intake.py --input .\\products.csv --base-url http://127.0.0.1:8000
+\`\`\`
+
+Dry-run is the default. It validates the entire file and prints its SHA-256. It does not read a token, write a checkpoint, or call the API.
+
+## Apply
+
+Obtain an access token through the approved HBI authentication flow. Do not put credentials or tokens in the CSV, checkpoint, command arguments, or Git.
+
+In PowerShell, enter the token into the current process environment, then run:
+
+\`\`\`powershell
+$env:HBI_ACCESS_TOKEN = Read-Host "HBI bearer access token"
+python scripts/bulk_product_intake.py --input .\\products.csv --base-url http://127.0.0.1:8000 --apply --checkpoint .\\bulk-intake.checkpoint.json
+Remove-Item Env:HBI_ACCESS_TOKEN
+\`\`\`
+
+Use the exact API origin that the operator has separately approved. The utility does not select a database or environment for you.
+
+## Resume
+
+Use the same source file, target URL, and checkpoint:
+
+\`\`\`powershell
+$env:HBI_ACCESS_TOKEN = Read-Host "HBI bearer access token"
+python scripts/bulk_product_intake.py --input .\\products.csv --base-url http://127.0.0.1:8000 --apply --resume --checkpoint .\\bulk-intake.checkpoint.json
+Remove-Item Env:HBI_ACCESS_TOKEN
+\`\`\`
+
+The checkpoint is written atomically after each row-state transition. It is bound to the source file SHA-256, row keys/hashes, and exact target URL. Changing any of these blocks resume.
+
+## Possible matches and operator decisions
+
+Rows classified \`POSSIBLE_MATCH_REVIEW\` are not created. Review the stored candidate Product IDs and duplicate-check audit ID. Only after an operator has explicitly decided that the incoming identity is a distinct new Product may a decision file be supplied:
+
+\`\`\`json
+{
+  "sku-17": {
+    "decision": "NEW",
+    "reason": "Operator reviewed the candidate and confirmed a distinct product identity"
+  }
+}
+\`\`\`
+
+Save it as a local JSON file and resume with \`--decision-file .\\decisions.json\`. The decision is recorded against the exact duplicate-check audit and the backend verifies that its identity snapshot matches the create payload. \`EXISTING\` requires \`selected_product_id\`; \`RENAME\` requires \`final_product_name\`. Those decisions are recorded and the batch row is skipped; the tool does not create from them. If identity changes, correct the source file and start a new batch/checkpoint.
+
+## Interrupted or uncertain requests
+
+Any process interruption while a request is in flight, transport failure, or server error that may have occurred after commit is marked \`UNKNOWN_OUTCOME\`. Resume never resends that row. Reconcile it read-only against the duplicate-check audit and Product Master before making a separate operator decision. Do not delete or edit the checkpoint to force a retry. If the outcome remains ambiguous, leave it blocked.
+
+## State meanings
+
+- \`CREATED\`: API returned 201 with the generated Product ID.
+- \`EXISTING\`: duplicate preflight found an exact existing Product; no create request was sent.
+- \`POSSIBLE_MATCH_REVIEW\`: human review and a snapshot-bound decision are required.
+- \`HUMAN_RESOLVED_SKIP\`: operator selected EXISTING or RENAME; no Product was created by this batch.
+- \`PREFLIGHT_FAILED\` / \`CREATE_REJECTED\`: API rejected the request; inspect the saved response before taking any further action.
+- \`UNKNOWN_OUTCOME\`: request outcome cannot be established safely; no automatic retry.
+
+## Governance boundary
+
+Each Product Create is an independent API transaction, not one all-or-nothing batch transaction. Successful rows remain committed if a later row fails. New Product records remain in the backend's initial DRAFT / PENDING / NEEDS_REVIEW state and receive only the existing zero-quantity Inventory anchor. This utility does not import Evidence, approve QA, verify identity, activate products, refresh ProductKnowledge, alter prices, receive stock, or change inventory quantities.
+
+Do not use it against a live or production target until that exact target and the source file have been separately approved by the Product Owner.
