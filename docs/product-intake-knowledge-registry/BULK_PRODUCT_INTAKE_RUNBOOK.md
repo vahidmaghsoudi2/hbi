@@ -77,7 +77,7 @@ The checkpoint is written atomically after each row-state transition. An exclusi
 
 ## Read-only reconciliation
 
-If a request becomes `UNKNOWN_OUTCOME`, the runner stops at that row and blocks further batch progress until reconciliation. This keeps the uncertain request's audit near the top of the bounded audit list.
+If a request becomes `UNKNOWN_OUTCOME`, the runner stops at that row and blocks further batch progress. Read-only reconciliation does not release this block; it only records candidate evidence. This keeps the uncertain request's audit near the top of the bounded audit list.
 
 Use the same CSV, target and checkpoint. Reconciliation uses only GET requests and records possible audit/Product matches; it never changes the row out of `UNKNOWN_OUTCOME`, never retries a POST, and never declares that a candidate was created by this batch:
 
