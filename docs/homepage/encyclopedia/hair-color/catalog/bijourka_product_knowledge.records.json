@@ -61,8 +61,8 @@
           "content_sha256": "1887a7d166164639e2c235a7144fe6b27b4861f5c36fac9af383bef14eec1212"
         },
         {
-          "evidence_id": "BIJOURKA-MANUFACTURER-PRODUCT-FAMILY-HAIR-COLOR-GOLD",
-          "source_type": "MANUFACTURER_DOCUMENT",
+          "evidence_id": "BIJOURKA-OFFICIAL-BRAND-PRODUCT-FAMILY-HAIR-COLOR-GOLD",
+          "source_type": "OTHER",
           "source_reference": "https://www.emperkperfumes.com/product/hair-color/ (Emper Kish official product page; indexed result identifies Brand: Bijourka)",
           "captured_at": null,
           "applies_to": {
@@ -71,7 +71,7 @@
             "lot": null,
             "formula_version": null
           },
-          "description": "شاهد سطح خانواده محصول: صفحه محصول در وب‌سایت Emper Kish، محصول Hair Color را با برند Bijourka معرفی می‌کند. این شاهد فقط وجود پیوند برند با خانواده محصول رنگ مو را پشتیبانی می‌کند؛ به شماره ۱۰.۳، سری زیتونی، بسته مشخص، بازار، بچ یا نسخه فرمول قابل انتساب نیست و هیچ ادعای ترکیب، روش مصرف، ایمنی، سازگاری یا نتیجه رنگ را اثبات نمی‌کند."
+          "description": "شاهد سطح خانواده محصول: صفحه محصول در وب‌سایت رسمی Emper Kish، محصول Hair Color را با برند Bijourka معرفی می‌کند. این شاهد فقط وجود پیوند برند با خانواده محصول رنگ مو را پشتیبانی می‌کند؛ به شماره ۱۰.۳، سری زیتونی، بسته مشخص، بازار، بچ یا نسخه فرمول قابل انتساب نیست و هیچ ادعای سازنده‌بودن Emper Kish، ترکیب، روش مصرف، ایمنی، سازگاری یا نتیجه رنگ را اثبات نمی‌کند."
         }
       ],
       "expert_review": {
