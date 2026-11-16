@@ -383,7 +383,7 @@ class BatchRunner:
         if result == "EXISTING":
             self.checkpoint.set_row(key, "EXISTING", duplicate_check_id=check_id, candidates=body.get("candidates", []), response=response_summary)
         elif result == "POSSIBLE_MATCH":
-            self.checkpoint.set_row(key, "POSSIBLE_MATCH_REVIEW", duplicate_check_id=check_id, candidates=body.get("candidates", []), response=body)
+            self.checkpoint.set_row(key, "POSSIBLE_MATCH_REVIEW", duplicate_check_id=check_id, candidates=body.get("candidates", []), response=response_summary)
             self._apply_decision(row, self.checkpoint.data["rows"][key])
         else:
             self.checkpoint.set_row(key, "DUPLICATE_CHECKED_NEW", duplicate_check_id=check_id, response=response_summary)
