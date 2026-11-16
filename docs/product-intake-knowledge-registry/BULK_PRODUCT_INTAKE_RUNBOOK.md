@@ -73,7 +73,7 @@ finally {
 }
 \`\`\`
 
-The checkpoint is written atomically after each row-state transition. An exclusive OS-level lock prevents two runner processes from using the same checkpoint concurrently; the operating system releases the lock when the process exits. It is bound to the source file SHA-256, row keys/hashes, and exact target URL. Changing any of these blocks resume.
+The checkpoint is written atomically after each row-state transition. An exclusive OS-level lock serializes batch runners targeting the same API origin on this host, even if they use different checkpoint paths; the operating system releases the lock when the process exits. This lock cannot block the HBI UI or runners on other hosts, so pause all other Product Create activity against this target for the duration of the batch. It is bound to the source file SHA-256, row keys/hashes, and exact target URL. Changing any of these blocks resume.
 
 ## Read-only reconciliation
 
@@ -129,4 +129,4 @@ Any process interruption while a request is in flight, transport failure, or ser
 
 Each Product Create is an independent API transaction, not one all-or-nothing batch transaction. Successful rows remain committed if a later row fails. New Product records remain in the backend's initial DRAFT / PENDING / NEEDS_REVIEW state and receive only the existing zero-quantity Inventory anchor. This utility does not import Evidence, approve QA, verify identity, activate products, refresh ProductKnowledge, alter prices, receive stock, or change inventory quantities.
 
-Do not use it against a live or production target until that exact target and the source file have been separately approved by the Product Owner.
+Do not run two independent Product Intake processes against the same target at once. The local lock does not coordinate with other computers or the HBI UI, so other Product Create activity must be paused during the batch. Do not use it against a live or production target until that exact target and the source file have been separately approved by the Product Owner.
