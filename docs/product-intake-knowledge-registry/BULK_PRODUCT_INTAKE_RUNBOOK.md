@@ -114,7 +114,7 @@ Save it as a local JSON file and resume with \`--decision-file .\\decisions.json
 
 ## Interrupted or uncertain requests
 
-Any process interruption while a request is in flight, transport failure, or server error that may have occurred after commit is marked \`UNKNOWN_OUTCOME\`. Resume never resends that row. Reconcile it read-only against the duplicate-check audit and Product Master for investigation only. The runner remains blocked regardless of the candidate results. Do not delete or edit the checkpoint to force a retry, and do not assume that an empty result proves non-creation. Resolve the outcome through an authorized independent review before preparing a reduced follow-on batch; if it remains ambiguous, leave it blocked.
+Any process interruption while a request is in flight, transport failure, HTTP 408/425 response, or server error that may have occurred after commit is marked \`UNKNOWN_OUTCOME\`. Resume never resends that row. Reconcile it read-only against the duplicate-check audit and Product Master for investigation only. The runner remains blocked regardless of the candidate results. Do not delete or edit the checkpoint to force a retry, and do not assume that an empty result proves non-creation. Resolve the outcome through an authorized independent review before preparing a reduced follow-on batch; if it remains ambiguous, leave it blocked.
 
 ## State meanings
 
