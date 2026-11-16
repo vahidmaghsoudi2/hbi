@@ -11,6 +11,7 @@ from app.models.product import Product
 from app.models.product_knowledge import ProductKnowledge
 from app.models.profile_fact import ProfileFact
 from app.reasoning.scoring import MatchScoringEngine
+from app.services.need_normalization import map_phrase_to_canonical
 from app.services.profile_fact_context_service import ProfileFactContextService
 from app.services.skin_next_question_service import (
     FACTOR_KEY,
@@ -318,3 +319,20 @@ def test_frozen_scoring_formula_is_unchanged():
     assert result["final_score"] == 1.0
     assert result["confidence"] == 1.0
     assert result["eligibility"] == "ELIGIBLE"
+
+
+def test_expanded_skin_menu_uses_existing_canonical_need_vocabulary():
+    expected = {
+        "ضدآفتاب": "sun_protection",
+        "آبرسان": "hydration",
+        "خشکی پوست": "dry_skin",
+        "لک صورت": "brightening",
+        "پوست حساس": "sensitivity",
+        "ضدچروک": "anti_aging",
+        "کنترل چربی": "oil_control",
+        "جوش": "acne_care",
+        "ترمیم سد پوستی": "barrier_repair",
+        "پاکسازی": "cleansing",
+    }
+    for phrase, canonical_id in expected.items():
+        assert map_phrase_to_canonical(phrase) == canonical_id
