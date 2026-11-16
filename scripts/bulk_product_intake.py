@@ -354,6 +354,77 @@ class BatchRunner:
                 continue
             self._duplicate_check(row)
 
+    def reconcile(self):
+        """Read-only lookup of uncertain rows; records candidates but never resolves them."""
+        unknown_rows = [
+            row for row in self.rows
+            if self.checkpoint.data["rows"][row["source_key"]].get("state") == "UNKNOWN_OUTCOME"
+        ]
+        if not unknown_rows:
+            return
+        audit_status, audits = self.api.request(
+            "GET", "/api/v1/products/duplicate-check/audit?limit=500"
+        )
+        product_status, products = self.api.request("GET", "/api/v1/products/manage")
+        if audit_status != 200 or product_status != 200:
+            self.checkpoint.data["last_reconciliation"] = {
+                "checked_at": utc_now(),
+                "read_only": True,
+                "audit_http_status": audit_status,
+                "product_http_status": product_status,
+                "error": "Read-only reconciliation could not retrieve both audit and Product Master data",
+            }
+            self.checkpoint.save()
+            return
+        if not isinstance(audits, list) or not isinstance(products, list):
+            raise ValueError("Read-only reconciliation returned an unexpected response shape")
+
+        for row in unknown_rows:
+            key = row["source_key"]
+            expected = {**_identity_payload(row), "product_id": None}
+            audit_ids = []
+            for audit in audits:
+                snapshot = audit.get("input_snapshot") or {}
+                if isinstance(snapshot, dict) and _same_identity(expected, snapshot):
+                    audit_ids.append(audit.get("check_id"))
+            product_ids = [
+                product.get("product_id")
+                for product in products
+                if _same_identity(expected, product)
+            ]
+            self.checkpoint.set_row(
+                key,
+                "UNKNOWN_OUTCOME",
+                reconciliation={
+                    "checked_at": utc_now(),
+                    "read_only": True,
+                    "duplicate_check_candidate_ids": [value for value in audit_ids if value],
+                    "product_candidate_ids": [value for value in product_ids if value],
+                    "disposition": "CANDIDATES_ONLY_NO_AUTOMATIC_RESOLUTION",
+                },
+            )
+
+
+def _same_identity(left: dict[str, Any], right: dict[str, Any]) -> bool:
+    """Compare only the existing duplicate-check identity fields."""
+    string_fields = (
+        "product_id", "barcode_gtin", "brand", "product_name", "variant",
+        "size_unit", "market_region", "packaging_version",
+    )
+    for field in string_fields:
+        if _norm(left.get(field)) != _norm(right.get(field)):
+            return False
+    left_size, right_size = left.get("size_value"), right.get("size_value")
+    if left_size is None and right_size is None:
+        return True
+    if left_size is None or right_size is None:
+        return False
+    try:
+        return float(left_size) == float(right_size)
+    except (TypeError, ValueError):
+        return _norm(left_size) == _norm(right_size)
+
+
     def _duplicate_check(self, row: dict[str, Any]):
         key = row["source_key"]
         self.checkpoint.set_row(key, "PREFLIGHT_IN_FLIGHT", preflight_started_at=utc_now())
@@ -489,6 +560,7 @@ def build_parser():
     parser.add_argument("--decision-file", type=Path, help="JSON mapping source_key to explicit operator decisions")
     parser.add_argument("--apply", action="store_true", help="Send API requests; without this flag only validate/plan")
     parser.add_argument("--resume", action="store_true", help="Resume from an existing matching checkpoint")
+    parser.add_argument("--reconcile", action="store_true", help="Read-only reconciliation of UNKNOWN_OUTCOME rows; requires --resume")
     return parser
 
 
@@ -505,7 +577,9 @@ def main(argv: list[str] | None = None) -> int:
         if parts.scheme != "https" and parts.hostname not in {"localhost", "127.0.0.1", "::1"}:
             raise ValueError("HTTPS is required for non-local API targets")
         print(f"Validated {len(rows)} product rows; input_sha256={input_hash}")
-        if not args.apply:
+        if args.reconcile and (not args.resume or args.apply):
+            raise ValueError("--reconcile requires --resume and must not be combined with --apply")
+        if not args.apply and not args.reconcile:
             print("DRY RUN: no token read, no checkpoint written, no API request sent.")
             return 0
         token = os.getenv("HBI_ACCESS_TOKEN", "").strip()
@@ -515,9 +589,15 @@ def main(argv: list[str] | None = None) -> int:
             if args.resume:
                 checkpoint = Checkpoint.resume(args.checkpoint, input_hash, base_url, rows)
             else:
+                if args.reconcile:
+                    raise ValueError("--reconcile requires an existing checkpoint")
                 checkpoint = Checkpoint.create(args.checkpoint, rows, input_hash, base_url)
             decisions = load_decisions(args.decision_file)
-            BatchRunner(rows, checkpoint, ApiClient(base_url, token), decisions).run()
+            runner = BatchRunner(rows, checkpoint, ApiClient(base_url, token), decisions)
+            if args.reconcile:
+                runner.reconcile()
+            else:
+                runner.run()
             counts: dict[str, int] = {}
             for item in checkpoint.data["rows"].values():
                 state = item.get("state", "UNKNOWN")
