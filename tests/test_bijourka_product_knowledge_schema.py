@@ -102,38 +102,69 @@ def test_schema_has_explicit_fail_closed_gap_categories_for_decision_use():
     }.issubset(blocked_uses)
 
 
-def test_olive_shade_records_are_independent_identity_only_and_fail_closed():
+def test_all_bijourka_catalog_identities_have_independent_fail_closed_records():
+    import csv
+
+    root = Path(__file__).resolve().parents[1]
     records_path = (
-        Path(__file__).resolve().parents[1]
+        root
         / "docs/homepage/encyclopedia/hair-color/catalog/"
         / "bijourka_product_knowledge.records.json"
     )
+    catalog_path = (
+        root
+        / "docs/homepage/encyclopedia/hair-color/catalog/"
+        / "raeaka_bijourka_catalog.csv"
+    )
     payload = json.loads(records_path.read_text(encoding="utf-8"))
+    with catalog_path.open(encoding="utf-8-sig", newline="") as catalog_file:
+        catalog_rows = list(csv.DictReader(catalog_file))
+
     assert payload["schema_version"] == "hbi.bijourka-product-knowledge.v1"
     assert payload["catalog_reference"]["authority"] == "PRODUCT_OWNER_APPROVED"
+    assert len(payload["records"]) == len(catalog_rows) == 88
+
+    def identity_key(identity):
+        return (
+            identity["brand"],
+            identity["series"],
+            identity["shade_number"],
+            identity["shade_name"],
+        )
 
     expected = {
-        "۶.۳": "بلوند زیتونی تیره",
-        "۷.۳": "بلوند زیتونی متوسط",
-        "۸.۳": "بلوند زیتونی روشن",
-        "۹.۳": "بلوند زیتونی خیلی روشن",
-        "۱۰.۳": "بلوند زیتونی پلاتینه",
+        identity_key(
+            {
+                "brand": row["برند"],
+                "series": row["سری محصول"],
+                "shade_number": row["شماره رنگ"],
+                "shade_name": row["نام رنگ"],
+            }
+        )
+        for row in catalog_rows
     }
     records = payload["records"]
-    assert len(records) == len(expected)
-    assert {r["catalog_identity"]["shade_number"]: r["catalog_identity"]["shade_name"] for r in records} == expected
-    assert len({r["record_id"] for r in records}) == len(expected)
+    actual = {identity_key(record["catalog_identity"]) for record in records}
+    assert actual == expected
+    assert len(actual) == len(records)
+    assert len({record["record_id"] for record in records}) == len(records)
 
     for record in records:
         identity = record["catalog_identity"]
         assert identity["brand"] == "بیجورکا"
-        assert identity["series"] == "زیتونی"
         assert record["formulation"]["status"] == "UNKNOWN"
         assert record["formulation"]["ingredient_list"] == []
         assert record["expert_review"]["status"] == "NOT_REVIEWED"
         assert record["record_status"] == "DRAFT"
+        assert record["product_context"]["formula_version"] is None
         assert all(claim["claim_scope"] == "IDENTITY" for claim in record["claims"])
-        assert {e["evidence_id"] for e in record["evidence"]} == {"CATALOG-SNAPSHOT-20261110"}
+        assert all(
+            claim["evidence_ids"] == ["CATALOG-SNAPSHOT-20261110"]
+            for claim in record["claims"]
+        )
+        assert {e["evidence_id"] for e in record["evidence"]} == {
+            "CATALOG-SNAPSHOT-20261110"
+        }
         assert any(
             gap["gap_type"] == "KNOWLEDGE_GAP"
             and "formulation.ingredient_list" in gap["field"]
