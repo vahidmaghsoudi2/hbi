@@ -348,6 +348,11 @@ class ApiClient:
             return status, {"_unparsed_response": raw.decode("utf-8", errors="replace")[:2000]}
 
 
+def _is_uncertain_write_status(status: int) -> bool:
+    """Statuses that do not prove a POST was not committed."""
+    return status in {408, 425} or status >= 500 or 200 <= status < 300
+
+
 def _is_batch_blocking(item: dict[str, Any]) -> bool:
     # A read-only candidate scan is evidence, not an operator disposition.
     # UNKNOWN_OUTCOME must remain a hard stop even after reconciliation;
@@ -469,7 +474,7 @@ class BatchRunner:
             self.checkpoint.set_row(key, "UNKNOWN_OUTCOME", error=f"DuplicateCheck transport outcome unknown: {exc}")
             return
         if status != 200:
-            state = "UNKNOWN_OUTCOME" if status >= 500 or 200 <= status < 300 else "PREFLIGHT_FAILED"
+            state = "UNKNOWN_OUTCOME" if _is_uncertain_write_status(status) else "PREFLIGHT_FAILED"
             self.checkpoint.set_row(
                 key, state, http_status=status, response=_safe_response_summary(body),
                 last_response={"status": status, "received_at": utc_now(), "body": _safe_response_summary(body)},
@@ -542,7 +547,7 @@ class BatchRunner:
             self.checkpoint.set_row(key, "UNKNOWN_OUTCOME", error=f"Operator decision transport outcome unknown: {exc}")
             return
         if status != 200:
-            state = "UNKNOWN_OUTCOME" if status >= 500 or 200 <= status < 300 else "POSSIBLE_MATCH_REVIEW"
+            state = "UNKNOWN_OUTCOME" if _is_uncertain_write_status(status) else "POSSIBLE_MATCH_REVIEW"
             self.checkpoint.set_row(key, state, decision_http_status=status, decision_response=_safe_response_summary(body), last_response={"status": status, "received_at": utc_now(), "body": _safe_response_summary(body)})
             return
         if choice == "NEW":
@@ -575,7 +580,7 @@ class BatchRunner:
                 http_status=status,
                 last_response={"status": status, "received_at": utc_now(), "body": _safe_response_summary(body)},
             )
-        elif status >= 500 or 200 <= status < 300:
+        elif _is_uncertain_write_status(status):
             self.checkpoint.set_row(
                 key, "UNKNOWN_OUTCOME", http_status=status,
                 error="Unexpected success response or server error; Product may have been committed",
