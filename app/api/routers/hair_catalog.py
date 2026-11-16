@@ -158,7 +158,7 @@ async def lookup_hair_catalog_identity(
         return HairCatalogLookupResponse(
             status="KNOWLEDGE_GAP",
             display_allowed=False,
-            message="مرجع اصلیِ مصوب و نسخه‌دار کاتالوگ هنوز در سامانه ثبت نشده است؛ نتیجهٔ قطعی ارائه نمی‌شود.",
+            message="Snapshot کاتالوگ Bijourka با نشانگر تأیید Product Owner و زنجیرهٔ یکپارچگی معتبر در دسترس نیست؛ نتیجهٔ قطعی ارائه نمی‌شود.",
         )
 
     reference_id, reference = approved_reference
