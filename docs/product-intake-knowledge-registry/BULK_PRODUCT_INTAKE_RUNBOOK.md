@@ -40,24 +40,40 @@ Obtain an access token through the approved HBI authentication flow. Do not put 
 In PowerShell, enter the token into the current process environment, then run:
 
 \`\`\`powershell
-$env:HBI_ACCESS_TOKEN = Read-Host "HBI bearer access token"
-python scripts/bulk_product_intake.py --input .\\products.csv --base-url http://127.0.0.1:8000 --apply --checkpoint .\\bulk-intake.checkpoint.json
-Remove-Item Env:HBI_ACCESS_TOKEN
+$secure = Read-Host "HBI bearer access token" -AsSecureString
+$ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
+try {
+    $env:HBI_ACCESS_TOKEN = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr)
+    python scripts/bulk_product_intake.py --input .\\products.csv --base-url http://127.0.0.1:8000 --apply --checkpoint .\\bulk-intake.checkpoint.json
+}
+finally {
+    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr)
+    Remove-Item Env:HBI_ACCESS_TOKEN -ErrorAction SilentlyContinue
+    $secure.Dispose()
+}
 \`\`\`
 
-Use the exact API origin that the operator has separately approved. The utility does not select a database or environment for you.
+Use the exact API origin that the operator has separately approved. HTTPS is required for non-local targets; HTTP is accepted only for localhost/loopback. The utility does not select a database or environment for you.
 
 ## Resume
 
 Use the same source file, target URL, and checkpoint:
 
 \`\`\`powershell
-$env:HBI_ACCESS_TOKEN = Read-Host "HBI bearer access token"
-python scripts/bulk_product_intake.py --input .\\products.csv --base-url http://127.0.0.1:8000 --apply --resume --checkpoint .\\bulk-intake.checkpoint.json
-Remove-Item Env:HBI_ACCESS_TOKEN
+$secure = Read-Host "HBI bearer access token" -AsSecureString
+$ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
+try {
+    $env:HBI_ACCESS_TOKEN = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr)
+    python scripts/bulk_product_intake.py --input .\\products.csv --base-url http://127.0.0.1:8000 --apply --resume --checkpoint .\\bulk-intake.checkpoint.json
+}
+finally {
+    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr)
+    Remove-Item Env:HBI_ACCESS_TOKEN -ErrorAction SilentlyContinue
+    $secure.Dispose()
+}
 \`\`\`
 
-The checkpoint is written atomically after each row-state transition. It is bound to the source file SHA-256, row keys/hashes, and exact target URL. Changing any of these blocks resume.
+The checkpoint is written atomically after each row-state transition. An exclusive OS-level lock prevents two runner processes from using the same checkpoint concurrently; the operating system releases the lock when the process exits. It is bound to the source file SHA-256, row keys/hashes, and exact target URL. Changing any of these blocks resume.
 
 ## Possible matches and operator decisions
 
