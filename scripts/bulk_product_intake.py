@@ -349,7 +349,11 @@ class ApiClient:
 
 
 def _is_batch_blocking(item: dict[str, Any]) -> bool:
-    if item.get("state") == "UNKNOWN_OUTCOME" and not item.get("reconciliation"):
+    # A read-only candidate scan is evidence, not an operator disposition.
+    # UNKNOWN_OUTCOME must remain a hard stop even after reconciliation;
+    # otherwise later audit rows can evict the uncertain request from the
+    # bounded audit window and the batch can silently proceed past ambiguity.
+    if item.get("state") == "UNKNOWN_OUTCOME":
         return True
     for key in ("http_status", "decision_http_status"):
         status = item.get(key)
