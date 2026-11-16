@@ -21,10 +21,6 @@ LookupStop = Literal["DATA_GAP", "KNOWLEDGE_GAP", "OUT_OF_DOMAIN", "ENGINE_FAIL"
 
 _APPROVED_SOURCE_KIND = "PO_APPROVED_BIJOURKA_CATALOG"
 _APPROVED_SOURCE_STATUS = "PO_APPROVED"
-_APPROVED_PATHS = frozenset((
-    "/آلبوم-رنگ-مو-بیجورکا/",
-    "/product/رنگ-موی-بیجورکا-سِری-طبیعی-شماره-1-مشکی/",
-))
 _REQUIRED_IDENTITY_FIELDS = (
     "brand",
     "series",
@@ -105,12 +101,6 @@ def _valid_capture_timestamp(value: str | None) -> bool:
     except ValueError:
         return False
     return parsed.tzinfo is not None and parsed.utcoffset() is not None
-
-
-def _valid_sha256(value: str | None) -> bool:
-    return value is None or (
-        isinstance(value, str) and re.fullmatch(r"[0-9a-fA-F]{64}", value) is not None
-    )
 
 
 def _missing_identity_fields(identity: CatalogIdentity) -> tuple[str, ...]:
