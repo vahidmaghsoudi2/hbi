@@ -16,6 +16,7 @@ import sys
 import tempfile
 import urllib.error
 import urllib.request
+from urllib.parse import urlsplit
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -233,12 +234,61 @@ class Checkpoint:
         self.save()
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """Never forward a bearer token to a redirected host or path."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+class CheckpointLock:
+    """Cross-platform exclusive lock; the OS releases it if the process exits."""
+
+    def __init__(self, checkpoint_path: Path):
+        self.path = checkpoint_path.with_suffix(checkpoint_path.suffix + ".lock")
+        self.handle = None
+
+    def __enter__(self):
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.handle = self.path.open("a+b")
+        self.handle.seek(0, os.SEEK_END)
+        if self.handle.tell() == 0:
+            self.handle.write(b"0")
+            self.handle.flush()
+        self.handle.seek(0)
+        try:
+            if os.name == "nt":
+                import msvcrt
+                msvcrt.locking(self.handle.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(self.handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except (OSError, BlockingIOError):
+            self.handle.close()
+            self.handle = None
+            raise RuntimeError(f"Another batch process holds checkpoint lock: {self.path}")
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        if self.handle is None:
+            return
+        self.handle.seek(0)
+        if os.name == "nt":
+            import msvcrt
+            msvcrt.locking(self.handle.fileno(), msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(self.handle.fileno(), fcntl.LOCK_UN)
+        self.handle.close()
+        self.handle = None
+
+
 class ApiClient:
     def __init__(self, base_url: str, token: str, timeout: float = 30.0, opener=None):
         self.base_url = base_url.rstrip("/")
         self.token = token
         self.timeout = timeout
-        self.opener = opener or urllib.request.urlopen
+        self.opener = opener or urllib.request.build_opener(_NoRedirect()).open
 
     def request(self, method: str, path: str, body: dict[str, Any] | None = None):
         url = self.base_url + path
@@ -423,8 +473,13 @@ def main(argv: list[str] | None = None) -> int:
     try:
         rows, input_hash = load_source(args.input)
         base_url = args.base_url.rstrip("/")
-        if not base_url.startswith(("http://", "https://")):
-            raise ValueError("--base-url must be an explicit http:// or https:// URL")
+        parts = urlsplit(base_url)
+        if parts.scheme not in {"http", "https"} or not parts.hostname:
+            raise ValueError("--base-url must be an explicit http:// or https:// origin")
+        if parts.username or parts.password or parts.query or parts.fragment or parts.path not in {"", "/"}:
+            raise ValueError("--base-url must be an origin only; do not include credentials, path, query, or fragment")
+        if parts.scheme != "https" and parts.hostname not in {"localhost", "127.0.0.1", "::1"}:
+            raise ValueError("HTTPS is required for non-local API targets")
         print(f"Validated {len(rows)} product rows; input_sha256={input_hash}")
         if not args.apply:
             print("DRY RUN: no token read, no checkpoint written, no API request sent.")
@@ -432,17 +487,18 @@ def main(argv: list[str] | None = None) -> int:
         token = os.getenv("HBI_ACCESS_TOKEN", "").strip()
         if not token:
             raise ValueError("Set HBI_ACCESS_TOKEN in the process environment; it is never stored in the checkpoint")
-        if args.resume:
-            checkpoint = Checkpoint.resume(args.checkpoint, input_hash, base_url, rows)
-        else:
-            checkpoint = Checkpoint.create(args.checkpoint, rows, input_hash, base_url)
-        decisions = load_decisions(args.decision_file)
-        BatchRunner(rows, checkpoint, ApiClient(base_url, token), decisions).run()
-        counts: dict[str, int] = {}
-        for item in checkpoint.data["rows"].values():
-            state = item.get("state", "UNKNOWN")
-            counts[state] = counts.get(state, 0) + 1
-        print(json.dumps({"batch_id": checkpoint.data["batch_id"], "states": counts, "checkpoint": str(args.checkpoint)}, indent=2))
+        with CheckpointLock(args.checkpoint):
+            if args.resume:
+                checkpoint = Checkpoint.resume(args.checkpoint, input_hash, base_url, rows)
+            else:
+                checkpoint = Checkpoint.create(args.checkpoint, rows, input_hash, base_url)
+            decisions = load_decisions(args.decision_file)
+            BatchRunner(rows, checkpoint, ApiClient(base_url, token), decisions).run()
+            counts: dict[str, int] = {}
+            for item in checkpoint.data["rows"].values():
+                state = item.get("state", "UNKNOWN")
+                counts[state] = counts.get(state, 0) + 1
+            print(json.dumps({"batch_id": checkpoint.data["batch_id"], "states": counts, "checkpoint": str(args.checkpoint)}, indent=2))
         return 0
     except Exception as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
