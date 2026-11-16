@@ -21,7 +21,7 @@ def test_approved_catalog_provider_loads_exact_88_row_artifact():
     assert reference_id == metadata.snapshot_id
     assert reference_id.startswith("hbi-hair-catalog-snapshot-")
     assert metadata.content_sha256 == digest
-    assert metadata.source_kind == "RAEAKA_BIJOURKA_CATALOG"
+    assert metadata.source_kind == "PO_APPROVED_BIJOURKA_CATALOG"
     assert metadata.approval_status == "PO_APPROVED"
     assert metadata.edition_label is None
     assert metadata.captured_at is None
