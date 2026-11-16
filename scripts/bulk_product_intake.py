@@ -402,12 +402,11 @@ class BatchRunner:
             "decision": choice,
             "selected_product_id": decision.get("selected_product_id"),
             "final_product_name": decision.get("final_product_name"),
-            "reason": decision.get("reason") or "Operator decision supplied in decision file",
+            "reason": str(decision.get("reason") or "").strip(),
         }
-        if choice == "NEW":
-            if not payload["reason"]:
-                self.checkpoint.set_row(key, "POSSIBLE_MATCH_REVIEW", decision_error="NEW decision requires a reason")
-                return
+        if not payload["reason"]:
+            self.checkpoint.set_row(key, "POSSIBLE_MATCH_REVIEW", decision_error="Every operator decision requires an explicit reason")
+            return
         elif choice == "EXISTING" and not payload["selected_product_id"]:
             self.checkpoint.set_row(key, "POSSIBLE_MATCH_REVIEW", decision_error="EXISTING decision requires selected_product_id")
             return
@@ -466,6 +465,17 @@ def load_decisions(path: Path | None) -> dict[str, dict[str, Any]]:
     data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
         raise ValueError("Decision file must be a JSON object keyed by source_key")
+    allowed_fields = {"decision", "selected_product_id", "final_product_name", "reason"}
+    for source_key, decision in data.items():
+        if not isinstance(decision, dict):
+            raise ValueError(f"Decision for {source_key!r} must be an object")
+        unknown = set(decision) - allowed_fields
+        if unknown:
+            raise ValueError(f"Decision for {source_key!r} has unsupported fields: {sorted(unknown)}")
+        if str(decision.get("decision", "")).strip().upper() not in {"NEW", "EXISTING", "RENAME"}:
+            raise ValueError(f"Decision for {source_key!r} must be NEW, EXISTING, or RENAME")
+        if not str(decision.get("reason") or "").strip():
+            raise ValueError(f"Decision for {source_key!r} requires an explicit reason")
     return data
 
 
