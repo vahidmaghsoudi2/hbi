@@ -58,6 +58,24 @@
             "شماره مجوز فقط همان‌طور که فروشگاه درج کرده ثبت شده و در این رکورد استعلام مستقل از مرجع صادرکننده محسوب نمی‌شود.",
             "این شاهد هیچ اطلاعاتی درباره فهرست INCI، فرمول، روش مصرف، ایمنی، سازگاری یا نتیجه رنگ اثبات نمی‌کند."
           ]
+        },
+        {
+          "claim_id": "RETAIL-METADATA-QUALITY-ALERT-1766203352",
+          "claim_type": "CONFLICT",
+          "claim_scope": "IDENTITY",
+          "statement": "در فهرست‌های تکنولایف، شماره مجوز ۱۷۶۶۲۰۳۳۵۲ برای چند شماره رنگ متفاوت (۷/۳، ۸/۳، ۹/۳ و ۱۰/۳) تکرار شده است؛ افزون بر آن، صفحه ۷/۳ در عنوان «بلوند زیتونی متوسط» اما در مشخصه فنی «Gold 24K» درج می‌کند. بنابراین این شماره مجوز در داده‌های فروشگاهی شناسه یکتای گونه/فرمول نیست و برخی فیلدهای فنی همان منبع ناسازگارند.",
+          "evidence_status": "CONFLICTING",
+          "evidence_ids": [
+            "BIJOURKA-RETAIL-LISTING-TECHNOLIFE-7-3-100ML",
+            "BIJOURKA-RETAIL-LISTING-TECHNOLIFE-8-3-100ML",
+            "BIJOURKA-RETAIL-LISTING-TECHNOLIFE-9-3-100ML",
+            "BIJOURKA-RETAIL-LISTING-TECHNOLIFE-10-3-100ML"
+          ],
+          "limitations": [
+            "این تعارض به فراداده فهرست‌های فروشگاهی محدود است و ثابت نمی‌کند برچسب یا محصول فیزیکی ۱۰/۳ اشتباه است.",
+            "شماره مجوزِ بازنشرشده در فروشگاه نباید به‌عنوان شناسه یکتای فرمول یا نسخه محصول استفاده شود.",
+            "هویت کاتالوگی ۱۰/۳ در سری زیتونی از کاتالوگ مرجع مستقل است و این مشاهده آن را تغییر نمی‌دهد."
+          ]
         }
       ],
       "evidence": [
@@ -100,6 +118,45 @@
             "formula_version": null
           },
           "description": "شاهد خرده‌فروشی برای هویت درج‌شده در صفحه: عنوان کالا «رنگ مو بیجورکا شماره 10-3 ... رنگ زیتونی پلاتینه» است؛ مشخصات فنی حجم ۱۰۰ میلی‌لیتر، شماره رنگ 10/3 و شماره مجوز 1766203352 را درج می‌کند. این صفحه سند سازنده یا تصویر خوانای برچسب بسته نیست و فقط محتوای فهرست فروشگاه را اثبات می‌کند."
+        },
+        {
+          "evidence_id": "BIJOURKA-RETAIL-LISTING-TECHNOLIFE-7-3-100ML",
+          "source_type": "OTHER",
+          "source_reference": "https://www.technolife.com/product-355539/ (Technolife retail listing; product title and technical specifications)",
+          "captured_at": "2026-11-16T17:45:00Z",
+          "applies_to": {
+            "market_region": "فهرست خرده‌فروشی آنلاین ایران",
+            "product_variant": "فهرست محصول ۱۰۰ میلی‌لیتری با شماره رنگ ۷/۳",
+            "lot": null,
+            "formula_version": null
+          },
+          "description": "عنوان صفحه محصول بیجورکا ۷/۳ را «بلوند زیتونی متوسط» معرفی می‌کند، اما مشخصه رنگ در مشخصات فنی همان صفحه «Gold 24K» درج شده است؛ همان صفحه شماره مجوز 1766203352 را نیز درج می‌کند. این ناسازگاری فقط در داده‌های فروشگاهی مشاهده شده و درباره برچسب واقعی یا فرمول محصول داوری نمی‌کند."
+        },
+        {
+          "evidence_id": "BIJOURKA-RETAIL-LISTING-TECHNOLIFE-8-3-100ML",
+          "source_type": "OTHER",
+          "source_reference": "https://www.technolife.com/product-355612/ (Technolife retail listing; product title and technical specifications)",
+          "captured_at": "2026-11-16T17:45:00Z",
+          "applies_to": {
+            "market_region": "فهرست خرده‌فروشی آنلاین ایران",
+            "product_variant": "فهرست محصول ۱۰۰ میلی‌لیتری با شماره رنگ ۸/۳",
+            "lot": null,
+            "formula_version": null
+          },
+          "description": "صفحه فروشگاهی بیجورکا ۸/۳ را زیتونی روشن، با حجم ۱۰۰ میلی‌لیتر و شماره مجوز 1766203352 معرفی می‌کند. شاهد صرفاً داده‌های همان فهرست فروشگاهی است."
+        },
+        {
+          "evidence_id": "BIJOURKA-RETAIL-LISTING-TECHNOLIFE-9-3-100ML",
+          "source_type": "OTHER",
+          "source_reference": "https://www.technolife.com/product-355677/ (Technolife retail listing; product title and technical specifications)",
+          "captured_at": "2026-11-16T17:45:00Z",
+          "applies_to": {
+            "market_region": "فهرست خرده‌فروشی آنلاین ایران",
+            "product_variant": "فهرست محصول ۱۰۰ میلی‌لیتری با شماره رنگ ۹/۳",
+            "lot": null,
+            "formula_version": null
+          },
+          "description": "صفحه فروشگاهی بیجورکا ۹/۳ را زیتونی خیلی روشن، با حجم ۱۰۰ میلی‌لیتر و شماره مجوز 1766203352 معرفی می‌کند. شاهد صرفاً داده‌های همان فهرست فروشگاهی است."
         }
       ],
       "expert_review": {
@@ -152,6 +209,19 @@
           "gap_type": "EXPERT_REVIEW_REQUIRED",
           "field": "expert_review",
           "description": "هر ادعای فراتر از هویت کاتالوگی باید پس از دریافت شواهد محصول‌محور توسط متخصص بررسی شود.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION",
+            "PROCESSING_PARAMETERS",
+            "COLOR_OUTCOME_PREDICTION"
+          ]
+        },
+        {
+          "gap_type": "SOURCE_CONFLICT",
+          "field": "retail_listing.technical_attributes/license_number",
+          "description": "فراداده فروشگاهی برای چند شماره رنگ، شماره مجوز یکسان درج می‌کند و در صفحه ۷/۳ بین عنوان زیتونی و مشخصه فنی Gold 24K ناسازگاری وجود دارد؛ شماره مجوز فروشگاهی برای شناسایی یکتای فرمول/نسخه کافی نیست و فیلدهای فنی باید با برچسب بسته یا سند مرجع مستقل تطبیق داده شوند.",
           "blocks": [
             "CHEMICAL_GUIDANCE",
             "SAFETY_ASSESSMENT",
