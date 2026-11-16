@@ -8,7 +8,7 @@ Required columns:
 
 - \`brand\`
 - \`product_name\`
-- \`product_line\` — explicit operator choice: \`SKIN\`, \`HAIR\`, \`BEAUTY\`, \`TOOLS\`, or \`OTHER\`
+- \`product_line\` — must be explicitly supplied as \`SKIN\` for Mission #283. Never infer it from brand, name, category, use case, or AI.
 
 Optional columns:
 
@@ -21,7 +21,7 @@ Optional columns:
 - \`country_of_origin\`
 - \`packaging_version\`
 
-Do not include \`product_id\`, lifecycle, identity, QA, inventory, price, Evidence, or ProductKnowledge fields. The backend generates Product IDs and controls governance state. A batch is limited to 500 rows. All rows are validated before any API request; repeated identities in the same source file are rejected.
+This mission is Skin-only under the governing Issue #283 contract; non-SKIN product_line values are rejected even though the wider HBI Product model supports other lines. Do not include \`product_id\`, lifecycle, identity, QA, inventory, price, Evidence, or ProductKnowledge fields. The backend generates Product IDs and controls governance state. A batch is limited to 500 rows. All rows are validated before any API request; repeated identities in the same source file are rejected.
 
 ## Dry run
 
