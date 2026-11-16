@@ -312,11 +312,19 @@ class ApiClient:
         )
         try:
             response = self.opener(request, timeout=self.timeout)
-            status = getattr(response, "status", None) or response.getcode()
-            raw = response.read()
+            try:
+                status = getattr(response, "status", None) or response.getcode()
+                raw = response.read()
+            finally:
+                close = getattr(response, "close", None)
+                if close:
+                    close()
         except urllib.error.HTTPError as exc:
             status = exc.code
-            raw = exc.read()
+            try:
+                raw = exc.read()
+            finally:
+                exc.close()
         if not 200 <= status < 300:
             try:
                 parsed = json.loads(raw.decode("utf-8"))
