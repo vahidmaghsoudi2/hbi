@@ -134,3 +134,41 @@ def test_first_bijourka_10_3_record_is_identity_only_and_fails_closed():
         claim["claim_scope"] == "IDENTITY"
         for claim in record["claims"]
     )
+
+def test_bijourka_10_3_record_preserves_retail_metadata_conflict_without_reclassifying_shade():
+    records_path = (
+        Path(__file__).resolve().parents[1]
+        / "docs/homepage/encyclopedia/hair-color/catalog/"
+        / "bijourka_product_knowledge.records.json"
+    )
+    payload = json.loads(records_path.read_text(encoding="utf-8"))
+    record = next(
+        item
+        for item in payload["records"]
+        if item["record_id"] == "BIJOURKA-KNOWLEDGE-10-3-MATT"
+    )
+
+    assert record["catalog_identity"]["series"] == "زیتونی"
+    assert record["catalog_identity"]["shade_number"] == "۱۰.۳"
+
+    conflict = next(
+        claim
+        for claim in record["claims"]
+        if claim["claim_id"] == "RETAIL-METADATA-QUALITY-ALERT-1766203352"
+    )
+    assert conflict["claim_type"] == "CONFLICT"
+    assert conflict["evidence_status"] == "CONFLICTING"
+    assert {
+        "BIJOURKA-RETAIL-LISTING-TECHNOLIFE-7-3-100ML",
+        "BIJOURKA-RETAIL-LISTING-TECHNOLIFE-8-3-100ML",
+        "BIJOURKA-RETAIL-LISTING-TECHNOLIFE-9-3-100ML",
+        "BIJOURKA-RETAIL-LISTING-TECHNOLIFE-10-3-100ML",
+    }.issubset(set(conflict["evidence_ids"]))
+
+    assert any(
+        gap["gap_type"] == "SOURCE_CONFLICT"
+        and gap["field"] == "retail_listing.technical_attributes/license_number"
+        and "CHEMICAL_GUIDANCE" in gap["blocks"]
+        for gap in record["evidence_gaps"]
+    )
+
