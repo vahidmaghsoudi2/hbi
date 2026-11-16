@@ -1,8 +1,9 @@
-"""Read-only server-side provider for the PO-approved 88-row hair catalog.
+"""Provider for the PO-approved 88-row Bijourka catalog identity snapshot.
 
-The CSV is a catalog identity artifact only. It is not evidence of chemical
-composition, safety, suitability, or an expected result. Publisher edition
-and source-capture provenance remain unset until independently established.
+The Product Owner approves this repository-registered catalog as the
+authoritative source for Bijourka shade identity and naming. The HBI snapshot
+ID, ingestion ID, capture timestamp and digest provide versioned integrity;
+publisher-issued edition metadata is not an approval prerequisite.
 """
 from __future__ import annotations
 
@@ -56,10 +57,11 @@ def _valid_aware_timestamp(value: object) -> bool:
 
 
 def _read_validated_snapshot_manifest(content_sha256: str) -> dict[str, object] | None:
-    """Load HBI-owned snapshot metadata and bind it to the exact CSV bytes.
+    """Load PO authority and HBI snapshot metadata bound to the exact CSV bytes.
 
-    Publisher edition/revision and publisher capture time remain separate,
-    nullable fields. HBI capture time never fills those publisher fields.
+    Publisher edition/revision fields are optional descriptive metadata.
+    Approval and version integrity come from the PO authority marker and the
+    validated HBI snapshot lineage bound to the exact CSV digest.
     """
     try:
         manifest = json.loads(_snapshot_manifest_path().read_text(encoding="utf-8"))
@@ -73,7 +75,9 @@ def _read_validated_snapshot_manifest(content_sha256: str) -> dict[str, object] 
         return None
     if manifest.get("schema_version") != 1:
         return None
-    if manifest.get("source_url") != REFERENCE_URL:
+    if manifest.get("catalog_authority") != CATALOG_AUTHORITY:
+        return None
+    if manifest.get("catalog_identity_scope") != CATALOG_IDENTITY_SCOPE:
         return None
     if manifest.get("artifact_path") != CATALOG_RELATIVE_PATH.as_posix():
         return None
