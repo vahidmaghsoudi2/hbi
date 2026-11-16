@@ -192,7 +192,7 @@ class BulkProductIntakeTests(unittest.TestCase):
             self.assertEqual(checkpoint.data["rows"]["sku-1"]["state"], "UNKNOWN_OUTCOME")
             resumed = Checkpoint.resume(checkpoint_path, digest, "https://hbi.test", rows)
             no_replay = FakeApi([])
-            with self.assertRaisesRegex(RuntimeError, "require --resume --reconcile"):
+            with self.assertRaisesRegex(RuntimeError, "Blocked rows"):
                 BatchRunner(rows, resumed, no_replay).run()
             self.assertEqual(no_replay.requests, [])
             self.assertEqual(resumed.data["rows"]["sku-1"]["state"], "UNKNOWN_OUTCOME")
@@ -207,7 +207,7 @@ class BulkProductIntakeTests(unittest.TestCase):
             resumed = Checkpoint.resume(checkpoint_path, digest, "https://hbi.test", rows)
             self.assertEqual(resumed.data["rows"]["sku-1"]["state"], "UNKNOWN_OUTCOME")
             api = FakeApi([])
-            with self.assertRaisesRegex(RuntimeError, "require --resume --reconcile"):
+            with self.assertRaisesRegex(RuntimeError, "Blocked rows"):
                 BatchRunner(rows, resumed, api).run()
             self.assertEqual(api.requests, [])
 
@@ -331,7 +331,7 @@ class BulkProductIntakeTests(unittest.TestCase):
 
             resumed = Checkpoint.resume(checkpoint_path, digest, "https://hbi.test", rows)
             blocked_api = FakeApi([])
-            with self.assertRaisesRegex(RuntimeError, "require --resume --reconcile"):
+            with self.assertRaisesRegex(RuntimeError, "Blocked rows"):
                 BatchRunner(rows, resumed, blocked_api).run()
             self.assertEqual(blocked_api.requests, [])
 
