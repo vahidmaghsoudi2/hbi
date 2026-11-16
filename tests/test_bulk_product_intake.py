@@ -12,6 +12,7 @@ from scripts.bulk_product_intake import (
     load_source,
     _product_payload,
     load_decisions,
+    _same_identity,
 )
 
 
@@ -266,6 +267,51 @@ class BulkProductIntakeTests(unittest.TestCase):
             self.write_csv(path, [{**self.make_row(), "size_value": "NaN"}])
             with self.assertRaisesRegex(ValueError, "finite and greater than zero"):
                 load_source(path)
+
+    def test_read_only_reconciliation_records_candidates_without_resolving(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            path, (rows, digest) = self.load_rows(directory, [self.make_row()])
+            checkpoint = self.make_checkpoint(directory, rows, digest)
+            checkpoint.set_row("sku-1", "UNKNOWN_OUTCOME", create_started_at="2026-11-16T00:00:00+00:00")
+            identity = {
+                "product_id": None,
+                "brand": "Brand 1",
+                "product_name": "Product 1",
+                "variant": "Original",
+                "size_value": 50.0,
+                "size_unit": "ml",
+                "barcode_gtin": None,
+                "market_region": None,
+                "packaging_version": None,
+            }
+            audit = {"check_id": "DCA-9", "input_snapshot": identity}
+            product = {**identity, "product_id": "HBI-PROD-9"}
+            api = FakeApi([(200, [audit]), (200, [product])])
+            BatchRunner(rows, checkpoint, api).reconcile()
+            item = checkpoint.data["rows"]["sku-1"]
+            self.assertEqual(item["state"], "UNKNOWN_OUTCOME")
+            self.assertEqual(item["reconciliation"]["duplicate_check_candidate_ids"], ["DCA-9"])
+            self.assertEqual(item["reconciliation"]["product_candidate_ids"], ["HBI-PROD-9"])
+            self.assertTrue(all(request[0] == "GET" for request in api.requests))
+
+    def test_reconciliation_failure_does_not_change_unknown_state(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            path, (rows, digest) = self.load_rows(directory, [self.make_row()])
+            checkpoint = self.make_checkpoint(directory, rows, digest)
+            checkpoint.set_row("sku-1", "UNKNOWN_OUTCOME")
+            api = FakeApi([(503, {"detail": "unavailable"}), (401, {"detail": "unauthorized"})])
+            BatchRunner(rows, checkpoint, api).reconcile()
+            self.assertEqual(checkpoint.data["rows"]["sku-1"]["state"], "UNKNOWN_OUTCOME")
+            self.assertTrue(checkpoint.data["last_reconciliation"]["read_only"])
+            self.assertEqual(len(api.requests), 2)
+            self.assertTrue(all(request[0] == "GET" for request in api.requests))
+
+    def test_identity_reconciliation_ignores_generated_product_id_when_not_supplied(self):
+        left = {"product_id": None, "brand": "Brand", "product_name": "Name", "size_value": 30}
+        right = {"product_id": "HBI-PROD-X", "brand": " brand ", "product_name": "NAME", "size_value": 30.0}
+        self.assertTrue(_same_identity(left, right))
 
 
 if __name__ == "__main__":
