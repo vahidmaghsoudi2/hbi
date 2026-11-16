@@ -465,7 +465,7 @@ class BatchRunner:
             self.checkpoint.set_row(key, "UNKNOWN_OUTCOME", error=f"DuplicateCheck transport outcome unknown: {exc}")
             return
         if status != 200:
-            state = "UNKNOWN_OUTCOME" if status >= 500 else "PREFLIGHT_FAILED"
+            state = "UNKNOWN_OUTCOME" if status >= 500 or 200 <= status < 300 else "PREFLIGHT_FAILED"
             self.checkpoint.set_row(
                 key, state, http_status=status, response=_safe_response_summary(body),
                 last_response={"status": status, "received_at": utc_now(), "body": _safe_response_summary(body)},
@@ -524,7 +524,8 @@ class BatchRunner:
         decision_path = f"/api/v1/products/duplicate-check/audit/{item['duplicate_check_id']}/decision"
         decision_started_at = utc_now()
         self.checkpoint.set_row(
-            key, "DECISION_IN_FLIGHT", pending_decision=payload,
+            key, "DECISION_IN_FLIGHT", pending_decision=payload, decision_error=None,
+            decision_http_status=None,
             last_request={"method": "POST", "path": decision_path, "started_at": decision_started_at},
         )
         try:
@@ -537,7 +538,7 @@ class BatchRunner:
             self.checkpoint.set_row(key, "UNKNOWN_OUTCOME", error=f"Operator decision transport outcome unknown: {exc}")
             return
         if status != 200:
-            state = "UNKNOWN_OUTCOME" if status >= 500 else "POSSIBLE_MATCH_REVIEW"
+            state = "UNKNOWN_OUTCOME" if status >= 500 or 200 <= status < 300 else "POSSIBLE_MATCH_REVIEW"
             self.checkpoint.set_row(key, state, decision_http_status=status, decision_response=_safe_response_summary(body), last_response={"status": status, "received_at": utc_now(), "body": _safe_response_summary(body)})
             return
         if choice == "NEW":
@@ -563,15 +564,20 @@ class BatchRunner:
         except Exception as exc:
             self.checkpoint.set_row(key, "UNKNOWN_OUTCOME", error=f"Product Create transport outcome unknown: {exc}")
             return
-        if status == 201 and body.get("product_id"):
+        if status == 201 and isinstance(body, dict) and body.get("product_id"):
             self.checkpoint.set_row(
                 key, "CREATED", product_id=body["product_id"], product_status=body.get("status"),
                 qa_verdict=body.get("qa_verdict"), identity_status=body.get("identity_status"),
                 http_status=status,
                 last_response={"status": status, "received_at": utc_now(), "body": _safe_response_summary(body)},
             )
-        elif status >= 500:
-            self.checkpoint.set_row(key, "UNKNOWN_OUTCOME", http_status=status, response=_safe_response_summary(body), last_response={"status": status, "received_at": utc_now(), "body": _safe_response_summary(body)})
+        elif status >= 500 or 200 <= status < 300:
+            self.checkpoint.set_row(
+                key, "UNKNOWN_OUTCOME", http_status=status,
+                error="Unexpected success response or server error; Product may have been committed",
+                response=_safe_response_summary(body),
+                last_response={"status": status, "received_at": utc_now(), "body": _safe_response_summary(body)},
+            )
         else:
             self.checkpoint.set_row(key, "CREATE_REJECTED", http_status=status, response=_safe_response_summary(body), last_response={"status": status, "received_at": utc_now(), "body": _safe_response_summary(body)})
 
