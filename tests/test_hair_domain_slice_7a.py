@@ -44,12 +44,16 @@ def identity(**changes):
 
 def reference(**changes):
     values = dict(
-        source_kind="RAEAKA_BIJOURKA_CATALOG",
+        source_kind="PO_APPROVED_BIJOURKA_CATALOG",
         approval_status="PO_APPROVED",
-        url=URL,
-        edition_label="synthetic-test-edition-1",
-        captured_at=CAPTURE,
+        url="hbi://po-approved/bijourka-catalog",
+        edition_label=None,
+        captured_at=None,
         content_sha256=SHA,
+        snapshot_id="synthetic-bijourka-snapshot-001",
+        snapshot_captured_at=CAPTURE,
+        ingestion_id="synthetic-bijourka-ingestion-001",
+        snapshot_validation_status="VALIDATED_ON_LOAD",
     )
     values.update(changes)
     return CatalogReference(**values)
@@ -142,15 +146,15 @@ class TestCatalogLookup(unittest.TestCase):
         self.assertEqual(result.outcome, "MISMATCH")
         self.assertIn("shade_name", result.mismatched_fields)
 
-    def test_unknown_edition_is_inconclusive(self):
+    def test_publisher_edition_label_is_not_required_for_po_approved_catalog(self):
         result = lookup(ref=reference(edition_label="نامشخص"))
-        self.assertEqual(result.outcome, "INCONCLUSIVE")
-        self.assertEqual(result.stop_class, "KNOWLEDGE_GAP")
+        self.assertEqual(result.outcome, "MATCH")
+        self.assertTrue(result.traceability_complete)
 
     def test_unversioned_conflict_is_not_definitive_mismatch(self):
         result = lookup(
             observed=identity(shade_number="2"),
-            ref=reference(edition_label=None),
+            ref=reference(snapshot_id=None),
         )
         self.assertEqual(result.outcome, "INCONCLUSIVE")
         self.assertIn("shade_number", result.mismatched_fields)
@@ -201,24 +205,18 @@ class TestCatalogLookup(unittest.TestCase):
         self.assertEqual(result.outcome, "STOP")
         self.assertEqual(result.stop_class, "OUT_OF_DOMAIN")
 
-    def test_unapproved_url_stops(self):
+    def test_po_approval_does_not_depend_on_external_publisher_host(self):
         result = lookup(ref=reference(url="https://example.com/catalog"))
-        self.assertEqual(result.outcome, "STOP")
-        self.assertEqual(result.stop_class, "KNOWLEDGE_GAP")
+        self.assertEqual(result.outcome, "MATCH")
+        self.assertTrue(result.traceability_complete)
 
-    def test_unapproved_host_stops(self):
+    def test_query_parameters_on_reference_pointer_do_not_revoke_po_approval(self):
+        result = lookup(ref=reference(url=URL + "?archive=1"))
+        self.assertEqual(result.outcome, "MATCH")
+
+    def test_timezone_missing_hbi_snapshot_capture_is_inconclusive(self):
         result = lookup(
-            ref=reference(url="https://raeaka.com.evil.example/catalog")
-        )
-        self.assertEqual(result.outcome, "STOP")
-
-    def test_query_string_url_stops(self):
-        result = lookup(ref=reference(url=URL + "?x=1"))
-        self.assertEqual(result.outcome, "STOP")
-
-    def test_timezone_missing_capture_is_inconclusive(self):
-        result = lookup(
-            ref=reference(captured_at="2026-11-09T14:00:00")
+            ref=reference(snapshot_captured_at="2026-11-09T14:00:00")
         )
         self.assertEqual(result.outcome, "INCONCLUSIVE")
         self.assertFalse(result.traceability_complete)
@@ -236,11 +234,11 @@ class TestOutputAndInvalidation(unittest.TestCase):
     def test_output_preserves_lineage_and_no_inherited_approval(self):
         output = output_for()
         self.assertEqual(output.inherited_approval_state, "NONE")
-        self.assertEqual(output.version_label, "synthetic-test-edition-1")
+        self.assertEqual(output.version_label, "synthetic-bijourka-snapshot-001")
         self.assertEqual(output.outcome, "MATCH")
 
-    def test_unversioned_inconclusive_output_can_be_built_but_withheld(self):
-        ref = reference(edition_label="unknown")
+    def test_missing_snapshot_lineage_output_can_be_built_but_withheld(self):
+        ref = reference(snapshot_id=None)
         result = lookup(ref=ref)
 
         self.assertEqual(result.outcome, "INCONCLUSIVE")
@@ -311,7 +309,7 @@ class TestDisplayAndEvents(unittest.TestCase):
         self.assertIn("ایمنی", decision.public_message_fa)
 
     def test_inconclusive_output_is_withheld(self):
-        ref = reference(edition_label=None)
+        ref = reference(snapshot_id=None)
         output = output_for(ref=ref, result=lookup(ref=ref))
         decision = decide_catalog_output_presentation(output)
         self.assertFalse(decision.display_allowed)
