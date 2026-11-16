@@ -12,5 +12,7 @@
   "publisher_captured_at": null,
   "expected_row_count": 88,
   "expected_column_count": 6,
-  "validation_policy": "REVALIDATE_ON_EVERY_LOAD"
+  "validation_policy": "REVALIDATE_ON_EVERY_LOAD",
+  "catalog_authority": "PRODUCT_OWNER_APPROVED",
+  "catalog_identity_scope": "BIJOURKA_SHADE_IDENTITY_ONLY"
 }
