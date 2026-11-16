@@ -79,7 +79,7 @@ class BulkProductIntakeTests(unittest.TestCase):
     def test_rejects_unknown_columns_and_invalid_product_line(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "products.csv"
-            self.write_csv(path, [{"brand": "A", "product_name": "B", "product_line": "SKIN", "status": "ACTIVE"}])
+            self.write_csv(path, [{"brand": "A", "product_name": "B", "product_line": "SKIN", "status": "ACTIVE"}], headers=["brand", "product_name", "product_line", "status"])
             with self.assertRaisesRegex(ValueError, "Unsupported CSV columns"):
                 load_source(path)
             self.write_csv(path, [{"brand": "A", "product_name": "B", "product_line": "INFERRED"}],
