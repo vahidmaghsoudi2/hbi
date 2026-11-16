@@ -251,8 +251,9 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
 class CheckpointLock:
     """Cross-platform exclusive lock; the OS releases it if the process exits."""
 
-    def __init__(self, checkpoint_path: Path):
-        self.path = checkpoint_path.with_suffix(checkpoint_path.suffix + ".lock")
+    def __init__(self, checkpoint_path: Path, base_url: str):
+        target_hash = hashlib.sha256(base_url.rstrip("/").casefold().encode("utf-8")).hexdigest()[:16]
+        self.path = Path(tempfile.gettempdir()) / f"hbi-bulk-product-intake-{target_hash}.lock"
         self.handle = None
 
     def __enter__(self):
@@ -632,7 +633,7 @@ def main(argv: list[str] | None = None) -> int:
         token = os.getenv("HBI_ACCESS_TOKEN", "").strip()
         if not token:
             raise ValueError("Set HBI_ACCESS_TOKEN in the process environment; it is never stored in the checkpoint")
-        with CheckpointLock(args.checkpoint):
+        with CheckpointLock(args.checkpoint, base_url):
             if args.resume:
                 checkpoint = Checkpoint.resume(args.checkpoint, input_hash, base_url, rows)
             else:
