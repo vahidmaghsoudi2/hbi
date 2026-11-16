@@ -341,7 +341,7 @@ A,B,SKIN,EXTRA
         right = {"product_id": "HBI-PROD-X", "brand": " brand ", "product_name": "NAME", "size_value": 30.0}
         self.assertTrue(_same_identity(left, right))
 
-    def test_uncertain_row_stops_batch_until_read_only_reconciliation(self):
+    def test_uncertain_row_remains_blocked_after_read_only_reconciliation(self):
         with tempfile.TemporaryDirectory() as tmp:
             directory = Path(tmp)
             path, (rows, digest) = self.load_rows(directory, [self.make_row(1), self.make_row(2)])
@@ -364,14 +364,14 @@ A,B,SKIN,EXTRA
             self.assertTrue(resumed.data["rows"]["sku-1"]["reconciliation"]["read_only"])
             self.assertEqual(resumed.data["rows"]["sku-1"]["state"], "UNKNOWN_OUTCOME")
 
-            continue_api = FakeApi([
-                (200, {"check_id": "DCA-10", "result": "NEW", "candidates": []}),
-                (201, {"product_id": "HBI-PROD-10", "status": "DRAFT", "qa_verdict": "PENDING", "identity_status": "NEEDS_REVIEW"}),
-            ])
-            BatchRunner(rows, resumed, continue_api).run()
+            # Reconciliation only records candidates; it is not proof of
+            # absence and must never unlock later writes automatically.
+            continue_api = FakeApi([])
+            with self.assertRaisesRegex(RuntimeError, "Blocked rows"):
+                BatchRunner(rows, resumed, continue_api).run()
             self.assertEqual(resumed.data["rows"]["sku-1"]["state"], "UNKNOWN_OUTCOME")
-            self.assertEqual(resumed.data["rows"]["sku-2"]["state"], "CREATED")
-            self.assertEqual(len(continue_api.requests), 2)
+            self.assertEqual(resumed.data["rows"]["sku-2"]["state"], "READY")
+            self.assertEqual(continue_api.requests, [])
 
     def test_api_client_uses_bearer_header_and_redirects_are_rejected(self):
         captured = {}
