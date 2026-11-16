@@ -375,9 +375,10 @@ class BulkProductIntakeTests(unittest.TestCase):
     def test_checkpoint_lock_rejects_concurrent_runner(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "checkpoint.json"
-            with CheckpointLock(path):
+            other_checkpoint = Path(tmp) / "other-checkpoint.json"
+            with CheckpointLock(path, "https://hbi.test"):
                 with self.assertRaisesRegex(RuntimeError, "Another batch process"):
-                    with CheckpointLock(path):
+                    with CheckpointLock(other_checkpoint, "https://hbi.test"):
                         pass
 
     def test_auth_failure_stops_batch_and_blocks_resume(self):
