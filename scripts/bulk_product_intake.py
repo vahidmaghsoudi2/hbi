@@ -382,7 +382,7 @@ class BatchRunner:
         ]
         if blocked:
             raise RuntimeError(
-                "Blocked rows require read-only reconciliation or operator correction before the batch can continue: "
+                "Blocked rows require independent operator disposition; read-only reconciliation is diagnostic only and never unblocks this checkpoint: "
                 + ", ".join(blocked)
             )
         for row in self.rows:
