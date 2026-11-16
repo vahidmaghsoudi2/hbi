@@ -329,6 +329,16 @@ class ApiClient:
             return status, {"_unparsed_response": raw.decode("utf-8", errors="replace")[:2000]}
 
 
+def _is_batch_blocking(item: dict[str, Any]) -> bool:
+    if item.get("state") == "UNKNOWN_OUTCOME" and not item.get("reconciliation"):
+        return True
+    for key in ("http_status", "decision_http_status"):
+        status = item.get(key)
+        if status in {401, 403, 429} or (isinstance(status, int) and 300 <= status < 400):
+            return True
+    return False
+
+
 class BatchRunner:
     def __init__(self, rows: list[dict[str, Any]], checkpoint: Checkpoint, api: ApiClient,
                  decisions: dict[str, dict[str, Any]] | None = None):
@@ -338,14 +348,14 @@ class BatchRunner:
         self.decisions = decisions or {}
 
     def run(self):
-        unreconciled = [
+        blocked = [
             key for key, item in self.checkpoint.data["rows"].items()
-            if item.get("state") == "UNKNOWN_OUTCOME" and not item.get("reconciliation")
+            if _is_batch_blocking(item)
         ]
-        if unreconciled:
+        if blocked:
             raise RuntimeError(
-                "UNKNOWN_OUTCOME rows require --resume --reconcile before the batch can continue: "
-                + ", ".join(unreconciled)
+                "Blocked rows require read-only reconciliation or operator correction before the batch can continue: "
+                + ", ".join(blocked)
             )
         for row in self.rows:
             key = row["source_key"]
@@ -359,9 +369,9 @@ class BatchRunner:
                 self._create(row, item)
             elif state == "READY":
                 self._duplicate_check(row)
-            if self.checkpoint.data["rows"][key].get("state") == "UNKNOWN_OUTCOME":
-                # Stop at the first uncertain request so its fresh audit stays
-                # inside the API's 500-row audit window for read-only reconciliation.
+            if _is_batch_blocking(self.checkpoint.data["rows"][key]):
+                # Stop on uncertainty, auth failure, rate limit, or redirect.
+                # This keeps an uncertain audit near the top of the 500-row list.
                 break
 
     def reconcile(self):
@@ -561,10 +571,15 @@ def load_decisions(path: Path | None) -> dict[str, dict[str, Any]]:
         unknown = set(decision) - allowed_fields
         if unknown:
             raise ValueError(f"Decision for {source_key!r} has unsupported fields: {sorted(unknown)}")
-        if str(decision.get("decision", "")).strip().upper() not in {"NEW", "EXISTING", "RENAME"}:
+        choice = str(decision.get("decision", "")).strip().upper()
+        if choice not in {"NEW", "EXISTING", "RENAME"}:
             raise ValueError(f"Decision for {source_key!r} must be NEW, EXISTING, or RENAME")
         if not str(decision.get("reason") or "").strip():
             raise ValueError(f"Decision for {source_key!r} requires an explicit reason")
+        if choice == "EXISTING" and not str(decision.get("selected_product_id") or "").strip():
+            raise ValueError(f"EXISTING decision for {source_key!r} requires selected_product_id")
+        if choice == "RENAME" and not str(decision.get("final_product_name") or "").strip():
+            raise ValueError(f"RENAME decision for {source_key!r} requires final_product_name")
     return data
 
 
@@ -611,6 +626,9 @@ def main(argv: list[str] | None = None) -> int:
                     raise ValueError("--reconcile requires an existing checkpoint")
                 checkpoint = Checkpoint.create(args.checkpoint, rows, input_hash, base_url)
             decisions = load_decisions(args.decision_file)
+            unknown_decision_keys = set(decisions) - {row["source_key"] for row in rows}
+            if unknown_decision_keys:
+                raise ValueError(f"Decision file contains unknown source_key values: {sorted(unknown_decision_keys)}")
             runner = BatchRunner(rows, checkpoint, ApiClient(base_url, token), decisions)
             if args.reconcile:
                 runner.reconcile()
