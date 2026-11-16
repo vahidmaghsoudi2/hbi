@@ -31,7 +31,7 @@ From the repository root:
 python scripts/bulk_product_intake.py --input .\\products.csv --base-url http://127.0.0.1:8000
 \`\`\`
 
-Dry-run is the default. It validates the entire file and prints its SHA-256. It does not read a token, write a checkpoint, or call the API.
+Dry-run is the default. It validates the entire file and prints a deterministic row plan (source key, brand, product name, product line) plus the source SHA-256. It does not read a token, write a checkpoint, or call the API.
 
 ## Apply
 
