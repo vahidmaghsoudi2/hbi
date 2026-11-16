@@ -1,7 +1,10 @@
 import csv
 import json
 import tempfile
+import contextlib
+import io
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 from scripts.bulk_product_intake import (
@@ -15,6 +18,7 @@ from scripts.bulk_product_intake import (
     _NoRedirect,
     CheckpointLock,
     validate_decision_keys,
+    main,
 )
 
 
@@ -420,6 +424,34 @@ class BulkProductIntakeTests(unittest.TestCase):
             decisions = load_decisions(decisions_path)
             with self.assertRaisesRegex(ValueError, "unknown source_key"):
                 validate_decision_keys(decisions, rows)
+
+    def test_dry_run_prints_plan_without_checkpoint_or_token(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            path = directory / "products.csv"
+            self.write_csv(path, [self.make_row()])
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                result = main(["--input", str(path), "--base-url", "http://127.0.0.1:8000",
+                               "--checkpoint", str(directory / "checkpoint.json")])
+            self.assertEqual(result, 0)
+            self.assertIn('"validated_rows": 1', output.getvalue())
+            self.assertIn('"source_key": "sku-1"', output.getvalue())
+            self.assertFalse((directory / "checkpoint.json").exists())
+
+    def test_checkpoint_save_preserves_previous_file_if_atomic_replace_fails(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            path, (rows, digest) = self.load_rows(directory, [self.make_row()])
+            checkpoint_path = directory / "checkpoint.json"
+            checkpoint = Checkpoint.create(checkpoint_path, rows, digest, "https://hbi.test")
+            original = checkpoint_path.read_text(encoding="utf-8")
+            checkpoint.data["test_marker"] = "new"
+            with patch("scripts.bulk_product_intake.os.replace", side_effect=OSError("simulated replace failure")):
+                with self.assertRaisesRegex(OSError, "simulated replace failure"):
+                    checkpoint.save()
+            self.assertEqual(checkpoint_path.read_text(encoding="utf-8"), original)
+            self.assertEqual(list(directory.glob(".checkpoint.json.*.tmp")), [])
 
 
 if __name__ == "__main__":
