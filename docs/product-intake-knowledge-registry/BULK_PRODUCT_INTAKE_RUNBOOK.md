@@ -95,7 +95,7 @@ finally {
 }
 ```
 
-Inspect the checkpoint's `reconciliation` candidates against the audit and Product Master. Ambiguous or missing evidence remains unresolved. Once the uncertain row has been reviewed, `--apply --resume` can continue with other READY rows, but it will never resend the UNKNOWN row. If an operator separately confirms that no Product was created, a new checkpoint may be started only after that disposition is documented and the source is revalidated.
+Inspect the checkpoint's `reconciliation` candidates against the audit and Product Master. This scan is diagnostic only: even an empty candidate list does not prove that the request did not commit, and reconciliation never unlocks the batch. `UNKNOWN_OUTCOME` remains a hard stop after every reconciliation attempt. Do not edit the checkpoint or change the row state to force progress. If an authorized operator independently establishes the outcome and decides to continue, create a new source CSV containing only rows that have not already been conclusively processed (plus any explicitly cleared uncertain row), document the disposition outside the runner, revalidate the reduced file, and start a new checkpoint. Never include rows already marked `CREATED`, `EXISTING`, or `HUMAN_RESOLVED_SKIP` in that new batch.
 
 ## Possible matches and operator decisions
 
@@ -114,7 +114,7 @@ Save it as a local JSON file and resume with \`--decision-file .\\decisions.json
 
 ## Interrupted or uncertain requests
 
-Any process interruption while a request is in flight, transport failure, or server error that may have occurred after commit is marked \`UNKNOWN_OUTCOME\`. Resume never resends that row. Reconcile it read-only against the duplicate-check audit and Product Master before making a separate operator decision. Do not delete or edit the checkpoint to force a retry. If the outcome remains ambiguous, leave it blocked.
+Any process interruption while a request is in flight, transport failure, or server error that may have occurred after commit is marked \`UNKNOWN_OUTCOME\`. Resume never resends that row. Reconcile it read-only against the duplicate-check audit and Product Master for investigation only. The runner remains blocked regardless of the candidate results. Do not delete or edit the checkpoint to force a retry, and do not assume that an empty result proves non-creation. Resolve the outcome through an authorized independent review before preparing a reduced follow-on batch; if it remains ambiguous, leave it blocked.
 
 ## State meanings
 
