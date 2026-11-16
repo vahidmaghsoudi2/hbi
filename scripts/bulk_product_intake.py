@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
+import io
 import json
 import os
 import sys
@@ -56,9 +57,10 @@ def _identity_payload(row: dict[str, Any]) -> dict[str, Any]:
 
 
 def _product_payload(row: dict[str, Any], duplicate_check_id: str | None = None) -> dict[str, Any]:
+    allowed = REQUIRED_COLUMNS | (OPTIONAL_COLUMNS - {"source_key"})
     payload = {
         key: value for key, value in row.items()
-        if key not in {"source_key"} and value not in (None, "")
+        if key in allowed and value not in (None, "")
     }
     if duplicate_check_id:
         payload["duplicate_check_id"] = duplicate_check_id
@@ -71,7 +73,7 @@ def load_source(path: Path) -> tuple[list[dict[str, Any]], str]:
     raw = path.read_bytes()
     digest = hashlib.sha256(raw).hexdigest()
     text = raw.decode("utf-8-sig")
-    reader = csv.DictReader(text.splitlines())
+    reader = csv.DictReader(io.StringIO(text, newline=""))
     if not reader.fieldnames:
         raise ValueError("CSV must contain a header row")
     headers = {str(h or "").strip() for h in reader.fieldnames}
@@ -253,7 +255,7 @@ class ApiClient:
         )
         try:
             response = self.opener(request, timeout=self.timeout)
-            status = getattr(response, "status", response.getcode())
+            status = getattr(response, "status", None) or response.getcode()
             raw = response.read()
         except urllib.error.HTTPError as exc:
             status = exc.code
@@ -288,7 +290,7 @@ class BatchRunner:
             if state == "POSSIBLE_MATCH_REVIEW":
                 self._apply_decision(row, item)
                 continue
-            if state == "DECISION_RECORDED":
+            if state in {"DECISION_RECORDED", "DUPLICATE_CHECKED_NEW"}:
                 self._create(row, item)
                 continue
             if state != "READY":
