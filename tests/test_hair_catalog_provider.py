@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import csv
 import hashlib
+from io import StringIO
 
+from app.domain.hair_catalog_identity_lookup import CatalogIdentity
 from app.domain.hair_catalog_provider import (
     EXPECTED_DATA_ROWS,
     _catalog_path,
+    approved_catalog_contains_identity,
     load_approved_hair_catalog_reference,
 )
 
@@ -38,3 +42,27 @@ def test_approved_catalog_provider_does_not_invent_version_metadata():
     _, metadata = reference
     assert metadata.edition_label is None
     assert metadata.captured_at is None
+
+
+
+def test_all_88_bijourka_catalog_rows_resolve_by_exact_identity():
+    raw = _catalog_path().read_bytes()
+    digest = hashlib.sha256(raw).hexdigest()
+    rows = list(csv.DictReader(StringIO(raw.decode("utf-8-sig"), newline="")))
+
+    assert len(rows) == EXPECTED_DATA_ROWS == 88
+    for row in rows:
+        identity = CatalogIdentity(
+            brand=row["برند"],
+            series=row["سری محصول"],
+            shade_number=row["شماره رنگ"],
+            shade_name=row["نام رنگ"],
+        )
+        assert approved_catalog_contains_identity(
+            identity,
+            expected_content_sha256=digest,
+        ), (
+            row["سری محصول"],
+            row["شماره رنگ"],
+            row["نام رنگ"],
+        )
