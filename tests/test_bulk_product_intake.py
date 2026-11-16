@@ -128,6 +128,45 @@ class BulkProductIntakeTests(unittest.TestCase):
             self.assertEqual(item["last_request"]["path"], "/api/v1/products/")
             self.assertEqual(item["last_response"]["status"], 201)
 
+    def test_http_408_product_create_is_unknown_and_stops_batch(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            path, (rows, digest) = self.load_rows(directory, [self.make_row(1), self.make_row(2)])
+            checkpoint = self.make_checkpoint(directory, rows, digest)
+            api = FakeApi([
+                (200, {"check_id": "DCA-408", "result": "NEW", "candidates": []}),
+                (408, {"detail": "request timeout"}),
+            ])
+            BatchRunner(rows, checkpoint, api).run()
+            self.assertEqual(checkpoint.data["rows"]["sku-1"]["state"], "UNKNOWN_OUTCOME")
+            self.assertEqual(checkpoint.data["rows"]["sku-2"]["state"], "READY")
+            self.assertEqual(len(api.requests), 2)
+
+    def test_http_425_operator_decision_is_unknown(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            path, (rows, digest) = self.load_rows(directory, [self.make_row()])
+            checkpoint = self.make_checkpoint(directory, rows, digest)
+            api = FakeApi([
+                (200, {"check_id": "DCA-425", "result": "POSSIBLE_MATCH", "candidates": [{"product_id": "P1"}]}),
+                (425, {"detail": "too early"}),
+            ])
+            decisions = {"sku-1": {"decision": "NEW", "reason": "Operator reviewed identity"}}
+            BatchRunner(rows, checkpoint, api, decisions).run()
+            self.assertEqual(checkpoint.data["rows"]["sku-1"]["state"], "UNKNOWN_OUTCOME")
+            self.assertEqual(len(api.requests), 2)
+
+    def test_http_408_duplicate_check_is_unknown_and_stops_batch(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            path, (rows, digest) = self.load_rows(directory, [self.make_row(1), self.make_row(2)])
+            checkpoint = self.make_checkpoint(directory, rows, digest)
+            api = FakeApi([(408, {"detail": "request timeout"})])
+            BatchRunner(rows, checkpoint, api).run()
+            self.assertEqual(checkpoint.data["rows"]["sku-1"]["state"], "UNKNOWN_OUTCOME")
+            self.assertEqual(checkpoint.data["rows"]["sku-2"]["state"], "READY")
+            self.assertEqual(len(api.requests), 1)
+
     def test_unexpected_success_response_without_product_id_is_unknown(self):
         with tempfile.TemporaryDirectory() as tmp:
             directory = Path(tmp)
