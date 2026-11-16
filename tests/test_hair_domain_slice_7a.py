@@ -156,8 +156,8 @@ class TestCatalogLookup(unittest.TestCase):
             observed=identity(shade_number="2"),
             ref=reference(snapshot_id=None),
         )
-        self.assertEqual(result.outcome, "INCONCLUSIVE")
-        self.assertIn("shade_number", result.mismatched_fields)
+        self.assertEqual(result.outcome, "STOP")
+        self.assertEqual(result.stop_class, "KNOWLEDGE_GAP")
 
     def test_missing_required_field_stops(self):
         result = lookup(expected=identity(shade_number=" "))
@@ -218,12 +218,14 @@ class TestCatalogLookup(unittest.TestCase):
         result = lookup(
             ref=reference(snapshot_captured_at="2026-11-09T14:00:00")
         )
-        self.assertEqual(result.outcome, "INCONCLUSIVE")
+        self.assertEqual(result.outcome, "STOP")
+        self.assertEqual(result.stop_class, "KNOWLEDGE_GAP")
         self.assertFalse(result.traceability_complete)
 
-    def test_malformed_hash_is_inconclusive(self):
+    def test_malformed_hash_stops(self):
         result = lookup(ref=reference(content_sha256="not-a-hash"))
-        self.assertEqual(result.outcome, "INCONCLUSIVE")
+        self.assertEqual(result.outcome, "STOP")
+        self.assertEqual(result.stop_class, "KNOWLEDGE_GAP")
 
     def test_album_reference_is_accepted(self):
         result = lookup(ref=reference(url=ALBUM_URL))
@@ -241,7 +243,7 @@ class TestOutputAndInvalidation(unittest.TestCase):
         ref = reference(snapshot_id=None)
         result = lookup(ref=ref)
 
-        self.assertEqual(result.outcome, "INCONCLUSIVE")
+        self.assertEqual(result.outcome, "STOP")
 
         output = output_for(result=result, ref=ref)
         self.assertEqual(output.outcome, "INCONCLUSIVE")
