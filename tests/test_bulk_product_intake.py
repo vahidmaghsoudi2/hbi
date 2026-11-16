@@ -278,10 +278,10 @@ class BulkProductIntakeTests(unittest.TestCase):
     def test_duplicate_headers_and_extra_csv_values_are_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "products.csv"
-            path.write_text("brand,product_name,product_line,brand\\nA,B,SKIN,A\\n", encoding="utf-8")
+            path.write_text("brand,product_name,product_line,brand\nA,B,SKIN,A\n", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "duplicate column names"):
                 load_source(path)
-            path.write_text("brand,product_name,product_line\\nA,B,SKIN,EXTRA\\n", encoding="utf-8")
+            path.write_text("brand,product_name,product_line\nA,B,SKIN,EXTRA\n", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "more values than declared columns"):
                 load_source(path)
 
