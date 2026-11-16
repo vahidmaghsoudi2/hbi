@@ -121,6 +121,22 @@ class BulkProductIntakeTests(unittest.TestCase):
             self.assertEqual(api.requests[1][2]["duplicate_check_id"], "DCA-1")
             self.assertNotIn("source_key", api.requests[1][2])
             self.assertNotIn("_row_hash", api.requests[1][2])
+            self.assertEqual(item["last_request"]["path"], "/api/v1/products/")
+            self.assertEqual(item["last_response"]["status"], 201)
+
+    def test_unexpected_success_response_without_product_id_is_unknown(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            path, (rows, digest) = self.load_rows(directory, [self.make_row()])
+            checkpoint = self.make_checkpoint(directory, rows, digest)
+            api = FakeApi([
+                (200, {"check_id": "DCA-11", "result": "NEW", "candidates": []}),
+                (201, {"status": "DRAFT"}),
+            ])
+            BatchRunner(rows, checkpoint, api).run()
+            item = checkpoint.data["rows"]["sku-1"]
+            self.assertEqual(item["state"], "UNKNOWN_OUTCOME")
+            self.assertIn("may have been committed", item["error"])
 
     def test_existing_match_never_creates(self):
         with tempfile.TemporaryDirectory() as tmp:
