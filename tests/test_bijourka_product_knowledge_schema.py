@@ -100,3 +100,37 @@ def test_schema_has_explicit_fail_closed_gap_categories_for_decision_use():
         "PROCESSING_PARAMETERS",
         "COLOR_OUTCOME_PREDICTION",
     }.issubset(blocked_uses)
+
+
+def test_first_bijourka_10_3_record_is_identity_only_and_fails_closed():
+    records_path = (
+        Path(__file__).resolve().parents[1]
+        / "docs/homepage/encyclopedia/hair-color/catalog/"
+        / "bijourka_product_knowledge.records.json"
+    )
+    payload = json.loads(records_path.read_text(encoding="utf-8"))
+    assert payload["schema_version"] == "hbi.bijourka-product-knowledge.v1"
+    assert payload["catalog_reference"]["authority"] == "PRODUCT_OWNER_APPROVED"
+    assert len(payload["records"]) == 1
+
+    record = payload["records"][0]
+    assert record["catalog_identity"] == {
+        "brand": "بیجورکا",
+        "series": "زیتونی",
+        "shade_number": "۱۰.۳",
+        "shade_name": "بلوند زیتونی پلاتینه",
+    }
+    assert record["formulation"]["status"] == "UNKNOWN"
+    assert record["formulation"]["ingredient_list"] == []
+    assert record["expert_review"]["status"] == "NOT_REVIEWED"
+    assert record["record_status"] == "DRAFT"
+    assert any(
+        gap["gap_type"] == "KNOWLEDGE_GAP"
+        and "formulation.ingredient_list" in gap["field"]
+        and "CHEMICAL_GUIDANCE" in gap["blocks"]
+        for gap in record["evidence_gaps"]
+    )
+    assert all(
+        claim["claim_scope"] == "IDENTITY"
+        for claim in record["claims"]
+    )
