@@ -75,6 +75,28 @@ finally {
 
 The checkpoint is written atomically after each row-state transition. An exclusive OS-level lock prevents two runner processes from using the same checkpoint concurrently; the operating system releases the lock when the process exits. It is bound to the source file SHA-256, row keys/hashes, and exact target URL. Changing any of these blocks resume.
 
+## Read-only reconciliation
+
+If a request becomes `UNKNOWN_OUTCOME`, the runner stops at that row and blocks further batch progress until reconciliation. This keeps the uncertain request's audit near the top of the bounded audit list.
+
+Use the same CSV, target and checkpoint. Reconciliation uses only GET requests and records possible audit/Product matches; it never changes the row out of `UNKNOWN_OUTCOME`, never retries a POST, and never declares that a candidate was created by this batch:
+
+```powershell
+$secure = Read-Host "HBI bearer access token" -AsSecureString
+$ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
+try {
+    $env:HBI_ACCESS_TOKEN = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr)
+    python scripts/bulk_product_intake.py --input .\products.csv --base-url http://127.0.0.1:8000 --resume --reconcile --checkpoint .\bulk-intake.checkpoint.json
+}
+finally {
+    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr)
+    Remove-Item Env:HBI_ACCESS_TOKEN -ErrorAction SilentlyContinue
+    $secure.Dispose()
+}
+```
+
+Inspect the checkpoint's `reconciliation` candidates against the audit and Product Master. Ambiguous or missing evidence remains unresolved. Once the uncertain row has been reviewed, `--apply --resume` can continue with other READY rows, but it will never resend the UNKNOWN row. If an operator separately confirms that no Product was created, a new checkpoint may be started only after that disposition is documented and the source is revalidated.
+
 ## Possible matches and operator decisions
 
 Rows classified \`POSSIBLE_MATCH_REVIEW\` are not created. Review the stored candidate Product IDs and duplicate-check audit ID. Only after an operator has explicitly decided that the incoming identity is a distinct new Product may a decision file be supplied:
