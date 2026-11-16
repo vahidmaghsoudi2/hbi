@@ -214,7 +214,7 @@ class TestCatalogLookup(unittest.TestCase):
         result = lookup(ref=reference(url=URL + "?archive=1"))
         self.assertEqual(result.outcome, "MATCH")
 
-    def test_timezone_missing_hbi_snapshot_capture_is_inconclusive(self):
+    def test_timezone_missing_hbi_snapshot_capture_stops(self):
         result = lookup(
             ref=reference(snapshot_captured_at="2026-11-09T14:00:00")
         )
@@ -246,7 +246,7 @@ class TestOutputAndInvalidation(unittest.TestCase):
         self.assertEqual(result.outcome, "STOP")
 
         output = output_for(result=result, ref=ref)
-        self.assertEqual(output.outcome, "INCONCLUSIVE")
+        self.assertEqual(output.outcome, "STOP")
 
         decision = decide_catalog_output_presentation(output)
         self.assertFalse(decision.display_allowed)
