@@ -10,6 +10,7 @@ import argparse
 import csv
 import hashlib
 import io
+import math
 import json
 import os
 import sys
@@ -77,7 +78,11 @@ def load_source(path: Path) -> tuple[list[dict[str, Any]], str]:
     reader = csv.DictReader(io.StringIO(text, newline=""))
     if not reader.fieldnames:
         raise ValueError("CSV must contain a header row")
-    headers = {str(h or "").strip() for h in reader.fieldnames}
+    normalized_headers = [str(h or "").strip() for h in reader.fieldnames]
+    if len(normalized_headers) != len(set(normalized_headers)):
+        raise ValueError("CSV contains duplicate column names")
+    reader.fieldnames = normalized_headers
+    headers = set(normalized_headers)
     missing = REQUIRED_COLUMNS - headers
     unknown = headers - REQUIRED_COLUMNS - OPTIONAL_COLUMNS
     if missing:
@@ -89,6 +94,8 @@ def load_source(path: Path) -> tuple[list[dict[str, Any]], str]:
     seen_keys: set[str] = set()
     seen_identities: dict[str, int] = {}
     for line_number, raw_row in enumerate(reader, start=2):
+        if None in raw_row and any(str(v or "").strip() for v in (raw_row[None] or [])):
+            raise ValueError(f"CSV line {line_number}: more values than declared columns")
         if not any(str(v or "").strip() for v in raw_row.values()):
             continue
         row: dict[str, Any] = {}
@@ -112,8 +119,8 @@ def load_source(path: Path) -> tuple[list[dict[str, Any]], str]:
                 size_value = float(row["size_value"])
             except (TypeError, ValueError):
                 raise ValueError(f"CSV line {line_number}: size_value must be numeric")
-            if size_value <= 0:
-                raise ValueError(f"CSV line {line_number}: size_value must be greater than zero")
+            if not math.isfinite(size_value) or size_value <= 0:
+                raise ValueError(f"CSV line {line_number}: size_value must be finite and greater than zero")
             row["size_value"] = size_value
 
         source_key = row.get("source_key") or f"row-{line_number}"
@@ -363,16 +370,23 @@ class BatchRunner:
             return
         result = str(body.get("result", "")).upper()
         check_id = body.get("check_id")
+        response_summary = {
+            "result": result,
+            "reason": body.get("reason"),
+            "candidates": body.get("candidates", []),
+            "naming_reference_count": len(body.get("naming_reference") or []),
+            "operator_decision_required": body.get("operator_decision_required"),
+        }
         if not check_id or result not in {"NEW", "EXISTING", "POSSIBLE_MATCH"}:
-            self.checkpoint.set_row(key, "UNKNOWN_OUTCOME", error="DuplicateCheck returned an incomplete or unknown response", response=body)
+            self.checkpoint.set_row(key, "UNKNOWN_OUTCOME", error="DuplicateCheck returned an incomplete or unknown response", response=response_summary)
             return
         if result == "EXISTING":
-            self.checkpoint.set_row(key, "EXISTING", duplicate_check_id=check_id, candidates=body.get("candidates", []), response=body)
+            self.checkpoint.set_row(key, "EXISTING", duplicate_check_id=check_id, candidates=body.get("candidates", []), response=response_summary)
         elif result == "POSSIBLE_MATCH":
             self.checkpoint.set_row(key, "POSSIBLE_MATCH_REVIEW", duplicate_check_id=check_id, candidates=body.get("candidates", []), response=body)
             self._apply_decision(row, self.checkpoint.data["rows"][key])
         else:
-            self.checkpoint.set_row(key, "DUPLICATE_CHECKED_NEW", duplicate_check_id=check_id, response=body)
+            self.checkpoint.set_row(key, "DUPLICATE_CHECKED_NEW", duplicate_check_id=check_id, response=response_summary)
             self._create(row, self.checkpoint.data["rows"][key])
 
     def _apply_decision(self, row: dict[str, Any], item: dict[str, Any]):
