@@ -1,0 +1,127 @@
+{
+  "schema_version": "hbi.bijourka-product-knowledge.v1",
+  "catalog_reference": {
+    "authority": "PRODUCT_OWNER_APPROVED",
+    "identity_scope": "BIJOURKA_SHADE_IDENTITY_ONLY",
+    "snapshot_id": "hbi-hair-catalog-snapshot-20261110-185700z",
+    "content_sha256": "1887a7d166164639e2c235a7144fe6b27b4861f5c36fac9af383bef14eec1212"
+  },
+  "records": [
+    {
+      "record_id": "BIJOURKA-KNOWLEDGE-10-3-MATT",
+      "catalog_identity": {
+        "brand": "بیجورکا",
+        "series": "زیتونی",
+        "shade_number": "۱۰.۳",
+        "shade_name": "بلوند زیتونی پلاتینه"
+      },
+      "product_context": {
+        "market_region": null,
+        "product_variant": null,
+        "package_identifier": null,
+        "gtin": null,
+        "lot": null,
+        "formula_version": null
+      },
+      "formulation": {
+        "status": "UNKNOWN",
+        "ingredient_list": [],
+        "notes": [
+          "هیچ فهرست ترکیبات قابل انتساب به همین محصول/نسخه در شواهد بررسی‌شده موجود نیست؛ فهرست INCI عمداً خالی مانده است."
+        ]
+      },
+      "claims": [
+        {
+          "claim_id": "IDENTITY-10-3",
+          "claim_type": "IDENTITY_FACT",
+          "claim_scope": "IDENTITY",
+          "statement": "در کاتالوگ مرجع مورد تأیید مالک محصول، شماره ۱۰.۳ در سری زیتونی با نام «بلوند زیتونی پلاتینه» ثبت شده است.",
+          "evidence_status": "SUPPORTED_WITHIN_SCOPE",
+          "evidence_ids": [
+            "CATALOG-SNAPSHOT-20261110"
+          ],
+          "limitations": [
+            "این گزاره فقط هویت کاتالوگی را تأیید می‌کند و درباره ترکیب شیمیایی، کاربرد، ایمنی، سازگاری یا نتیجه رنگ چیزی اثبات نمی‌کند."
+          ]
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "CATALOG-SNAPSHOT-20261110",
+          "source_type": "OTHER",
+          "source_reference": "docs/homepage/encyclopedia/hair-color/catalog/raeaka_bijourka_catalog.csv; snapshot hbi-hair-catalog-snapshot-20261110-185700z; SHA-256 1887a7d166164639e2c235a7144fe6b27b4861f5c36fac9af383bef14eec1212",
+          "captured_at": "2026-11-10T18:57:00Z",
+          "applies_to": {
+            "market_region": null,
+            "product_variant": null,
+            "lot": null,
+            "formula_version": null
+          },
+          "description": "کاتالوگ مرجع مورد تأیید مالک محصول؛ تنها برای اثبات هویت و نام‌گذاری شماره رنگ استفاده شده است.",
+          "content_sha256": "1887a7d166164639e2c235a7144fe6b27b4861f5c36fac9af383bef14eec1212"
+        }
+      ],
+      "expert_review": {
+        "status": "NOT_REVIEWED",
+        "scope": [],
+        "reviewed_claim_ids": [],
+        "reviewed_at": null,
+        "limitations": [
+          "هیچ ارزیابی تخصصی محصول‌محور انجام یا ثبت نشده است."
+        ]
+      },
+      "evidence_gaps": [
+        {
+          "gap_type": "DATA_GAP",
+          "field": "product_context.market_region/product_variant/package_identifier/gtin/lot/formula_version",
+          "description": "بازار عرضه، گونه محصول، شناسه بسته، GTIN، بچ و نسخه فرمول برای این رکورد مشخص نشده‌اند.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION",
+            "PROCESSING_PARAMETERS",
+            "COLOR_OUTCOME_PREDICTION"
+          ]
+        },
+        {
+          "gap_type": "KNOWLEDGE_GAP",
+          "field": "formulation.ingredient_list",
+          "description": "فهرست ترکیبات کامل و قابل انتساب به همین گونه/نسخه محصول در دسترس نیست.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION"
+          ]
+        },
+        {
+          "gap_type": "DATA_GAP",
+          "field": "evidence.package_label_or_manufacturer_document",
+          "description": "تصویر خوانا از برچسب ترکیبات یا سند سازنده که دقیقاً به همین محصول و نسخه مربوط باشد ثبت نشده است.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION",
+            "PROCESSING_PARAMETERS"
+          ]
+        },
+        {
+          "gap_type": "EXPERT_REVIEW_REQUIRED",
+          "field": "expert_review",
+          "description": "هر ادعای فراتر از هویت کاتالوگی باید پس از دریافت شواهد محصول‌محور توسط متخصص بررسی شود.",
+          "blocks": [
+            "CHEMICAL_GUIDANCE",
+            "SAFETY_ASSESSMENT",
+            "COMPATIBILITY_ASSESSMENT",
+            "FORMULA_SELECTION",
+            "PROCESSING_PARAMETERS",
+            "COLOR_OUTCOME_PREDICTION"
+          ]
+        }
+      ],
+      "record_status": "DRAFT"
+    }
+  ]
+}
