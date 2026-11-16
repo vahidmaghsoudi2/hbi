@@ -32,7 +32,7 @@ EXPECTED_HEADERS = (
     "حجم محصول",
 )
 IDENTITY_COLUMNS = ("برند", "سری محصول", "شماره رنگ", "نام رنگ")
-REFERENCE_URL = "https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/"
+REFERENCE_URL = "https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/"\nCATALOG_AUTHORITY = "PRODUCT_OWNER_APPROVED"\nCATALOG_IDENTITY_SCOPE = "BIJOURKA_SHADE_IDENTITY_ONLY"\nCATALOG_SOURCE_KIND = "PO_APPROVED_BIJOURKA_CATALOG"
 
 
 def _catalog_path() -> Path:
@@ -189,7 +189,7 @@ def load_approved_hair_catalog_reference() -> tuple[str, CatalogReference] | Non
 
     reference_id = str(manifest["snapshot_id"])
     reference = CatalogReference(
-        source_kind="RAEAKA_BIJOURKA_CATALOG",
+        source_kind=CATALOG_SOURCE_KIND,
         approval_status="PO_APPROVED",
         url=REFERENCE_URL,
         edition_label=manifest.get("publisher_edition"),
