@@ -3,8 +3,8 @@
 This endpoint is intentionally limited to CATALOG_READY. The expected
 identity must be an exact row in the PO-approved server-side CSV; the observed
 identity is compared field-by-field. Callers cannot submit or assert catalog
-approval, edition, capture metadata, or content hashes. Definitive output
-remains fail-closed while publisher edition/capture provenance is incomplete.
+approval, snapshot metadata, or content hashes. Definitive identity output
+requires the server-validated PO authority marker and HBI snapshot lineage.
 No database writes, customer profile reads, event persistence, or service
 execution occur here.
 """
@@ -80,8 +80,8 @@ def get_approved_hair_catalog_reference() -> tuple[str, CatalogReference] | None
 
     The exact 88-row artifact is loaded and hashed on the server. The API also
     verifies that the submitted expected identity exists in this same
-    content-hash snapshot. Publisher edition and capture provenance remain
-    unknown, so definitive lookup output stays withheld.
+    content-hash snapshot. PO approval and HBI snapshot lineage, not publisher
+    edition metadata, establish the reference for identity lookup.
     """
     return load_approved_hair_catalog_reference()
 
