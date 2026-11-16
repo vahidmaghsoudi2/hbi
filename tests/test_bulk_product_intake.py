@@ -190,7 +190,8 @@ class BulkProductIntakeTests(unittest.TestCase):
             self.assertEqual(checkpoint.data["rows"]["sku-1"]["state"], "UNKNOWN_OUTCOME")
             resumed = Checkpoint.resume(checkpoint_path, digest, "https://hbi.test", rows)
             no_replay = FakeApi([])
-            BatchRunner(rows, resumed, no_replay).run()
+            with self.assertRaisesRegex(RuntimeError, "require --resume --reconcile"):
+                BatchRunner(rows, resumed, no_replay).run()
             self.assertEqual(no_replay.requests, [])
             self.assertEqual(resumed.data["rows"]["sku-1"]["state"], "UNKNOWN_OUTCOME")
 
@@ -204,7 +205,8 @@ class BulkProductIntakeTests(unittest.TestCase):
             resumed = Checkpoint.resume(checkpoint_path, digest, "https://hbi.test", rows)
             self.assertEqual(resumed.data["rows"]["sku-1"]["state"], "UNKNOWN_OUTCOME")
             api = FakeApi([])
-            BatchRunner(rows, resumed, api).run()
+            with self.assertRaisesRegex(RuntimeError, "require --resume --reconcile"):
+                BatchRunner(rows, resumed, api).run()
             self.assertEqual(api.requests, [])
 
     def test_resume_continues_after_duplicate_check_was_checkpointed(self):
@@ -291,7 +293,7 @@ class BulkProductIntakeTests(unittest.TestCase):
             BatchRunner(rows, checkpoint, api).reconcile()
             item = checkpoint.data["rows"]["sku-1"]
             self.assertEqual(item["state"], "UNKNOWN_OUTCOME")
-            self.assertEqual(item["reconciliation"]["duplicate_check_candidate_ids"], ["DCA-9"])
+            self.assertEqual([x["check_id"] for x in item["reconciliation"]["duplicate_check_candidates"]], ["DCA-9"])
             self.assertEqual(item["reconciliation"]["product_candidate_ids"], ["HBI-PROD-9"])
             self.assertTrue(all(request[0] == "GET" for request in api.requests))
 
@@ -312,6 +314,38 @@ class BulkProductIntakeTests(unittest.TestCase):
         left = {"product_id": None, "brand": "Brand", "product_name": "Name", "size_value": 30}
         right = {"product_id": "HBI-PROD-X", "brand": " brand ", "product_name": "NAME", "size_value": 30.0}
         self.assertTrue(_same_identity(left, right))
+
+    def test_uncertain_row_stops_batch_until_read_only_reconciliation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            path, (rows, digest) = self.load_rows(directory, [self.make_row(1), self.make_row(2)])
+            checkpoint_path = directory / "checkpoint.json"
+            checkpoint = Checkpoint.create(checkpoint_path, rows, digest, "https://hbi.test")
+            first_api = FakeApi([(503, {"detail": "server outcome uncertain"})])
+            BatchRunner(rows, checkpoint, first_api).run()
+            self.assertEqual(checkpoint.data["rows"]["sku-1"]["state"], "UNKNOWN_OUTCOME")
+            self.assertEqual(checkpoint.data["rows"]["sku-2"]["state"], "READY")
+            self.assertEqual(len(first_api.requests), 1)
+
+            resumed = Checkpoint.resume(checkpoint_path, digest, "https://hbi.test", rows)
+            blocked_api = FakeApi([])
+            with self.assertRaisesRegex(RuntimeError, "require --resume --reconcile"):
+                BatchRunner(rows, resumed, blocked_api).run()
+            self.assertEqual(blocked_api.requests, [])
+
+            reconcile_api = FakeApi([(200, []), (200, [])])
+            BatchRunner(rows, resumed, reconcile_api).reconcile()
+            self.assertTrue(resumed.data["rows"]["sku-1"]["reconciliation"]["read_only"])
+            self.assertEqual(resumed.data["rows"]["sku-1"]["state"], "UNKNOWN_OUTCOME")
+
+            continue_api = FakeApi([
+                (200, {"check_id": "DCA-10", "result": "NEW", "candidates": []}),
+                (201, {"product_id": "HBI-PROD-10", "status": "DRAFT", "qa_verdict": "PENDING", "identity_status": "NEEDS_REVIEW"}),
+            ])
+            BatchRunner(rows, resumed, continue_api).run()
+            self.assertEqual(resumed.data["rows"]["sku-1"]["state"], "UNKNOWN_OUTCOME")
+            self.assertEqual(resumed.data["rows"]["sku-2"]["state"], "CREATED")
+            self.assertEqual(len(continue_api.requests), 2)
 
 
 if __name__ == "__main__":
