@@ -45,10 +45,14 @@ import type {
 const CONCERN_OPTIONS = [
   { id: "spf", value: "ضدآفتاب", label: "ضدآفتاب / SPF" },
   { id: "hydrate", value: "آبرسان", label: "آبرسانی پوست" },
+  { id: "dryness", value: "خشکی پوست", label: "خشکی و کم‌آبی پوست" },
   { id: "spot", value: "لک صورت", label: "لک و تیرگی" },
   { id: "sensitive", value: "پوست حساس", label: "حساسیت / قرمزی" },
-  { id: "antiage", value: "ضدچروک", label: "ضدچروک" },
-  { id: "oil", value: "کنترل چربی", label: "پوست چرب" },
+  { id: "antiage", value: "ضدچروک", label: "خطوط ریز و چین‌وچروک" },
+  { id: "oil", value: "کنترل چربی", label: "کنترل چربی و براقیت" },
+  { id: "acne", value: "جوش", label: "جوش و آکنه" },
+  { id: "barrier", value: "ترمیم سد پوستی", label: "تقویت سد دفاعی پوست" },
+  { id: "cleansing", value: "پاکسازی", label: "پاکسازی پوست" },
 ] as const;
 
 const SKIN_OPTIONS = ["خشک", "چرب", "مختلط", "معمولی", "حساس"] as const;

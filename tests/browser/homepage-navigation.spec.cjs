@@ -418,7 +418,7 @@ test("Obsolete standalone catalog URL redirects to the homepage", async ({ page 
 });
 
 
-test("Home Page captures all six Case-owned Needs before generating an eligible recommendation", async ({ page, request }) => {
+test("Home Page captures Case-owned Needs and exposes the expanded Skin menu", async ({ page, request }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-multi-need-e2e-admin-token");
   });
@@ -439,6 +439,15 @@ test("Home Page captures all six Case-owned Needs before generating an eligible 
   await page.getByRole("button", { name: "شروع مشاوره" }).click();
   await page.locator("#name").fill("Home Page E2E Customer");
   await page.locator("#mobile").fill(mobile);
+  for (const label of [
+    "خشکی و کم‌آبی پوست",
+    "جوش و آکنه",
+    "تقویت سد دفاعی پوست",
+    "پاکسازی پوست",
+  ]) {
+    await expect(page.locator("label.pro-check-card").filter({ hasText: label })).toBeVisible();
+  }
+
   const selections = [
     { label: "ضدآفتاب / SPF", value: "ضدآفتاب" },
     { label: "آبرسانی پوست", value: "آبرسان" },

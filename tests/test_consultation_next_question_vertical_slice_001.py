@@ -108,14 +108,18 @@ def test_missing_skin_input_produces_one_bounded_question(client, db_session):
     assert question["question_id"] == QUESTION_ID
     assert question["factor"] == FACTOR_KEY
     assert question["mode"] == "MISSING_INPUT"
-    assert len(question["options"]) == 6
+    assert len(question["options"]) == 10
     assert {item["value"] for item in question["options"]} == {
         "ضدآفتاب",
         "آبرسان",
+        "خشکی پوست",
         "لک صورت",
         "پوست حساس",
         "ضدچروک",
         "کنترل چربی",
+        "جوش",
+        "ترمیم سد پوستی",
+        "پاکسازی",
     }
     assert question["evidence_gap"]["status"] == "MISSING"
     assert question["evidence_gap"]["gap_id"] == f"{case.case_id}:{QUESTION_ID}"
