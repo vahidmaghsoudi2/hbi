@@ -338,6 +338,15 @@ class BatchRunner:
         self.decisions = decisions or {}
 
     def run(self):
+        unreconciled = [
+            key for key, item in self.checkpoint.data["rows"].items()
+            if item.get("state") == "UNKNOWN_OUTCOME" and not item.get("reconciliation")
+        ]
+        if unreconciled:
+            raise RuntimeError(
+                "UNKNOWN_OUTCOME rows require --resume --reconcile before the batch can continue: "
+                + ", ".join(unreconciled)
+            )
         for row in self.rows:
             key = row["source_key"]
             item = self.checkpoint.data["rows"][key]
@@ -346,13 +355,14 @@ class BatchRunner:
                 continue
             if state == "POSSIBLE_MATCH_REVIEW":
                 self._apply_decision(row, item)
-                continue
-            if state in {"DECISION_RECORDED", "DUPLICATE_CHECKED_NEW"}:
+            elif state in {"DECISION_RECORDED", "DUPLICATE_CHECKED_NEW"}:
                 self._create(row, item)
-                continue
-            if state != "READY":
-                continue
-            self._duplicate_check(row)
+            elif state == "READY":
+                self._duplicate_check(row)
+            if self.checkpoint.data["rows"][key].get("state") == "UNKNOWN_OUTCOME":
+                # Stop at the first uncertain request so its fresh audit stays
+                # inside the API's 500-row audit window for read-only reconciliation.
+                break
 
     def reconcile(self):
         """Read-only lookup of uncertain rows; records candidates but never resolves them."""
@@ -382,11 +392,17 @@ class BatchRunner:
         for row in unknown_rows:
             key = row["source_key"]
             expected = {**_identity_payload(row), "product_id": None}
-            audit_ids = []
+            audit_candidates = []
             for audit in audits:
                 snapshot = audit.get("input_snapshot") or {}
                 if isinstance(snapshot, dict) and _same_identity(expected, snapshot):
-                    audit_ids.append(audit.get("check_id"))
+                    audit_candidates.append({
+                        "check_id": audit.get("check_id"),
+                        "result": audit.get("result"),
+                        "operator_decision": audit.get("operator_decision"),
+                        "timestamp": audit.get("timestamp"),
+                        "actor_id": audit.get("actor_id"),
+                    })
             product_ids = [
                 product.get("product_id")
                 for product in products
@@ -398,7 +414,7 @@ class BatchRunner:
                 reconciliation={
                     "checked_at": utc_now(),
                     "read_only": True,
-                    "duplicate_check_candidate_ids": [value for value in audit_ids if value],
+                    "duplicate_check_candidates": audit_candidates,
                     "product_candidate_ids": [value for value in product_ids if value],
                     "disposition": "CANDIDATES_ONLY_NO_AUTOMATIC_RESOLUTION",
                 },
