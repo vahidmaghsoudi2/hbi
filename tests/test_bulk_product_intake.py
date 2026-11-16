@@ -14,6 +14,7 @@ from scripts.bulk_product_intake import (
     _same_identity,
     _NoRedirect,
     CheckpointLock,
+    validate_decision_keys,
 )
 
 
@@ -400,7 +401,8 @@ class BulkProductIntakeTests(unittest.TestCase):
             decisions_path = directory / "decisions.json"
             decisions_path.write_text(json.dumps({"not-a-row": {"decision": "NEW", "reason": "reviewed"}}), encoding="utf-8")
             decisions = load_decisions(decisions_path)
-            self.assertEqual(set(decisions) - {row["source_key"] for row in rows}, {"not-a-row"})
+            with self.assertRaisesRegex(ValueError, "unknown source_key"):
+                validate_decision_keys(decisions, rows)
 
 
 if __name__ == "__main__":
