@@ -21,7 +21,6 @@ LookupStop = Literal["DATA_GAP", "KNOWLEDGE_GAP", "OUT_OF_DOMAIN", "ENGINE_FAIL"
 
 _APPROVED_SOURCE_KIND = "PO_APPROVED_BIJOURKA_CATALOG"
 _APPROVED_SOURCE_STATUS = "PO_APPROVED"
-_APPROVED_HOST = "raeaka.com"
 _APPROVED_PATHS = frozenset((
     "/آلبوم-رنگ-مو-بیجورکا/",
     "/product/رنگ-موی-بیجورکا-سِری-طبیعی-شماره-1-مشکی/",
@@ -164,8 +163,8 @@ def lookup_catalog_identity(
     if missing:
         return CatalogLookupResult(
             "STOP", "DATA_GAP", "REQUIRED_IDENTITY_FIELD_MISSING",
-            (), (), missing, reference.url, reference.edition_label,
-            reference.captured_at, reference.content_sha256, False,
+            (), (), missing, reference.url, reference.snapshot_id,
+            reference.snapshot_captured_at, reference.content_sha256, False,
         )
 
     matched = tuple(
@@ -288,8 +287,8 @@ def catalog_lookup_idempotency_key(
         "source_kind", reference.source_kind,
         "approval_status", reference.approval_status,
         "source_url", reference.url,
-        "version_label", _edition_or_unversioned(reference.edition_label),
-        "captured_at", reference.captured_at,
+        "version_label", _edition_or_unversioned(reference.snapshot_id),
+        "captured_at", reference.snapshot_captured_at,
         "content_sha256", reference.content_sha256,
         "snapshot_id", reference.snapshot_id,
         "snapshot_captured_at", reference.snapshot_captured_at,
@@ -501,7 +500,7 @@ def decide_catalog_output_presentation(
             "WITHHOLD_INCONCLUSIVE",
             False,
             "CATALOG_IDENTITY_NOT_VERIFIABLE",
-            "هویت قلم از مرجع نسخه‌دار و قابل‌ردیابی قابل تأیید نیست؛ نتیجهٔ قطعی نمایش داده نمی‌شود.",
+            "هویت قلم از Snapshot مورد تأیید Product Owner و دارای زنجیرهٔ یکپارچگی معتبر قابل تأیید نیست؛ نتیجهٔ قطعی نمایش داده نمی‌شود.",
         )
 
     if output.outcome == "MATCH":
