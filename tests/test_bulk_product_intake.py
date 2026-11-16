@@ -8,11 +8,12 @@ from scripts.bulk_product_intake import (
     ApiClient,
     BatchRunner,
     Checkpoint,
-    FINAL_STATES,
     load_source,
     _product_payload,
     load_decisions,
     _same_identity,
+    _NoRedirect,
+    CheckpointLock,
 )
 
 
@@ -346,6 +347,60 @@ class BulkProductIntakeTests(unittest.TestCase):
             self.assertEqual(resumed.data["rows"]["sku-1"]["state"], "UNKNOWN_OUTCOME")
             self.assertEqual(resumed.data["rows"]["sku-2"]["state"], "CREATED")
             self.assertEqual(len(continue_api.requests), 2)
+
+    def test_api_client_uses_bearer_header_and_redirects_are_rejected(self):
+        captured = {}
+
+        class Response:
+            status = 200
+            def read(self):
+                return b'{"ok": true}'
+            def getcode(self):
+                return 200
+
+        def opener(request, timeout):
+            captured["authorization"] = request.get_header("Authorization")
+            captured["timeout"] = timeout
+            return Response()
+
+        status, body = ApiClient("https://hbi.test", "secret-token", opener=opener).request("GET", "/health")
+        self.assertEqual(status, 200)
+        self.assertEqual(body, {"ok": True})
+        self.assertEqual(captured["authorization"], "Bearer secret-token")
+        self.assertEqual(captured["timeout"], 30.0)
+        self.assertIsNone(_NoRedirect().redirect_request(None, None, 302, "Found", {}, "https://other.test"))
+
+    @unittest.skipIf(__import__("os").name == "nt", "POSIX flock behavior only")
+    def test_checkpoint_lock_rejects_concurrent_runner(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "checkpoint.json"
+            with CheckpointLock(path):
+                with self.assertRaisesRegex(RuntimeError, "Another batch process"):
+                    with CheckpointLock(path):
+                        pass
+
+    def test_auth_failure_stops_batch_and_blocks_resume(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            path, (rows, digest) = self.load_rows(directory, [self.make_row(1), self.make_row(2)])
+            checkpoint_path = directory / "checkpoint.json"
+            checkpoint = Checkpoint.create(checkpoint_path, rows, digest, "https://hbi.test")
+            api = FakeApi([(401, {"detail": "unauthorized"})])
+            BatchRunner(rows, checkpoint, api).run()
+            self.assertEqual(checkpoint.data["rows"]["sku-1"]["state"], "PREFLIGHT_FAILED")
+            self.assertEqual(checkpoint.data["rows"]["sku-2"]["state"], "READY")
+            resumed = Checkpoint.resume(checkpoint_path, digest, "https://hbi.test", rows)
+            with self.assertRaisesRegex(RuntimeError, "Blocked rows"):
+                BatchRunner(rows, resumed, FakeApi([])).run()
+
+    def test_decision_file_rejects_unknown_source_key(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            path, (rows, digest) = self.load_rows(directory, [self.make_row()])
+            decisions_path = directory / "decisions.json"
+            decisions_path.write_text(json.dumps({"not-a-row": {"decision": "NEW", "reason": "reviewed"}}), encoding="utf-8")
+            decisions = load_decisions(decisions_path)
+            self.assertEqual(set(decisions) - {row["source_key"] for row in rows}, {"not-a-row"})
 
 
 if __name__ == "__main__":
