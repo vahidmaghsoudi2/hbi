@@ -94,6 +94,10 @@ class BulkProductIntakeTests(unittest.TestCase):
                            headers=["brand", "product_name", "product_line"])
             with self.assertRaisesRegex(ValueError, "never inferred"):
                 load_source(path)
+            self.write_csv(path, [{ "brand": "A", "product_name": "B", "product_line": "HAIR" }],
+                           headers=["brand", "product_name", "product_line"])
+            with self.assertRaisesRegex(ValueError, "must be one of"):
+                load_source(path)
 
     def test_rejects_duplicate_identity_and_duplicate_source_key(self):
         with tempfile.TemporaryDirectory() as tmp:
