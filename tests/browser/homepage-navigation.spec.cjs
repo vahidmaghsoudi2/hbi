@@ -453,8 +453,8 @@ test("Home Page captures Case-owned Needs and exposes the expanded Skin menu", a
     { label: "آبرسانی پوست", value: "آبرسان" },
     { label: "لک و تیرگی", value: "لک صورت" },
     { label: "حساسیت / قرمزی", value: "پوست حساس" },
-    { label: "ضدچروک", value: "ضدچروک" },
-    { label: "پوست چرب", value: "کنترل چربی" },
+    { label: "خطوط ریز و چین‌وچروک", value: "ضدچروک" },
+    { label: "کنترل چربی و براقیت", value: "کنترل چربی" },
   ];
   for (const selection of selections) {
     await page.locator("label.pro-check-card")
