@@ -256,7 +256,12 @@ def _product_report(
             history_status = "UNAVAILABLE"
         elif "[REJECTED_BY_CONFLICT_RESOLUTION" in current_notes:
             history_status = "INCOMPLETE"
-        elif history and latest and latest.get("decision") == qa:
+        elif (
+            history
+            and latest
+            and latest.get("decision") == qa
+            and not (qa == "VERIFIED" and latest.get("reason_status") != "PRESENT")
+        ):
             history_status = "CONSISTENT"
         elif history:
             history_status = "INCOMPLETE"
