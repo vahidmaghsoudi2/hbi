@@ -203,8 +203,8 @@ def test_six_need_question_contract_is_v2_and_legacy_v1_answers_remain_readable(
     assert LEGACY_QUESTION_ID == "skin.primary_need.v1"
     assert CONTRACT_VERSION == "2"
     assert question["question_id"] == QUESTION_ID
-    assert len(OPTIONS) == 6
-    assert len(question["options"]) == 6
+    assert len(OPTIONS) == 10
+    assert len(question["options"]) == 10
 
     # Historical v1 clients may still submit the two original canonical values.
     legacy_result = service.capture_answer(case, LEGACY_QUESTION_ID, "hydration")
