@@ -368,7 +368,7 @@ def _product_report(
     }
 
 
-def build_acceptance_reports(db: Session, product_ids: Sequence[str]) -> Tuple[Dict[str, Dict[str, Any]], Dict[str, bool]]:
+def build_acceptance_reports(db: Session, product_ids: Sequence[str]) -> Tuple[Dict[str, Dict[str, Any]], Dict[str, bool], Dict[str, str]]:
     """Build reports with bounded query count; this function never writes."""
     ids = list(product_ids)
     products = db.query(Product).filter(Product.product_id.in_(ids)).all()
