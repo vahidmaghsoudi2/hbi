@@ -6,12 +6,51 @@ from datetime import datetime
 from pathlib import Path
 
 NEW_COLUMNS = {"feature_basis", "outcome", "assertion_key", "revision_no", "supersedes_link_id", "idempotency_key", "request_fingerprint"}
+HISTORY_COLUMNS = {
+    "event_id", "link_id", "assertion_key", "revision_no", "actor_id",
+    "actor_role", "event_type", "reason", "before_state", "after_state",
+    "correlation_id", "timestamp",
+}
 LEGACY_COLUMNS = [
     "link_id", "product_id", "variant", "market_region", "claim_id", "evidence_id",
     "problem_id", "problem_type", "problem_definition_ref", "relationship_role",
     "relationship_status", "semantic_basis", "limitations", "decision_basis",
     "problem_map_version", "created_at", "updated_at",
 ]
+
+
+def _ensure_history_schema(conn: sqlite3.Connection) -> None:
+    """Create the history table when absent and reject incomplete pre-existing schemas."""
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS ProductProblemLinkAssessmentEvent (
+            event_id VARCHAR PRIMARY KEY, link_id VARCHAR NOT NULL,
+            assertion_key VARCHAR NULL, revision_no INTEGER NULL,
+            actor_id VARCHAR NOT NULL, actor_role VARCHAR NULL,
+            event_type VARCHAR NOT NULL, reason TEXT NOT NULL,
+            before_state TEXT NULL, after_state TEXT NOT NULL,
+            correlation_id VARCHAR NULL, timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    columns = {
+        row[1]
+        for row in conn.execute(
+            'PRAGMA table_info("ProductProblemLinkAssessmentEvent")'
+        )
+    }
+    missing = sorted(HISTORY_COLUMNS - columns)
+    if missing:
+        raise RuntimeError(
+            "Incomplete ProductProblemLinkAssessmentEvent schema; "
+            f"missing required columns: {', '.join(missing)}"
+        )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS ix_ppl_event_link_time "
+        "ON ProductProblemLinkAssessmentEvent(link_id, timestamp)"
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS ix_ProductProblemLinkAssessmentEvent_assertion_key "
+        "ON ProductProblemLinkAssessmentEvent(assertion_key)"
+    )
 
 
 
@@ -65,17 +104,7 @@ def migrate(db_path: str | Path) -> str:
             return "SKIPPED: ProductProblemLink does not exist; fresh create_all will create the new schema."
         columns = {r[1] for r in conn.execute('PRAGMA table_info("ProductProblemLink")')}
         if NEW_COLUMNS.issubset(columns):
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS ProductProblemLinkAssessmentEvent (
-                    event_id VARCHAR PRIMARY KEY, link_id VARCHAR NOT NULL,
-                    assertion_key VARCHAR NULL, revision_no INTEGER NULL,
-                    actor_id VARCHAR NOT NULL, actor_role VARCHAR NULL,
-                    event_type VARCHAR NOT NULL, reason TEXT NOT NULL,
-                    before_state TEXT NULL, after_state TEXT NOT NULL,
-                    correlation_id VARCHAR NULL, timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-                )
-            """)
-            conn.execute("CREATE INDEX IF NOT EXISTS ix_ppl_event_link_time ON ProductProblemLinkAssessmentEvent(link_id, timestamp)")
+            _ensure_history_schema(conn)
             conn.commit()
             conn.execute("PRAGMA foreign_keys=ON")
             return "ALREADY MIGRATED: assessment columns and history table are present."
@@ -120,17 +149,7 @@ def migrate(db_path: str | Path) -> str:
         conn.execute('CREATE INDEX ix_productproblemlink_problem ON ProductProblemLink(problem_id)')
         conn.execute('CREATE INDEX ix_productproblemlink_status ON ProductProblemLink(relationship_status)')
         conn.execute('CREATE INDEX ix_productproblemlink_assertion ON ProductProblemLink(assertion_key)')
-        conn.execute("""
-            CREATE TABLE ProductProblemLinkAssessmentEvent (
-                event_id VARCHAR PRIMARY KEY, link_id VARCHAR NOT NULL,
-                assertion_key VARCHAR NULL, revision_no INTEGER NULL,
-                actor_id VARCHAR NOT NULL, actor_role VARCHAR NULL,
-                event_type VARCHAR NOT NULL, reason TEXT NOT NULL,
-                before_state TEXT NULL, after_state TEXT NOT NULL,
-                correlation_id VARCHAR NULL, timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
-        conn.execute('CREATE INDEX ix_ppl_event_link_time ON ProductProblemLinkAssessmentEvent(link_id, timestamp)')
+        _ensure_history_schema(conn)
         after_count = conn.execute('SELECT COUNT(*) FROM ProductProblemLink').fetchone()[0]
         if before_count != after_count:
             raise RuntimeError(f"Legacy row count changed: {before_count} -> {after_count}")

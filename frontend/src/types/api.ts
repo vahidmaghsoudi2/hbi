@@ -61,6 +61,7 @@ export interface RecommendationDTO {
   evidence_score?: number | null;
   evidence_refs?: unknown[] | null;
   warnings?: unknown[] | null;
+  pk_completeness?: ProductKnowledgeCompletenessDTO | null;
   exclusion_reasons?: string[] | null;
   availability?: string | null;
   price?: number | null;
@@ -329,6 +330,8 @@ export interface ProductKnowledgeDTO {
   product_id: string;
   ingredients?: string | null;
   ingredient_roles?: string | null;
+  other_attributes?: string | null;
+  domain_evidence_status?: string | null;
   claimed_benefits?: string | null;
   known_use_cases?: string | null;
   contraindications?: string | null;
@@ -339,4 +342,83 @@ export interface ProductKnowledgeDTO {
   knowledge_confidence?: number | null;
   created_at?: string | null;
   updated_at?: string | null;
+}
+
+
+export interface ProductKnowledgeCompletenessDTO {
+  status: "complete" | "partial";
+  missing_domains: string[];
+  incomplete_domains: Array<{ field: string; status: string }>;
+  contraindications_unreviewed: boolean;
+  pk_record_missing: boolean;
+  domain_report: Array<{ field: string; label: string; status: string; message: string }>;
+}
+
+/** Stateless synthetic-only dialogue transition. */
+export interface HairDialogueState {
+  case_id: string;
+  case_version: string;
+  goal_version: string;
+  active_proposal_id: string | null;
+  active_proposal_case_version: string | null;
+  active_proposal_goal_version: string | null;
+  rejected_proposal_ids: string[];
+  client_decision: "NONE" | "ACCEPTED" | "REJECTED";
+  execution_consent_for_proposal_id: string | null;
+}
+export type HairDialogueAction =
+  | "ANSWER_QUESTION"
+  | "ATTACH_PROPOSAL"
+  | "ACCEPT_PROPOSAL"
+  | "RECORD_EXECUTION_CONSENT"
+  | "CHANGE_GOAL";
+export interface HairDialogueTurnRequest {
+  action: HairDialogueAction;
+  state: HairDialogueState;
+  question_code?: "STATUS_REASON" | "MISSING_DATA" | "PROCESS_LIMIT";
+  answer_code?: "STATUS_REASON" | "MISSING_DATA" | "PROCESS_LIMIT";
+  proposal_id?: string;
+  explicit_consent?: boolean;
+  new_goal_version?: string;
+}
+export interface HairDialogueTurnResponse {
+  action: HairDialogueAction;
+  state: HairDialogueState;
+  result: Record<string, unknown>;
+  recommendation: null;
+  display_allowed: false;
+  client_visible: false;
+  persistence: "COMPUTED_ONLY";
+}
+
+/** Read-only synthetic specialist preview. */
+export interface HairSpecialistPreviewRequest {
+  case_id: string;
+  case_version: string;
+  goal_version: string;
+  service_kind: string;
+  catalog_identity: {
+    brand: string;
+    series: string;
+    shade_number: string;
+    shade_name: string;
+    product_specification?: string | null;
+    product_volume?: string | null;
+  };
+}
+export interface HairSpecialistPreviewResponse {
+  view_version: string;
+  audience: string;
+  data_class: string;
+  case: { case_id: string; case_version: string; goal_version: string; service_kind: string };
+  decision: { status: string; reason_code?: string | null; summary_fa: string; recommendation: null; display_allowed: false; client_visible: false };
+  evidence: Array<{ evidence_id: string; source_type: string; source_reference: string; qa_status: string }>;
+  lineage: {
+    run_id: string; knowledge_package_id: string; knowledge_package_version: string;
+    rule_id: string; rule_version: string; snapshot_id: string; content_sha256: string;
+    engine_version: string; dependencies: Array<{ kind: string; dependency_id: string; version: string }>;
+    persistence: string;
+  };
+  review_controls: { specialist_review_required_by_this_slice: boolean; specialist_review_recorded: boolean; acceptance_inherited: boolean; execution_consent_inherited: boolean; available_actions: string[] };
+  limitations: string[];
 }

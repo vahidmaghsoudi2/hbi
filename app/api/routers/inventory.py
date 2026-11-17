@@ -208,7 +208,10 @@ async def adjust_stock(
     direction = body.direction.strip().lower()
     try:
         if direction == "increase":
-            inv = svc.increase_stock(body.product_id, body.quantity, note=body.note)
+            # /adjust is a reconciliation, not a purchase receipt. Keep STOCK_IN for /stock-in.
+            inv = svc.increase_stock(
+                body.product_id, body.quantity, note=body.note, movement_type="ADJUSTMENT"
+            )
         elif direction == "decrease":
             inv = svc.decrease_stock(body.product_id, body.quantity, note=body.note)
         else:

@@ -40,6 +40,28 @@ test("Skin encyclopedia reads product identity, evidence and knowledge without i
       source_reference: "https://example.invalid/product",
     }]),
   }));
+  await page.route("**/api/v1/evidence/knowledge/TEST-SKIN-001/completeness", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({
+      status: "partial",
+      missing_domains: ["ingredients", "contraindications", "evidence_refs"],
+      incomplete_domains: [
+        { field: "ingredients", status: "MISSING" },
+        { field: "contraindications", status: "MISSING" },
+        { field: "evidence_refs", status: "PARTIAL" },
+      ],
+      contraindications_unreviewed: true,
+      pk_record_missing: false,
+      domain_report: [
+        { field: "ingredients", label: "ترکیبات", status: "MISSING", message: "ترکیبات ثبت نشده است." },
+        { field: "known_use_cases", label: "موارد کاربرد", status: "NOT_ASSESSED", message: "ارزیابی نشده است." },
+        { field: "usage_instructions", label: "دستور مصرف", status: "MISSING", message: "ثبت نشده است." },
+        { field: "contraindications", label: "موارد منع مصرف و احتیاط", status: "MISSING", message: "بررسی نشده است." },
+        { field: "evidence_refs", label: "مراجع شواهد", status: "PARTIAL", message: "QA شواهد تأیید نشده است." },
+      ],
+    }),
+  }));
   await page.route("**/api/v1/evidence/knowledge/TEST-SKIN-001", (route) => route.fulfill({
     status: 200,
     contentType: "application/json",
@@ -53,6 +75,8 @@ test("Skin encyclopedia reads product identity, evidence and knowledge without i
       contraindications: null,
       usage_instructions: null,
       manufacturer_claims: null,
+      other_attributes: '{"texture":"gel"}',
+      domain_evidence_status: '{"ingredients":"SUPPORTED"}',
       evidence_refs: null,
       evidence_status: "UNKNOWN",
       knowledge_confidence: null,
@@ -78,6 +102,10 @@ test("Skin encyclopedia reads product identity, evidence and knowledge without i
   await expect(page.getByText("ثبت نشده / نامشخص").first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "دانش تجمیع‌شدهٔ واجد شرایط" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "شواهد و منشأ اطلاعات" })).toBeVisible();
+  await expect(page.getByText("سایر ویژگی‌های ثبت‌شده")).toBeVisible();
+  await expect(page.getByText('{"texture":"gel"}')).toBeVisible();
+  await expect(page.getByText("وضعیت شواهد به تفکیک حوزه")).toBeVisible();
+  await expect(page.getByText('{"ingredients":"SUPPORTED"}')).toBeVisible();
   await expect(page.getByText("Water")).toBeVisible();
   await expect(page.getByText(/QA: PENDING · شواهد: UNKNOWN/)).toBeVisible();
   await page.getByRole("button", { name: "بازگشت", exact: true }).click();

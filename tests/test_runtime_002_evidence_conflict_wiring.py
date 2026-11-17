@@ -1,6 +1,14 @@
 """HBI-RUNTIME-002 — Evidence.conflict_status propagation into Recommendation path."""
+import json
 from types import SimpleNamespace
 
+from app.models.case import Case
+from app.models.customer import Customer
+from app.models.evidence import Evidence
+from app.models.inventory import Inventory
+from app.models.product import Product
+from app.models.product_knowledge import ProductKnowledge
+from app.models.recommendation import Recommendation
 from app.reasoning.reasoning_engine import ReasoningEngine
 from app.services.recommendation_service import RecommendationService
 
@@ -106,3 +114,117 @@ def test_case_unknowns_not_mutated_by_product_conflicts():
     }
     _ = svc._map_eligibility(engine_result, decision_state, need_match=0.9, product_unknowns=[])
     assert decision_state["unknowns"] == before
+
+
+
+def test_recommendation_service_persists_review_gate_for_ingredient_conflict(db_session):
+    """LOW-severity ingredient conflicts still require review in the persisted service result."""
+    customer_id = "C-RUNTIME-002-CONFLICT"
+    case_id = "CASE-RUNTIME-002-CONFLICT"
+    product_id = "P-RUNTIME-002-CONFLICT"
+
+    db_session.add(Customer(
+        customer_id=customer_id,
+        name="Runtime conflict fixture",
+        consent_to_store_data=1,
+    ))
+    db_session.add(Case(
+        case_id=case_id,
+        customer_id=customer_id,
+        case_type="SKIN",
+        evidence_gaps=json.dumps({
+            "answers": [{
+                "question_id": "skin.primary_need.v2",
+                "factor": "concerns",
+                "source": "CURRENT_CASE_CONSULTATION",
+                "value_state": "KNOWN",
+                "value": ["hydration"],
+            }]
+        }),
+    ))
+    db_session.add(Product(
+        product_id=product_id,
+        brand="TestBrand",
+        product_name="Ingredient conflict fixture",
+        product_line="SKIN",
+        identity_status="VERIFIED",
+        qa_verdict="VALID",
+        status="ACTIVE",
+    ))
+    db_session.add(ProductKnowledge(
+        product_knowledge_id="PK-RUNTIME-002-CONFLICT",
+        product_id=product_id,
+        known_use_cases="hydration",
+        evidence_status="SUPPORTED",
+        knowledge_confidence=0.8,
+    ))
+    db_session.add(Inventory(
+        inventory_id="INV-RUNTIME-002-CONFLICT",
+        product_id=product_id,
+        quantity_available=2,
+        quantity_reserved=0,
+        quantity_damaged=0,
+        stock_status="AVAILABLE",
+    ))
+    db_session.add_all([
+        Evidence(
+            evidence_id="EV-RUNTIME-002-INGREDIENT-A",
+            product_id=product_id,
+            claim_id="CL-RUNTIME-002-INGREDIENT-A",
+            source_type="MANUFACTURER",
+            source_reference="https://manufacturer.example/ingredient-a",
+            claim="The formula contains ingredient A.",
+            field="ingredients",
+            claim_type="MANUFACTURER_CLAIM",
+            evidence_strength="UNVERIFIED",
+            evidence_status="UNKNOWN",
+            conflict_status="CONFLICT",
+            qa_status="VERIFIED",
+        ),
+        Evidence(
+            evidence_id="EV-RUNTIME-002-INGREDIENT-B",
+            product_id=product_id,
+            claim_id="CL-RUNTIME-002-INGREDIENT-B",
+            source_type="MANUFACTURER",
+            source_reference="https://manufacturer.example/ingredient-b",
+            claim="The formula contains ingredient B.",
+            field="ingredients",
+            claim_type="MANUFACTURER_CLAIM",
+            evidence_strength="UNVERIFIED",
+            evidence_status="UNKNOWN",
+            conflict_status="CONFLICT",
+            qa_status="VERIFIED",
+        ),
+        Evidence(
+            evidence_id="EV-RUNTIME-002-APPROVED",
+            product_id=product_id,
+            claim_id="CL-RUNTIME-002-APPROVED",
+            source_type="MANUFACTURER",
+            source_reference="https://manufacturer.example/usage",
+            claim="Use after cleansing.",
+            field="usage_instructions",
+            claim_type="MANUFACTURER_CLAIM",
+            evidence_strength="STRONG",
+            evidence_status="SUPPORTED",
+            conflict_status="NONE",
+            qa_status="VERIFIED",
+        ),
+    ])
+    db_session.commit()
+
+    generated = RecommendationService(db_session).generate_recommendations(
+        case_id,
+        {"concerns": "hydration"},
+    )
+
+    assert generated == []
+    persisted = db_session.query(Recommendation).filter_by(
+        case_id=case_id,
+        product_id=product_id,
+    ).one()
+    assert persisted.eligibility_status == "INELIGIBLE_PENDING_REVIEW"
+    assert json.loads(persisted.exclusion_reasons) == [
+        "EVIDENCE_CONFLICT_REVIEW_REQUIRED"
+    ]
+    assert persisted.evidence_score > 0
+    assert "product_conflicts=2" in persisted.ranking_reasons

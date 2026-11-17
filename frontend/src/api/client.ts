@@ -23,12 +23,17 @@ import type {
   StockMovementDTO,
   EvidenceDTO,
   ProductKnowledgeDTO,
+  ProductKnowledgeCompletenessDTO,
   MutationLogDTO,
   DuplicateCheckRequest,
   DuplicateCheckResponse,
   DuplicateCheckOperatorDecisionRequest,
   DuplicateCheckOperatorDecisionResponse,
   ResearchAssertionRequest,
+  HairSpecialistPreviewRequest,
+  HairSpecialistPreviewResponse,
+  HairDialogueTurnRequest,
+  HairDialogueTurnResponse,
 } from "../types/api";
 
 const BASE = import.meta.env?.VITE_API_BASE ?? "/api/v1";
@@ -225,6 +230,11 @@ export function getProductEvidence(
 /** Read the existing QA-eligible ProductKnowledge projection. Read-only. */
 export function getProductKnowledge(productId: string, token: string): Promise<ProductKnowledgeDTO> {
   return request<ProductKnowledgeDTO>(`/evidence/knowledge/${encodeURIComponent(productId)}`, {}, token);
+}
+
+/** Server-evaluated, product-scoped PK completeness report. Read-only. */
+export function getProductKnowledgeCompleteness(productId: string, token: string): Promise<ProductKnowledgeCompletenessDTO> {
+  return request<ProductKnowledgeCompletenessDTO>(`/evidence/knowledge/${encodeURIComponent(productId)}/completeness`, {}, token);
 }
 
 /** Create source-traceable research assertions; they remain PENDING/UNKNOWN until reviewed. */
@@ -585,5 +595,30 @@ export function getStockMovements(
     `/inventory/movements${suffix ? `?${suffix}` : ""}`,
     {},
     adminToken
+  );
+}
+
+
+/** Internal, read-only, synthetic-only Hair specialist preview. */
+export function previewHairSpecialist(
+  body: HairSpecialistPreviewRequest,
+  adminToken: string,
+): Promise<HairSpecialistPreviewResponse> {
+  return request<HairSpecialistPreviewResponse>(
+    "/hair/specialist-preview",
+    { method: "POST", body: JSON.stringify(body) },
+    adminToken,
+  );
+}
+
+/** Stateless synthetic-only dialogue transition. */
+export function runHairDialogueTurn(
+  body: HairDialogueTurnRequest,
+  internalToken: string,
+): Promise<HairDialogueTurnResponse> {
+  return request<HairDialogueTurnResponse>(
+    "/hair/dialogue/turn",
+    { method: "POST", body: JSON.stringify(body) },
+    internalToken,
   );
 }

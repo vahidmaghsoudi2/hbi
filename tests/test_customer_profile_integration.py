@@ -483,7 +483,7 @@ def test_skin_quick_intake_captures_all_selected_needs_as_case_evidence(client, 
     )
     assert question.status_code == 200, question.text
     assert question.json()["status"] == "QUESTION_REQUIRED"
-    assert len(question.json()["question"]["options"]) == 6
+    assert len(question.json()["question"]["options"]) == 10
 
     selected = ["ضدآفتاب", "آبرسان", "لک صورت", "پوست حساس", "ضدچروک", "کنترل چربی"]
     answer = client.post(

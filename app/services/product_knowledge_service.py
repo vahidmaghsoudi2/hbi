@@ -33,8 +33,10 @@ def version_scope_key(
     product_market: Optional[str],
     packaging_version: Optional[str],
 ) -> str:
-    """Build a non-guessing scope key. Empty segments stay empty (not defaulted to IR)."""
-    market = (evidence_market or "").strip().upper() or (product_market or "").strip().upper()
+    """Build an Evidence-owned scope key; never infer its market from Product."""
+    # product_market remains in the signature for compatibility with existing
+    # callers, but is deliberately not a fallback for missing Evidence scope.
+    market = (evidence_market or "").strip().upper()
     pack = (packaging_version or "").strip()
     return f"market={market}|pack={pack}"
 
@@ -122,6 +124,58 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
             )
         return knowledge
 
+    def refresh_conflict_status_after_reclassification(self, product_id: str) -> Optional[ProductKnowledge]:
+        """Clear stale conflict-only status without rebuilding or importing pending claims.
+
+        Reclassification is field-only. When it removes the final active conflict,
+        update only derived status fields and preserve ProductKnowledge content
+        and confidence exactly as they were.
+        """
+        knowledge = self.repository.find_by_product(product_id)
+        if (
+            not knowledge
+            or (knowledge.evidence_status or "").strip().upper() != "CONFLICT"
+        ):
+            return knowledge
+
+        evidences = self.evidence_repo.find_by_product(product_id)
+        if any(
+            (getattr(ev, "conflict_status", None) or "NONE").strip().upper() == "CONFLICT"
+            for ev in evidences
+        ):
+            return knowledge
+
+        try:
+            domain_status = json.loads(knowledge.domain_evidence_status or "{}")
+        except (TypeError, json.JSONDecodeError):
+            domain_status = {}
+        if not isinstance(domain_status, dict):
+            domain_status = {}
+
+        for field, status in list(domain_status.items()):
+            if str(status or "").strip().upper() == "CONFLICT":
+                domain_status[field] = "UNKNOWN"
+
+        values = {str(value or "").strip().upper() for value in domain_status.values()}
+        if "SUPPORTED" in values:
+            overall = (
+                "PARTIAL"
+                if values.intersection({"UNKNOWN", "PARTIAL"})
+                else "SUPPORTED"
+            )
+        elif "PARTIAL" in values:
+            overall = "PARTIAL"
+        else:
+            overall = "UNKNOWN"
+
+        return self.repository.update_knowledge(
+            product_id,
+            evidence_status=overall,
+            domain_evidence_status=(
+                json.dumps(domain_status, ensure_ascii=False) if domain_status else None
+            ),
+        )
+
     _QA_APPROVED = frozenset({"APPROVED", "VERIFIED"})
 
     def update_from_evidence(self, product_id: str) -> Optional[ProductKnowledge]:
@@ -165,8 +219,10 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
             scopes.setdefault(key, []).append(ev)
 
         preferred = version_scope_key(
-            evidence_market=None,
-            product_market=product_market,
+            # The Product's own market defines the preferred target scope; an
+            # Evidence row must independently carry that same market to join it.
+            evidence_market=product_market,
+            product_market=None,
             packaging_version=packaging_version,
         )
         if preferred in scopes:

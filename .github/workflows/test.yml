@@ -49,6 +49,7 @@ jobs:
         working-directory: frontend
         run: |
           npm install --no-audit --no-fund
+          npm run typecheck
           npm run build
 
       - name: Upload coverage reports as artifacts

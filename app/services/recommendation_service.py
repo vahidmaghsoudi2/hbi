@@ -20,6 +20,10 @@ from app.services.need_normalization import normalize_needs_from_factors, CANONI
 from app.services.product_compatibility import product_compatibility_ids
 from app.reasoning.reasoning_engine import ReasoningEngine
 from app.reasoning.conflict_analyzer import ConflictSeverity
+from app.domain.product_knowledge_gaps import (
+    evaluate_product_knowledge_completeness,
+    consultation_gap_warnings,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -235,6 +239,18 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         product_ids = set(product_compatibility_ids(known_use_cases))
         return round(len(generated_ids & product_ids) / max(len(generated_ids), 1), 4)
 
+    @staticmethod
+    def _evidence_matches_product_market(evidence: Evidence, product_market: Optional[str]) -> bool:
+        """Keep Evidence and Product in the same explicit market scope.
+
+        Two genuinely unscoped records retain the legacy unscoped path. A known
+        Product market never inherits an Evidence row with an unknown market.
+        """
+        product_scope = product_market.strip().upper() if isinstance(product_market, str) else ""
+        evidence_market = getattr(evidence, "market_region", None)
+        evidence_scope = evidence_market.strip().upper() if isinstance(evidence_market, str) else ""
+        return product_scope == evidence_scope
+
     def _compute_evidence_score(self, evidences: List[Evidence]) -> float:
         """Score only Evidence explicitly approved by QA for decision use."""
         approved_evidences = [
@@ -291,6 +307,11 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         ]
         if high_or_critical:
             return "INELIGIBLE_PENDING_REVIEW"
+        # ReasoningEngine marks every unresolved Evidence conflict as NEEDS_REVIEW.
+        # Preserve that decision at the service persistence boundary, including
+        # LOW-severity fields such as ingredients and usage instructions.
+        if engine_result.get("conflicts"):
+            return "INELIGIBLE_PENDING_REVIEW"
         # Business Contract V1: Need Match and Final Score are ranking signals,
         # not eligibility gates. Approved/verified Evidence remains a prerequisite
         # for automatic recommendation.
@@ -333,6 +354,8 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             for c in (engine_result.get("conflicts") or [])
         ):
             return "HIGH_CRITICAL_CONFLICT"
+        if engine_result.get("conflicts"):
+            return "EVIDENCE_CONFLICT_REVIEW_REQUIRED"
         if not decision_state.get("needs"):
             return "NO_CANONICAL_NEED"
         db = getattr(self, "db", None)
@@ -394,6 +417,12 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         return conflicts
 
     def generate_recommendations(self, case_id: str, customer_profile: Dict = None) -> List[Recommendation]:
+        case_row = self.db.query(Case).filter(Case.case_id == case_id).first()
+        case_type = getattr(case_row, "case_type", None)
+        if (case_type or "").strip().upper() in {"HAIR", "CATALOG_READY"}:
+            raise ValueError(
+                "HAIR/CATALOG_READY requests are outside the legacy RecommendationService scope."
+            )
         if customer_profile is None:
             customer_profile = {}
         decision_state = self._build_decision_state(case_id, customer_profile)
@@ -405,8 +434,6 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         if decision_state["medical_context_active"]:
             decision_state["decision_status"] = "REFERRAL"
         products = self.product_repo.find_by_identity_status_and_active("VERIFIED")
-        case_row = self.db.query(Case).filter(Case.case_id == case_id).first()
-        case_type = getattr(case_row, "case_type", None)
         products = [
             product for product in products
             if _candidate_matches_case_product_line(product, case_type)
@@ -419,6 +446,11 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             pk = self.pk_repo.find_by_product(product.product_id)
             known_use_cases = pk.known_use_cases if pk else None
             evidences = self.evidence_repo.find_by_product(product.product_id)
+            product_market = getattr(product, "market_region", None)
+            decision_evidences = [
+                ev for ev in evidences
+                if self._evidence_matches_product_market(ev, product_market)
+            ]
             inv = self.inventory_repo.find_by_product(product.product_id)
             # Inventory is a V1 entry gate. Keep the service-level check as a
             # defense-in-depth invariant for alternate/test candidate providers.
@@ -437,7 +469,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             # Inventory quantity is availability-only and must not influence ranking.
             inventory_score = 1.0
             need_match = self._calculate_need_match(needs, known_use_cases)
-            evidence_score = self._compute_evidence_score(evidences)
+            evidence_score = self._compute_evidence_score(decision_evidences)
             evidence_list = [{
                 "evidence_id": ev.evidence_id,
                 "claim_id": ev.claim_id,
@@ -449,8 +481,8 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 "qa_status": ev.qa_status,
                 "claim": ev.claim,
                 "conflict_status": getattr(ev, "conflict_status", None),
-            } for ev in evidences]
-            existing_conflicts = self._existing_conflicts_from_evidence(evidences, product.product_id)
+            } for ev in decision_evidences]
+            existing_conflicts = self._existing_conflicts_from_evidence(decision_evidences, product.product_id)
             pk_snapshot = {}
             if pk:
                 pk_snapshot = {"known_use_cases": pk.known_use_cases, "claimed_benefits": pk.claimed_benefits, "contraindications": pk.contraindications, "ingredients": pk.ingredients}
@@ -474,6 +506,15 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             rationale = engine_result.get("rationale", "")
             trace_evidence_refs = list(engine_result.get("evidence_refs", []))
             trace_warnings = list(engine_result.get("warnings", []))
+            # PK incompleteness is disclosed and retained for later completion;
+            # it never changes eligibility or bypasses existing independent gates.
+            pk_completeness = evaluate_product_knowledge_completeness(
+                pk, evidences, product_market_region=getattr(product, "market_region", None)
+            )
+            pk_gap_report = pk_completeness["domain_report"]
+            trace_warnings.extend(consultation_gap_warnings(
+                pk_gap_report, pk_record_missing=pk_completeness["pk_record_missing"]
+            ))
             if eligibility != "ELIGIBLE" and not trace_warnings:
                 trace_warnings.append(f"Recommendation gated: {eligibility}")
             profile_fact_context = decision_state.get("profile_fact_context") or {}
@@ -485,6 +526,9 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 f"inferences={len(inferences)} | need_mappings={len(decision_state.get('need_mappings') or [])} | "
                 f"unmapped_need_factors={len(decision_state.get('unmapped_need_factors') or [])} | "
                 f"ambiguous_need_factors={len(decision_state.get('ambiguous_need_factors') or [])} | "
+                f"pk_completeness={pk_completeness['status']} | "
+                f"pk_missing_domains={json.dumps(pk_completeness['missing_domains'], ensure_ascii=False)} | "
+                f"contraindications_unreviewed={pk_completeness['contraindications_unreviewed']} | "
                 f"profile_fact_trace={json.dumps(profile_fact_context, ensure_ascii=False, sort_keys=True)}"
             )
             exclusion_reasons = ""

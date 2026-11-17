@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { getProduct, getProductEvidence, getProductKnowledge, listManageableProducts } from "../api/client";
-import type { EvidenceDTO, ProductDTO, ProductKnowledgeDTO } from "../types/api";
+import { getProduct, getProductEvidence, getProductKnowledge, getProductKnowledgeCompleteness, listManageableProducts } from "../api/client";
+import type { EvidenceDTO, ProductDTO, ProductKnowledgeDTO, ProductKnowledgeCompletenessDTO } from "../types/api";
 
 type Props = { onBack: () => void };
 
@@ -12,10 +12,13 @@ const labels: Array<[keyof ProductKnowledgeDTO, string]> = [
   ["contraindications", "محدودیت‌ها و احتیاط‌ها"],
   ["usage_instructions", "دستور مصرف"],
   ["manufacturer_claims", "ادعاهای سازنده"],
-  ["evidence_status", "وضعیت شواهد"],
+  ["other_attributes", "سایر ویژگی‌های ثبت‌شده"],
+  ["domain_evidence_status", "وضعیت شواهد به تفکیک حوزه"],
+  ["evidence_status", "وضعیت کلی شواهد"],
   ["knowledge_confidence", "اطمینان دانش"],
   ["evidence_refs", "مراجع شواهد"],
 ];
+
 
 function valueOrUnknown(value: unknown): string {
   if (value === null || value === undefined || value === "") return "ثبت نشده / نامشخص";
@@ -28,6 +31,7 @@ export default function SkinProductEncyclopedia({ onBack }: Props) {
   const [selectedId, setSelectedId] = useState("");
   const [product, setProduct] = useState<ProductDTO | null>(null);
   const [knowledge, setKnowledge] = useState<ProductKnowledgeDTO | null>(null);
+  const [completeness, setCompleteness] = useState<ProductKnowledgeCompletenessDTO | null>(null);
   const [evidence, setEvidence] = useState<EvidenceDTO[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -55,23 +59,24 @@ export default function SkinProductEncyclopedia({ onBack }: Props) {
 
   useEffect(() => {
     if (!selectedId) {
-      setProduct(null); setKnowledge(null); setEvidence([]);
+      setProduct(null); setKnowledge(null); setEvidence([]); setCompleteness(null);
       return;
     }
     let alive = true;
-    setLoadingDetail(true); setError(null); setKnowledgeError(null);
+    setLoadingDetail(true); setError(null); setKnowledgeError(null); setCompleteness(null);
     setProduct(null); setKnowledge(null); setEvidence([]);
     const token = sessionStorage.getItem("hbi_admin_access_token") ?? sessionStorage.getItem("hbi_access_token") ?? "";
     Promise.all([
       getProduct(selectedId),
       getProductEvidence(selectedId, token),
+      getProductKnowledgeCompleteness(selectedId, token),
       getProductKnowledge(selectedId, token).catch((e) => {
         if (alive) setKnowledgeError(e instanceof Error ? e.message : String(e));
         return null;
       }),
-    ]).then(([p, ev, pk]) => {
+    ]).then(([p, ev, report, pk]) => {
       if (!alive) return;
-      setProduct(p); setEvidence(Array.isArray(ev) ? ev : []); setKnowledge(pk);
+      setProduct(p); setEvidence(Array.isArray(ev) ? ev : []); setCompleteness(report); setKnowledge(pk);
     }).catch((e) => {
       if (alive) setError(e instanceof Error ? e.message : String(e));
     }).finally(() => { if (alive) setLoadingDetail(false); });
@@ -118,6 +123,14 @@ export default function SkinProductEncyclopedia({ onBack }: Props) {
         <section className="pro-product-card" aria-labelledby="skin-product-knowledge">
           <h2 id="skin-product-knowledge">دانش تجمیع‌شدهٔ واجد شرایط</h2>
           {knowledgeError ? <p className="pro-muted">ProductKnowledge قابل دریافت نیست: {knowledgeError}</p> : null}
+          <aside className="pro-product-card pro-pk-gap-panel" aria-label="نواقص اطلاعات محصول">
+            <h3>نواقص اطلاعات و تکمیل بعدی</h3>
+            <p className="pro-muted">کمبود این موارد به‌تنهایی مانع ارزیابی محصول نیست؛ در مشاوره، موارد ناقص به اپراتور/پزشک اعلام می‌شود.</p>
+            {completeness ? <ul className="pro-ol">{completeness.domain_report.map((item) => (
+              <li key={item.field}><strong>{item.label}</strong> · {item.status}<p className="pro-muted">{item.message}</p></li>
+            ))}</ul> : <p className="pro-muted">گزارش ارزیابی سمت سرور در دسترس نیست؛ وضعیت حوزه‌ها حدس زده نمی‌شود.</p>}
+            {completeness?.contraindications_unreviewed ? <p role="alert" className="pro-error">موارد منع مصرف در پرونده فعلی بررسی/تأیید نشده‌اند؛ این وضعیت به معنی نبود منع مصرف نیست.</p> : null}
+          </aside>
           {knowledge ? <dl>{labels.map(([key, label]) => <div key={key}><dt><strong>{label}</strong></dt><dd>{valueOrUnknown(knowledge[key])}</dd></div>)}</dl> : <p className="pro-muted">رکورد ProductKnowledge موجود یا قابل خواندن نیست؛ داده‌ای حدس زده نمی‌شود.</p>}
         </section>
         <section className="pro-product-card" aria-labelledby="skin-product-evidence">

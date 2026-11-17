@@ -11,6 +11,7 @@ from app.models.product import Product
 from app.models.product_knowledge import ProductKnowledge
 from app.models.profile_fact import ProfileFact
 from app.reasoning.scoring import MatchScoringEngine
+from app.services.need_normalization import map_phrase_to_canonical
 from app.services.profile_fact_context_service import ProfileFactContextService
 from app.services.skin_next_question_service import (
     FACTOR_KEY,
@@ -108,14 +109,18 @@ def test_missing_skin_input_produces_one_bounded_question(client, db_session):
     assert question["question_id"] == QUESTION_ID
     assert question["factor"] == FACTOR_KEY
     assert question["mode"] == "MISSING_INPUT"
-    assert len(question["options"]) == 6
+    assert len(question["options"]) == 10
     assert {item["value"] for item in question["options"]} == {
         "ضدآفتاب",
         "آبرسان",
+        "خشکی پوست",
         "لک صورت",
         "پوست حساس",
         "ضدچروک",
         "کنترل چربی",
+        "جوش",
+        "ترمیم سد پوستی",
+        "پاکسازی",
     }
     assert question["evidence_gap"]["status"] == "MISSING"
     assert question["evidence_gap"]["gap_id"] == f"{case.case_id}:{QUESTION_ID}"
@@ -314,3 +319,20 @@ def test_frozen_scoring_formula_is_unchanged():
     assert result["final_score"] == 1.0
     assert result["confidence"] == 1.0
     assert result["eligibility"] == "ELIGIBLE"
+
+
+def test_expanded_skin_menu_uses_existing_canonical_need_vocabulary():
+    expected = {
+        "ضدآفتاب": "sun_protection",
+        "آبرسان": "hydration",
+        "خشکی پوست": "dry_skin",
+        "لک صورت": "brightening",
+        "پوست حساس": "sensitivity",
+        "ضدچروک": "anti_aging",
+        "کنترل چربی": "oil_control",
+        "جوش": "acne_care",
+        "ترمیم سد پوستی": "barrier_repair",
+        "پاکسازی": "cleansing",
+    }
+    for phrase, canonical_id in expected.items():
+        assert map_phrase_to_canonical(phrase) == canonical_id

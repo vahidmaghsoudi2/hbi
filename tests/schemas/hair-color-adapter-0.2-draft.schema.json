@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hbi.local/schemas/hair-color-adapter-0.2-draft.schema.json",
+  "title": "HBI Hair Color Adapter Contract 0.2-draft",
+  "description": "Structural schema for the current isolated adapter envelope only. Cross-field invariants and recursive prohibited-field checks remain enforced by adapter.py. This schema is not a production protocol or scientific validation.",
+  "$defs": {
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "request": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "request_id",
+        "operation",
+        "case_ref",
+        "case_version",
+        "target_version",
+        "case_context",
+        "evidence_context",
+        "policy_context"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "0.2-draft"
+        },
+        "request_id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "operation": {
+          "enum": [
+            "EVALUATE_CASE",
+            "ANSWER_QUESTION",
+            "REEVALUATE"
+          ]
+        },
+        "case_ref": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "case_version": {
+          "$ref": "#/$defs/version"
+        },
+        "target_version": {
+          "$ref": "#/$defs/version"
+        },
+        "case_context": {
+          "type": "object",
+          "description": "Opaque case snapshot at this draft stage; detailed domain schema is intentionally unresolved."
+        },
+        "evidence_context": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "evidence_ref": {
+                "$ref": "#/$defs/nonEmptyString"
+              }
+            }
+          }
+        },
+        "policy_context": {
+          "type": "object",
+          "description": "Opaque policy snapshot; detailed policy schema is intentionally unresolved."
+        }
+      },
+      "additionalProperties": true
+    },
+    "response": {
+      "type": "object",
+      "required": [
+        "request_id",
+        "case_ref",
+        "evaluated_case_version",
+        "evaluated_target_version",
+        "engine_state",
+        "consultation_status",
+        "reason_codes",
+        "summary",
+        "options",
+        "missing_information",
+        "evidence_refs",
+        "limitations",
+        "next_step"
+      ],
+      "properties": {
+        "request_id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "case_ref": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "evaluated_case_version": {
+          "$ref": "#/$defs/version"
+        },
+        "evaluated_target_version": {
+          "$ref": "#/$defs/version"
+        },
+        "engine_state": {
+          "enum": [
+            "SUGGESTION_REVIEWABLE",
+            "CONDITIONAL_SUGGESTION",
+            "NEEDS_MORE_INFORMATION",
+            "STOP_OR_REFER_WITH_REASON"
+          ]
+        },
+        "consultation_status": {
+          "enum": [
+            "SYSTEM_REASONED_SUGGESTION",
+            "NEEDS_INFORMATION_OR_TEST",
+            "NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW",
+            "SAFETY_STOP_NO_EXECUTION_SUGGESTION",
+            "OUT_OF_V1_SCOPE"
+          ]
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "DATA_GAP",
+              "KNOWLEDGE_GAP",
+              "ENGINE_FAIL",
+              "CONFLICTING_DATA",
+              "SAFETY_CONCERN",
+              "OUT_OF_SCOPE",
+              "STALE_CASE_VERSION"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "summary": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "options": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "description": "Opaque candidate object; its domain schema is not approved."
+          }
+        },
+        "missing_information": {
+          "type": "array"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          },
+          "uniqueItems": true
+        },
+        "limitations": {
+          "type": "array"
+        },
+        "next_step": {
+          "type": "object",
+          "description": "Opaque next-step object; its domain schema is not approved."
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/request"
+    },
+    {
+      "$ref": "#/$defs/response"
+    }
+  ]
+}

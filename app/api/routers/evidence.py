@@ -13,6 +13,10 @@ from app.interface.schemas import (
 from app.interface.facades import EvidenceFacade, ProductKnowledgeFacade
 from app.models.user_role import ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN
 from app.services.evidence_mutation_log_service import EvidenceMutationLogService
+from app.models.product import Product
+from app.models.product_knowledge import ProductKnowledge
+from app.models.evidence import Evidence
+from app.domain.product_knowledge_gaps import evaluate_product_knowledge_completeness
 
 router = APIRouter()
 
@@ -55,8 +59,28 @@ async def get_product_knowledge(
     customer_id: str = Depends(get_current_customer_id),
 ):
     facade = ProductKnowledgeFacade(db)
-    dto = facade.get_by_product(product_id)
+    try:
+        dto = facade.get_by_product(product_id)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     return ProductKnowledgeResponse.model_validate(dto.__dict__)
+
+
+@router.get("/knowledge/{product_id}/completeness")
+async def get_product_knowledge_completeness(
+    product_id: str,
+    db: Session = Depends(get_db),
+    customer_id: str = Depends(get_current_customer_id),
+):
+    """Read-only server-side PK completeness report using product-scoped Evidence."""
+    product = db.query(Product).filter(Product.product_id == product_id).first()
+    if product is None:
+        raise HTTPException(status_code=404, detail=f"Product {product_id} not found")
+    knowledge = db.query(ProductKnowledge).filter(ProductKnowledge.product_id == product_id).first()
+    evidences = db.query(Evidence).filter(Evidence.product_id == product_id).all()
+    return evaluate_product_knowledge_completeness(
+        knowledge, evidences, product_market_region=getattr(product, "market_region", None)
+    )
 
 
 @router.post("/knowledge/{product_id}/refresh", response_model=ProductKnowledgeResponse)

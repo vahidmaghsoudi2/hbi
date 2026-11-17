@@ -24,6 +24,8 @@ def test_product_candidates_require_active_and_valid_qa():
         ("P-DRAFT", "DRAFT", "PENDING"),
         ("P-APPROVED", "APPROVED", "VALID"),
         ("P-ACTIVE-BAD-QA", "ACTIVE", "PENDING"),
+        ("P-ACTIVE-ZERO-STOCK", "ACTIVE", "VALID"),
+        ("P-ACTIVE-FULLY-RESERVED", "ACTIVE", "VALID"),
         ("P-ACTIVE", "ACTIVE", "VALID"),
     ]:
         db.add(Product(
@@ -35,12 +37,20 @@ def test_product_candidates_require_active_and_valid_qa():
             status=status,
         ))
     db.commit()
-    for pid in ("P-DRAFT", "P-APPROVED", "P-ACTIVE-BAD-QA", "P-ACTIVE"):
+    stock_rows = {
+        "P-DRAFT": (10, 0),
+        "P-APPROVED": (10, 0),
+        "P-ACTIVE-BAD-QA": (10, 0),
+        "P-ACTIVE-ZERO-STOCK": (0, 0),
+        "P-ACTIVE-FULLY-RESERVED": (5, 5),
+        "P-ACTIVE": (10, 0),
+    }
+    for pid, (available, reserved) in stock_rows.items():
         db.add(Inventory(
             inventory_id=f"INV-{pid}",
             product_id=pid,
-            quantity_available=10,
-            quantity_reserved=0,
+            quantity_available=available,
+            quantity_reserved=reserved,
             stock_status="AVAILABLE",
             sale_price_toman=0,
         ))

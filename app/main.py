@@ -15,7 +15,8 @@ from app.api.routers import (
     recommendations_router, inventory_router, sales_router, evidence_router,
     payments_router, returns_router, fx_router, reports_router,
     specialist_router, followups_router, outcome_assessments_router,
-    product_problem_links_router,
+    product_problem_links_router, hair_catalog_router, hair_dialogue_router,
+    acceptance_reports_router,
 )
 
 try:
@@ -131,6 +132,9 @@ app.include_router(specialist_router, prefix="/api/v1/specialist", tags=["Specia
 app.include_router(followups_router, prefix="/api/v1/followups", tags=["Follow-ups"])
 app.include_router(outcome_assessments_router, prefix="/api/v1/outcome-assessments", tags=["Outcome Assessments"])
 app.include_router(product_problem_links_router, prefix="/api/v1/product-problem-links", tags=["Product Problem Links"])
+app.include_router(hair_catalog_router, prefix="/api/v1/hair", tags=["Hair Catalog Identity"])
+app.include_router(hair_dialogue_router, prefix="/api/v1/hair", tags=["Hair Dialogue Runtime"])
+app.include_router(acceptance_reports_router, tags=["Acceptance Reports"])
 
 
 @app.get("/health", tags=["System"])

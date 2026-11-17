@@ -1,0 +1,37 @@
+--- a/frontend/src/pages/NewHomePage.tsx
++++ b/frontend/src/pages/NewHomePage.tsx
+@@ -1,5 +1,5 @@
+ import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+-import { Link, useNavigate } from "react-router-dom";
++import { Link } from "react-router-dom";
+ import {
+   listSellableProducts,
+   listManageableProducts,
+@@ -60,7 +60,6 @@
+ type PageView = "main" | "section" | "content";
+ 
+ export default function NewHomePage() {
+-  const navigate = useNavigate();
+   const [active, setActive] = useState<Panel>("home");
+   const [pageView, setPageView] = useState<PageView>("main");
+   const [mainSection, setMainSection] = useState<MainSection>("home");
+@@ -421,11 +420,6 @@
+       return;
+     }
+     setPageView(mainSection === "home" ? "main" : "section");
+-  }
+-
+-  function logout() {
+-    sessionStorage.clear();
+-    navigate("/login", { replace: true });
+   }
+ 
+   async function ensureSession(displayName: string, concernsForGuest: string) {
+@@ -817,7 +811,6 @@
+             {pageView !== "main" ? (
+               <button type="button" className="pro-btn-secondary" onClick={() => { setError(null); setReturnToDashboard(false); setReturnToCatalog(false); setPageView("main"); }}>منوی اصلی</button>
+             ) : null}
+-            <button type="button" className="pro-btn-secondary" onClick={logout}>خروج از حساب مدیر</button>
+             {pageView === "content" && !(mainSection === "home" && active === "home" && !returnToDashboard) ? (
+               <button type="button" className="pro-btn-secondary" onClick={backToNavigation}>
+                 {returnToDashboard ? "بازگشت به داشبورد" : returnToCatalog ? "بازگشت به فهرست محصولات" : mainSection === "home" ? "بازگشت به منوی اصلی" : "بازگشت به بخش"}
