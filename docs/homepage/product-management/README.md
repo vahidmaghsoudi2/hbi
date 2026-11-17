@@ -17,14 +17,25 @@
 | **[Issue #406](https://github.com/vahidmaghsoudi2/hbi/issues/406)** | تصمیم‌ها، مجوزها، Gateها |
 | **`docs/homepage/product-management/`** | مشخصات عملیاتی ورود/ویرایش محصول زیر هوم‌پیج |
 | **[PR #411](https://github.com/vahidmaghsoudi2/hbi/pull/411)** | دفتر پژوهش Product Knowledge (تابع؛ نه محل قالب UI) |
-| **دانشنامه** | نمایش/سازمان؛ SoR ورود محصول نیست |
+| **دانشنامه** | بانک اصلی دانش کسب‌وکار برای مسیر مشاوره (طبق تصمیم الزام‌آور زیر) |
+
+## تصمیم الزام‌آور (بخوانید)
+
+**[HBI-PO-DEC-ENCYCLOPEDIA-PRIMARY-KB-001](../../03_decision_log/HBI-PO-DEC-ENCYCLOPEDIA-PRIMARY-KB-001.md)** — 2026-11-17
+
+- تفسیر قدیمی «دانشنامه فقط نمایش/سازمان است و در مشاوره نقشی ندارد» **منسوخ** است.
+- دانشنامه باید به مسیر رسمی تصمیم سیستم وصل شود:
+  `دانشنامه تأییدشده → Evidence → ProductKnowledge → Recommendation`
+- ورود محصول همچنان برای هویت عملیاتی Product Master لازم است؛ جایگزین دانشنامه نیست.
 
 ## قواعد
 
 1. مشخصات قالب ورود پوست **فقط** در این پوشه به‌روز شود.
 2. کپی موازی در Issueهای پراکنده یا پوشه‌های دیگر ساخته نشود؛ در صورت نیاز فقط لینک به اینجا.
 3. این مستندات به‌تنهایی مجوز تغییر schema/API/فعال‌سازی محصول نیستند.
+4. هر طراحی جدید مرتبط با دانش محصول یا مشاوره باید به `HBI-PO-DEC-ENCYCLOPEDIA-PRIMARY-KB-001` لینک دهد و خلاف آن عمل نکند.
 
 ## پیوند بالا
 
 - هاب هوم‌پیج: [../README.md](../README.md)
+- Decision Log: [../../03_decision_log/DECISION_LOG_INDEX.md](../../03_decision_log/DECISION_LOG_INDEX.md)

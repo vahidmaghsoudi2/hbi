@@ -1,5 +1,5 @@
 # Decision Log Index
-Last Updated: 2026-09-16
+Last Updated: 2026-11-17
 
 Every major project decision is recorded as an ADR or PO Decision record.
 
@@ -18,5 +18,10 @@ Every major project decision is recorded as an ADR or PO Decision record.
 | **HBI-PO-DEC-GAP04-002** | **GAP-04 Option B — one current Recommendation per Case+Product; re-Generate updates** | **DECISION RESOLVED — IMPLEMENTED** | **2026-09-13** |
 | **HBI-PO-DEC-GAP05-001** | **GAP-05 L1 — Controlled Semantic Need Normalization Contract; Implementation NOT AUTHORIZED** | **RECORDED — CONTRACT COMPLETE** | **2026-09-14** |
 | **HBI-PO-DEC-IOV-001** | **IOV Policy V1.0 activation — ACTIVE / PO ACCEPTED; docs-only** | **DECISION RESOLVED — ACTIVE** | **2026-09-16** |
+| **HBI-PO-DEC-ENCYCLOPEDIA-PRIMARY-KB-001** | **دانشنامه = بانک اصلی دانش مشاوره؛ تفسیر display-only منسوخ است** | **DECIDED / PO ACCEPTED — BINDING** | **2026-11-17** |
 
 To add a new decision, create a file in this folder and add a row to the table above.
+
+## Active supersessions (read first)
+
+- **HBI-PO-DEC-ENCYCLOPEDIA-PRIMARY-KB-001** supersedes any older homepage/docs language that treats دانشنامه as merely human-readable or non-decisional. See the decision file for the required operating model: دانشنامه تأییدشده → Evidence → ProductKnowledge → Consultation.
