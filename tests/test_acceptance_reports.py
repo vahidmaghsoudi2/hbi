@@ -106,6 +106,8 @@ def test_acceptance_report_applies_phase0_policy_and_separates_stored_from_verif
     assert "EVIDENCE_VERSION_SCOPE_UNAVAILABLE" in item["eligibility_reasons"]
     assert item["latest_qa_decision"]["actor"] == "reviewer-1"
     assert item["latest_qa_decision"]["reason_status"] == "MISSING"
+    assert item["qa_decision_history_status"] == "INCOMPLETE"
+    assert any("no matching per-row QA decision audit record" in note for note in report["limitations"])
     assert report["product"]["product_qa"]["latest_qa_decision"]["qa_notes"] == "Reviewed"
     assert report["product"]["product_qa"]["latest_qa_decision"]["reason_status"] == "MISSING"
     assert report["knowledge"]["stored_content_fields"] == ["ingredients", "contraindications"]
