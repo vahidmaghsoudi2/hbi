@@ -14,19 +14,13 @@ from dataclasses import dataclass
 from datetime import datetime
 import re
 from typing import Literal
-from urllib.parse import unquote, urlparse
 
 
 LookupOutcome = Literal["MATCH", "MISMATCH", "INCONCLUSIVE", "STOP"]
 LookupStop = Literal["DATA_GAP", "KNOWLEDGE_GAP", "OUT_OF_DOMAIN", "ENGINE_FAIL"]
 
-_APPROVED_SOURCE_KIND = "RAEAKA_BIJOURKA_CATALOG"
+_APPROVED_SOURCE_KIND = "PO_APPROVED_BIJOURKA_CATALOG"
 _APPROVED_SOURCE_STATUS = "PO_APPROVED"
-_APPROVED_HOST = "raeaka.com"
-_APPROVED_PATHS = frozenset((
-    "/آلبوم-رنگ-مو-بیجورکا/",
-    "/product/رنگ-موی-بیجورکا-سِری-طبیعی-شماره-1-مشکی/",
-))
 _REQUIRED_IDENTITY_FIELDS = (
     "brand",
     "series",
@@ -76,31 +70,28 @@ class CatalogLookupResult:
 
 
 def _is_approved_reference(reference: CatalogReference) -> bool:
-    """Accept only the exact PO-approved Raeaka Bijourka catalog URL family."""
-    if (
-        not isinstance(reference.source_kind, str)
-        or not isinstance(reference.approval_status, str)
-        or reference.source_kind != _APPROVED_SOURCE_KIND
-        or reference.approval_status != _APPROVED_SOURCE_STATUS
-        or not isinstance(reference.url, str)
-    ):
-        return False
-    try:
-        parsed = urlparse(reference.url)
-    except (TypeError, ValueError):
-        return False
-    if parsed.scheme != "https" or parsed.hostname != _APPROVED_HOST:
-        return False
-    try:
-        port = parsed.port
-    except ValueError:
-        return False
-    if parsed.username or parsed.password or port not in (None, 443):
-        return False
-    if parsed.query or parsed.fragment:
-        return False
-    return unquote(parsed.path) in _APPROVED_PATHS
+    """Accept only a server-registered, PO-approved Bijourka identity snapshot.
 
+    The Product Owner's approval marker and HBI snapshot lineage establish
+    authority and version integrity. Publisher URL/edition metadata is not
+    required for this PO-owned catalog.
+    """
+    if not isinstance(reference, CatalogReference):
+        return False
+    return bool(
+        reference.source_kind == _APPROVED_SOURCE_KIND
+        and reference.approval_status == _APPROVED_SOURCE_STATUS
+        and isinstance(reference.url, str)
+        and reference.url.strip()
+        and isinstance(reference.snapshot_id, str)
+        and reference.snapshot_id.strip()
+        and isinstance(reference.ingestion_id, str)
+        and reference.ingestion_id.strip()
+        and reference.snapshot_validation_status == "VALIDATED_ON_LOAD"
+        and _valid_capture_timestamp(reference.snapshot_captured_at)
+        and isinstance(reference.content_sha256, str)
+        and re.fullmatch(r"[0-9a-fA-F]{64}", reference.content_sha256) is not None
+    )
 
 def _valid_capture_timestamp(value: str | None) -> bool:
     if not isinstance(value, str) or not value:
@@ -110,12 +101,6 @@ def _valid_capture_timestamp(value: str | None) -> bool:
     except ValueError:
         return False
     return parsed.tzinfo is not None and parsed.utcoffset() is not None
-
-
-def _valid_sha256(value: str | None) -> bool:
-    return value is None or (
-        isinstance(value, str) and re.fullmatch(r"[0-9a-fA-F]{64}", value) is not None
-    )
 
 
 def _missing_identity_fields(identity: CatalogIdentity) -> tuple[str, ...]:
@@ -137,9 +122,8 @@ def lookup_catalog_identity(
     """Compare exact catalog identity fields and return a traceable outcome.
 
     No trimming, case folding, aliases, fuzzy matching, inferred values, or
-    fallback to Product Master/GTIN are permitted. A missing edition label
-    (including the literal "نامشخص" or "unknown") prevents MATCH and yields
-    INCONCLUSIVE/KNOWLEDGE_GAP, while a known field conflict yields MISMATCH.
+    fallback to Product Master/GTIN are permitted. Missing or invalid HBI
+    snapshot lineage prevents MATCH; publisher edition metadata is not used.
     """
     if service_kind != "CATALOG_READY" or not isinstance(service_kind, str):
         return CatalogLookupResult(
@@ -169,8 +153,8 @@ def lookup_catalog_identity(
     if missing:
         return CatalogLookupResult(
             "STOP", "DATA_GAP", "REQUIRED_IDENTITY_FIELD_MISSING",
-            (), (), missing, reference.url, reference.edition_label,
-            reference.captured_at, reference.content_sha256, False,
+            (), (), missing, reference.url, reference.snapshot_id,
+            reference.snapshot_captured_at, reference.content_sha256, False,
         )
 
     matched = tuple(
@@ -182,37 +166,33 @@ def lookup_catalog_identity(
         if getattr(expected, field) != getattr(observed, field)
     )
 
-    traceability_complete = bool(
-        isinstance(reference.edition_label, str)
-        and reference.edition_label.strip()
-        and reference.edition_label.strip().casefold() not in ("unknown", "نامشخص")
-        and _valid_capture_timestamp(reference.captured_at)
-        and _valid_sha256(reference.content_sha256)
-    )
+    traceability_complete = _is_approved_reference(reference)
+    version_label = reference.snapshot_id
+    snapshot_captured_at = reference.snapshot_captured_at
 
     if not traceability_complete:
         reason = (
-            "CATALOG_EDITION_UNKNOWN_FIELD_CONFLICT_UNVERIFIED"
+            "CATALOG_SNAPSHOT_FIELD_CONFLICT_UNVERIFIED"
             if mismatched
-            else "CATALOG_EDITION_OR_CAPTURE_METADATA_INCOMPLETE"
+            else "CATALOG_SNAPSHOT_LINEAGE_INCOMPLETE"
         )
         return CatalogLookupResult(
             "INCONCLUSIVE", "KNOWLEDGE_GAP", reason,
-            matched, mismatched, (), reference.url, reference.edition_label,
-            reference.captured_at, reference.content_sha256, False,
+            matched, mismatched, (), reference.url, version_label,
+            snapshot_captured_at, reference.content_sha256, False,
         )
 
     if mismatched:
         return CatalogLookupResult(
             "MISMATCH", None, "CATALOG_IDENTITY_FIELD_CONFLICT",
-            matched, mismatched, (), reference.url, reference.edition_label,
-            reference.captured_at, reference.content_sha256, True,
+            matched, mismatched, (), reference.url, version_label,
+            snapshot_captured_at, reference.content_sha256, True,
         )
 
     return CatalogLookupResult(
         "MATCH", None, "EXACT_CATALOG_IDENTITY_MATCH",
-        matched, (), (), reference.url, reference.edition_label,
-        reference.captured_at, reference.content_sha256, True,
+        matched, (), (), reference.url, version_label,
+        snapshot_captured_at, reference.content_sha256, True,
     )
 
 
@@ -297,8 +277,8 @@ def catalog_lookup_idempotency_key(
         "source_kind", reference.source_kind,
         "approval_status", reference.approval_status,
         "source_url", reference.url,
-        "version_label", _edition_or_unversioned(reference.edition_label),
-        "captured_at", reference.captured_at,
+        "version_label", _edition_or_unversioned(reference.snapshot_id),
+        "captured_at", reference.snapshot_captured_at,
         "content_sha256", reference.content_sha256,
         "snapshot_id", reference.snapshot_id,
         "snapshot_captured_at", reference.snapshot_captured_at,
@@ -344,15 +324,15 @@ def build_catalog_decision_output(
     ):
         raise TypeError("evidence_reference_pointers must be a tuple of strings")
 
-    version_label = _edition_or_unversioned(reference.edition_label)
+    version_label = _edition_or_unversioned(reference.snapshot_id)
     if result.outcome in ("MATCH", "MISMATCH") and (
         version_label == _UNVERSIONED or not result.traceability_complete
     ):
         raise ValueError("definitive lookup outcomes require a traceable versioned reference")
     if result.outcome in ("MATCH", "MISMATCH") and (
         result.source_url != reference.url
-        or result.source_edition != reference.edition_label
-        or result.source_captured_at != reference.captured_at
+        or result.source_edition != reference.snapshot_id
+        or result.source_captured_at != reference.snapshot_captured_at
         or result.source_sha256 != reference.content_sha256
     ):
         raise ValueError("definitive lookup outcome metadata must match its reference")
@@ -374,7 +354,7 @@ def build_catalog_decision_output(
         source_url=reference.url,
         version_label=version_label,
         source_approval_status=reference.approval_status,
-        source_captured_at=reference.captured_at,
+        source_captured_at=reference.snapshot_captured_at,
         source_content_sha256=reference.content_sha256,
         traceability_complete=result.traceability_complete,
         provenance=tuple(provenance),
@@ -492,15 +472,17 @@ def decide_catalog_output_presentation(
         and output.source_approval_status == _APPROVED_SOURCE_STATUS
         and output.version_label != _UNVERSIONED
         and output.traceability_complete
-        and _valid_capture_timestamp(output.source_captured_at)
-        and _valid_sha256(output.source_content_sha256)
         and _is_approved_reference(CatalogReference(
             source_kind=output.source_kind,
             approval_status=output.source_approval_status,
             url=output.source_url,
-            edition_label=output.version_label,
-            captured_at=output.source_captured_at,
+            edition_label=None,
+            captured_at=None,
             content_sha256=output.source_content_sha256,
+            snapshot_id=output.snapshot_id,
+            snapshot_captured_at=output.snapshot_captured_at,
+            ingestion_id=output.ingestion_id,
+            snapshot_validation_status=output.snapshot_validation_status,
         ))
     )
     if not traceable:
@@ -508,7 +490,7 @@ def decide_catalog_output_presentation(
             "WITHHOLD_INCONCLUSIVE",
             False,
             "CATALOG_IDENTITY_NOT_VERIFIABLE",
-            "هویت قلم از مرجع نسخه‌دار و قابل‌ردیابی قابل تأیید نیست؛ نتیجهٔ قطعی نمایش داده نمی‌شود.",
+            "هویت قلم از Snapshot مورد تأیید Product Owner و دارای زنجیرهٔ یکپارچگی معتبر قابل تأیید نیست؛ نتیجهٔ قطعی نمایش داده نمی‌شود.",
         )
 
     if output.outcome == "MATCH":
@@ -516,14 +498,14 @@ def decide_catalog_output_presentation(
             "IDENTITY_MATCH_DISPLAYABLE",
             True,
             "CATALOG_IDENTITY_MATCH_ONLY",
-            "مشخصات این قلم با مرجع نسخه‌دار کاتالوگ تطبیق دارد. این نتیجه به‌معنی تأیید تناسب با فرد، ایمنی یا تضمین نتیجه نیست.",
+            "مشخصات این قلم با Snapshot مورد تأیید Product Owner از کاتالوگ Bijourka تطبیق دارد. این نتیجه به‌معنی تأیید تناسب با فرد، ایمنی یا تضمین نتیجه نیست.",
         )
     if output.outcome == "MISMATCH":
         return CatalogDisplayDecision(
             "IDENTITY_MISMATCH_DISPLAYABLE",
             True,
             "CATALOG_IDENTITY_MISMATCH_ONLY",
-            "مشخصات این قلم با مرجع نسخه‌دار کاتالوگ تطبیق ندارد؛ از این تطبیق برای انتخاب یا اجرای خدمت استفاده نشود.",
+            "مشخصات این قلم با Snapshot مورد تأیید Product Owner از کاتالوگ Bijourka تطبیق ندارد؛ از این تطبیق برای انتخاب یا اجرای خدمت استفاده نشود.",
         )
     if output.outcome == "INCONCLUSIVE":
         return CatalogDisplayDecision(

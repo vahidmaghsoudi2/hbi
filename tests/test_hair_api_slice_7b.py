@@ -31,12 +31,16 @@ def _synthetic_reference():
     assert loaded is not None
     _, approved_reference = loaded
     return CatalogReference(
-        source_kind="RAEAKA_BIJOURKA_CATALOG",
+        source_kind="PO_APPROVED_BIJOURKA_CATALOG",
         approval_status="PO_APPROVED",
-        url="https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/",
-        edition_label="SYNTHETIC-TEST-EDITION",
-        captured_at="2026-11-09T12:00:00+00:00",
+        url="hbi://po-approved/bijourka-catalog",
+        edition_label=None,
+        captured_at=None,
         content_sha256=approved_reference.content_sha256,
+        snapshot_id="synthetic-bijourka-snapshot-001",
+        snapshot_captured_at="2026-11-09T12:00:00+00:00",
+        ingestion_id="synthetic-bijourka-ingestion-001",
+        snapshot_validation_status="VALIDATED_ON_LOAD",
     )
 
 
@@ -73,7 +77,7 @@ class TestHairCatalogApiSlice7B:
         )
         assert response.status_code == 403
 
-    def test_server_csv_reference_is_loaded_but_unversioned_lookup_fails_closed(
+    def test_server_csv_reference_is_po_approved_and_identity_lookup_is_displayable(
         self, client, db_session
     ):
         _grant_po(db_session)
@@ -84,9 +88,10 @@ class TestHairCatalogApiSlice7B:
         )
         assert response.status_code == 200
         body = response.json()
-        assert body["status"] == "WITHHOLD_INCONCLUSIVE"
-        assert body["display_allowed"] is False
-        assert "نسخه‌دار و قابل‌ردیابی" in body["message"]
+        assert body["status"] == "IDENTITY_MATCH_DISPLAYABLE"
+        assert body["display_allowed"] is True
+        assert "Product Owner" in body["message"]
+        assert "ایمنی" in body["message"]
 
     def test_unapproved_expected_identity_is_not_accepted_as_catalog_baseline(
         self, client, db_session
@@ -111,7 +116,7 @@ class TestHairCatalogApiSlice7B:
         _grant_po(db_session)
         payload = _payload()
         payload["reference"] = {
-            "source_kind": "RAEAKA_BIJOURKA_CATALOG",
+            "source_kind": "PO_APPROVED_BIJOURKA_CATALOG",
             "approval_status": "PO_APPROVED",
             "edition_label": "claimed-edition",
             "captured_at": "2026-11-09T12:00:00+00:00",

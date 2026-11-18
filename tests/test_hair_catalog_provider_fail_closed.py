@@ -162,6 +162,8 @@ def _write_manifest(tmp_path, catalog_path, **overrides):
         "publisher_edition": None,
         "publisher_revision": None,
         "publisher_captured_at": None,
+        "catalog_authority": provider.CATALOG_AUTHORITY,
+        "catalog_identity_scope": provider.CATALOG_IDENTITY_SCOPE,
         "validation_policy": "REVALIDATE_ON_EVERY_LOAD",
         "expected_row_count": provider.EXPECTED_DATA_ROWS,
         "expected_column_count": len(provider.EXPECTED_HEADERS),
@@ -221,6 +223,32 @@ def test_provider_fails_closed_when_snapshot_timestamp_is_not_timezone_aware(
     catalog_path = _write_csv(tmp_path, _valid_csv())
     manifest_path = _write_manifest(
         tmp_path, catalog_path, snapshot_captured_at="2026-11-10T18:57:00"
+    )
+    monkeypatch.setattr(provider, "_catalog_path", lambda: catalog_path)
+    monkeypatch.setattr(provider, "_snapshot_manifest_path", lambda: manifest_path)
+
+    assert provider.load_approved_hair_catalog_reference() is None
+
+
+def test_provider_fails_closed_when_po_catalog_authority_marker_is_missing(
+    tmp_path, monkeypatch
+):
+    catalog_path = _write_csv(tmp_path, _valid_csv())
+    manifest_path = _write_manifest(
+        tmp_path, catalog_path, catalog_authority="UNAPPROVED"
+    )
+    monkeypatch.setattr(provider, "_catalog_path", lambda: catalog_path)
+    monkeypatch.setattr(provider, "_snapshot_manifest_path", lambda: manifest_path)
+
+    assert provider.load_approved_hair_catalog_reference() is None
+
+
+def test_provider_fails_closed_when_catalog_identity_scope_is_not_bijourka(
+    tmp_path, monkeypatch
+):
+    catalog_path = _write_csv(tmp_path, _valid_csv())
+    manifest_path = _write_manifest(
+        tmp_path, catalog_path, catalog_identity_scope="ALL_BRANDS"
     )
     monkeypatch.setattr(provider, "_catalog_path", lambda: catalog_path)
     monkeypatch.setattr(provider, "_snapshot_manifest_path", lambda: manifest_path)
