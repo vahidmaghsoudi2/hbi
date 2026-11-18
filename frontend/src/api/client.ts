@@ -427,10 +427,6 @@ export function approveProduct(productId: string, token: string): Promise<Produc
   return request<ProductDTO>(`/products/${encodeURIComponent(productId)}/approve`, { method: "POST" }, token);
 }
 
-export function activateProduct(productId: string, token: string): Promise<ProductDTO> {
-  return request<ProductDTO>(`/products/${encodeURIComponent(productId)}/activate`, { method: "POST" }, token);
-}
-
 export function rejectProduct(productId: string, reason: string, token: string): Promise<ProductDTO> {
   return request<ProductDTO>(`/products/${encodeURIComponent(productId)}/reject`, {
     method: "POST",
