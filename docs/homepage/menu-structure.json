@@ -275,6 +275,9 @@
       ],
       "consultation_eligibility": {
         "approved_product_information_required": true,
+        "po_approval_sets_product_status_to_active": true,
+        "separate_post_approval_activation_required": false,
+        "stock_in_requires_po_approved_product": true,
         "sellable_inventory_greater_than_zero_enters_consultation_candidate_set": true,
         "suitability_decided_by_consultation_engine_against_customer_context": true,
         "manual_consultation_activation_required": false
