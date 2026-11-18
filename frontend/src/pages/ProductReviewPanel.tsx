@@ -350,7 +350,7 @@ export default function ProductReviewPanel({
                 <button type="button" className="pro-btn-primary" disabled={busy} onClick={() => void run(
                   (opToken) => approveProduct(product.product_id, opToken),
                   "محصول با تأیید PO مستقیماً Active شد."
-                )}>تأیید PO و فعال‌سازی</button>
+                )}>تأیید نهایی PO</button>
               ) : null}
               {status === "APPROVED" ? (
                 <p className="pro-muted">وضعیت APPROVED مربوط به چرخهٔ قدیمی است؛ در مسیر فعلی، تأیید PO مستقیماً محصول را ACTIVE می‌کند.</p>
