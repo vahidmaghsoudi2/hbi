@@ -7,6 +7,8 @@
   "snapshot_captured_at": "2026-11-10T18:57:00Z",
   "capture_method": "HBI_REPOSITORY_ARTIFACT_REGISTRATION",
   "content_sha256": "1887a7d166164639e2c235a7144fe6b27b4861f5c36fac9af383bef14eec1212",
+  "publisher_source_capture_status": "NOT_CAPTURED",
+  "publisher_source_sha256": null,
   "publisher_edition": null,
   "publisher_revision": null,
   "publisher_captured_at": null,

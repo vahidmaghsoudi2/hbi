@@ -159,6 +159,8 @@ def _write_manifest(tmp_path, catalog_path, **overrides):
         "snapshot_captured_at": "2026-11-10T18:57:00Z",
         "capture_method": "HBI_REPOSITORY_ARTIFACT_REGISTRATION",
         "content_sha256": hashlib.sha256(raw).hexdigest(),
+        "publisher_source_capture_status": "NOT_CAPTURED",
+        "publisher_source_sha256": None,
         "publisher_edition": None,
         "publisher_revision": None,
         "publisher_captured_at": None,
@@ -221,6 +223,35 @@ def test_provider_fails_closed_when_snapshot_timestamp_is_not_timezone_aware(
     catalog_path = _write_csv(tmp_path, _valid_csv())
     manifest_path = _write_manifest(
         tmp_path, catalog_path, snapshot_captured_at="2026-11-10T18:57:00"
+    )
+    monkeypatch.setattr(provider, "_catalog_path", lambda: catalog_path)
+    monkeypatch.setattr(provider, "_snapshot_manifest_path", lambda: manifest_path)
+
+    assert provider.load_approved_hair_catalog_reference() is None
+
+
+def test_provider_fails_closed_if_manifest_claims_publisher_capture_without_workflow(
+    tmp_path, monkeypatch
+):
+    catalog_path = _write_csv(tmp_path, _valid_csv())
+    manifest_path = _write_manifest(
+        tmp_path,
+        catalog_path,
+        publisher_source_capture_status="CAPTURED",
+        publisher_source_sha256="a" * 64,
+    )
+    monkeypatch.setattr(provider, "_catalog_path", lambda: catalog_path)
+    monkeypatch.setattr(provider, "_snapshot_manifest_path", lambda: manifest_path)
+
+    assert provider.load_approved_hair_catalog_reference() is None
+
+
+def test_provider_fails_closed_if_publisher_source_hash_is_present_without_capture(
+    tmp_path, monkeypatch
+):
+    catalog_path = _write_csv(tmp_path, _valid_csv())
+    manifest_path = _write_manifest(
+        tmp_path, catalog_path, publisher_source_sha256="a" * 64
     )
     monkeypatch.setattr(provider, "_catalog_path", lambda: catalog_path)
     monkeypatch.setattr(provider, "_snapshot_manifest_path", lambda: manifest_path)
