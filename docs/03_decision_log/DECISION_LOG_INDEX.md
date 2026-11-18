@@ -1,10 +1,12 @@
 # Decision Log Index
-Last Updated: 2026-09-16
+Last Updated: 2026-11-18
 
 Every major project decision is recorded as an ADR or PO Decision record.
 
 | ID | Subject | Status | Date |
 |---|---|---|---|
+| **HBI-PO-DEC-THREE-PART-001** | **HBI's three-part model: ProductKnowledge + Customer Context + Intelligence & Response; simplicity-first product intake** | **PO DECIDED — DOCUMENTATION PR DRAFT** | **2026-11-18** |
+| HBI-PO-DEC-CKER-001 | Central Knowledge & Evidence Repository — historical proposal, superseded by HBI-PO-DEC-THREE-PART-001; do not use as current architecture | **SUPERSEDED** | 2026-11-18 |
 | ADR-001 | Use quoted table name Case due to reserved keyword | ACCEPTED | 1405-05-21 |
 | ADR-002 | Do not implement Evidence/ProductKnowledge in GATE 6-4B | ACCEPTED | 1405-05-21 |
 | ADR-003 | Use GitHub as Source of Truth for project memory | PROPOSED | 1405-05-22 (2026-08-13) |
