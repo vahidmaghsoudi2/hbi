@@ -54,9 +54,9 @@ The visible menu must not expose a separate «بررسی و تأیید QA» step
 
 ### Product and consultation eligibility rules
 
-- Only products with valid, completed and Product Owner-approved information may enter the product system and inventory.
+- Creating a Product Master DRAFT with zero inventory is permitted before final acceptance; it is a working record, not sellable stock or a consultation candidate.
+- Only completed, Product Owner-approved product information may proceed to operational use and stock-in.
 - A product with sellable inventory greater than zero automatically enters the set considered by consultation.
-- Expiry or a stop-sale condition means sellable inventory is zero; such a product is not included in the consultation candidate set.
 - The consultation engine, not a pre-filter, evaluates suitability for the current customer. It recommends a suitable product, excludes an unsuitable one with a reason, or reports uncertainty when information is insufficient.
 - No separate manual activation for consultation is required.
 
