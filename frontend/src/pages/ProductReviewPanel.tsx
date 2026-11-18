@@ -231,7 +231,7 @@ export default function ProductReviewPanel({
     <section className="pro-panel">
       <div className="pro-panel-head">
         <div>
-          <h1>بررسی پرونده محصول</h1>
+          <h1>پرونده محصول</h1>
           <p className="pro-lead">یک dossier عملیاتی برای همان Product Master؛ Transitionها را سرور انجام می‌دهد.</p>
         </div>
         <button
@@ -250,7 +250,7 @@ export default function ProductReviewPanel({
       {!product && !loading ? (
         <div className="pro-empty">
           <strong>محصولی برای بررسی انتخاب نشده است.</strong>
-          <p>از بخش «محصولات» یک Product را انتخاب کنید.</p>
+          <p>از «فهرست کالاها» یک محصول را انتخاب کنید.</p>
         </div>
       ) : null}
 
