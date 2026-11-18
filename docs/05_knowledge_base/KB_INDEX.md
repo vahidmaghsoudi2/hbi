@@ -1,40 +1,50 @@
 # ProductKnowledge Index
 
 **Last Updated:** 2026-11-18  
-**Architecture authority:** [HBI-PO-DEC-THREE-PART-001](../03_decision_log/HBI-PO-DEC-THREE-PART-001.md)
+**Architecture authority:** [HBI-PO-DEC-THREE-PART-001](../03_decision_log/HBI-PO-DEC-THREE-PART-001.md)  
+**Encyclopedia source-of-truth decision:** [HBI-PO-DEC-ENCYCLOPEDIA-PRIMARY-KB-001](https://github.com/vahidmaghsoudi2/hbi/issues/406#issuecomment-6989651765)
 
 ## Purpose
 
-ProductKnowledge is HBI's single bank of reliable, approved product information. It supplies the product facts that the Intelligence & Response part connects with Customer Context.
+ProductKnowledge is HBI's **single operational runtime bank** of accepted product information. It supplies the product facts that the Intelligence & Response part connects with Customer Context.
 
-This index locates the current product-information and related specialist records. It does not create a second product bank or change existing Product Master ownership.
+The human-curated source of truth for approved product knowledge is the Encyclopedia. This is a division of responsibility, not a second product bank or a fourth architecture pillar.
 
-## Product-information intake
+## Product-information path
 
-The Product Owner supplies the product and defines the required information, standards, scope and acceptance criteria. Multiple AI research systems collect and organize the requested information. Material that fails the stated requirements is corrected or rejected before acceptance. The Product Owner reviews and approves the completed information. Once approved, the product information is ready for entry into ProductKnowledge and use by HBI.
+`Approved Encyclopedia → Evidence / Source Traceability → ProductKnowledge → Consultation`
 
-Sources and supporting evidence remain traceable where relevant. They support the reliability of product information; they are not separate repositories or additional approval stages after PO approval.
+1. The Product Owner defines the product, scope, standards and acceptance criteria.
+2. Research and review organize the requested information through the Encyclopedia workflow.
+3. Approved product knowledge is maintained in the Encyclopedia, with links to original manufacturer, package, technical and relevant scientific sources.
+4. Original source documents are preserved and are not replaced by summaries.
+5. Evidence and Source Traceability support provenance and checking; they do not form a separate repository or approval stage.
+6. After PO approval, the accepted information is made available in ProductKnowledge for runtime use.
+
+**PO approval completes content acceptance. Do not add another content approval or QA gate after it.** Existing safety and lifecycle controls remain separate and unchanged.
 
 ## Canonical locations
 
 | Purpose | Canonical location | Responsibility |
 |---|---|---|
-| ProductKnowledge architecture and intake decision | [HBI-PO-DEC-THREE-PART-001](../03_decision_log/HBI-PO-DEC-THREE-PART-001.md) | Governing three-part model and simple product-intake path |
-| Curated product and domain knowledge | docs/homepage/encyclopedia/ | Human-readable organization and navigation of approved knowledge |
-| Skin product research dossiers | docs/homepage/encyclopedia/skin/PRODUCTS.md | Source-linked product research records; follow the governing product-intake acceptance direction |
-| Skin Problem Space | docs/product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md and linked working records | Specialist customer/problem-domain knowledge; do not duplicate it into ProductKnowledge |
-| Operational product knowledge | ProductKnowledge model and app/services/product_knowledge_service.py | Existing product-scoped runtime representation; current implementation status must be verified in code |
+| Architecture and intake decision | [HBI-PO-DEC-THREE-PART-001](../03_decision_log/HBI-PO-DEC-THREE-PART-001.md) | Governing three-part model |
+| Human-curated approved product knowledge | `docs/homepage/encyclopedia/` | Primary, live, editable reference for approved knowledge |
+| Skin product dossiers | [docs/homepage/encyclopedia/skin/PRODUCTS.md](../homepage/encyclopedia/skin/PRODUCTS.md) | Approved knowledge plus explicitly labeled research drafts and source links |
+| Supporting source traceability | `docs/07_evidence/EVIDENCE_INDEX.md` and existing Evidence records | Provenance and source checking; not a parallel bank |
+| Operational product knowledge | ProductKnowledge model and `app/services/product_knowledge_service.py` | Runtime representation consumed by HBI |
 | Product identity | Existing Product Master / Product records | Canonical product identity; not replaced by this index |
+| Original source documents | Manufacturer/package/technical/scientific source records | Primary evidence; preserve and link, never replace with a summary |
 
 ## Use rules
 
-1. ProductKnowledge is the product-information bank. Do not split it into parallel Evidence, Encyclopedia and QA repositories.
-2. Information must meet the PO's stated requirements and receive PO approval before it is accepted into ProductKnowledge.
-3. Keep source references and relevant limitations with the information so that important product facts can be traced and checked.
-4. Do not add a second approval or QA gate after the PO has accepted the prepared product information.
-5. Do not invent missing product facts. Mark uncertainty clearly and resolve it during research and review before acceptance.
-6. ProductKnowledge does not replace Product Master identity, inventory state, product lifecycle or other existing operational controls.
-7. ProductKnowledge is one of the three HBI architecture parts; Customer Context and Intelligence & Response are defined in the governing decision.
+1. The Encyclopedia is the primary human-curated source for approved product knowledge.
+2. ProductKnowledge is the one operational runtime bank; do not create another operational bank.
+3. Keep original source documents and relevant limitations traceable from the Encyclopedia.
+4. Distinguish `MANUFACTURER_CLAIM`, independent evidence, observation and inference; never silently upgrade a claim.
+5. Do not invent missing facts. Keep `UNKNOWN`, `CONFLICT` and partial coverage explicit.
+6. PO approval completes content acceptance; no duplicate post-approval content gate.
+7. ProductKnowledge does not replace Product Master identity, inventory state, product lifecycle or other existing operational controls.
+8. ProductKnowledge is one of the three HBI architecture parts; Customer Context and Intelligence & Response are defined in the governing decision.
 
 ## Historical note
 
