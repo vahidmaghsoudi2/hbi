@@ -5,6 +5,8 @@ import {
   getProduct,
   getProductEvidence,
   getProductMutationLog,
+  getInventoryByProduct,
+  getProductKnowledge,
   rejectProduct,
   resolveEvidenceConflict,
   setProductQa,
@@ -73,6 +75,8 @@ export default function ProductReviewPanel({
   const [rejectReason, setRejectReason] = useState("");
   const [conflictResolutionReason, setConflictResolutionReason] = useState("");
   const [selectedId, setSelectedId] = useState(productId ?? "");
+  const [inventoryInfo, setInventoryInfo] = useState<Record<string, unknown> | null>(null);
+  const [knowledgeHint, setKnowledgeHint] = useState<string | null>(null);
 
   const load = async (id: string) => {
     if (!id) {
