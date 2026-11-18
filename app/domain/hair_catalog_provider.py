@@ -54,6 +54,30 @@ EXPECTED_SERIES = (
     "ترکیبی",
     "واریاسیون",
 )
+# Exact raw shade-code membership for each series in the approved 88-row
+# identity snapshot. These are catalog membership constraints only; they do
+# not encode tone meaning, chemistry, lift, mixing ratios, or performance.
+EXPECTED_SERIES_CODES = {
+    "طبیعی": ("۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹", "۱۰"),
+    "طبیعی اکسترا": ("+۰۵", "+۰۶", "+۰۷", "+۰۸", "+۰۹"),
+    "خاکستری": ("۱.۱", "۴.۱", "۵.۱", "۶.۱", "۷.۱", "۸.۱", "۹.۱", "۱۰.۱"),
+    "دودی": ("۶.۲", "۷.۲", "۸.۲", "۹.۲", "۱۰.۲"),
+    "زیتونی": ("۵.۳", "۶.۳", "۷.۳", "۸.۳", "۹.۳", "۱۰.۳"),
+    "طلایی": ("۵.۵", "۶.۵", "۷.۵", "۸.۵", "۹.۵", "۱۰.۵"),
+    "بژ": ("۷.۳۱", "۸.۳۱", "۹.۳۱", "۱۰.۳۱"),
+    "نسکافه ای": ("۶.۷", "۷.۷", "۸.۷", "۹.۷"),
+    "آلبالویی": ("۵.۶", "۶.۶", "۷.۶"),
+    "شکلاتی": ("۵.۵۳", "۶.۵۳", "۷.۵۳", "۸.۵۳"),
+    "عسلی": ("۶.۵۴", "۷.۵۴", "۸.۵۴"),
+    "فندقی": ("۵.۶۵", "۶.۶۵", "۷.۶۵", "۸.۶۵"),
+    "شرابی": ("۴.۲۰", "۵.۲۰", "۶.۲۰", "۷.۲۰"),
+    "قرمز": ("۵.۶۲", "۶.۴۵", "۶.۴۶", "RE.7"),
+    "عروسکی": ("۸.۵۶", "۸.۵۷", "۸.۵۳۱"),
+    "بیسکویتی": ("۶.۷۳", "۸.۷۳"),
+    "کاپوچینو": ("۶.۷۵", "۸.۷۵"),
+    "ترکیبی": ("BI.1", "BI.2", "BI.3", "BI.4", "BI.5", "BI.6", "BI.7", "BI.8"),
+    "واریاسیون": ("۰۰۰", "۰۰۲", "۰۰۴"),
+}
 REFERENCE_URL = "https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/"
 
 
@@ -139,6 +163,14 @@ def _read_validated_catalog() -> tuple[bytes, list[dict[str, str]]] | None:
     if any(tuple(row.keys()) != EXPECTED_HEADERS for row in rows):
         return None
     if {row["سری محصول"] for row in rows} != set(EXPECTED_SERIES):
+        return None
+    actual_series_codes: dict[str, set[str]] = {series: set() for series in EXPECTED_SERIES}
+    for row in rows:
+        actual_series_codes[row["سری محصول"]].add(row["شماره رنگ"])
+    if any(
+        actual_series_codes[series] != set(EXPECTED_SERIES_CODES[series])
+        for series in EXPECTED_SERIES
+    ):
         return None
 
     seen: set[tuple[str, ...]] = set()
