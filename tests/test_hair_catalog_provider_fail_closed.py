@@ -140,7 +140,7 @@ def test_provider_accepts_only_exact_identity_present_in_approved_csv(tmp_path, 
         CatalogIdentity(
             brand="Brand-0",
             series=provider.EXPECTED_SERIES[0],
-            shade_number="1",
+            shade_number="۱",
             shade_name="Shade-0",
         )
     )
@@ -154,7 +154,7 @@ def test_provider_membership_uses_three_field_key_not_descriptive_shade_name(tmp
         CatalogIdentity(
             brand="Brand-0",
             series=provider.EXPECTED_SERIES[0],
-            shade_number="1",
+            shade_number="۱",
             shade_name="Different descriptive label",
         )
     )
