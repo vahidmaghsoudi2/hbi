@@ -1,4 +1,4 @@
-import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+﻿import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   listSellableProducts,
@@ -862,9 +862,9 @@ export default function NewHomePage() {
               <article className="pro-product-card"><h2>مشتریان</h2><p className="pro-muted">پروفایل، جست‌وجو و سابقهٔ خرید مشتری.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("customers")}>ورود به مشتریان</button></article>
               <article className="pro-product-card"><h2>مشاوره</h2><p className="pro-muted">ثبت مسئله، بررسی نیاز و مشاهده پیشنهادهای واجد شرایط.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("consultation")}>ورود به مشاوره</button></article>
               <article className="pro-product-card"><h2>فروش</h2><p className="pro-muted">ثبت فروش؛ مشاوره پیش‌نیاز فروش مستقیم نیست.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("sales")}>ورود به فروش</button></article>
-              <article className="pro-product-card"><h2>مدیریت محصولات</h2><p className="pro-muted">فهرست، ورود اطلاعات و بررسی QA؛ مستقل از ورود فیزیکی موجودی.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("products")}>ورود به مدیریت محصولات</button></article>
-              <article className="pro-product-card"><h2>کالا و موجودی</h2><p className="pro-muted">مشاهده موجودی و گردش‌های انبار؛ جدا از مدیریت اطلاعات و تأیید محصول.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("inventory")}>ورود به کالا و موجودی</button></article>
-              <article className="pro-product-card"><h2>خرید</h2><p className="pro-muted">ثبت خرید و ورود فیزیکی موجودی.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("purchases")}>ورود به خرید</button></article>
+              <article className="pro-product-card"><h2>مدیریت محصولات</h2><p className="pro-muted">فهرست کالاها نقطهٔ شروع است؛ ورود، تکمیل ویژگی‌ها و پروندهٔ همان محصول در یک جریان واحد — جدا از ورود فیزیکی موجودی.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("products")}>ورود به مدیریت محصولات</button></article>
+              <article className="pro-product-card"><h2>کالا و موجودی</h2><p className="pro-muted">عملیات انبار و گردش موجودی؛ تعریف و تکمیل مشخصات محصول در «مدیریت محصولات» انجام می‌شود.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("inventory")}>ورود به کالا و موجودی</button></article>
+              <article className="pro-product-card"><h2>خرید</h2><p className="pro-muted">جریان تأمین و ورود فیزیکی موجودی؛ مشخصات محصول اینجا تعریف نمی‌شود. Stock-In طبق Backend فقط برای محصول تأییدشده مجاز است.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("purchases")}>ورود به خرید</button></article>
               <article className="pro-product-card"><h2>حسابداری و گزارش‌ها</h2><p className="pro-muted">گزارش فروش و مالی؛ گزارش موجودی و گردش کالا در بخش «کالا و موجودی» قرار دارد.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("reports")}>ورود به حسابداری و گزارش‌ها</button></article>
               <article className="pro-product-card"><h2>دانشنامه</h2><p className="pro-muted">دسترسی مرکزی به دانش پوست، مو، ادکلن، رنگ مو، آرایش، ابزار و سایر موضوعات.</p><button type="button" className="pro-btn-primary" onClick={() => openMainSection("encyclopedia")}>ورود به دانشنامه</button></article>
             </div>
@@ -1550,3 +1550,4 @@ export default function NewHomePage() {
     </div>
   );
 }
+
