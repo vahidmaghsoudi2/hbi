@@ -15,8 +15,8 @@
 ## نقشهٔ حوزه‌ها
 
 | حوزه | تصمیم / مجوز (Issue) | کار جاری / شواهد (PR یا دفتر) | مستندات ماندگار (`docs/`) | وضعیت (خلاصه) |
-| دانش و Evidence مرکزی HBI | [HBI-PO-DEC-CKER-001](../03_decision_log/HBI-PO-DEC-CKER-001.md) | Evidence runtime و دفترهای منبع موجود | [معماری](../02_architecture/HBI_ARCHITECTURE.md)، [KB](../05_knowledge_base/KB_INDEX.md)، [Evidence](../07_evidence/EVIDENCE_INDEX.md)، [دانشنامه](../homepage/encyclopedia/README.md) | **PO DECIDED — مستندات در Draft PR** |
 |------|----------------------|--------------------------------|---------------------------|----------------|
+| دانش و Evidence مرکزی HBI | [HBI-PO-DEC-CKER-001](../03_decision_log/HBI-PO-DEC-CKER-001.md) | Evidence runtime و دفترهای منبع موجود | [معماری](../02_architecture/HBI_ARCHITECTURE.md)، [KB](../05_knowledge_base/KB_INDEX.md)، [Evidence](../07_evidence/EVIDENCE_INDEX.md)، [دانشنامه](../homepage/encyclopedia/README.md) | **PO DECIDED — مستندات در Draft PR** |
 | ویژگی‌ها و توانمندی‌های محصول | [Issue #406](https://github.com/vahidmaghsoudi2/hbi/issues/406) | [PR #411](https://github.com/vahidmaghsoudi2/hbi/pull/411) | در صورت نیاز بعداً زیر `docs/` لینک می‌شود؛ تصمیم‌ها در #406 می‌مانند | Gate 0: **PARTIAL** (طبق #406؛ تأیید نهایی نشده) |
 | هوم‌پیج (عملیاتی / منو) | تصمیم‌های سیاستی مرتبط → [#406](https://github.com/vahidmaghsoudi2/hbi/issues/406) در صورت نیاز | — | [`docs/homepage/`](../homepage/README.md) (پس از ادغام PR #436) | اسکلت + پروتوتایپ مستنداتی؛ مسیر کاربر عمدتاً **NOT RUN** |
 | ورود / ثبت محصول (Intake) | [Issue #283](https://github.com/vahidmaghsoudi2/hbi/issues/283) و مرتبط | PRهای مستنداتی Intake در صورت باز بودن | `docs/product-intake/` و `docs/product-intake-knowledge-registry/` | طبق قرارداد و دفترهای همان حوزه؛ G8 جدا |
