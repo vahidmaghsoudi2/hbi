@@ -83,21 +83,6 @@ def test_c01_formula_helpers():
 def test_successful_stock_in(session):
     _seed(session, qty=5)
     svc = StockInService(session)
-
-@pytest.mark.parametrize("status", ["DRAFT", "SUBMITTED", "QA_REVIEW", "APPROVED", "REJECTED"])
-def test_stock_in_rejects_unapproved_product_status(session, status):
-    _seed(session, qty=5, status=status)
-    with pytest.raises(ValueError, match="Stock-In requires Product Owner-approved ACTIVE product"):
-        StockInService(session).stock_in(
-            product_id="P-SI-1",
-            quantity=2,
-            purchase_price_usd=10.0,
-            fx_rate_usd_to_irr=1_000_000.0,
-        )
-    assert session.get(Inventory, "INV-P-SI-1").quantity_available == 5
-    assert session.query(StockMovement).filter_by(product_id="P-SI-1").count() == 0
-
-
     result = svc.stock_in(
         product_id="P-SI-1",
         quantity=3,
@@ -114,6 +99,20 @@ def test_stock_in_rejects_unapproved_product_status(session, status):
     assert mov.quantity_after == 8
     assert mov.product_id == "P-SI-1"
     assert mov.inventory_id == "INV-P-SI-1"
+
+
+@pytest.mark.parametrize("status", ["DRAFT", "SUBMITTED", "QA_REVIEW", "APPROVED", "REJECTED"])
+def test_stock_in_rejects_unapproved_product_status(session, status):
+    _seed(session, qty=5, status=status)
+    with pytest.raises(ValueError, match="Stock-In requires Product Owner-approved ACTIVE product"):
+        StockInService(session).stock_in(
+            product_id="P-SI-1",
+            quantity=2,
+            purchase_price_usd=10.0,
+            fx_rate_usd_to_irr=1_000_000.0,
+        )
+    assert session.get(Inventory, "INV-P-SI-1").quantity_available == 5
+    assert session.query(StockMovement).filter_by(product_id="P-SI-1").count() == 0
 
 
 def test_inventory_quantity_increase(session):
