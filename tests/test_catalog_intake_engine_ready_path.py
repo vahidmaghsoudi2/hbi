@@ -27,7 +27,7 @@ PID = "P_CATALOG_INTAKE_E2E_001"
 
 def test_governed_intake_reaches_engine_ready_and_recommendation(db_session):
     """create → submit → QA_REVIEW → identity VERIFIED → claim Evidence +
-    ProductKnowledge → QA VALID → readiness → APPROVE → ACTIVATE → rec.
+    ProductKnowledge → QA VALID → readiness → PO APPROVE (direct ACTIVE) → stock-in → rec.
     """
     svc = ProductService(db_session)
     transitions = ProductTransitionService(db_session)
@@ -110,8 +110,7 @@ def test_governed_intake_reaches_engine_ready_and_recommendation(db_session):
     readiness = EvidenceReadinessService(db_session).evaluate(PID)
     assert readiness.ready is True, readiness.summary
 
-    assert transitions.approve(PID, "po_catalog", PO).status == "APPROVED"
-    assert transitions.activate(PID, "po_catalog", PO).status == "ACTIVE"
+    assert transitions.approve(PID, "po_catalog", PO).status == "ACTIVE"
 
     # Recommendation candidates must have a separately recorded physical receipt.
     stock = StockInService(db_session).stock_in(

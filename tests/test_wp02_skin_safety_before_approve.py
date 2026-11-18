@@ -93,7 +93,7 @@ def test_skin_verified_contraindication_allows_approve(db_session):
     result = SkinSafetyMinimumService(db_session).evaluate(pid)
     assert result.satisfied is True
     assert "E-SKIN-VALID-SAFE" in result.matching_evidence_ids
-    assert ProductTransitionService(db_session).approve(pid, "po", {ROLE_PO}).status == "APPROVED"
+    assert ProductTransitionService(db_session).approve(pid, "po", {ROLE_PO}).status == "ACTIVE"
 
 
 def test_skin_explicit_unknown_allows_approve(db_session):
@@ -113,7 +113,7 @@ def test_skin_explicit_unknown_allows_approve(db_session):
     result = SkinSafetyMinimumService(db_session).evaluate(pid)
     assert result.satisfied is True
     assert "E-SKIN-UNKNOWN-SAFE" in result.matching_evidence_ids
-    assert ProductTransitionService(db_session).approve(pid, "po", {ROLE_PO}).status == "APPROVED"
+    assert ProductTransitionService(db_session).approve(pid, "po", {ROLE_PO}).status == "ACTIVE"
 
 
 @pytest.mark.parametrize("qa", ["PENDING", "NEEDS_REVIEW", "REJECTED"])
@@ -211,31 +211,6 @@ def test_non_skin_is_not_forced_through_skin_gate(db_session):
     assert result.satisfied is True
     assert "NOT_APPLICABLE" in result.summary
 
-    assert ProductTransitionService(db_session).approve(pid, "po", {ROLE_PO}).status == "APPROVED"
+    assert ProductTransitionService(db_session).approve(pid, "po", {ROLE_PO}).status == "ACTIVE"
 
 
-def test_activate_rechecks_skin_safety(db_session):
-    pid = "WP02-SKIN-ACTIVATE"
-    _product(db_session, pid, status="APPROVED")
-    _ready(db_session, pid, "E-SKIN-ACTIVATE-READY")
-
-    with pytest.raises(ValidationError, match="Skin safety minimum"):
-        ProductTransitionService(db_session).activate(pid, "po", {ROLE_PO})
-
-    _ev(
-        db_session,
-        eid="E-SKIN-ACTIVATE-SAFE",
-        pid=pid,
-        field="contraindications",
-        claim="UNKNOWN",
-        claim_type="UNKNOWN",
-        qa="VERIFIED",
-    )
-    assert ProductTransitionService(db_session).activate(pid, "po", {ROLE_PO}).status == "ACTIVE"
-
-
-def test_existing_hair_path_preserves_activation_behavior(db_session):
-    pid = "WP02-HAIR-ACTIVATE"
-    _product(db_session, pid, product_line="HAIR", status="APPROVED")
-    _ready(db_session, pid, "E-HAIR-ACTIVATE-READY")
-    assert ProductTransitionService(db_session).activate(pid, "po", {ROLE_PO}).status == "ACTIVE"

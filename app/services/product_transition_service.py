@@ -5,7 +5,7 @@ from typing import Optional, Set
 from sqlalchemy.orm import Session
 from app.core.exceptions import NotFoundError, ValidationError
 from app.core.governance import (
-    ACTION_ACTIVATE, ACTION_APPROVE, ACTION_ARCHIVE, ACTION_ENTER_QA_REVIEW,
+    ACTION_APPROVE, ACTION_ARCHIVE, ACTION_ENTER_QA_REVIEW,
     ACTION_IDENTITY_CHANGE, ACTION_QA_CHANGE, ACTION_REJECT, ACTION_SUBMIT,
     ALLOWED_TRANSITIONS, TRANSITION_ROLES,
 )
@@ -93,28 +93,6 @@ class ProductTransitionService:
         if not reason or not str(reason).strip():
             raise ValidationError("REJECT requires non-empty reason")
         return self._transition(product_id, ACTION_REJECT, actor_id, roles, reason=reason.strip())
-
-    def activate(self, product_id, actor_id, roles):
-        product = self._get_product(product_id)
-        if product.status != "APPROVED":
-            raise ValidationError("ACTIVATE requires status=APPROVED")
-        if ROLE_PO not in roles:
-            raise ValidationError("ACTIVATE requires PO role")
-        if product.qa_verdict != "VALID":
-            raise ValidationError("ACTIVATE requires qa_verdict=VALID")
-        if product.identity_status != "VERIFIED":
-            raise ValidationError("ACTIVATE requires identity_status=VERIFIED")
-        if product.product_line == "SKIN":
-            safety = self.skin_safety.evaluate(product_id)
-            if not safety.satisfied:
-                raise ValidationError(f"Skin safety minimum FAIL: {safety.summary}")
-        readiness = self.readiness.evaluate(product_id)
-        if not readiness.ready:
-            raise ValidationError(f"Evidence Readiness FAIL: {readiness.summary}")
-        d3 = self.d3_policy.evaluate_for_qa_valid(product_id)
-        if not d3.allowed:
-            raise ValidationError(d3.summary)
-        return self._transition(product_id, ACTION_ACTIVATE, actor_id, roles)
 
     def archive(self, product_id, actor_id, roles, reason=None):
         return self._transition(product_id, ACTION_ARCHIVE, actor_id, roles, reason=reason)

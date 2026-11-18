@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  activateProduct,
   approveProduct,
   enterProductQaReview,
   getProduct,
@@ -332,8 +331,7 @@ export default function ProductReviewPanel({
             <div className="pro-tags" style={{ marginBottom: "0.75rem" }}>
               <span className="pro-tag">DRAFT → SUBMITTED</span>
               <span className="pro-tag">SUBMITTED → QA_REVIEW</span>
-              <span className="pro-tag">QA_REVIEW → APPROVED</span>
-              <span className="pro-tag">APPROVED → ACTIVE</span>
+              <span className="pro-tag">QA_REVIEW → ACTIVE (با تأیید PO)</span>
             </div>
             <div className="pro-actions">
               {status === "DRAFT" ? (
@@ -351,14 +349,11 @@ export default function ProductReviewPanel({
               {status === "QA_REVIEW" ? (
                 <button type="button" className="pro-btn-primary" disabled={busy} onClick={() => void run(
                   (opToken) => approveProduct(product.product_id, opToken),
-                  "محصول Approved شد."
-                )}>Approve</button>
+                  "محصول با تأیید PO مستقیماً Active شد."
+                )}>تأیید نهایی PO</button>
               ) : null}
               {status === "APPROVED" ? (
-                <button type="button" className="pro-btn-primary" disabled={busy} onClick={() => void run(
-                  (opToken) => activateProduct(product.product_id, opToken),
-                  "محصول Active شد."
-                )}>Activate</button>
+                <p className="pro-muted">وضعیت APPROVED مربوط به چرخهٔ قدیمی است؛ در مسیر فعلی، تأیید PO مستقیماً محصول را ACTIVE می‌کند.</p>
               ) : null}
             </div>
           </fieldset>
