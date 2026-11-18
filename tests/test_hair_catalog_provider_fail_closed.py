@@ -14,7 +14,7 @@ def _valid_csv(row_count: int = provider.EXPECTED_DATA_ROWS) -> str:
     for index in range(row_count):
         values = [
             f"Brand-{index}",
-            f"Series-{index}",
+            provider.EXPECTED_SERIES[index % len(provider.EXPECTED_SERIES)],
             str(index + 1),
             f"Shade-{index}",
             "Synthetic specification",
@@ -32,6 +32,19 @@ def _write_csv(tmp_path, content: str):
 
 def test_provider_fails_closed_when_catalog_has_wrong_row_count(tmp_path, monkeypatch):
     path = _write_csv(tmp_path, _valid_csv(row_count=provider.EXPECTED_DATA_ROWS - 1))
+    monkeypatch.setattr(provider, "_catalog_path", lambda: path)
+
+    assert provider.load_approved_hair_catalog_reference() is None
+
+
+def test_provider_fails_closed_when_catalog_series_set_is_changed(tmp_path, monkeypatch):
+    rows = list(csv.reader(_valid_csv().splitlines()))
+    rows[1][1] = "Unapproved-Series"
+    from io import StringIO
+
+    buffer = StringIO()
+    csv.writer(buffer, lineterminator="\n").writerows(rows)
+    path = _write_csv(tmp_path, buffer.getvalue())
     monkeypatch.setattr(provider, "_catalog_path", lambda: path)
 
     assert provider.load_approved_hair_catalog_reference() is None
@@ -96,9 +109,23 @@ def test_provider_accepts_only_exact_identity_present_in_approved_csv(tmp_path, 
     assert provider.approved_catalog_contains_identity(
         CatalogIdentity(
             brand="Brand-0",
-            series="Series-0",
+            series=provider.EXPECTED_SERIES[0],
             shade_number="1",
             shade_name="Shade-0",
+        )
+    )
+
+
+def test_provider_membership_uses_three_field_key_not_descriptive_shade_name(tmp_path, monkeypatch):
+    path = _write_csv(tmp_path, _valid_csv())
+    monkeypatch.setattr(provider, "_catalog_path", lambda: path)
+
+    assert provider.approved_catalog_contains_identity(
+        CatalogIdentity(
+            brand="Brand-0",
+            series="Series-0",
+            shade_number="1",
+            shade_name="Different descriptive label",
         )
     )
 

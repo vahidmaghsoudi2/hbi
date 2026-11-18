@@ -31,7 +31,29 @@ EXPECTED_HEADERS = (
     "مشخصات قلم محصول",
     "حجم محصول",
 )
-IDENTITY_COLUMNS = ("برند", "سری محصول", "شماره رنگ", "نام رنگ")
+IDENTITY_COLUMNS = ("برند", "سری محصول", "شماره رنگ")
+REQUIRED_ROW_COLUMNS = IDENTITY_COLUMNS + ("نام رنگ",)
+EXPECTED_SERIES = (
+    "طبیعی",
+    "طبیعی اکسترا",
+    "خاکستری",
+    "دودی",
+    "زیتونی",
+    "طلایی",
+    "بژ",
+    "نسکافه ای",
+    "آلبالویی",
+    "شکلاتی",
+    "عسلی",
+    "فندقی",
+    "شرابی",
+    "قرمز",
+    "عروسکی",
+    "بیسکویتی",
+    "کاپوچینو",
+    "ترکیبی",
+    "واریاسیون",
+)
 REFERENCE_URL = "https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/"
 
 
@@ -116,12 +138,14 @@ def _read_validated_catalog() -> tuple[bytes, list[dict[str, str]]] | None:
         return None
     if any(tuple(row.keys()) != EXPECTED_HEADERS for row in rows):
         return None
+    if {row["سری محصول"] for row in rows} != set(EXPECTED_SERIES):
+        return None
 
     seen: set[tuple[str, ...]] = set()
     for row in rows:
         if any(
             not isinstance(row.get(column), str) or not row[column].strip()
-            for column in IDENTITY_COLUMNS
+            for column in REQUIRED_ROW_COLUMNS
         ):
             return None
         identity = tuple(row[column] for column in IDENTITY_COLUMNS)
@@ -159,7 +183,6 @@ def approved_catalog_contains_identity(
         identity.brand,
         identity.series,
         identity.shade_number,
-        identity.shade_name,
     )
     if any(not isinstance(value, str) or not value.strip() for value in values):
         return False

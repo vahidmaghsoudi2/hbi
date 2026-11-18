@@ -47,9 +47,13 @@ def reference(**changes):
         source_kind="RAEAKA_BIJOURKA_CATALOG",
         approval_status="PO_APPROVED",
         url=URL,
-        edition_label="synthetic-test-edition-1",
-        captured_at=CAPTURE,
+        edition_label=None,
+        captured_at=None,
         content_sha256=SHA,
+        snapshot_id="hbi-hair-catalog-snapshot-test-001",
+        snapshot_captured_at="2026-11-10T18:57:00Z",
+        ingestion_id="hbi-hair-catalog-ingestion-test-001",
+        snapshot_validation_status="VALIDATED_ON_LOAD",
     )
     values.update(changes)
     return CatalogReference(**values)
@@ -135,25 +139,34 @@ class TestCatalogLookup(unittest.TestCase):
         result = lookup()
         self.assertEqual(result.outcome, "MATCH")
         self.assertTrue(result.traceability_complete)
-        self.assertEqual(result.matched_fields, ("brand", "series", "shade_number", "shade_name"))
+        self.assertEqual(result.matched_fields, ("brand", "series", "shade_number"))
 
     def test_versioned_field_conflict_is_mismatch(self):
-        result = lookup(observed=identity(shade_name="قهوه‌ای"))
+        result = lookup(observed=identity(shade_number="2"))
         self.assertEqual(result.outcome, "MISMATCH")
-        self.assertIn("shade_name", result.mismatched_fields)
+        self.assertIn("shade_number", result.mismatched_fields)
 
-    def test_unknown_edition_is_inconclusive(self):
-        result = lookup(ref=reference(edition_label="نامشخص"))
+    def test_publisher_edition_is_not_required_when_hbi_snapshot_lineage_is_valid(self):
+        result = lookup(ref=reference(edition_label=None, captured_at=None))
+        self.assertEqual(result.outcome, "MATCH")
+        self.assertTrue(result.traceability_complete)
+
+    def test_snapshot_lineage_allows_definitive_field_conflict(self):
+        result = lookup(observed=identity(shade_number="2"))
+        self.assertEqual(result.outcome, "MISMATCH")
+        self.assertIn("shade_number", result.mismatched_fields)
+
+    def test_missing_hbi_snapshot_lineage_and_publisher_edition_is_inconclusive(self):
+        result = lookup(ref=reference(
+            edition_label=None,
+            captured_at=None,
+            snapshot_id=None,
+            snapshot_captured_at=None,
+            ingestion_id=None,
+            snapshot_validation_status=None,
+        ))
         self.assertEqual(result.outcome, "INCONCLUSIVE")
         self.assertEqual(result.stop_class, "KNOWLEDGE_GAP")
-
-    def test_unversioned_conflict_is_not_definitive_mismatch(self):
-        result = lookup(
-            observed=identity(shade_number="2"),
-            ref=reference(edition_label=None),
-        )
-        self.assertEqual(result.outcome, "INCONCLUSIVE")
-        self.assertIn("shade_number", result.mismatched_fields)
 
     def test_missing_required_field_stops(self):
         result = lookup(expected=identity(shade_number=" "))
@@ -168,8 +181,13 @@ class TestCatalogLookup(unittest.TestCase):
         self.assertEqual(result.outcome, "MATCH")
         self.assertEqual(
             result.matched_fields,
-            ("brand", "series", "shade_number", "shade_name"),
+            ("brand", "series", "shade_number"),
         )
+
+    def test_shade_name_is_a_descriptor_not_part_of_the_identity_key(self):
+        result = lookup(observed=identity(shade_name="نام توصیفی متفاوت"))
+        self.assertEqual(result.outcome, "MATCH")
+        self.assertNotIn("shade_name", result.mismatched_fields)
 
     def test_product_details_are_not_required_for_identity_match(self):
         expected = identity(product_specification=None, product_volume=None)
@@ -216,10 +234,12 @@ class TestCatalogLookup(unittest.TestCase):
         result = lookup(ref=reference(url=URL + "?x=1"))
         self.assertEqual(result.outcome, "STOP")
 
-    def test_timezone_missing_capture_is_inconclusive(self):
-        result = lookup(
-            ref=reference(captured_at="2026-11-09T14:00:00")
-        )
+    def test_missing_snapshot_capture_timestamp_is_inconclusive_without_publisher_capture(self):
+        result = lookup(ref=reference(
+            snapshot_captured_at=None,
+            edition_label=None,
+            captured_at=None,
+        ))
         self.assertEqual(result.outcome, "INCONCLUSIVE")
         self.assertFalse(result.traceability_complete)
 
@@ -236,11 +256,18 @@ class TestOutputAndInvalidation(unittest.TestCase):
     def test_output_preserves_lineage_and_no_inherited_approval(self):
         output = output_for()
         self.assertEqual(output.inherited_approval_state, "NONE")
-        self.assertEqual(output.version_label, "synthetic-test-edition-1")
+        self.assertEqual(output.version_label, "hbi-hair-catalog-snapshot-test-001")
         self.assertEqual(output.outcome, "MATCH")
 
     def test_unversioned_inconclusive_output_can_be_built_but_withheld(self):
-        ref = reference(edition_label="unknown")
+        ref = reference(
+            edition_label="unknown",
+            captured_at=None,
+            snapshot_id=None,
+            snapshot_captured_at=None,
+            ingestion_id=None,
+            snapshot_validation_status=None,
+        )
         result = lookup(ref=ref)
 
         self.assertEqual(result.outcome, "INCONCLUSIVE")
@@ -311,7 +338,14 @@ class TestDisplayAndEvents(unittest.TestCase):
         self.assertIn("ایمنی", decision.public_message_fa)
 
     def test_inconclusive_output_is_withheld(self):
-        ref = reference(edition_label=None)
+        ref = reference(
+            edition_label=None,
+            captured_at=None,
+            snapshot_id=None,
+            snapshot_captured_at=None,
+            ingestion_id=None,
+            snapshot_validation_status=None,
+        )
         output = output_for(ref=ref, result=lookup(ref=ref))
         decision = decide_catalog_output_presentation(output)
         self.assertFalse(decision.display_allowed)
