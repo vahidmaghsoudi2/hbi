@@ -99,6 +99,19 @@ export default function ProductReviewPanel({
       setEvidences(Array.isArray(ev) ? ev : []);
       setLogs(Array.isArray(log) ? log : []);
       setSelectedId(id);
+      try {
+        const inv = await getInventoryByProduct(id, opToken);
+        setInventoryInfo(inv as unknown as Record<string, unknown>);
+      } catch {
+        setInventoryInfo(null);
+      }
+      try {
+        const pk = await getProductKnowledge(id, opToken);
+        const keys = pk ? Object.keys(pk as object).filter((k) => k !== "product_id") : [];
+        setKnowledgeHint(keys.length ? `ProductKnowledge: ${keys.length} فیلد خوانده شد` : "ProductKnowledge خالی یا ناقص");
+      } catch {
+        setKnowledgeHint("ProductKnowledge در دسترس نیست یا خوانده نشد");
+      }
       setIdentityStatus(upper(p.identity_status) || "NEEDS_REVIEW");
       setIdentityRefs(text((p as { identity_source_refs?: unknown }).identity_source_refs));
       const confidence = (p as { identity_confidence?: unknown }).identity_confidence;
@@ -285,6 +298,23 @@ export default function ProductReviewPanel({
                   <p style={{ marginBottom: 0 }}>خطاهای دقیق Transition نیز از پاسخ سرور نمایش داده می‌شوند.</p>
                 </div>
               )}
+            </article>
+            <article className="pro-product-card">
+              <h3>نمای موجودی مرتبط</h3>
+              {inventoryInfo ? (
+                <div className="pro-tags">
+                  {Object.entries(inventoryInfo).slice(0, 12).map(([k, v]) => (
+                    <span key={k} className="pro-tag">{k}: {formatJson(v)}</span>
+                  ))}
+                </div>
+              ) : (
+                <p className="pro-muted">موجودی از API خوانده نشد یا ردیف ندارد.</p>
+              )}
+            </article>
+            <article className="pro-product-card">
+              <h3>دانش و منابع</h3>
+              <p className="pro-muted">{knowledgeHint ?? "—"}</p>
+              <p className="pro-muted">دانشنامه جایگزین Evidence نیست. ProductProblemLink در UI کامل نیست.</p>
             </article>
           </div>
 
