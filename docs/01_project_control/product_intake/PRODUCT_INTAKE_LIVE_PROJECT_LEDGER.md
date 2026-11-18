@@ -1,5 +1,11 @@
 # PRODUCT INTAKE — LIVE PROJECT LEDGER
 
+> 🔴 **HISTORICAL / SUPERSEDED STATUS SNAPSHOT — DO NOT USE THE STATUS OR NEXT-ACTION SECTIONS BELOW AS CURRENT INSTRUCTIONS.**
+>
+> This document was last reconciled on 2026-09-07 and contains stale phase labels, old PR #33 instructions, and implementation/status claims that have not been reconciled with the current repository. It is retained for traceability, not deleted. Before acting on any item below, verify current master, current approved contracts, and later work recorded in Issues #278 / #283 and the relevant merged PRs (including #322, #332, and #334). Historical findings must be reclassified as **RECONFIRMED**, **RESOLVED**, **SUPERSEDED**, or **NOT RECHECKED**. Do not treat this banner as a claim that every historical gap is resolved.
+
+---
+
 **Project:** HBI — Health & Beauty Intelligence  
 **Domain:** Product Intake  
 **Source of Truth:** GitHub master  
