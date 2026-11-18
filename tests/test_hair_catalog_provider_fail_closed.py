@@ -43,7 +43,7 @@ def test_provider_fails_closed_when_catalog_series_set_is_changed(tmp_path, monk
     from io import StringIO
 
     buffer = StringIO()
-    csv.writer(buffer, lineterminator="\\n").writerows(rows)
+    csv.writer(buffer, lineterminator="\n").writerows(rows)
     path = _write_csv(tmp_path, buffer.getvalue())
     monkeypatch.setattr(provider, "_catalog_path", lambda: path)
 
