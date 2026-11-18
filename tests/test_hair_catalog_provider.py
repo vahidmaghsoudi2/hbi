@@ -37,6 +37,39 @@ def test_approved_catalog_provider_loads_exact_88_row_artifact():
     rows = list(csv.DictReader(StringIO(raw.decode("utf-8-sig"))))
     assert {row["سری محصول"] for row in rows} == set(EXPECTED_SERIES)
     assert len(EXPECTED_SERIES) == 19
+    actual_series_codes = {
+        series: {row["شماره رنگ"] for row in rows if row["سری محصول"] == series}
+        for series in EXPECTED_SERIES
+    }
+    assert actual_series_codes == {
+        series: set(codes)
+        for series, codes in __import__(
+            "app.domain.hair_catalog_provider",
+            fromlist=["EXPECTED_SERIES_CODES"],
+        ).EXPECTED_SERIES_CODES.items()
+    }
+    assert sum(len(codes) for codes in actual_series_codes.values()) == 88
+    assert {series: len(codes) for series, codes in actual_series_codes.items()} == {
+        "طبیعی": 10,
+        "طبیعی اکسترا": 5,
+        "خاکستری": 8,
+        "دودی": 5,
+        "زیتونی": 6,
+        "طلایی": 6,
+        "بژ": 4,
+        "نسکافه ای": 4,
+        "آلبالویی": 3,
+        "شکلاتی": 4,
+        "عسلی": 3,
+        "فندقی": 4,
+        "شرابی": 4,
+        "قرمز": 4,
+        "عروسکی": 3,
+        "بیسکویتی": 2,
+        "کاپوچینو": 2,
+        "ترکیبی": 8,
+        "واریاسیون": 3,
+    }
 
 
 def test_approved_catalog_provider_does_not_invent_version_metadata():
