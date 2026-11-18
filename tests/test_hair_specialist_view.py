@@ -182,6 +182,20 @@ def test_specialist_preview_rejects_non_synthetic_case_id(client, db_session):
         headers=_headers(),
     )
     assert response.status_code == 422
+    assert "CASE-REAL-001" not in response.text
+
+
+def test_specialist_preview_rejects_oversized_fields_without_echo(client, db_session):
+    _grant_reviewer_qa(db_session)
+    sentinel = "PRIVATE-PREVIEW-SENTINEL-" + ("X" * 130)
+    response = client.post(
+        "/api/v1/hair/specialist-preview",
+        json=_preview_payload(catalog_identity={"brand": sentinel}),
+        headers=_headers(),
+    )
+    assert response.status_code == 422
+    assert sentinel not in response.text
+    assert "input" not in response.json()
 
 
 def test_specialist_preview_returns_internal_evidence_and_limits_only(client, db_session):

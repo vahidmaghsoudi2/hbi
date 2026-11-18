@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core.rate_limit import RateLimitMiddleware
+from app.core.hair_request_limits import HairRequestSizeLimitMiddleware
 from app.g8_http_evidence import G8RawHttpEvidenceMiddleware
 from app.database import init_db, SessionLocal
 from app.services.admin_auth_service import ensure_admin_account
@@ -75,6 +76,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.add_middleware(HairRequestSizeLimitMiddleware)
 app.add_middleware(RateLimitMiddleware)
 
 # The G8 runner opts in explicitly; normal application runs do not write HTTP bodies.

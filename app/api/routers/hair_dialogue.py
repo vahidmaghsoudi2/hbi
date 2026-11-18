@@ -7,12 +7,13 @@ service execution. All state is supplied and returned by the caller.
 from __future__ import annotations
 
 from dataclasses import asdict
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.authorization import require_any_role
+from app.core.hair_request_limits import HairSafeValidationRoute
 from app.domain.hair_dialogue_contract import (
     ClientDecision,
     DialogueCaseState,
@@ -29,21 +30,21 @@ from app.domain.hair_dialogue_contract import (
 )
 from app.models.user_role import ROLE_ADMIN, ROLE_PO, ROLE_REVIEWER_QA
 
-router = APIRouter()
+router = APIRouter(route_class=HairSafeValidationRoute)
 
 
 class DialogueStateInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    case_id: str
-    case_version: str
-    goal_version: str
-    active_proposal_id: str | None = None
-    active_proposal_case_version: str | None = None
-    active_proposal_goal_version: str | None = None
-    rejected_proposal_ids: list[str] = Field(default_factory=list)
+    case_id: str = Field(max_length=64)
+    case_version: str = Field(max_length=32)
+    goal_version: str = Field(max_length=32)
+    active_proposal_id: str | None = Field(default=None, max_length=64)
+    active_proposal_case_version: str | None = Field(default=None, max_length=32)
+    active_proposal_goal_version: str | None = Field(default=None, max_length=32)
+    rejected_proposal_ids: list[Annotated[str, Field(max_length=64)]] = Field(default_factory=list, max_length=20)
     client_decision: Literal["NONE", "ACCEPTED", "REJECTED"] = "NONE"
-    execution_consent_for_proposal_id: str | None = None
+    execution_consent_for_proposal_id: str | None = Field(default=None, max_length=64)
 
     def to_domain(self) -> DialogueCaseState:
         return DialogueCaseState(
@@ -78,17 +79,17 @@ class HairDialogueTurnRequest(BaseModel):
     question_code: Literal["STATUS_REASON", "MISSING_DATA", "PROCESS_LIMIT"] | None = None
     answer_code: Literal["STATUS_REASON", "MISSING_DATA", "PROCESS_LIMIT"] | None = None
     reason_code: Literal["CATALOG_ONLY", "DATA_GAP", "KNOWLEDGE_GAP", "SAFETY_STOP"] | None = None
-    recorded_fields: list[str] | None = None
-    required_fields: list[str] | None = None
+    recorded_fields: list[Annotated[str, Field(max_length=64)]] | None = Field(default=None, max_length=50)
+    required_fields: list[Annotated[str, Field(max_length=64)]] | None = Field(default=None, max_length=50)
     data_complete: bool | None = None
     safety_passed: bool | None = None
     rule_valid: bool | None = None
     evidence_valid: bool | None = None
     engine_ok: bool = True
-    proposal_id: str | None = None
+    proposal_id: str | None = Field(default=None, max_length=64)
     explicit_consent: bool = False
-    new_goal_version: str | None = None
-    invalidation_status: str | None = None
+    new_goal_version: str | None = Field(default=None, max_length=32)
+    invalidation_status: str | None = Field(default=None, max_length=40)
 
 
 def _state_payload(state: DialogueCaseState) -> dict[str, Any]:
@@ -179,7 +180,7 @@ async def run_hair_dialogue_turn(
             result = {"status": "STATE_UPDATED"}
 
     except (TypeError, ValueError) as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
+        raise HTTPException(status_code=422, detail="Dialogue request could not be processed.") from exc
 
     return {
         "action": payload.action,
