@@ -267,27 +267,10 @@
       "market_region": "UK",
       "identity_limits": [
         "Historical product is distinct from the replacement/current Dark Spot Clearing Serum",
-        "Retailer INCI snapshot does not verify physical package, lot or exact formula"
+        "Retailer INCI snapshot does not verify physical package, lot or exact formula",
+        "The cited historical Clinique product URL currently redirects to the current/replacement Dark Spot Clearing Serum; it does not verify the historical 100 ml formula or its historical performance claims."
       ],
-      "assertions": [
-        {
-          "field": "claimed_benefits",
-          "claim_type": "MANUFACTURER_CLAIM",
-          "source_type": "MANUFACTURER",
-          "source_reference": "https://www.clinique.com/product/4034/68008/skincare/serum/even-better-clinicaltm-radical-dark-spot-corrector-interrupter",
-          "evidence_strength": "UNVERIFIED",
-          "claim": "The manufacturer positions this historical product to visibly reduce the appearance of dark spots and improve radiance/uneven tone. The page reports 39% visible reduction after 12 weeks in clinical testing on 52 women; this is a manufacturer-reported result and must not be transferred to the replacement serum.",
-          "market_region": "US"
-        },
-        {
-          "field": "manufacturer_claims",
-          "claim_type": "MANUFACTURER_CLAIM",
-          "source_type": "MANUFACTURER",
-          "source_reference": "https://www.clinique.com/product/4034/68008/skincare/serum/even-better-clinicaltm-radical-dark-spot-corrector-interrupter",
-          "evidence_strength": "UNVERIFIED",
-          "claim": "The historical product page reports 39% visible reduction in dark spots in 12 weeks from clinical testing on 52 women. Separate consumer testing on a larger group reports different endpoints and must not be conflated. The public page does not establish randomization, blinding, comparator or full protocol. Do not transfer current replacement-serum outcomes to the historical 100 ml dossier."
-        }
-      ]
+      "assertions": []
     },
     {
       "dossier": "P7",
@@ -304,10 +287,10 @@
           "field": "claimed_benefits",
           "claim_type": "MANUFACTURER_CLAIM",
           "source_type": "MANUFACTURER",
-          "source_reference": "https://pages.anua.com/solutions/redness-prone-routine-sensitive-skin",
+          "source_reference": "https://anua.com/products/azelaic-acid-10-hyaluron-redness-soothing-serum",
           "market_region": "US",
           "evidence_strength": "UNVERIFIED",
-          "claim": "A separate Anua routine/claim page reports that 90% of participants agreed the appearance of red troubled spots improved, attributed to a 2026 Anua US clinical study. Public methodology, sample details, comparator, validated endpoint and statistical report are not disclosed. Do not transfer evidence from the separate Anua azelaic-acid pads to this serum.",
+          "claim": "The official Anua product page displays manufacturer-reported survey outcomes: 90% agreed there was a reduction in skin redness and 90% agreed the appearance of red troubled spots improved after use. The public page does not disclose the sample, comparator, validated endpoint or statistical report. This remains a manufacturer claim, not independently verified efficacy.",
           "notes": "Separate official routine-page manufacturer result. Kept in a distinct ProductKnowledge domain from the product-page 10%/tolerability claims to avoid merging unlike assertions into one field. Protocol remains undisclosed."
         },
         {
@@ -354,7 +337,8 @@
       "Keep the Clinique historical product distinct from its replacement; do not use retailer-sourced INCI as manufacturer/package evidence.",
       "Keep SKIN1004 international/European formula distinct from the US UV version.",
       "Do not populate contraindications unless an explicit package warning is available; otherwise preserve the unreviewed/unknown state.",
-      "After any separately authorized QA action, read back all seven ProductKnowledge rows and confirm field-level provenance and warnings."
+      "After any separately authorized QA action, read back all seven ProductKnowledge rows and confirm field-level provenance and warnings.",
+      "P6 Clinique historical 100 ml product: the previously cited official URL now redirects to the current/replacement serum. Keep historical claims and formula UNKNOWN; add no ProductKnowledge claim until an official historical manufacturer record or the confirmed physical package supplies traceable support."
     ]
   }
 }
