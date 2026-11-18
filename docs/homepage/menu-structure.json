@@ -276,7 +276,6 @@
       "consultation_eligibility": {
         "approved_product_information_required": true,
         "sellable_inventory_greater_than_zero_enters_consultation_candidate_set": true,
-        "expired_or_stop_sale_means_sellable_inventory_zero": true,
         "suitability_decided_by_consultation_engine_against_customer_context": true,
         "manual_consultation_activation_required": false
       }
