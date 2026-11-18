@@ -55,7 +55,9 @@ The visible menu must not expose a separate «بررسی و تأیید QA» step
 ### Product and consultation eligibility rules
 
 - Creating a Product Master DRAFT with zero inventory is permitted before final acceptance; it is a working record, not sellable stock or a consultation candidate.
-- Only completed, Product Owner-approved product information may proceed to operational use and stock-in.
+- A Product Master DRAFT may be created before acceptance as a working record and deleted later if not pursued.
+- Product Owner approval completes information acceptance and directly sets the product to `ACTIVE`; there is no separate manual `APPROVED → ACTIVE` step or post-approval QA gate.
+- Stock-In is permitted only after PO approval; the current Stock-In path must reject DRAFT/unapproved products.
 - A product with sellable inventory greater than zero automatically enters the set considered by consultation.
 - The consultation engine, not a pre-filter, evaluates suitability for the current customer. It recommends a suitable product, excludes an unsuitable one with a reason, or reports uncertainty when information is insufficient.
 - No separate manual activation for consultation is required.
