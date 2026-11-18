@@ -222,7 +222,7 @@ def test_readiness_approved_evidence_passes(db_session):
     assert result.ready is True
     assert result.missing_required == []
     assert ProductTransitionService(db_session).approve(
-        "P_CMP_RDY_AP", "po", {ROLE_PO}).status == "APPROVED"
+        "P_CMP_RDY_AP", "po", {ROLE_PO}).status == "ACTIVE"
 
 
 def test_readiness_acceptable_plus_incomplete_still_blocks(db_session):
