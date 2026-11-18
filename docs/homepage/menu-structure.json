@@ -7,7 +7,7 @@
     "observed_commit": "388f4977261cc37588389bf78a73f7014254d5e6",
     "supporting_audit": "docs/HOMEPAGE_IA_AUDIT_STAGE2.md"
   },
-  "notice": "این فایل نقشهٔ مستنداتی و دادهٔ پیش‌نمایش است؛ منوی «دانشنامه» در frontend/src/pages/NewHomePage.tsx پیاده‌سازی شده است. ویرایش این فایل به‌تنهایی برنامهٔ عملیاتی را تغییر نمی‌دهد.",
+  "notice": "بخش menus وضعیت مشاهده‌شده UI را نگه می‌دارد؛ proposed_menus هدف تأییدشده مستنداتی را نشان می‌دهد که هنوز در runtime پیاده‌سازی نشده است. ویرایش این فایل به‌تنهایی برنامه عملیاتی را تغییر نمی‌دهد.",
   "menus": [
     {
       "id": "home",
@@ -239,7 +239,49 @@
       ]
     }
   ],
-  "proposed_menus": [],
+  "proposed_menus": [
+    {
+      "id": "products",
+      "label": "مدیریت محصولات",
+      "status": "po-confirmed-documentation-target-not-implemented",
+      "description": "محیط یکپارچه هدف برای مدیریت اطلاعات و پرونده محصول، اطلاعات عملیاتی/موجودی و دانش مشکلات پوستی.",
+      "submenus": [
+        {
+          "id": "products-catalog",
+          "label": "کالا و ویژگی محصول",
+          "status": "po-confirmed-target",
+          "items": [
+            "فهرست کالاها",
+            "ورود و تکمیل اطلاعات محصول",
+            "پرونده کامل ویژگی‌های همان محصول",
+            "اطلاعات عملیاتی و موجودی همان کالا"
+          ],
+          "rules": [
+            "ویژگی‌ها در پرونده همان محصول نگهداری می‌شوند؛ منوی مستقل ویژگی محصولات یا بانک تکراری ساخته نمی‌شود.",
+            "فهرست کالاها حفظ می‌شود.",
+            "اطلاعات موجودی در همین محیط در دسترس خواهد بود."
+          ]
+        },
+        {
+          "id": "products-skin-problems",
+          "label": "مشکلات پوستی",
+          "status": "po-confirmed-target",
+          "description": "دانش مشکلات پوستی، عوامل و راهکارها با روابط ساختاریافته و قابل پیمایش به ویژگی‌ها و محصولات مرتبط؛ بدون کپی بانک مرجع مشکلات."
+        }
+      ],
+      "excluded_menu_items": [
+        "بررسی و تأیید QA به‌عنوان منوی مستقل یا Gate پس از تأیید Product Owner",
+        "ویژگی محصولات به‌عنوان منوی مستقل"
+      ],
+      "consultation_eligibility": {
+        "approved_product_information_required": true,
+        "sellable_inventory_greater_than_zero_enters_consultation_candidate_set": true,
+        "expired_or_stop_sale_means_sellable_inventory_zero": true,
+        "suitability_decided_by_consultation_engine_against_customer_context": true,
+        "manual_consultation_activation_required": false
+      }
+    }
+  ],
   "top_actions": [
     {
       "id": "top-main-menu",
@@ -257,6 +299,14 @@
       "id": "settings",
       "label": "تنظیمات",
       "note": "«تنظیمات» در نه کارت منوی اصلی ثبت‌شده در NewHomePage.tsx دیده نمی‌شود؛ تا مشاهده و تأیید جداگانه، منوی فعال محسوب نشود."
+    }
+  ],
+  "open_design_questions": [
+    {
+      "id": "non-skin-encyclopedia-navigation",
+      "status": "open",
+      "question": "پس از انتقال دانش پوست به محیط مدیریت محصولات، دسترسی به دانش مو، دانش ادکلن، رنگ مو، آرایش، ابزار و سایر در کدام جایگاه منویی باقی بماند؟",
+      "preservation_rule": "تا تصمیم و پیاده‌سازی جداگانه، هر شش حوزه و مسیرهای دسترسی فعلی آن‌ها حفظ شوند؛ این تغییر مجوز حذف منوی دانشنامه یا مقصدهای غیرپوستی نیست."
     }
   ]
 }
