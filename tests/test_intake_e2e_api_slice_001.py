@@ -61,6 +61,9 @@ def test_product_intake_requires_po_approval_before_stock_in_api(client, db_sess
         product_name="Explicit Stock-In Product",
         product_line="SKIN",
     )
+    # Persist the created DRAFT before the rejected Stock-In request; the API
+    # correctly rolls back its request transaction on validation failure.
+    db_session.commit()
 
     inventory = db_session.query(Inventory).filter(Inventory.product_id == pid).one()
     assert inventory.quantity_available == 0
