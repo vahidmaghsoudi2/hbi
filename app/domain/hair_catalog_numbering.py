@@ -36,12 +36,8 @@ _EXTRA_ALIAS = {
 OWNER_EXCEPTION_CODES = frozenset(
     {"۶.۷", "۸.۵۶", "۶.۵۳", "۶.۵۴", "6.7", "8.56", "6.53", "6.54"}
 )
-NATURAL_SIMPLE_CODES = frozenset(str(n) for n in range(1, 11)) | frozenset(
-    "۰۱۲۳۴۵۶۷۸۹"
-)
-NATURAL_EXTRA_CODES = frozenset({f"+۰{n}" for n in range(5, 10)}) | frozenset(
-    {f"+0{n}" for n in range(5, 10)}
-)
+NATURAL_SIMPLE_CODES = frozenset({"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹", "۱۰"})
+NATURAL_EXTRA_CODES = frozenset({"+۰۵", "+۰۶", "+۰۷", "+۰۸", "+۰۹", "+05", "+06", "+07", "+08", "+09"})
 
 
 @dataclass(frozen=True)
