@@ -73,7 +73,7 @@ class TestHairCatalogApiSlice7B:
         )
         assert response.status_code == 403
 
-    def test_server_csv_reference_is_loaded_but_unversioned_lookup_fails_closed(
+    def test_server_csv_reference_uses_hbi_snapshot_lineage_for_identity_lookup(
         self, client, db_session
     ):
         _grant_po(db_session)
@@ -84,9 +84,10 @@ class TestHairCatalogApiSlice7B:
         )
         assert response.status_code == 200
         body = response.json()
-        assert body["status"] == "WITHHOLD_INCONCLUSIVE"
-        assert body["display_allowed"] is False
-        assert "نسخه‌دار و قابل‌ردیابی" in body["message"]
+        assert body["status"] == "IDENTITY_MATCH_DISPLAYABLE"
+        assert body["display_allowed"] is True
+        assert "تطبیق دارد" in body["message"]
+        assert "ایمنی" in body["message"]
 
     def test_unapproved_expected_identity_is_not_accepted_as_catalog_baseline(
         self, client, db_session
