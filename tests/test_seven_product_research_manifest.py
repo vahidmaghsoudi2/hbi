@@ -27,7 +27,7 @@ def _manifest():
     return json.loads(MANIFEST_PATH.read_text(encoding="utf-8-sig"))
 
 
-def test_seven_product_manifest_has_exact_canonical_scope_and_27_manufacturer_assertions():
+def test_seven_product_manifest_has_exact_canonical_scope_and_25_manufacturer_assertions():
     manifest = _manifest()
     products = manifest["products"]
     assertions = [
