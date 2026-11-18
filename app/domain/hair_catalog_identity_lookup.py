@@ -113,9 +113,32 @@ def _valid_capture_timestamp(value: str | None) -> bool:
 
 
 def _valid_sha256(value: str | None) -> bool:
-    return value is None or (
-        isinstance(value, str) and re.fullmatch(r"[0-9a-fA-F]{64}", value) is not None
+    return isinstance(value, str) and re.fullmatch(r"[0-9a-fA-F]{64}", value) is not None
+
+
+def _reference_traceability_complete(reference: CatalogReference) -> bool:
+    """Validate HBI snapshot lineage or a separately complete publisher edition.
+
+    HBI snapshot identity is sufficient for this catalog-identity operation.
+    It must never be represented as a publisher-issued edition or used as
+    evidence of product chemistry, safety, suitability, or performance.
+    """
+    digest_valid = _valid_sha256(reference.content_sha256)
+    hbi_snapshot_valid = bool(
+        isinstance(reference.snapshot_id, str)
+        and reference.snapshot_id.strip()
+        and isinstance(reference.ingestion_id, str)
+        and reference.ingestion_id.strip()
+        and _valid_capture_timestamp(reference.snapshot_captured_at)
+        and reference.snapshot_validation_status == "VALIDATED_ON_LOAD"
     )
+    publisher_edition_valid = bool(
+        isinstance(reference.edition_label, str)
+        and reference.edition_label.strip()
+        and reference.edition_label.strip().casefold() not in ("unknown", "نامشخص")
+        and _valid_capture_timestamp(reference.captured_at)
+    )
+    return digest_valid and (hbi_snapshot_valid or publisher_edition_valid)
 
 
 def _missing_identity_fields(identity: CatalogIdentity) -> tuple[str, ...]:
@@ -182,19 +205,13 @@ def lookup_catalog_identity(
         if getattr(expected, field) != getattr(observed, field)
     )
 
-    traceability_complete = bool(
-        isinstance(reference.edition_label, str)
-        and reference.edition_label.strip()
-        and reference.edition_label.strip().casefold() not in ("unknown", "نامشخص")
-        and _valid_capture_timestamp(reference.captured_at)
-        and _valid_sha256(reference.content_sha256)
-    )
+    traceability_complete = _reference_traceability_complete(reference)
 
     if not traceability_complete:
         reason = (
-            "CATALOG_EDITION_UNKNOWN_FIELD_CONFLICT_UNVERIFIED"
+            "CATALOG_REFERENCE_LINEAGE_INCOMPLETE_FIELD_CONFLICT_UNVERIFIED"
             if mismatched
-            else "CATALOG_EDITION_OR_CAPTURE_METADATA_INCOMPLETE"
+            else "CATALOG_REFERENCE_LINEAGE_INCOMPLETE"
         )
         return CatalogLookupResult(
             "INCONCLUSIVE", "KNOWLEDGE_GAP", reason,
@@ -344,11 +361,23 @@ def build_catalog_decision_output(
     ):
         raise TypeError("evidence_reference_pointers must be a tuple of strings")
 
-    version_label = _edition_or_unversioned(reference.edition_label)
+    snapshot_lineage_valid = bool(
+        isinstance(reference.snapshot_id, str)
+        and reference.snapshot_id.strip()
+        and isinstance(reference.ingestion_id, str)
+        and reference.ingestion_id.strip()
+        and _valid_capture_timestamp(reference.snapshot_captured_at)
+        and reference.snapshot_validation_status == "VALIDATED_ON_LOAD"
+    )
+    version_label = (
+        reference.snapshot_id
+        if snapshot_lineage_valid
+        else _edition_or_unversioned(reference.edition_label)
+    )
     if result.outcome in ("MATCH", "MISMATCH") and (
         version_label == _UNVERSIONED or not result.traceability_complete
     ):
-        raise ValueError("definitive lookup outcomes require a traceable versioned reference")
+        raise ValueError("definitive lookup outcomes require a traceable catalog reference")
     if result.outcome in ("MATCH", "MISMATCH") and (
         result.source_url != reference.url
         or result.source_edition != reference.edition_label
@@ -492,15 +521,35 @@ def decide_catalog_output_presentation(
         and output.source_approval_status == _APPROVED_SOURCE_STATUS
         and output.version_label != _UNVERSIONED
         and output.traceability_complete
-        and _valid_capture_timestamp(output.source_captured_at)
-        and _valid_sha256(output.source_content_sha256)
         and _is_approved_reference(CatalogReference(
             source_kind=output.source_kind,
             approval_status=output.source_approval_status,
             url=output.source_url,
-            edition_label=output.version_label,
+            edition_label=(
+                None if output.version_label == output.snapshot_id
+                else output.version_label
+            ),
             captured_at=output.source_captured_at,
             content_sha256=output.source_content_sha256,
+            snapshot_id=output.snapshot_id,
+            snapshot_captured_at=output.snapshot_captured_at,
+            ingestion_id=output.ingestion_id,
+            snapshot_validation_status=output.snapshot_validation_status,
+        ))
+        and _reference_traceability_complete(CatalogReference(
+            source_kind=output.source_kind,
+            approval_status=output.source_approval_status,
+            url=output.source_url,
+            edition_label=(
+                None if output.version_label == output.snapshot_id
+                else output.version_label
+            ),
+            captured_at=output.source_captured_at,
+            content_sha256=output.source_content_sha256,
+            snapshot_id=output.snapshot_id,
+            snapshot_captured_at=output.snapshot_captured_at,
+            ingestion_id=output.ingestion_id,
+            snapshot_validation_status=output.snapshot_validation_status,
         ))
     )
     if not traceable:
