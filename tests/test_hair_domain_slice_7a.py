@@ -139,12 +139,12 @@ class TestCatalogLookup(unittest.TestCase):
         result = lookup()
         self.assertEqual(result.outcome, "MATCH")
         self.assertTrue(result.traceability_complete)
-        self.assertEqual(result.matched_fields, ("brand", "series", "shade_number", "shade_name"))
+        self.assertEqual(result.matched_fields, ("brand", "series", "shade_number"))
 
     def test_versioned_field_conflict_is_mismatch(self):
-        result = lookup(observed=identity(shade_name="قهوه‌ای"))
+        result = lookup(observed=identity(shade_number="2"))
         self.assertEqual(result.outcome, "MISMATCH")
-        self.assertIn("shade_name", result.mismatched_fields)
+        self.assertIn("shade_number", result.mismatched_fields)
 
     def test_publisher_edition_is_not_required_when_hbi_snapshot_lineage_is_valid(self):
         result = lookup(ref=reference(edition_label=None, captured_at=None))
@@ -181,8 +181,13 @@ class TestCatalogLookup(unittest.TestCase):
         self.assertEqual(result.outcome, "MATCH")
         self.assertEqual(
             result.matched_fields,
-            ("brand", "series", "shade_number", "shade_name"),
+            ("brand", "series", "shade_number"),
         )
+
+    def test_shade_name_is_a_descriptor_not_part_of_the_identity_key(self):
+        result = lookup(observed=identity(shade_name="نام توصیفی متفاوت"))
+        self.assertEqual(result.outcome, "MATCH")
+        self.assertNotIn("shade_name", result.mismatched_fields)
 
     def test_product_details_are_not_required_for_identity_match(self):
         expected = identity(product_specification=None, product_volume=None)
