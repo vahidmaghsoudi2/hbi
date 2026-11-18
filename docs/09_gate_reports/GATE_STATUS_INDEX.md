@@ -1,3 +1,11 @@
+> ## 🔴 HISTORICAL GATE INDEX — RECONCILIATION REQUIRED
+>
+> This index is dated 2026-08-23. Its gate statuses and “Phase-1 Pilot READY FOR PO DECISION” line are historical snapshots, not current gate decisions. Later work changed the runtime path, Product Intake lifecycle, stock semantics, and persisted recommendation readback. Do not use this index to infer current G8 or production readiness.
+>
+> Current Product Intake/G8 status must be reconciled from Issue #278, Issue #283 and exact current-master/runtime evidence. Automated tests and CI alone do not establish the real-product pilot. Preserve this index as history; no claim that all historical gates are resolved is made here.
+>
+> ---
+
 # Gate Reports Index
 Last Updated: 2026-08-23
 
