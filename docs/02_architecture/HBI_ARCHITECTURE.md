@@ -1,51 +1,68 @@
 # HBI Architecture
 
 **Last Updated:** 2026-11-18  
-**Architecture decision:** [HBI-PO-DEC-CKER-001 — Central Knowledge & Evidence Repository](../03_decision_log/HBI-PO-DEC-CKER-001.md)
+**Architecture authority:** [HBI-PO-DEC-THREE-PART-001](../03_decision_log/HBI-PO-DEC-THREE-PART-001.md)
 
-## Backend Layers
+## The HBI model
 
-| Layer | Path | Gate | Status |
-|---|---|---|---|
-| Models | app/models/ | 6-1 | Existing model layer; see current Gate evidence |
-| Repositories | app/repositories/ | 6-2 | Existing repository layer; see current Gate evidence |
-| Services | app/services/ | 6-3 | Existing service layer; see current Gate evidence |
-| Interface (Facade/DTO/CLI) | app/interface/ | 6-4 | Existing interface layer; acceptance remains governed by its current Gate |
+HBI has three main parts. Keep the architecture and the working path centered on these parts:
 
-## Knowledge and Evidence architecture
+1. **ProductKnowledge** — what the system reliably knows about each product.
+2. **Customer Context** — the customer's relevant profile, history, current condition and need.
+3. **Intelligence & Response** — the system connects the product information with the customer's context, analyses their fit and limitations, and gives an appropriate response.
 
-HBI uses one logical **HBI Central Knowledge & Evidence Repository (CKER)** as the governing source-of-truth boundary for curated knowledge and its supporting Evidence.
+The purpose is to make this connection accurate, safe, dependable, smooth and fast. Do not turn internal evidence handling, review activities or technical implementation details into additional top-level architecture parts.
 
-- **Encyclopedia / curated Knowledge** is the human-facing, organized knowledge core of CKER.
-- **Evidence** is the internal structured layer of atomic, source-bound claims. It is not a separate repository.
-- Original manufacturer documents, physical package information, scientific publications, regulatory sources and other primary artifacts remain independently identifiable sources. CKER stores traceable claims and curated synthesis; it does not replace the original source.
-- Each material claim retains its source, claim type, QA state, conflict state and applicable scope. Article-level editorial review does not replace claim-level Evidence QA.
-- **ProductKnowledge** remains the product-scoped operational projection consumed by the recommendation runtime. It is not a parallel master knowledge repository and must follow its existing evaluated-Evidence rules.
-- Product identity, product QA/lifecycle, Inventory, G8 and Recommendation eligibility remain separate authorities/gates.
+## 1. ProductKnowledge
 
-Canonical governance flow:
+ProductKnowledge is the single product-information bank used by HBI.
 
-Original source → atomic Evidence → curated CKER Knowledge / Encyclopedia → ProductKnowledge → eligibility gates → Recommendation
+A product is researched before entry. The Product Owner supplies the product and the required instructions, standards, scope and acceptance criteria to multiple AI research systems. They collect and organize the requested product information. Information that does not meet the stated requirements is rejected or corrected before acceptance. The Product Owner reviews and approves the completed product information. After that approval, the product information is ready to be entered into ProductKnowledge and used by the system.
 
-This is a logical architecture boundary across existing canonical storage surfaces. It does not imply a new ORM entity/table, database, schema migration, or separate GitHub repository.
+**Approval is part of preparing the information for entry, not another gate after entry.** Do not create separate Evidence, Encyclopedia and QA repositories or sequential approval barriers for the same product-information intake.
 
-## Decision Support Flow
+Sources and supporting evidence remain attached or traceable where relevant, so that the origin and limits of important information can be checked. They support the reliability of ProductKnowledge; they are not a second product bank or a separate user-facing workflow.
 
-Customer → Case → Decision State / Factors / Needs → ProductKnowledge + eligible Evidence → Reasoning → Eligibility Gates → Recommendation → Product / Inventory → Outcome
+## 2. Customer Context
 
-The exact runtime contract and hard gates remain defined by the active decision and domain contracts. Ranking cannot rescue a candidate that failed a hard gate.
+Customer Context contains the information needed to understand the person and the current consultation:
 
-## Architecture Constraints
+- The customer's relevant profile and stable information.
+- Relevant skin/hair condition and history.
+- The customer's current need, request and reported concerns.
+- Information recorded or confirmed for the current consultation by the gallery operator, consultant or clinician, as applicable.
 
-- The currently locked schema remains locked; any schema change requires its own Change Request and explicit authorization.
-- Facades are Use-Case-Oriented, not CRUD-Oriented.
-- Interface code has no direct access to Repository, Model or Database layers.
-- Evidence QA is distinct from Product QA.
-- Evidence approval does not itself authorize recommendation use.
-- UNKNOWN and CONFLICT remain explicit; no unsupported assertion is promoted by summarization or page-level approval.
-- No parallel Evidence repository or duplicate knowledge bank is created.
-- The current append-only Evidence mutation audit is traceability, not proof of a complete immutable revision/version chain.
+Keep persistent customer information distinct from the current consultation details, but treat both as one Customer Context part of the HBI model. Collect and use personal information only with an appropriate basis and access controls.
 
-## Implementation boundary
+## 3. Intelligence & Response
 
-This document records the architecture decision only. Runtime code, APIs, UI, schema, migrations, production data, ProductKnowledge, Evidence QA, Inventory, G8 and Recommendation behavior are unchanged by this documentation record.
+This is the part that connects ProductKnowledge and Customer Context.
+
+It should understand the customer's need, retrieve relevant product facts, assess suitability and limitations, recognize risks or missing/contradictory information, and produce a clear response appropriate to that customer.
+
+When reliable information is insufficient or a medical warning sign or high-risk situation is present, it must not invent certainty or force a product recommendation. It should ask for the necessary information, explain the limitation or direct the customer to an appropriate healthcare professional.
+
+## Product-intake completion rule
+
+The practical product-intake path is:
+
+Product supplied + PO standards/instructions → AI research and compilation → review against the stated requirements → PO approval → ProductKnowledge entry and availability for system use.
+
+Do not add a second QA approval stage after the PO has accepted the prepared product information. Any correction or later change follows the same clear review-and-approval responsibility; it does not justify creating parallel banks or unnecessary gates.
+
+## Simplicity and implementation rules
+
+- Keep these three parts as the complete top-level architecture.
+- Every additional component, filter, approval or process must solve a concrete, demonstrated problem. If it does not, do not add it.
+- Do not split one product-information intake into multiple repositories, repeated reviews or duplicate approvals.
+- Preserve scientific accuracy, source traceability, privacy and safety without making them separate obstacles to routine work.
+- Prefer the shortest reliable path that lets the team introduce a product and use it in a customer consultation.
+- Do not claim a capability is implemented unless repository code and relevant tests/evidence verify it.
+
+## Existing backend structure
+
+The repository may contain models, repositories, services, interfaces and domain-specific gates. These are implementation details, not additional top-level business pillars. Preserve existing contracts and safety requirements unless a separately authorized change is made. Do not create or change schema, APIs, UI, runtime behavior or production data as a consequence of this documentation decision alone.
+
+## Scope
+
+This document records the agreed target architecture and product-intake principle. It does not claim that the complete three-part connection is already implemented, and it does not authorize runtime, schema, API, UI, database, product-data or customer-data changes.
