@@ -291,7 +291,7 @@
           "market_region": "US",
           "evidence_strength": "UNVERIFIED",
           "claim": "The official Anua product page displays manufacturer-reported survey outcomes: 90% agreed there was a reduction in skin redness and 90% agreed the appearance of red troubled spots improved after use. The public page does not disclose the sample, comparator, validated endpoint or statistical report. This remains a manufacturer claim, not independently verified efficacy.",
-          "notes": "Separate official routine-page manufacturer result. Kept in a distinct ProductKnowledge domain from the product-page 10%/tolerability claims to avoid merging unlike assertions into one field. Protocol remains undisclosed."
+          "notes": "The source is the exact official product page for the serum, not a separate routine page. The manufacturer-displayed survey result remains unverified because the public page does not disclose the protocol."
         },
         {
           "field": "ingredients",
