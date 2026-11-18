@@ -38,11 +38,11 @@ def test_seven_product_manifest_has_exact_canonical_scope_and_27_manufacturer_as
 
     assert len(products) == 7
     assert {product["product_id"] for product in products} == CANONICAL_IDS
-    assert len(assertions) == 27
+    assert len(assertions) == 25
     assert {
         product["dossier"]: len(product["assertions"])
         for product in products
-    } == {"P1": 5, "P2": 4, "P3": 4, "P4": 4, "P5": 4, "P6": 2, "P7": 4}
+    } == {"P1": 5, "P2": 4, "P3": 4, "P4": 4, "P5": 4, "P6": 0, "P7": 4}
     assert {item["source_type"] for item in assertions} == {"MANUFACTURER"}
     assert {item["claim_type"] for item in assertions} == {"MANUFACTURER_CLAIM"}
     assert all(item["evidence_strength"] == "UNVERIFIED" for item in assertions)
@@ -71,3 +71,19 @@ def test_manifest_preserves_p7_ingredient_assertion_and_existing_conflict_review
         "do not infer a one-to-one match from counts" in item
         for item in boundary["explicit_review_queue"]
     )
+
+
+def test_historical_clinique_claims_stay_unverified_when_official_url_redirects_to_replacement():
+    manifest = _manifest()
+    p6 = next(product for product in manifest["products"] if product["dossier"] == "P6")
+    assert p6["assertions"] == []
+    assert any("currently redirects to the current/replacement serum" in item for item in p6["identity_limits"])
+    assert any("Keep historical claims and formula UNKNOWN" in item for item in manifest["acceptance_boundary"]["explicit_review_queue"])
+
+
+def test_anua_redness_survey_claim_uses_the_exact_product_page():
+    manifest = _manifest()
+    p7 = next(product for product in manifest["products"] if product["dossier"] == "P7")
+    claim = next(item for item in p7["assertions"] if item["field"] == "claimed_benefits")
+    assert claim["source_reference"] == "https://anua.com/products/azelaic-acid-10-hyaluron-redness-soothing-serum"
+    assert claim["claim_type"] == "MANUFACTURER_CLAIM"
