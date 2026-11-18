@@ -27,7 +27,7 @@ PID = "P_CATALOG_INTAKE_E2E_001"
 
 def test_governed_intake_reaches_engine_ready_and_recommendation(db_session):
     """create → submit → QA_REVIEW → identity VERIFIED → claim Evidence +
-    ProductKnowledge → QA VALID → readiness → APPROVE → ACTIVATE → rec.
+    ProductKnowledge → QA VALID → readiness → PO APPROVE (direct ACTIVE) → stock-in → rec.
     """
     svc = ProductService(db_session)
     transitions = ProductTransitionService(db_session)
