@@ -48,7 +48,7 @@ def test_unknown_and_whitespace_codes_are_not_silently_normalized():
 
 def test_natural_series_ranges_are_bounded_and_series_specific():
     assert validate_owner_defined_series_range("طبیعی", "۱۰") is True
-    assert validate_owner_defined_series_range("طبیعی", "10") is True
+    assert validate_owner_defined_series_range("طبیعی", "10") is False
     assert validate_owner_defined_series_range("طبیعی", "۱۱") is False
     assert validate_owner_defined_series_range("طبیعی اکسترا", "+۰۹") is True
     assert validate_owner_defined_series_range("طبیعی اکسترا", "+05") is True
