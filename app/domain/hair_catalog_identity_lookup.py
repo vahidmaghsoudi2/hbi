@@ -4,9 +4,10 @@ Scope: compare one catalog item with one PO-approved catalog reference.
 This module does not access Product Master, GTIN, databases, APIs, Skin,
 legacy recommendation services, customer data, or chemical/safety rules.
 
-A MATCH requires the four exact color-identity fields and a traceable,
-versioned approved reference. Product specification and product volume are
-catalog details only; neither participates in identity matching.
+A MATCH requires the three exact canonical key fields (brand, raw series,
+raw shade code) and a traceable HBI snapshot or publisher-versioned source.
+Shade name, product specification and volume are retained descriptors;
+none participates in the canonical identity key.
 """
 from __future__ import annotations
 
@@ -27,11 +28,11 @@ _APPROVED_PATHS = frozenset((
     "/آلبوم-رنگ-مو-بیجورکا/",
     "/product/رنگ-موی-بیجورکا-سِری-طبیعی-شماره-1-مشکی/",
 ))
+# Canonical identity key: descriptive shade_name is retained but is not a key.
 _REQUIRED_IDENTITY_FIELDS = (
     "brand",
     "series",
     "shade_number",
-    "shade_name",
 )
 
 
@@ -160,9 +161,9 @@ def lookup_catalog_identity(
     """Compare exact catalog identity fields and return a traceable outcome.
 
     No trimming, case folding, aliases, fuzzy matching, inferred values, or
-    fallback to Product Master/GTIN are permitted. A missing edition label
-    (including the literal "نامشخص" or "unknown") prevents MATCH and yields
-    INCONCLUSIVE/KNOWLEDGE_GAP, while a known field conflict yields MISMATCH.
+    fallback to Product Master/GTIN are permitted. Exact identity can be
+    established from validated HBI snapshot lineage without inventing a
+    publisher-issued edition. Shade name is descriptive, not a key field.
     """
     if service_kind != "CATALOG_READY" or not isinstance(service_kind, str):
         return CatalogLookupResult(
