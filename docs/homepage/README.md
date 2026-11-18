@@ -1,79 +1,92 @@
 # HBI Homepage — menu map and operational documentation hub
 
-**Status:** Documentation + editable prototype. The production homepage «دانشنامه» menu was implemented in [PR #441](https://github.com/vahidmaghsoudi2/hbi/pull/441); its nested skin navigation was finalized in merged [PR #489](https://github.com/vahidmaghsoudi2/hbi/pull/489). This documentation/prototype does not itself change application code, schema, API, or database.
+**Status:** This folder contains observed UI documentation and a proposed, PO-confirmed information-architecture target. The target is documentation only and is not yet implemented in the application. No code, schema, API, database, inventory, product or customer data is changed by this documentation.
 
 ## Start here
 
-- **[View interactive menu preview](https://htmlpreview.github.io/?https://github.com/vahidmaghsoudi2/hbi/blob/docs/homepage-operational-folder-20261023/docs/homepage/index.html)** — opens the prototype in a static preview service.
-- **[Open prototype source](index.html)** — HTML source stored in this repository.
-- **[Canonical observed menu structure](menu-structure.json)** — editable source data used by the prototype.
-- [Operational roadmap](ROADMAP.md) — completion stages and evidence gates.
-- [User-path checklist](USER_PATH_CHECKLIST.md) — observed user paths and test evidence slots.
-- **[مدیریت محصولات — قالب ورود پوست V1](product-management/SKIN_INTAKE_TEMPLATE_FORMS_V1.md)** — fixed skin intake templates (canonical under homepage)
-- **[هاب مدیریت محصولات](product-management/README.md)** — product-management menu documentation space
-- **[دانشنامه — مرجع مستندات](encyclopedia/README.md)** — هاب هفت زیرمنو و مسیرهای محتوایی دانشنامه
-- **[دانش پوست — فهرست محصولات](encyclopedia/skin/PRODUCTS.md)** — دفتر مرکزی نمونه‌ها و تغییرات محتوای دانش پوست
-- **[دانشنامه ← رنگ مو — مرجع اصلی پروژه](encyclopedia/hair-color/README.md)** — هدف، تصمیم‌ها، قرارداد مشاوره، نقشهٔ دسترسی، وضعیت و گام بعدی؛ تغییرات فعلی در PR #542 و هنوز ادغام‌نشده
-
-> The prototype edits only a browser-local draft. To persist changes in the repository, export the JSON, review it, then submit the revised `menu-structure.json` through a Pull Request. The prototype does not write to GitHub automatically. The interactive preview uses a third-party static preview service and is not GitHub Pages or a production deployment. `menu-structure.json` remains the canonical menu data; the embedded fallback in `index.html` must be refreshed whenever that JSON changes.
+- [Canonical observed and proposed menu structure](menu-structure.json)
+- [Operational roadmap](ROADMAP.md)
+- [User-path checklist](USER_PATH_CHECKLIST.md)
+- [مدیریت محصولات — هاب و ساختار هدف](product-management/README.md)
+- [قالب‌های ورود پوست V1](product-management/SKIN_INTAKE_TEMPLATE_FORMS_V1.md)
+- [دانشنامه — مرجع حوزه‌های دانشی باقی‌مانده](encyclopedia/README.md)
+- [دانش پوست — دفتر پژوهش هفت محصول](encyclopedia/skin/PRODUCTS.md)
+- [دانشنامه ← رنگ مو — مرجع اصلی پروژه](encyclopedia/hair-color/README.md)
 
 ## Authority map
 
 | Location | Responsibility |
-|----------|----------------|
-| **[Issue #406](https://github.com/vahidmaghsoudi2/hbi/issues/406) body** | Sole authority for product decisions, permissions, Gates, and the official index of related IDs for Product Characteristics / homepage policy |
-| **`docs/homepage/`** | Homepage menu map, prototype, operational docs and user-path evidence |
-| **`docs/homepage/product-management/`** | Product management menu: skin intake template map (V1) |
-| **[PR #411](https://github.com/vahidmaghsoudi2/hbi/pull/411)** and its research files | Technical evidence and Product Knowledge research workbook |
-| **Problem Space / PR #433 / P01–P61** | Content remains in its specialist registry; «دانش پوست → مشکلات پوستی» links to the existing Workspace Index without copying records |
+|---|---|
+| [Issue #406](https://github.com/vahidmaghsoudi2/hbi/issues/406) | Product Owner decisions, permissions, gates and current product-management policy |
+| `docs/homepage/` | Observed homepage menu, target information architecture, prototype and user-path documentation |
+| `docs/homepage/product-management/` | Product-management structure and skin intake specifications |
+| [PR #411](https://github.com/vahidmaghsoudi2/hbi/pull/411) | Product Knowledge research continuity and technical evidence |
+| `docs/product-intake-knowledge-registry/` | Existing canonical skin-problem records and index P01–P61 |
 
-### Rules that prevent another source-of-truth problem
+Do not create a parallel decision register. Product Owner decisions remain in Issue #406; these files document navigation and operational structure.
 
-1. Do not record new Product Owner decisions in this folder. Decisions and permissions belong in Issue **#406**; link to them here.
-2. Do not create a second decision/status register.
-3. Historical Issues/comments remain in GitHub; this hub links to them rather than pretending to move their history.
-4. Menu labels marked `observed` are derived from `frontend/src/pages/NewHomePage.tsx`; the «دانشنامه» menu is active after PR #441. The prototype documents the menu and is not proof of any behavior beyond the source and runtime checks.
-5. No file here authorizes production code, schema, API, database, product creation, QA, or activation changes.
-6. Skin intake template specs live only under `docs/homepage/product-management/`; do not scatter copies.
+## Current observed UI (not the target)
 
-## Observed main menu
-
-The current `NewHomePage.tsx` snapshot shows nine main menu cards:
+The last documented `NewHomePage.tsx` snapshot contains these nine main menu cards:
 
 1. خانه و داشبورد
 2. مشتریان
 3. مشاوره
 4. فروش
-5. مدیریت محصولات → [product-management/](product-management/)
+5. مدیریت محصولات
 6. کالا و موجودی
 7. خرید
 8. حسابداری و گزارش‌ها
 9. دانشنامه
 
-The prototype also identifies the top actions separately. «تنظیمات» is not treated as an active main-menu card because it is not present among those nine cards in the inspected source snapshot.
+The current UI snapshot and its existing submenu implementation are recorded as **observed** in `menu-structure.json`. Do not read an observed entry as approval of the future structure.
 
-## Active encyclopedia menu — implementation and source-of-truth boundaries
+## PO-confirmed target: مدیریت محصولات
 
-The «دانشنامه» menu and its seven submenus are present in the production homepage after [PR #441](https://github.com/vahidmaghsoudi2/hbi/pull/441). The current second-level path is **دانشنامه → دانش پوست → (ویژگی محصولات پوستی | مشکلات پوستی)**. «ویژگی محصولات پوستی» opens the existing read-only product encyclopedia and links to [PRODUCTS.md](encyclopedia/skin/PRODUCTS.md), containing the seven research dossiers P1–P7. «مشکلات پوستی» opens the existing [SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md](../product-intake-knowledge-registry/SKIN_PROBLEM_BANK_WORKSPACE_INDEX.md), whose canonical list is P01–P61. These remain two independent sources; the menu is navigation only and must not copy either dataset. Their documented relationship source is the existing ProductProblemLink model/API; this navigation change does not add live relationship rendering to the UI. The other six encyclopedia destinations remain unchanged.
+The target unifies product management and skin knowledge in one main **مدیریت محصولات** environment:
 
-Two boundaries are explicit: «دانش مو» covers general hair/scalp knowledge, while «رنگ مو» covers coloring and care of color-treated hair. The knowledge category «سایر» is not the product-line value `OTHER`.
+- **کالا و ویژگی محصول:** فهرست کالاها، ورود و تکمیل اطلاعات محصول، پرونده کامل ویژگی‌های همان محصول، و اطلاعات عملیاتی/موجودی در کنار همان کالا.
+- **مشکلات پوستی:** دانش مشکلات پوستی و ارتباط ساختاریافته آن با ویژگی‌ها و محصولات.
 
-The menu implementation is merged; this does not claim that the six not-yet-created destination pages are operationally ready.
+Product characteristics are maintained in the dossier of the relevant product. There is no separate «ویژگی محصولات» knowledge menu or duplicated characteristics bank. Product-to-problem and problem-to-product navigation should be possible through structured relationships; the recommendation engine evaluates suitability against the customer's context.
 
-## Existing records (linked, not moved)
+The visible menu must not expose a separate «بررسی و تأیید QA» step. Research and quality review take place within the preparation process and Product Owner review. Product Owner approval completes the information-acceptance process; no additional QA gate follows it.
 
-- [Issue #406 — decisions and Gates](https://github.com/vahidmaghsoudi2/hbi/issues/406)
+### Product and consultation eligibility rules
+
+- Only products with valid, completed and Product Owner-approved information may enter the product system and inventory.
+- A product with sellable inventory greater than zero automatically enters the set considered by consultation.
+- Expiry or a stop-sale condition means sellable inventory is zero; such a product is not included in the consultation candidate set.
+- The consultation engine, not a pre-filter, evaluates suitability for the current customer. It recommends a suitable product, excludes an unsuitable one with a reason, or reports uncertainty when information is insufficient.
+- No separate manual activation for consultation is required.
+
+The seven P1–P7 dossiers in `encyclopedia/skin/PRODUCTS.md` remain research dossiers. Their presence does not mean they have been accepted as ProductKnowledge or Product Master records.
+
+## Non-skin knowledge areas
+
+The six non-skin knowledge areas remain preserved and must not be deleted as part of this change:
+
+- دانش مو
+- دانش ادکلن
+- رنگ مو
+- آرایش
+- ابزار
+- سایر
+
+Their final navigation placement is still an open design detail. Until that placement is explicitly decided and implemented, retain their existing access paths. The target must not silently discard them or imply that their destination pages are all operationally complete.
+
+## Scope and implementation boundary
+
+- `menu-structure.json` keeps **observed current UI** separate from the **proposed target**.
+- The current homepage implementation is not changed by this documentation PR.
+- No database, API, schema, runtime, stock, product lifecycle, ProductKnowledge or ProductProblemLink data is changed.
+- No P1–P7 dossier is promoted automatically.
+- Any runtime or data-model change requires its own explicit scope and authorization.
+
+## Existing references
+
+- [Issue #406 — decisions and permissions](https://github.com/vahidmaghsoudi2/hbi/issues/406)
 - [PR #411 — Product Knowledge research workbook](https://github.com/vahidmaghsoudi2/hbi/pull/411)
-- [HBI operational roadmap](../HBI_HOME_OPERATIONAL_ROADMAP.md)
 - [Homepage architecture decision](../HBI_HOME_PAGE_ARCHITECTURE_DECISION.md)
 - [Homepage completion ledger](../HOMEPAGE_COMPLETION_LEDGER.md)
 - [Homepage IA audit, Stage 2](../HOMEPAGE_IA_AUDIT_STAGE2.md)
-- [Home frontend/backend connections](../HOME_FRONTEND_BACKEND_CONNECTIONS.md)
-
-## Continue
-
-1. Use the prototype to organize menu labels and submenus; do not treat edits as production changes.
-2. Keep the JSON schema/data coherent and review exported changes before committing them.
-3. Record actual browser/test outcomes in `USER_PATH_CHECKLIST.md` only when supported by evidence.
-4. Send policy/Gate decisions to Issue #406 and Product Knowledge evidence to PR #411.
-5. This folder is documentation and prototype only; production behavior changes must be implemented and reviewed in application code.
