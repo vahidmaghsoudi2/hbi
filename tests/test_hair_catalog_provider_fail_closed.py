@@ -116,6 +116,20 @@ def test_provider_accepts_only_exact_identity_present_in_approved_csv(tmp_path, 
     )
 
 
+def test_provider_membership_uses_three_field_key_not_descriptive_shade_name(tmp_path, monkeypatch):
+    path = _write_csv(tmp_path, _valid_csv())
+    monkeypatch.setattr(provider, "_catalog_path", lambda: path)
+
+    assert provider.approved_catalog_contains_identity(
+        CatalogIdentity(
+            brand="Brand-0",
+            series="Series-0",
+            shade_number="1",
+            shade_name="Different descriptive label",
+        )
+    )
+
+
 def test_provider_rejects_identity_not_present_in_approved_csv(tmp_path, monkeypatch):
     path = _write_csv(tmp_path, _valid_csv())
     monkeypatch.setattr(provider, "_catalog_path", lambda: path)
