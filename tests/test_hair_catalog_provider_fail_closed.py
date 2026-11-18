@@ -14,7 +14,7 @@ def _valid_csv(row_count: int = provider.EXPECTED_DATA_ROWS) -> str:
     for index in range(row_count):
         values = [
             f"Brand-{index}",
-            f"Series-{index}",
+            provider.EXPECTED_SERIES[index % len(provider.EXPECTED_SERIES)],
             str(index + 1),
             f"Shade-{index}",
             "Synthetic specification",
@@ -109,7 +109,7 @@ def test_provider_accepts_only_exact_identity_present_in_approved_csv(tmp_path, 
     assert provider.approved_catalog_contains_identity(
         CatalogIdentity(
             brand="Brand-0",
-            series="Series-0",
+            series=provider.EXPECTED_SERIES[0],
             shade_number="1",
             shade_name="Shade-0",
         )
