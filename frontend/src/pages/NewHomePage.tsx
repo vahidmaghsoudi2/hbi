@@ -1,4 +1,4 @@
-﻿import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   listSellableProducts,
@@ -892,9 +892,8 @@ export default function NewHomePage() {
               </> : null}
               {mainSection === "sales" ? <article className="pro-product-card"><h2>ثبت فروش مستقیم</h2><p className="pro-muted">ثبت فروش بدون الزام به مشاورهٔ قبلی؛ نمایش آخرین فروش پس از ثبت.</p><button type="button" className="pro-btn-primary" onClick={() => go("sales")}>بازکردن ثبت فروش</button></article> : null}
               {mainSection === "products" ? <>
-                <article className="pro-product-card"><h2>فهرست کالاها</h2><p className="pro-muted">فهرست مدیریتی واحد برای مشاهدهٔ کالاها، ورود به پرونده و انتخاب محصول برای بررسی QA.</p><button type="button" className="pro-btn-primary" onClick={() => go("catalog")}>بازکردن فهرست کالاها</button></article>
-                <article className="pro-product-card"><h2>ورود و ویرایش محصول</h2><p className="pro-muted">ثبت مشخصات محصول؛ جدا از موجودی فیزیکی.</p><button type="button" className="pro-btn-primary" onClick={() => { setEditProduct(null); go("intake"); }}>ورود و ویرایش محصول</button></article>
-                <article className="pro-product-card"><h2>بررسی و تأیید QA</h2><p className="pro-muted">ابتدا محصول را از فهرست مدیریتی انتخاب کنید؛ پروندهٔ QA برای محصول مشخص باز می‌شود.</p><button type="button" className="pro-btn-primary" onClick={() => go("catalog")}>انتخاب محصول برای QA</button></article>
+                <article className="pro-product-card"><h2>فهرست کالاها</h2><p className="pro-muted">نقطهٔ شروع مدیریت محصول: مشاهدهٔ کالاها و ورود به پرونده یا تکمیل همان محصول. منوی مستقل QA وجود ندارد.</p><button type="button" className="pro-btn-primary" onClick={() => go("catalog")}>بازکردن فهرست کالاها</button></article>
+                <article className="pro-product-card"><h2>ورود محصول جدید</h2><p className="pro-muted">ایجاد پیش‌نویس کاری (DRAFT) با مشخصات و ویژگی‌های همان محصول؛ موجودی فیزیکی اینجا ثبت نمی‌شود.</p><button type="button" className="pro-btn-primary" onClick={() => { setEditProduct(null); go("intake"); }}>شروع ورود محصول</button></article>
               </> : null}
               {mainSection === "inventory" ? <>
                 <article className="pro-product-card"><h2>موجودی کالا</h2><p className="pro-muted">موجودی قابل مشاهده و ارزش‌گذاری‌شده بر پایه آخرین قیمت خرید ثبت‌شده.</p><Link to="/inventory?section=inventory" className="pro-btn-primary">بازکردن گزارش موجودی</Link></article>
@@ -1311,7 +1310,7 @@ export default function NewHomePage() {
                         go("review");
                       }}
                     >
-                      بررسی پرونده
+                      پرونده و بررسی
                     </button>
                   </div>
                 </article>
