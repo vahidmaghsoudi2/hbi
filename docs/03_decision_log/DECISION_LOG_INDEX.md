@@ -4,6 +4,7 @@ Last Updated: 2026-09-16
 Every major project decision is recorded as an ADR or PO Decision record.
 
 | ID | Subject | Status | Date |
+| **HBI-PO-DEC-CKER-001** | **Central Knowledge & Evidence Repository — one CKER; Encyclopedia core + internal atomic Evidence layer** | **PO DECIDED — PR DRAFT** | **2026-11-18** |
 |---|---|---|---|
 | ADR-001 | Use quoted table name Case due to reserved keyword | ACCEPTED | 1405-05-21 |
 | ADR-002 | Do not implement Evidence/ProductKnowledge in GATE 6-4B | ACCEPTED | 1405-05-21 |
