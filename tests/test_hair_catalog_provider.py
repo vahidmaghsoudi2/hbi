@@ -4,6 +4,8 @@ import hashlib
 
 from app.domain.hair_catalog_provider import (
     EXPECTED_DATA_ROWS,
+    EXPECTED_SERIES,
+    EXPECTED_SERIES_CODES,
     _catalog_path,
     load_approved_hair_catalog_reference,
 )
@@ -30,7 +32,6 @@ def test_approved_catalog_provider_loads_exact_88_row_artifact():
     assert metadata.snapshot_validation_status == "VALIDATED_ON_LOAD"
     assert metadata.snapshot_id == "hbi-hair-catalog-snapshot-20261110-185700z"
     assert len(raw.decode("utf-8-sig").splitlines()) - 1 == EXPECTED_DATA_ROWS
-    from app.domain.hair_catalog_provider import EXPECTED_SERIES
     import csv
     from io import StringIO
 
@@ -43,10 +44,7 @@ def test_approved_catalog_provider_loads_exact_88_row_artifact():
     }
     assert actual_series_codes == {
         series: set(codes)
-        for series, codes in __import__(
-            "app.domain.hair_catalog_provider",
-            fromlist=["EXPECTED_SERIES_CODES"],
-        ).EXPECTED_SERIES_CODES.items()
+        for series, codes in EXPECTED_SERIES_CODES.items()
     }
     assert sum(len(codes) for codes in actual_series_codes.values()) == 88
     assert {series: len(codes) for series, codes in actual_series_codes.items()} == {
