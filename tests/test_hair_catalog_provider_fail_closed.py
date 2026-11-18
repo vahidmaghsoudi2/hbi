@@ -37,6 +37,19 @@ def test_provider_fails_closed_when_catalog_has_wrong_row_count(tmp_path, monkey
     assert provider.load_approved_hair_catalog_reference() is None
 
 
+def test_provider_fails_closed_when_catalog_series_set_is_changed(tmp_path, monkeypatch):
+    rows = list(csv.reader(_valid_csv().splitlines()))
+    rows[1][1] = "Unapproved-Series"
+    from io import StringIO
+
+    buffer = StringIO()
+    csv.writer(buffer, lineterminator="\\n").writerows(rows)
+    path = _write_csv(tmp_path, buffer.getvalue())
+    monkeypatch.setattr(provider, "_catalog_path", lambda: path)
+
+    assert provider.load_approved_hair_catalog_reference() is None
+
+
 def test_provider_fails_closed_when_catalog_headers_are_changed(tmp_path, monkeypatch):
     headers = list(provider.EXPECTED_HEADERS)
     headers[2] = "شماره متفاوت"
