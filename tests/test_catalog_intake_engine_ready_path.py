@@ -110,8 +110,7 @@ def test_governed_intake_reaches_engine_ready_and_recommendation(db_session):
     readiness = EvidenceReadinessService(db_session).evaluate(PID)
     assert readiness.ready is True, readiness.summary
 
-    assert transitions.approve(PID, "po_catalog", PO).status == "APPROVED"
-    assert transitions.activate(PID, "po_catalog", PO).status == "ACTIVE"
+    assert transitions.approve(PID, "po_catalog", PO).status == "ACTIVE"
 
     # Recommendation candidates must have a separately recorded physical receipt.
     stock = StockInService(db_session).stock_in(
