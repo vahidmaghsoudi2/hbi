@@ -24,17 +24,20 @@ These three parts are the architecture. Do not add more top-level pillars by ren
 
 ProductKnowledge is the single bank of product information used by HBI.
 
-### Product-intake path
+### Product-information path and source of truth
 
 1. The Product Owner (PO) introduces the product and supplies the required instructions, standards, scope, direction and acceptance criteria.
-2. Multiple AI research systems are instructed to research and extract the product information according to those requirements.
-3. The systems collect and organize the information. Material that fails the stated standards is corrected or rejected; it is not accepted as product information.
-4. The PO reviews and approves the prepared product information.
-5. After PO approval, the information is ready to enter ProductKnowledge and be used by HBI.
+2. Research systems collect and organize the requested information in the Encyclopedia workflow against those requirements. Material that fails the stated standards is corrected, kept explicitly uncertain or rejected; it is not silently accepted.
+3. The **Approved Encyclopedia** is the primary, live and human-editable reference for approved product knowledge. It is where the accepted human-readable knowledge is organized and maintained.
+4. Original manufacturer disclosures, physical package text, technical documents and relevant scientific sources remain primary source records. They are never deleted or replaced by an Encyclopedia summary; important statements remain traceable to the original source and its limitations.
+5. Evidence and Source Traceability support the provenance and review of statements. They are not a parallel product bank, a fourth architecture part or a separate approval gate.
+6. **ProductKnowledge** remains the single operational runtime bank that supplies accepted product information to HBI.
 
-**The PO's approval completes product-information acceptance. Do not add another approval or QA gate after it.** Quality checking is inherent in the research, review and acceptance process. It is not a separate bank or an extra post-approval stage.
+**Approved Encyclopedia → Evidence / Source Traceability → ProductKnowledge → Consultation**
 
-Sources and supporting evidence should remain traceable where relevant. They support the reliability and verifiability of the information inside ProductKnowledge; they do not create another top-level architecture part, parallel product bank or separate intake workflow.
+**The PO's approval completes product-information acceptance. Do not add another approval or QA gate after it.** Quality checking is part of research, review and acceptance; it is not a duplicate post-approval stage. Independent safety and lifecycle controls remain in force.
+
+This source-of-truth refinement is recorded by the PO decision `HBI-PO-DEC-ENCYCLOPEDIA-PRIMARY-KB-001` in [Issue #406](https://github.com/vahidmaghsoudi2/hbi/issues/406#issuecomment-6989651765). It does not add a top-level architecture part or authorize runtime/schema/API/database changes.
 
 ## 2. Customer Context
 
