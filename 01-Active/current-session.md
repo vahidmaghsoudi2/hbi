@@ -1,33 +1,48 @@
 # HBI Active Session
 
+## CURRENT AUTHORITATIVE PROJECT REPORT — 2026-11-14
 
-## CURRENT AUTHORITATIVE CORRECTION — 2026-11-12
+This report supersedes all conflicting earlier status statements in this file, including older snapshots, inventory baselines, and Anua conflict notes. The sections below the current report are retained as historical records; they must not be mistaken for the latest state.
 
-This section supersedes any conflicting statement in older handoff sections below. Older snapshots and comments remain historical records of what was reported at their timestamps; they are not current-state assertions.
+### Owner-confirmed corrections — 2026-11-14
+- **Sellable inventory:** The Product Owner confirms that each of the seven canonical pilot products has **12 units**, for **84 units total**. This is the current owner-confirmed physical/sellable-stock figure and supersedes earlier statements that the actual stock was unknown or that the seven products had no stock. This documentation update does not itself write or reconcile the local database inventory rows; database quantities and stock movements must be verified by a fresh read-back.
+- **Anua:** The Product Owner confirms that the Anua issue has been **resolved**. Earlier handoff statements describing the Anua conflict as still unresolved are superseded as an operational status. Preserve the historical record of the former conflict and its correction rationale, but do not reopen or repeat that work. If a technical audit is needed, verify the final Evidence dispositions and audit event read-only; do not rerun the correction merely because older notes say it was pending.
 
-### ProductKnowledge transfer — verified operator report
-- The 2026-11-12 operator report confirms that exactly seven existing ProductKnowledge rows were updated in a content-only transaction, writing only: `ingredients`, `ingredient_roles`, `claimed_benefits`, `known_use_cases`, `usage_instructions`, `manufacturer_claims`, `contraindications`, and `evidence_refs`.
-- The reported transaction passed SQLite integrity (`ok`) with zero FK violations. A pre-write backup was reported at `E:\\HBI_GitHub_Current\\artifacts\\hbi-before-productknowledge-write-20261112-001331.db`.
-- The report states that Product, Evidence, Inventory, Recommendation, ProductProblemLink, and ProductKnowledge status/confidence/domain-status fields were not changed by that transfer.
-- All 25 Evidence rows remained `PENDING / UNKNOWN`; no Evidence QA promotion occurred. ISDIN ProductKnowledge `ingredients` remained empty because no matching ingredients Evidence row was available.
-- This supersedes older handoff wording that ProductKnowledge content fields were empty. That wording describes an earlier snapshot and must not be used as the present post-transfer state. A fresh local read-back is still required before claiming the saved content is currently verified.
+### Confirmed completed work — do not repeat
+- The canonical research Manifest contains 24 assertions. Do not regenerate or re-import it.
+- The seven product dossier drafts received human review and were accepted as the content basis, with the documented product-specific limitations and caveats.
+- The controlled content transfer on 2026-11-12 updated exactly seven existing ProductKnowledge rows and only these eight content columns: `ingredients`, `ingredient_roles`, `claimed_benefits`, `known_use_cases`, `usage_instructions`, `manufacturer_claims`, `contraindications`, and `evidence_refs`.
+- The ProductKnowledge transfer was reported committed with SQLite integrity `ok` and zero FK violations. The reported pre-write backup was `E:\HBI_GitHub_Current\artifacts\hbi-before-productknowledge-write-20261112-001331.db`.
+- The transfer did not promote Evidence QA or change Product identity/lifecycle, Inventory, Recommendation, or ProductProblemLink.
+- The GET ProductKnowledge read-only behavior, Recommendation hard-gate tests for zero/reserved stock, and Inventory ADJUSTMENT handling are already present in the reported master code/test history (PRs #537, #536, and #538 respectively). Do not reimplement these without new regression evidence.
+- The seven visual package references were previously confirmed, including the Garnier pump-package correction. Visual confirmation is not proof of market/formula identity.
 
-### Anua — corrected evidence interpretation and proposed disposition
-- The existing 24-assertion manifest remains the canonical research set; do not regenerate or re-import it. The 25th DB Evidence row is an additional duplicate Anua assertion, not a 25th canonical manifest assertion.
-- Three relevant Anua Evidence records were identified:
-  - `...-1ed73fb7`: the source-backed full INCI assertion in `ingredients`; retain this record.
-  - `...-36d28c8a`: the manufacturer-declared 10% azelaic-acid claim in `manufacturer_claims`; retain this record.
-  - `...-2b4c9e26`: a duplicate 10% manufacturer claim incorrectly classified under `ingredients`; this is the record designated for audited rejection from the active evidence set.
-- Therefore, any earlier instruction or implication to remove `...-1ed73fb7` is incorrect and is superseded. Do not reject or delete the full-INCI record.
-- The user has now requested that the Anua findings and correction be recorded and that inaccurate prior history be corrected. The intended data disposition is to retain `...-1ed73fb7` and `...-36d28c8a`, and reject `...-2b4c9e26` through the existing audited conflict-resolution service (not physical deletion).
-- **Execution status:** this GitHub documentation update does not modify the local SQLite database. The Anua Evidence conflict must not be described as resolved until the local audited service operation is actually run and its post-write read-back confirms the exact intended rows and audit event. Verify the competing set before calling the service; no unrelated Evidence may be changed.
+### Remaining verification and acceptance gates
+1. **Read-only database verification:** Read back all seven ProductKnowledge rows and verify the prior content transfer. Do not repeat the transfer or import.
+2. **Evidence QA:** Earlier operator records reported 25 Evidence rows as `UNKNOWN / PENDING`. The current final status after the Anua resolution must be read back; do not assume all 25 have been QA-approved merely because Anua is resolved.
+3. **Anua technical closure:** Do not repeat the correction. If required, perform read-only verification of the final active/rejected Evidence records and audit trail.
+4. **Inventory database reconciliation:** The owner-confirmed quantity is 12 units per product (84 total). Read back all seven Inventory rows and relevant StockMovement records to confirm the database matches this figure. Do not write adjustments unless the owner separately authorizes that exact operation.
+5. **Identity and formula caveats:** Retain only material unresolved identity/market/formula questions. In particular, keep the historical Clinique UK 100 ml dossier distinct from its replacement serum; keep the two ISDIN INCI lists separate; and do not merge SKIN1004 market variants without evidence. Do not repeat already-confirmed package reviews.
+6. **Recommendation and ProductProblemLink:** Earlier snapshots reported zero rows. Verify current state and test behavior using isolated/non-production data. Do not create or alter production links/recommendations without separate authorization.
+7. **End-to-end acceptance:** Run the seven-product operational E2E only after the relevant data and QA gates are verified, then record explicit Product Owner acceptance.
+8. **Roadmap:** Keep Issue #406 as the single roadmap/source-of-truth issue and update it only with evidence-backed current gate status. Do not create a parallel handoff.
 
-### Protected scope and next steps
-- No Evidence QA promotion, no bulk status change, no migration, no code change, and no Inventory, Recommendation, ProductProblemLink, Product identity, or lifecycle mutation is authorized by this documentation correction.
-- Obtain a fresh read-only local DB snapshot and ProductKnowledge read-back. For Anua, inspect the exact competing set, run only the audited correction described above, and verify the winner, rejected duplicate, audit event, and absence of unrelated changes.
-- Issue #406 remains the single roadmap/source-of-truth issue and stays OPEN until its actual acceptance gates pass.
-- Continue using this file as the sole active-session handoff. Do not create a parallel handoff document.
+### Current interpretation
+- The project is **not starting over**. The Manifest, dossier review, seven-row ProductKnowledge content transfer, and the listed code/test improvements are completed work.
+- The Anua issue is owner-confirmed resolved.
+- Actual sellable stock is owner-confirmed as 12 units for each pilot product, 84 total; database reconciliation remains a separate read-only verification.
+- Do not describe old snapshots as current state. A live DB audit has not been performed by this documentation update.
+- No database write, QA promotion, inventory adjustment, migration, import, merge, or production-data mutation is authorized by this report update.
 
+### Evidence and authority rules
+- Distinguish code merged in GitHub, actions reported executed on the local DB, current DB read-back, automated tests, and Product Owner acceptance.
+- Evidence being present does not mean it is accepted.
+- Do not repeat completed tasks without a specific failed verification, regression, or new requirement.
+- Skin consultation and hair-colour workflows remain separate domains.
+- Preserve local worktrees and user changes; no reset, overwrite, cleanup, or unsafe legacy importer execution.
+- This file remains the sole active-session handoff. Keep older dated sections below as history, but this 2026-11-14 report governs whenever they conflict.
+
+---
 
 ## Current Operational Handoff — post-merge correction — 2026-11-11
 
