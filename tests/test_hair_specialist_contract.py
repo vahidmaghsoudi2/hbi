@@ -1,5 +1,6 @@
 import pytest
 
+from app.domain.hair_engine_readiness import EngineReadiness
 from app.domain.hair_specialist_contract import (
     EvidenceRef,
     GateStatus,
@@ -7,7 +8,7 @@ from app.domain.hair_specialist_contract import (
     ResponseType,
     ReviewDecision,
     SpecialistOutput,
-    evaluate_specialist_output,
+    evaluate_specialist_output as _evaluate_specialist_output,
     record_specialist_review,
     rejected_proposal_may_be_reactivated,
     revision_requires_new_proposal_id,
@@ -23,6 +24,12 @@ def _evidence(kind):
         content_sha256="a" * 64,
         scope="synthetic-test-scope",
     )
+
+
+
+def evaluate_specialist_output(output, *, engine_readiness=EngineReadiness.HEALTHY):
+    """Test helper: synthetic success explicitly injects trusted test readiness."""
+    return _evaluate_specialist_output(output, engine_readiness=engine_readiness)
 
 
 def _output(**changes):
@@ -58,6 +65,21 @@ def _review(output, gate, **changes):
     }
     values.update(changes)
     return record_specialist_review(output, gate, **values)
+
+
+
+def test_specialist_output_gate_defaults_to_engine_fail_closed():
+    assert _evaluate_specialist_output(_output()).status == GateStatus.ENGINE_FAIL
+
+
+@pytest.mark.parametrize(
+    "readiness",
+    [EngineReadiness.UNHEALTHY, EngineReadiness.STALE, "HEALTHY", None],
+)
+def test_specialist_output_gate_accepts_only_typed_healthy_readiness(readiness):
+    gate = _evaluate_specialist_output(_output(), engine_readiness=readiness)
+    assert gate.status == GateStatus.ENGINE_FAIL
+    assert gate.publishable_to_internal_review is False
 
 
 def test_complete_evidence_opens_internal_review_only():
@@ -99,7 +121,7 @@ def test_invalid_hash_or_unverified_evidence_does_not_satisfy_gate():
 
 
 def test_engine_failure_is_fail_closed_and_takes_precedence():
-    gate = evaluate_specialist_output(_output(data_complete=False), engine_ok=False)
+    gate = evaluate_specialist_output(_output(data_complete=False), engine_readiness=EngineReadiness.UNHEALTHY)
     assert gate.status == GateStatus.ENGINE_FAIL
     assert gate.publishable_to_internal_review is False
 
@@ -297,7 +319,7 @@ def test_raw_recommendation_payload_is_never_accepted_by_contract():
 
 def test_ineligible_output_cannot_receive_specialist_review():
     output = _output()
-    ineligible = evaluate_specialist_output(output, engine_ok=False)
+    ineligible = evaluate_specialist_output(output, engine_readiness=EngineReadiness.UNHEALTHY)
     with pytest.raises(ValueError):
         _review(output, ineligible)
 
@@ -349,8 +371,8 @@ def test_malformed_missing_data_field_fails_closed():
     assert gate.status == GateStatus.ENGINE_FAIL
 
 
-def test_non_boolean_engine_health_flag_fails_closed():
-    gate = evaluate_specialist_output(_output(), engine_ok="true")
+def test_untyped_engine_readiness_fails_closed():
+    gate = evaluate_specialist_output(_output(), engine_readiness="HEALTHY")
     assert gate.status == GateStatus.ENGINE_FAIL
 
 

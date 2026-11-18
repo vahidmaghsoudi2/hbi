@@ -12,6 +12,8 @@ from enum import Enum
 import re
 from typing import Iterable
 
+from app.domain.hair_engine_readiness import EngineReadiness
+
 
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
@@ -144,13 +146,17 @@ def _evidence_is_valid(item: EvidenceRef) -> bool:
     )
 
 
-def evaluate_specialist_output(output: SpecialistOutput, *, engine_ok: bool = True) -> GateResult:
-    """Apply ordered gates; internal review is the maximum permitted exposure."""
+def evaluate_specialist_output(
+    output: SpecialistOutput,
+    *,
+    engine_readiness: EngineReadiness = EngineReadiness.UNAVAILABLE,
+) -> GateResult:
+    """Apply ordered gates; readiness must be supplied by a trusted server provider."""
     if not isinstance(output, SpecialistOutput):
         raise TypeError("output must be a SpecialistOutput")
 
     # Internal control failure takes precedence over every other state.
-    if engine_ok is not True:
+    if engine_readiness is not EngineReadiness.HEALTHY:
         return GateResult(GateStatus.ENGINE_FAIL, False, ("ENGINE_FAIL",))
 
     if (
