@@ -26,6 +26,7 @@ from app.domain.hair_dialogue_contract import (
     record_execution_consent,
     reject_proposal,
     resolve_required_data,
+    validate_dialogue_state,
 )
 from app.models.user_role import ROLE_ADMIN, ROLE_PO, ROLE_REVIEWER_QA
 
@@ -105,10 +106,10 @@ async def run_hair_dialogue_turn(
 ):
     """Apply one approved dialogue transition to a synthetic state, without persistence."""
     state = payload.state.to_domain()
-    if not isinstance(state.case_id, str) or not state.case_id.startswith("SYNTHETIC-"):
-        raise HTTPException(status_code=422, detail="PO-66-09 permits synthetic case identifiers only.")
-    if not state.case_version.strip() or not state.goal_version.strip():
-        raise HTTPException(status_code=422, detail="Synthetic case and goal versions must be non-empty.")
+    try:
+        validate_dialogue_state(state)
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=422, detail="Only bounded synthetic dialogue identifiers and versions are permitted.") from exc
 
     try:
         result: Any = None

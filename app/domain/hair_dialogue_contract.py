@@ -10,6 +10,12 @@ from dataclasses import dataclass, replace
 from enum import Enum
 from typing import Any, Mapping
 
+from app.domain.hair_data_governance import (
+    is_permitted_synthetic_identifier,
+    is_permitted_synthetic_version,
+    is_permitted_field_name,
+)
+
 
 class ClientDecision(str, Enum):
     NONE = "NONE"
@@ -59,18 +65,65 @@ class ReassessmentResult:
     status: str
 
 
-def _validate_state(state: DialogueCaseState) -> None:
+def validate_dialogue_state(state: DialogueCaseState) -> None:
+    """Validate the complete synthetic identity envelope before any transition or echo."""
     if not isinstance(state, DialogueCaseState):
         raise TypeError("state must be a DialogueCaseState")
     if (
-        not isinstance(state.case_id, str)
-        or not state.case_id.startswith("SYNTHETIC-")
-        or not isinstance(state.case_version, str)
-        or not state.case_version.strip()
-        or not isinstance(state.goal_version, str)
-        or not state.goal_version.strip()
+        not is_permitted_synthetic_identifier(state.case_id)
+        or not is_permitted_synthetic_version(state.case_version, kind="case")
+        or not is_permitted_synthetic_version(state.goal_version, kind="goal")
     ):
-        raise ValueError("Only versioned synthetic dialogue state is permitted")
+        raise ValueError("Only bounded synthetic case and goal identifiers are permitted")
+
+    optional_identifiers = (
+        state.active_proposal_id,
+        state.execution_consent_for_proposal_id,
+    )
+    if any(
+        value is not None and not is_permitted_synthetic_identifier(value)
+        for value in optional_identifiers
+    ):
+        raise ValueError("Only bounded synthetic proposal identifiers are permitted")
+
+    if not isinstance(state.rejected_proposal_ids, tuple) or any(
+        not is_permitted_synthetic_identifier(value)
+        for value in state.rejected_proposal_ids
+    ):
+        raise ValueError("Rejected proposal identifiers must be synthetic")
+
+    if (
+        state.active_proposal_case_version is not None
+        and not is_permitted_synthetic_version(state.active_proposal_case_version, kind="case")
+    ):
+        raise ValueError("Active proposal case version must be a synthetic version token")
+    if (
+        state.active_proposal_goal_version is not None
+        and not is_permitted_synthetic_version(state.active_proposal_goal_version, kind="goal")
+    ):
+        raise ValueError("Active proposal goal version must be a synthetic version token")
+
+    if state.active_proposal_id is None:
+        if (
+            state.active_proposal_case_version is not None
+            or state.active_proposal_goal_version is not None
+            or state.execution_consent_for_proposal_id is not None
+            or state.client_decision == ClientDecision.ACCEPTED
+        ):
+            raise ValueError("Proposal versions and consent require an active proposal")
+    else:
+        if (
+            state.active_proposal_case_version != state.case_version
+            or state.active_proposal_goal_version != state.goal_version
+            or state.client_decision == ClientDecision.REJECTED
+        ):
+            raise ValueError("Stale or rejected proposals cannot remain active")
+
+    if state.execution_consent_for_proposal_id is not None and (
+        state.execution_consent_for_proposal_id != state.active_proposal_id
+        or state.client_decision != ClientDecision.ACCEPTED
+    ):
+        raise ValueError("Execution consent must match the accepted active proposal")
 
 
 def answer_question(
@@ -80,7 +133,7 @@ def answer_question(
     answer: str,
 ) -> DialogueReply:
     """Answer a question without changing acceptance, rejection, or consent."""
-    _validate_state(state)
+    validate_dialogue_state(state)
     if not isinstance(question, str) or not question.strip():
         raise ValueError("A non-empty customer question is required")
     if not isinstance(answer, str) or not answer.strip():
@@ -102,10 +155,12 @@ def resolve_required_data(
     """Use recorded values only; report exact missing fields and never infer them."""
     if not isinstance(recorded_data, Mapping):
         raise TypeError("recorded_data must be a mapping")
+    if any(not is_permitted_field_name(field) for field in recorded_data):
+        raise ValueError("recorded_data keys must be bounded schema field names")
     if not isinstance(required_fields, tuple) or not all(
-        isinstance(field, str) and field.strip() for field in required_fields
+        is_permitted_field_name(field) for field in required_fields
     ):
-        raise ValueError("required_fields must be a tuple of non-empty field names")
+        raise ValueError("required_fields must be a tuple of bounded schema field names")
     if len(set(required_fields)) != len(required_fields):
         raise ValueError("required_fields must not contain duplicates")
 
@@ -146,9 +201,9 @@ def attach_proposal(
     proposal_id: str,
 ) -> DialogueCaseState:
     """Attach a version-bound synthetic proposal unless its ID was rejected."""
-    _validate_state(state)
-    if not isinstance(proposal_id, str) or not proposal_id.startswith("SYNTHETIC-"):
-        raise ValueError("Only synthetic proposal identifiers are permitted")
+    validate_dialogue_state(state)
+    if not is_permitted_synthetic_identifier(proposal_id):
+        raise ValueError("Only bounded synthetic proposal identifiers are permitted")
     if proposal_id in state.rejected_proposal_ids:
         raise ValueError("A rejected proposal cannot be reactivated")
     return replace(
@@ -166,7 +221,7 @@ def accept_proposal(
     proposal_id: str,
 ) -> DialogueCaseState:
     """Record client acceptance only; execution consent remains independent."""
-    _validate_state(state)
+    validate_dialogue_state(state)
     if (
         proposal_id != state.active_proposal_id
         or state.active_proposal_case_version != state.case_version
@@ -185,7 +240,7 @@ def reject_proposal(
     proposal_id: str,
 ) -> DialogueCaseState:
     """Record rejection on the active version and deactivate that proposal."""
-    _validate_state(state)
+    validate_dialogue_state(state)
     if (
         proposal_id != state.active_proposal_id
         or state.active_proposal_case_version != state.case_version
@@ -211,7 +266,7 @@ def record_execution_consent(
     explicit_consent: bool,
 ) -> DialogueCaseState:
     """Record execution consent only after explicit consent for an accepted proposal."""
-    _validate_state(state)
+    validate_dialogue_state(state)
     if (
         explicit_consent is not True
         or state.client_decision != ClientDecision.ACCEPTED
@@ -228,9 +283,9 @@ def change_goal(
     new_goal_version: str,
 ) -> DialogueCaseState:
     """Create a fresh goal version and clear only the proposal/decisions it invalidates."""
-    _validate_state(state)
-    if not isinstance(new_goal_version, str) or not new_goal_version.strip():
-        raise ValueError("A non-empty new goal version is required")
+    validate_dialogue_state(state)
+    if not is_permitted_synthetic_version(new_goal_version, kind="goal"):
+        raise ValueError("A bounded synthetic goal version token is required")
     if new_goal_version == state.goal_version:
         raise ValueError("A changed goal requires a new goal version")
     return replace(
@@ -249,7 +304,7 @@ def apply_dependency_reassessment(
     invalidation_status: str,
 ) -> ReassessmentResult:
     """Invalidate dependent decisions on effective or unresolved changes."""
-    _validate_state(state)
+    validate_dialogue_state(state)
     if invalidation_status == "PRESERVE":
         return ReassessmentResult(state=state, status="PRESERVED")
     if invalidation_status == "INVALIDATE":
@@ -298,4 +353,5 @@ __all__ = [
     "record_execution_consent",
     "reject_proposal",
     "resolve_required_data",
+    "validate_dialogue_state",
 ]

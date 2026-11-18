@@ -255,3 +255,77 @@ def test_unknown_dependency_status_fails_closed_and_clears_decisions():
     assert result.state.active_proposal_id is None
     assert result.state.client_decision == ClientDecision.NONE
     assert result.state.execution_consent_for_proposal_id is None
+
+
+@pytest.mark.parametrize(
+    "state_changes",
+    [
+        {"case_id": "SYNTHETIC-" + "X" * 130},
+        {"case_version": "PRIVATE-CLIENT-VERSION"},
+        {"goal_version": "goal-v0"},
+        {"active_proposal_id": "REAL-CLIENT-PROPOSAL"},
+        {"rejected_proposal_ids": ("REAL-CLIENT-PROPOSAL",)},
+        {"execution_consent_for_proposal_id": "REAL-CLIENT-PROPOSAL"},
+        {"active_proposal_case_version": "PRIVATE-CASE-VERSION"},
+        {"active_proposal_goal_version": "PRIVATE-GOAL-VERSION"},
+    ],
+)
+def test_dialogue_state_rejects_unbounded_or_non_synthetic_nested_identifiers(state_changes):
+    from dataclasses import replace
+
+    state = replace(_state(), **state_changes)
+    with pytest.raises(ValueError):
+        answer_question(state, question="Synthetic question", answer="Synthetic answer")
+
+
+def test_dialogue_contract_rejects_unbounded_proposal_and_goal_version_tokens():
+    with pytest.raises(ValueError):
+        attach_proposal(_state(), "SYNTHETIC-" + "P" * 130)
+    with pytest.raises(ValueError):
+        change_goal(_state(), "PRIVATE-CLIENT-GOAL-VERSION")
+
+
+def test_required_data_contract_rejects_caller_text_as_field_names():
+    with pytest.raises(ValueError):
+        resolve_required_data(
+            {"customer@example.com": "SYNTHETIC-VALUE"},
+            ("customer@example.com",),
+        )
+    with pytest.raises(ValueError):
+        resolve_required_data({}, ("field name with spaces",))
+
+
+def test_dialogue_state_rejects_stale_proposals_and_orphaned_execution_consent():
+    from dataclasses import replace
+
+    stale_case = replace(_active_state(), active_proposal_case_version="case-v2")
+    stale_goal = replace(_active_state(), active_proposal_goal_version="goal-v2")
+    missing_binding = replace(_active_state(), active_proposal_goal_version=None)
+    orphaned_consent = replace(
+        _active_state(),
+        client_decision=ClientDecision.ACCEPTED,
+        execution_consent_for_proposal_id="SYNTHETIC-OTHER-PROPOSAL",
+    )
+    consent_without_acceptance = replace(
+        _active_state(),
+        execution_consent_for_proposal_id="SYNTHETIC-PROPOSAL-001",
+    )
+    accepted_without_active = replace(
+        _state(),
+        client_decision=ClientDecision.ACCEPTED,
+    )
+
+    for invalid_state in (
+        stale_case,
+        stale_goal,
+        missing_binding,
+        orphaned_consent,
+        consent_without_acceptance,
+        accepted_without_active,
+    ):
+        with pytest.raises(ValueError):
+            answer_question(
+                invalid_state,
+                question="Synthetic question",
+                answer="Synthetic answer",
+            )

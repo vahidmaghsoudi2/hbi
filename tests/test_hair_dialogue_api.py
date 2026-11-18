@@ -1,4 +1,6 @@
 """HTTP-level conformance for the stateless, synthetic Hair dialogue runtime."""
+from sqlalchemy import inspect, text
+
 from app.core.auth import create_access_token
 from app.models.user_role import ROLE_REVIEWER_QA, UserRole
 
@@ -39,6 +41,18 @@ def _turn(client, state, action, **fields):
         json={"action": action, "state": state, **fields},
         headers=_headers(),
     )
+
+
+def _database_snapshot(db_session):
+    table_names = inspect(db_session.get_bind()).get_table_names()
+    snapshot = {}
+    for table_name in table_names:
+        quoted_name = '"' + table_name.replace('"', '""') + '"'
+        rows = db_session.execute(text(f"SELECT * FROM {quoted_name}")).all()
+        snapshot[table_name] = tuple(
+            sorted(tuple(repr(value) for value in row) for row in rows)
+        )
+    return snapshot
 
 
 
@@ -230,3 +244,103 @@ def test_multiturn_http_flow_keeps_acceptance_consent_and_goal_version_separate(
     assert body["state"]["active_proposal_id"] is None
     assert body["state"]["client_decision"] == "NONE"
     assert body["state"]["execution_consent_for_proposal_id"] is None
+
+
+def test_dialogue_http_rejects_untrusted_nested_identifiers_and_version_tokens(client, db_session):
+    _grant_reviewer_qa(db_session)
+    invalid_states = [
+        _state(case_version="PRIVATE-CLIENT-VERSION-MARKER"),
+        _state(goal_version="PRIVATE-GOAL-VERSION-MARKER"),
+        _state(active_proposal_id="REAL-CLIENT-PROPOSAL-MARKER"),
+        _state(rejected_proposal_ids=["REAL-CLIENT-PROPOSAL-MARKER"]),
+        _state(execution_consent_for_proposal_id="REAL-CLIENT-PROPOSAL-MARKER"),
+        _state(active_proposal_case_version="PRIVATE-CASE-VERSION-MARKER"),
+        _state(active_proposal_goal_version="PRIVATE-GOAL-VERSION-MARKER"),
+        _state(
+            active_proposal_id="SYNTHETIC-PROPOSAL-STALE-CASE",
+            active_proposal_case_version="case-v2",
+            active_proposal_goal_version="goal-v1",
+        ),
+        _state(
+            active_proposal_id="SYNTHETIC-PROPOSAL-STALE-GOAL",
+            active_proposal_case_version="case-v1",
+            active_proposal_goal_version="goal-v2",
+        ),
+        _state(
+            active_proposal_id="SYNTHETIC-PROPOSAL-ORPHANED-CONSENT",
+            active_proposal_case_version="case-v1",
+            active_proposal_goal_version="goal-v1",
+            execution_consent_for_proposal_id="SYNTHETIC-OTHER-PROPOSAL",
+            client_decision="ACCEPTED",
+        ),
+    ]
+
+    for invalid_state in invalid_states:
+        response = _turn(
+            client,
+            invalid_state,
+            "ANSWER_QUESTION",
+            question_code="STATUS_REASON",
+            answer_code="STATUS_REASON",
+        )
+        assert response.status_code == 422
+        assert "PRIVATE-" not in response.text
+        assert "REAL-CLIENT-" not in response.text
+
+
+def test_dialogue_http_rejects_untrusted_action_tokens_and_field_names(client, db_session):
+    _grant_reviewer_qa(db_session)
+
+    oversized_proposal = _turn(
+        client,
+        _state(),
+        "ATTACH_PROPOSAL",
+        proposal_id="SYNTHETIC-" + "P" * 130,
+    )
+    assert oversized_proposal.status_code == 422
+
+    unsafe_goal = _turn(
+        client,
+        _state(),
+        "CHANGE_GOAL",
+        new_goal_version="PRIVATE-CLIENT-GOAL-VERSION",
+    )
+    assert unsafe_goal.status_code == 422
+    assert "PRIVATE-" not in unsafe_goal.text
+
+    unsafe_field = _turn(
+        client,
+        _state(),
+        "RESOLVE_REQUIRED_DATA",
+        recorded_fields=["customer@example.com"],
+        required_fields=["customer@example.com"],
+    )
+    assert unsafe_field.status_code == 422
+    assert "customer@example.com" not in unsafe_field.text
+
+
+def test_dialogue_http_success_and_rejection_have_no_database_side_effects(client, db_session):
+    _grant_reviewer_qa(db_session)
+    before = _database_snapshot(db_session)
+
+    success = _turn(
+        client,
+        _state(),
+        "ANSWER_QUESTION",
+        question_code="STATUS_REASON",
+        answer_code="STATUS_REASON",
+    )
+    assert success.status_code == 200
+    _assert_non_publishing_envelope(success.json())
+
+    rejected = _turn(
+        client,
+        _state(case_id="REAL-CLIENT-NOT-PERMITTED"),
+        "ANSWER_QUESTION",
+        question_code="STATUS_REASON",
+        answer_code="STATUS_REASON",
+    )
+    assert rejected.status_code == 422
+
+    db_session.expire_all()
+    assert _database_snapshot(db_session) == before

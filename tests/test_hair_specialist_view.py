@@ -1,6 +1,7 @@
 from dataclasses import replace
 
 import pytest
+from sqlalchemy import inspect, text
 
 from app.domain.hair_catalog_identity_lookup import CatalogIdentity
 from app.domain.hair_data_governance import (
@@ -165,6 +166,18 @@ def _preview_payload(**overrides):
     return payload
 
 
+def _database_snapshot(db_session):
+    table_names = inspect(db_session.get_bind()).get_table_names()
+    snapshot = {}
+    for table_name in table_names:
+        quoted_name = '"' + table_name.replace('"', '""') + '"'
+        rows = db_session.execute(text(f"SELECT * FROM {quoted_name}")).all()
+        snapshot[table_name] = tuple(
+            sorted(tuple(repr(value) for value in row) for row in rows)
+        )
+    return snapshot
+
+
 def test_specialist_preview_requires_internal_role(client, db_session):
     response = client.post(
         "/api/v1/hair/specialist-preview",
@@ -200,6 +213,7 @@ def test_specialist_preview_returns_internal_evidence_and_limits_only(client, db
     assert body["decision"]["client_visible"] is False
     assert body["evidence"]
     assert body["lineage"]["persistence"] == "COMPUTED_ONLY"
+    assert body["lineage"]["run_id"].startswith("SYNTHETIC-")
     assert body["limitations"]
 
 
@@ -234,3 +248,134 @@ def test_policy_blocked_run_cannot_be_presented_even_with_synthetic_prefix():
     assert run.status == "STOP_DATA_POLICY"
     with pytest.raises(ValueError):
         build_hair_specialist_view(run)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("case_version", "PRIVATE-CLIENT-VERSION-MARKER"),
+        ("goal_version", "PRIVATE-GOAL-VERSION-MARKER"),
+        ("case_version", "case-v9999999"),
+        ("case_id", "SYNTHETIC-" + "X" * 130),
+    ],
+)
+def test_specialist_preview_rejects_unbounded_or_non_synthetic_case_tokens(
+    client, db_session, field, value
+):
+    _grant_reviewer_qa(db_session)
+    response = client.post(
+        "/api/v1/hair/specialist-preview",
+        json=_preview_payload(**{field: value}),
+        headers=_headers(),
+    )
+    assert response.status_code == 422
+    assert "PRIVATE-" not in response.text
+
+
+def test_specialist_preview_is_computed_only_and_has_no_database_side_effects(
+    client, db_session
+):
+    _grant_reviewer_qa(db_session)
+    before = _database_snapshot(db_session)
+
+    response = client.post(
+        "/api/v1/hair/specialist-preview",
+        json=_preview_payload(),
+        headers=_headers(),
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["lineage"]["persistence"] == "COMPUTED_ONLY"
+    assert body["decision"]["recommendation"] is None
+    assert body["decision"]["display_allowed"] is False
+    assert body["decision"]["client_visible"] is False
+
+    db_session.expire_all()
+    assert _database_snapshot(db_session) == before
+
+
+def test_specialist_view_rejects_caller_controlled_run_and_version_lineage():
+    run = _run()
+    invalid_runs = (
+        replace(run, run_id="PRIVATE-RUN-IDENTIFIER"),
+        replace(run, case_version="PRIVATE-CASE-VERSION"),
+        replace(run, goal_version="PRIVATE-GOAL-VERSION"),
+        replace(run, case_version="case-v1234567"),
+    )
+    for invalid_run in invalid_runs:
+        with pytest.raises(ValueError):
+            build_hair_specialist_view(invalid_run)
+
+
+def test_specialist_view_allows_empty_versions_only_for_data_gap_runs():
+    run = _run(case_version="")
+    assert run.status == "STOP_DATA_GAP"
+    view = build_hair_specialist_view(run)
+    assert view["case"]["case_version"] == ""
+    assert view["case"]["goal_version"] == ""
+    assert view["lineage"]["persistence"] == "COMPUTED_ONLY"
+
+
+def test_specialist_view_rejects_caller_controlled_evidence_lineage():
+    run = _run()
+    for field, marker in (
+        ("source", "PRIVATE-CLIENT-EVIDENCE-REFERENCE"),
+        ("source_type", "PRIVATE-CLIENT-EVIDENCE-TYPE"),
+        ("qa_status", "PRIVATE-CLIENT-EVIDENCE-STATUS"),
+    ):
+        raw_result = dict(run.reasoning_result)
+        evidence = [dict(item) for item in raw_result["evidence_refs"]]
+        evidence[0][field] = marker
+        raw_result["evidence_refs"] = evidence
+        tampered = replace(run, reasoning_result=raw_result)
+        with pytest.raises(ValueError):
+            build_hair_specialist_view(tampered)
+
+
+def test_specialist_view_rejects_unrecognized_or_duplicate_evidence_records():
+    run = _run()
+    raw_result = dict(run.reasoning_result)
+    evidence = [dict(item) for item in raw_result["evidence_refs"]]
+    evidence[-1]["evidence_id"] = "PRIVATE-EVIDENCE-ID"
+    raw_result["evidence_refs"] = evidence
+    with pytest.raises(ValueError):
+        build_hair_specialist_view(replace(run, reasoning_result=raw_result))
+
+    raw_result = dict(run.reasoning_result)
+    evidence = [dict(item) for item in raw_result["evidence_refs"]]
+    evidence[-1] = dict(evidence[0])
+    raw_result["evidence_refs"] = evidence
+    with pytest.raises(ValueError):
+        build_hair_specialist_view(replace(run, reasoning_result=raw_result))
+
+
+def test_specialist_view_rejects_forged_package_rule_and_dependency_lineage():
+    run = _run()
+    invalid_runs = [
+        replace(run, package_id="PRIVATE-PACKAGE-ID"),
+        replace(run, package_version="PRIVATE-PACKAGE-VERSION"),
+        replace(run, rule_id="PRIVATE-RULE-ID"),
+        replace(run, rule_version="PRIVATE-RULE-VERSION"),
+        replace(run, snapshot_id="PRIVATE-SNAPSHOT-ID"),
+        replace(run, content_sha256="0" * 64),
+        replace(run, engine_version="PRIVATE-ENGINE-VERSION"),
+        replace(
+            run,
+            dependencies=(
+                replace(run.dependencies[0], dependency_id="PRIVATE-CASE-REFERENCE"),
+                *run.dependencies[1:],
+            ),
+        ),
+    ]
+    for invalid_run in invalid_runs:
+        with pytest.raises(ValueError):
+            build_hair_specialist_view(invalid_run)
+
+
+def test_specialist_view_never_echoes_unknown_reason_code():
+    run = _run()
+    private_reason = "PRIVATE-CLIENT-REASON-CODE"
+    view = build_hair_specialist_view(replace(run, reason_code=private_reason))
+    assert view["decision"]["reason_code"] == "UNRECOGNIZED_REASON_CODE"
+    assert private_reason not in repr(view)

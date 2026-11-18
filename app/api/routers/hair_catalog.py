@@ -17,6 +17,10 @@ from pydantic import BaseModel, ConfigDict
 
 from app.core.authorization import require_any_role
 from app.domain.hair_service_scope import evaluate_hair_service_scope
+from app.domain.hair_data_governance import (
+    is_permitted_synthetic_identifier,
+    is_permitted_synthetic_version,
+)
 from app.domain.hair_catalog_provider import (
     approved_catalog_contains_identity,
     load_approved_hair_catalog_reference,
@@ -104,10 +108,14 @@ async def preview_hair_specialist_view(
     _auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
 ):
     """Render a non-persistent, synthetic-only specialist review projection."""
-    if not payload.case_id.startswith("SYNTHETIC-"):
+    if (
+        not is_permitted_synthetic_identifier(payload.case_id)
+        or not is_permitted_synthetic_version(payload.case_version, kind="case")
+        or not is_permitted_synthetic_version(payload.goal_version, kind="goal")
+    ):
         raise HTTPException(
             status_code=422,
-            detail="PO-66-09 permits synthetic case identifiers only.",
+            detail="Only bounded synthetic case and goal identifiers are permitted.",
         )
 
     package = build_approved_catalog_knowledge_package()
@@ -129,7 +137,7 @@ async def preview_hair_specialist_view(
         case=case,
         package=package,
         rule=rule,
-        run_id=f"hair-specialist-preview-{uuid4()}",
+        run_id=f"SYNTHETIC-HAIR-PREVIEW-{uuid4()}",
     )
     return build_hair_specialist_view(run)
 
