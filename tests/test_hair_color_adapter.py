@@ -323,3 +323,30 @@ def test_duplicate_reason_codes_and_evidence_refs_are_rejected():
     with pytest.raises(AdapterContractError, match="evidence_refs must not contain duplicates"):
         run(request(), response(evidence_refs=["EVIDENCE-MOCK-A", "EVIDENCE-MOCK-A"]))
 
+
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"reason_codes": ["STALE_CASE_VERSION"]},
+        {"reason_codes": ["OUT_OF_SCOPE"]},
+        {"consultation_status": "OUT_OF_V1_SCOPE"},
+    ],
+)
+def test_stale_or_out_of_scope_response_cannot_publish_candidate_options(overrides):
+    """Approved stale/scope boundaries must suppress candidate options."""
+    with pytest.raises(AdapterContractError, match="blocked consultation"):
+        run(request(), response(**overrides))
+
+def test_engine_mutation_is_confined_to_a_deep_copied_request_snapshot():
+    supplied = request()
+    before = deepcopy(supplied)
+
+    def mutating_engine(engine_request):
+        engine_request["case_context"]["client_goal"]["value"] = "ENGINE-MUTATION"
+        engine_request["evidence_context"].clear()
+        return response(options=[])
+
+    HairColorAdapter(mutating_engine).evaluate(supplied)
+    assert supplied == before
