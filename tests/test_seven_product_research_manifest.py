@@ -77,7 +77,7 @@ def test_historical_clinique_claims_stay_unverified_when_official_url_redirects_
     manifest = _manifest()
     p6 = next(product for product in manifest["products"] if product["dossier"] == "P6")
     assert p6["assertions"] == []
-    assert any("currently redirects to the current/replacement serum" in item for item in p6["identity_limits"])
+    assert any("currently redirects to the current/replacement Dark Spot Clearing Serum" in item for item in p6["identity_limits"])
     assert any("Keep historical claims and formula UNKNOWN" in item for item in manifest["acceptance_boundary"]["explicit_review_queue"])
 
 
