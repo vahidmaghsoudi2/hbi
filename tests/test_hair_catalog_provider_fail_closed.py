@@ -11,18 +11,22 @@ from app.domain.hair_catalog_identity_lookup import CatalogIdentity
 def _valid_csv(row_count: int = provider.EXPECTED_DATA_ROWS) -> str:
     headers = provider.EXPECTED_HEADERS
     lines = [",".join(headers)]
-    for index in range(row_count):
+    series_code_pairs = [
+        (series, code)
+        for series in provider.EXPECTED_SERIES
+        for code in provider.EXPECTED_SERIES_CODES[series]
+    ][:row_count]
+    for index, (series, shade_code) in enumerate(series_code_pairs):
         values = [
             f"Brand-{index}",
-            provider.EXPECTED_SERIES[index % len(provider.EXPECTED_SERIES)],
-            str(index + 1),
+            series,
+            shade_code,
             f"Shade-{index}",
             "Synthetic specification",
             "Synthetic volume",
         ]
         lines.append(",".join(values))
     return "\n".join(lines) + "\n"
-
 
 def _write_csv(tmp_path, content: str):
     path = tmp_path / "catalog.csv"
@@ -40,6 +44,32 @@ def test_provider_fails_closed_when_catalog_has_wrong_row_count(tmp_path, monkey
 def test_provider_fails_closed_when_catalog_series_set_is_changed(tmp_path, monkeypatch):
     rows = list(csv.reader(_valid_csv().splitlines()))
     rows[1][1] = "Unapproved-Series"
+    from io import StringIO
+
+    buffer = StringIO()
+    csv.writer(buffer, lineterminator="\n").writerows(rows)
+    path = _write_csv(tmp_path, buffer.getvalue())
+    monkeypatch.setattr(provider, "_catalog_path", lambda: path)
+
+    assert provider.load_approved_hair_catalog_reference() is None
+
+
+def test_provider_fails_closed_when_shade_code_is_not_in_its_series(tmp_path, monkeypatch):
+    rows = list(csv.reader(_valid_csv().splitlines()))
+    rows[1][2] = "+۰۵"
+    from io import StringIO
+
+    buffer = StringIO()
+    csv.writer(buffer, lineterminator="\n").writerows(rows)
+    path = _write_csv(tmp_path, buffer.getvalue())
+    monkeypatch.setattr(provider, "_catalog_path", lambda: path)
+
+    assert provider.load_approved_hair_catalog_reference() is None
+
+
+def test_provider_fails_closed_when_code_is_moved_to_another_series(tmp_path, monkeypatch):
+    rows = list(csv.reader(_valid_csv().splitlines()))
+    rows[1][1] = "طبیعی اکسترا"
     from io import StringIO
 
     buffer = StringIO()
@@ -123,7 +153,7 @@ def test_provider_membership_uses_three_field_key_not_descriptive_shade_name(tmp
     assert provider.approved_catalog_contains_identity(
         CatalogIdentity(
             brand="Brand-0",
-            series="Series-0",
+            series=provider.EXPECTED_SERIES[0],
             shade_number="1",
             shade_name="Different descriptive label",
         )
@@ -137,7 +167,7 @@ def test_provider_rejects_identity_not_present_in_approved_csv(tmp_path, monkeyp
     assert not provider.approved_catalog_contains_identity(
         CatalogIdentity(
             brand="brand-0",
-            series="Series-0",
+            series=provider.EXPECTED_SERIES[0],
             shade_number="1",
             shade_name="Shade-0",
         )
@@ -151,7 +181,7 @@ def test_provider_rejects_identity_when_catalog_is_invalid(tmp_path, monkeypatch
     assert not provider.approved_catalog_contains_identity(
         CatalogIdentity(
             brand="Brand-0",
-            series="Series-0",
+            series=provider.EXPECTED_SERIES[0],
             shade_number="1",
             shade_name="Shade-0",
         )
@@ -166,7 +196,7 @@ def test_provider_rejects_identity_when_reference_hash_differs(tmp_path, monkeyp
     assert not provider.approved_catalog_contains_identity(
         CatalogIdentity(
             brand="Brand-0",
-            series="Series-0",
+            series=provider.EXPECTED_SERIES[0],
             shade_number="1",
             shade_name="Shade-0",
         ),
