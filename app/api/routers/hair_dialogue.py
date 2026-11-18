@@ -10,9 +10,11 @@ from dataclasses import asdict
 from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy.exc import SQLAlchemyError
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from app.core.authorization import require_any_role
+from app.core.authorization import get_roles_for_subject
+from app.core.deps import get_current_customer_id, get_db
 from app.domain.hair_dialogue_contract import (
     ClientDecision,
     DialogueCaseState,
@@ -26,6 +28,8 @@ from app.domain.hair_dialogue_contract import (
     record_execution_consent,
     reject_proposal,
     resolve_required_data,
+    validate_dialogue_state,
+    validate_proposal_id,
 )
 from app.models.user_role import ROLE_ADMIN, ROLE_PO, ROLE_REVIEWER_QA
 
@@ -33,7 +37,7 @@ router = APIRouter()
 
 
 class DialogueStateInput(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", strict=True)
 
     case_id: str
     case_version: str
@@ -60,7 +64,7 @@ class DialogueStateInput(BaseModel):
 
 
 class HairDialogueTurnRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", strict=True)
 
     action: Literal[
         "ANSWER_QUESTION",
@@ -88,7 +92,32 @@ class HairDialogueTurnRequest(BaseModel):
     proposal_id: str | None = None
     explicit_consent: bool = False
     new_goal_version: str | None = None
-    invalidation_status: str | None = None
+    # PRESERVE is intentionally excluded at the HTTP boundary: callers cannot prove dependencies are unchanged.
+    invalidation_status: Literal["INVALIDATE", "UNRESOLVED"] | None = None
+
+    @model_validator(mode="after")
+    def reject_action_irrelevant_fields(self):
+        """Reject cross-action fields instead of silently ignoring caller intent."""
+        allowed_fields = {
+            "ANSWER_QUESTION": {"question_code", "answer_code"},
+            "EXPLAIN_REASON": {"reason_code"},
+            "RESOLVE_REQUIRED_DATA": {"recorded_fields", "required_fields"},
+            "EVALUATE_ADVICE_GATE": {
+                "data_complete", "safety_passed", "rule_valid", "evidence_valid", "engine_ok"
+            },
+            "ATTACH_PROPOSAL": {"proposal_id"},
+            "ACCEPT_PROPOSAL": {"proposal_id"},
+            "REJECT_PROPOSAL": {"proposal_id"},
+            "RECORD_EXECUTION_CONSENT": {"proposal_id", "explicit_consent"},
+            "CHANGE_GOAL": {"new_goal_version"},
+            "REASSESS_DEPENDENCIES": {"invalidation_status"},
+        }
+        supplied = self.model_fields_set - {"action", "state"}
+        irrelevant = supplied - allowed_fields[self.action]
+        if irrelevant:
+            names = ", ".join(sorted(irrelevant))
+            raise ValueError(f"Fields not valid for {self.action}: {names}")
+        return self
 
 
 def _state_payload(state: DialogueCaseState) -> dict[str, Any]:
@@ -98,17 +127,60 @@ def _state_payload(state: DialogueCaseState) -> dict[str, Any]:
     return result
 
 
+async def require_hair_dialogue_internal_role(
+    subject_id=Depends(get_current_customer_id),
+    db=Depends(get_db),
+):
+    """Require a canonical authenticated actor and an exact internal role."""
+    if (
+        not isinstance(subject_id, str)
+        or not subject_id
+        or subject_id != subject_id.strip()
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="A non-empty canonical authenticated actor is required",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    try:
+        roles = get_roles_for_subject(db, subject_id)
+    except SQLAlchemyError as exc:
+        # Authorization must fail closed without exposing database diagnostics.
+        raise HTTPException(
+            status_code=503,
+            detail="Internal authorization service is temporarily unavailable",
+        ) from exc
+    allowed_roles = {ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN}
+    if not roles.intersection(allowed_roles):
+        raise HTTPException(
+            status_code=403,
+            detail="Hair dialogue runtime requires an authorized internal role",
+        )
+    return subject_id, roles
+
+
 @router.post("/dialogue/turn")
 async def run_hair_dialogue_turn(
     payload: HairDialogueTurnRequest,
-    _auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
+    _auth=Depends(require_hair_dialogue_internal_role),
 ):
     """Apply one approved dialogue transition to a synthetic state, without persistence."""
-    state = payload.state.to_domain()
-    if not isinstance(state.case_id, str) or not state.case_id.startswith("SYNTHETIC-"):
-        raise HTTPException(status_code=422, detail="PO-66-09 permits synthetic case identifiers only.")
-    if not state.case_version.strip() or not state.goal_version.strip():
-        raise HTTPException(status_code=422, detail="Synthetic case and goal versions must be non-empty.")
+    try:
+        state = payload.state.to_domain()
+        # Validate every caller-supplied state reference before any action can echo it.
+        validate_dialogue_state(state)
+        if payload.proposal_id is not None:
+            validate_proposal_id(payload.proposal_id)
+        if payload.action in {
+            "ATTACH_PROPOSAL",
+            "ACCEPT_PROPOSAL",
+            "REJECT_PROPOSAL",
+            "RECORD_EXECUTION_CONSENT",
+        }:
+            validate_proposal_id(payload.proposal_id)
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     try:
         result: Any = None
@@ -138,6 +210,15 @@ async def run_hair_dialogue_turn(
             result = {"summary_fa": explain_reason(reason_text)}
         elif action == "RESOLVE_REQUIRED_DATA":
             fields = payload.recorded_fields or []
+            if any(
+                not isinstance(field, str)
+                or not field.strip()
+                or field != field.strip()
+                for field in fields
+            ):
+                raise ValueError(
+                    "recorded_fields must contain non-empty, unpadded field names"
+                )
             if len(set(fields)) != len(fields):
                 raise ValueError("recorded_fields must not contain duplicates")
             # The HTTP contract accepts field-presence markers only, never client values.
@@ -172,7 +253,11 @@ async def run_hair_dialogue_turn(
         elif action == "CHANGE_GOAL":
             next_state = change_goal(state, payload.new_goal_version or "")
         elif action == "REASSESS_DEPENDENCIES":
-            reassessment = apply_dependency_reassessment(state, payload.invalidation_status or "")
+            if payload.invalidation_status is None:
+                raise ValueError("A dependency reassessment outcome is required.")
+            reassessment = apply_dependency_reassessment(
+                state, payload.invalidation_status
+            )
             next_state = reassessment.state
             result = {"status": reassessment.status}
         if result is None:

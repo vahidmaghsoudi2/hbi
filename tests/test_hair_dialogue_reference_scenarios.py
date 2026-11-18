@@ -155,9 +155,11 @@ def test_scenario_10_effective_or_unresolved_change_invalidates_dependent_decisi
         explicit_consent=True,
     )
 
-    preserved = apply_dependency_reassessment(accepted, "PRESERVE")
-    assert preserved.status == "PRESERVED"
-    assert preserved.state is accepted
+    unverified_preservation = apply_dependency_reassessment(accepted, "PRESERVE")
+    assert unverified_preservation.status == "ENGINE_FAIL_CLOSED"
+    assert unverified_preservation.state.active_proposal_id is None
+    assert unverified_preservation.state.client_decision == ClientDecision.NONE
+    assert unverified_preservation.state.execution_consent_for_proposal_id is None
 
     invalidated = apply_dependency_reassessment(accepted, "INVALIDATE")
     assert invalidated.status == "INVALIDATED"
@@ -172,13 +174,12 @@ def test_scenario_10_effective_or_unresolved_change_invalidates_dependent_decisi
 
 
 def test_dialogue_contract_rejects_non_synthetic_case_state():
-    invalid = DialogueCaseState(
-        case_id="REAL-CLIENT-001",
-        case_version="case-v1",
-        goal_version="goal-v1",
-    )
     with pytest.raises(ValueError, match="synthetic"):
-        answer_question(invalid, question="question", answer="answer")
+        DialogueCaseState(
+            case_id="REAL-CLIENT-001",
+            case_version="case-v1",
+            goal_version="goal-v1",
+        )
 
 
 def test_advice_gate_uses_fail_closed_priority():
@@ -191,7 +192,6 @@ def test_advice_gate_uses_fail_closed_priority():
     )
     assert gate.advice_allowed is False
     assert gate.reason_codes == ("ENGINE_FAIL",)
-
 
 
 def test_dialogue_contract_rejects_wrong_state_type():
@@ -214,6 +214,25 @@ def test_required_data_resolver_rejects_malformed_field_contracts():
         resolve_required_data({}, ["brand"])
     with pytest.raises(ValueError):
         resolve_required_data({}, ("brand", "brand"))
+
+
+def test_required_data_resolver_rejects_empty_required_field_contract():
+    with pytest.raises(ValueError, match="non-empty tuple"):
+        resolve_required_data({"brand": "SYNTHETIC"}, ())
+
+
+def test_required_data_resolver_rejects_padded_field_identifiers():
+    with pytest.raises(ValueError, match="unpadded"):
+        resolve_required_data({"brand": "SYNTHETIC"}, (" brand",))
+    with pytest.raises(ValueError, match="unpadded"):
+        resolve_required_data({"brand": "SYNTHETIC"}, ("brand ",))
+
+
+def test_required_data_resolver_uses_exact_field_keys_without_normalizing():
+    result = resolve_required_data({" brand ": "SYNTHETIC"}, ("brand",))
+    assert result.known_values == ()
+    assert result.missing_fields == ("brand",)
+    assert result.complete is False
 
 
 def test_safety_gate_prevents_advice_even_when_other_gates_pass():
@@ -248,9 +267,25 @@ def test_goal_change_requires_a_distinct_non_empty_version():
         change_goal(state, "goal-v1")
 
 
-def test_unknown_dependency_status_fails_closed_and_clears_decisions():
-    state = accept_proposal(_active_state(), "SYNTHETIC-PROPOSAL-001")
-    result = apply_dependency_reassessment(state, "UNRECOGNIZED_IMPACT")
+def test_goal_change_rejects_padded_new_version_identifiers():
+    state = _state()
+    with pytest.raises(ValueError, match="unpadded"):
+        change_goal(state, " goal-v2")
+    with pytest.raises(ValueError, match="unpadded"):
+        change_goal(state, "goal-v2 ")
+
+
+@pytest.mark.parametrize(
+    "unverified_status",
+    ["PRESERVE", "UNRECOGNIZED_IMPACT", "INVALIDATE ", None, 123],
+)
+def test_unverified_dependency_status_fails_closed_and_clears_decisions(unverified_status):
+    state = record_execution_consent(
+        accept_proposal(_active_state(), "SYNTHETIC-PROPOSAL-001"),
+        "SYNTHETIC-PROPOSAL-001",
+        explicit_consent=True,
+    )
+    result = apply_dependency_reassessment(state, unverified_status)
     assert result.status == "ENGINE_FAIL_CLOSED"
     assert result.state.active_proposal_id is None
     assert result.state.client_decision == ClientDecision.NONE
