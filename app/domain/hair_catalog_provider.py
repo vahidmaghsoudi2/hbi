@@ -32,6 +32,27 @@ EXPECTED_HEADERS = (
     "حجم محصول",
 )
 IDENTITY_COLUMNS = ("برند", "سری محصول", "شماره رنگ", "نام رنگ")
+EXPECTED_SERIES = (
+    "طبیعی",
+    "طبیعی اکسترا",
+    "خاکستری",
+    "دودی",
+    "زیتونی",
+    "طلایی",
+    "بژ",
+    "نسکافه ای",
+    "آلبالویی",
+    "شکلاتی",
+    "عسلی",
+    "فندقی",
+    "شرابی",
+    "قرمز",
+    "عروسکی",
+    "بیسکویتی",
+    "کاپوچینو",
+    "ترکیبی",
+    "واریاسیون",
+)
 REFERENCE_URL = "https://raeaka.com/آلبوم-رنگ-مو-بیجورکا/"
 
 
@@ -115,6 +136,8 @@ def _read_validated_catalog() -> tuple[bytes, list[dict[str, str]]] | None:
     if tuple(rows[0].keys()) != EXPECTED_HEADERS:
         return None
     if any(tuple(row.keys()) != EXPECTED_HEADERS for row in rows):
+        return None
+    if {row["سری محصول"] for row in rows} != set(EXPECTED_SERIES):
         return None
 
     seen: set[tuple[str, ...]] = set()
