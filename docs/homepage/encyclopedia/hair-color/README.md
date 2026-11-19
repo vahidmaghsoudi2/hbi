@@ -645,7 +645,7 @@
 | ۳۳ | آزمون تغییر هدف و اطلاعات | **۱۰ cross-module scenarios برای target/full invalidation، dependency sets، unknown fail-closed، decision reset و preserved outputs ثبت شد؛ PR فعالیت ۳۳ Draft است. Test/CI اجرا نشده.** |
 | ۳۴ | آزمون توقف و خطای داخلی | **۱۰ cross-module stop/failure scenarios: safety، engine، gaps، client stop، restart، workflow bypass، conditional و scope ثبت شد؛ PR فعالیت ۳۴ Draft است. Test/CI اجرا نشده.** |
 | ۳۵ | بررسی مستندات و شواهد هر قاعده | **Evidence classification/gates برای owner/catalog/scientific/product/specialist/anecdotal و traceability ثبت شد؛ شش محور خارج از scope دوباره blocker نشده‌اند؛ PR فعالیت ۳۵ Draft است. Test/CI اجرا نشده.** |
-| ۳۶ | تهیهٔ فهرست قواعد نیازمند متخصص | انجام‌نشده |
+| ۳۶ | تهیهٔ فهرست قواعد نیازمند متخصص | **۱۵ review topic با scope/status pending، تفکیک owner-defined و gates evidence/reviewer ثبت شد؛ PR فعالیت ۳۶ Draft است. Test/CI اجرا نشده.** |
 | ۳۷ | ارائهٔ اسناد به متخصص رنگ مو | انجام‌نشده |
 | ۳۸ | ثبت نظر متخصص برای هر قاعده | انجام‌نشده |
 | ۳۹ | اعمال اصلاحات تأییدشده | انجام‌نشده |
