@@ -647,7 +647,7 @@
 | ۳۵ | بررسی مستندات و شواهد هر قاعده | **Evidence classification/gates برای owner/catalog/scientific/product/specialist/anecdotal و traceability ثبت شد؛ شش محور خارج از scope دوباره blocker نشده‌اند؛ PR فعالیت ۳۵ Draft است. Test/CI اجرا نشده.** |
 | ۳۶ | تهیهٔ فهرست قواعد نیازمند متخصص | **۱۵ review topic با scope/status pending، تفکیک owner-defined و gates evidence/reviewer ثبت شد؛ PR فعالیت ۳۶ Draft است. Test/CI اجرا نشده.** |
 | ۳۷ | ارائهٔ اسناد به متخصص رنگ مو | **Review package با ۱۵ topic، document refs، سؤال و evidence requests آماده شد؛ delivery واقعی انجام نشده؛ PR فعالیت ۳۷ Draft است. Test/CI اجرا نشده.** |
-| ۳۸ | ثبت نظر متخصص برای هر قاعده | انجام‌نشده |
+| ۳۸ | ثبت نظر متخصص برای هر قاعده | **Schema ثبت review واقعی با reviewer/evidence/date/scope/findings/limitations، status validation و تفکیک PO acceptance ایجاد شد؛ هیچ نظر واقعی ثبت نشده؛ PR فعالیت ۳۸ Draft است. Test/CI اجرا نشده.** |
 | ۳۹ | اعمال اصلاحات تأییدشده | انجام‌نشده |
 | ۴۰ | تهیهٔ سند نهایی دانش مشاورهٔ رنگ مو | انجام‌نشده |
 | ۴۱ | تهیهٔ گزارش پذیرش محصول از دید مالک پروژه | انجام‌نشده |
