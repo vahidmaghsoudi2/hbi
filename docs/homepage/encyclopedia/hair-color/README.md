@@ -648,7 +648,7 @@
 | ۳۶ | تهیهٔ فهرست قواعد نیازمند متخصص | **۱۵ review topic با scope/status pending، تفکیک owner-defined و gates evidence/reviewer ثبت شد؛ PR فعالیت ۳۶ Draft است. Test/CI اجرا نشده.** |
 | ۳۷ | ارائهٔ اسناد به متخصص رنگ مو | **Review package با ۱۵ topic، document refs، سؤال و evidence requests آماده شد؛ delivery واقعی انجام نشده؛ PR فعالیت ۳۷ Draft است. Test/CI اجرا نشده.** |
 | ۳۸ | ثبت نظر متخصص برای هر قاعده | **Schema ثبت review واقعی با reviewer/evidence/date/scope/findings/limitations، status validation و تفکیک PO acceptance ایجاد شد؛ هیچ نظر واقعی ثبت نشده؛ PR فعالیت ۳۸ Draft است. Test/CI اجرا نشده.** |
-| ۳۹ | اعمال اصلاحات تأییدشده | انجام‌نشده |
+| ۳۹ | اعمال اصلاحات تأییدشده | **Correction gate با specialist scope، PO approval، evidence refs، baseline/target version و receipt ایجاد شد؛ هیچ اصلاحی واقعاً اعمال نشده؛ PR فعالیت ۳۹ Draft است. Test/CI اجرا نشده.** |
 | ۴۰ | تهیهٔ سند نهایی دانش مشاورهٔ رنگ مو | انجام‌نشده |
 | ۴۱ | تهیهٔ گزارش پذیرش محصول از دید مالک پروژه | انجام‌نشده |
 | ۴۲ | تهیهٔ بستهٔ تحویل برای مرحلهٔ پیاده‌سازی | انجام‌نشده |
