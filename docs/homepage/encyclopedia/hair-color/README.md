@@ -664,7 +664,7 @@
 
 **اسناد چت ۲:** [ماتریس پیگیری H0–H6](./implementation/43-phase-tracking-matrix.md) | [قرارداد baseline و اجرایی](./implementation/chat-2-baseline-contract-spec.md)
 
-**یادداشت چت ۳ از ۶ — ممیزی ایستا H1:** موجودی کد و آزمون‌ها، بازبینی عمیق‌تر coverage و اولویت‌های آزمون ثبت شد؛ نتیجه PARTIAL/NOT VERIFIED است. پوشش اختصاصی lookup/output/presentation در بررسی درخت تست‌ها یافت نشد؛ این شکاف پوشش است، نه نقص runtime اثبات‌شده. H0 pending؛ تست اجرا نشده. [گزارش ممیزی ایستا H1](./implementation/chat-3-h1-foundation-static-audit.md)
+**یادداشت چت ۳ از ۶ — ممیزی ایستا H1:** موجودی کد و آزمون‌ها، بازبینی عمیق‌تر coverage و اولویت‌های آزمون ثبت شد؛ نتیجه PARTIAL/NOT VERIFIED است. پوشش اختصاصی lookup/output/presentation در بررسی درخت تست‌ها یافت نشد؛ این شکاف پوشش است، نه نقص runtime اثبات‌شده. H0 pending؛ تست اجرا نشده. [گزارش ممیزی ایستا H1](./implementation/chat-3-h1-foundation-static-audit.md) | [مشخصات آزمون متمرکز H1](./implementation/chat-3-h1-focused-test-spec.md)
 
 ### مسئولیت و معیار ثبت
 - **مالک تصمیم و تصویب:** Product Owner.
