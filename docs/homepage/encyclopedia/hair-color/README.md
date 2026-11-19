@@ -636,7 +636,7 @@
 | ۲۴ | مدیریت رد پیشنهاد | **ثبت rejection با suggestion ID و fingerprint پایدار، جلوگیری از resurfacing، alternatives valid/evidence-backed و limit سه‌گزینه‌ای در کد/تست/سند ثبت شد؛ PR فعالیت ۲۴ Draft است. Test/CI اجرا نشده.** |
 | ۲۵ | تفکیک پذیرش پیشنهاد از اجازهٔ اجرا | **Acceptance و execution consent مستقل، version/suggestion scoped و gate اجرای جدا در کد/تست/سند ثبت شد؛ PR فعالیت ۲۵ Draft است. Test/CI اجرا نشده.** |
 | ۲۶ | مدیریت تغییر هدف یا اطلاعات | **Versioned change، target-change full invalidation، dependency-based invalidation و reset dependent review/acceptance/consent در کد/تست/سند ثبت شد؛ PR فعالیت ۲۶ Draft است. Test/CI اجرا نشده.** |
-| ۲۷ | مدیریت توقف مسیر مشاوره | تصمیم مصوب موجود؛ آزمون لازم |
+| ۲۷ | مدیریت توقف مسیر مشاوره | **Stop request trace، ثبت فقط performed steps، no-auto-resume و restart gate با version و ۵ fresh checks + authorization در کد/تست/سند ثبت شد؛ PR فعالیت ۲۷ Draft است. Test/CI اجرا نشده.** |
 | ۲۸ | مدیریت فقدان داده، دانش یا خطای داخلی | طراحی قبلی موجود؛ آزمون لازم |
 | ۲۹ | تدوین سناریوهای گفت‌وگویی ده‌گانه | سناریوهای قبلی موجود؛ تطبیق لازم |
 | ۳۰ | تدوین سناریوهای تخصصی رنگ مو | انجام‌نشده |
