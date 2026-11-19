@@ -632,7 +632,7 @@
 | ۲۰ | تثبیت چهار وضعیت موتور تصمیم | **Canonical mapping برای چهار state مصوب، precedence و reason codeها در کد/تست/سند ثبت شد؛ PR فعالیت ۲۰ Draft است. Test/CI اجرا نشده.** |
 | ۲۱ | تثبیت پنج وضعیت پاسخ مشاوره | **۵ label canonical و mapping چهار motor state، conditional به‌عنوان motor نه response state، در کد/تست/سند ثبت شد؛ PR فعالیت ۲۱ Draft است. Test/CI اجرا نشده.** |
 | ۲۲ | تثبیت ده وضعیت گردش پرونده | **۱۰ state canonical و transition guard برای intake، test، safety-stop، specialist/client approvals، execution consent، restart تازه و terminal closure در کد/تست/سند ثبت شد؛ PR فعالیت ۲۲ Draft است. Test/CI اجرا نشده.** |
-| ۲۳ | مدیریت پرسش‌های مشتری قبل از تصمیم | طراحی قبلی موجود؛ آزمون لازم |
+| ۲۳ | مدیریت پرسش‌های مشتری قبل از تصمیم | **سؤال informational، evidence/no-evidence پاسخ، حفظ case/suggestion/version و تفکیک explicit decision event در کد/تست/سند ثبت شد؛ PR فعالیت ۲۳ Draft است. Test/CI اجرا نشده.** |
 | ۲۴ | مدیریت رد پیشنهاد | طراحی قبلی موجود؛ آزمون لازم |
 | ۲۵ | تفکیک پذیرش پیشنهاد از اجازهٔ اجرا | تصمیم مصوب موجود؛ آزمون لازم |
 | ۲۶ | مدیریت تغییر هدف یا اطلاعات | تصمیم مصوب موجود؛ آزمون لازم |
