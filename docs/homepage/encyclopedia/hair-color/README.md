@@ -640,7 +640,7 @@
 | ۲۸ | مدیریت فقدان داده، دانش یا خطای داخلی | **Distinct gap taxonomy، mixed-gap handling و ENGINE_FAIL output suppression precedence در کد/تست/سند ثبت شد؛ PR فعالیت ۲۸ Draft است. Test/CI اجرا نشده.** |
 | ۲۹ | تدوین سناریوهای گفت‌وگویی ده‌گانه | **۱۰ behavioral contract با cross-module tests: state/version preservation، simple reasons، evidence/data gaps، versioning، rejection، acceptance/consent و dependency invalidation در کد/تست/سند ثبت شد؛ PR فعالیت ۲۹ Draft است. Test/CI اجرا نشده.** |
 | ۳۰ | تدوین سناریوهای تخصصی رنگ مو | **۱۲ archetype تخصصی با required fields، pending oracle و gate تأیید متخصص + evidence ثبت شد؛ هیچ technical outcome ساخته نشده؛ PR فعالیت ۳۰ Draft است. Test/CI اجرا نشده.** |
-| ۳۱ | آزمون داده‌های ناقص | انجام‌نشده |
+| ۳۱ | آزمون داده‌های ناقص | **Required-data matrix generic/product-specific، missing/unknown/image-only/conflict gates و tests ثبت شد؛ PR فعالیت ۳۱ Draft است. Test/CI اجرا نشده.** |
 | ۳۲ | آزمون پیشنهادهای متعارض یا نامعتبر | انجام‌نشده |
 | ۳۳ | آزمون تغییر هدف و اطلاعات | انجام‌نشده |
 | ۳۴ | آزمون توقف و خطای داخلی | انجام‌نشده |
