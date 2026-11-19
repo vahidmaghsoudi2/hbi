@@ -42,7 +42,7 @@ def test_invalid_candidate_type_fails_closed():
     assert select_reviewable_options(["invalid"]).status=="invalid_candidates"
 
 def test_more_than_three_valid_options_not_truncated():
-    a=select_reviewable_options([candidate("A","بژ",1),candidate("B","طلایی",2),candidate("C","خاکستری",3),candidate("D","دودی",1)])
+    a=select_reviewable_options([candidate("A","بژ",1),candidate("B","طلایی",2),candidate("C","خاکستری",3),candidate("D","دودی",4)])
     assert a.status=="too_many_valid_options"
     assert a.selected==()
 
