@@ -634,7 +634,7 @@
 | ۲۲ | تثبیت ده وضعیت گردش پرونده | **۱۰ state canonical و transition guard برای intake، test، safety-stop، specialist/client approvals، execution consent، restart تازه و terminal closure در کد/تست/سند ثبت شد؛ PR فعالیت ۲۲ Draft است. Test/CI اجرا نشده.** |
 | ۲۳ | مدیریت پرسش‌های مشتری قبل از تصمیم | **سؤال informational، evidence/no-evidence پاسخ، حفظ case/suggestion/version و تفکیک explicit decision event در کد/تست/سند ثبت شد؛ PR فعالیت ۲۳ Draft است. Test/CI اجرا نشده.** |
 | ۲۴ | مدیریت رد پیشنهاد | **ثبت rejection با suggestion ID و fingerprint پایدار، جلوگیری از resurfacing، alternatives valid/evidence-backed و limit سه‌گزینه‌ای در کد/تست/سند ثبت شد؛ PR فعالیت ۲۴ Draft است. Test/CI اجرا نشده.** |
-| ۲۵ | تفکیک پذیرش پیشنهاد از اجازهٔ اجرا | تصمیم مصوب موجود؛ آزمون لازم |
+| ۲۵ | تفکیک پذیرش پیشنهاد از اجازهٔ اجرا | **Acceptance و execution consent مستقل، version/suggestion scoped و gate اجرای جدا در کد/تست/سند ثبت شد؛ PR فعالیت ۲۵ Draft است. Test/CI اجرا نشده.** |
 | ۲۶ | مدیریت تغییر هدف یا اطلاعات | تصمیم مصوب موجود؛ آزمون لازم |
 | ۲۷ | مدیریت توقف مسیر مشاوره | تصمیم مصوب موجود؛ آزمون لازم |
 | ۲۸ | مدیریت فقدان داده، دانش یا خطای داخلی | طراحی قبلی موجود؛ آزمون لازم |
