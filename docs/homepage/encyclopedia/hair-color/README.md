@@ -646,7 +646,7 @@
 | ۳۴ | آزمون توقف و خطای داخلی | **۱۰ cross-module stop/failure scenarios: safety، engine، gaps، client stop، restart، workflow bypass، conditional و scope ثبت شد؛ PR فعالیت ۳۴ Draft است. Test/CI اجرا نشده.** |
 | ۳۵ | بررسی مستندات و شواهد هر قاعده | **Evidence classification/gates برای owner/catalog/scientific/product/specialist/anecdotal و traceability ثبت شد؛ شش محور خارج از scope دوباره blocker نشده‌اند؛ PR فعالیت ۳۵ Draft است. Test/CI اجرا نشده.** |
 | ۳۶ | تهیهٔ فهرست قواعد نیازمند متخصص | **۱۵ review topic با scope/status pending، تفکیک owner-defined و gates evidence/reviewer ثبت شد؛ PR فعالیت ۳۶ Draft است. Test/CI اجرا نشده.** |
-| ۳۷ | ارائهٔ اسناد به متخصص رنگ مو | انجام‌نشده |
+| ۳۷ | ارائهٔ اسناد به متخصص رنگ مو | **Review package با ۱۵ topic، document refs، سؤال و evidence requests آماده شد؛ delivery واقعی انجام نشده؛ PR فعالیت ۳۷ Draft است. Test/CI اجرا نشده.** |
 | ۳۸ | ثبت نظر متخصص برای هر قاعده | انجام‌نشده |
 | ۳۹ | اعمال اصلاحات تأییدشده | انجام‌نشده |
 | ۴۰ | تهیهٔ سند نهایی دانش مشاورهٔ رنگ مو | انجام‌نشده |
