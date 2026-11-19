@@ -31,7 +31,7 @@ def make_evaluated_option(option_id: object, family_label: object, rank: object,
         return None
     if not isinstance(family_label, str) or family_label not in KNOWN_FAMILIES:
         return None
-    if not isinstance(rank, int) or isinstance(rank, bool) or not 1 <= rank <= MAX_OPTIONS:
+    if not isinstance(rank, int) or isinstance(rank, bool) or rank < 1:
         return None
     if validity not in ("validated", "unvalidated", "rejected"):
         return None
