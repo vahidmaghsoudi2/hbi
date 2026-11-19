@@ -639,7 +639,7 @@
 | ۲۷ | مدیریت توقف مسیر مشاوره | **Stop request trace، ثبت فقط performed steps، no-auto-resume و restart gate با version و ۵ fresh checks + authorization در کد/تست/سند ثبت شد؛ PR فعالیت ۲۷ Draft است. Test/CI اجرا نشده.** |
 | ۲۸ | مدیریت فقدان داده، دانش یا خطای داخلی | **Distinct gap taxonomy، mixed-gap handling و ENGINE_FAIL output suppression precedence در کد/تست/سند ثبت شد؛ PR فعالیت ۲۸ Draft است. Test/CI اجرا نشده.** |
 | ۲۹ | تدوین سناریوهای گفت‌وگویی ده‌گانه | **۱۰ behavioral contract با cross-module tests: state/version preservation، simple reasons، evidence/data gaps، versioning، rejection، acceptance/consent و dependency invalidation در کد/تست/سند ثبت شد؛ PR فعالیت ۲۹ Draft است. Test/CI اجرا نشده.** |
-| ۳۰ | تدوین سناریوهای تخصصی رنگ مو | انجام‌نشده |
+| ۳۰ | تدوین سناریوهای تخصصی رنگ مو | **۱۲ archetype تخصصی با required fields، pending oracle و gate تأیید متخصص + evidence ثبت شد؛ هیچ technical outcome ساخته نشده؛ PR فعالیت ۳۰ Draft است. Test/CI اجرا نشده.** |
 | ۳۱ | آزمون داده‌های ناقص | انجام‌نشده |
 | ۳۲ | آزمون پیشنهادهای متعارض یا نامعتبر | انجام‌نشده |
 | ۳۳ | آزمون تغییر هدف و اطلاعات | انجام‌نشده |
