@@ -80,3 +80,29 @@ The static snippets reviewed contain tests for exact catalog size/snapshot valid
 ## 7. Next action
 
 **Activity 44 / H0 remains the active gate.** This audit provides the H1 starting inventory so implementation after authorization can proceed from existing code and targeted gaps rather than restarting. Runtime implementation and test execution are held until H0 is explicitly resolved.
+
+## 8. Deeper static coverage review (test priorities)
+
+A deeper read of the focused H1 tests confirms useful negative-path coverage, but also identifies coverage risks to address only after H0 authorizes execution/test work:
+
+### Priority A — catalog provider / manifest
+- Manifest malformed JSON, wrong JSON root type, missing required fields, wrong source URL/artifact path, wrong schema version, wrong capture method/policy, wrong expected row/column counts, malformed publisher metadata, invalid publisher timestamp, and invalid snapshot timestamp are code gates; the current test file does not visibly exercise each branch.
+- CSV parser edge cases should be covered with real CSV quoting (embedded comma/quote/newline in descriptive columns), duplicate identity, malformed row shape, unexpected/blank identity fields, and UTF-8 variants. Existing tests already cover many baseline cases: row count, series/code membership, headers, duplicate identity, invalid UTF-8, missing file, manifest missing/hash mismatch/timezone, and exact membership.
+- Confirm that the provider consistently handles BOM and line endings, and that any parser exceptions are caught at the intended boundary.
+
+### Priority B — exact catalog identity lookup (largest static test gap)
+- The source module `app/domain/hair_catalog_identity_lookup.py` is substantial (646 lines) and defines lookup, reference traceability, decision output, idempotency key, dependency invalidation, display gating, and occurrence-event helpers.
+- No dedicated `tests/test_hair_catalog_identity_lookup.py` was found in the tree reviewed. Existing provider tests exercise membership only; they do not visibly cover the module's full lookup/output/presentation/event behavior.
+- After H0, add tests for exact three-field identity, incomplete identity, mismatch, traceability/reference fields, invalid or missing publisher provenance, fail-closed presentation, dependent-vs-independent invalidation, idempotency, and event timestamp/pointer validation.
+
+### Priority C — intake data validation
+- Existing tests cover required fields, image-only uncertainty, target gaps/invalid priorities, unknown-vs-none history, history conflicts/invalid entries, and regional missing/uncertain/conflicting/invalid scope.
+- Add boundary tests for invalid field value types, malformed dimension maps, duplicate regional records, invalid confidence/source combinations, and conflict resolution/clearing semantics if the implementation contract supports them. Avoid asserting unsupported policy.
+
+### Priority D — test execution
+- Tests remain unexecuted in this chat. These are test-review findings, not observed runtime defects.
+- First authorized run should be focused, reproducible, and use synthetic fixtures only; record exact command, environment, commit, summary, and failures. No broad-suite claims until broad suite is run.
+
+## 9. Updated status
+
+Static source and test review: **PARTIAL / NOT VERIFIED**. H1 code exists, but H0 authorization is pending, no test run occurred, and exact-lookup output/presentation coverage appears to be a material gap. This is not a runtime defect finding.
