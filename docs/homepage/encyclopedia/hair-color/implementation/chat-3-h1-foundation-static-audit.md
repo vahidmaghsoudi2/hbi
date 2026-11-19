@@ -106,3 +106,24 @@ A deeper read of the focused H1 tests confirms useful negative-path coverage, bu
 ## 9. Updated status
 
 Static source and test review: **PARTIAL / NOT VERIFIED**. H1 code exists, but H0 authorization is pending, no test run occurred, and exact-lookup output/presentation coverage appears to be a material gap. This is not a runtime defect finding.
+
+## 10. Lookup module test matrix from full static read
+
+The module was read in four ranges to map its main branches. Suggested focused tests after H0:
+
+| Function/branch | Test cases to add/confirm |
+|---|---|
+| Approved URL validator | wrong host, HTTP, wrong path, query/fragment, userinfo, invalid port, accepted canonical URLs |
+| Traceability | valid HBI snapshot lineage; publisher-edition lineage; missing/invalid SHA; missing IDs/timestamp/validation status; publisher label unknown; timezone missing |
+| `lookup_catalog_identity` | non-CATALOG_READY; invalid identity type; invalid/unapproved reference; missing expected vs observed key; exact match; each of 3 field mismatches; incomplete lineage with mismatch and without mismatch |
+| Decision output | wrong service; blank IDs; invalid result/reference/identity types; non-tuple provenance/pointers; definitive outcome with unversioned or mismatched metadata; valid snapshot version labeling |
+| Idempotency | same semantic inputs stable; change each canonical key field/reference/hash/provenance/evidence pointer changes key; shade_name descriptive field treatment is explicitly documented |
+| Invalidation | effective dependency invalidates; non-effective preserves; unknown unresolved; unrelated dependency ignored; invalid impact unresolved |
+| Presentation | malformed output; traceability failure withheld; match/mismatch displayable only identity-level; inconclusive and STOP withheld; no safety/feasibility wording |
+| Event contract | event kind/actor pairing; OUTPUT_PRESENTED requires exact output and display gate; invalid timestamp; blank output ID/pointer; acceptance vs consent event separation |
+
+### Static design question to reconcile (not a defect finding)
+
+The output dependency list includes `catalog_item.shade_name`, while the semantic idempotency key is built from the three canonical identity fields and does not include shade_name. Since shade name is explicitly descriptive and non-key, this may be intentional; document the intended behavior and test it so dependency invalidation and idempotency semantics cannot drift.
+
+This is a design consistency question only; no code was changed and no runtime defect was claimed.
