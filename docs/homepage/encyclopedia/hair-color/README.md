@@ -631,7 +631,7 @@
 | ۱۹ | تعریف محدودیت‌های پیشنهاد | **گیت محدودیت‌ها و precedence تفکیک DATA_GAP/KNOWLEDGE_GAP/SAFETY_STOP/SCOPE/ENGINE_FAIL/CONDITION و نگاشت به چهار motor state مصوب در کد/تست/سند ثبت شد؛ PR فعالیت ۱۹ Draft است. Test/CI اجرا نشده.** |
 | ۲۰ | تثبیت چهار وضعیت موتور تصمیم | **Canonical mapping برای چهار state مصوب، precedence و reason codeها در کد/تست/سند ثبت شد؛ PR فعالیت ۲۰ Draft است. Test/CI اجرا نشده.** |
 | ۲۱ | تثبیت پنج وضعیت پاسخ مشاوره | **۵ label canonical و mapping چهار motor state، conditional به‌عنوان motor نه response state، در کد/تست/سند ثبت شد؛ PR فعالیت ۲۱ Draft است. Test/CI اجرا نشده.** |
-| ۲۲ | تثبیت ده وضعیت گردش پرونده | طراحی قبلی موجود؛ تطبیق نهایی لازم |
+| ۲۲ | تثبیت ده وضعیت گردش پرونده | **۱۰ state canonical و transition guard برای intake، test، safety-stop، specialist/client approvals، execution consent، restart تازه و terminal closure در کد/تست/سند ثبت شد؛ PR فعالیت ۲۲ Draft است. Test/CI اجرا نشده.** |
 | ۲۳ | مدیریت پرسش‌های مشتری قبل از تصمیم | طراحی قبلی موجود؛ آزمون لازم |
 | ۲۴ | مدیریت رد پیشنهاد | طراحی قبلی موجود؛ آزمون لازم |
 | ۲۵ | تفکیک پذیرش پیشنهاد از اجازهٔ اجرا | تصمیم مصوب موجود؛ آزمون لازم |
