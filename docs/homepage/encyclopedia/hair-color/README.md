@@ -49,6 +49,7 @@
 | فعالیت ۷: تثبیت هویت کاتالوگ Bijourka | [گزارش تثبیت هویت و قواعد کلید](./catalog/07-bijourka-catalog-identity-stabilization.md) |
 | فعالیت ۸: ساختار ۱۹ سری رنگ Bijourka | [ماتریس ۱۹ سری و ۸۸ کد خام](./catalog/08-bijourka-19-series-structure.md) |
 | فعالیت ۹: قواعد شماره‌گذاری Bijourka | [قواعد ساختاری، aliasهای محدود و استثناها](./catalog/09-bijourka-numbering-rules.md) |
+| فعالیت ۱۰: تثبیت خانواده‌های رنگی در کاتالوگ | [۱۹ نام خام سری و گروه‌بندی فرعی پیشنهادی (provisional)](./catalog/10-bijourka-color-families.md) |
 | ۱۵ سناریوی مصنوعی قابل‌ماشین‌خوانی | [بستهٔ fixtureها](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/tests/fixtures/hair-color-contract-v1.json) |
 | ساختار مجاز بستهٔ fixtureها | [JSON Schema](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/tests/fixtures/hair-color-contract-v1.schema.json) |
 | اعتبارسنج ساختاری قرارداد (نه اجرای موتور محصول) | [Runner](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/scripts/run_hair_color_contract.py) و [آزمون‌های Runner](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/tests/test_hair_color_contract_runner.py) |
@@ -608,7 +609,7 @@
 | ۷ | تثبیت هویت کاتالوگ ۸۸ رکوردی Bijourka | **کنترل و تثبیت در PR #607 ثبت شد: ۸۸ رکورد، ۱۹ سری، ۸۸ کلید سه‌جزئی یکتا؛ بدون رکورد ناقص یا کلید تکراری. قرارداد provider/lookup نیز هم‌راستا شد.** |
 | ۸ | تثبیت ساختار ۱۹ سری رنگ | **ماتریس ۱۹ سری و ۸۸ کد خام استخراج و تثبیت شد؛ provider به کنترل دقیق عضویت کد در سری مجهز شد؛ آزمون‌های مثبت و fail-closed ثبت شدند. PR فعالیت ۸ Draft است؛ CI خودکار اجرا نشده، زیرا Workflow فعلی فقط PRهای مقصد master را پوشش می‌دهد.** |
 | ۹ | تثبیت قواعد شماره‌گذاری | **قالب‌های خام، aliasهای صریح +05 تا +09، دامنهٔ طبیعی/طبیعی اکسترا و چهار استثنا در ماژول و آزمون مستقل ثبت شدند؛ سند فعالیت ۹ ایجاد شد. عضویت کاتالوگی همچنان تابع کنترل فعالیت ۸ است؛ اجرای آزمون/CI هنوز تأیید نشده است.** |
-| ۱۰ | تثبیت خانواده‌های رنگی در کاتالوگ | انجام‌نشده |
+| ۱۰ | تثبیت خانواده‌های رنگی در کاتالوگ | **۱۹ نام خام سری به‌عنوان خانوادهٔ کاتالوگی تثبیت و classifier دقیق ایجاد شد؛ گروه‌بندی فرعی فقط provisional و نیازمند تأیید PO است. سند و آزمون‌ها در PR فعالیت ۱۰ ثبت شدند؛ CI/test execution تأیید نشده است.** |
 | ۱۱ | تثبیت قواعد اختصاصی مصوب مالک پروژه | قواعد پراکنده موجود؛ تجمیع نهایی لازم |
 | ۱۲ | تعریف ورودی‌های لازم برای مشاوره | انجام‌نشده |
 | ۱۳ | تعیین نقش پایهٔ فعلی مو در انتخاب رنگ | انجام‌نشده |
