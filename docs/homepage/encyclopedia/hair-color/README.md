@@ -650,7 +650,7 @@
 | ۳۸ | ثبت نظر متخصص برای هر قاعده | **Schema ثبت review واقعی با reviewer/evidence/date/scope/findings/limitations، status validation و تفکیک PO acceptance ایجاد شد؛ هیچ نظر واقعی ثبت نشده؛ PR فعالیت ۳۸ Draft است. Test/CI اجرا نشده.** |
 | ۳۹ | اعمال اصلاحات تأییدشده | **Correction gate با specialist scope، PO approval، evidence refs، baseline/target version و receipt ایجاد شد؛ هیچ اصلاحی واقعاً اعمال نشده؛ PR فعالیت ۳۹ Draft است. Test/CI اجرا نشده.** |
 | ۴۰ | تهیهٔ سند نهایی دانش مشاورهٔ رنگ مو | **Synthesis یکپارچهٔ مبانی، catalog، intake، evidence، states، option/workflow rules، محدودیت‌ها و readiness ثبت شد؛ customer-use=false و specialist pending؛ PR فعالیت ۴۰ Draft است. Test/CI اجرا نشده.** |
-| ۴۱ | تهیهٔ گزارش پذیرش محصول از دید مالک پروژه | انجام‌نشده |
+| ۴۱ | تهیهٔ گزارش پذیرش محصول از دید مالک پروژه | **Acceptance report با ۱۰ معیار، blockerها و recommendation محدود به documentation baseline تدوین شد؛ تصمیم PO pending؛ PR فعالیت ۴۱ Draft است. Test/CI اجرا نشده.** |
 | ۴۲ | تهیهٔ بستهٔ تحویل برای مرحلهٔ پیاده‌سازی | انجام‌نشده |
 
 ### اقدام فعال بعدی
