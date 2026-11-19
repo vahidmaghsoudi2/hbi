@@ -1,4 +1,4 @@
-from app.domain/hair_color_missing_data_gates import GENERIC_REQUIRED, PRODUCT_SPECIFIC_REQUIRED, make_data_entry, assess_data_completeness
+from app.domain.hair_color_missing_data_gates import GENERIC_REQUIRED, PRODUCT_SPECIFIC_REQUIRED, make_data_entry, assess_data_completeness
 
 def complete_entries():
     return [make_data_entry(f,"recorded","professional_observed","high") for f in GENERIC_REQUIRED]
