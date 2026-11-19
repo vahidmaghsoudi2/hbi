@@ -643,7 +643,7 @@
 | ۳۱ | آزمون داده‌های ناقص | **Required-data matrix generic/product-specific، missing/unknown/image-only/conflict gates و tests ثبت شد؛ PR فعالیت ۳۱ Draft است. Test/CI اجرا نشده.** |
 | ۳۲ | آزمون پیشنهادهای متعارض یا نامعتبر | **Cross-module option bundle gate + test matrix برای invalid/unvalidated/rejected/evidence-less/duplicate/rank/limit/gap/safety/engine/conditional ثبت شد؛ PR فعالیت ۳۲ Draft است. Test/CI اجرا نشده.** |
 | ۳۳ | آزمون تغییر هدف و اطلاعات | **۱۰ cross-module scenarios برای target/full invalidation، dependency sets، unknown fail-closed، decision reset و preserved outputs ثبت شد؛ PR فعالیت ۳۳ Draft است. Test/CI اجرا نشده.** |
-| ۳۴ | آزمون توقف و خطای داخلی | انجام‌نشده |
+| ۳۴ | آزمون توقف و خطای داخلی | **۱۰ cross-module stop/failure scenarios: safety، engine، gaps، client stop، restart، workflow bypass، conditional و scope ثبت شد؛ PR فعالیت ۳۴ Draft است. Test/CI اجرا نشده.** |
 | ۳۵ | بررسی مستندات و شواهد هر قاعده | انجام‌نشده |
 | ۳۶ | تهیهٔ فهرست قواعد نیازمند متخصص | انجام‌نشده |
 | ۳۷ | ارائهٔ اسناد به متخصص رنگ مو | انجام‌نشده |
