@@ -68,3 +68,8 @@ H1 remains PARTIAL because test execution success is narrower than full acceptan
 ### Activity 45 — criterion-level source coverage
 
 The focused test source was mapped criterion by criterion. Corrected totals: **59 = 32 PASS / 17 PARTIAL / 10 NOT TESTED / 0 FAIL**. This supersedes the earlier provisional 26/19/14 mapping. PASS here means a direct assertion exists; it does not mean specialist acceptance. The 118-pass local execution remains separate evidence for the selected 11 files only. H1 remains PARTIAL; H2 remains blocked.
+
+
+### Activity 45 work item
+
+Detailed gap closure is tracked in [Issue #648](https://github.com/vahidmaghsoudi2/hbi/issues/648). Criteria to disposition are grouped there by manifest/catalog, lookup, output/invalidation, presentation/events, and intake. H1 remains PARTIAL; H2 blocked.
