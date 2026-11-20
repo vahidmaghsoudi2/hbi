@@ -41,8 +41,15 @@
 - ENGINE_FAIL suppresses run output.
 - No merge, deployment, release, or use of customer data.
 
-## 5. Chat 2 completion / next chat
-Activity 43 is completed as a tracking matrix. Chat 2's baseline-contract specification is documented separately. Chat 3 may begin only after the H0 baseline/PO gate and the Chat 2 contract handoff are reviewed/authorized; Chat 3 must implement H1 only and stay in synthetic/test scope.
+## 5. Chat 2 completion / current H1 disposition
+
+Activity 43 is completed as a tracking matrix. Chat 2's baseline-contract specification is documented separately. The original H0-pending statement was accurate when Chat 2/3 documents were first written; it is superseded for current-status purposes by the PO's limited authorization dated 2026-11-20.
+
+H0 is now authorized only for isolated H1 validation with synthetic/test data. The baseline is `3478f65e5ec2f28c0b4f5592c1abf62be31272b7`. The focused 11-file H1 test suite ran twice with Python 3.14.6 / pytest 9.1.1: 118 passed, 0 failed, 0 skipped, 0 xfailed in each run. The two local corrections present during execution remain uncommitted and are not on this GitHub branch.
+
+**H1 is not yet accepted.** The test run is successful evidence for the listed files only. The preliminary 59-criterion map (26 PASS / 19 PARTIAL / 14 NOT TESTED) must be reconciled to exact assertions. H2 remains blocked until H1 acceptance is closed.
+
+**Next action:** Activity 45 — close the H1 acceptance matrix. Do not begin H2, real-customer data processing, customer-facing advice, service execution, merge, release, or production deployment under this authorization.
 
 
 ## 6. H0 authorization and H1 execution update — 2026-11-20
