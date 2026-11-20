@@ -445,7 +445,7 @@ test("Product dossier edit saves and returns to the refreshed dossier before ret
 
   await page.getByRole("button", { name: "ویرایش مشخصات محصول" }).click();
   await expect(page.getByRole("heading", { name: "ویرایش محصول" })).toBeVisible();
-  await page.getByLabel("نام محصول").fill("محصول پس از ویرایش");
+  await page.locator("label.pro-label").filter({ hasText: "نام محصول" }).locator("..").locator("input").fill("محصول پس از ویرایش");
   await page.getByRole("button", { name: "تأیید و به‌روزرسانی" }).click();
 
   await expect(page.getByRole("heading", { name: "پرونده واحد محصول" })).toBeVisible();
