@@ -41,6 +41,18 @@ test("selected existing skin product receives source-bound box drafts without cr
       return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([selectedProduct]) });
     }
 
+    if (path.includes("/evidence/knowledge/") && path.endsWith("/completeness") && method === "GET") {
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+        status: "partial", missing_domains: ["ingredients"], incomplete_domains: [],
+        contraindications_unreviewed: false, pk_record_missing: false,
+        domain_report: [{ field: "ingredients", label: "ترکیبات", status: "missing", message: "منبع لازم است" }],
+      }) });
+    }
+    if (path.includes("/evidence/knowledge/") && method === "GET") {
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+        product_knowledge_id: "PK-FIXTURE", ingredients: "ثبت نشده", evidence_status: "PARTIAL", knowledge_confidence: 0.4,
+      }) });
+    }
     if (path.endsWith("/evidence/") && method === "GET") {
       return route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
     }
