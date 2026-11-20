@@ -365,6 +365,9 @@ test("Product menu has one canonical list and routes all product work through on
     sessionStorage.setItem("hbi_operator_access_token", "homepage-product-operator-test-token");
   });
   await page.route("**/products/manage", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([{ product_id: "PRD-DOSSIER-1", product_name: "محصول آزمایشی", brand: "HBI Test", identity_status: "VERIFIED" }]) }));
+  await page.route("**/evidence/knowledge/PRD-DOSSIER-1/completeness", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ status: "partial", missing_domains: ["ingredients"], incomplete_domains: [], contraindications_unreviewed: false, pk_record_missing: false, domain_report: [{ field: "ingredients", label: "ترکیبات", status: "missing", message: "منبع لازم است" }] }) }));
+  await page.route("**/evidence/knowledge/PRD-DOSSIER-1", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ product_knowledge_id: "PK-1", product_id: "PRD-DOSSIER-1", ingredients: "INCI آزمایشی", evidence_status: "PARTIAL", knowledge_confidence: 0.4 }) }));
+  await page.route("**/evidence/?product_id=PRD-DOSSIER-1", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([{ evidence_id: "EV-1", product_id: "PRD-DOSSIER-1", field: "ingredients", claim: "ترکیبات آزمایشی", qa_status: "PENDING", source_type: "LABEL", source_reference: "fixture" }]) }));
   await page.goto("/");
   await page.getByRole("button", { name: "ورود به مدیریت محصولات" }).click();
   await expect(page.getByRole("button", { name: "بازکردن فهرست کالاها" })).toBeVisible();
@@ -378,8 +381,11 @@ test("Product menu has one canonical list and routes all product work through on
   await page.getByRole("button", { name: "بازکردن پرونده واحد" }).click();
   await expect(page.getByRole("heading", { name: "پرونده واحد محصول", exact: true })).toBeVisible();
   await expect(page.getByText("PRD-DOSSIER-1", { exact: true })).toBeVisible();
+  await expect(page.getByText("INCI آزمایشی")).toBeVisible();
+  await expect(page.getByText("ترکیبات آزمایشی")).toBeVisible();
+  await expect(page.getByText(/حوزه‌های ناقص: ترکیبات/)).toBeVisible();
   await expect(page.getByRole("button", { name: "ویرایش مشخصات محصول" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "بازکردن بررسی کیفیت" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "بازکردن بررسی کیفیت و شواهد" })).toBeVisible();
   await page.getByRole("button", { name: "بازگشت به فهرست کالاها" }).click();
   await expect(page.getByRole("heading", { name: "فهرست کالاها", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "بازگشت به بخش" }).click();
