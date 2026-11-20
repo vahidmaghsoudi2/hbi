@@ -68,7 +68,8 @@ test("Product Intake category remains operator-only and is not sent as knowledge
   await expect(page.getByRole("heading", { name: "فضای کاری مدیر" })).toBeVisible();
 
   await page.getByRole("button", { name: "ورود به مدیریت محصولات" }).click();
-  await page.getByRole("button", { name: "ورود و ویرایش محصول" }).click();
+  await page.getByRole("button", { name: "بازکردن فهرست کالاها" }).click();
+  await page.getByRole("button", { name: "ثبت محصول جدید" }).click();
   await expect(page.getByRole("heading", { name: /ورود محصول/ })).toBeVisible();
 
   await page.getByLabel("۱) خلاصه معرفی شما").fill("آبرسان آزمایشی, برند: TestBrand, حجم 50 ml");
