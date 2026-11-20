@@ -424,7 +424,7 @@ test("Product dossier edit saves and returns to the refreshed dossier before ret
     if (path.endsWith("/evidence/knowledge/PRD-EDIT-E2E-1")) {
       return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ product_knowledge_id: "PK-EDIT-1", product_id: product.product_id, ingredients: "INCI fixture", evidence_status: "PARTIAL", knowledge_confidence: 0.5 }) });
     }
-    if (path.includes("/evidence/") && path.includes("product_id=PRD-EDIT-E2E-1")) {
+    if (path.endsWith("/evidence/") && url.searchParams.get("product_id") === "PRD-EDIT-E2E-1") {
       return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([{ evidence_id: "EV-EDIT-1", product_id: product.product_id, field: "ingredients", claim: "شاهد آزمایشی", qa_status: "PENDING", source_type: "LABEL", source_reference: "fixture-source" }]) });
     }
     if (path.endsWith("/reports/sales/period/today")) {
