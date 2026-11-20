@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   getProductEvidence,
   getProductKnowledge,
@@ -50,6 +50,8 @@ export default function ProductDossierPanel({
   const [evidence, setEvidence] = useState<EvidenceDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState<string[]>([]);
+  const ensureSessionRef = useRef(onEnsureSession);
+  ensureSessionRef.current = onEnsureSession;
 
   useEffect(() => {
     let current = true;
@@ -57,7 +59,7 @@ export default function ProductDossierPanel({
       setLoading(true);
       setErrors([]);
       try {
-        const token = await onEnsureSession();
+        const token = await ensureSessionRef.current();
         if (!token) throw new Error("نشست اپراتور برای مشاهده پرونده محصول در دسترس نیست.");
         const results = await Promise.allSettled([
           getProductKnowledge(product.product_id, token),
@@ -86,7 +88,7 @@ export default function ProductDossierPanel({
     }
     void load();
     return () => { current = false; };
-  }, [product.product_id, onEnsureSession]);
+  }, [product.product_id]);
 
   return (
     <section className="pro-panel" aria-labelledby="product-dossier-title">
