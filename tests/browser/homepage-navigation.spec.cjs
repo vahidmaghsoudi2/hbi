@@ -366,11 +366,11 @@ test("Product menu uses list as primary entry without independent QA menu", asyn
   await page.goto("/");
   await page.getByRole("button", { name: "ورود به مدیریت محصولات" }).click();
   await expect(page.getByRole("button", { name: "بازکردن فهرست کالاها" })).toBeVisible();
-  await expect(page.getByRole("button", { name: /شروع ورود محصول|ورود محصول جدید|ورود و ویرایش محصول/ }).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "شروع ورود محصول" })).toBeVisible();
   await expect(page.getByRole("button", { name: "انتخاب محصول برای QA" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "بازکردن کاتالوگ هویت‌تأییدشده" })).toHaveCount(0);
   await page.getByRole("button", { name: "بازکردن فهرست کالاها" }).click();
-  await expect(page.getByRole("heading", { name: /فهرست کالاها|محصولات/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "فهرست کالاها", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "بازگشت به بخش" }).click();
   await expect(page.getByRole("heading", { name: "مدیریت محصولات", exact: true })).toBeVisible();
 });
@@ -391,7 +391,7 @@ test("Researched P4 starter pre-fills a SKIN draft without guessing market ident
 
   await page.goto("/");
   await page.getByRole("button", { name: "ورود به مدیریت محصولات" }).click();
-  await page.getByRole("button", { name: /شروع ورود محصول|ورود محصول جدید|ورود و ویرایش محصول/ }).first().click();
+  await page.getByRole("button", { name: "شروع ورود محصول" }).click();
   await page.getByRole("button", { name: "بارگذاری پیش‌نویس پژوهشی P4 · SKIN1004" }).click();
 
   const field = (label) => page.locator("label.pro-label").filter({ hasText: label }).first().locator("..").locator("input");

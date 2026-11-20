@@ -1267,7 +1267,7 @@ export default function NewHomePage() {
         {pageView === "content" && active === "catalog" && (
           <section className="pro-panel">
             <div className="pro-panel-head">
-              <h1>محصولات</h1>
+              <h1>فهرست کالاها</h1>
               <button type="button" className="pro-btn-secondary" onClick={() => void loadProducts()}>
                 نوسازی
               </button>
