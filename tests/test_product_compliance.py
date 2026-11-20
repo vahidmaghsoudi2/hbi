@@ -2,6 +2,7 @@
 from __future__ import annotations
 import pytest
 from app.models.product import Product
+from app.core.governance import ALLOWED_TRANSITIONS
 from app.models.user_role import UserRole, ROLE_EDITOR, ROLE_PO, ROLE_REVIEWER_QA
 from app.models.evidence import Evidence
 from app.core.auth import create_access_token
@@ -96,10 +97,10 @@ def test_lifecycle_submit_enter_qa(db_session):
     assert tr.enter_qa_review("P_CMP_LIFE", "rev", {ROLE_REVIEWER_QA}).status == "QA_REVIEW"
 
 
-def test_invalid_transition_rejected(db_session):
-    _make_product(db_session, "P_CMP_INV", status="DRAFT")
-    with pytest.raises(ValidationError):
-        ProductTransitionService(db_session).activate("P_CMP_INV", "po", {ROLE_PO})
+def test_no_separate_activation_transition():
+    assert ALLOWED_TRANSITIONS[("QA_REVIEW", "APPROVE")] == "ACTIVE"
+    assert ("APPROVED", "ACTIVATE") not in ALLOWED_TRANSITIONS
+    assert not hasattr(ProductTransitionService, "activate")
 
 
 def test_reject_requires_reason(db_session):
@@ -140,7 +141,7 @@ def test_readiness_pass_and_approve(db_session):
     db_session.flush()
     assert EvidenceReadinessService(db_session).evaluate("P_CMP_RDY2").ready is True
     assert ProductTransitionService(db_session).approve(
-        "P_CMP_RDY2", "po", {ROLE_PO}).status == "APPROVED"
+        "P_CMP_RDY2", "po", {ROLE_PO}).status == "ACTIVE"
 
 
 def test_active_grandfathered(db_session):
@@ -221,7 +222,7 @@ def test_readiness_approved_evidence_passes(db_session):
     assert result.ready is True
     assert result.missing_required == []
     assert ProductTransitionService(db_session).approve(
-        "P_CMP_RDY_AP", "po", {ROLE_PO}).status == "APPROVED"
+        "P_CMP_RDY_AP", "po", {ROLE_PO}).status == "ACTIVE"
 
 
 def test_readiness_acceptable_plus_incomplete_still_blocks(db_session):
@@ -349,7 +350,7 @@ def test_mutation_log_identity_change(db_session):
 
 
 def test_mutation_log_approve(db_session):
-    """WP-04: APPROVE must log status transition QA_REVIEW → APPROVED."""
+    """PO APPROVE must log the direct QA_REVIEW → ACTIVE transition."""
     _make_product(db_session, "P_ML_AP", status="QA_REVIEW",
                   qa_verdict="VALID", identity_status="VERIFIED")
     _seed_ready_evidence(db_session, "P_ML_AP", "E_ML_AP")
@@ -359,23 +360,8 @@ def test_mutation_log_approve(db_session):
     row = rows[0]
     assert row.actor_id == "po_ml"
     assert row.actor_role == ROLE_PO
-    assert row.resulting_state == "APPROVED"
-    assert "QA_REVIEW" in (row.before_state or "")
-    assert "APPROVED" in (row.after_state or "")
-
-
-def test_mutation_log_activate(db_session):
-    """WP-04: ACTIVATE must log APPROVED → ACTIVE."""
-    _make_product(db_session, "P_ML_AC", status="APPROVED",
-                  qa_verdict="VALID", identity_status="VERIFIED")
-    _seed_ready_evidence(db_session, "P_ML_AC", "E_ML_AC")
-    ProductTransitionService(db_session).activate("P_ML_AC", "po_ml", {ROLE_PO})
-    rows = _logs_by_action(db_session, "P_ML_AC", "ACTIVATE")
-    assert len(rows) == 1
-    row = rows[0]
-    assert row.actor_id == "po_ml"
     assert row.resulting_state == "ACTIVE"
-    assert "APPROVED" in (row.before_state or "")
+    assert "QA_REVIEW" in (row.before_state or "")
     assert "ACTIVE" in (row.after_state or "")
 
 
