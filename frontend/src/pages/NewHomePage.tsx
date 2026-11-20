@@ -27,6 +27,7 @@ import {
 } from "../api/client";
 import ProductIntakePanel from "./ProductIntakePanel";
 import ProductReviewPanel from "./ProductReviewPanel";
+import ProductDossierPanel from "./ProductDossierPanel";
 import SkinProductEncyclopedia from "./SkinProductEncyclopedia";
 import SkinProblemBank from "./SkinProblemBank";
 import type {
@@ -1300,22 +1301,13 @@ export default function NewHomePage() {
         )}
 
         {pageView === "content" && active === "dossier" && selectedProduct && (
-          <section className="pro-panel" aria-labelledby="product-dossier-title">
-            <div className="pro-panel-head">
-              <div><h1 id="product-dossier-title">پرونده واحد محصول</h1><p className="pro-muted">هویت، ویژگی‌ها، شواهد و کنترل کیفیت در مسیر همین محصول نگهداری می‌شوند.</p></div>
-              <button type="button" className="pro-btn-secondary" onClick={() => { setActive("catalog"); setPageView("content"); }}>بازگشت به فهرست کالاها</button>
-            </div>
-            <dl className="pro-dl">
-              <div><dt>نام محصول</dt><dd>{selectedProduct.product_name}</dd></div>
-              <div><dt>برند</dt><dd>{selectedProduct.brand || "ثبت نشده"}</dd></div>
-              <div><dt>شناسه محصول</dt><dd><code>{selectedProduct.product_id}</code></dd></div>
-              <div><dt>وضعیت هویت</dt><dd>{selectedProduct.identity_status || "ثبت نشده"}</dd></div>
-            </dl>
-            <div className="pro-product-grid">
-              <article className="pro-product-card"><h2>مشخصات و ویژگی‌های محصول</h2><p className="pro-muted">ثبت یا تکمیل اطلاعات در همین پرونده؛ ورود اطلاعات به معنی تأیید یا فعال‌سازی محصول نیست.</p><button type="button" className="pro-btn-primary" onClick={() => { setEditProduct(selectedProduct); setReturnToCatalog(true); go("intake"); }}>ویرایش مشخصات محصول</button></article>
-              <article className="pro-product-card"><h2>شواهد و کنترل کیفیت</h2><p className="pro-muted">بررسی شواهد و تصمیم QA برای همین شناسه محصول. تأیید نهایی طبق مجوز PO انجام می‌شود.</p><button type="button" className="pro-btn-primary" onClick={() => { sessionStorage.setItem("hbi_review_product_id", selectedProduct.product_id); setReturnToCatalog(true); go("review"); }}>بازکردن بررسی کیفیت</button></article>
-            </div>
-          </section>
+          <ProductDossierPanel
+            product={selectedProduct}
+            onEnsureSession={ensureProductSession}
+            onBack={() => { setActive("catalog"); setPageView("content"); }}
+            onEdit={() => { setEditProduct(selectedProduct); setReturnToCatalog(true); go("intake"); }}
+            onReview={() => { sessionStorage.setItem("hbi_review_product_id", selectedProduct.product_id); setReturnToCatalog(true); go("review"); }}
+          />
         )}
 
         {pageView === "content" && active === "review" && (
