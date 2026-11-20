@@ -127,3 +127,18 @@ The module was read in four ranges to map its main branches. Suggested focused t
 The output dependency list includes `catalog_item.shade_name`, while the semantic idempotency key is built from the three canonical identity fields and does not include shade_name. Since shade name is explicitly descriptive and non-key, this may be intentional; document the intended behavior and test it so dependency invalidation and idempotency semantics cannot drift.
 
 This is a design consistency question only; no code was changed and no runtime defect was claimed.
+
+
+---
+
+## Post-audit update — 2026-11-20
+
+The statements above describing H0 as pending and tests as not executed are the accurate status of the **2026-11-19 static audit at the time it was written**. They are superseded for current-status purposes by this dated update:
+
+- PO authorized a bounded H0 baseline for isolated H1 validation using synthetic/test data only.
+- The focused 11-file H1 suite was run twice against baseline HEAD `3478f65e5ec2f28c0b4f5592c1abf62be31272b7`, using Python 3.14.6 and pytest 9.1.1.
+- Both runs passed: 118 passed, 0 failed, 0 skipped, 0 xfailed; durations 8.56 s and 6.01 s.
+- The working tree contained two uncommitted corrections during the runs: STOP presentation withholding in `app/domain/hair_catalog_identity_lookup.py`, and the canonical `patch_or_zone` fixture value in `tests/test_hair_color_regional_state.py`.
+- No runtime/test changes were pushed or committed; no merge, H2 work, real-customer data, customer use, service execution, release, or deployment occurred.
+
+**Updated disposition:** H0 is authorized for this limited validation scope. H1 test execution is complete for the 11-file focused suite, but H1 acceptance remains **PARTIAL / NOT CLOSED** until the 59-criterion matrix is reconciled against exact assertions and the untested/partial criteria are dispositioned. The successful test run is not specialist approval, product chemistry validation, or proof of a real recommendation engine.
