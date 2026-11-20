@@ -43,14 +43,14 @@ The current UI snapshot and its existing submenu implementation are recorded as 
 
 ## PO-confirmed target: مدیریت محصولات
 
-The target unifies product management and skin knowledge in one main **مدیریت محصولات** environment:
+The target unifies product management and skin knowledge in one main **مدیریت محصولات** environment while preserving the nine observed main-menu cards until a separately authorized UI change. The nine cards are: خانه و داشبورد، مشتریان، مشاوره، فروش، مدیریت محصولات، کالا و موجودی، خرید، حسابداری و گزارش‌ها، دانشنامه.
 
-- **کالا و ویژگی محصول:** فهرست کالاها، ورود و تکمیل اطلاعات محصول، پرونده کامل ویژگی‌های همان محصول، و اطلاعات عملیاتی/موجودی در کنار همان کالا.
+- **کالا و ویژگی محصول:** «فهرست کالاها» نقطه ورود و فهرست مرجع این بخش است. ایجاد، ورود، تکمیل و ویرایش هر کالا از همان فهرست به پرونده واحد همان محصول می‌رسد؛ همه ویژگی‌ها و اطلاعات هویتی/پژوهشی در همان پرونده نگهداری می‌شوند. اطلاعات عملیاتی و موجودی همان کالا نیز باید در همان محیط قابل مشاهده باشد.
 - **مشکلات پوستی:** دانش مشکلات پوستی و ارتباط ساختاریافته آن با ویژگی‌ها و محصولات.
 
 Product characteristics are maintained in the dossier of the relevant product. There is no separate «ویژگی محصولات» knowledge menu or duplicated characteristics bank. Product-to-problem and problem-to-product navigation should be possible through structured relationships; the recommendation engine evaluates suitability against the customer's context.
 
-The visible menu must not expose a separate «بررسی و تأیید QA» step. Research and quality review take place within the preparation process and Product Owner review. Product Owner approval completes the information-acceptance process; no additional QA gate follows it.
+The target menu must not expose «بررسی و تأیید QA» as a separate destination or post-PO gate. Removing that menu does not remove quality controls: identity and version verification, duplicate checks, source/Evidence traceability and readiness, completeness and conflict review, applicable skin-safety checks, and a QA/reviewer verdict remain part of preparation before the final PO decision. PO approval completes information acceptance and directly sets ACTIVE; no second activation or repeated acceptance gate follows it.
 
 ### Product and consultation eligibility rules
 
