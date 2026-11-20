@@ -83,7 +83,8 @@ test("selected existing skin product receives source-bound box drafts without cr
   await page.getByRole("button", { name: "ورود به مدیریت محصولات" }).click();
   await page.getByRole("button", { name: "بازکردن فهرست کالاها" }).click();
   await expect(page.getByText("Clear & Defend 2% Salicylic Acid Face Wash")).toBeVisible();
-  await page.getByRole("button", { name: "ویرایش" }).click();
+  await page.getByRole("button", { name: "بازکردن پرونده واحد" }).click();
+  await page.getByRole("button", { name: "ویرایش مشخصات محصول" }).click();
 
   await expect(page.getByRole("heading", { name: "ویرایش محصول" })).toBeVisible();
   await expect(page.locator("#product-line-select")).toHaveValue("SKIN");
