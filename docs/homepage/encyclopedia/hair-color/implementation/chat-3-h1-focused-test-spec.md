@@ -135,6 +135,74 @@ Repeatability and worktree-integrity checks passed.
 
 The final worktree contained only these two modified paths. They were not pushed or committed; the GitHub branch does not yet contain these runtime/test changes. The two successful runs therefore establish local regression evidence for this exact working tree, not CI evidence for a committed GitHub head.
 
-**Acceptance interpretation:** The 118 passing tests are execution results for the 11 listed files; they do not prove every H1 acceptance criterion. A separate preliminary review mapped 59 criteria as 26 PASS, 19 PARTIAL, 14 NOT TESTED, and 0 FAIL. That mapping remains provisional and requires criterion-by-criterion evidence reconciliation before H1 can be declared accepted.
+**Criterion-to-assertion reconciliation — Activity 45 (static source mapping):**
+
+The labels below mean: PASS = direct assertion exists in the reviewed test source; PARTIAL = only part of the criterion is asserted; NOT TESTED = no direct assertion for the stated branch. These labels describe source coverage, not a fresh runtime outcome and not specialist approval.
+
+| ID | Status | Assertion evidence / remaining gap |
+|---|---|---|
+| A01 | **PASS** | `test_approved_catalog_provider_loads_exact_88_row_artifact`؛ ۸۸ رکورد و metadata snapshot بررسی می‌شود. |
+| A02 | **PASS** | `test_provider_fails_closed_when_catalog_has_wrong_row_count`. |
+| A03 | **PASS** | `test_provider_fails_closed_when_catalog_headers_are_changed`. |
+| A04 | **PASS** | `test_provider_fails_closed_when_catalog_series_set_is_changed`. |
+| A05 | **PASS** | `...shade_code_is_not_in_its_series` و `...code_is_moved_to_another_series`. |
+| A06 | **PASS** | `test_provider_fails_closed_on_duplicate_catalog_identity`. |
+| A07 | **PASS** | `test_provider_fails_closed_when_required_identity_is_empty`؛ مقدار shade-name خالی آزمایش می‌شود. |
+| A08 | **PASS** | `...invalid_utf8` و `...catalog_file_is_missing`. |
+| A09 | **PARTIAL** | فقط نبودن manifest آزموده شده؛ JSON نامعتبر و root غیر-object آزمون مستقیم ندارند. |
+| A10 | **NOT TESTED** | schema_version، source_url، artifact_path، capture_method و validation_policy نامعتبر به‌صورت مستقل آزموده نشده‌اند. |
+| A11 | **PARTIAL** | hash mismatch آزموده شده؛ metadata row/column count mismatch آزمون مستقیم ندارد. |
+| A12 | **PARTIAL** | timestamp بدون timezone و نبود snapshot timestamp در lookup پوشش دارند؛ تمام حالت‌های invalid/missing manifest timestamp پوشش داده نشده‌اند. |
+| A13 | **NOT TESTED** | publisher edition/revision و publisher_captured_at نامعتبر یا naive آزمون مستقیم ندارند. |
+| A14 | **NOT TESTED** | BOM و CRLF آزمون مستقیم ندارند. |
+| A15 | **NOT TESTED** | CSV description با comma/quote/newline آزمون parser مستقیم ندارد. |
+| B01 | **PASS** | `test_exact_catalog_ready_allowed`، رد combination consult و کنترل missing/blank/case/whitespace/non-string service. |
+| B02 | **NOT TESTED** | نوع نامعتبر expected/observed object جدا از نوع service آزموده نشده است. |
+| B03 | **PARTIAL** | URL/host/query نامعتبر رد می‌شود؛ source/statusهای نامعتبر جداگانه پوشش ندارند. |
+| B04 | **PASS** | `test_missing_required_field_stops`؛ فیلد canonical ناقص DATA_GAP می‌دهد. |
+| B05 | **PASS** | `test_exact_versioned_identity_matches`؛ تطبیق سه فیلد canonical. |
+| B06 | **PARTIAL** | تعارض shade_number آزموده شده؛ mismatch مستقل brand و series در lookup آزمون جدا ندارند. |
+| B07 | **PASS** | نبود lineage با identity برابر، INCONCLUSIVE / KNOWLEDGE_GAP می‌دهد. |
+| B08 | **NOT TESTED** | ترکیب lineage ناقص همراه با identity متفاوت مستقیماً آزموده نشده است. |
+| B09 | **PASS** | `test_shade_name_is_a_descriptor_not_part_of_the_identity_key`. |
+| B10 | **PARTIAL** | حفظ raw code و رد برخی variationها آزموده شده؛ تمام case/whitespace variationهای سه فیلد lookup پوشش مستقیم ندارند. |
+| C01 | **PARTIAL** | ساخت output و حفظ lineage/عدم انتقال approval برای MATCH آزموده شده؛ assertion متناظر برای همهٔ حالت‌های MATCH و MISMATCH کامل نیست. |
+| C02 | **PARTIAL** | service نامعتبر پوشش دارد؛ blank reference ID و output ID آزمون مستقیم ندارند. |
+| C03 | **NOT TESTED** | result/reference/identity typeهای نامعتبر آزمون مستقیم ندارند. |
+| C04 | **NOT TESTED** | provenance و evidence pointer غیر-tuple یا عضوهای نامعتبر آزمون مستقیم ندارند. |
+| C05 | **PARTIAL** | inconclusive/unversioned output ساخته و withheld می‌شود؛ ساخت definitive output با metadata متعارض/بدون version مستقیماً آزموده نشده است. |
+| C06 | **PARTIAL** | تأثیرناپذیری کلید از product_volume و حضور lineage در کلید آزموده شده؛ برابری دو خروجی با تمام ورودی‌های semantic یکسان assertion مستقل ندارد. |
+| C07 | **PARTIAL** | بخشی از رفتار key نسبت به volume و lineage پوشش دارد؛ تغییر تک‌تک identity/reference/hash/provenance/evidence pointerها آزموده نشده است. |
+| C08 | **PASS** | effective dependency → INVALIDATE. |
+| C09 | **PASS** | non-effective dependency → PRESERVE. |
+| C10 | **PASS** | unknown dependency impact → UNRESOLVED. |
+| C11 | **PASS** | unrelated dependency → PRESERVE. |
+| C12 | **PARTIAL** | shade_name در dependency invalidation پوشش دارد و descriptor بودنش بررسی شده؛ idempotency behavior خود shade_name assertion مستقیم ندارد. |
+| D01 | **PARTIAL** | MATCH قابل نمایش با status هویتی آزموده شده؛ نبود همهٔ ادعاهای safety/result/feasibility به‌صورت negative assertion کامل نیست. |
+| D02 | **PASS** | MISMATCH نمایش‌پذیر است و پیام استفاده برای اجرای خدمت را منع می‌کند. |
+| D03 | **PARTIAL** | inconclusive output withheld است؛ malformed envelope به‌صورت مستقل آزموده نشده. |
+| D04 | **PASS** | inconclusive output withheld. |
+| D05 | **NOT TESTED** | STOP→WITHHOLD_STOP فقط اصلاح محلیِ commit‌نشده است؛ assertion regression مستقیم در suite/branch موجود نیست. |
+| D06 | **PARTIAL** | actor-kind mismatch آزموده شده؛ event kind ناشناخته assertion مستقیم ندارد. |
+| D07 | **PASS** | OUTPUT_PRESENTED با output ID متفاوت رد می‌شود. |
+| D08 | **NOT TESTED** | OUTPUT_PRESENTED برای outputی که display gate آن را block کرده مستقیماً آزموده نشده است. |
+| D09 | **PASS** | timestamp بدون timezone رد می‌شود. |
+| D10 | **PARTIAL** | evidence pointer خالی رد می‌شود؛ output ID خالی آزمون مستقل ندارد. |
+| D11 | **PASS** | CLIENT_ACCEPTANCE و EXECUTION_CONSENT دو event kind جدا هستند. |
+| E01 | **PASS** | required input ناقص، needs_more_information و no definitive advice می‌دهد. |
+| E02 | **PASS** | image-only intake به limited_review/uncertain می‌رود. |
+| E03 | **PARTIAL** | unknown field رد می‌شود؛ invalid type برای همهٔ input fields به‌صورت مستقیم پوشش داده نشده. |
+| E04 | **PASS** | level نامعتبر/boolean، source نامعتبر و confidence unknown کنترل شده‌اند. |
+| E05 | **PASS** | هدف ناقص، priority نامعتبر و dimension نامشخص clarification می‌خواهند. |
+| E06 | **PASS** | history_unknown، no_history_reported و history_incomplete از هم جدا هستند. |
+| E07 | **PASS** | history conflict و invalid entries کنترل شده‌اند. |
+| E08 | **PASS** | ناحیهٔ استاندارد مفقود، more information می‌خواهد. |
+| E09 | **PASS** | image-only و unknown source به limited review می‌روند. |
+| E10 | **PASS** | regional conflict، invalid record و invalid scope کنترل شده‌اند. |
+| E11 | **PASS** | patch_or_zone افزوده می‌شود بدون جایگزینی roots/mid-lengths/ends. |
+
+**Reconciled totals:** 59 criteria = **32 PASS / 17 PARTIAL / 10 NOT TESTED / 0 FAIL**. This replaces the earlier provisional 26/19/14 mapping. The correction follows direct inspection of all 11 test files, including 41 unittest methods in `tests/test_hair_domain_slice_7a.py`; the earlier static note that no dedicated lookup test file existed was true, but it understated the lookup/output/event coverage already present in that domain-slice file.
+
+**Important distinction:** the two 118-pass runs establish that the selected tests passed in the recorded local working tree. They do not upgrade PARTIAL or NOT TESTED criteria to PASS unless a direct assertion exists.
 
 **Current H1 disposition:** `PARTIAL — TEST SUITE PASSED; ACCEPTANCE NOT CLOSED`.
