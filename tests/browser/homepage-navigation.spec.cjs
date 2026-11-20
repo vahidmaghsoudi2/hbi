@@ -392,6 +392,70 @@ test("Product menu has one canonical list and routes all product work through on
   await expect(page.getByRole("heading", { name: "مدیریت محصولات", exact: true })).toBeVisible();
 });
 
+test("Product dossier edit saves and returns to the refreshed dossier before returning to the catalog", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-product-edit-e2e-token");
+    sessionStorage.setItem("hbi_operator_access_token", "homepage-product-edit-operator-token");
+  });
+  let product = {
+    product_id: "PRD-EDIT-E2E-1", product_name: "محصول قبل از ویرایش",
+    brand: "HBI Test", product_line: "SKIN", identity_status: "VERIFIED",
+    qa_verdict: "PENDING", status: "ACTIVE", variant: "daily", size_value: 50, size_unit: "ml",
+  };
+  let patchPayload = null;
+  await page.route("**/api/v1/**", async (route) => {
+    const request = route.request();
+    const url = new URL(request.url());
+    const path = url.pathname;
+    if (path.endsWith("/auth/pilot-operator-token") && request.method() === "POST") {
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ access_token: "fixture-operator-token", refresh_token: "fixture-refresh-token", token_type: "bearer" }) });
+    }
+    if (path.endsWith("/products/manage") && request.method() === "GET") {
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([product]) });
+    }
+    if (path.endsWith("/products/PRD-EDIT-E2E-1") && request.method() === "PATCH") {
+      patchPayload = request.postDataJSON();
+      product = { ...product, ...patchPayload };
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(product) });
+    }
+    if (path.endsWith("/evidence/knowledge/PRD-EDIT-E2E-1/completeness")) {
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ status: "partial", missing_domains: ["ingredients"], incomplete_domains: [], contraindications_unreviewed: false, pk_record_missing: false, domain_report: [] }) });
+    }
+    if (path.endsWith("/evidence/knowledge/PRD-EDIT-E2E-1")) {
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ product_knowledge_id: "PK-EDIT-1", product_id: product.product_id, ingredients: "INCI fixture", evidence_status: "PARTIAL", knowledge_confidence: 0.5 }) });
+    }
+    if (path.includes("/evidence/") && path.includes("product_id=PRD-EDIT-E2E-1")) {
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([{ evidence_id: "EV-EDIT-1", product_id: product.product_id, field: "ingredients", claim: "شاهد آزمایشی", qa_status: "PENDING", source_type: "LABEL", source_reference: "fixture-source" }]) });
+    }
+    if (path.endsWith("/reports/sales/period/today")) {
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ sale_count: 0, revenue_toman: 0, revenue_usd: 0 }) });
+    }
+    return route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "ورود به مدیریت محصولات" }).click();
+  await page.getByRole("button", { name: "بازکردن فهرست کالاها" }).click();
+  await expect(page.getByRole("heading", { name: "فهرست کالاها" })).toBeVisible();
+  await page.getByRole("button", { name: "بازکردن پرونده واحد" }).click();
+  await expect(page.getByRole("heading", { name: "پرونده واحد محصول" })).toBeVisible();
+  await expect(page.getByText("INCI fixture")).toBeVisible();
+  await expect(page.getByText("شاهد آزمایشی")).toBeVisible();
+  await expect(page.getByText(/حوزه‌های ناقص: ingredients/)).toBeVisible();
+
+  await page.getByRole("button", { name: "ویرایش مشخصات محصول" }).click();
+  await expect(page.getByRole("heading", { name: "ویرایش محصول" })).toBeVisible();
+  await page.getByLabel("نام محصول").fill("محصول پس از ویرایش");
+  await page.getByRole("button", { name: "تأیید و به‌روزرسانی" }).click();
+
+  await expect(page.getByRole("heading", { name: "پرونده واحد محصول" })).toBeVisible();
+  await expect(page.getByText("محصول پس از ویرایش", { exact: true })).toBeVisible();
+  expect(patchPayload).toMatchObject({ product_name: "محصول پس از ویرایش" });
+  await page.getByRole("button", { name: "بازگشت به فهرست کالاها" }).click();
+  await expect(page.getByRole("heading", { name: "فهرست کالاها" })).toBeVisible();
+  await expect(page.getByText("محصول پس از ویرایش", { exact: true })).toBeVisible();
+});
+
 test("Researched P4 starter pre-fills a SKIN draft without guessing market identity or creating a record", async ({ page }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-p4-starter-test-token");
