@@ -7,6 +7,7 @@ test("Product Intake category remains operator-only and is not sent as knowledge
 
   let createPayload = null;
   let createRequestCount = 0;
+  const manageableProducts = [];
 
   // Every API request is fulfilled by an isolated browser fixture. No live API,
   // database, Product Master, Evidence, or QA write is performed by this test.
@@ -51,9 +52,21 @@ test("Product Intake category remains operator-only and is not sent as knowledge
           status: "DRAFT",
         }),
       });
+      manageableProducts.push({
+        product_id: createPayload.product_id || "HBI-PROD-FIXTURE0001",
+        brand: createPayload.brand,
+        product_name: createPayload.product_name,
+        product_line: createPayload.product_line,
+        identity_status: "NEEDS_REVIEW",
+        qa_verdict: "PENDING",
+        status: "DRAFT",
+      });
     }
 
-    if (path.endsWith("/products/manage") || path.endsWith("/products/sellable") || path.endsWith("/evidence/")) {
+    if (path.endsWith("/products/manage")) {
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(manageableProducts) });
+    }
+    if (path.endsWith("/products/sellable") || path.endsWith("/evidence/")) {
       return route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
     }
 
@@ -84,7 +97,7 @@ test("Product Intake category remains operator-only and is not sent as knowledge
   await expect(page.getByText("بررسی تکراری: NEW", { exact: false })).toBeVisible();
 
   await page.getByRole("button", { name: "ثبت محصول به‌صورت Draft" }).click();
-  await expect(page.getByRole("status")).toContainText("ثبت اولیه انجام شد");
+  await expect(page.getByRole("heading", { name: "پرونده واحد محصول" })).toBeVisible();
 
   expect(createRequestCount).toBe(1);
   expect(createPayload).not.toBeNull();
