@@ -49,7 +49,8 @@ test("authenticated Anua Evidence draft is saved and read back without changing 
 
   const productCard = page.locator("article.pro-product-card").filter({ hasText: productName });
   await expect(productCard).toBeVisible();
-  await productCard.getByRole("button", { name: "ویرایش" }).click();
+  await productCard.getByRole("button", { name: "بازکردن پرونده واحد" }).click();
+  await page.getByRole("button", { name: "ویرایش مشخصات محصول" }).click();
 
   await expect(page.getByRole("heading", { name: "ویرایش محصول" })).toBeVisible();
   await expect(page.locator("#product-line-select")).toHaveValue("SKIN");
