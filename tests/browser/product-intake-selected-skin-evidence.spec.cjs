@@ -41,6 +41,18 @@ test("selected existing skin product receives source-bound box drafts without cr
       return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([selectedProduct]) });
     }
 
+    if (path.includes("/evidence/knowledge/") && path.endsWith("/completeness") && method === "GET") {
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+        status: "partial", missing_domains: ["ingredients"], incomplete_domains: [],
+        contraindications_unreviewed: false, pk_record_missing: false,
+        domain_report: [{ field: "ingredients", label: "ترکیبات", status: "missing", message: "منبع لازم است" }],
+      }) });
+    }
+    if (path.includes("/evidence/knowledge/") && method === "GET") {
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+        product_knowledge_id: "PK-FIXTURE", ingredients: "ثبت نشده", evidence_status: "PARTIAL", knowledge_confidence: 0.4,
+      }) });
+    }
     if (path.endsWith("/evidence/") && method === "GET") {
       return route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
     }
@@ -83,7 +95,9 @@ test("selected existing skin product receives source-bound box drafts without cr
   await page.getByRole("button", { name: "ورود به مدیریت محصولات" }).click();
   await page.getByRole("button", { name: "بازکردن فهرست کالاها" }).click();
   await expect(page.getByText("Clear & Defend 2% Salicylic Acid Face Wash")).toBeVisible();
-  await page.getByRole("button", { name: "ویرایش" }).click();
+  await page.getByRole("button", { name: "بازکردن پرونده واحد" }).click();
+  await expect(page.getByRole("heading", { name: "پرونده واحد محصول" })).toBeVisible();
+  await page.getByRole("button", { name: "ویرایش مشخصات محصول" }).click();
 
   await expect(page.getByRole("heading", { name: "ویرایش محصول" })).toBeVisible();
   await expect(page.locator("#product-line-select")).toHaveValue("SKIN");
@@ -173,6 +187,18 @@ test("Anua soothing claim maps to manufacturer claims, not ingredients", async (
     if (path.endsWith("/products/manage") && method === "GET") {
       return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([selectedProduct]) });
     }
+    if (path.includes("/evidence/knowledge/") && path.endsWith("/completeness") && method === "GET") {
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+        status: "partial", missing_domains: ["ingredients"], incomplete_domains: [],
+        contraindications_unreviewed: false, pk_record_missing: false,
+        domain_report: [{ field: "ingredients", label: "ترکیبات", status: "missing", message: "منبع لازم است" }],
+      }) });
+    }
+    if (path.includes("/evidence/knowledge/") && method === "GET") {
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+        product_knowledge_id: "PK-FIXTURE", ingredients: "ثبت نشده", evidence_status: "PARTIAL", knowledge_confidence: 0.4,
+      }) });
+    }
     if (path.endsWith("/evidence/") && method === "GET") {
       return route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
     }
@@ -210,7 +236,9 @@ test("Anua soothing claim maps to manufacturer claims, not ingredients", async (
   await page.getByRole("button", { name: "ورود به مدیریت محصولات" }).click();
   await page.getByRole("button", { name: "بازکردن فهرست کالاها" }).click();
   await expect(page.getByText("Azelaic Acid 10% + Hyaluron Redness Soothing Serum")).toBeVisible();
-  await page.getByRole("button", { name: "ویرایش" }).click();
+  await page.getByRole("button", { name: "بازکردن پرونده واحد" }).click();
+  await expect(page.getByRole("heading", { name: "پرونده واحد محصول" })).toBeVisible();
+  await page.getByRole("button", { name: "ویرایش مشخصات محصول" }).click();
   await expect(page.getByRole("heading", { name: "ویرایش محصول" })).toBeVisible();
   await expect(page.locator("#product-line-select")).toHaveValue("SKIN");
   await expect(page.locator("#skin-template")).toHaveValue("HYDRATING_MOISTURIZER");

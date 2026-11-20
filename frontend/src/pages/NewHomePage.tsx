@@ -27,6 +27,7 @@ import {
 } from "../api/client";
 import ProductIntakePanel from "./ProductIntakePanel";
 import ProductReviewPanel from "./ProductReviewPanel";
+import ProductDossierPanel from "./ProductDossierPanel";
 import SkinProductEncyclopedia from "./SkinProductEncyclopedia";
 import SkinProblemBank from "./SkinProblemBank";
 import type {
@@ -59,7 +60,7 @@ const SKIN_OPTIONS = ["خشک", "چرب", "مختلط", "معمولی", "حسا�
 const CONSULTATION_LINES = [{ id: "SKIN", label: "پوست" }] as const;
 const INITIAL_RECOMMENDATION_LIMIT = 5;
 
-type Panel = "home" | "consult" | "previous" | "profile" | "catalog" | "review" | "intake" | "results" | "sales" | "about" | "skin-encyclopedia" | "skin-problems";
+type Panel = "home" | "consult" | "previous" | "profile" | "catalog" | "dossier" | "review" | "intake" | "results" | "sales" | "about" | "skin-encyclopedia" | "skin-problems";
 type MainSection = "home" | "customers" | "consultation" | "sales" | "products" | "inventory" | "purchases" | "reports" | "encyclopedia" | "skin-knowledge";
 type PageView = "main" | "section" | "content";
 
@@ -102,6 +103,7 @@ export default function NewHomePage() {
   const [lastSale, setLastSale] = useState<SaleDTO | null>(null);
   const [totalSales, setTotalSales] = useState<number | null>(null);
   const [editProduct, setEditProduct] = useState<ProductDTO | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductDTO | null>(null);
   const [profileSaving, setProfileSaving] = useState(false);
   const [customerSearch, setCustomerSearch] = useState("");
   const [customerSearchResults, setCustomerSearchResults] = useState<CustomerSearchResult[]>([]);
@@ -184,10 +186,13 @@ export default function NewHomePage() {
       const operatorToken = await ensureProductSession();
       if (!operatorToken) throw new Error("نشست اپراتور برای مشاهده محصولات در دسترس نیست.");
       const data = await listManageableProducts(operatorToken);
-      setProducts(Array.isArray(data) ? data : []);
+      const items = Array.isArray(data) ? data : [];
+      setProducts(items);
+      return items;
     } catch (e) {
       setCatalogError(e instanceof Error ? e.message : String(e));
       setProducts([]);
+      return [];
     } finally {
       setCatalogLoading(false);
     }
@@ -892,9 +897,7 @@ export default function NewHomePage() {
               </> : null}
               {mainSection === "sales" ? <article className="pro-product-card"><h2>ثبت فروش مستقیم</h2><p className="pro-muted">ثبت فروش بدون الزام به مشاورهٔ قبلی؛ نمایش آخرین فروش پس از ثبت.</p><button type="button" className="pro-btn-primary" onClick={() => go("sales")}>بازکردن ثبت فروش</button></article> : null}
               {mainSection === "products" ? <>
-                <article className="pro-product-card"><h2>فهرست کالاها</h2><p className="pro-muted">فهرست مدیریتی واحد برای مشاهدهٔ کالاها، ورود به پرونده و انتخاب محصول برای بررسی QA.</p><button type="button" className="pro-btn-primary" onClick={() => go("catalog")}>بازکردن فهرست کالاها</button></article>
-                <article className="pro-product-card"><h2>ورود و ویرایش محصول</h2><p className="pro-muted">ثبت مشخصات محصول؛ جدا از موجودی فیزیکی.</p><button type="button" className="pro-btn-primary" onClick={() => { setEditProduct(null); go("intake"); }}>ورود و ویرایش محصول</button></article>
-                <article className="pro-product-card"><h2>بررسی و تأیید QA</h2><p className="pro-muted">ابتدا محصول را از فهرست مدیریتی انتخاب کنید؛ پروندهٔ QA برای محصول مشخص باز می‌شود.</p><button type="button" className="pro-btn-primary" onClick={() => go("catalog")}>انتخاب محصول برای QA</button></article>
+                <article className="pro-product-card"><h2>فهرست کالاها</h2><p className="pro-muted">نقطهٔ ورود واحد مدیریت محصولات؛ ایجاد محصول جدید یا بازکردن پروندهٔ موجود. ویژگی‌ها، شواهد و کنترل کیفیت در همان پرونده دنبال می‌شوند.</p><button type="button" className="pro-btn-primary" onClick={() => go("catalog")}>بازکردن فهرست کالاها</button></article>
               </> : null}
               {mainSection === "inventory" ? <>
                 <article className="pro-product-card"><h2>موجودی کالا</h2><p className="pro-muted">موجودی قابل مشاهده و ارزش‌گذاری‌شده بر پایه آخرین قیمت خرید ثبت‌شده.</p><Link to="/inventory?section=inventory" className="pro-btn-primary">بازکردن گزارش موجودی</Link></article>
@@ -1268,7 +1271,7 @@ export default function NewHomePage() {
         {pageView === "content" && active === "catalog" && (
           <section className="pro-panel">
             <div className="pro-panel-head">
-              <h1>محصولات</h1>
+              <h1>فهرست کالاها</h1>
               <button type="button" className="pro-btn-secondary" onClick={() => void loadProducts()}>
                 نوسازی
               </button>
@@ -1281,43 +1284,33 @@ export default function NewHomePage() {
                 <p>فهرست خالی است؛ این موضوع به‌تنهایی به معنی خطای بارگذاری نیست.</p>
               </div>
             ) : null}
+            <div className="pro-actions">
+              <button type="button" className="pro-btn-primary" onClick={() => { setEditProduct(null); setSelectedProduct(null); setReturnToCatalog(true); go("intake"); }}>ثبت محصول جدید</button>
+            </div>
             <div className="pro-product-grid">
               {products.map((p) => (
                 <article key={p.product_id} className="pro-product-card">
                   <h3>{p.product_name}</h3>
                   <p className="pro-muted">{p.brand}</p>
-                  <div className="pro-tags">
-                    <span className="pro-tag">{p.identity_status}</span>
-                  </div>
+                  <div className="pro-tags"><span className="pro-tag">هویت: {p.identity_status}</span><span className="pro-tag">پرونده محصول</span></div>
                   <code className="pro-code">{p.product_id}</code>
                   <div className="pro-actions" style={{ marginTop: "0.6rem" }}>
-                    <button
-                      type="button"
-                      className="pro-btn-secondary"
-                      onClick={() => {
-                        setEditProduct(p);
-                        setReturnToCatalog(true);
-                        go("intake");
-                      }}
-                    >
-                      ویرایش
-                    </button>
-                    <button
-                      type="button"
-                      className="pro-btn-primary"
-                      onClick={() => {
-                        sessionStorage.setItem("hbi_review_product_id", p.product_id);
-                        setReturnToCatalog(true);
-                        go("review");
-                      }}
-                    >
-                      بررسی پرونده
-                    </button>
+                    <button type="button" className="pro-btn-primary" onClick={() => { setSelectedProduct(p); go("dossier"); }}>بازکردن پرونده واحد</button>
                   </div>
                 </article>
               ))}
             </div>
           </section>
+        )}
+
+        {pageView === "content" && active === "dossier" && selectedProduct && (
+          <ProductDossierPanel
+            product={selectedProduct}
+            onEnsureSession={ensureProductSession}
+            onBack={() => { setActive("catalog"); setPageView("content"); }}
+            onEdit={() => { setEditProduct(selectedProduct); setReturnToCatalog(true); go("intake"); }}
+            onReview={() => { sessionStorage.setItem("hbi_review_product_id", selectedProduct.product_id); setReturnToCatalog(true); go("review"); }}
+          />
         )}
 
         {pageView === "content" && active === "review" && (
@@ -1334,10 +1327,20 @@ export default function NewHomePage() {
             token={token}
             onEnsureSession={ensureProductSession}
             editProduct={editProduct}
-            onCancelEdit={() => { setEditProduct(null); setReturnToCatalog(false); go("catalog"); }}
-            onRegistered={() => {
+            onCancelEdit={() => { setEditProduct(null); setReturnToCatalog(false); if (selectedProduct) { setActive("dossier"); setPageView("content"); } else go("catalog"); }}
+            onRegistered={async (productId) => {
               setEditProduct(null);
-              void loadProducts();
+              const refreshed = await loadProducts();
+              const updatedProduct = refreshed.find((item) => item.product_id === productId);
+              if (updatedProduct) {
+                setSelectedProduct(updatedProduct);
+                setActive("dossier");
+                setPageView("content");
+                setMainSection("products");
+              } else {
+                setActive("catalog");
+                setPageView("content");
+              }
             }}
           />
         )}
