@@ -362,7 +362,9 @@ test("Dashboard quick actions stay limited to sale, customers, and consultation"
 test("Product menu has one canonical list and routes all product work through one dossier", async ({ page }) => {
   await page.addInitScript(() => {
     sessionStorage.setItem("hbi_admin_access_token", "homepage-product-catalog-test-token");
+    sessionStorage.setItem("hbi_operator_access_token", "homepage-product-operator-test-token");
   });
+  await page.route("**/products/manage", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([{ product_id: "PRD-DOSSIER-1", product_name: "محصول آزمایشی", brand: "HBI Test", identity_status: "VERIFIED" }]) }));
   await page.goto("/");
   await page.getByRole("button", { name: "ورود به مدیریت محصولات" }).click();
   await expect(page.getByRole("button", { name: "بازکردن فهرست کالاها" })).toBeVisible();
@@ -372,6 +374,14 @@ test("Product menu has one canonical list and routes all product work through on
   await page.getByRole("button", { name: "بازکردن فهرست کالاها" }).click();
   await expect(page.getByRole("heading", { name: "فهرست کالاها", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "ثبت محصول جدید" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "بازکردن پرونده واحد" })).toBeVisible();
+  await page.getByRole("button", { name: "بازکردن پرونده واحد" }).click();
+  await expect(page.getByRole("heading", { name: "پرونده واحد محصول", exact: true })).toBeVisible();
+  await expect(page.getByText("PRD-DOSSIER-1", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "ویرایش مشخصات محصول" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "بازکردن بررسی کیفیت" })).toBeVisible();
+  await page.getByRole("button", { name: "بازگشت به فهرست کالاها" }).click();
+  await expect(page.getByRole("heading", { name: "فهرست کالاها", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "بازگشت به بخش" }).click();
   await expect(page.getByRole("heading", { name: "مدیریت محصولات", exact: true })).toBeVisible();
 });
