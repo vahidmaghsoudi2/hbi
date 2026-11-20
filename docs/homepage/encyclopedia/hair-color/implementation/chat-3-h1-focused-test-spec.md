@@ -1,8 +1,8 @@
 # H1 Focused Test Specification — Chat 3/6
 
-**Status:** Draft test plan only; tests not executed.  
-**Gate:** H0 PO authorization pending.  
-**Data:** Synthetic fixtures only.  
+**Status:** Focused H1 test suite executed twice; H1 acceptance remains PARTIAL pending criterion-level closeout.  
+**Gate:** PO authorized isolated H1 validation on 2026-11-20, limited to synthetic/test data and the recorded baseline.  
+**Data:** Synthetic fixtures only; no real customer data.  
 **Purpose:** Convert static audit findings into executable, bounded acceptance tests without changing runtime behavior.
 
 ## Test batch A — Catalog provider and snapshot manifest
@@ -101,3 +101,40 @@ When H0 is authorized, append:
 - whether each H1 acceptance criterion is PASS / PARTIAL / FAIL.
 
 **No status is pre-filled as PASS.** Static existence of tests is not execution evidence.
+
+
+---
+
+## Post-H0 execution record — 2026-11-20
+
+**Authorization boundary:** Product Owner authorized isolated H1 validation using synthetic data only. This does not authorize H2, real customer data, customer-facing advice, service execution, push, merge, release, or production deployment.
+
+**Repository baseline:** `3478f65e5ec2f28c0b4f5592c1abf62be31272b7` (HEAD remained unchanged during both runs).
+
+**Environment:**
+- Python `3.14.6`
+- pytest `9.1.1`
+
+**Exact command:**
+```powershell
+python -m pytest -q tests/test_hair_catalog_provider.py tests/test_hair_catalog_provider_fail_closed.py tests/test_hair_catalog_numbering.py tests/test_hair_catalog_families.py tests/test_hair_color_owner_rules.py tests/test_hair_color_consultation_inputs.py tests/test_hair_color_current_base.py tests/test_hair_color_target_goal.py tests/test_hair_color_service_history.py tests/test_hair_color_regional_state.py tests/test_hair_domain_slice_7a.py
+```
+
+**Results:**
+
+| Run | Result | Failed | Skipped | xfailed | Duration | Exit |
+|---|---:|---:|---:|---:|---:|---:|
+| 1 | 118 passed | 0 | 0 | 0 | 8.56 s | 0 |
+| 2 | 118 passed | 0 | 0 | 0 | 6.01 s | 0 |
+
+Repeatability and worktree-integrity checks passed.
+
+**Two local, uncommitted corrections present during the runs:**
+1. `app/domain/hair_catalog_identity_lookup.py`: STOP outcomes are presented as `WITHHOLD_STOP`, with `display_allowed=False` and reason `CATALOG_LOOKUP_STOPPED`.
+2. `tests/test_hair_color_regional_state.py`: the patch-zone fixture uses the canonical `patch_or_zone` value instead of `patch`.
+
+The final worktree contained only these two modified paths. They were not pushed or committed; the GitHub branch does not yet contain these runtime/test changes. The two successful runs therefore establish local regression evidence for this exact working tree, not CI evidence for a committed GitHub head.
+
+**Acceptance interpretation:** The 118 passing tests are execution results for the 11 listed files; they do not prove every H1 acceptance criterion. A separate preliminary review mapped 59 criteria as 26 PASS, 19 PARTIAL, 14 NOT TESTED, and 0 FAIL. That mapping remains provisional and requires criterion-by-criterion evidence reconciliation before H1 can be declared accepted.
+
+**Current H1 disposition:** `PARTIAL — TEST SUITE PASSED; ACCEPTANCE NOT CLOSED`.
