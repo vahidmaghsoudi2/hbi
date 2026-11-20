@@ -186,10 +186,13 @@ export default function NewHomePage() {
       const operatorToken = await ensureProductSession();
       if (!operatorToken) throw new Error("نشست اپراتور برای مشاهده محصولات در دسترس نیست.");
       const data = await listManageableProducts(operatorToken);
-      setProducts(Array.isArray(data) ? data : []);
+      const items = Array.isArray(data) ? data : [];
+      setProducts(items);
+      return items;
     } catch (e) {
       setCatalogError(e instanceof Error ? e.message : String(e));
       setProducts([]);
+      return [];
     } finally {
       setCatalogLoading(false);
     }
@@ -1325,9 +1328,19 @@ export default function NewHomePage() {
             onEnsureSession={ensureProductSession}
             editProduct={editProduct}
             onCancelEdit={() => { setEditProduct(null); setReturnToCatalog(false); if (selectedProduct) { setActive("dossier"); setPageView("content"); } else go("catalog"); }}
-            onRegistered={() => {
+            onRegistered={async (productId) => {
               setEditProduct(null);
-              void loadProducts();
+              const refreshed = await loadProducts();
+              const updatedProduct = refreshed.find((item) => item.product_id === productId);
+              if (updatedProduct) {
+                setSelectedProduct(updatedProduct);
+                setActive("dossier");
+                setPageView("content");
+                setMainSection("products");
+              } else {
+                setActive("catalog");
+                setPageView("content");
+              }
             }}
           />
         )}
