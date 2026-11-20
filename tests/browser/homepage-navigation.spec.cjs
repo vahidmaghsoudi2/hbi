@@ -408,7 +408,8 @@ test("Researched P4 starter pre-fills a SKIN draft without guessing market ident
 
   await page.goto("/");
   await page.getByRole("button", { name: "ورود به مدیریت محصولات" }).click();
-  await page.getByRole("button", { name: "ورود و ویرایش محصول" }).click();
+  await page.getByRole("button", { name: "بازکردن فهرست کالاها" }).click();
+  await page.getByRole("button", { name: "ثبت محصول جدید" }).click();
   await page.getByRole("button", { name: "بارگذاری پیش‌نویس پژوهشی P4 · SKIN1004" }).click();
 
   const field = (label) => page.locator("label.pro-label").filter({ hasText: label }).first().locator("..").locator("input");
