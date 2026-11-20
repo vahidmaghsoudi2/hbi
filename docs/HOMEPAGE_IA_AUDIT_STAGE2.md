@@ -6,6 +6,16 @@
 
 Legend: **✓** belongs in the proposed location; **X** misplaced or duplicated; **?** requires product decision/evidence before moving.
 
+> **Historical snapshot / superseded target:** This audit records the earlier homepage structure and decisions at the time of its inspection. Its placement verdicts below are not the current Product Owner target for product management. The current target is documented in [Issue #406](https://github.com/vahidmaghsoudi2/hbi/issues/406), [homepage target](./homepage/README.md), and [product-management structure](./homepage/product-management/README.md). In particular, the old separate Product QA menu and the split between product list/intake/characteristics are superseded as target navigation.
+
+## Current PO-confirmed product-management target (Stage 3)
+
+- Preserve the nine observed main-menu cards until separately authorized UI implementation.
+- Within **مدیریت محصولات**, **فهرست کالاها** is the entry point. Create, intake, complete and edit actions resolve to one dossier per product; characteristics and evidence are stored with that product.
+- Do not expose a standalone QA menu. Preserve identity/version, duplicate, Evidence/readiness, completeness/conflict/UNKNOWN and applicable skin-safety controls within preparation before the final PO decision.
+- PO approval directly sets ACTIVE; no separate post-PO activation or repeated acceptance gate.
+- Preserve skin knowledge and the six non-skin knowledge domains. Do not delete or relocate their existing access paths without a separate decision.
+
 ## 1. Existing route/page inventory
 
 | Route | Current page | Access guard | Navigation relationship |
