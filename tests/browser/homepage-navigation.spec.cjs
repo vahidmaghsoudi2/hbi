@@ -383,7 +383,7 @@ test("Product menu has one canonical list and routes all product work through on
   await expect(page.getByText("PRD-DOSSIER-1", { exact: true })).toBeVisible();
   await expect(page.getByText("INCI آزمایشی")).toBeVisible();
   await expect(page.getByText("ترکیبات آزمایشی")).toBeVisible();
-  await expect(page.getByText(/حوزه‌های ناقص: ترکیبات/)).toBeVisible();
+  await expect(page.getByText(/حوزه‌های ناقص: ingredients/)).toBeVisible();
   await expect(page.getByRole("button", { name: "ویرایش مشخصات محصول" })).toBeVisible();
   await expect(page.getByRole("button", { name: "بازکردن بررسی کیفیت و شواهد" })).toBeVisible();
   await page.getByRole("button", { name: "بازگشت به فهرست کالاها" }).click();
