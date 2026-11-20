@@ -36,6 +36,15 @@ test("Product Intake category remains operator-only and is not sent as knowledge
     if (path.endsWith("/products/") && method === "POST") {
       createRequestCount += 1;
       createPayload = request.postDataJSON();
+      manageableProducts.push({
+        product_id: createPayload.product_id || "HBI-PROD-FIXTURE0001",
+        brand: createPayload.brand,
+        product_name: createPayload.product_name,
+        product_line: createPayload.product_line,
+        identity_status: "NEEDS_REVIEW",
+        qa_verdict: "PENDING",
+        status: "DRAFT",
+      });
       return route.fulfill({
         status: 201,
         contentType: "application/json",
@@ -51,15 +60,6 @@ test("Product Intake category remains operator-only and is not sent as knowledge
           qa_verdict: "PENDING",
           status: "DRAFT",
         }),
-      });
-      manageableProducts.push({
-        product_id: createPayload.product_id || "HBI-PROD-FIXTURE0001",
-        brand: createPayload.brand,
-        product_name: createPayload.product_name,
-        product_line: createPayload.product_line,
-        identity_status: "NEEDS_REVIEW",
-        qa_verdict: "PENDING",
-        status: "DRAFT",
       });
     }
 
