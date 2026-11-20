@@ -142,3 +142,23 @@ The statements above describing H0 as pending and tests as not executed are the 
 - No runtime/test changes were pushed or committed; no merge, H2 work, real-customer data, customer use, service execution, release, or deployment occurred.
 
 **Updated disposition:** H0 is authorized for this limited validation scope. H1 test execution is complete for the 11-file focused suite, but H1 acceptance remains **PARTIAL / NOT CLOSED** until the 59-criterion matrix is reconciled against exact assertions and the untested/partial criteria are dispositioned. The successful test run is not specialist approval, product chemistry validation, or proof of a real recommendation engine.
+
+
+## Activity 45 — criterion-level coverage correction — 2026-11-20
+
+A correction is required to the earlier static-audit interpretation: no file named `test_hair_catalog_identity_lookup.py` exists, but the 41-test `tests/test_hair_domain_slice_7a.py` does directly exercise substantial lookup, traceability, output, invalidation, presentation, and event behavior. Therefore, absence of a dedicated test filename must not be reported as absence of lookup coverage.
+
+After reviewing the exact assertions in all 11 focused H1 test files and mapping them to A01–A15, B01–B10, C01–C12, D01–D11, and E01–E11, the criterion-level source-coverage disposition is:
+
+- **PASS: 32**
+- **PARTIAL: 17**
+- **NOT TESTED: 10**
+- **FAIL: 0**
+
+This replaces the earlier preliminary 26 / 19 / 14 mapping. The exact criterion-by-criterion evidence and gaps are recorded in `chat-3-h1-focused-test-spec.md`.
+
+Material remaining gaps include malformed/non-object manifest cases and metadata validation (A09–A15); invalid expected/observed object types and incomplete-lineage conflict behavior (B02, B08); output/event type and idempotency edge cases (C02–C07, C12); STOP withholding and blocked-presentation event assertions (D05, D08); and broader invalid-type coverage for intake (E03).
+
+The 118-pass result remains valid only for the executed 11-file local suite. It does not convert PARTIAL or NOT TESTED criteria into PASS. The STOP presentation correction was local and uncommitted and has no direct regression assertion in the current GitHub test suite.
+
+**Updated H1 disposition:** `PARTIAL — TEST SUITE PASSED; ACCEPTANCE NOT CLOSED`. H2 remains blocked until the 17 partial and 10 untested criteria are dispositioned and H1 is explicitly accepted.
