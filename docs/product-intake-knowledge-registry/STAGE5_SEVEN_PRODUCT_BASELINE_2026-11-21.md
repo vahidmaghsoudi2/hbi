@@ -356,3 +356,22 @@ The GitHub repository also contains `data/seed_products.json`, `data/seed_eviden
 - The repository contains a comprehensive draft manifest for all seven IDs and a regression test that asserts exact canonical scope, 24 assertion count, per-product counts, and draft-only boundary including P7 review conflict.
 - This confirms the existence and integrity checks of the GitHub source package; it does **not** prove test execution in this pass, nor live operational record state.
 - Source assertions and research dossiers are reusable for Stage 6. No re-research of already recorded assertions is authorized by this snapshot; Stage 6 should focus only on gaps, conflicts, market/formula identity verification, and upgrading evidence where needed.
+
+
+## Operational-state snapshot sourced from existing GitHub read-only records
+
+**Source date:** 2026-11-16 (GitHub Issue #283 comment #6924295875, PO handoff); cross-checked against the older detailed snapshot report in Issue #283 comment #6902085054. This is an existing operator-supplied read-only snapshot, not a fresh query performed by this session. The exact query timestamp, snapshot file/hash, and row-level exports are not present in those comments; freshness is therefore NOT VERIFIED.
+
+| Operational entity | Reported snapshot | Boundary |
+|---|---|---|
+| Product | 7 rows, one per canonical P1–P7 | PO confirmed product identities; no row-level ID/state export attached in the referenced comment |
+| ProductKnowledge | 7 rows | Reported evidence_status=UNKNOWN, knowledge_confidence=0.0 in detailed source snapshot |
+| Evidence | 25 rows | Detailed snapshot: 19 PENDING, 6 NEEDS_REVIEW; all 25 evidence_status=UNKNOWN, strength UNVERIFIED, conflict_status NONE. Later PO handoff summary says all 25 are PENDING and notes 2 Anua conflict rows. These summaries conflict; current exact row state is NOT VERIFIED without the read-only exporter output. |
+| Inventory | 12 units per product / 84 total | PO accepted planning quantity and use of system quantity for consultation; not a fresh database read. Do not ask for stock re-confirmation or reclassification as a V1 blocker. |
+| Product lifecycle / QA | All 7 reportedly DRAFT / NEEDS_REVIEW / PENDING | Source summary only; not fresh row-level readback. |
+
+**Scope decisions that supersede older blockers:** the seven physical identities are PO-confirmed; inventory planning is 12 each / 84; Anua is settled and must not be re-cleaned/reclassified absent a newly observed concrete defect. V1 evidence scope is official manufacturer disclosure and package text; no independent clinical research detour. COSRX scope is only The 6 Peptide Skin Booster Serum. These decisions are recorded in Issue #406 comment #6955477364.
+
+**Manifest-count reconciliation:** the baseline pinned here is the master manifest with 24 assertions. Later open PR #594 proposes the manufacturer/package-only manifest (25 assertions in the 2026-11-18 checkpoint; 27 in an earlier PR state). It is not merged and is not treated as current operational data. The 25 reported Evidence rows are not presumed to map one-to-one to any manifest version.
+
+**Stage 5 disposition:** repository baseline plus existing operational-state snapshot summary is documented and reusable: DONE / READY FOR PO REVIEW. Exact current freshness and row-level reconciliation remain clearly marked NOT VERIFIED, and are not falsely promoted. Stage 6 remains NOT STARTED pending Stage 5 PO acceptance.
