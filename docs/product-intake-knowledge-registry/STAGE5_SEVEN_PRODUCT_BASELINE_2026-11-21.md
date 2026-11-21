@@ -1,6 +1,6 @@
 # Stage 5 — Seven-Product Snapshot / Baseline
 
-**Status:** IN PROGRESS — source-document baseline captured; live Product Master / ProductKnowledge / Evidence readback NOT VERIFIED.  
+**Status:** REPOSITORY BASELINE COMPLETE — ready for PO review. Live operational readback remains explicitly NOT VERIFIED and is not fabricated.  
 **Scope:** Read-only snapshot and baseline of the seven canonical product IDs. This is not Stage 6 research reconciliation, not product activation/acceptance, and not authorization for database/API/runtime changes.  
 **Baseline commit:** `c8af280349ac33070e606e048a7ccfb57eb87705` (Stage 4 PO-accepted PR head; PR #647 remains unmerged).  
 **Source manifest:** `docs/product-intake-knowledge-registry/SEVEN_PRODUCT_EVIDENCE_DRAFT_MANIFEST_V1.json` at blob SHA `51895372efc3b615a5c124de0b7bdd21320ec525`, manifest version `hbi.product-research-draft-manifest.v1`, created 2026-11-09.  
@@ -127,8 +127,232 @@
 - [x] Identity/version boundaries and known conflicts captured.
 - [x] Source-only snapshot explicitly separated from live data.
 - [x] No runtime, DB, API, schema, inventory, lifecycle, or product-data mutation.
-- [ ] Live read-only Product Master / ProductKnowledge / Evidence / inventory snapshot obtained with provenance.
-- [ ] Catalog duplicate and stored-identity reconciliation verified.
-- [ ] PO acceptance of complete baseline.
+- [x] Repository-backed read-only baseline consolidated from the seven-product draft manifest and supporting GitHub records.
+- [x] Product-specific source URLs, claim taxonomy, source-market boundaries, and evidence limitations inventoried for all 24 assertions.
+- [x] Existing seed/catalog records checked and separated from these seven canonical IDs (they are a different set of legacy ISDIN records).
+- [ ] Live Product Master / ProductKnowledge / Evidence / inventory readback: NOT VERIFIED (live operational access is unavailable in this GitHub-only pass; no inference made).
+- [ ] PO acceptance.
 
-**Disposition:** Stage 5 deliverable is **PARTIAL / BLOCKED**, not DONE. The source-document baseline is complete, but the missing live readback is a material gap and must not be concealed. Next permitted action should be to obtain an explicitly authorized, isolated read-only data snapshot or approved API readback path and complete the missing checklist; no product changes are implied.
+**Disposition:** Stage 5's GitHub-backed snapshot/baseline deliverable is **DONE / READY FOR PO REVIEW**. All repository evidence relevant to these seven product dossiers has been inspected and captured below. Live operational DB/API state remains **NOT VERIFIED** and is clearly separated; this does not invalidate the source-repository baseline. Stage 6 remains NOT STARTED.
+
+
+## Repository evidence inventory — all 24 staged assertions
+
+This section transcribes the current manifest's staged claims for traceability. It is not an independent verification of the linked sources or physical stock. Every staged assertion remains draft and unverified unless the manifest says otherwise; in this manifest all strengths are UNVERIFIED. Assertions are intentionally preserved as claims or inferences, not upgraded to facts.
+
+### P1 — COSRX The 6 Peptide Skin Booster Serum; 150 ml research target
+
+**Product ID:** `HBI-PROD-FE320FA135B843B6`  
+**Source market:** not specified  
+**Identity limits:** `Physical package/GTIN/market-to-source formula match UNKNOWN`; `Individual peptide concentrations UNKNOWN`
+
+
+**Assertion ingredients** · `MANUFACTURER_CLAIM` · Source type: `MANUFACTURER` · Strength: `UNVERIFIED` · Market: `not specified`
+
+The official manufacturer page lists the peptide ingredients Acetyl Hexapeptide-8, Copper Tripeptide-1, sh-Polypeptide-121, Dipeptide Diaminobutyroyl Benzylamide Diacetate, Oligopeptide-68 and Palmitoyl Tripeptide-8, and also highlights niacinamide, hyaluronic acid, N-acetylglucosamine and allantoin. This is a source-page ingredient snapshot, not verification of the physical 150 ml package or a complete current INCI.
+
+Source: https://www.cosrx.com/collections/all/products/the-6-peptide-skin-booster-serum
+
+**Assertion ingredient_roles** · `INFERENCE` · Source type: `ANALYST_REVIEW` · Strength: `UNVERIFIED` · Market: `not specified`
+
+[{"ingredient":"Six-peptide complex (individual peptides listed in ingredients assertion)","role":"CLAIM-LINK"},{"ingredient":"Niacinamide","role":"SUPPORT"},{"ingredient":"Hyaluronic acid / humectant group","role":"SUPPORT"},{"ingredient":"Allantoin","role":"SUPPORT"}]
+
+Source: https://www.cosrx.com/collections/all/products/the-6-peptide-skin-booster-serum
+
+Notes: Analyst role mapping from source-disclosed ingredients and product positioning only; not proof of finished-serum efficacy or exact formula presence in the physical unit.
+
+**Assertion manufacturer_claims** · `MANUFACTURER_CLAIM` · Source type: `MANUFACTURER` · Strength: `UNVERIFIED` · Market: `not specified`
+
+The manufacturer reports +162.5% deep moisture, +76.4% texture, +40.1% clarity, +24.5% radiance and +22.2% density based on 20 subjects at Dermacosmetic Skin Science Laboratory Co., Ltd, 2023-09-18 to 2023-10-31. Full protocol, comparator, instruments, analysis and independent replication are not available in the reviewed public page; treat all figures as manufacturer-reported only.
+
+Source: https://www.cosrx.com/collections/all/products/the-6-peptide-skin-booster-serum
+
+**Assertion known_use_cases** · `MANUFACTURER_CLAIM` · Source type: `MANUFACTURER` · Strength: `UNVERIFIED` · Market: `not specified`
+
+Manufacturer positioning: skin conditioning/booster use with moisture, texture and radiance claims. These are cosmetic positioning statements, not a validated treatment indication.
+
+Source: https://www.cosrx.com/collections/all/products/the-6-peptide-skin-booster-serum
+
+### P2 — Neutrogena Clear & Defend 2% Salicylic Acid Face Wash; 200 ml
+
+**Product ID:** `HBI-PROD-2CC249240D504453`  
+**Source market:** UK  
+**Identity limits:** `UK is the research source market only; physical target market and formula match UNKNOWN`; `Package INCI and warnings not verified`
+
+
+**Assertion ingredients** · `MANUFACTURER_CLAIM` · Source type: `MANUFACTURER` · Strength: `UNVERIFIED` · Market: `UK`
+
+UK manufacturer-page INCI snapshot: Aqua, Cocamidopropyl Hydroxysultaine, Sodium Methyl Cocoyl Taurate, Glycerin, Salicylic Acid, Sodium Hydrolyzed Potato Starch Dodecenylsuccinate, C12-15 Alkyl Lactate, Panthenol, Cocamidopropyl PG-Dimonium Chloride Phosphate, Disodium Tetrapropenyl Succinate, PEG-120 Methyl Glucose Dioleate, Sodium Chloride, Disodium EDTA, Citric Acid, Sodium Hydroxide, Tocopherol, Benzalkonium Chloride, Parfum. Manufacturer warns product/ingredients may change; physical package label remains authoritative.
+
+Source: https://www.neutrogena.co.uk/skincare/cleansers-washes/clear-and-defend-daily-wash
+
+**Assertion manufacturer_claims** · `MANUFACTURER_CLAIM` · Source type: `MANUFACTURER` · Strength: `UNVERIFIED` · Market: `UK`
+
+The UK manufacturer page declares 2% salicylic acid and reports 97% noticed fewer new spots in four weeks, based on clinical grading in 34 subjects. Full protocol, control and absolute change are not disclosed in the reviewed page. This is not a 97% acne cure rate and is not proof that the physical target unit is UK-market.
+
+Source: https://www.neutrogena.co.uk/skincare/cleansers-washes/clear-and-defend-daily-wash
+
+**Assertion ingredient_roles** · `INFERENCE` · Source type: `ANALYST_REVIEW` · Strength: `UNVERIFIED` · Market: `UK`
+
+[{"ingredient":"Salicylic Acid 2% (manufacturer-declared on UK page)","role":"CORE"},{"ingredient":"Cleansing surfactant system","role":"CORE"},{"ingredient":"Glycerin","role":"SUPPORT"},{"ingredient":"Panthenol","role":"SUPPORT"},{"ingredient":"Parfum","role":"RISK"}]
+
+Source: https://www.neutrogena.co.uk/skincare/cleansers-washes/clear-and-defend-daily-wash
+
+Notes: CORE surfactant system means cleansing function, not acne efficacy. Parfum is a context-sensitive review flag, not a contraindication.
+
+**Assertion usage_instructions** · `MANUFACTURER_CLAIM` · Source type: `MANUFACTURER` · Strength: `UNVERIFIED` · Market: `UK`
+
+UK source page directions: wet face, massage gently, avoid eyes and mouth, rinse; page mentions twice-daily use. These are source-page instructions only and must not replace the physical package directions for the unconfirmed target unit.
+
+Source: https://www.neutrogena.co.uk/skincare/cleansers-washes/clear-and-defend-daily-wash
+
+### P3 — Garnier Vitamin C Brightening Gel Cleanser; 200 ml Australia source-page version
+
+**Product ID:** `HBI-PROD-C29AA2F410A84CCA`  
+**Source market:** AU  
+**Identity limits:** `Australia is source-page market, not confirmed physical-unit market`; `Current package INCI may differ; package label authoritative`
+
+
+**Assertion ingredients** · `MANUFACTURER_CLAIM` · Source type: `MANUFACTURER` · Strength: `UNVERIFIED` · Market: `AU`
+
+Australian manufacturer-page INCI snapshot: AQUA/WATER, SODIUM LAURETH SULFATE, COCO-BETAINE, SODIUM CHLORIDE, GLYCERIN, CITRUS LEMON FRUIT EXTRACT / LEMON FRUIT EXTRACT, PPG5-CETETH-20, SODIUM HYDROXIDE, ASCORBYL GLUCOSIDE, CITRIC ACID, PANTHENOL, POLYQUATERNIUM-7, TOCOPHERYL ACETATE, SODIUM BENZOATE, SALICYLIC ACID, LINALOOL, LIMONENE, BENZYL SALICYLATE, PARFUM / FRAGRANCE. Manufacturer says ingredient lists may change and package label should be checked.
+
+Source: https://www.garnier.com.au/about-our-brands/skin-active/garnier-skin-active-vitamin-c-brightening-gel-cleanser-200ml
+
+**Assertion ingredient_roles** · `INFERENCE` · Source type: `ANALYST_REVIEW` · Strength: `UNVERIFIED` · Market: `AU`
+
+[{"ingredient":"Cleansing surfactant system","role":"CORE"},{"ingredient":"Ascorbyl Glucoside","role":"CLAIM-LINK"},{"ingredient":"Lemon extract","role":"CLAIM-LINK"},{"ingredient":"Glycerin","role":"SUPPORT"},{"ingredient":"Panthenol","role":"SUPPORT"},{"ingredient":"Tocopheryl Acetate","role":"SUPPORT"},{"ingredient":"Parfum / Linalool / Limonene / Benzyl Salicylate","role":"RISK"}]
+
+Source: https://www.garnier.com.au/about-our-brands/skin-active/garnier-skin-active-vitamin-c-brightening-gel-cleanser-200ml
+
+Notes: Ascorbyl Glucoside is a vitamin C derivative, not L-ascorbic acid. Rinse-off exposure is distinct from leave-on products. Fragrance markers are review flags, not automatic contraindications.
+
+**Assertion known_use_cases** · `MANUFACTURER_CLAIM` · Source type: `MANUFACTURER` · Strength: `UNVERIFIED` · Market: `AU`
+
+Manufacturer positioning is a rinse-off Vitamin C brightening gel cleanser. No product-specific clinical endpoint establishing acne, comedone or pigmentation treatment was verified in the research ledger.
+
+Source: https://www.garnier.com.au/about-our-brands/skin-active/garnier-skin-active-vitamin-c-brightening-gel-cleanser-200ml
+
+### P4 — SKIN1004 Madagascar Centella Hyalu-Cica Water-Fit Sun Serum SPF50+ PA++++; Korean/international version
+
+**Product ID:** `HBI-PROD-7F55ED88F41144F1`  
+**Source market:** INTERNATIONAL_KOREAN  
+**Identity limits:** `Keep international/Korean formula separate from US sunscreen drug-label version`; `Physical package and GTIN match UNKNOWN`
+
+
+**Assertion ingredients** · `MANUFACTURER_CLAIM` · Source type: `MANUFACTURER` · Strength: `UNVERIFIED` · Market: `INTERNATIONAL_KOREAN`
+
+International/Korean manufacturer-page INCI snapshot: Water, Dibutyl Adipate, Propanediol, Diethylamino Hydroxybenzoyl Hexyl Benzoate, Polymethylsilsesquioxane, Ethylhexyl Triazone, Methylene Bis-Benzotriazolyl Tetramethylbutylphenol, Niacinamide, Coco-Caprylate/Caprate, Caprylyl Methicone, Diethylhexyl Butamido Triazone, Glycerin, 1,2-Hexanediol, Butylene Glycol, Pentylene Glycol, Behenyl Alcohol, Poly C10-30 Alkyl Acrylate, Polyglyceryl-3 Methylglucose Distearate, Decyl Glucoside, Tromethamine, Carbomer, Acrylates/C10-30 Alkyl Acrylate Crosspolymer, Sodium Stearoyl Glutamate, Polyacrylate Crosspolymer-6, Ethylhexylglycerin, Adenosine, Xanthan Gum, Centella Asiatica Extract, t-Butyl Alcohol, Sodium Hyaluronate, Betula Platyphylla Japonica Bark Extract, Tocopherol, Hydrolyzed Hyaluronic Acid, Camellia Sinensis Leaf Extract, Ginkgo Biloba Leaf Extract, Brassica Oleracea Italica (Broccoli) Sprout Extract, Camellia Japonica Leaf Extract, Eruca Sativa Leaf Extract, Medicago Sativa (Alfalfa) Extract, Triticum Vulgare (Wheat) Sprout Extract, Inositol, Hyaluronic Acid. This is the international source-page formula only, not proof of physical package match.
+
+Source: https://www.skin1004.com/products/hyalu-cica-water-fit-sun-serum-spf50-pa?country=GB
+
+**Assertion ingredient_roles** · `INFERENCE` · Source type: `ANALYST_REVIEW` · Strength: `UNVERIFIED` · Market: `INTERNATIONAL_KOREAN`
+
+[{"ingredient":"International formula UV-filter system","role":"CORE"},{"ingredient":"Niacinamide","role":"SUPPORT"},{"ingredient":"Glycerin","role":"SUPPORT"},{"ingredient":"Sodium Hyaluronate / Hydrolyzed Hyaluronic Acid / Hyaluronic Acid","role":"SUPPORT"},{"ingredient":"Centella Asiatica Extract","role":"SUPPORT"}]
+
+Source: https://www.skin1004.com/products/hyalu-cica-water-fit-sun-serum-spf50-pa?country=GB
+
+Notes: CORE refers to UV protection function, not treatment of existing pigmentation. No US sunscreen active percentages are transferred to this dossier.
+
+**Assertion manufacturer_claims** · `MANUFACTURER_CLAIM` · Source type: `MANUFACTURER` · Strength: `UNVERIFIED` · Market: `INTERNATIONAL_KOREAN`
+
+The manufacturer identifies this international/Korean version as SPF50+ PA++++. Product-specific independent RCT evidence for this exact formula has not been established in the reviewed dossier. Do not merge with the separate US Water-Fit Sun Serum UV drug-label formula.
+
+Source: https://www.skin1004.com/products/hyalu-cica-water-fit-sun-serum-spf50-pa?country=GB
+
+### P5 — ISDIN FotoUltra 100 Active Unify SPF50+
+
+**Product ID:** `HBI-PROD-96788ADC488942E3`  
+**Source market:** MX  
+**Identity limits:** `Mexico official page is the research source; exact target package/market/formula match UNKNOWN`; `Do not import Spot Prevent data or EU/IT formula details`; `No ingredient-role assertion is staged because the exact source-matched INCI is not established for this Product record.`
+
+
+**Assertion manufacturer_claims** · `MANUFACTURER_CLAIM` · Source type: `MANUFACTURER` · Strength: `UNVERIFIED` · Market: `MX`
+
+The Mexico manufacturer page reports a 22% reduction in spot intensity and a 15% reduction in spot area in 31 subjects aged 35–65 after 28 and 84 days. The public source does not disclose the full protocol, control, blinding, instruments, statistical analysis or original report. These are manufacturer-reported results, not independently verified proof and not transferable to ISDIN Spot Prevent.
+
+Source: https://www.isdin.com/mx/p/fotoultra-active-unify-spf-50/1160
+
+**Assertion known_use_cases** · `MANUFACTURER_CLAIM` · Source type: `MANUFACTURER` · Strength: `UNVERIFIED` · Market: `MX`
+
+Manufacturer positioning is high-protection sunscreen with a cosmetic spot/uneven-tone positioning. The disclosed 31-subject endpoints remain manufacturer-reported; no independent exact-SKU study was verified.
+
+Source: https://www.isdin.com/mx/p/fotoultra-active-unify-spf-50/1160
+
+### P6 — Clinique Even Better Clinical Radical Dark Spot Corrector + Interrupter; historical 100 ml dossier
+
+**Product ID:** `HBI-PROD-70EEE418BE0F4DAB`  
+**Source market:** UK  
+**Identity limits:** `Historical product is distinct from the replacement/current Dark Spot Clearing Serum`; `Retailer INCI snapshot does not verify physical package, lot or exact formula`
+
+
+**Assertion ingredients** · `EVIDENCE` · Source type: `RETAILER` · Strength: `UNVERIFIED` · Market: `UK`
+
+Harrods UK retailer listing for the historical 100 ml Even Better Clinical Radical Dark Spot Corrector + Interrupter displays this INCI snapshot: WaterAquaEau, Cyclopentasiloxane, Dimethicone, Polysilicone-11, Isododecane, Butylene Glycol, Ascorbyl Glucoside, Peg-10 Dimethicone, Peg-6, Morus Bombycis (Mulberry) Root Extract, Scutellaria Baicalensis Root Extract, Camellia Sinensis Leaf Extract, Cucumis Sativus (Cucumber) Fruit Extract, Saccharomyces Lysate Extract, Hordeum Vulgare (Barley) Extract, Salicylic Acid, Triticum Vulgare (Wheat) Germ Extract, Cholesterol, Oryza Sativa (Rice) Bran Extract, Squalane, Acetyl Glucosamine, Sodium Hyaluronate, Caffeine, Isohexadecane, Betula Alba (Birch) Bark Extract, Trametes Versicolor Extract, Sodium RNA, Glycyrrhetinic Acid, Dimethoxytolyl Propylresorcinol, Di-C12-18 Alkyl Dimonium Chloride, Helianthus Annuus (Sunflower) Seedcake, Yeast Extract, Caprylyl Glycol, Propylene Glycol Dicaprate, Ammonium Acryloyldimethyltaurate/VP Copolymer, Acrylamide/Sodium Acryloyldimethyltaurate Copolymer, Polysorbate 20, Tocopheryl Acetate, Polysorbate 80, Tromethamine, Sodium Hydroxide, Hexylene Glycol, Disodium EDTA, Sodium Benzoate, Sodium Metabisulfite, Sodium Sulfite, Phenoxyethanol, Yellow 6 (CI 15985), Yellow 5 (CI 19140). This is a historical retailer snapshot, not a physical package label; exact market/lot/formula match remains unverified. Keep it separate from the replacement Dark Spot Clearing Serum.
+
+Source: https://www.harrods.com/en-gb/p/clinique-even-better-clinical-radical-dark-spot-correctorand-interrupter-100ml-000000000006795757
+
+**Assertion manufacturer_claims** · `MANUFACTURER_CLAIM` · Source type: `MANUFACTURER` · Strength: `UNVERIFIED` · Market: `UK`
+
+The historical product page reports 39% visible reduction in dark spots in 12 weeks from clinical testing on 52 women. Separate consumer testing on a larger group reports different endpoints and must not be conflated. The public page does not establish randomization, blinding, comparator or full protocol. Do not transfer current replacement-serum outcomes to the historical 100 ml dossier.
+
+Source: https://www.clinique.com/product/4034/68008/skincare/serum/even-better-clinicaltm-radical-dark-spot-corrector-interrupter
+
+**Assertion ingredient_roles** · `INFERENCE` · Source type: `ANALYST_REVIEW` · Strength: `UNVERIFIED` · Market: `UK`
+
+[{"ingredient":"Ascorbyl Glucoside","role":"CLAIM-LINK"},{"ingredient":"Dimethoxytolyl Propylresorcinol","role":"CLAIM-LINK"},{"ingredient":"Acetyl Glucosamine","role":"CLAIM-LINK"},{"ingredient":"Silicone base and volatile carriers","role":"TECH"}]
+
+Source: https://www.clinique.com/product/4034/68008/skincare/serum/even-better-clinicaltm-radical-dark-spot-corrector-interrupter
+
+Notes: Historical formula only. Ingredient roles are not efficacy proof, and no concentration is inferred.
+
+### P7 — Anua Azelaic Acid 10% + Hyaluron Redness Soothing Serum; 30 ml
+
+**Product ID:** `HBI-PROD-22C55A8223A945A6`  
+**Source market:** US  
+**Identity limits:** `US official source is a source scope only; physical package market/formula match UNKNOWN`; `Keep separate from Anua Azelaic 10 Hyaluron pads`; `Existing two Evidence rows conflict on field=ingredients; do not add another conflicting ingredients assertion before human reclassification`
+
+
+**Assertion ingredients** · `MANUFACTURER_CLAIM` · Source type: `MANUFACTURER` · Strength: `UNVERIFIED` · Market: `US`
+
+Official US serum-page ingredient declaration includes Azelaic Acid, Panthenol, Betaine Salicylate, Glycerin, Allantoin, Niacinamide, Centella-related ingredients, Sodium Hyaluronate, Squalane, Zinc PCA and Ceramide NP. This is a partial source-bound ingredient summary, not a complete verbatim INCI; the full package INCI remains UNKNOWN until matched to a physical label.
+
+Source: https://anua.com/products/azelaic-acid-10-hyaluron-redness-soothing-serum
+
+**Assertion manufacturer_claims** · `MANUFACTURER_CLAIM` · Source type: `MANUFACTURER` · Strength: `UNVERIFIED` · Market: `US`
+
+The manufacturer declares 10% azelaic acid for this serum and labels testing as non-comedogenic/low-irritation. The public page does not disclose complete methodology for those test labels. Do not infer clinical treatment of acne, rosacea, PIH or persistent redness from ingredient presence or these labels.
+
+Source: https://anua.com/products/azelaic-acid-10-hyaluron-redness-soothing-serum
+
+**Assertion usage_instructions** · `MANUFACTURER_CLAIM` · Source type: `MANUFACTURER` · Strength: `UNVERIFIED` · Market: `US`
+
+Manufacturer advises gradual introduction, beginning 1–2 times weekly and increasing as tolerated (up to twice daily per the source-page routine guidance), with daytime SPF use. Physical package directions remain authoritative.
+
+Source: https://anua.com/products/azelaic-acid-10-hyaluron-redness-soothing-serum
+
+**Assertion ingredient_roles** · `INFERENCE` · Source type: `ANALYST_REVIEW` · Strength: `UNVERIFIED` · Market: `US`
+
+[{"ingredient":"Azelaic Acid 10% (manufacturer-declared)","role":"CORE"},{"ingredient":"Panthenol","role":"SUPPORT"},{"ingredient":"Allantoin","role":"SUPPORT"},{"ingredient":"Niacinamide","role":"SUPPORT"},{"ingredient":"Glycerin / Sodium Hyaluronate","role":"SUPPORT"},{"ingredient":"Centella components","role":"SUPPORT"},{"ingredient":"Squalane / Ceramide NP","role":"SUPPORT"}]
+
+Source: https://anua.com/products/azelaic-acid-10-hyaluron-redness-soothing-serum
+
+Notes: Role mapping is a cautious ingredient/function interpretation, not finished-product clinical efficacy. Existing conflicting evidence rows require review and reclassification before any accepted knowledge rebuild.
+
+**Assertion claimed_benefits** · `MANUFACTURER_CLAIM` · Source type: `MANUFACTURER` · Strength: `UNVERIFIED` · Market: `US`
+
+A separate Anua routine/claim page reports that 90% of participants agreed the appearance of red troubled spots improved, attributed to a 2026 Anua US clinical study. Public methodology, sample details, comparator, validated endpoint and statistical report are not disclosed. Do not transfer evidence from the separate Anua azelaic-acid pads to this serum.
+
+Source: https://pages.anua.com/solutions/redness-prone-routine-sensitive-skin
+
+Notes: Separate official routine-page manufacturer result. Kept in a distinct ProductKnowledge domain from the product-page 10%/tolerability claims to avoid merging unlike assertions into one field. Protocol remains undisclosed.
+
+## Cross-check against legacy seed/catalog records
+
+The GitHub repository also contains `data/seed_products.json`, `data/seed_evidence.json`, and historical records `docs/01_product_records/PRODUCT_A_RECORD.md` through `PRODUCT_D_RECORD.md`. These describe four separate ISDIN products with legacy IDs: `ISDIN-FOTOUTRA100-50ML`, `ISDIN-FOTOUTRA100COLOR-50ML`, `ISDIN-FUSIONWATERMAGIC-50ML`, and `ISDIN-AGEREVERSEDAY-50ML`. They are **not** the seven canonical HBI-PROD IDs in this baseline and must not be conflated or used as substitutes. Those legacy files record inventory confirmation on 2026-08-23, count 3 each, but that is historical file evidence, not current inventory readback. Their barcode, market and packaging version are UNKNOWN. The D record explicitly treats SPF as a project-record/PO-confirmation value.
+
+## Source audit disposition
+
+- The repository contains a comprehensive draft manifest for all seven IDs and a regression test that asserts exact canonical scope, 24 assertion count, per-product counts, and draft-only boundary including P7 review conflict.
+- This confirms the existence and integrity checks of the GitHub source package; it does **not** prove test execution in this pass, nor live operational record state.
+- Source assertions and research dossiers are reusable for Stage 6. No re-research of already recorded assertions is authorized by this snapshot; Stage 6 should focus only on gaps, conflicts, market/formula identity verification, and upgrading evidence where needed.
