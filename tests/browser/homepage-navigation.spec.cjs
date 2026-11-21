@@ -220,7 +220,7 @@ test("Dashboard report shortcuts preserve their own report destinations", async 
   }));
   await page.goto("/");
   await page.getByRole("button", { name: "بازکردن داشبورد" }).click();
-  await expect(page.getByRole("heading", { name: "داشبورد HBI", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "صفحه اول (داشبورد) - نمای کلی", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "گزارش فروش" })).toHaveAttribute("href", "/accounting?section=sales");
   await expect(page.getByRole("link", { name: "گزارش موجودی" })).toHaveAttribute("href", "/inventory?section=inventory");
   await expect(page.getByRole("link", { name: "کمبود موجودی", exact: true })).toHaveAttribute("href", "/inventory?section=low-stock");
@@ -246,7 +246,7 @@ test("Dashboard New customer action clears the previously active customer", asyn
   await expect(page.getByText("CUS-OLD-1", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "ابتدا مشتری را ذخیره کنید" })).toBeDisabled();
   await page.getByRole("button", { name: "بازگشت به داشبورد" }).click();
-  await expect(page.getByRole("heading", { name: "داشبورد HBI", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "صفحه اول (داشبورد) - نمای کلی", exact: true })).toBeVisible();
 });
 
 test("A blank customer profile cannot claim to consult an existing customer", async ({ page }) => {
@@ -340,7 +340,7 @@ test("Dashboard quick actions stay limited to sale, customers, and consultation"
   });
   await page.goto("/");
   await page.getByRole("button", { name: "بازکردن داشبورد" }).click();
-  await expect(page.getByRole("heading", { name: "داشبورد HBI", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "صفحه اول (داشبورد) - نمای کلی", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "اقدام سریع" })).toBeVisible();
   await expect(page.getByRole("button", { name: "ثبت فروش" })).toBeVisible();
   await expect(page.getByRole("button", { name: "جست‌وجوی مشتری" })).toBeVisible();
@@ -348,11 +348,11 @@ test("Dashboard quick actions stay limited to sale, customers, and consultation"
   await page.getByRole("button", { name: "ثبت فروش" }).click();
   await expect(page.getByRole("heading", { name: "ثبت فروش", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "بازگشت به داشبورد" }).click();
-  await expect(page.getByRole("heading", { name: "داشبورد HBI", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "صفحه اول (داشبورد) - نمای کلی", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "شروع مشاوره" }).click();
   await expect(page.getByRole("heading", { name: "فرم مشاوره سریع" })).toBeVisible();
   await page.getByRole("button", { name: "بازگشت به داشبورد" }).click();
-  await expect(page.getByRole("heading", { name: "داشبورد HBI", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "صفحه اول (داشبورد) - نمای کلی", exact: true })).toBeVisible();
   // Product intake / purchase / QA are not dashboard quick actions.
   await expect(page.getByRole("button", { name: "ورود و ویرایش محصول" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "بازکردن بررسی QA" })).toHaveCount(0);
