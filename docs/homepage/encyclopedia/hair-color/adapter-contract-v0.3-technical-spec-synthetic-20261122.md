@@ -245,3 +245,12 @@ This is an executable intake/triage consultation, not a specialist color consult
 - Real product/shade/chemical knowledge, specialist rules, formula or processing instructions, feasibility or result claims.
 - Specialist validation, product-specific evidence registry, real client data, case store, authoritative ledger, consent/workflow ownership, orchestrator publication atomicity/freshness, pilot, release, merge.
 - CI outcomes for the latest commits remain pending at the time of this section's recording.
+
+## 15. Final verification record
+
+- Earlier CI heads `5a1f8a5` and `59b2783` failed in the Hair Color test group. Root causes were identified from Actions logs: stale candidate assertion, blocked-option rejection order, S12/S14 fixtures mapped to an invalid suggestion state, and DATA_GAP fixtures missing explicit intake fields. Fixes have been committed after those runs.
+- Latest branch head at record time: `9ed4c2c321af14b64fc661adaa91ed3da695dff0`.
+- HBI CI / Pilot Browser Proof / Auto Tasks for this head are queued; no passing result is asserted.
+- Local test execution was unavailable because the environment could not resolve GitHub's host. Verification must therefore come from Actions on the latest head.
+
+**Acceptance decision:** The fail-closed intake/triage runtime is implemented, but the requested independent specialist color-consultation capability is **NOT DELIVERED**. It remains blocked by unvalidated specialist rules, evidence provenance/applicability, product identity/version coverage, and a publication/orchestrator boundary. Do not merge, release, or pilot this PR as a completed consultation product.
