@@ -61,7 +61,11 @@
               "evidence_ref": {
                 "$ref": "#/$defs/nonEmptyString"
               }
-            }
+            },
+            "required": [
+              "evidence_ref"
+            ],
+            "additionalProperties": true
           }
         },
         "policy_context": {
@@ -211,23 +215,57 @@
           "maxItems": 3,
           "items": {
             "type": "object",
-            "required": ["candidate_key", "rank", "summary", "claims"],
+            "required": [
+              "candidate_key",
+              "rank",
+              "summary",
+              "claims"
+            ],
             "properties": {
-              "candidate_key": {"$ref": "#/$defs/nonEmptyString"},
-              "rank": {"type": "integer", "minimum": 1, "maximum": 3},
-              "summary": {"$ref": "#/$defs/nonEmptyString"},
+              "candidate_key": {
+                "$ref": "#/$defs/nonEmptyString"
+              },
+              "rank": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 3
+              },
+              "summary": {
+                "$ref": "#/$defs/nonEmptyString"
+              },
               "claims": {
                 "type": "array",
                 "minItems": 1,
                 "items": {
                   "type": "object",
-                  "required": ["claim_ref", "claim_text", "rule_ref", "evidence_refs", "support_status"],
+                  "required": [
+                    "claim_ref",
+                    "claim_text",
+                    "rule_ref",
+                    "evidence_refs",
+                    "support_status"
+                  ],
                   "properties": {
-                    "claim_ref": {"$ref": "#/$defs/nonEmptyString"},
-                    "claim_text": {"$ref": "#/$defs/nonEmptyString"},
-                    "rule_ref": {"$ref": "#/$defs/nonEmptyString"},
-                    "evidence_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/nonEmptyString"}},
-                    "support_status": {"const": "MOCK_SUPPORTED"}
+                    "claim_ref": {
+                      "$ref": "#/$defs/nonEmptyString"
+                    },
+                    "claim_text": {
+                      "$ref": "#/$defs/nonEmptyString"
+                    },
+                    "rule_ref": {
+                      "$ref": "#/$defs/nonEmptyString"
+                    },
+                    "evidence_refs": {
+                      "type": "array",
+                      "minItems": 1,
+                      "uniqueItems": true,
+                      "items": {
+                        "$ref": "#/$defs/nonEmptyString"
+                      }
+                    },
+                    "support_status": {
+                      "const": "MOCK_SUPPORTED"
+                    }
                   },
                   "additionalProperties": false
                 }
@@ -238,7 +276,17 @@
           }
         },
         "missing_information": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/nonEmptyString"
+              },
+              {
+                "type": "object"
+              }
+            ]
+          }
         },
         "evidence_refs": {
           "type": "array",
@@ -248,7 +296,10 @@
           "uniqueItems": true
         },
         "limitations": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
         },
         "next_step": {
           "type": "object",
