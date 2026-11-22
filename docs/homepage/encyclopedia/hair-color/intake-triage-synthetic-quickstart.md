@@ -35,3 +35,15 @@ The test data must remain synthetic. Passing these tests proves only the intake/
 ## Activation gate for domain knowledge
 
 Any knowledge bundle must remain inactive unless it has exact source/product identity, version/market and applicability metadata, claim-level evidence links, a recorded specialist approval, and publication-gate checks. This document does not authorize or define operational hair-color chemistry.
+
+## Guarded case workflow (synthetic)
+
+The separate `workflow_state_machine` module models the ten case states and rejects illegal shortcuts. Transition calls require a traceable event ID and matching case/target versions. The transition to `APPROVED_FOR_EXECUTION` requires both client acceptance and explicit execution consent. A safety-stopped case cannot resume; the restart helper creates a distinct case reference with incremented versions and returns it to incomplete intake.
+
+Run the transition invariants:
+
+```bash
+pytest -q tests/test_hair_color_workflow_state_machine.py
+```
+
+This state model is not wired to a database, UI, or real execution service. The approval state is an abstract contract state only; no actual hair-color service is enabled.
