@@ -539,3 +539,24 @@ Field coverage is not evidence acceptance. All stored knowledge remains explicit
 **Stage 5 status:** **READY FOR PO REVIEW — NOT ACCEPTED.** The requested read-only snapshot has been received, structurally checked, and reconciled against the 7-product / 24-assertion baseline. The remaining items above are explicit PO review findings, not reasons to invent or silently repair data. **Stage 6 remains NOT STARTED.**
 
 **Safety boundary:** this work was read-only. No DB write, migration, seed, import, product/evidence/knowledge/inventory mutation, customer-data access, runtime deployment, or merge was performed.
+
+---
+
+## Final PO handoff summary
+
+### Completed and reliable
+- The read-only operational snapshot was obtained from the identified local database using the PR #523 exporter and reconciled against the seven-product baseline.
+- Snapshot structure and integrity checks passed: seven canonical Product IDs, seven ProductKnowledge rows, 25 Evidence rows, seven Inventory rows, no foreign-key violations, and SQLite integrity `ok`.
+- The recorded inventory quantity is 12 per product / 84 total and is accepted as the PO-approved planning quantity.
+- The snapshot is preserved as a point-in-time comparison baseline. No database, product, knowledge, evidence, inventory, or customer data was changed.
+
+### Existing UNKNOWN / CONFLICT classifications
+- Physical package / GTIN / lot / exact formula / market identity remains UNKNOWN wherever the existing source record does not establish it.
+- ProductKnowledge and Evidence verification classifications remain as captured in the snapshot; these labels are retained as source-state metadata, not reopened as new product-approval requests.
+- The existing Anua ingredients-row mapping / manifest conflict-flag discrepancy remains recorded for traceability. It is not treated here as a new product defect or a reason to repeat product review.
+- The recorded Product Master lifecycle and QA fields remain a snapshot of stored system state, not a reversal of PO's prior product reviews or approvals.
+
+### Stage 6 baseline suitability
+**YES.** The snapshot is sufficient as a stable, read-only point-in-time baseline for future comparison and Stage 6 planning. This statement does not start Stage 6 or authorize changes. Stage 6 remains NOT STARTED and is subject to PO's explicit acceptance and direction.
+
+**Disposition: Stage 5 is ready for final PO handoff. This document does not declare PO acceptance or mark Stage 5 as PO-accepted.**
