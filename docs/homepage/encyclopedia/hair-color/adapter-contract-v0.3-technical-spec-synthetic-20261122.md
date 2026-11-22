@@ -160,3 +160,34 @@ This is a service-boundary specification only; persistence/locking protocol must
 ## 9. Next step without rework
 
 The next implementation task is a bounded synthetic contract revision on the existing adapter branch: operation validation + typed `NO_VALID_OPTION` + state matrix and focused tests. The current adapter and fixtures must first be checked for existing behavior; only failing gaps are changed. Existing test coverage is preserved and not duplicated.
+
+
+## 11. Source-level implementation comparison (Chat 3; no code changes)
+
+This section records direct inspection of the existing master implementation added in PR #547, rather than repeating the earlier static audit. The inspected source is `app/hair_color/adapter.py`, its schema `tests/schemas/hair-color-adapter-0.2-draft.schema.json`, and tests `tests/test_hair_color_adapter.py`. No runtime files were modified.
+
+### Verified existing behavior (retain; do not reimplement)
+- Request envelope checks required fields, contract version, request/case identifiers, supported operation, positive integer case/target versions, mapping/array context types, and recursive prohibition of chemical-execution fields.
+- Engine exceptions fail closed as `EngineExecutionFailure`; a response marked `ENGINE_FAIL` cannot be treated as a successful consultation.
+- Response identity and case/target versions must match request; state/reason values are allow-listed; duplicate reasons/evidence refs and >3 options are rejected.
+- Evidence refs must exist in the request evidence context; candidates are suppressed for blocked engine/consultation states and blocking reason codes.
+- Decision/workflow fields and prohibited chemical instruction fields are recursively rejected; engine input/output are copied to avoid mutable aliasing.
+- Synthetic adapter tests already cover S01–S15 boundary behaviors, including specialist-review suppression, stale version rejection, fresh reevaluation, and engine exception handling. Preserve these tests and avoid duplicates.
+
+### Concrete remaining contract gaps (verified against source)
+| Gap | Existing source behavior | Required next bounded change | Authority / blocker |
+|---|---|---|---|
+| Q01–Q02 operation-specific question | `ANSWER_QUESTION` is an allowed operation but `question` is not required or validated. Existing S11 test supplies it but does not test absent/blank question. | Add operation-conditioned validation and focused negative tests. | Synthetic contract implementation scope; no product rule needed. |
+| Q03 question on non-question operation | Request envelope/schema permits additional properties; `question` is not rejected on other operations. | Enforce the agreed strict operation-field rule. | Contract decision recorded in Chat 1; confirm implementation gate. |
+| C01 candidate identity | Candidate option objects are opaque; no candidate-key uniqueness or structure check. | Define minimal synthetic candidate envelope; validate unique local keys. | Keep candidate fields non-claiming and synthetic. |
+| C02–C04 claim/evidence binding | Evidence is validated only at response-level; each candidate has no claim/evidence applicability structure. | Add candidate-local evidence links and structural checks only; do not claim scientific applicability. | Evidence-scope validator remains a separate owner and must not be simulated. |
+| State/reason compatibility | Existing validator checks a broad blocking predicate, not a full compatibility matrix. | Add table-driven structural matrix tests; preserve suppression behavior. | Must match the already approved five response states and four engine states. |
+| S08 typed no-option reason | S08 currently returns an empty option set with specialist-review status in test fixture; there is no typed `NO_VALID_OPTION` reason code. | Add synthetic typed reason and test empty-option invariants; do not conflate with out-of-scope or knowledge-gap. | Contract reason-code change; use prior PO decision record. |
+| Publication freshness/atomicity | Adapter validates version equality at response time only; it has no authoritative store, ledger, dependency service, CAS, or publish transaction. | Keep publication freshness/concurrency in Orchestrator/service-boundary design; Adapter must not pretend to implement it. | Separate service architecture/implementation authorization required. |
+| Schema strictness | Adapter schema uses `additionalProperties: true` and `oneOf` envelope shapes; candidate and context fields are opaque. | Tighten only the request operation conditionals and minimal candidate structure in a separately authorized schema change. | Existing schema/tests must be inspected and preserved. |
+
+### Non-duplicative execution sequence for the remaining chats
+1. **Chat 4:** Implement only the already-decided synthetic request/candidate contract gaps (Q01–Q03, candidate-key structure, S08 typed reason, compatibility matrix) if implementation authorization is explicit; otherwise prepare a minimal patch and test diff without committing runtime changes.
+2. **Chat 5:** Focused tests and validation evidence for changed paths; review service boundary/publish freshness as design-only where runtime authority is absent; final closeout with explicit remaining blockers and no release/pilot claim.
+
+**Scope warning:** Source inspection does not establish specialist validation, real product behavior, chemistry, or publication correctness. Existing synthetic tests are contract boundary checks only.
