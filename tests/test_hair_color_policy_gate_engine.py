@@ -95,3 +95,14 @@ def test_public_consultation_entrypoint_is_callable_and_fails_closed():
     assert result["options"] == []
     assert result["reason_codes"] == ["KNOWLEDGE_GAP"]
     assert result["engine_state"] == "STOP_OR_REFER_WITH_REASON"
+
+def test_missing_and_conflicting_fields_are_reported_together():
+    result = HairColorAdapter(PolicyGateEngine()).evaluate(
+        request(case_context={
+            "missing_fields": ["synthetic missing"],
+            "conflicting_fields": ["synthetic conflict"],
+        })
+    )
+    assert set(result["reason_codes"]) == {"DATA_GAP", "CONFLICTING_DATA"}
+    assert len(result["missing_information"]) == 2
+    assert result["options"] == []
