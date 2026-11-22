@@ -92,7 +92,9 @@ def test_stopped_case_restart_is_fresh_case_without_carryover():
     assert restarted.case_ref == "CASE-SYN-NEW"
     assert restarted.case_version == 2 and restarted.target_version == 2
     assert restarted.suggestions == ()
-    assert len(restarted.events) == 1\n    assert restarted.events[0].event_type == "FRESH_RESTART_FROM_STOP"\n    assert restarted.events[0].details == ("CASE-SYN-LEDGER",)
+    assert len(restarted.events) == 1
+    assert restarted.events[0].event_type == "FRESH_RESTART_FROM_STOP"
+    assert restarted.events[0].details == ("CASE-SYN-LEDGER",)
     assert restarted.stopped is False
 
 
