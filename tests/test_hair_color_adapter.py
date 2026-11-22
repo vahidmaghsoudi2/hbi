@@ -33,6 +33,22 @@ def request(**overrides):
     return value
 
 
+def candidate(rank=1, key=None, evidence_ref="EVIDENCE-MOCK-A"):
+    key = key or f"CAND-SYN-{rank}"
+    return {
+        "candidate_key": key,
+        "rank": rank,
+        "summary": f"Synthetic candidate placeholder {rank}",
+        "claims": [{
+            "claim_ref": f"CLAIM-SYN-{rank}",
+            "claim_text": "Synthetic placeholder claim; no domain assertion.",
+            "rule_ref": f"RULE-SYN-{rank}",
+            "evidence_refs": [evidence_ref],
+            "support_status": "MOCK_SUPPORTED",
+        }],
+    }
+
+
 def response(**overrides):
     value = {
         "request_id": "REQ-SYN-001",
@@ -43,7 +59,7 @@ def response(**overrides):
         "consultation_status": "SYSTEM_REASONED_SUGGESTION",
         "reason_codes": [],
         "summary": "Synthetic response only; not a hair-colour recommendation.",
-        "options": [{}],
+        "options": [candidate()],
         "missing_information": [],
         "evidence_refs": ["EVIDENCE-MOCK-A"],
         "limitations": ["Synthetic fixture; no scientific evidence."],
@@ -185,13 +201,13 @@ def test_s08_no_valid_alternative_is_returned_as_an_empty_option_set():
 
 
 def test_s09_adapter_accepts_two_candidate_objects_and_keeps_their_count():
-    options = [{}, {}]
+    options = [candidate(1), candidate(2)]
     result = run(request(), response(options=options))
     assert len(result["options"]) == 2
 
 
 def test_s10_adapter_preserves_exactly_one_candidate_without_fabricating_more():
-    only_option = [{}]
+    only_option = [candidate()]
     result = run(request(), response(options=only_option))
     assert result["options"] == only_option
 
@@ -291,11 +307,11 @@ def test_unknown_states_reason_codes_and_more_than_three_options_are_rejected():
     with pytest.raises(AdapterContractError, match="unknown or malformed"):
         run(request(), response(reason_codes=["MADE_UP_REASON"]))
     with pytest.raises(AdapterContractError, match="more than three"):
-        run(request(), response(options=[{}, {}, {}, {}]))
+        run(request(), response(options=[candidate(1), candidate(2), candidate(3), candidate(4)]))
 
 
 def test_chemical_execution_fields_are_rejected_recursively():
-    unsafe = response(options=[{"candidate_key": "A", "oxidant_percentage": 6}])
+    unsafe = response(options=[{**candidate(), "oxidant_percentage": 6}])
     with pytest.raises(AdapterContractError, match="prohibited field"):
         run(request(), unsafe)
 
@@ -371,7 +387,7 @@ def test_s08_no_valid_option_reason_is_typed_and_requires_empty_options():
                      reason_codes=["NO_VALID_OPTION"], options=[])
     assert run(request(), valid)["reason_codes"] == ["NO_VALID_OPTION"]
     with pytest.raises(AdapterContractError, match="compatibility"):
-        run(request(), {**valid, "options": [{}]})
+        run(request(), {**valid, "options": [candidate()]})
 
 
 def test_answer_question_missing_question_is_rejected():
