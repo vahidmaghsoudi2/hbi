@@ -191,3 +191,21 @@ This section records direct inspection of the existing master implementation add
 2. **Chat 5:** Focused tests and validation evidence for changed paths; review service boundary/publish freshness as design-only where runtime authority is absent; final closeout with explicit remaining blockers and no release/pilot claim.
 
 **Scope warning:** Source inspection does not establish specialist validation, real product behavior, chemistry, or publication correctness. Existing synthetic tests are contract boundary checks only.
+
+
+## 12. Chat 4 implementation delta — source verified (2026-11-23)
+
+The current PR head now contains a synthetic Contract 0.3 implementation for the bounded request/state/S08 items previously listed as gaps. This is a source inspection update; CI runs for this head were still in progress when recorded.
+
+| Gap | Current source status | Remaining boundary |
+|---|---|---|
+| Q01–Q02 question required/nonblank | Implemented in Adapter; focused tests cover missing, null, blank, and whitespace-only question. | Schema operation conditional also exists; retain draft-only status. |
+| Q03 question fields on non-question operations | Implemented rejection for question and question_about; tests cover both. | No Orchestrator referent-currentness check is provided by Adapter. |
+| S08 typed reason | NO_VALID_OPTION added to reason enum and S08 synthetic fixture response; options remain empty. | Only synthetic semantics; no real feasibility or chemistry implication. |
+| State/reason/status checks | Compatibility checks added for suggestion, information-needed, stop/refer, safety, scope, and no-valid-option mappings. | Matrix still needs expanded exhaustive boundary tests and review for any permitted tuple not covered. |
+| Candidate structure and uniqueness (C01) | Not implemented: option objects remain opaque; candidate keys/ranks are not validated. | Minimal non-claiming candidate envelope, unique key/rank and deterministic-order checks remain. |
+| Candidate-local claim/evidence relations (C02–C04) | Not implemented: response evidence refs are validated globally, not per candidate/claim. | Structural candidate/claim linkage only; evidence applicability stays with separate validator. |
+| Provenance typed records | Not implemented in Adapter schema/runtime. | Remains outside this bounded change unless separately authorized. |
+| Publication freshness / atomicity | Not implemented in Adapter (correct ownership boundary). | Orchestrator/service design and implementation remain separate; no publication claim. |
+
+**Verified head at inspection:** 40f8584408d8228e8dc58b0148c17f5f99d18780. PR #651 currently reports mergeable. HBI CI, HBI Auto Tasks, and HBI Pilot Browser Proof were running; no outcome is claimed here.
