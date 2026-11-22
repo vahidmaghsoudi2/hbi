@@ -88,11 +88,11 @@ def test_stop_records_only_reported_performed_steps_and_blocks_new_suggestions()
 
 def test_stopped_case_restart_is_fresh_case_without_carryover():
     stopped = request_stop(with_suggestion(), event_id="EV-SYN-STOP2", performed_step_refs=[])
-    restarted = fresh_restart(stopped, new_case_ref="CASE-SYN-NEW")
+    restarted = fresh_restart(stopped, new_case_ref="CASE-SYN-NEW", event_id="EV-SYN-RESTART1")
     assert restarted.case_ref == "CASE-SYN-NEW"
     assert restarted.case_version == 2 and restarted.target_version == 2
     assert restarted.suggestions == ()
-    assert restarted.events == ()
+    assert len(restarted.events) == 1\n    assert restarted.events[0].event_type == "FRESH_RESTART_FROM_STOP"\n    assert restarted.events[0].details == ("CASE-SYN-LEDGER",)
     assert restarted.stopped is False
 
 
@@ -101,7 +101,7 @@ def test_restart_cannot_resume_same_case_or_nonstopped_case():
         fresh_restart(base(), new_case_ref="CASE-SYN-NEW")
     stopped = request_stop(base(), event_id="EV-SYN-STOP3", performed_step_refs=[])
     with pytest.raises(LedgerContractError, match="distinct"):
-        fresh_restart(stopped, new_case_ref="CASE-SYN-LEDGER")
+        fresh_restart(stopped, new_case_ref="CASE-SYN-LEDGER", event_id="EV-SYN-RESTART3")
 
 
 def test_stopped_case_blocks_acceptance_and_consent():
@@ -110,3 +110,19 @@ def test_stopped_case_blocks_acceptance_and_consent():
         accept_suggestion(stopped, event_id="EV-SYN-A6", suggestion_ref="SUG-SYN-1")
     with pytest.raises(LedgerContractError, match="stopped"):
         grant_execution_consent(stopped, event_id="EV-SYN-C3", suggestion_ref="SUG-SYN-1")
+
+
+def test_restart_requires_traceable_event_id():
+    stopped = request_stop(base(), event_id="EV-SYN-STOP5", performed_step_refs=[])
+    with pytest.raises(LedgerContractError, match="event_id"):
+        fresh_restart(stopped, new_case_ref="CASE-SYN-NEW", event_id=" ")
+
+
+def test_nonstring_dependency_fields_fail_closed():
+    with pytest.raises(LedgerContractError, match="strings"):
+        add_suggestion(base(), suggestion_ref="SUG-SYN-BAD", dependent_fields=[17])
+
+
+def test_nonstring_changed_fields_fail_closed():
+    with pytest.raises(LedgerContractError, match="strings"):
+        change_data(with_suggestion(), event_id="EV-SYN-D3", changed_fields=[17])
