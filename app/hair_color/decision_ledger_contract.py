@@ -151,7 +151,7 @@ def change_data(ledger: ConsultationLedger, *, event_id: str, changed_fields: It
     records = tuple(
         replace(item, evaluated_case_version=next_case, status=SuggestionStatus.INVALIDATED)
         if changed.intersection(item.dependent_fields)
-        else replace(item, evaluated_case_version=next_case)
+        else item
         for item in ledger.suggestions
     )
     event = DecisionEvent(event_id, "DATA_CHANGED", None, next_case, ledger.target_version, fields)
