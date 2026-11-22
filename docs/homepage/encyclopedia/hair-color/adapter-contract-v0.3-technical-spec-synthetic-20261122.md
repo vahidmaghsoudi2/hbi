@@ -209,3 +209,17 @@ The current PR head now contains a synthetic Contract 0.3 implementation for the
 | Publication freshness / atomicity | Not implemented in Adapter (correct ownership boundary). | Orchestrator/service design and implementation remain separate; no publication claim. |
 
 **Verified head at inspection:** 40f8584408d8228e8dc58b0148c17f5f99d18780. PR #651 currently reports mergeable. HBI CI, HBI Auto Tasks, and HBI Pilot Browser Proof were running; no outcome is claimed here.
+
+
+## 13. Chat 4 implementation delta — candidate envelope (synthetic only; tests pending)
+
+The Adapter now validates a minimal candidate envelope instead of accepting opaque option objects:
+- required candidate key, rank, neutral summary, and non-empty claim list;
+- unique candidate keys and rank values;
+- ranks must be contiguous and match option order (1..N), with N ≤ 3;
+- every claim has non-empty claim/rule identifiers and text, a non-empty unique evidence-ref list resolved against request evidence context, and the synthetic-only support marker `MOCK_SUPPORTED`;
+- malformed candidate or claim structures fail closed before a response is returned.
+
+The draft JSON Schema was tightened to describe this structure. Focused synthetic tests were added for duplicate keys/ranks, rank-order mismatch, missing candidate/claim fields, empty claims, unresolved claim evidence, and non-synthetic support marker.
+
+**Limits:** This is structural linkage only. It does not evaluate evidence relevance, scientific validity, rule applicability, constraint completeness, candidate scoring, or real-world safety/feasibility. Claim text and evidence in fixtures are placeholders. Tests/CI have not yet been observed to pass on this new head; Chat 5 must verify workflow results and inspect any failures before closure.
