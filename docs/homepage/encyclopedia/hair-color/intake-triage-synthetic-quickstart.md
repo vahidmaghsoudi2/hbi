@@ -47,3 +47,13 @@ pytest -q tests/test_hair_color_workflow_state_machine.py
 ```
 
 This state model is not wired to a database, UI, or real execution service. The approval state is an abstract contract state only; no actual hair-color service is enabled.
+
+## Knowledge-bundle provenance metadata validator (synthetic)
+
+`app.hair_color.knowledge_bundle_provenance.validate_knowledge_bundle` checks exact product identity fields, source metadata, unique source/claim IDs, and claim-to-source links. It reports metadata readiness only. Even a synthetic bundle with an approval record remains `publishable=False` and `activation_allowed=False`; the validator has no activation/publication function and does not assess evidence quality or scientific validity.
+
+Run its tests:
+
+```bash
+pytest -q tests/test_hair_color_knowledge_bundle_provenance.py
+```
