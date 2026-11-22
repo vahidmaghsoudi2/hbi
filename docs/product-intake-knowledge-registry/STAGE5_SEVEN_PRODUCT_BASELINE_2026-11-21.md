@@ -375,3 +375,51 @@ The GitHub repository also contains `data/seed_products.json`, `data/seed_eviden
 **Manifest-count reconciliation:** the baseline pinned here is the master manifest with 24 assertions. Later open PR #594 proposes the manufacturer/package-only manifest (25 assertions in the 2026-11-18 checkpoint; 27 in an earlier PR state). It is not merged and is not treated as current operational data. The 25 reported Evidence rows are not presumed to map one-to-one to any manifest version.
 
 **Stage 5 disposition:** repository baseline plus existing operational-state snapshot summary is documented and reusable: DONE / READY FOR PO REVIEW. Exact current freshness and row-level reconciliation remain clearly marked NOT VERIFIED, and are not falsely promoted. Stage 6 remains NOT STARTED pending Stage 5 PO acceptance.
+
+
+---
+
+## 2026-11-22 — Follow-up read-only local database and runtime audit
+
+**Purpose:** continue the Stage 5 live-state investigation using the local read-only diagnostic outputs supplied during the PO execution session. This addendum does not convert any local database artifact into the operational database without a runtime-to-file/endpoint provenance link.
+
+### Runtime configuration and process evidence
+
+- The inspected application configuration in `app/database.py` uses `DATABASE_URL` when supplied and otherwise falls back to `sqlite:///./data/hbi.db`; the relative SQLite path resolves from the process working directory.
+- No `DATABASE_URL` was present in the inspected Process, User, or Machine environment scopes.
+- No matching HBI runtime process, HBI-named Windows service, listener owned by a matching runtime process, or HBI-named scheduled task was found during the local scan.
+- The inspected source checkouts did not contain a populated `data/hbi.db`; two related worktree database files were present but had zero operational records.
+- These are bounded local observations at scan time. They do not rule out a remote/cloud/container runtime, a runtime on another machine, or a stopped service.
+
+### Local database artifacts inspected (read-only)
+
+| Artifact label | SHA-256 | Product | ProductKnowledge | Evidence | Inventory | Other relevant counts | Integrity |
+|---|---|---:|---:|---:|---:|---|---|
+| `MAIN_REPO` local repository DB | `86ca03555529c3a2674d8b41985539de7c7945bd22bbbc3abd0ea23c9ac2ff32` | 7 | 1 | 0 | 7 | ProductMutationLog 7; AdminCredential 1; UserRole 2; DuplicateCheckAudit 14 | `ok` |
+| `SAFETY_BACKUP` dated safety backup | `e34ac2c7ac92f53f17cf93af9d7251b0350ad527cad758d89bf8f23436383c6f` | 7 | 7 | 25 | 7 | EvidenceMutationLog 25; Customer 9; Case 1; DuplicateCheckAudit 21; AdminCredential 5; UserRole 5 | `ok` |
+| `PPL_WORKTREE` | `87e7e7a9d34c2097d51705c981933d58278c29b53910952bc3dcdde27bf11db6` | 0 | 0 | 0 | 0 | ProductProblemLink schema present; no operational rows | `ok` |
+| `SKIN_WORKTREE` | `4debd3ace360c6a694559491db9f1447be52ee50c0254c781fdb452a35449be6` | 0 | 0 | 0 | 0 | No operational rows | `ok` |
+
+All four inspected SQLite files passed `PRAGMA integrity_check`; foreign-key checks reported no violations. No database write, migration, seed, import, or export was performed in this follow-up.
+
+### Data interpretation and conflicts
+
+1. `MAIN_REPO` is not a complete seven-product knowledge/evidence snapshot: only one ProductKnowledge row exists and Evidence is zero. Its seven Product rows are DRAFT / NEEDS_REVIEW / QA PENDING.
+2. `SAFETY_BACKUP` is the most data-complete local artifact among those inspected: seven Product rows, seven ProductKnowledge rows, 25 Evidence rows, and seven Inventory rows. However, all seven products remain DRAFT / NEEDS_REVIEW / QA PENDING; all seven knowledge-confidence values are zero; Evidence status is UNKNOWN for six products and CONFLICT for Anua. This is not accepted/verified product knowledge.
+3. The safety-backup filename includes `before-productknowledge-write-20261112`, yet its contents include seven ProductKnowledge rows. Filename and contents therefore have unresolved provenance ambiguity. The filename must not be used to infer the database's point-in-time state.
+4. The seven Product IDs in `MAIN_REPO` differ from the seven IDs in `SAFETY_BACKUP`, despite matching the same logical seven product names/brands. They represent distinct data generations; they are not interchangeable copies and must not be joined by product name.
+5. The safety backup's ProductKnowledge rows link to their corresponding Product rows in that same file, and the 25 Evidence rows are associated with the seven products. This establishes internal linkage in that backup only, not operational use.
+6. No credentials, credential values, connection strings, or sensitive row contents were inspected or recorded. Only table counts and integrity outcomes are included here.
+
+### Stage 5 disposition after this audit
+
+- **Local database candidates:** VERIFIED EXISTING as files with the table counts and hashes above.
+- **Operational database identity:** NOT VERIFIED.
+- **Runtime-to-database provenance:** NOT VERIFIED.
+- **Live Product Master / ProductKnowledge / Evidence / inventory readback:** NOT VERIFIED.
+- **PO-approved product acceptance or sellability:** NOT VERIFIED; the observed local product rows are still DRAFT / NEEDS_REVIEW / PENDING.
+- **Stage 5:** remains **BLOCKED / NOT VERIFIED** for the operational readback criterion.
+
+The decisive missing evidence is not another directory listing. It is an authoritative deployment/runtime reference that identifies the running HBI service and its configured database endpoint or mounted SQLite file, followed by a read-only readback from that exact target. Until that provenance link exists, choosing `SAFETY_BACKUP` merely because it contains more rows would violate the project's NO ASSUMPTION rule.
+
+**Provenance note:** the local hashes, counts, and runtime-scan outcomes above are transcribed from the PO-supplied read-only diagnostic outputs in the execution conversation. They are not represented as a fresh independent query by the GitHub connector. The repository configuration and project rules were separately inspected from GitHub.
