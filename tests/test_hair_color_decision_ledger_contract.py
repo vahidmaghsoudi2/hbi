@@ -71,6 +71,10 @@ def test_data_change_invalidates_only_suggestions_dependent_on_changed_field():
     states = {s.suggestion_ref: s.status for s in changed.suggestions}
     assert states["SUG-SYN-DEP"] is SuggestionStatus.INVALIDATED
     assert states["SUG-SYN-INDEP"] is SuggestionStatus.REVIEWABLE
+    independent = next(s for s in changed.suggestions if s.suggestion_ref == "SUG-SYN-INDEP")
+    assert independent.evaluated_case_version == 1  # not silently re-evaluated or carried to v2
+    with pytest.raises(LedgerContractError, match="stale"):
+        accept_suggestion(changed, event_id="EV-SYN-A7", suggestion_ref="SUG-SYN-INDEP")
 
 
 def test_change_data_requires_fields_and_event_id():
