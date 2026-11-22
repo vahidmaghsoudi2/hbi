@@ -42,6 +42,10 @@ def test_draft_schema_keeps_candidate_and_duplicate_reference_constraints():
     claim_schema = candidate_schema["properties"]["claims"]["items"]
     assert claim_schema["properties"]["support_status"]["const"] == "MOCK_SUPPORTED"
     assert claim_schema["properties"]["evidence_refs"]["minItems"] == 1
+    evidence_item_schema = request["properties"]["evidence_context"]["items"]
+    assert evidence_item_schema["required"] == ["evidence_ref"]
+    assert response["properties"]["limitations"]["items"]["$ref"] == "#/$defs/nonEmptyString"
+    assert "anyOf" in response["properties"]["missing_information"]["items"]
 
 
 def test_0_3_schema_operation_specific_question_fields():
