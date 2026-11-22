@@ -67,3 +67,5 @@ Run:
 ```bash
 pytest -q tests/test_hair_color_decision_ledger_contract.py
 ```
+
+Dependency-change semantics in the ledger contract: suggestions depending on changed fields are invalidated; unaffected suggestions retain their candidate record but receive the current case version and return to `REVIEWABLE`, so prior acceptance/consent is not carried forward. Rejected suggestions remain rejected.
