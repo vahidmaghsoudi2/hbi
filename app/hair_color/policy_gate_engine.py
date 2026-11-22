@@ -76,31 +76,37 @@ class PolicyGateEngine:
 
         missing = case.get("missing_fields", [])
         conflicting = case.get("conflicting_fields", [])
-        if isinstance(missing, list) and missing:
-            base.update(
-                engine_state="NEEDS_MORE_INFORMATION",
-                consultation_status="NEEDS_INFORMATION_OR_TEST",
-                reason_codes=["DATA_GAP"],
-                summary="Required intake information is missing. No recommendation is issued.",
-                missing_information=[
+        missing = missing if isinstance(missing, list) else []
+        conflicting = conflicting if isinstance(conflicting, list) else []
+        if missing or conflicting:
+            reasons = []
+            missing_items = []
+            if missing:
+                reasons.append("DATA_GAP")
+                missing_items.extend(
                     {"field": field, "reason": "Required intake field not supplied."}
                     for field in missing if isinstance(field, str) and field.strip()
-                ],
-                next_step={"action": "ASK_FOR_INFORMATION", "fields": missing},
-            )
-            return base
-
-        if isinstance(conflicting, list) and conflicting:
+                )
+            if conflicting:
+                reasons.append("CONFLICTING_DATA")
+                missing_items.extend(
+                    {"field": field, "reason": "Conflicting intake data needs clarification."}
+                    for field in conflicting if isinstance(field, str) and field.strip()
+                )
             base.update(
                 engine_state="NEEDS_MORE_INFORMATION",
                 consultation_status="NEEDS_INFORMATION_OR_TEST",
-                reason_codes=["CONFLICTING_DATA"],
-                summary="The intake contains conflicting information. It must be clarified before proceeding.",
-                missing_information=[
-                    {"field": field, "reason": "Conflicting intake data needs clarification."}
-                    for field in conflicting if isinstance(field, str) and field.strip()
-                ],
-                next_step={"action": "CLARIFY_CONFLICTS", "fields": conflicting},
+                reason_codes=reasons,
+                summary=(
+                    "Required intake information is missing and/or conflicting. "
+                    "Clarification is needed; no recommendation is issued."
+                ),
+                missing_information=missing_items,
+                next_step={
+                    "action": "ASK_AND_CLARIFY",
+                    "missing_fields": missing,
+                    "conflicting_fields": conflicting,
+                },
             )
             return base
 
