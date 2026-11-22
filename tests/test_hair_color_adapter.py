@@ -372,3 +372,18 @@ def test_s08_no_valid_option_reason_is_typed_and_requires_empty_options():
     assert run(request(), valid)["reason_codes"] == ["NO_VALID_OPTION"]
     with pytest.raises(AdapterContractError, match="compatibility"):
         run(request(), {**valid, "options": [{}]})
+
+
+def test_answer_question_missing_question_is_rejected():
+    missing = request(operation="ANSWER_QUESTION")
+    missing.pop("question")
+    with pytest.raises(AdapterContractError, match="question"):
+        run(missing, response(options=[]))
+
+
+def test_question_about_is_rejected_on_non_question_operation():
+    bad = request(operation="EVALUATE_CASE", question_about={
+        "suggestion_ref": "SUG-MOCK-01", "suggestion_version": 1,
+    })
+    with pytest.raises(AdapterContractError, match="only for ANSWER_QUESTION"):
+        run(bad, response())
