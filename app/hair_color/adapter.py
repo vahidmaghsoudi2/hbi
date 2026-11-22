@@ -48,8 +48,6 @@ _REQUEST_FIELDS = (
     "case_context",
     "evidence_context",
     "policy_context",
-    "question",
-    "question_about",
 )
 _RESPONSE_FIELDS = (
     "request_id",
