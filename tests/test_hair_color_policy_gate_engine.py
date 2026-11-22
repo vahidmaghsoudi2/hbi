@@ -106,3 +106,14 @@ def test_missing_and_conflicting_fields_are_reported_together():
     assert set(result["reason_codes"]) == {"DATA_GAP", "CONFLICTING_DATA"}
     assert len(result["missing_information"]) == 2
     assert result["options"] == []
+
+
+def test_persian_public_callable_returns_raw_gate_and_ui_presentation():
+    from app.hair_color.consultation import run_consultation_persian
+
+    result = run_consultation_persian(request())
+    assert result["consultation"]["options"] == []
+    assert result["presentation"]["options"] == []
+    assert result["execution_authorized"] is False
+    assert result["presentation"]["execution_authorized"] is False
+    assert "متخصص" in result["presentation"]["title"]
