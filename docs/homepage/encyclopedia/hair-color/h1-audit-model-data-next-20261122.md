@@ -166,3 +166,45 @@ Before non-synthetic engine implementation, require explicit PO authorization fo
 - Synthetic fixture contract: `tests/fixtures/hair-color-contract-v1.json`
 - Synthetic fixture schema: `tests/fixtures/hair-color-contract-v1.schema.json`
 - Evidence revision policy proposal (open): `docs/homepage/encyclopedia/hair-color/po-proposal-evidence-revision-after-client-decision-20261112.md`
+
+
+## 11. کد-به-کد: ممیزی تکمیلی Adapter و آزمون‌های دقیق بعدی (22 Nov)
+
+**روش:** بازخوانی ایستا فایل‌های master در base commit PR #651؛ هیچ تستی در این نوبت اجرا نشد و هیچ Runtime/schema/test تغییر نکرد.
+
+### یافته‌های مستقیم از کد
+
+| ID | مشاهدهٔ دقیق در Adapter 0.2-draft / تست‌ها | اثر / ریسک قراردادی | تست یا اقدام پیشنهادی (فقط پس از approval) |
+|---|---|---|---|
+| A-Q1 | `ANSWER_QUESTION` operation مجاز است؛ `question` جزو `_REQUEST_FIELDS` نیست و validate_request آن را require نمی‌کند. | operation بدون پرسش معتبر می‌تواند وارد engine شود؛ سؤال در تست‌ها فقط به صورت extra field می‌آید. | Q01 missing-question reject; Q02 whitespace-only reject; Q03 question روی operation دیگر policy مشخص/تست شود. |
+| A-Q2 | Request و response در JSON Schema دارای `additionalProperties: true` هستند. | typo/field نامنتظر به‌صورت structural reject تضمین نمی‌شود؛ این می‌تواند permissive بودن Draft باشد، نه نقص تأییدشدهٔ production. | قرارداد production باید explicit تعیین کند unknown fields reject، ignore یا forward شوند؛ parity test. |
+| A-C1 | `options` فقط object بودن، تعداد ≤3 و وجود response-level `evidence_refs` را چک می‌کند. | candidate key، claim، hard-constraint result و candidate-specific evidence links enforce نمی‌شوند. | C01 duplicate candidate key; C02 claim بدون evidence; C03 evidence ref خارج از request/scope; C04 hard constraint failed candidate suppressed. |
+| A-C2 | Evidence refs پاسخ از refs موجود در request بررسی می‌شوند؛ linkage option/claim به ref مشخص بررسی نمی‌شود. | وجود ref در context، support/applicability برای claim را اثبات نمی‌کند. | claim-to-evidence relation + scope/status gate در contract/service owner؛ reference existence تنها Pass نباشد. |
+| A-S1 | Blocking check، option presence را در برابر چند engine/consultation state و reason code کنترل می‌کند؛ اما سازگاری کامل همهٔ ترکیب state/status/reasonها جدول‌محور enforce نشده است. | ممکن است ترکیب‌های ناسازگار بدون option از validation عبور کنند. | State-consistency matrix؛ همهٔ combinations مجاز و ممنوع را با tests تعریف کنید، بدون inventing PO mapping. |
+| A-S2 | `CONDITIONAL_SUGGESTION` در enum وجود دارد؛ شرط ساختاریافته/شرط وابسته و validation آن در envelope مشخص نیست. | conditional بودن می‌تواند صرفاً label باشد، نه شرط قابل‌بررسی. | شرط و limitation representation را در contract design تعریف کنید؛ شرط نامشخص/خالی candidate publication را block کند. |
+| A-D1 | `case_context` و `policy_context` opaque mappings؛ knowledge states/provenance/ownership enforce نمی‌شوند. | دادهٔ مصنوعی فعلی عبور می‌کند، اما typed/provenance contract اجرایی هنوز نداریم. | typed sub-contract و validation ownership review؛ نه schema implementation بدون approval. |
+| A-L1 | Adapter هیچ ledger، suggestion identity، decision-event، workflow، dependency service یا persistent storage ندارد (و نباید authority اینها را بگیرد). | S11–S14 فقط test oracle/boundary behavior؛ service integration اثبات نشده. | Orchestrator/Ledger/Workflow boundary tests و exact refs/version/current-status checks در owner service. |
+| A-P1 | Adapter version alignment را در request/response بررسی می‌کند؛ publication-time freshness/atomicity/retry/idempotency/correlation semantics ندارد. | این validation فقط freshness در evaluation response را نشان می‌دهد، نه publish freshness. | Stale-at-publish test؛ concurrent case/target change; evidence/policy revision; idempotent retry; run-correlated failure suppresses current output. |
+| A-F1 | engine exception به `EngineExecutionFailure` تبدیل می‌شود؛ پاسخ `ENGINE_FAIL` نیز successful response محسوب نمی‌شود. | Fail-closed Adapter boundary موجود؛ stale prior output policy در publisher/orchestrator اثبات نشده. | S15 run-scoped suppression + correlation, no fallback to stale/current-looking result. |
+
+
+### Test work packages — ترتیب پیشنهادی و exit criteria
+
+1. **WP-C0 — Adapter contract tests (synthetic, no chemistry):** Q01–Q03، candidate validation C01–C04، response state/reason consistency، conditional-condition representation. Exit: approved contract decisions encoded as explicit tests; schema/runtime parity.
+2. **WP-C1 — Orchestrator/Ledger boundary (synthetic):** S11 resolves exact suggestion version and current ledger state; stale/non-active referent cannot be described as current; question never mutates decision/consent. S12 rejection event binds exact ref/version and rejected suggestion cannot be reactivated. Exit: owner-service tests, not adapter mocks.
+3. **WP-C2 — Case/Dependency/Workflow boundary (synthetic):** S13 target change creates new lineage and only dependent outputs are re-evaluated; unknown dependency impact suppresses affected output. S14 stop event + performed-step log; restart is fresh evaluation only, no auto-resume. Exit: service-level state assertions.
+4. **WP-C3 — Publication and failure:** S15 failed run has correlation identity and no candidate publication; case/target/evidence/policy/workflow/ledger change between evaluation and publish suppresses stale result. Exit: deterministic race/concurrency tests and explicit atomicity/idempotency semantics.
+5. **WP-E — Product evidence preparation:** first Bijourka, then Magic Color per README priority; establish exact product identity, market, version, official-source index and evidence-to-claim inventory only. No formula/chemistry rule, product claim or catalogue activation until specialist approval.
+
+### Decision blockers vs. independent technical work
+
+| Item | Can progress without PO policy selection? | Status |
+|---|---|---|
+| Static mapping of current fields/tests and candidate validation gaps | Yes | Completed in this read-only audit |
+| Q-A/Q-B/Q-C question request semantics | No final wire choice | Draft options already in Contract 0.3 proposal |
+| S06/S08 consultation mapping | No | Explicit PO decision pending |
+| Service ownership, failure and freshness test architecture | Technical draft can progress | Service implementation not present in this boundary |
+| Product/chemistry claims and rules | No specialist approval | Remain disabled/unvalidated |
+| Runtime/schema/fixture/test changes, persistence, pilot/release | Requires explicit implementation authorization | Not authorized by this audit |
+
+**Audit limitation:** this is source-level evidence from the base commit and test design review; no local test run, CI rerun, product chemistry validation, Orchestrator/Ledger implementation check, or runtime integration proof is claimed.
