@@ -14,7 +14,7 @@ class KnowledgeBundleValidationError(ValueError):
 
 
 _REQUIRED_PRODUCT = ("product_id", "brand", "market", "product_version")
-_REQUIRED_SOURCE = ("source_id", "publisher", "title", "source_version", "applicability")
+_REQUIRED_SOURCE = ("source_id", "publisher", "title", "source_version", "source_locator", "retrieved_at", "applicability")
 _REQUIRED_CLAIM = ("claim_id", "claim_text", "source_refs")
 
 
