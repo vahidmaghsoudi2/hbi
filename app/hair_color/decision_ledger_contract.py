@@ -60,15 +60,20 @@ def add_suggestion(
 ) -> ConsultationLedger:
     if ledger.stopped:
         raise LedgerContractError("stopped case cannot accept suggestions")
-    if not suggestion_ref.strip() or any(s.suggestion_ref == suggestion_ref for s in ledger.suggestions):
+    if not isinstance(suggestion_ref, str) or not suggestion_ref.strip():
         raise LedgerContractError("suggestion_ref must be unique and non-empty")
-    fields = tuple(dependent_fields)\n    if any(not isinstance(field, str) for field in fields):\n        raise LedgerContractError("dependent field names must be strings")\n    deps = tuple(sorted({field for field in fields if field.strip()}))
+    if any(s.suggestion_ref == suggestion_ref for s in ledger.suggestions):
+        raise LedgerContractError("suggestion_ref must be unique and non-empty")
+    fields = tuple(dependent_fields)
+    if any(not isinstance(field, str) for field in fields):
+        raise LedgerContractError("dependent field names must be strings")
+    deps = tuple(sorted({field for field in fields if field.strip()}))
     record = SuggestionRecord(suggestion_ref, ledger.case_version, ledger.target_version, deps)
     return replace(ledger, suggestions=ledger.suggestions + (record,))
 
 
 def record_question(ledger: ConsultationLedger, *, event_id: str, question_ref: str) -> ConsultationLedger:
-    if not event_id.strip() or not question_ref.strip():
+    if not isinstance(event_id, str) or not event_id.strip() or not isinstance(question_ref, str) or not question_ref.strip():
         raise LedgerContractError("question event requires event_id and question_ref")
     event = DecisionEvent(event_id, "QUESTION", None, ledger.case_version, ledger.target_version, (question_ref,))
     return replace(ledger, events=ledger.events + (event,))
@@ -88,7 +93,9 @@ def _replace_suggestion(ledger: ConsultationLedger, changed: SuggestionRecord) -
 
 def reject_suggestion(ledger: ConsultationLedger, *, event_id: str, suggestion_ref: str) -> ConsultationLedger:
     record = _get_suggestion(ledger, suggestion_ref)
-    if not event_id.strip() or record.status is not SuggestionStatus.REVIEWABLE:
+    if ledger.stopped:
+        raise LedgerContractError("stopped case cannot accept decision events")
+    if not isinstance(event_id, str) or not event_id.strip() or record.status is not SuggestionStatus.REVIEWABLE:
         raise LedgerContractError("only a current reviewable suggestion can be rejected")
     updated = _replace_suggestion(ledger, replace(record, status=SuggestionStatus.REJECTED))
     event = DecisionEvent(event_id, "REJECT", suggestion_ref, ledger.case_version, ledger.target_version)
@@ -97,7 +104,9 @@ def reject_suggestion(ledger: ConsultationLedger, *, event_id: str, suggestion_r
 
 def accept_suggestion(ledger: ConsultationLedger, *, event_id: str, suggestion_ref: str) -> ConsultationLedger:
     record = _get_suggestion(ledger, suggestion_ref)
-    if not event_id.strip() or record.status is not SuggestionStatus.REVIEWABLE:
+    if ledger.stopped:
+        raise LedgerContractError("stopped case cannot accept decision events")
+    if not isinstance(event_id, str) or not event_id.strip() or record.status is not SuggestionStatus.REVIEWABLE:
         raise LedgerContractError("only a current reviewable suggestion can be accepted")
     if (record.evaluated_case_version, record.evaluated_target_version) != (ledger.case_version, ledger.target_version):
         raise LedgerContractError("stale suggestion; fresh evaluation required")
@@ -110,7 +119,9 @@ def grant_execution_consent(
     ledger: ConsultationLedger, *, event_id: str, suggestion_ref: str
 ) -> ConsultationLedger:
     record = _get_suggestion(ledger, suggestion_ref)
-    if not event_id.strip() or record.status is not SuggestionStatus.ACCEPTED:
+    if ledger.stopped:
+        raise LedgerContractError("stopped case cannot accept decision events")
+    if not isinstance(event_id, str) or not event_id.strip() or record.status is not SuggestionStatus.ACCEPTED:
         raise LedgerContractError("execution consent requires a separately accepted suggestion")
     if (record.evaluated_case_version, record.evaluated_target_version) != (ledger.case_version, ledger.target_version):
         raise LedgerContractError("stale suggestion; fresh evaluation required")
@@ -120,20 +131,20 @@ def grant_execution_consent(
 
 
 def change_target(ledger: ConsultationLedger, *, event_id: str) -> ConsultationLedger:
-    if not event_id.strip() or ledger.stopped:
+    if not isinstance(event_id, str) or not event_id.strip() or ledger.stopped:
         raise LedgerContractError("target change requires an active case and event ID")
     next_case, next_target = ledger.case_version + 1, ledger.target_version + 1
-    records = tuple(replace(
-        item, evaluated_case_version=next_case, evaluated_target_version=next_target,
-        status=SuggestionStatus.INVALIDATED,
-    ) for item in ledger.suggestions)
+    records = tuple(replace(item, status=SuggestionStatus.INVALIDATED) for item in ledger.suggestions)
     event = DecisionEvent(event_id, "TARGET_CHANGED", None, next_case, next_target)
     return replace(ledger, case_version=next_case, target_version=next_target, suggestions=records, events=ledger.events + (event,))
 
 
 def change_data(ledger: ConsultationLedger, *, event_id: str, changed_fields: Iterable[str]) -> ConsultationLedger:
-    fields = tuple(sorted({field for field in changed_fields if field.strip()}))
-    if not event_id.strip() or not fields or ledger.stopped:
+    supplied_fields = tuple(changed_fields)
+    if any(not isinstance(field, str) for field in supplied_fields):
+        raise LedgerContractError("changed field names must be strings")
+    fields = tuple(sorted({field for field in supplied_fields if field.strip()}))
+    if not isinstance(event_id, str) or not event_id.strip() or not fields or ledger.stopped:
         raise LedgerContractError("data change requires active case, event ID, and field names")
     next_case = ledger.case_version + 1
     changed = set(fields)
@@ -148,9 +159,12 @@ def change_data(ledger: ConsultationLedger, *, event_id: str, changed_fields: It
 
 
 def request_stop(ledger: ConsultationLedger, *, event_id: str, performed_step_refs: Iterable[str]) -> ConsultationLedger:
-    if not event_id.strip() or ledger.stopped:
+    if not isinstance(event_id, str) or not event_id.strip() or ledger.stopped:
         raise LedgerContractError("stop event requires active case and event ID")
-    refs = tuple(performed_step_refs)\n    if any(not isinstance(ref, str) for ref in refs):\n        raise LedgerContractError("performed step references must be strings")\n    performed = tuple(dict.fromkeys(ref for ref in refs if ref.strip()))
+    refs = tuple(performed_step_refs)
+    if any(not isinstance(ref, str) for ref in refs):
+        raise LedgerContractError("performed step references must be strings")
+    performed = tuple(dict.fromkeys(ref for ref in refs if ref.strip()))
     event = DecisionEvent(event_id, "STOP_REQUESTED", None, ledger.case_version, ledger.target_version, performed)
     return replace(ledger, stopped=True, performed_step_refs=performed, events=ledger.events + (event,))
 
@@ -158,10 +172,15 @@ def request_stop(ledger: ConsultationLedger, *, event_id: str, performed_step_re
 def fresh_restart(ledger: ConsultationLedger, *, new_case_ref: str, event_id: str) -> ConsultationLedger:
     if not ledger.stopped:
         raise LedgerContractError("restart requires a stopped source case")
-    if not new_case_ref.strip() or new_case_ref == ledger.case_ref:
+    if not isinstance(event_id, str) or not event_id.strip():
+        raise LedgerContractError("restart requires traceable event_id")
+    if not isinstance(new_case_ref, str) or not new_case_ref.strip() or new_case_ref == ledger.case_ref:
         raise LedgerContractError("restart must use a distinct case reference")
+    next_case, next_target = ledger.case_version + 1, ledger.target_version + 1
+    event = DecisionEvent(event_id, "FRESH_RESTART_FROM_STOP", None, next_case, next_target, (ledger.case_ref,))
     return ConsultationLedger(
         case_ref=new_case_ref,
-        case_version=ledger.case_version + 1,
-        target_version=ledger.target_version + 1,
+        case_version=next_case,
+        target_version=next_target,
+        events=(event,),
     )
