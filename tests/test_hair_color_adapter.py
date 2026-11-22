@@ -410,7 +410,7 @@ def test_question_about_is_rejected_on_non_question_operation():
     [
         ([candidate(1, key="DUP"), candidate(2, key="DUP")], "candidate_key values must be unique"),
         ([candidate(1), candidate(1, key="CAND-SYN-OTHER")], "candidate ranks must be unique, contiguous, and ordered"),
-        ([candidate(2)], "candidate ranks must be unique and contiguous"),
+        ([candidate(2)], "candidate ranks must be unique, contiguous, and ordered"),
         ([{"candidate_key": "C", "rank": 1, "summary": "missing claims"}], "candidate missing required structural fields"),
         ([{**candidate(), "claims": []}], "candidate claims must be a non-empty array"),
         ([{**candidate(), "claims": [{**candidate()["claims"][0], "evidence_refs": ["EVIDENCE-ABSENT"]}]}], "candidate claim references evidence absent from request context"),
