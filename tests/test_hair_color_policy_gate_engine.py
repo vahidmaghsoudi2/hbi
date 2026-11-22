@@ -87,3 +87,11 @@ def test_policy_gate_does_not_mutate_request():
     before = deepcopy(value)
     HairColorAdapter(PolicyGateEngine()).evaluate(value)
     assert value == before
+
+def test_public_consultation_entrypoint_is_callable_and_fails_closed():
+    from app.hair_color.consultation import run_consultation
+
+    result = run_consultation(request())
+    assert result["options"] == []
+    assert result["reason_codes"] == ["KNOWLEDGE_GAP"]
+    assert result["engine_state"] == "STOP_OR_REFER_WITH_REASON"
