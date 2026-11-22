@@ -39,6 +39,7 @@
 | وضعیت واقعی، موانع، وابستگی‌ها و گام بعدی | [مرکز کنترل مدیریتی](#L526) |
 | قرارداد فنی ارتباط ارکستراتور و موتور (Draft 0.2) | [قرارداد Adapter](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/docs/homepage/encyclopedia/hair-color/adapter-contract-draft-v0.2.md) |
 | قرارداد Adapter 0.3 (Synthetic-only؛ در حال آزمون، بدون ادعای اعتبار علمی) | [کد Adapter](../../../../app/hair_color/adapter.py) · [Schema 0.3](../../../../tests/schemas/hair-color-adapter-0.3-draft.schema.json) · [آزمون‌ها](../../../../tests/test_hair_color_adapter.py) |
+| ورودی اجرایی مشاورهٔ فعلی (Intake/triage فقط؛ بدون توصیهٔ رنگ، تا زمان اعتبارسنجی دانش تخصصی) | [API](../../../../app/hair_color/consultation.py) · [Policy Gate](../../../../app/hair_color/policy_gate_engine.py) · [تست‌ها](../../../../tests/test_hair_color_policy_gate_engine.py) |
 | ثبت تصمیم‌های طراحی Adapter | [دفتر تصمیم‌های Adapter](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/docs/homepage/encyclopedia/hair-color/adapter-contract-po-decision-register-draft-v0.1.md) |
 | پیشنهاد سیاست دربارهٔ تغییر اعتبار شواهد پس از تصمیم مشتری | [پیشنهاد سیاست — پیش‌نویس و تأییدنشده](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/docs/homepage/encyclopedia/hair-color/po-proposal-evidence-revision-after-client-decision-20261112.md) |
 | ممیزی H1 و پیشنهاد تکمیل قرارداد/مدل داده (Draft، بدون مجوز اجرا) | [گزارش ۲۲ نوامبر ۲۰۲۶](./h1-audit-model-data-next-20261122.md) |
