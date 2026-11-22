@@ -102,6 +102,12 @@ class SyntheticHairColorEngine:
             result["options"] = [synthetic_candidate(1), synthetic_candidate(2)]
         elif scenario_id in {"S11", "S12", "S14"}:
             result["options"] = []
+            if scenario_id in {"S12", "S14"}:
+                result.update(
+                    engine_state="STOP_OR_REFER_WITH_REASON",
+                    consultation_status="NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW",
+                    reason_codes=["KNOWLEDGE_GAP"],
+                )
         elif scenario_id == "S13":
             result["summary"] = "Fresh synthetic evaluation for the supplied case and target versions."
 
