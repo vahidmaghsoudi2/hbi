@@ -37,6 +37,11 @@ def test_draft_schema_keeps_candidate_and_duplicate_reference_constraints():
     assert response["properties"]["reason_codes"]["uniqueItems"] is True
     assert response["properties"]["evidence_refs"]["uniqueItems"] is True
     assert "NO_VALID_OPTION" in response["properties"]["reason_codes"]["items"]["enum"]
+    candidate_schema = response["properties"]["options"]["items"]
+    assert set(candidate_schema["required"]) == {"candidate_key", "rank", "summary", "claims"}
+    claim_schema = candidate_schema["properties"]["claims"]["items"]
+    assert claim_schema["properties"]["support_status"]["const"] == "MOCK_SUPPORTED"
+    assert claim_schema["properties"]["evidence_refs"]["minItems"] == 1
 
 
 def test_0_3_schema_operation_specific_question_fields():
