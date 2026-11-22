@@ -207,6 +207,8 @@ def validate_response(request: Mapping[str, Any], response: Mapping[str, Any]) -
 
     _require_nonempty_string(response["summary"], "summary")
 
+
+
     for field in ("options", "missing_information", "evidence_refs", "limitations"):
         if not isinstance(response[field], list):
             raise AdapterContractError(f"{field} must be an array")
