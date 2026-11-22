@@ -57,3 +57,13 @@ Run its tests:
 ```bash
 pytest -q tests/test_hair_color_knowledge_bundle_provenance.py
 ```
+
+## Decision-ledger contract (synthetic, in-memory)
+
+`app.hair_color.decision_ledger_contract` tests neutral question events, rejection non-reactivation, acceptance vs execution-consent separation, target-change invalidation, dependency-specific invalidation, stop recording, and restart as a distinct fresh case. It is not persistence and does not execute services. The case workflow state model is separate from this decision ledger contract.
+
+Run:
+
+```bash
+pytest -q tests/test_hair_color_decision_ledger_contract.py
+```
