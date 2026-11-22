@@ -239,6 +239,8 @@ def validate_response(request: Mapping[str, Any], response: Mapping[str, Any]) -
         required_candidate_fields = {"candidate_key", "rank", "summary", "claims"}
         if not required_candidate_fields <= set(option):
             raise AdapterContractError("candidate missing required structural fields")
+        if set(option) != required_candidate_fields:
+            raise AdapterContractError("candidate contains unexpected structural fields")
         _require_nonempty_string(option["candidate_key"], "candidate_key")
         _require_nonempty_string(option["summary"], "candidate summary")
         rank = option["rank"]
@@ -249,10 +251,11 @@ def validate_response(request: Mapping[str, Any], response: Mapping[str, Any]) -
         candidate_keys.append(option["candidate_key"])
         candidate_ranks.append(rank)
         for claim in option["claims"]:
-            if not isinstance(claim, Mapping) or not {
-                "claim_ref", "claim_text", "rule_ref", "evidence_refs", "support_status"
-            } <= set(claim):
+            required_claim_fields = {"claim_ref", "claim_text", "rule_ref", "evidence_refs", "support_status"}
+            if not isinstance(claim, Mapping) or not required_claim_fields <= set(claim):
                 raise AdapterContractError("candidate claim missing required structural fields")
+            if set(claim) != required_claim_fields:
+                raise AdapterContractError("candidate claim contains unexpected structural fields")
             for field in ("claim_ref", "claim_text", "rule_ref"):
                 _require_nonempty_string(claim[field], f"claim {field}")
             if claim["support_status"] != "MOCK_SUPPORTED":
