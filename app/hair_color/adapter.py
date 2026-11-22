@@ -232,6 +232,45 @@ def validate_response(request: Mapping[str, Any], response: Mapping[str, Any]) -
     if any(ref not in supplied_evidence_refs for ref in response["evidence_refs"]):
         raise AdapterContractError("engine response references evidence absent from the request context")
 
+    # Minimal synthetic candidate envelope: traceability structure only; no domain validation.
+    candidate_keys = []
+    candidate_ranks = []
+    for option in response["options"]:
+        required_candidate_fields = {"candidate_key", "rank", "summary", "claims"}
+        if not required_candidate_fields <= set(option):
+            raise AdapterContractError("candidate missing required structural fields")
+        _require_nonempty_string(option["candidate_key"], "candidate_key")
+        _require_nonempty_string(option["summary"], "candidate summary")
+        rank = option["rank"]
+        if isinstance(rank, bool) or not isinstance(rank, int) or rank < 1 or rank > 3:
+            raise AdapterContractError("candidate rank must be an integer from 1 to 3")
+        if not isinstance(option["claims"], list) or not option["claims"]:
+            raise AdapterContractError("candidate claims must be a non-empty array")
+        candidate_keys.append(option["candidate_key"])
+        candidate_ranks.append(rank)
+        for claim in option["claims"]:
+            if not isinstance(claim, Mapping) or not {
+                "claim_ref", "claim_text", "rule_ref", "evidence_refs", "support_status"
+            } <= set(claim):
+                raise AdapterContractError("candidate claim missing required structural fields")
+            for field in ("claim_ref", "claim_text", "rule_ref"):
+                _require_nonempty_string(claim[field], f"claim {field}")
+            if claim["support_status"] != "MOCK_SUPPORTED":
+                raise AdapterContractError("candidate claim support_status must be MOCK_SUPPORTED in synthetic contract")
+            refs = claim["evidence_refs"]
+            if not isinstance(refs, list) or not refs or any(
+                not isinstance(ref, str) or not ref.strip() for ref in refs
+            ):
+                raise AdapterContractError("candidate claim evidence_refs must be non-empty")
+            if len(refs) != len(set(refs)):
+                raise AdapterContractError("candidate claim evidence_refs must not contain duplicates")
+            if any(ref not in supplied_evidence_refs for ref in refs):
+                raise AdapterContractError("candidate claim references evidence absent from request context")
+    if len(candidate_keys) != len(set(candidate_keys)):
+        raise AdapterContractError("candidate_key values must be unique")
+    if candidate_ranks and sorted(candidate_ranks) != list(range(1, len(candidate_ranks) + 1)):
+        raise AdapterContractError("candidate ranks must be unique and contiguous starting at 1")
+
     if not isinstance(response["next_step"], Mapping):
         raise AdapterContractError("next_step must be an object")
 
