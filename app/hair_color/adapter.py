@@ -11,7 +11,7 @@ from copy import deepcopy
 from typing import Any
 
 
-CONTRACT_VERSION = "0.2-draft"
+CONTRACT_VERSION = "0.3-draft"
 
 OPERATIONS = frozenset({"EVALUATE_CASE", "ANSWER_QUESTION", "REEVALUATE"})
 ENGINE_STATES = frozenset({
@@ -35,6 +35,7 @@ REASON_CODES = frozenset({
     "SAFETY_CONCERN",
     "OUT_OF_SCOPE",
     "STALE_CASE_VERSION",
+    "NO_VALID_OPTION",
 })
 
 _REQUEST_FIELDS = (
@@ -47,6 +48,8 @@ _REQUEST_FIELDS = (
     "case_context",
     "evidence_context",
     "policy_context",
+    "question",
+    "question_about",
 )
 _RESPONSE_FIELDS = (
     "request_id",
@@ -151,6 +154,17 @@ def validate_request(request: Mapping[str, Any]) -> None:
     if not isinstance(request["policy_context"], Mapping):
         raise AdapterContractError("policy_context must be an object")
 
+    if request["operation"] == "ANSWER_QUESTION":
+        _require_nonempty_string(request.get("question"), "question")
+        question_about = request.get("question_about")
+        if question_about is not None:
+            if not isinstance(question_about, Mapping):
+                raise AdapterContractError("question_about must be an object")
+            _require_nonempty_string(question_about.get("suggestion_ref"), "question_about.suggestion_ref")
+            _require_version(question_about.get("suggestion_version"), "question_about.suggestion_version")
+    elif "question" in request or "question_about" in request:
+        raise AdapterContractError("question fields are allowed only for ANSWER_QUESTION")
+
     forbidden = _has_forbidden_key(request, _FORBIDDEN_REQUEST_KEYS)
     if forbidden is not None:
         raise AdapterContractError(f"request contains prohibited field: {forbidden}")
@@ -238,10 +252,43 @@ def validate_response(request: Mapping[str, Any], response: Mapping[str, Any]) -
             "SAFETY_CONCERN",
             "OUT_OF_SCOPE",
             "STALE_CASE_VERSION",
+            "NO_VALID_OPTION",
         })
     )
     if blocking and response["options"]:
         raise AdapterContractError("a blocked consultation response cannot contain candidate options")
+
+    state, status, reasons = response["engine_state"], response["consultation_status"], set(reason_codes)
+    is_question = request["operation"] == "ANSWER_QUESTION"
+    if state in {"SUGGESTION_REVIEWABLE", "CONDITIONAL_SUGGESTION"}:
+        if status != "SYSTEM_REASONED_SUGGESTION" or reasons & {
+            "DATA_GAP", "KNOWLEDGE_GAP", "ENGINE_FAIL", "CONFLICTING_DATA",
+            "SAFETY_CONCERN", "OUT_OF_SCOPE", "STALE_CASE_VERSION", "NO_VALID_OPTION",
+        } or (not is_question and not response["options"]):
+            raise AdapterContractError("state/reason/status compatibility violation")
+        if is_question and response["options"]:
+            raise AdapterContractError("question responses cannot return candidate options")
+    elif state == "NEEDS_MORE_INFORMATION":
+        if status != "NEEDS_INFORMATION_OR_TEST" or not reasons or not reasons <= {
+            "DATA_GAP", "KNOWLEDGE_GAP", "CONFLICTING_DATA",
+        } or response["options"]:
+            raise AdapterContractError("state/reason/status compatibility violation")
+    elif state == "STOP_OR_REFER_WITH_REASON":
+        if response["options"] or not reasons:
+            raise AdapterContractError("state/reason/status compatibility violation")
+        if status == "SAFETY_STOP_NO_EXECUTION_SUGGESTION" and reasons != {"SAFETY_CONCERN"}:
+            raise AdapterContractError("state/reason/status compatibility violation")
+        if status == "OUT_OF_V1_SCOPE" and reasons != {"OUT_OF_SCOPE"}:
+            raise AdapterContractError("state/reason/status compatibility violation")
+        if status == "NEEDS_INFORMATION_OR_TEST" and reasons != {"NO_VALID_OPTION"}:
+            raise AdapterContractError("state/reason/status compatibility violation")
+        if status == "NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW" and not reasons <= {
+            "SAFETY_CONCERN", "KNOWLEDGE_GAP", "CONFLICTING_DATA", "DATA_GAP",
+            "OUT_OF_SCOPE", "STALE_CASE_VERSION",
+        }:
+            raise AdapterContractError("state/reason/status compatibility violation")
+        if status == "SYSTEM_REASONED_SUGGESTION":
+            raise AdapterContractError("state/reason/status compatibility violation")
 
     forbidden = _has_forbidden_key(response, _FORBIDDEN_RESPONSE_KEYS | _FORBIDDEN_DECISION_KEYS)
     if forbidden is not None:
