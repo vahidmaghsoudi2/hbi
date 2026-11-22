@@ -62,7 +62,7 @@ def add_suggestion(
         raise LedgerContractError("stopped case cannot accept suggestions")
     if not suggestion_ref.strip() or any(s.suggestion_ref == suggestion_ref for s in ledger.suggestions):
         raise LedgerContractError("suggestion_ref must be unique and non-empty")
-    deps = tuple(sorted({field for field in dependent_fields if field.strip()}))
+    fields = tuple(dependent_fields)\n    if any(not isinstance(field, str) for field in fields):\n        raise LedgerContractError("dependent field names must be strings")\n    deps = tuple(sorted({field for field in fields if field.strip()}))
     record = SuggestionRecord(suggestion_ref, ledger.case_version, ledger.target_version, deps)
     return replace(ledger, suggestions=ledger.suggestions + (record,))
 
@@ -150,12 +150,12 @@ def change_data(ledger: ConsultationLedger, *, event_id: str, changed_fields: It
 def request_stop(ledger: ConsultationLedger, *, event_id: str, performed_step_refs: Iterable[str]) -> ConsultationLedger:
     if not event_id.strip() or ledger.stopped:
         raise LedgerContractError("stop event requires active case and event ID")
-    performed = tuple(dict.fromkeys(ref for ref in performed_step_refs if ref.strip()))
+    refs = tuple(performed_step_refs)\n    if any(not isinstance(ref, str) for ref in refs):\n        raise LedgerContractError("performed step references must be strings")\n    performed = tuple(dict.fromkeys(ref for ref in refs if ref.strip()))
     event = DecisionEvent(event_id, "STOP_REQUESTED", None, ledger.case_version, ledger.target_version, performed)
     return replace(ledger, stopped=True, performed_step_refs=performed, events=ledger.events + (event,))
 
 
-def fresh_restart(ledger: ConsultationLedger, *, new_case_ref: str) -> ConsultationLedger:
+def fresh_restart(ledger: ConsultationLedger, *, new_case_ref: str, event_id: str) -> ConsultationLedger:
     if not ledger.stopped:
         raise LedgerContractError("restart requires a stopped source case")
     if not new_case_ref.strip() or new_case_ref == ledger.case_ref:
