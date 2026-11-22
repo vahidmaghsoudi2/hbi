@@ -17,7 +17,7 @@ from app.hair_color.adapter import (
 
 def request(**overrides):
     value = {
-        "contract_version": "0.2-draft",
+        "contract_version": "0.3-draft",
         "request_id": "REQ-SYN-001",
         "operation": "EVALUATE_CASE",
         "case_ref": "CASE-SYN-001",
@@ -28,6 +28,8 @@ def request(**overrides):
         "policy_context": {"chemical_execution_instructions": "PROHIBITED"},
     }
     value.update(overrides)
+    if value["operation"] == "ANSWER_QUESTION" and "question" not in value:
+        value["question"] = "Synthetic-only question"
     return value
 
 
@@ -173,7 +175,8 @@ def test_s08_no_valid_alternative_is_returned_as_an_empty_option_set():
         request(),
         response(
             engine_state="STOP_OR_REFER_WITH_REASON",
-            consultation_status="NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW",
+            consultation_status="NEEDS_INFORMATION_OR_TEST",
+            reason_codes=["NO_VALID_OPTION"],
             options=[],
             summary="No valid option is supported under the synthetic constraints.",
         ),
@@ -323,3 +326,49 @@ def test_duplicate_reason_codes_and_evidence_refs_are_rejected():
     with pytest.raises(AdapterContractError, match="evidence_refs must not contain duplicates"):
         run(request(), response(evidence_refs=["EVIDENCE-MOCK-A", "EVIDENCE-MOCK-A"]))
 
+
+
+@pytest.mark.parametrize("bad_question", [None, "", "   "])
+def test_answer_question_requires_nonblank_question_before_engine(bad_question):
+    bad = request(operation="ANSWER_QUESTION", question=bad_question)
+    with pytest.raises(AdapterContractError, match="question"):
+        run(bad, response(options=[]))
+
+
+@pytest.mark.parametrize("operation", ["EVALUATE_CASE", "REEVALUATE"])
+def test_question_fields_are_rejected_on_non_question_operations(operation):
+    bad = request(operation=operation, question="synthetic question")
+    with pytest.raises(AdapterContractError, match="only for ANSWER_QUESTION"):
+        run(bad, response(options=[]))
+
+
+def test_question_about_requires_exact_suggestion_ref_and_positive_version():
+    valid = request(operation="ANSWER_QUESTION", question_about={
+        "suggestion_ref": "SUG-MOCK-01", "suggestion_version": 1,
+    })
+    assert run(valid, response(options=[]))["options"] == []
+    invalid = request(operation="ANSWER_QUESTION", question_about={
+        "suggestion_ref": "", "suggestion_version": 0,
+    })
+    with pytest.raises(AdapterContractError, match="question_about"):
+        run(invalid, response(options=[]))
+
+
+def test_state_reason_status_matrix_rejects_incompatible_pairs():
+    with pytest.raises(AdapterContractError, match="compatibility"):
+        run(request(), response(engine_state="SUGGESTION_REVIEWABLE",
+                                consultation_status="NEEDS_INFORMATION_OR_TEST",
+                                reason_codes=["DATA_GAP"], options=[]))
+    with pytest.raises(AdapterContractError, match="compatibility"):
+        run(request(), response(engine_state="STOP_OR_REFER_WITH_REASON",
+                                consultation_status="OUT_OF_V1_SCOPE",
+                                reason_codes=["KNOWLEDGE_GAP"], options=[]))
+
+
+def test_s08_no_valid_option_reason_is_typed_and_requires_empty_options():
+    valid = response(engine_state="STOP_OR_REFER_WITH_REASON",
+                     consultation_status="NEEDS_INFORMATION_OR_TEST",
+                     reason_codes=["NO_VALID_OPTION"], options=[])
+    assert run(request(), valid)["reason_codes"] == ["NO_VALID_OPTION"]
+    with pytest.raises(AdapterContractError, match="compatibility"):
+        run(request(), {**valid, "options": [{}]})
