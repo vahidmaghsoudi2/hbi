@@ -72,9 +72,9 @@ def test_data_change_invalidates_only_suggestions_dependent_on_changed_field():
     assert states["SUG-SYN-DEP"] is SuggestionStatus.INVALIDATED
     assert states["SUG-SYN-INDEP"] is SuggestionStatus.REVIEWABLE
     independent = next(s for s in changed.suggestions if s.suggestion_ref == "SUG-SYN-INDEP")
-    assert independent.evaluated_case_version == 1  # not silently re-evaluated or carried to v2
-    with pytest.raises(LedgerContractError, match="stale"):
-        accept_suggestion(changed, event_id="EV-SYN-A7", suggestion_ref="SUG-SYN-INDEP")
+    assert independent.evaluated_case_version == 2  # unaffected dependency snapshot retained
+    accepted_again = accept_suggestion(changed, event_id="EV-SYN-A7", suggestion_ref="SUG-SYN-INDEP")
+    assert accepted_again.suggestions[1].status is SuggestionStatus.ACCEPTED
 
 
 def test_change_data_requires_fields_and_event_id():
@@ -132,3 +132,24 @@ def test_nonstring_dependency_fields_fail_closed():
 def test_nonstring_changed_fields_fail_closed():
     with pytest.raises(LedgerContractError, match="strings"):
         change_data(with_suggestion(), event_id="EV-SYN-D3", changed_fields=[17])
+
+
+def test_unaffected_acceptance_and_consent_reset_after_case_data_version_changes():
+    ledger = add_suggestion(base(), suggestion_ref="SUG-SYN-DECISION", dependent_fields=["unrelated"])
+    accepted = accept_suggestion(ledger, event_id="EV-SYN-A8", suggestion_ref="SUG-SYN-DECISION")
+    consented = grant_execution_consent(accepted, event_id="EV-SYN-C4", suggestion_ref="SUG-SYN-DECISION")
+    changed = change_data(consented, event_id="EV-SYN-D4", changed_fields=["different_field"])
+    record = changed.suggestions[0]
+    assert record.status is SuggestionStatus.REVIEWABLE
+    assert record.evaluated_case_version == changed.case_version
+    assert not any(event.event_type == "EXECUTION_CONSENT" and event.case_version == changed.case_version for event in changed.events)
+    fresh_acceptance = accept_suggestion(changed, event_id="EV-SYN-A9", suggestion_ref="SUG-SYN-DECISION")
+    assert fresh_acceptance.suggestions[0].status is SuggestionStatus.ACCEPTED
+
+
+def test_rejected_suggestion_stays_rejected_after_unrelated_data_change():
+    rejected = reject_suggestion(with_suggestion(), event_id="EV-SYN-R2", suggestion_ref="SUG-SYN-1")
+    changed = change_data(rejected, event_id="EV-SYN-D5", changed_fields=["unrelated"])
+    assert changed.suggestions[0].status is SuggestionStatus.REJECTED
+    with pytest.raises(LedgerContractError, match="reviewable"):
+        accept_suggestion(changed, event_id="EV-SYN-A10", suggestion_ref="SUG-SYN-1")
