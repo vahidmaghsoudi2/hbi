@@ -240,6 +240,27 @@ def validate_response(request: Mapping[str, Any], response: Mapping[str, Any]) -
     if any(ref not in supplied_evidence_refs for ref in response["evidence_refs"]):
         raise AdapterContractError("engine response references evidence absent from the request context")
 
+    blocking = (
+        response["engine_state"] in {"NEEDS_MORE_INFORMATION", "STOP_OR_REFER_WITH_REASON"}
+        or response["consultation_status"] in {
+            "NEEDS_INFORMATION_OR_TEST",
+            "NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW",
+            "SAFETY_STOP_NO_EXECUTION_SUGGESTION",
+            "OUT_OF_V1_SCOPE",
+        }
+        or any(code in reason_codes for code in {
+            "DATA_GAP",
+            "KNOWLEDGE_GAP",
+            "CONFLICTING_DATA",
+            "SAFETY_CONCERN",
+            "OUT_OF_SCOPE",
+            "STALE_CASE_VERSION",
+            "NO_VALID_OPTION",
+        })
+    )
+    if blocking and response["options"]:
+        raise AdapterContractError("a blocked consultation response cannot contain candidate options")
+
     # Minimal synthetic candidate envelope: traceability structure only; no domain validation.
     candidate_keys = []
     candidate_ranks = []
@@ -291,26 +312,7 @@ def validate_response(request: Mapping[str, Any], response: Mapping[str, Any]) -
     if not isinstance(response["next_step"], Mapping):
         raise AdapterContractError("next_step must be an object")
 
-    blocking = (
-        response["engine_state"] in {"NEEDS_MORE_INFORMATION", "STOP_OR_REFER_WITH_REASON"}
-        or response["consultation_status"] in {
-            "NEEDS_INFORMATION_OR_TEST",
-            "NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW",
-            "SAFETY_STOP_NO_EXECUTION_SUGGESTION",
-            "OUT_OF_V1_SCOPE",
-        }
-        or any(code in reason_codes for code in {
-            "DATA_GAP",
-            "KNOWLEDGE_GAP",
-            "CONFLICTING_DATA",
-            "SAFETY_CONCERN",
-            "OUT_OF_SCOPE",
-            "STALE_CASE_VERSION",
-            "NO_VALID_OPTION",
-        })
-    )
-    if blocking and response["options"]:
-        raise AdapterContractError("a blocked consultation response cannot contain candidate options")
+
 
     state, status, reasons = response["engine_state"], response["consultation_status"], set(reason_codes)
     is_question = request["operation"] == "ANSWER_QUESTION"
