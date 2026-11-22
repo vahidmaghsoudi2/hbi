@@ -69,3 +69,13 @@ pytest -q tests/test_hair_color_decision_ledger_contract.py
 ```
 
 Dependency-change semantics in the ledger contract: suggestions depending on changed fields are invalidated; unaffected suggestions retain their candidate record but receive the current case version and return to `REVIEWABLE`, so prior acceptance/consent is not carried forward. Rejected suggestions remain rejected.
+
+## Publication gate
+
+`app.hair_color.publication_gate.evaluate_publication_gate` permits only current, option-free, non-advice triage statuses. It blocks any candidate option, recommendation status, stale case/target snapshot, or invalid reason code and returns a specialist-review fallback. The combined Persian public callable now applies this gate before rendering. No recommendation publication path is enabled.
+
+Run:
+
+```bash
+pytest -q tests/test_hair_color_publication_gate.py
+```
