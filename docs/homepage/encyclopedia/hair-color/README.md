@@ -42,6 +42,7 @@
 | پیشنهاد سیاست دربارهٔ تغییر اعتبار شواهد پس از تصمیم مشتری | [پیشنهاد سیاست — پیش‌نویس و تأییدنشده](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/docs/homepage/encyclopedia/hair-color/po-proposal-evidence-revision-after-client-decision-20261112.md) |
 | ممیزی H1 و پیشنهاد تکمیل قرارداد/مدل داده (Draft، بدون مجوز اجرا) | [گزارش ۲۲ نوامبر ۲۰۲۶](./h1-audit-model-data-next-20261122.md) |
 | مدل مالکیت داده، lineage و publication gates (Draft، بدون مجوز اجرا) | [پیشنهاد مدل داده و gates](./model-data-ownership-publication-gates-draft-20261122.md) |
+| پیشنهاد Contract 0.3 (request semantics، candidate/evidence، publication gate؛ Draft) | [پیشنهاد بازبینی قرارداد](./adapter-contract-v0.3-revision-proposal-20261122.md) |
 | ۱۵ سناریوی مصنوعی قابل‌ماشین‌خوانی | [بستهٔ fixtureها](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/tests/fixtures/hair-color-contract-v1.json) |
 | ساختار مجاز بستهٔ fixtureها | [JSON Schema](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/tests/fixtures/hair-color-contract-v1.schema.json) |
 | اعتبارسنج ساختاری قرارداد (نه اجرای موتور محصول) | [Runner](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/scripts/run_hair_color_contract.py) و [آزمون‌های Runner](https://github.com/vahidmaghsoudi2/hbi/blob/bde6dd7142badd7026a61af368ee36aa254c15a0/tests/test_hair_color_contract_runner.py) |
