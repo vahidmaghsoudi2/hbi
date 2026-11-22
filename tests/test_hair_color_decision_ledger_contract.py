@@ -102,3 +102,11 @@ def test_restart_cannot_resume_same_case_or_nonstopped_case():
     stopped = request_stop(base(), event_id="EV-SYN-STOP3", performed_step_refs=[])
     with pytest.raises(LedgerContractError, match="distinct"):
         fresh_restart(stopped, new_case_ref="CASE-SYN-LEDGER")
+
+
+def test_stopped_case_blocks_acceptance_and_consent():
+    stopped = request_stop(with_suggestion(), event_id="EV-SYN-STOP4", performed_step_refs=[])
+    with pytest.raises(LedgerContractError, match="stopped"):
+        accept_suggestion(stopped, event_id="EV-SYN-A6", suggestion_ref="SUG-SYN-1")
+    with pytest.raises(LedgerContractError, match="stopped"):
+        grant_execution_consent(stopped, event_id="EV-SYN-C3", suggestion_ref="SUG-SYN-1")
