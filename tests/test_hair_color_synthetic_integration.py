@@ -17,7 +17,7 @@ from tests.support.hair_color_synthetic_engine import SyntheticHairColorEngine
 
 def make_request(scenario_id, **overrides):
     value = {
-        "contract_version": "0.2-draft",
+        "contract_version": "0.3-draft",
         "request_id": f"REQ-{scenario_id}",
         "operation": {"S11": "ANSWER_QUESTION", "S13": "REEVALUATE", "S14": "REEVALUATE"}.get(scenario_id, "EVALUATE_CASE"),
         "case_ref": f"CASE-{scenario_id}",
@@ -28,6 +28,8 @@ def make_request(scenario_id, **overrides):
         "policy_context": {"chemical_execution_instructions": "PROHIBITED"},
     }
     value.update(overrides)
+    if value["operation"] == "ANSWER_QUESTION" and "question" not in value:
+        value["question"] = "Synthetic-only question"
     return value
 
 
@@ -41,7 +43,7 @@ def make_request(scenario_id, **overrides):
         ("S05", 0, "DATA_GAP"),
         ("S06", 0, "KNOWLEDGE_GAP"),
         ("S07", 0, "SAFETY_CONCERN"),
-        ("S08", 0, None),
+        ("S08", 0, "NO_VALID_OPTION"),
         ("S09", 2, None),
         ("S10", 1, None),
         ("S11", 0, None),
