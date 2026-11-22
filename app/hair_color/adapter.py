@@ -268,8 +268,8 @@ def validate_response(request: Mapping[str, Any], response: Mapping[str, Any]) -
                 raise AdapterContractError("candidate claim references evidence absent from request context")
     if len(candidate_keys) != len(set(candidate_keys)):
         raise AdapterContractError("candidate_key values must be unique")
-    if candidate_ranks and sorted(candidate_ranks) != list(range(1, len(candidate_ranks) + 1)):
-        raise AdapterContractError("candidate ranks must be unique and contiguous starting at 1")
+    if candidate_ranks and candidate_ranks != list(range(1, len(candidate_ranks) + 1)):
+        raise AdapterContractError("candidate ranks must be unique, contiguous, and ordered starting at 1")
 
     if not isinstance(response["next_step"], Mapping):
         raise AdapterContractError("next_step must be an object")
