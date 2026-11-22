@@ -234,7 +234,12 @@ def test_s12_rejection_and_suggestion_ledger_remain_outside_adapter_authority():
     # has no ledger/store dependency and must not mutate the supplied snapshot.
     snapshot = request()
     before = deepcopy(snapshot)
-    run(snapshot, response(options=[]))
+    run(snapshot, response(
+        engine_state="STOP_OR_REFER_WITH_REASON",
+        consultation_status="NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW",
+        reason_codes=["KNOWLEDGE_GAP"],
+        options=[],
+    ))
     assert snapshot == before
 
 
@@ -249,7 +254,13 @@ def test_s14_resume_check_is_not_an_operation_but_fresh_reevaluation_is():
         run(request(operation="RESUME_CHECK"), response(options=[]))
 
     fresh = request(operation="REEVALUATE")
-    assert run(fresh, response(options=[]))["request_id"] == fresh["request_id"]
+    result = run(fresh, response(
+        engine_state="STOP_OR_REFER_WITH_REASON",
+        consultation_status="NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW",
+        reason_codes=["KNOWLEDGE_GAP"],
+        options=[],
+    ))
+    assert result["request_id"] == fresh["request_id"]
 
 
 def test_s15_engine_exception_returns_no_consultation_result():
