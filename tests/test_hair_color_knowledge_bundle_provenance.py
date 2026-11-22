@@ -92,3 +92,11 @@ def test_incomplete_approval_metadata_is_not_recognized_as_approval():
     result = validate_knowledge_bundle(bundle)
     assert result["specialist_approval_record_valid"] is False
     assert result["activation_allowed"] is False
+
+
+@pytest.mark.parametrize("missing", ["source_id", "publisher", "title", "source_version", "source_locator", "retrieved_at", "applicability"])
+def test_missing_source_provenance_field_rejected(missing):
+    bundle = valid_bundle()
+    del bundle["sources"][0][missing]
+    with pytest.raises(KnowledgeBundleValidationError, match="source."):
+        validate_knowledge_bundle(bundle)
