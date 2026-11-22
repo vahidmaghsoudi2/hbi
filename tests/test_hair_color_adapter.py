@@ -413,7 +413,7 @@ def test_s08_no_valid_option_reason_is_typed_and_requires_empty_options():
                      consultation_status="NEEDS_INFORMATION_OR_TEST",
                      reason_codes=["NO_VALID_OPTION"], options=[])
     assert run(request(), valid)["reason_codes"] == ["NO_VALID_OPTION"]
-    with pytest.raises(AdapterContractError, match="compatibility"):
+    with pytest.raises(AdapterContractError, match="blocked consultation"):
         run(request(), {**valid, "options": [candidate()]})
 
 
