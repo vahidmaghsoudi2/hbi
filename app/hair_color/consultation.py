@@ -23,10 +23,17 @@ def run_consultation(request: Mapping[str, Any]) -> dict[str, Any]:
 def run_consultation_persian(request: Mapping[str, Any]) -> dict[str, Any]:
     """Convenience API for UI callers: raw validated result plus Persian rendering."""
     from .persian_response_renderer import render_persian_response
+    from .publication_gate import evaluate_publication_gate
 
     result = run_consultation(request)
+    gate = evaluate_publication_gate(
+        result,
+        current_case_version=request["case_version"],
+        current_target_version=request["target_version"],
+    )
     return {
         "consultation": result,
-        "presentation": render_persian_response(result),
+        "publication_gate": gate,
+        "presentation": render_persian_response(gate["safe_response"]),
         "execution_authorized": False,
     }
