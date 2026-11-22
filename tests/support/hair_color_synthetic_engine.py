@@ -86,6 +86,11 @@ class SyntheticHairColorEngine:
                 options=[],
             )
 
+        if scenario_id in {"S02", "S04", "S05"}:
+            result["missing_information"] = [
+                {"field": f"SYNTHETIC_REQUIRED_DATA_{scenario_id}", "reason": "fixture-only"}
+            ]
+
         if scenario_id == "S08":
             result.update(
                 engine_state="STOP_OR_REFER_WITH_REASON",
