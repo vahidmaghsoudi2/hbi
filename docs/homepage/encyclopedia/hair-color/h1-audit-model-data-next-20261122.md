@@ -2,7 +2,7 @@
 
 **وضعیت:** گزارش ممیزی read-only و پیشنهاد مسیر بعدی؛ Draft، بدون تصویب PO و بدون مجوز تغییر runtime.  
 **دامنه:** Hair Color فقط؛ Adapter 0.2-draft، Schema، unit/integration tests، synthetic fixture contract و اسناد معماری.  
-**مبنای master:** `cc567099a5d66e8656e55ca4436213e285094219` (پس از ادغام PR #551).  
+**مبنای master در زمان ایجاد PR:** `12fbcdc2d5a11046c1f93c1e21e41284701083ab`؛ merge-base با شاخهٔ گزارش `cc567099a5d66e8656e55ca4436213e285094219` است.  
 **مبنای سند قرارداد و PO register:** commit ثابت `bde6dd7142badd7026a61af368ee36aa254c15a0`؛ فایل‌های منحصربه‌فرد PR #535 در master در مسیرهای README به commit ثابت پیوند دارند و نباید فرض شود هر لینک در master جاری است.
 
 ## 1. خلاصه اجرایی
