@@ -98,7 +98,7 @@ def test_stopped_case_restart_is_fresh_case_without_carryover():
 
 def test_restart_cannot_resume_same_case_or_nonstopped_case():
     with pytest.raises(LedgerContractError, match="stopped"):
-        fresh_restart(base(), new_case_ref="CASE-SYN-NEW")
+        fresh_restart(base(), new_case_ref="CASE-SYN-NEW", event_id="EV-SYN-RESTART0")
     stopped = request_stop(base(), event_id="EV-SYN-STOP3", performed_step_refs=[])
     with pytest.raises(LedgerContractError, match="distinct"):
         fresh_restart(stopped, new_case_ref="CASE-SYN-LEDGER", event_id="EV-SYN-RESTART3")
