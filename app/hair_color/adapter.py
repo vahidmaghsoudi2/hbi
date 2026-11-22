@@ -220,13 +220,15 @@ def validate_response(request: Mapping[str, Any], response: Mapping[str, Any]) -
     if len(response["evidence_refs"]) != len(set(response["evidence_refs"])):
         raise AdapterContractError("evidence_refs must not contain duplicates")
 
-    supplied_evidence_refs = {
-        item.get("evidence_ref")
-        for item in request["evidence_context"]
-        if isinstance(item, Mapping)
-        and isinstance(item.get("evidence_ref"), str)
-        and item.get("evidence_ref").strip()
-    }
+    supplied_evidence_refs = set()
+    for item in request["evidence_context"]:
+        if not isinstance(item, Mapping):
+            raise AdapterContractError("each evidence_context item must be an object")
+        evidence_ref = item.get("evidence_ref")
+        _require_nonempty_string(evidence_ref, "evidence_context.evidence_ref")
+        if evidence_ref in supplied_evidence_refs:
+            raise AdapterContractError("request evidence_context references must be unique")
+        supplied_evidence_refs.add(evidence_ref)
     if response["options"] and not response["evidence_refs"]:
         raise AdapterContractError("candidate options require traceable evidence references")
     if any(ref not in supplied_evidence_refs for ref in response["evidence_refs"]):
@@ -269,11 +271,17 @@ def validate_response(request: Mapping[str, Any], response: Mapping[str, Any]) -
                 raise AdapterContractError("candidate claim evidence_refs must not contain duplicates")
             if any(ref not in supplied_evidence_refs for ref in refs):
                 raise AdapterContractError("candidate claim references evidence absent from request context")
+            if any(ref not in response["evidence_refs"] for ref in refs):
+                raise AdapterContractError("candidate claim evidence must be included in response evidence_refs")
     if len(candidate_keys) != len(set(candidate_keys)):
         raise AdapterContractError("candidate_key values must be unique")
     if candidate_ranks and candidate_ranks != list(range(1, len(candidate_ranks) + 1)):
         raise AdapterContractError("candidate ranks must be unique, contiguous, and ordered starting at 1")
 
+    if any(not isinstance(item, (str, Mapping)) for item in response["missing_information"]):
+        raise AdapterContractError("missing_information items must be strings or objects")
+    if any(not isinstance(item, str) or not item.strip() for item in response["limitations"]):
+        raise AdapterContractError("limitations must contain non-empty strings")
     if not isinstance(response["next_step"], Mapping):
         raise AdapterContractError("next_step must be an object")
 
@@ -313,6 +321,8 @@ def validate_response(request: Mapping[str, Any], response: Mapping[str, Any]) -
             "DATA_GAP", "KNOWLEDGE_GAP", "CONFLICTING_DATA",
         } or response["options"]:
             raise AdapterContractError("state/reason/status compatibility violation")
+        if "DATA_GAP" in reasons and not response["missing_information"]:
+            raise AdapterContractError("DATA_GAP requires explicit missing_information")
     elif state == "STOP_OR_REFER_WITH_REASON":
         if response["options"] or not reasons:
             raise AdapterContractError("state/reason/status compatibility violation")
