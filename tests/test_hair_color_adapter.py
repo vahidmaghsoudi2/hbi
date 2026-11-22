@@ -169,7 +169,7 @@ def test_specialist_review_status_withholds_candidate_options():
     unsafe = response(
         engine_state="SUGGESTION_REVIEWABLE",
         consultation_status="NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW",
-        options=[{}],
+        options=[candidate()],
     )
     with pytest.raises(AdapterContractError, match="blocked consultation"):
         run(request(), unsafe)
@@ -403,3 +403,26 @@ def test_question_about_is_rejected_on_non_question_operation():
     })
     with pytest.raises(AdapterContractError, match="only for ANSWER_QUESTION"):
         run(bad, response())
+
+
+@pytest.mark.parametrize(
+    ("options", "error"),
+    [
+        ([candidate(1, key="DUP"), candidate(2, key="DUP")], "candidate_key values must be unique"),
+        ([candidate(1), candidate(1, key="CAND-SYN-OTHER")], "candidate ranks must be unique and contiguous"),
+        ([candidate(2)], "candidate ranks must be unique and contiguous"),
+        ([{"candidate_key": "C", "rank": 1, "summary": "missing claims"}], "candidate missing required structural fields"),
+        ([{**candidate(), "claims": []}], "candidate claims must be a non-empty array"),
+        ([{**candidate(), "claims": [{**candidate()["claims"][0], "evidence_refs": ["EVIDENCE-ABSENT"]}]}], "candidate claim references evidence absent from request context"),
+        ([{**candidate(), "claims": [{**candidate()["claims"][0], "support_status": "UNVERIFIED"}]}], "support_status must be MOCK_SUPPORTED"),
+    ],
+)
+def test_candidate_structure_uniqueness_and_claim_evidence_are_fail_closed(options, error):
+    with pytest.raises(AdapterContractError, match=error):
+        run(request(), response(options=options))
+
+
+def test_candidate_rank_order_may_be_presented_but_rank_values_must_be_contiguous():
+    options = [candidate(2), candidate(1)]
+    result = run(request(), response(options=options))
+    assert [option["rank"] for option in result["options"]] == [2, 1]
