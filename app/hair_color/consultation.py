@@ -18,3 +18,15 @@ _POLICY_GATE_ADAPTER = HairColorAdapter(PolicyGateEngine())
 def run_consultation(request: Mapping[str, Any]) -> dict[str, Any]:
     """Run a fail-closed intake/triage consultation; no color candidates are emitted."""
     return _POLICY_GATE_ADAPTER.evaluate(request)
+
+
+def run_consultation_persian(request: Mapping[str, Any]) -> dict[str, Any]:
+    """Convenience API for UI callers: raw validated result plus Persian rendering."""
+    from .persian_response_renderer import render_persian_response
+
+    result = run_consultation(request)
+    return {
+        "consultation": result,
+        "presentation": render_persian_response(result),
+        "execution_authorized": False,
+    }
