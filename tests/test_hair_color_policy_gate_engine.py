@@ -116,4 +116,7 @@ def test_persian_public_callable_returns_raw_gate_and_ui_presentation():
     assert result["presentation"]["options"] == []
     assert result["execution_authorized"] is False
     assert result["presentation"]["execution_authorized"] is False
+    assert result["publication_gate"]["publication_allowed"] is True
+    assert result["publication_gate"]["publication_kind"] == "TRIAGE_ONLY"
+    assert result["publication_gate"]["options"] == []
     assert "متخصص" in result["presentation"]["title"]
