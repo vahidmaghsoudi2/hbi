@@ -423,3 +423,119 @@ All four inspected SQLite files passed `PRAGMA integrity_check`; foreign-key che
 The decisive missing evidence is not another directory listing. It is an authoritative deployment/runtime reference that identifies the running HBI service and its configured database endpoint or mounted SQLite file, followed by a read-only readback from that exact target. Until that provenance link exists, choosing `SAFETY_BACKUP` merely because it contains more rows would violate the project's NO ASSUMPTION rule.
 
 **Provenance note:** the local hashes, counts, and runtime-scan outcomes above are transcribed from the PO-supplied read-only diagnostic outputs in the execution conversation. They are not represented as a fresh independent query by the GitHub connector. The repository configuration and project rules were separately inspected from GitHub.
+
+
+---
+
+## 2026-11-23 — Seven-product read-only operational DB snapshot reconciliation
+
+**Disposition update:** This addendum supersedes earlier statements in this document that the local operational readback was NOT VERIFIED / unavailable. The PO supplied the output of the PR #523 read-only exporter from the previously identified local operational database path. The source database SHA-256 exactly matches the previously established operational DB fingerprint. The runtime was stopped for the export; this is a point-in-time readback of the identified local operational DB file, not a claim that a service was running during export. **Stage 5 is READY FOR PO REVIEW, not PO-ACCEPTED. Stage 6 remains NOT STARTED.**
+
+### Snapshot provenance and integrity
+
+| Check | Snapshot result | Assessment |
+|---|---|---|
+| Snapshot kind | `HBI_SEVEN_PRODUCT_READ_ONLY_ACCEPTANCE_BASELINE` | MATCH |
+| Export timestamp | `2026-11-24T20:24:16+00:00` | FUTURE-DATED relative to the review date 2026-11-23; provenance/time-source discrepancy remains OPEN |
+| Source DB | `hbi.db`, 589,824 bytes | Recorded |
+| Source DB SHA-256 | `cb75363628cf3dd8320d5b40c324276b018b3075a18489b4ba4f1420fd541d1c` | MATCH to previously identified operational DB fingerprint |
+| WAL / SHM / journal | All absent; 0 bytes | Recorded |
+| Export method | Stable DB+WAL file copy; source DB never opened by SQLite; SQLite opened isolated temporary copy only | READ-ONLY METHOD ASSERTED BY EXPORTER |
+| Source sidecar stability | Source components hashed before/after; verification true | PASS |
+| SQLite integrity | `ok` | PASS |
+| Foreign-key violations | 0 | PASS |
+| Missing canonical products / tables / columns | 0 / 0 / 0 | PASS |
+| Privacy scope | Seven canonical product IDs only; Case, Customer and customer identifiers excluded | PASS |
+
+**Timestamp caveat:** the supplied filename also contains `2026-11-24`, consistent with the JSON timestamp but later than the current review date. The exporter metadata and filename agree with each other; neither establishes why the machine clock/export date is ahead. Do not silently normalize this. PO should confirm the export host clock/timezone or provide a corrected, freshly generated snapshot if the timestamp is material to acceptance.
+
+### Canonical Product Master reconciliation
+
+All seven IDs exactly match the seven canonical IDs in the baseline. Every row is `DRAFT`, `identity_status=NEEDS_REVIEW`, and `qa_verdict=PENDING`; no product is accepted or active based on this snapshot.
+
+| Product | Product Master vs baseline | Identity / QA | Result |
+|---|---|---|---|
+| P1 COSRX | 150 ml research target in baseline; stored size is NULL | NEEDS_REVIEW / PENDING / DRAFT | MISMATCH: size not populated; physical identity remains UNKNOWN |
+| P2 Neutrogena | 200 ml and UK market stored | NEEDS_REVIEW / PENDING / DRAFT | MATCH on stored size/source-market metadata; physical market/formula remains UNKNOWN |
+| P3 Garnier | 200 ml and AU market stored | NEEDS_REVIEW / PENDING / DRAFT | MATCH on stored size/source-market metadata; physical package match remains UNKNOWN |
+| P4 SKIN1004 | baseline identifies Korean/international version; stored size and market are NULL | NEEDS_REVIEW / PENDING / DRAFT | PARTIAL / UNKNOWN: source-market boundary exists in Evidence, not Product Master |
+| P5 ISDIN | SPF50+ research target; stored size and market are NULL | NEEDS_REVIEW / PENDING / DRAFT | PARTIAL / UNKNOWN: physical market/formula and size remain UNKNOWN |
+| P6 Clinique | historical 100 ml dossier; stored size is 100 ml, market NULL | NEEDS_REVIEW / PENDING / DRAFT | PARTIAL: size matches; UK retailer evidence market is not populated in Product Master |
+| P7 Anua | 30 ml research target; stored size is 30 ml, market NULL | NEEDS_REVIEW / PENDING / DRAFT | PARTIAL: size matches; US evidence scope is not populated in Product Master |
+
+The market values on Product Master are not physical package verification. Evidence source markets remain scoped to their source pages and must not be promoted to physical-unit market identity.
+
+### Evidence reconciliation against the 24-assertion manifest
+
+Snapshot contains 25 Evidence rows, distributed P1–P7 as 4 / 4 / 3 / 3 / 2 / 3 / 6. The baseline manifest contains 24 draft assertions distributed 4 / 4 / 3 / 3 / 2 / 3 / 5. P1–P6 row counts and fields align with their manifest assertion inventories. P7 has one additional stored Evidence row and requires human mapping/reconciliation.
+
+| Product | Manifest assertions | Snapshot Evidence rows | Field-level result |
+|---|---:|---:|---|
+| P1 COSRX | 4 | 4 | MATCH in row count and fields |
+| P2 Neutrogena | 4 | 4 | MATCH in row count and fields |
+| P3 Garnier | 3 | 3 | MATCH in row count and fields |
+| P4 SKIN1004 | 3 | 3 | MATCH in row count and fields |
+| P5 ISDIN | 2 | 2 | MATCH in row count and fields |
+| P6 Clinique | 3 | 3 | MATCH in row count and fields |
+| P7 Anua | 5 | 6 | MISMATCH / REVIEW: two Evidence rows use `field=ingredients`; the manifest has one ingredients assertion and explicitly records a pre-existing conflict requiring human reclassification |
+
+Across all 25 Evidence rows:
+- `evidence_strength=UNVERIFIED`: 25.
+- `evidence_status=UNKNOWN`: 25.
+- `conflict_status=NONE`: 25.
+- `qa_status=PENDING`: 19; `NEEDS_REVIEW`: 6.
+- No row is independently verified or QA-approved.
+
+**P7 conflict handling:** the repository manifest describes an ingredients-field conflict, while the snapshot's two Anua ingredients rows both report `conflict_status=NONE`. This is a concrete state mismatch between the draft manifest's conflict note and the stored row flags. Do not infer that the conflict is resolved. Preserve both rows and UNKNOWN statuses; record the conflict as OPEN for PO/human review. No row was deleted, merged, or reclassified.
+
+### ProductKnowledge reconciliation
+
+There are seven ProductKnowledge rows, one per canonical product. All seven have `evidence_status=UNKNOWN`, `knowledge_confidence=0.0`, and NULL `domain_evidence_status`.
+
+- P1 COSRX: all knowledge payload fields and evidence_refs are NULL despite four corresponding Evidence rows. **MISMATCH / material gap.**
+- P2 Neutrogena: ingredients, ingredient_roles, usage_instructions, manufacturer_claims and evidence_refs populated; these correspond to its four Evidence rows. **FIELD COVERAGE MATCH**, but knowledge remains UNKNOWN / confidence 0.
+- P3 Garnier: ingredients, ingredient_roles, known_use_cases and evidence_refs populated; correspond to its three Evidence rows. **FIELD COVERAGE MATCH**, but knowledge remains UNKNOWN / confidence 0.
+- P4 SKIN1004: ingredients, ingredient_roles, manufacturer_claims and evidence_refs populated; correspond to its three Evidence rows. **FIELD COVERAGE MATCH**, but knowledge remains UNKNOWN / confidence 0.
+- P5 ISDIN: manufacturer_claims, known_use_cases and evidence_refs populated; correspond to its two Evidence rows. **FIELD COVERAGE MATCH**, but knowledge remains UNKNOWN / confidence 0.
+- P6 Clinique: ingredients, ingredient_roles, manufacturer_claims and evidence_refs populated; correspond to its three Evidence rows. **FIELD COVERAGE MATCH**, but knowledge remains UNKNOWN / confidence 0.
+- P7 Anua: all knowledge payload fields and evidence_refs are NULL despite six Evidence rows. **MISMATCH / material gap**, compounded by the duplicate ingredients field and conflict-flag discrepancy.
+
+Field coverage is not evidence acceptance. All stored knowledge remains explicitly UNKNOWN and must not be treated as approved consultation content.
+
+### Inventory and relationship tables
+
+| Table | Snapshot | Reconciliation |
+|---|---:|---|
+| Inventory | 7 rows; each has quantity_available=12, quantity_reserved=0, quantity_damaged=0, stock_status=active | MATCH to the recorded 12-per-product / 84-unit planning baseline; this is database quantity, not a physical count or proof of sellability |
+| Recommendation | 0 rows | EMPTY; no recommendation records exist in this snapshot |
+| ProductProblemLink | 0 rows | EMPTY; no product-problem relationships exist in this snapshot |
+
+### Final Stage 5 classification
+
+**PASS**
+- Snapshot structurally valid; integrity check OK; zero FK violations.
+- Exact seven canonical IDs present; required tables/columns present.
+- Read-only exporter provenance fields and stable-source hash checks are present.
+- Source DB hash matches the previously identified local operational DB fingerprint.
+- Inventory rows and counts are visible and reconciled to the recorded planning quantity.
+- No write/migration/seed/import or product/evidence/inventory/customer mutation was performed by this review.
+
+**MISMATCH / OPEN**
+- Future-dated export timestamp and filename relative to review date.
+- P1 COSRX Product Master size NULL despite 150 ml research target.
+- P4 source-market boundary, P5 size/market, and P6 market are not populated in Product Master; physical identity remains UNKNOWN.
+- P1 and P7 ProductKnowledge payloads/evidence_refs are entirely NULL.
+- P7 has six Evidence rows against five manifest assertions, two ingredients-field rows, and stored conflict flags NONE despite the manifest's unresolved conflict note.
+- All Product QA remains PENDING; all Product identity statuses NEEDS_REVIEW; all Product statuses DRAFT.
+- All Evidence remains UNVERIFIED / UNKNOWN; all ProductKnowledge remains UNKNOWN with zero confidence.
+- Recommendation and ProductProblemLink remain empty.
+- Snapshot timestamp requires PO confirmation.
+
+**UNKNOWN — deliberately preserved**
+- Physical package, GTIN, exact lot/formula and market match for products where not established by the source.
+- Whether 12 units per product correspond to physically counted stock; whether stock is sellable under lifecycle/PO rules.
+- Any product acceptance, activation, consultation suitability or supported ProductProblemLink relationship.
+
+**Stage 5 status:** **READY FOR PO REVIEW — NOT ACCEPTED.** The requested read-only snapshot has been received, structurally checked, and reconciled against the 7-product / 24-assertion baseline. The remaining items above are explicit PO review findings, not reasons to invent or silently repair data. **Stage 6 remains NOT STARTED.**
+
+**Safety boundary:** this work was read-only. No DB write, migration, seed, import, product/evidence/knowledge/inventory mutation, customer-data access, runtime deployment, or merge was performed.
