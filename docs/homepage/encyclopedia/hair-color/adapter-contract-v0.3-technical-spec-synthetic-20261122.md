@@ -223,3 +223,25 @@ The Adapter now validates a minimal candidate envelope instead of accepting opaq
 The draft JSON Schema was tightened to describe this structure. Focused synthetic tests were added for duplicate keys/ranks, rank-order mismatch, missing candidate/claim fields, empty claims, unresolved claim evidence, and non-synthetic support marker.
 
 **Limits:** This is structural linkage only. It does not evaluate evidence relevance, scientific validity, rule applicability, constraint completeness, candidate scoring, or real-world safety/feasibility. Claim text and evidence in fixtures are placeholders. Tests/CI have not yet been observed to pass on this new head; Chat 5 must verify workflow results and inspect any failures before closure.
+
+## 14. Final-chat runtime gate and implementation status
+
+### Runtime entry point added
+- `app/hair_color/consultation.py` exposes `run_consultation(request)`.
+- It uses `PolicyGateEngine` and the Contract 0.3 Adapter.
+- `app/hair_color/policy_gate_engine.py` implements deterministic intake routing for explicit safety concern, out-of-scope, stale snapshot, missing intake fields, conflicting fields, question requests, and complete intake without approved knowledge.
+- It **never emits candidate options**. Complete intake alone does not unlock domain recommendations.
+
+### Verified design boundary
+This is an executable intake/triage consultation, not a specialist color consultation. The specialist-approved knowledge/evidence bundle and its validation are still missing; therefore the runtime defaults to KNOWLEDGE_GAP and referral when intake is otherwise complete. This is deliberate fail-closed behavior, not a claim of project completion for real color advice.
+
+### Tests added
+- Candidate claim evidence must be included in response-level evidence refs and supplied request context.
+- Request evidence refs must be non-empty and unique.
+- DATA_GAP must carry explicit missing-information items.
+- Public entry-point and policy-gate synthetic tests cover safety, scope, stale version, missing data, conflict, questions, complete intake without approved knowledge, and non-mutation.
+
+### Not approved / not implemented
+- Real product/shade/chemical knowledge, specialist rules, formula or processing instructions, feasibility or result claims.
+- Specialist validation, product-specific evidence registry, real client data, case store, authoritative ledger, consent/workflow ownership, orchestrator publication atomicity/freshness, pilot, release, merge.
+- CI outcomes for the latest commits remain pending at the time of this section's recording.
