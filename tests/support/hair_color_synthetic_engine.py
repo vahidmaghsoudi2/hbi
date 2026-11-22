@@ -74,7 +74,8 @@ class SyntheticHairColorEngine:
         if scenario_id == "S08":
             result.update(
                 engine_state="STOP_OR_REFER_WITH_REASON",
-                consultation_status="NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW",
+                consultation_status="NEEDS_INFORMATION_OR_TEST",
+                reason_codes=["NO_VALID_OPTION"],
                 options=[],
             )
         elif scenario_id == "S09":
