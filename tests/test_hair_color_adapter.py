@@ -414,6 +414,8 @@ def test_question_about_is_rejected_on_non_question_operation():
         ([{"candidate_key": "C", "rank": 1, "summary": "missing claims"}], "candidate missing required structural fields"),
         ([{**candidate(), "claims": []}], "candidate claims must be a non-empty array"),
         ([{**candidate(), "claims": [{**candidate()["claims"][0], "evidence_refs": ["EVIDENCE-ABSENT"]}]}], "candidate claim references evidence absent from request context"),
+        ([{**candidate(), "extra_field": "not allowed"}], "candidate contains unexpected structural fields"),
+        ([{**candidate(), "claims": [{**candidate()["claims"][0], "extra": "not allowed"}]}], "candidate claim contains unexpected structural fields"),
         ([{**candidate(), "claims": [{**candidate()["claims"][0], "support_status": "UNVERIFIED"}]}], "support_status must be MOCK_SUPPORTED"),
     ],
 )
