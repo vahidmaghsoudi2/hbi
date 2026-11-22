@@ -76,7 +76,7 @@ def run(request_value, response_value):
 def test_s01_valid_synthetic_request_passes_adapter_boundary():
     result = run(request(), response())
     assert result["engine_state"] == "SUGGESTION_REVIEWABLE"
-    assert result["options"] == [{}]
+    assert result["options"] == [candidate()]
 
 
 def test_s02_data_gap_withholds_dependent_options():
@@ -87,6 +87,7 @@ def test_s02_data_gap_withholds_dependent_options():
             consultation_status="NEEDS_INFORMATION_OR_TEST",
             reason_codes=["DATA_GAP"],
             options=[],
+            missing_information=["synthetic required field"],
         ),
     )
     assert result["options"] == []
@@ -116,6 +117,7 @@ def test_s04_image_limited_case_cannot_publish_a_candidate_without_required_data
             reason_codes=["DATA_GAP"],
             options=[],
             limitations=["Image input is not used to infer hidden chemical history."],
+            missing_information=["synthetic baseline data"],
         ),
     )
     assert result["options"] == []
@@ -315,6 +317,31 @@ def test_chemical_execution_fields_are_rejected_recursively():
     with pytest.raises(AdapterContractError, match="prohibited field"):
         run(request(), unsafe)
 
+
+
+def test_candidate_claim_evidence_must_be_in_response_level_evidence_refs():
+    bad = candidate()
+    bad["claims"][0]["evidence_refs"] = ["EVIDENCE-MOCK-A"]
+    with pytest.raises(AdapterContractError, match="included in response evidence_refs"):
+        run(request(), response(evidence_refs=[], options=[bad]))
+
+
+def test_request_evidence_context_requires_unique_nonempty_reference_objects():
+    for invalid in (
+        [{"evidence_ref": "EVIDENCE-MOCK-A"}, {"evidence_ref": "EVIDENCE-MOCK-A"}],
+        [{"evidence_ref": ""}],
+        [None],
+    ):
+        with pytest.raises(AdapterContractError, match="evidence_context"):
+            HairColorAdapter(lambda _request: response()).evaluate(request(evidence_context=invalid))
+
+
+def test_data_gap_requires_explicit_missing_information():
+    bad = response(engine_state="NEEDS_MORE_INFORMATION",
+                   consultation_status="NEEDS_INFORMATION_OR_TEST",
+                   reason_codes=["DATA_GAP"], options=[], missing_information=[])
+    with pytest.raises(AdapterContractError, match="explicit missing_information"):
+        run(request(), bad)
 
 
 def test_candidate_requires_evidence_refs_bound_to_the_request_context():
