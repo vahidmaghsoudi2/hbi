@@ -207,6 +207,10 @@ def validate_response(request: Mapping[str, Any], response: Mapping[str, Any]) -
 
     _require_nonempty_string(response["summary"], "summary")
 
+    forbidden = _has_forbidden_key(response, _FORBIDDEN_RESPONSE_KEYS | _FORBIDDEN_DECISION_KEYS)
+    if forbidden is not None:
+        raise AdapterContractError(f"engine response contains prohibited field: {forbidden}")
+
 
 
     for field in ("options", "missing_information", "evidence_refs", "limitations"):
@@ -342,9 +346,7 @@ def validate_response(request: Mapping[str, Any], response: Mapping[str, Any]) -
         if status == "SYSTEM_REASONED_SUGGESTION":
             raise AdapterContractError("state/reason/status compatibility violation")
 
-    forbidden = _has_forbidden_key(response, _FORBIDDEN_RESPONSE_KEYS | _FORBIDDEN_DECISION_KEYS)
-    if forbidden is not None:
-        raise AdapterContractError(f"engine response contains prohibited field: {forbidden}")
+
 
 
 class HairColorAdapter:
