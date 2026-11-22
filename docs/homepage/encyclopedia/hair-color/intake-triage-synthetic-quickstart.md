@@ -6,7 +6,7 @@ This is the **current safe runtime surface**. It is not a color-recommendation e
 
 `app.hair_color.consultation.run_consultation(request)` validates the contract and runs the fail-closed intake gate. The gate never emits color candidates, shade rankings, formulas, product equivalence, chemical/process parameters, or predicted outcomes.
 
-The Persian presentation helper is:
+For a UI caller, the combined public callable is \`run_consultation_persian(request)\`; it returns the validated consultation result and a Persian presentation object, and hardcodes execution authorization to false.\n\nThe standalone Persian presentation helper is:
 
 `app.hair_color.persian_response_renderer.render_persian_response(response)`
 
