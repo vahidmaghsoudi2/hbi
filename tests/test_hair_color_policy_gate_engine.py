@@ -120,3 +120,14 @@ def test_persian_public_callable_returns_raw_gate_and_ui_presentation():
     assert result["publication_gate"]["publication_kind"] == "TRIAGE_ONLY"
     assert result["publication_gate"]["options"] == []
     assert "متخصص" in result["presentation"]["title"]
+
+
+def test_missing_and_conflicting_fields_use_general_clarification_action():
+    result = HairColorAdapter(PolicyGateEngine()).evaluate(
+        request(case_context={
+            "missing_fields": ["synthetic missing"],
+            "conflicting_fields": ["synthetic conflict"],
+        })
+    )
+    assert set(result["reason_codes"]) == {"DATA_GAP", "CONFLICTING_DATA"}
+    assert result["next_step"]["action"] == "ASK_AND_CLARIFY"
