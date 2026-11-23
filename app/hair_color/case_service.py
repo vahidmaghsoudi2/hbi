@@ -43,7 +43,9 @@ class HairColorCaseService:
 
     def get_case(self, case_ref: str):
         self._synthetic_id(case_ref, "case_ref")
-        return self.store.get_case(case_ref)
+        snapshot = self.store.get_case(case_ref)
+        self._synthetic_payload(snapshot.intake)
+        return snapshot
 
     def update_intake(self, *, case_ref: str, event_id: str, expected_case_version: int, fields: Mapping[str, Any]):
         self._synthetic_id(case_ref, "case_ref")
@@ -64,6 +66,8 @@ class HairColorCaseService:
     def stop_case(self, *, case_ref: str, event_id: str, expected_case_version: int, performed_step_refs: tuple[str, ...] = ()):
         self._synthetic_id(case_ref, "case_ref")
         self._synthetic_id(event_id, "event_id")
+        if not isinstance(performed_step_refs, tuple) or any(not isinstance(ref, str) or not ref.startswith("SYNTHETIC-") for ref in performed_step_refs):
+            raise HairColorCaseServiceError("performed_step_refs must use SYNTHETIC- identifiers")
         return self.store.stop_case(
             case_ref=case_ref, event_id=event_id, expected_case_version=expected_case_version,
             performed_step_refs=performed_step_refs,
@@ -72,6 +76,8 @@ class HairColorCaseService:
     def close_case(self, *, case_ref: str, event_id: str, expected_case_version: int, closure_reason: str):
         self._synthetic_id(case_ref, "case_ref")
         self._synthetic_id(event_id, "event_id")
+        if not isinstance(closure_reason, str) or not closure_reason.startswith("SYNTHETIC:"):
+            raise HairColorCaseServiceError("closure_reason must be synthetic placeholder text")
         return self.store.close_case(
             case_ref=case_ref, event_id=event_id, expected_case_version=expected_case_version,
             closure_reason=closure_reason,
