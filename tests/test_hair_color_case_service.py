@@ -79,7 +79,7 @@ def test_service_rejects_non_synthetic_identifiers(service, identifier):
 
 
 def test_close_case_is_terminal(service):
-    service.create_case(case_ref="SYNTHETIC-CASE-005", event_id="SYNTHETIC-EVENT-001", intake={"goal": "synthetic"})
+    service.create_case(case_ref="SYNTHETIC-CASE-005", event_id="SYNTHETIC-EVENT-001", intake={"goal": "SYNTHETIC: value"})
     closed = service.close_case(
         case_ref="SYNTHETIC-CASE-005", event_id="SYNTHETIC-EVENT-002",
         expected_case_version=1, closure_reason="SYNTHETIC: closure",
