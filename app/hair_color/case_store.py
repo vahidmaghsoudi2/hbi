@@ -450,7 +450,7 @@ class HairColorCaseStore:
         normalized = self._normalize_intake(intake)
         with self._connect() as db:
             db.execute("BEGIN IMMEDIATE")
-            source = db.execute("SELECT state FROM hair_color_cases WHERE case_ref=?", (source_case_ref,)).fetchone()
+            source = db.execute("SELECT * FROM hair_color_cases WHERE case_ref=?", (source_case_ref,)).fetchone()
             if source is None:
                 db.rollback()
                 raise CaseNotFound("source case not found")
@@ -459,10 +459,14 @@ class HairColorCaseStore:
                 raise StoppedCase("fresh restart is permitted only from a stopped source case")
             created_payload = json.dumps({"intake_fields": sorted(normalized)}, ensure_ascii=False)
             source_payload = json.dumps({"source_case_ref": source_case_ref}, ensure_ascii=False)
+            backlink_payload = json.dumps({"new_case_ref": new_case_ref}, ensure_ascii=False)
+            source_event_id = f"{event_id}:RESTARTED_AS"
+            new_case_source_event_id = f"{event_id}:SOURCE"
             try:
                 db.execute(
                     "INSERT INTO hair_color_cases VALUES(?,?,?,?,?,?,?)",
-                    (new_case_ref, 1, 1, "ACTIVE", json.dumps(normalized, ensure_ascii=False), event_id, event_id),
+                    (new_case_ref, 1, 1, "ACTIVE", json.dumps(normalized, ensure_ascii=False),
+                     event_id, new_case_source_event_id),
                 )
                 db.execute(
                     "INSERT INTO hair_color_case_events VALUES(?,?,?,?,?,?)",
@@ -470,7 +474,16 @@ class HairColorCaseStore:
                 )
                 db.execute(
                     "INSERT INTO hair_color_case_events VALUES(?,?,?,?,?,?)",
-                    (new_case_ref, f"{event_id}:SOURCE", "FRESH_RESTART_FROM_STOP", 1, 1, source_payload),
+                    (new_case_ref, new_case_source_event_id, "FRESH_RESTART_FROM_STOP", 1, 1, source_payload),
+                )
+                db.execute(
+                    "INSERT INTO hair_color_case_events VALUES(?,?,?,?,?,?)",
+                    (source_case_ref, source_event_id, "FRESH_RESTARTED_AS",
+                     source["case_version"], source["target_version"], backlink_payload),
+                )
+                db.execute(
+                    "UPDATE hair_color_cases SET updated_event_id=? WHERE case_ref=?",
+                    (source_event_id, source_case_ref),
                 )
             except sqlite3.IntegrityError as exc:
                 db.rollback()
