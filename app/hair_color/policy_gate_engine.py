@@ -103,7 +103,7 @@ class PolicyGateEngine:
                 ),
                 missing_information=missing_items,
                 next_step={
-                    "action": "ASK_AND_CLARIFY",
+                    "action": "CLARIFY_CONFLICTS" if conflicting and not missing else "ASK_AND_CLARIFY",
                     "missing_fields": missing,
                     "conflicting_fields": conflicting,
                 },
