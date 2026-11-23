@@ -45,7 +45,11 @@ class HairColorCaseStore:
     """SQLite-backed case snapshots with optimistic concurrency and audit events."""
 
     def __init__(self, database_path: str | Path):
-        self.database_path = str(database_path)
+        path = Path(database_path)
+        if str(path) == ":memory:":
+            raise CaseStoreError("SQLite case store requires a persistent file path")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        self.database_path = str(path)
         self._initialize()
 
     def _connect(self) -> sqlite3.Connection:
