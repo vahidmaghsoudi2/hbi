@@ -116,7 +116,7 @@ def test_triage_event_requires_current_versions_and_unique_reasons(store):
         expected_target_version=1, request_id="REQ-1", consultation_status="NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW",
         reason_codes=("KNOWLEDGE_GAP",), safe_summary="synthetic safe summary",
     )
-    with pytest.raises(CaseStoreError, match="request_id must be unique"):
+    with pytest.raises(CaseStoreError, match="request_id has already been evaluated"):
         store.record_triage(
             case_ref="CASE-TRIAGE", event_id="EV-REPLAY", expected_case_version=1,
             expected_target_version=1, request_id="REQ-1", consultation_status="NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW",
@@ -171,7 +171,7 @@ def test_validation_rejects_duplicate_normalized_keys_and_bool_versions(store):
         store.create_case(case_ref="CASE-NORM", event_id="EV-NORM", intake={"goal": "x", " goal ": "y"})
     store.create_case(case_ref="CASE-BOOL", event_id="EV-BOOL", intake={"goal": "synthetic"})
     with pytest.raises(CaseStoreError, match="positive integer"):
-        store.change_target(case_ref="CASE-BOOL", event_id="EV-BOOL-2", expected_case_version=True)
+        store.change_target(case_ref="CASE-BOOL", event_id="EV-BOOL-2", expected_case_version=True, target_description="synthetic target")
     with pytest.raises(CaseStoreError, match="positive integer"):
         store.stop_case(case_ref="CASE-BOOL", event_id="EV-BOOL-3", expected_case_version=True)
 
