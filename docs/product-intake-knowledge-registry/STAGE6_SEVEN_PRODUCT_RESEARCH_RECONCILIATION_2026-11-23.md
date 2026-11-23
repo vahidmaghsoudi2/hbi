@@ -171,3 +171,28 @@
 4. Confirm whether this research artifact is accepted as Stage 6 deliverable. Acceptance would not itself authorize data mutation.
 
 **Prepared as a durable comparison artifact:** source URLs, product IDs, classifications, findings, conflicts and UNKNOWNs are all recorded in this file for later retrieval and comparison.
+
+
+---
+
+## Independent link re-check and QA pass (2026-11-23)
+
+This appendix records a second verification pass against accessible public pages. It does not convert marketing claims into independent efficacy evidence.
+
+| Dossier | Re-check result | QA note |
+|---|---|---|
+| P1 COSRX | Official page still presents 150 ml and the 20-subject trial metrics | Claim wording retained as manufacturer-reported; protocol remains unavailable in the page reviewed |
+| P2 Neutrogena | UK official page confirms 2% salicylic acid and product/INCI disclosure; its review page states 97% noticed fewer new spots in 4 weeks, clinical grading, 34 subjects | **Directions discrepancy:** official page presents twice-daily use, while retailers may display once-daily directions. Follow the exact package label and avoid normalizing this discrepancy |
+| P3 Garnier AU | Official page confirms 200 ml and Vitamin Cg/citrus positioning | No evidence in this source of an acne or pigment treatment endpoint; rinse-off context retained |
+| P4 SKIN1004 global/KR | Official international SPF50+ PA++++ page and distinct US SPF50 UV page accessible | Formula/filter separation is confirmed; physical unit still needs package-market match |
+| P5 ISDIN MX | Official Mexico page confirms 50 ml, SPF50+, DP-Complex, and 22% intensity / 15% area claims from 31 participants at 28 and 84 days | Manufacturer-reported study; public page does not provide full protocol |
+| P6 Clinique | Official discontinued-product page explicitly says the Radical Dark Spot Corrector + Interrupter is no longer available and identifies Dark Spot Clearing Serum as replacement | This strengthens the historical/current version boundary. Do not transfer formula or claims to replacement |
+| P7 Anua | Anua Global page displays 10% azelaic acid, ingredient disclosure, and gradual-use directions | Source page content rechecked; publisher/market/package identity and physical unit still not independently authenticated. Snapshot conflict remains unresolved |
+
+### QA corrections/clarifications
+- P2 reported study wording is participant-level (“noticed less new spots”), not a percent reduction or cure rate. Retailer and manufacturer directions can differ; source/package instructions take precedence.
+- P6 discontinued status is now explicitly supported by Clinique's official discontinued-products page; the replacement is named there, but the two dossiers remain separate.
+- P7 the cited Anua Global page was rechecked for content. Its public page alone does not prove the exact market, physical unit, GTIN, lot, or source mapping for the Stage 5 snapshot. Those remain UNKNOWN.
+- All seven source URLs were rechecked in this pass where accessible. This is a link/content check only, not laboratory testing, package authentication, or independent clinical review.
+
+**QA pass status:** PASS WITH OPEN LIMITATIONS. No operational data was touched. Stage 6 remains a research deliverable pending PO review/acceptance; Stage 7 remains NOT STARTED.
