@@ -26,9 +26,19 @@ class HairColorCaseService:
             raise HairColorCaseServiceError(f"{name} must use the SYNTHETIC- prefix")
         return value
 
+    @staticmethod
+    def _synthetic_payload(intake: Mapping[str, Any]) -> Mapping[str, Any]:
+        if not isinstance(intake, Mapping):
+            raise HairColorCaseServiceError("synthetic intake must be a mapping")
+        for key, value in intake.items():
+            if not isinstance(key, str) or not key.strip() or not isinstance(value, str) or not value.startswith("SYNTHETIC:"):
+                raise HairColorCaseServiceError("all intake fields must contain synthetic placeholder values")
+        return intake
+
     def create_case(self, *, case_ref: str, event_id: str, intake: Mapping[str, Any]):
         self._synthetic_id(case_ref, "case_ref")
         self._synthetic_id(event_id, "event_id")
+        self._synthetic_payload(intake)
         return self.store.create_case(case_ref=case_ref, event_id=event_id, intake=intake)
 
     def get_case(self, case_ref: str):
@@ -38,6 +48,7 @@ class HairColorCaseService:
     def update_intake(self, *, case_ref: str, event_id: str, expected_case_version: int, fields: Mapping[str, Any]):
         self._synthetic_id(case_ref, "case_ref")
         self._synthetic_id(event_id, "event_id")
+        self._synthetic_payload(fields)
         return self.store.update_intake(
             case_ref=case_ref, event_id=event_id,
             expected_case_version=expected_case_version, fields=fields,
@@ -70,6 +81,7 @@ class HairColorCaseService:
         self._synthetic_id(source_case_ref, "source_case_ref")
         self._synthetic_id(new_case_ref, "new_case_ref")
         self._synthetic_id(event_id, "event_id")
+        self._synthetic_payload(intake)
         return self.store.fresh_restart(
             source_case_ref=source_case_ref, new_case_ref=new_case_ref, event_id=event_id, intake=intake,
         )
