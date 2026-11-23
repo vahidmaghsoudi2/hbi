@@ -115,4 +115,4 @@ def test_gate_rejects_duplicate_reason_codes_and_invalid_version_types():
         current_case_version=1, current_target_version=1,
     )
     assert not invalid["publication_allowed"]
-    assert "INVALID_VERSION_FIELD" in invalid["reason_codes"
+    assert "INVALID_VERSION_FIELD" in invalid["reason_codes"]
