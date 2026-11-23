@@ -55,6 +55,9 @@ def test_persistent_synthetic_case_api_create_update_stop_restart_and_history(cl
             json={"request_id": "SYNTHETIC-API-REQUEST-01", "triage_event_id": "SYNTHETIC-API-EVENT-TRIAGE-01"},
         )
         assert triage.status_code == 200
+        assert triage.json()["consultation"]["consultation_status"] == "NEEDS_INFORMATION_OR_TEST"
+        assert "DATA_GAP" in triage.json()["consultation"]["reason_codes"]
+        assert triage.json()["consultation"]["missing_information"]
         assert triage.json()["consultation"]["options"] == []
         assert triage.json()["execution_authorized"] is False
 
@@ -258,5 +261,43 @@ def test_target_change_versions_case_and_invalidates_old_decision_context(client
             headers=_headers(),
         )
         assert [event["event_type"] for event in history.json()] == ["CASE_CREATED", "TARGET_CHANGED"]
+    finally:
+        client.app.dependency_overrides.pop(get_hair_color_case_service, None)
+
+
+def test_complete_intake_still_fails_closed_without_approved_specialist_knowledge(client, db_session, tmp_path):
+    _grant_role(db_session)
+    service = HairColorCaseService(HairColorCaseStore(tmp_path / "hair-color-complete-intake.sqlite"))
+    client.app.dependency_overrides[get_hair_color_case_service] = lambda: service
+    try:
+        created = client.post(
+            "/api/v1/hair/color-consultation/cases",
+            headers=_headers(),
+            json={
+                "case_ref": "SYNTHETIC-COMPLETE-CASE",
+                "event_id": "SYNTHETIC-COMPLETE-CREATE",
+                "intake": {
+                    "current_hair_state": "SYNTHETIC: placeholder current state",
+                    "desired_result": "SYNTHETIC: placeholder desired result",
+                    "service_history": "SYNTHETIC: placeholder service history",
+                    "product_context": "SYNTHETIC: placeholder product context",
+                },
+            },
+        )
+        assert created.status_code == 201
+        triage = client.post(
+            "/api/v1/hair/color-consultation/cases/SYNTHETIC-COMPLETE-CASE/triage",
+            headers=_headers(),
+            json={
+                "request_id": "SYNTHETIC-COMPLETE-REQUEST",
+                "triage_event_id": "SYNTHETIC-COMPLETE-TRIAGE",
+            },
+        )
+        assert triage.status_code == 200
+        consultation = triage.json()["consultation"]
+        assert consultation["consultation_status"] == "NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW"
+        assert "KNOWLEDGE_GAP" in consultation["reason_codes"]
+        assert consultation["options"] == []
+        assert triage.json()["execution_authorized"] is False
     finally:
         client.app.dependency_overrides.pop(get_hair_color_case_service, None)
