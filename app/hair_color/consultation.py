@@ -37,3 +37,32 @@ def run_consultation_persian(request: Mapping[str, Any]) -> dict[str, Any]:
         "presentation": render_persian_response(gate["safe_response"]),
         "execution_authorized": False,
     }
+
+
+def run_consultation_from_intake(intake: Mapping[str, Any], **metadata: Any) -> dict[str, Any]:
+    """Build a safe request from user-facing intake and execute the triage API."""
+    from .intake import build_intake_request
+
+    request = build_intake_request(intake, **metadata)
+    return run_consultation(request)
+
+
+def run_consultation_from_intake_persian(intake: Mapping[str, Any], **metadata: Any) -> dict[str, Any]:
+    """Public Persian UI wrapper for intake-only consultation."""
+    from .intake import build_intake_request
+    from .persian_response_renderer import render_persian_response
+    from .publication_gate import evaluate_publication_gate
+
+    request = build_intake_request(intake, **metadata)
+    result = run_consultation(request)
+    gate = evaluate_publication_gate(
+        result,
+        current_case_version=request["case_version"],
+        current_target_version=request["target_version"],
+    )
+    return {
+        "consultation": result,
+        "publication_gate": gate,
+        "presentation": render_persian_response(gate["safe_response"]),
+        "execution_authorized": False,
+    }
