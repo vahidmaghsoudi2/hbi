@@ -128,6 +128,13 @@ def test_triage_event_requires_current_versions_and_unique_reasons(store):
             expected_target_version=1, request_id="REQ-3", consultation_status="NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW",
             reason_codes=(), safe_summary="summary",
         )
+    with pytest.raises(CaseStoreError, match="request_id has already been evaluated"):
+        store.record_triage(
+            case_ref="CASE-TRIAGE", event_id="EV-5", expected_case_version=1,
+            expected_target_version=1, request_id="REQ-1", consultation_status="NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW",
+            reason_codes=("KNOWLEDGE_GAP",), safe_summary="duplicate request",
+        )
+    assert len(store.list_events("CASE-TRIAGE")) == 2
 
 
 def test_close_case_records_terminal_state_and_blocks_updates(store):
