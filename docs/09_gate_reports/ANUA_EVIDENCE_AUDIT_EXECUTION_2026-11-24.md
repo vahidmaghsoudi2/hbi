@@ -88,8 +88,9 @@ Save an immutable before-snapshot locally before any mutation. Compare all six f
 - Live database/API readback: **not performed in this runtime**.
 - Evidence mutation: **not performed**.
 - ProductKnowledge refresh: **not performed**.
-- Automated tests: **not run**.
-- CI: **not run**.
+- Automated tests: **GitHub Actions CI passed** on commit `86ad8f512e6bc87d2915c0adeb3c8f8d8fffb7e9` (run `45279455883`). The `test` job completed compile checks, G8 regression bundle, pytest with strict coverage, and frontend typecheck/build successfully. The `governance-tests` job passed the P4 compliance and API auth matrix suites. The `g8-isolated-pilot-smoke` job passed API startup/health against a disposable SQLite database. These results do not validate the live Anua database or the six Evidence rows.
+- Browser proof: run `45279455803`; 61-record parser conformance and isolated fixture preparation passed. The real-browser proof step was still `in_progress` at the time of this update; no final browser result is claimed.
+- Live local API/SQLite tests: **not run**.
 - Schema/migration changes: **none**.
 - Merge/review: **not performed**. PR #655 remains Draft and open.
 
