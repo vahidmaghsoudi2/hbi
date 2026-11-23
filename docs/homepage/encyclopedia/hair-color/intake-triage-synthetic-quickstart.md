@@ -46,6 +46,16 @@ pytest -q tests/test_hair_color_case_store.py
 
 This persistence component does not activate specialist advice, store real-client data, or authorize service execution. Project policy remains synthetic-only.
 
+## Case application service
+
+`HairColorCaseService` combines the SQLite case store and Persian triage entrypoint. It requires every case/request/event identifier to use the `SYNTHETIC-` prefix. It offers create/read/update/target-change/stop/close/restart and a persisted safe triage summary. The stored triage event records status, reason codes, summary, zero options, and execution-authorized false—not raw intake text, candidate claims, or formula data. Stale versions and stopped cases are rejected.
+
+Run the integration tests:
+
+```bash
+pytest -q tests/test_hair_color_case_service.py
+```
+
 ## Inactive knowledge bundle ingestion
 
 `app.hair_color.knowledge_bundle_ingestion.ingest_knowledge_bundle` accepts JSON text or a mapping envelope with `bundle_schema_version: "1.0"` and `bundle`. It checks schema version and metadata/provenance, and returns `INACTIVE_REVIEW_REQUIRED`. This is in-memory only; it cannot persist, activate, or publish domain knowledge.
