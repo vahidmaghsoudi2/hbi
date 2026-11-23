@@ -67,7 +67,7 @@ jobs:
         env:
           # Config lives at repo root but @playwright/test is installed under frontend/.
           NODE_PATH: ${{ github.workspace }}/frontend/node_modules
-        run: ./frontend/node_modules/.bin/playwright test --config=playwright.config.cjs tests/browser/hair-specialist-preview.spec.cjs tests/browser/pilot-recommendation.spec.cjs
+        run: ./frontend/node_modules/.bin/playwright test --config=playwright.config.cjs
       - name: Upload browser evidence
         if: always()
         uses: actions/upload-artifact@v4
