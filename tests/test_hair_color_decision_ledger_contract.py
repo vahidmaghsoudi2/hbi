@@ -153,3 +153,9 @@ def test_rejected_suggestion_stays_rejected_after_unrelated_data_change():
     assert changed.suggestions[0].status is SuggestionStatus.REJECTED
     with pytest.raises(LedgerContractError, match="reviewable"):
         accept_suggestion(changed, event_id="EV-SYN-A10", suggestion_ref="SUG-SYN-1")
+
+
+def test_event_ids_must_be_unique_within_case():
+    questioned = record_question(base(), event_id="EV-SYN-UNIQUE", question_ref="Q-SYN-UNIQUE")
+    with pytest.raises(LedgerContractError, match="event_id must be unique"):
+        record_question(questioned, event_id="EV-SYN-UNIQUE", question_ref="Q-SYN-DUP")
