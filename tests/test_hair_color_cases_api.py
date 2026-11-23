@@ -79,6 +79,7 @@ def test_persistent_synthetic_case_api_create_update_stop_restart_and_history(cl
         )
         assert stopped.status_code == 200
         assert stopped.json()["state"] == "STOPPED"
+        assert stopped.json()["case_version"] == 3
 
         restarted = client.post(
             "/api/v1/hair/color-consultation/cases/SYNTHETIC-API-CASE-01/restart",
