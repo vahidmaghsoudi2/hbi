@@ -141,6 +141,16 @@ def test_store_creates_parent_directory_and_rejects_memory_database(tmp_path):
         HairColorCaseStore(":memory:")
 
 
+def test_validation_rejects_duplicate_normalized_keys_and_bool_versions(store):
+    with pytest.raises(CaseStoreError, match="unique after normalization"):
+        store.create_case(case_ref="CASE-NORM", event_id="EV-NORM", intake={"goal": "x", " goal ": "y"})
+    store.create_case(case_ref="CASE-BOOL", event_id="EV-BOOL", intake={"goal": "synthetic"})
+    with pytest.raises(CaseStoreError, match="positive integer"):
+        store.change_target(case_ref="CASE-BOOL", event_id="EV-BOOL-2", expected_case_version=True)
+    with pytest.raises(CaseStoreError, match="positive integer"):
+        store.stop_case(case_ref="CASE-BOOL", event_id="EV-BOOL-3", expected_case_version=True)
+
+
 def test_invalid_intake_and_missing_case_rejected(store):
     with pytest.raises(CaseStoreError):
         store.create_case(case_ref="CASE-X", event_id="EV-X", intake={"goal": 7})
