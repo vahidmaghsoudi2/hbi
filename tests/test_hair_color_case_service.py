@@ -88,6 +88,20 @@ def test_close_case_is_terminal(service):
     with pytest.raises(StoppedCase):
         service.consult_persian(case_ref="SYNTHETIC-CASE-005", request_id="SYNTHETIC-REQ-5", triage_event_id="SYNTHETIC-EVENT-3")
 
+def test_service_refuses_triage_of_unmarked_data_in_internal_store(service):
+    service.store.create_case(
+        case_ref="SYNTHETIC-CASE-UNMARKED",
+        event_id="SYNTHETIC-EVENT-UNMARKED",
+        intake={"desired_result": "unmarked text"},
+    )
+    with pytest.raises(HairColorCaseServiceError, match="synthetic placeholder"):
+        service.consult_persian(
+            case_ref="SYNTHETIC-CASE-UNMARKED",
+            request_id="SYNTHETIC-REQ-UNMARKED",
+            triage_event_id="SYNTHETIC-EVENT-TRIAGE-UNMARKED",
+        )
+
+
 def test_service_rejects_unmarked_intake_values(service):
     with pytest.raises(HairColorCaseServiceError, match="synthetic placeholder"):
         service.create_case(
