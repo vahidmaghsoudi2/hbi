@@ -282,8 +282,13 @@ class HairColorCaseStore:
         request_id = self._required_text(request_id, "request_id")
         consultation_status = self._required_text(consultation_status, "consultation_status")
         safe_summary = self._required_text(safe_summary, "safe_summary")
-        if not isinstance(reason_codes, tuple) or any(not isinstance(code, str) for code in reason_codes):
-            raise CaseStoreError("reason_codes must be a tuple of strings")
+        if not isinstance(reason_codes, tuple) or any(not isinstance(code, str) or not code.strip() for code in reason_codes):
+            raise CaseStoreError("reason_codes must be a tuple of non-empty strings")
+        if len(set(reason_codes)) != len(reason_codes):
+            raise CaseStoreError("reason_codes must be unique")
+        for version_name, version in (("expected_case_version", expected_case_version), ("expected_target_version", expected_target_version)):
+            if isinstance(version, bool) or not isinstance(version, int) or version < 1:
+                raise CaseStoreError(f"{version_name} must be a positive integer")
         with self._connect() as db:
             db.execute("BEGIN IMMEDIATE")
             row = db.execute("SELECT * FROM hair_color_cases WHERE case_ref=?", (case_ref,)).fetchone()
