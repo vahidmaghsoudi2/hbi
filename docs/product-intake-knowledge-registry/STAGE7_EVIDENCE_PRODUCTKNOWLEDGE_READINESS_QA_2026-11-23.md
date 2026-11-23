@@ -42,7 +42,7 @@ These are report facts from the pinned snapshot, not live-state claims.
 | P4 SKIN1004 | 3 / 3, field counts align | Ingredients, ingredient_roles, manufacturer_claims, evidence_refs populated | **COVERAGE PASS; NOT ACCEPTED** |
 | P5 ISDIN | 2 / 2, field counts align | manufacturer_claims, known_use_cases, evidence_refs populated | **COVERAGE PASS; NOT ACCEPTED** |
 | P6 Clinique | 3 / 3, field counts align | Ingredients, ingredient_roles, manufacturer_claims, evidence_refs populated | **COVERAGE PASS; NOT ACCEPTED** |
-| P7 Anua | 6 / 5, duplicate ingredients field | Payload fields and evidence_refs all NULL | **BLOCKED — payload gap plus open conflict** |
+| P7 Anua | 6 / 5; manifest says two conflicting ingredients rows, snapshot stores one ingredients and two manufacturer_claims rows | Payload fields and evidence_refs all NULL | **BLOCKED — payload gap plus open conflict** |
 
 Coverage pass means only that the stored field names/counts appear to map to the staged assertion inventory in the pinned snapshot. It is not evidence acceptance.
 
@@ -50,7 +50,7 @@ Coverage pass means only that the stored field names/counts appear to map to the
 
 | ID | Priority | Product / area | Candidate action | Prerequisite / stop condition |
 |---|---|---|---|---|
-| R-01 | P0 | P7 Anua duplicate ingredients Evidence | Human row-to-source mapping review; document which assertion is which, without changing rows | Must reconcile the two rows, manifest conflict note, and both stored `conflict_status=NONE`; no auto-merge/delete |
+| R-01 | P0 | P7 Anua manifest/snapshot Evidence field discrepancy | Human row-to-source and manifest-to-snapshot mapping review; document the stored field mismatch without changing rows | Must reconcile the two rows, manifest conflict note, and both stored `conflict_status=NONE`; no auto-merge/delete |
 | R-02 | P0 | P7 Anua ProductKnowledge | Draft mapping plan only after R-01; do not build payload yet | Source/market/package scope and conflict disposition must be explicit; any new source is separately reviewed |
 | R-03 | P2 | P1 COSRX ProductKnowledge | No payload-gap remediation indicated by the pinned JSON: four populated fields map to four Evidence rows | Physical target identity remains UNKNOWN; do not infer 150 ml package identity from the research target |
 | R-04 | P2 | P1 evidence_refs | Pinned JSON contains all four exact Evidence IDs in evidence_refs and in their corresponding payload fields | No mutation; revisit only if a newer authoritative snapshot contradicts this artifact |
@@ -77,7 +77,7 @@ Coverage pass means only that the stored field names/counts appear to map to the
 - [x] Snapshot-level counts and classifications transcribed from pinned Stage 5 reconciliation.
 - [x] All seven ProductKnowledge field-coverage states compared with the manifest.
 - [x] P7 payload/reference gap identified; P1 payload and all four Evidence references verified as populated and aligned.
-- [x] P7 duplicate-row/conflict-flag discrepancy preserved as OPEN.
+- [x] P7 manifest/snapshot field-mapping and conflict-flag discrepancies preserved as OPEN.
 - [x] Remediation candidates and prerequisites documented.
 - [x] All non-acceptance labels and source/version boundaries preserved.
 - [x] No DB/API/runtime write or mutation performed.
@@ -149,3 +149,11 @@ The suffixes in the table are abbreviated for readability; each full Evidence ID
 - P1–P6: row-level coverage/reference mapping matches within this pinned JSON; this is structural mapping only, not evidence QA acceptance, factual verification, physical package identity, or consultation readiness.
 - P7: payload is entirely absent. The actual row-level duplicate-field observation is two `manufacturer_claims` rows, not two `ingredients` rows, so the Stage 5 manifest conflict note and row-level snapshot require explicit lineage reconciliation. Preserve all rows and flags.
 - Stage 7 remains read-only. No Evidence/ProductKnowledge write, QA transition, identity change, activation, import, merge, or Stage 8 work was performed.
+
+
+### P7 manifest-to-snapshot crosswalk (explicit discrepancy)
+- Manifest assertion fields (5): `ingredients`, `manufacturer_claims`, `usage_instructions`, `ingredient_roles`, `claimed_benefits`.
+- Manifest identity note: two existing conflicting Evidence rows reportedly use `field=ingredients`.
+- Snapshot Evidence fields (6 rows): `manufacturer_claims` for claim IDs `...-001` and `...-003`; `ingredients` for `...-002`; `usage_instructions` for `...-004`; `ingredient_roles` for `...-005`; `claimed_benefits` for `...-006`.
+- Therefore the snapshot's field distribution is **not** the same as the manifest's reported duplicate-ingredients distribution. The extra row appears in `manufacturer_claims` in the snapshot, but row lineage and intended assertion identity cannot be established from counts alone.
+- No row deletion, merge, field rewrite, reclassification, conflict-flag update, or ProductKnowledge rebuild is permitted by this audit.
