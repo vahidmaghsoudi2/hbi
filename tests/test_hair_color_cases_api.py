@@ -137,3 +137,80 @@ def test_persistent_synthetic_case_api_role_required(client, db_session, tmp_pat
         assert denied.status_code == 403
     finally:
         client.app.dependency_overrides.pop(get_hair_color_case_service, None)
+
+
+def test_persistent_client_accept_and_reject_are_audited_without_execution_authority(client, db_session, tmp_path):
+    _grant_role(db_session)
+    service = HairColorCaseService(HairColorCaseStore(tmp_path / "hair-color-decisions.sqlite"))
+    client.app.dependency_overrides[get_hair_color_case_service] = lambda: service
+    try:
+        created = client.post(
+            "/api/v1/hair/color-consultation/cases",
+            headers=_headers(),
+            json={"case_ref": "SYNTHETIC-DECISION-CASE", "event_id": "SYNTHETIC-DECISION-CREATE",
+                  "intake": {"goal": "SYNTHETIC: placeholder"}},
+        )
+        assert created.status_code == 201
+        accepted = client.post(
+            "/api/v1/hair/color-consultation/cases/SYNTHETIC-DECISION-CASE/decision",
+            headers=_headers(),
+            json={"event_id": "SYNTHETIC-DECISION-ACCEPT", "expected_case_version": 1,
+                  "expected_target_version": 1, "decision": "ACCEPT",
+                  "suggestion_ref": "SYNTHETIC-SUGGESTION-1"},
+        )
+        assert accepted.status_code == 200
+        assert accepted.json()["execution_authorized"] is False
+        rejected = client.post(
+            "/api/v1/hair/color-consultation/cases/SYNTHETIC-DECISION-CASE/decision",
+            headers=_headers(),
+            json={"event_id": "SYNTHETIC-DECISION-REJECT", "expected_case_version": 1,
+                  "expected_target_version": 1, "decision": "REJECT",
+                  "suggestion_ref": "SYNTHETIC-SUGGESTION-2",
+                  "reason": "SYNTHETIC: placeholder rejection reason"},
+        )
+        assert rejected.status_code == 200
+        history = client.get(
+            "/api/v1/hair/color-consultation/cases/SYNTHETIC-DECISION-CASE/history",
+            headers=_headers(),
+        )
+        assert history.status_code == 200
+        events = history.json()
+        assert [event["event_type"] for event in events] == [
+            "CASE_CREATED", "CLIENT_ACCEPTED", "CLIENT_REJECTED",
+        ]
+        assert events[1]["payload"]["client_acceptance"] is True
+        assert events[1]["payload"]["execution_authorized"] is False
+        assert events[2]["payload"]["decision"] == "REJECT"
+    finally:
+        client.app.dependency_overrides.pop(get_hair_color_case_service, None)
+
+
+def test_client_decision_rejects_stale_version_and_invalid_decision(client, db_session, tmp_path):
+    _grant_role(db_session)
+    service = HairColorCaseService(HairColorCaseStore(tmp_path / "hair-color-decisions-negative.sqlite"))
+    client.app.dependency_overrides[get_hair_color_case_service] = lambda: service
+    try:
+        client.post(
+            "/api/v1/hair/color-consultation/cases",
+            headers=_headers(),
+            json={"case_ref": "SYNTHETIC-DECISION-STALE", "event_id": "SYNTHETIC-DECISION-STALE-CREATE",
+                  "intake": {"goal": "SYNTHETIC: placeholder"}},
+        )
+        stale = client.post(
+            "/api/v1/hair/color-consultation/cases/SYNTHETIC-DECISION-STALE/decision",
+            headers=_headers(),
+            json={"event_id": "SYNTHETIC-DECISION-STALE-EVENT", "expected_case_version": 2,
+                  "expected_target_version": 1, "decision": "ACCEPT",
+                  "suggestion_ref": "SYNTHETIC-SUGGESTION-1"},
+        )
+        assert stale.status_code == 409
+        invalid = client.post(
+            "/api/v1/hair/color-consultation/cases/SYNTHETIC-DECISION-STALE/decision",
+            headers=_headers(),
+            json={"event_id": "SYNTHETIC-DECISION-INVALID", "expected_case_version": 1,
+                  "expected_target_version": 1, "decision": "EXECUTE",
+                  "suggestion_ref": "SYNTHETIC-SUGGESTION-1"},
+        )
+        assert invalid.status_code == 422
+    finally:
+        client.app.dependency_overrides.pop(get_hair_color_case_service, None)
