@@ -48,12 +48,12 @@ This persistence component does not activate specialist advice, store real-clien
 
 ## Case application service
 
-`HairColorCaseService` combines the SQLite case store and Persian triage entrypoint. It requires every case/request/event identifier to use the `SYNTHETIC-` prefix. It offers create/read/update/target-change/stop/close/restart and a persisted safe triage summary. The stored triage event records status, reason codes, summary, zero options, and execution-authorized false—not raw intake text, candidate claims, or formula data. Stale versions and stopped cases are rejected.
+`HairColorCaseService` combines the SQLite case store and Persian triage entrypoint. Every case/request/event identifier must use the `SYNTHETIC-` prefix, and each intake field value, changed field value, and closure reason must start with `SYNTHETIC:`. It rejects unmarked payloads on create/update/read/restart/triage. It offers create/read/update/target-change/stop/close/restart and a persisted safe triage summary. The stored triage event records status, reason codes, summary, zero options, and execution-authorized false—not raw intake text, candidate claims, or formula data. Stale versions and stopped cases are rejected.
 
 Run the integration tests:
 
 ```bash
-pytest -q tests/test_hair_color_case_service.py
+pytest -q tests/test_hair_color_case_service.py tests/test_hair_color_case_store.py
 ```
 
 ## Inactive knowledge bundle ingestion
