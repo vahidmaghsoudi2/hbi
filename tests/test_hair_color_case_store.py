@@ -2,6 +2,7 @@
 import pytest
 
 from app.hair_color.case_store import (
+    CaseNotFound,
     CaseStoreError,
     HairColorCaseStore,
     StaleCaseVersion,
@@ -156,3 +157,109 @@ def test_invalid_intake_and_missing_case_rejected(store):
         store.create_case(case_ref="CASE-X", event_id="EV-X", intake={"goal": 7})
     with pytest.raises(CaseStoreError):
         store.get_case("missing")
+
+
+def test_create_and_input_normalization_edge_cases(store):
+    with pytest.raises(CaseStoreError, match="non-empty string"):
+        store.create_case(case_ref=" ", event_id="EV-BLANK", intake={})
+    with pytest.raises(CaseStoreError, match="non-empty string"):
+        store.create_case(case_ref="CASE-BLANK", event_id="", intake={})
+    with pytest.raises(CaseStoreError, match="mapping"):
+        store.create_case(case_ref="CASE-NONMAP", event_id="EV-NONMAP", intake=None)
+    with pytest.raises(CaseStoreError, match="keys must be non-empty"):
+        store.create_case(case_ref="CASE-EMPTYKEY", event_id="EV-EMPTYKEY", intake={" ": "x"})
+    store.create_case(case_ref="CASE-DUPCREATE", event_id="EV-DUPCREATE", intake={})
+    with pytest.raises(CaseStoreError, match="already exists"):
+        store.create_case(case_ref="CASE-DUPCREATE", event_id="EV-OTHER", intake={})
+
+
+def test_update_and_target_change_edge_guards(store):
+    store.create_case(case_ref="CASE-EDGE", event_id="EV-EDGE-1", intake={"goal": "test"})
+    with pytest.raises(CaseStoreError, match="at least one"):
+        store.update_intake(case_ref="CASE-EDGE", event_id="EV-EDGE-2", expected_case_version=1, fields={})
+    with pytest.raises(CaseNotFound):
+        store.update_intake(case_ref="CASE-MISSING", event_id="EV-EDGE-3", expected_case_version=1, fields={"goal": "x"})
+    with pytest.raises(CaseNotFound):
+        store.change_target(case_ref="CASE-MISSING", event_id="EV-EDGE-4", expected_case_version=1)
+    store.stop_case(case_ref="CASE-EDGE", event_id="EV-EDGE-5", expected_case_version=1)
+    with pytest.raises(StoppedCase):
+        store.change_target(case_ref="CASE-EDGE", event_id="EV-EDGE-6", expected_case_version=1)
+    with pytest.raises(StaleCaseVersion):
+        store.change_target(case_ref="CASE-EDGE", event_id="EV-EDGE-7", expected_case_version=2)
+
+
+def test_duplicate_target_and_stop_event_ids_roll_back(store):
+    store.create_case(case_ref="CASE-DUP-EVENT", event_id="EV-1", intake={"goal": "test"})
+    with pytest.raises(CaseStoreError, match="unique within case"):
+        store.change_target(case_ref="CASE-DUP-EVENT", event_id="EV-1", expected_case_version=1)
+    assert store.get_case("CASE-DUP-EVENT").case_version == 1
+    with pytest.raises(CaseStoreError, match="unique within case"):
+        store.stop_case(case_ref="CASE-DUP-EVENT", event_id="EV-1", expected_case_version=1)
+    assert store.get_case("CASE-DUP-EVENT").state == "ACTIVE"
+
+
+def test_stop_guards_and_validation(store):
+    store.create_case(case_ref="CASE-STOP-EDGE", event_id="EV-1", intake={"goal": "test"})
+    with pytest.raises(CaseStoreError, match="tuple of strings"):
+        store.stop_case(case_ref="CASE-STOP-EDGE", event_id="EV-2", expected_case_version=1, performed_step_refs=["x"])
+    with pytest.raises(CaseNotFound):
+        store.stop_case(case_ref="CASE-MISSING", event_id="EV-3", expected_case_version=1)
+    store.stop_case(case_ref="CASE-STOP-EDGE", event_id="EV-4", expected_case_version=1)
+    with pytest.raises(StoppedCase, match="already stopped"):
+        store.stop_case(case_ref="CASE-STOP-EDGE", event_id="EV-5", expected_case_version=1)
+    with pytest.raises(StaleCaseVersion):
+        store.stop_case(case_ref="CASE-STOP-EDGE", event_id="EV-6", expected_case_version=2)
+
+
+def test_triage_guards_and_duplicate_event_rollback(store):
+    store.create_case(case_ref="CASE-TRIAGE-EDGE", event_id="EV-1", intake={"goal": "test"})
+    valid = dict(
+        case_ref="CASE-TRIAGE-EDGE", event_id="EV-2", expected_case_version=1,
+        expected_target_version=1, request_id="REQ-2",
+        consultation_status="NEEDS_INFORMATION_OR_TEST",
+        reason_codes=(), safe_summary="synthetic summary",
+    )
+    with pytest.raises(CaseStoreError, match="tuple of non-empty"):
+        store.record_triage(**{**valid, "reason_codes": ["DATA_GAP"]})
+    with pytest.raises(CaseStoreError, match="triage-only status"):
+        store.record_triage(**{**valid, "consultation_status": "SUGGESTION"})
+    with pytest.raises(CaseNotFound):
+        store.record_triage(**{**valid, "case_ref": "CASE-MISSING"})
+    store.stop_case(case_ref="CASE-TRIAGE-EDGE", event_id="EV-3", expected_case_version=1)
+    with pytest.raises(StoppedCase):
+        store.record_triage(**{**valid, "event_id": "EV-4"})
+    store.create_case(case_ref="CASE-TRIAGE-DUP", event_id="EV-5", intake={})
+    duplicate = {**valid, "case_ref": "CASE-TRIAGE-DUP", "event_id": "EV-5"}
+    with pytest.raises(CaseStoreError, match="unique within case"):
+        store.record_triage(**duplicate)
+    assert store.get_case("CASE-TRIAGE-DUP").state == "ACTIVE"
+
+
+def test_close_guards_and_duplicate_event_rollback(store):
+    store.create_case(case_ref="CASE-CLOSE-EDGE", event_id="EV-1", intake={"goal": "test"})
+    with pytest.raises(CaseNotFound):
+        store.close_case(case_ref="CASE-MISSING", event_id="EV-2", expected_case_version=1, closure_reason="done")
+    closed = store.close_case(case_ref="CASE-CLOSE-EDGE", event_id="EV-3", expected_case_version=1, closure_reason="done")
+    assert closed.state == "CLOSED"
+    with pytest.raises(CaseStoreError, match="already closed"):
+        store.close_case(case_ref="CASE-CLOSE-EDGE", event_id="EV-4", expected_case_version=1, closure_reason="again")
+    with pytest.raises(StaleCaseVersion):
+        store.close_case(case_ref="CASE-CLOSE-EDGE", event_id="EV-5", expected_case_version=2, closure_reason="stale")
+    store.create_case(case_ref="CASE-CLOSE-DUP", event_id="EV-6", intake={})
+    with pytest.raises(CaseStoreError, match="unique within case"):
+        store.close_case(case_ref="CASE-CLOSE-DUP", event_id="EV-6", expected_case_version=1, closure_reason="done")
+    assert store.get_case("CASE-CLOSE-DUP").state == "ACTIVE"
+
+
+def test_restart_guards_and_duplicate_restart_rollback(store):
+    with pytest.raises(CaseStoreError, match="distinct case_ref"):
+        store.fresh_restart(source_case_ref="SAME", new_case_ref="SAME", event_id="EV-1", intake={})
+    with pytest.raises(CaseNotFound, match="source case"):
+        store.fresh_restart(source_case_ref="MISSING", new_case_ref="NEW", event_id="EV-2", intake={})
+    store.create_case(case_ref="CASE-RESTART-SOURCE", event_id="EV-3", intake={})
+    store.stop_case(case_ref="CASE-RESTART-SOURCE", event_id="EV-4", expected_case_version=1)
+    store.create_case(case_ref="CASE-RESTART-EXISTS", event_id="EV-5", intake={})
+    with pytest.raises(CaseStoreError, match="restart case or audit events"):
+        store.fresh_restart(source_case_ref="CASE-RESTART-SOURCE", new_case_ref="CASE-RESTART-EXISTS", event_id="EV-5", intake={})
+    assert store.get_case("CASE-RESTART-SOURCE").state == "STOPPED"
+    assert store.get_case("CASE-RESTART-EXISTS").state == "ACTIVE"
