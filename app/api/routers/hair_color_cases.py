@@ -50,6 +50,16 @@ class TriageRequest(BaseModel):
     triage_event_id: str
 
 
+class ClientDecisionRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    event_id: str
+    expected_case_version: int = Field(ge=1)
+    expected_target_version: int = Field(ge=1)
+    decision: str
+    suggestion_ref: str
+    reason: str | None = None
+
+
 class StopCaseRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     event_id: str
@@ -141,6 +151,32 @@ def run_synthetic_hair_color_triage(
         if consultation.get("options") or result.get("execution_authorized") is not False:
             raise CaseStoreError("synthetic triage output violated non-publishing contract")
         return result
+    except Exception as exc:
+        raise _translate_error(exc) from exc
+
+
+
+@router.post("/cases/{case_ref}/decision")
+def record_hair_color_client_decision(
+    case_ref: str,
+    payload: ClientDecisionRequest,
+    service: HairColorCaseService = Depends(get_hair_color_case_service),
+    _auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
+):
+    try:
+        for value, name in ((case_ref, "case_ref"), (payload.event_id, "event_id"),
+                            (payload.suggestion_ref, "suggestion_ref")):
+            service._synthetic_id(value, name)
+        if payload.reason is not None and not payload.reason.startswith("SYNTHETIC:"):
+            raise HairColorCaseServiceError("reason must be synthetic placeholder text")
+        snapshot = service.store.record_client_decision(
+            case_ref=case_ref, event_id=payload.event_id,
+            expected_case_version=payload.expected_case_version,
+            expected_target_version=payload.expected_target_version,
+            decision=payload.decision, suggestion_ref=payload.suggestion_ref,
+            reason=payload.reason,
+        )
+        return {**_snapshot(snapshot), "execution_authorized": False}
     except Exception as exc:
         raise _translate_error(exc) from exc
 
