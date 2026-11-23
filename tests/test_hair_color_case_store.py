@@ -112,6 +112,14 @@ def test_close_case_records_terminal_state_and_blocks_updates(store):
         store.update_intake(case_ref="CASE-CLOSE", event_id="EV-3", expected_case_version=1, fields={"goal": "b"})
 
 
+def test_store_creates_parent_directory_and_rejects_memory_database(tmp_path):
+    path = tmp_path / "nested" / "case.sqlite"
+    store = HairColorCaseStore(path)
+    assert path.exists()
+    with pytest.raises(CaseStoreError, match="persistent file path"):
+        HairColorCaseStore(":memory:")
+
+
 def test_invalid_intake_and_missing_case_rejected(store):
     with pytest.raises(CaseStoreError):
         store.create_case(case_ref="CASE-X", event_id="EV-X", intake={"goal": 7})
