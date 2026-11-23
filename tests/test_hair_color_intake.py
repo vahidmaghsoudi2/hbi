@@ -81,3 +81,11 @@ def test_persian_public_intake_wrapper_keeps_no_options_and_no_execution():
     assert result["presentation"]["missing_fields"]
     assert result["presentation"]["options"] == []
     assert result["execution_authorized"] is False
+
+
+def test_persian_renderer_translates_intake_missing_field_keys():
+    result = run_consultation_from_intake_persian(
+        {"desired_result": "Synthetic"}, **meta()
+    )
+    assert "شرح وضعیت فعلی مو" in result["presentation"]["missing_fields"]
+    assert "current_hair_state" in result["presentation"]["missing_field_keys"]
