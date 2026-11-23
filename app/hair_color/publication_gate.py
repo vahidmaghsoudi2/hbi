@@ -69,19 +69,22 @@ def evaluate_publication_gate(
 
     # Validate status/reason compatibility independently of the adapter so the
     # publication boundary cannot be bypassed with a hand-crafted response.
-    if status == "SAFETY_STOP_NO_EXECUTION_SUGGESTION" and reason_codes != ["SAFETY_CONCERN"]:
+    reason_codes_valid = isinstance(reason_codes, list) and all(
+        isinstance(code, str) and code in _ALLOWED_REASON_CODES for code in reason_codes
+    )
+    if reason_codes_valid and status == "SAFETY_STOP_NO_EXECUTION_SUGGESTION" and reason_codes != ["SAFETY_CONCERN"]:
         reasons.append("STATUS_REASON_MISMATCH")
-    if status == "OUT_OF_V1_SCOPE" and reason_codes != ["OUT_OF_SCOPE"]:
+    if reason_codes_valid and status == "OUT_OF_V1_SCOPE" and reason_codes != ["OUT_OF_SCOPE"]:
         reasons.append("STATUS_REASON_MISMATCH")
-    if status == "NEEDS_INFORMATION_OR_TEST" and not set(reason_codes) <= {
+    if reason_codes_valid and status == "NEEDS_INFORMATION_OR_TEST" and not set(reason_codes) <= {
         "DATA_GAP", "CONFLICTING_DATA", "NO_VALID_OPTION"
     }:
         reasons.append("STATUS_REASON_MISMATCH")
-    if status == "NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW" and not set(reason_codes) <= {
+    if reason_codes_valid and status == "NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW" and not set(reason_codes) <= {
         "KNOWLEDGE_GAP", "CONFLICTING_DATA", "DATA_GAP", "STALE_CASE_VERSION"
     }:
         reasons.append("STATUS_REASON_MISMATCH")
-    if "DATA_GAP" in reason_codes and not response.get("missing_information"):
+    if reason_codes_valid and "DATA_GAP" in reason_codes and not response.get("missing_information"):
         reasons.append("DATA_GAP_WITHOUT_DETAILS")
     if not isinstance(response.get("summary"), str) or not response.get("summary", "").strip():
         reasons.append("INVALID_SUMMARY")
