@@ -50,6 +50,12 @@ class TriageRequest(BaseModel):
     triage_event_id: str
 
 
+class TargetChangeRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    event_id: str
+    expected_case_version: int = Field(ge=1)
+
+
 class ClientDecisionRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     event_id: str
@@ -131,6 +137,23 @@ def update_hair_color_intake(
         return _snapshot(service.update_intake(
             case_ref=case_ref, event_id=payload.event_id,
             expected_case_version=payload.expected_case_version, fields=payload.fields,
+        ))
+    except Exception as exc:
+        raise _translate_error(exc) from exc
+
+
+
+@router.post("/cases/{case_ref}/target-change")
+def change_hair_color_target(
+    case_ref: str,
+    payload: TargetChangeRequest,
+    service: HairColorCaseService = Depends(get_hair_color_case_service),
+    _auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
+):
+    try:
+        return _snapshot(service.change_target(
+            case_ref=case_ref, event_id=payload.event_id,
+            expected_case_version=payload.expected_case_version,
         ))
     except Exception as exc:
         raise _translate_error(exc) from exc
