@@ -91,7 +91,7 @@ def test_fresh_restart_requires_stopped_source_case(store):
 
 def test_fresh_restart_creates_new_case_and_links_source(store):
     store.create_case(case_ref="CASE-OLD", event_id="EV-1", intake={"goal": "old"})
-    store.stop_case(case_ref="CASE-OLD", event_id="EV-2", expected_case_version=1, target_description="revised target")
+    store.stop_case(case_ref="CASE-OLD", event_id="EV-2", expected_case_version=1)
     new = store.fresh_restart(
         source_case_ref="CASE-OLD", new_case_ref="CASE-NEW", event_id="EV-3",
         intake={"goal": "new"},
@@ -205,10 +205,10 @@ def test_stop_guards_and_validation(store):
     with pytest.raises(CaseStoreError, match="tuple of strings"):
         store.stop_case(case_ref="CASE-STOP-EDGE", event_id="EV-2", expected_case_version=1, performed_step_refs=["x"])
     with pytest.raises(CaseNotFound):
-        store.stop_case(case_ref="CASE-MISSING", event_id="EV-3", expected_case_version=1, target_description="revised target")
-    store.stop_case(case_ref="CASE-STOP-EDGE", event_id="EV-4", expected_case_version=1, target_description="revised target")
+        store.stop_case(case_ref="CASE-MISSING", event_id="EV-3", expected_case_version=1)
+    store.stop_case(case_ref="CASE-STOP-EDGE", event_id="EV-4", expected_case_version=1)
     with pytest.raises(StoppedCase, match="already stopped"):
-        store.stop_case(case_ref="CASE-STOP-EDGE", event_id="EV-5", expected_case_version=1, target_description="revised target")
+        store.stop_case(case_ref="CASE-STOP-EDGE", event_id="EV-5", expected_case_version=1)
     with pytest.raises(StoppedCase):
         store.stop_case(case_ref="CASE-STOP-EDGE", event_id="EV-6", expected_case_version=2)
 
@@ -227,7 +227,7 @@ def test_triage_guards_and_duplicate_event_rollback(store):
         store.record_triage(**{**valid, "consultation_status": "SUGGESTION"})
     with pytest.raises(CaseNotFound):
         store.record_triage(**{**valid, "case_ref": "CASE-MISSING"})
-    store.stop_case(case_ref="CASE-TRIAGE-EDGE", event_id="EV-3", expected_case_version=1, target_description="revised target")
+    store.stop_case(case_ref="CASE-TRIAGE-EDGE", event_id="EV-3", expected_case_version=1)
     with pytest.raises(StoppedCase):
         store.record_triage(**{**valid, "event_id": "EV-4"})
     store.create_case(case_ref="CASE-TRIAGE-DUP", event_id="EV-5", intake={})
@@ -261,7 +261,7 @@ def test_restart_guards_and_duplicate_restart_rollback(store):
     with pytest.raises(CaseNotFound, match="source case"):
         store.fresh_restart(source_case_ref="MISSING", new_case_ref="NEW", event_id="EV-2", intake={})
     store.create_case(case_ref="CASE-RESTART-SOURCE", event_id="EV-3", intake={})
-    store.stop_case(case_ref="CASE-RESTART-SOURCE", event_id="EV-4", expected_case_version=1, target_description="revised target")
+    store.stop_case(case_ref="CASE-RESTART-SOURCE", event_id="EV-4", expected_case_version=1)
     store.create_case(case_ref="CASE-RESTART-EXISTS", event_id="EV-5", intake={})
     with pytest.raises(CaseStoreError, match="restart case or audit events"):
         store.fresh_restart(source_case_ref="CASE-RESTART-SOURCE", new_case_ref="CASE-RESTART-EXISTS", event_id="EV-5", intake={})
