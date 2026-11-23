@@ -8,7 +8,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from .case_store import HairColorCaseStore, CaseStoreError
+from .case_store import HairColorCaseStore, StoppedCase
 from .consultation import run_consultation_from_intake_persian
 
 
@@ -80,7 +80,7 @@ class HairColorCaseService:
         self._synthetic_id(triage_event_id, "triage_event_id")
         snapshot = self.store.get_case(case_ref)
         if snapshot.state != "ACTIVE":
-            raise HairColorCaseServiceError("stopped or closed case cannot be consulted")
+            raise StoppedCase("stopped or closed case cannot be consulted")
         result = run_consultation_from_intake_persian(
             snapshot.intake,
             request_id=request_id,
