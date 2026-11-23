@@ -310,6 +310,18 @@ class HairColorCaseStore:
             if (row["case_version"], row["target_version"]) != (expected_case_version, expected_target_version):
                 db.rollback()
                 raise StaleCaseVersion("case or target version changed; decision must be re-evaluated")
+            prior_events = db.execute(
+                "SELECT event_type,payload_json FROM hair_color_case_events "
+                "WHERE case_ref=? AND event_type IN ('CLIENT_ACCEPTED','CLIENT_REJECTED')",
+                (case_ref,),
+            ).fetchall()
+            for prior in prior_events:
+                prior_payload = json.loads(prior["payload_json"])
+                if prior_payload.get("suggestion_ref") == suggestion_ref:
+                    db.rollback()
+                    raise CaseStoreError(
+                        "a client decision is already recorded for this suggestion; rejected suggestions cannot be reactivated"
+                    )
             payload = json.dumps({
                 "decision": decision,
                 "suggestion_ref": suggestion_ref,
