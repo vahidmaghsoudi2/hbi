@@ -82,6 +82,12 @@ def test_stop_is_a_terminal_record_for_updates_and_no_auto_resume(store):
         store.update_intake(case_ref="CASE-STOP", event_id="EV-3", expected_case_version=1, fields={"goal": "b"})
 
 
+def test_fresh_restart_requires_stopped_source_case(store):
+    store.create_case(case_ref="CASE-ACTIVE", event_id="EV-A", intake={"goal": "x"})
+    with pytest.raises(StoppedCase, match="stopped source"):
+        store.fresh_restart(source_case_ref="CASE-ACTIVE", new_case_ref="CASE-B", event_id="EV-B", intake={"goal": "y"})
+
+
 def test_fresh_restart_creates_new_case_and_links_source(store):
     store.create_case(case_ref="CASE-OLD", event_id="EV-1", intake={"goal": "old"})
     store.stop_case(case_ref="CASE-OLD", event_id="EV-2", expected_case_version=1)
