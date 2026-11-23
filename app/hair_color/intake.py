@@ -15,7 +15,7 @@ INTAKE_FIELDS = {
     "product_context": "محصولات مرتبط و مشخصات روی بسته‌بندی",
     "reference_context": "توضیح عکس یا نمونه مرجع (در صورت وجود)",
 }
-_REQUIRED_FIELDS = tuple(INTAKE_FIELDS)
+_REQUIRED_FIELDS = tuple(field for field in INTAKE_FIELDS if field != "reference_context")
 
 
 class HairColorIntakeError(ValueError):
@@ -56,6 +56,10 @@ def build_intake_request(
             missing.append(field)
         else:
             normalized[field] = value.strip()
+
+    optional_reference = intake.get("reference_context")
+    if isinstance(optional_reference, str) and optional_reference.strip():
+        normalized["reference_context"] = optional_reference.strip()
 
     return {
         "contract_version": "0.3-draft",
