@@ -282,6 +282,54 @@ class HairColorCaseStore:
             db.commit()
         return self.get_case(case_ref)
 
+
+    def record_client_decision(
+        self, *, case_ref: str, event_id: str, expected_case_version: int,
+        expected_target_version: int, decision: str, suggestion_ref: str,
+        reason: str | None = None,
+    ) -> HairColorCaseSnapshot:
+        """Persist an explicit accept/reject decision; acceptance never authorizes execution."""
+        case_ref = self._required_text(case_ref, "case_ref")
+        event_id = self._required_text(event_id, "event_id")
+        suggestion_ref = self._required_text(suggestion_ref, "suggestion_ref")
+        if decision not in {"ACCEPT", "REJECT"}:
+            raise CaseStoreError("decision must be ACCEPT or REJECT")
+        if reason is not None:
+            reason = self._required_text(reason, "reason")
+        self._validate_version(expected_case_version, "expected_case_version")
+        self._validate_version(expected_target_version, "expected_target_version")
+        with self._connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute("SELECT * FROM hair_color_cases WHERE case_ref=?", (case_ref,)).fetchone()
+            if row is None:
+                db.rollback()
+                raise CaseNotFound("case not found")
+            if row["state"] != "ACTIVE":
+                db.rollback()
+                raise StoppedCase("stopped or closed case cannot accept decisions")
+            if (row["case_version"], row["target_version"]) != (expected_case_version, expected_target_version):
+                db.rollback()
+                raise StaleCaseVersion("case or target version changed; decision must be re-evaluated")
+            payload = json.dumps({
+                "decision": decision,
+                "suggestion_ref": suggestion_ref,
+                "reason": reason,
+                "client_acceptance": decision == "ACCEPT",
+                "execution_authorized": False,
+            }, ensure_ascii=False)
+            try:
+                db.execute(
+                    "INSERT INTO hair_color_case_events VALUES(?,?,?,?,?,?)",
+                    (case_ref, event_id, f"CLIENT_{decision}ED" if decision == "ACCEPT" else "CLIENT_REJECTED",
+                     row["case_version"], row["target_version"], payload),
+                )
+                db.execute("UPDATE hair_color_cases SET updated_event_id=? WHERE case_ref=?", (event_id, case_ref))
+            except sqlite3.IntegrityError as exc:
+                db.rollback()
+                raise CaseStoreError("event_id must be unique within case") from exc
+            db.commit()
+        return self.get_case(case_ref)
+
     def record_triage(
         self, *, case_ref: str, event_id: str, expected_case_version: int,
         expected_target_version: int, request_id: str, consultation_status: str,
