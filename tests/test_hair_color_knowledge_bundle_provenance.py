@@ -21,6 +21,8 @@ def valid_bundle():
             "title": "Synthetic source document",
             "source_version": "SYN-REV-1",
             "applicability": "Synthetic scope only",
+            "source_locator": "synthetic://fixture/source",
+            "retrieved_at": "SYNTHETIC-TIME",
         }],
         "claims": [{
             "claim_id": "CLAIM-SYN-01",
