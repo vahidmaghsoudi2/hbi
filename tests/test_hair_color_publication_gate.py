@@ -61,3 +61,21 @@ def test_gate_fails_closed_for_empty_or_unknown_reason_codes():
     empty = evaluate_publication_gate(triage_response(reason_codes=[]), current_case_version=1, current_target_version=1)
     unknown = evaluate_publication_gate(triage_response(reason_codes=["UNRECOGNIZED"]), current_case_version=1, current_target_version=1)
     assert not empty["publication_allowed"] and not unknown["publication_allowed"]
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("consultation_status", ["NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW"]),
+        ("engine_state", ["STOP_OR_REFER_WITH_REASON"]),
+        ("reason_codes", [["KNOWLEDGE_GAP"]]),
+    ],
+)
+def test_gate_blocks_malformed_unhashable_values_without_crashing(field, value):
+    gate = evaluate_publication_gate(
+        triage_response(**{field: value}), current_case_version=1, current_target_version=1
+    )
+    assert gate["publication_allowed"] is False
+    assert gate["publication_kind"] == "BLOCKED"
+    assert gate["safe_response"]["options"] == []
+    assert gate["execution_authorized"] is False
