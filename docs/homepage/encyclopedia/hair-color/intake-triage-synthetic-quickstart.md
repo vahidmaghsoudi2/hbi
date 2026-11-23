@@ -14,6 +14,38 @@ Synthetic tests:
 pytest -q tests/test_hair_color_intake.py
 ```
 
+## Durable case intake and audit trail
+
+`app.hair_color.case_store.HairColorCaseStore` stores synthetic-only case snapshots in SQLite, with optimistic case-version checks and atomic audit events. It supports create/read, field updates, target-version changes, stop events, and a fresh case restart linked to a stopped source. Audit payloads for intake changes record field names, not changed values. A stopped case cannot be edited or resumed. Restart creation and source-link event are committed atomically.
+
+Example:
+
+```python
+from app.hair_color.case_store import HairColorCaseStore
+
+store = HairColorCaseStore("hair-color-synthetic.sqlite3")
+case = store.create_case(
+    case_ref="SYNTHETIC-CASE-001",
+    event_id="SYNTHETIC-EVENT-001",
+    intake={"desired_result": "synthetic only"},
+)
+updated = store.update_intake(
+    case_ref=case.case_ref,
+    event_id="SYNTHETIC-EVENT-002",
+    expected_case_version=1,
+    fields={"service_history": "synthetic only"},
+)
+assert updated.case_version == 2
+```
+
+Test the persistence and versioning contract:
+
+```bash
+pytest -q tests/test_hair_color_case_store.py
+```
+
+This persistence component does not activate specialist advice, store real-client data, or authorize service execution. Project policy remains synthetic-only.
+
 ## Inactive knowledge bundle ingestion
 
 `app.hair_color.knowledge_bundle_ingestion.ingest_knowledge_bundle` accepts JSON text or a mapping envelope with `bundle_schema_version: "1.0"` and `bundle`. It checks schema version and metadata/provenance, and returns `INACTIVE_REVIEW_REQUIRED`. This is in-memory only; it cannot persist, activate, or publish domain knowledge.
