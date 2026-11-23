@@ -277,26 +277,33 @@ class HairColorCaseStore:
         event_id = self._required_text(event_id, "event_id")
         if source_case_ref == new_case_ref:
             raise CaseStoreError("fresh restart must use a distinct case_ref")
-        source = self.get_case(source_case_ref)
-        if source.state != "STOPPED":
-            raise StoppedCase("fresh restart is permitted only from a stopped source case")
-        new_snapshot = self.create_case(
-            case_ref=new_case_ref,
-            event_id=event_id,
-            intake=intake,
-        )
-        # Store the source relationship in a separate, unique audit event.
+        normalized = self._normalize_intake(intake)
         with self._connect() as db:
             db.execute("BEGIN IMMEDIATE")
+            source = db.execute("SELECT state FROM hair_color_cases WHERE case_ref=?", (source_case_ref,)).fetchone()
+            if source is None:
+                db.rollback()
+                raise CaseNotFound("source case not found")
+            if source["state"] != "STOPPED":
+                db.rollback()
+                raise StoppedCase("fresh restart is permitted only from a stopped source case")
+            created_payload = json.dumps({"intake_fields": sorted(normalized)}, ensure_ascii=False)
+            source_payload = json.dumps({"source_case_ref": source_case_ref}, ensure_ascii=False)
             try:
                 db.execute(
+                    "INSERT INTO hair_color_cases VALUES(?,?,?,?,?,?,?)",
+                    (new_case_ref, 1, 1, "ACTIVE", json.dumps(normalized, ensure_ascii=False), event_id, event_id),
+                )
+                db.execute(
                     "INSERT INTO hair_color_case_events VALUES(?,?,?,?,?,?)",
-                    (new_case_ref, f"{event_id}:SOURCE", "FRESH_RESTART_FROM_STOP",
-                     new_snapshot.case_version, new_snapshot.target_version,
-                     json.dumps({"source_case_ref": source_case_ref}, ensure_ascii=False)),
+                    (new_case_ref, event_id, "CASE_CREATED", 1, 1, created_payload),
+                )
+                db.execute(
+                    "INSERT INTO hair_color_case_events VALUES(?,?,?,?,?,?)",
+                    (new_case_ref, f"{event_id}:SOURCE", "FRESH_RESTART_FROM_STOP", 1, 1, source_payload),
                 )
             except sqlite3.IntegrityError as exc:
                 db.rollback()
-                raise CaseStoreError("restart audit event could not be recorded") from exc
+                raise CaseStoreError("restart case or audit events already exist") from exc
             db.commit()
         return self.get_case(new_case_ref)
