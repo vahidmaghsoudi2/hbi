@@ -276,14 +276,15 @@ class HairColorCaseStore:
                 db.rollback()
                 raise StaleCaseVersion("case version changed; refresh snapshot before stopping")
             payload = json.dumps({"performed_step_refs": refs}, ensure_ascii=False)
+            next_version = row["case_version"] + 1
             db.execute(
-                "UPDATE hair_color_cases SET state='STOPPED',updated_event_id=? WHERE case_ref=?",
-                (event_id, case_ref),
+                "UPDATE hair_color_cases SET case_version=?,state='STOPPED',updated_event_id=? WHERE case_ref=?",
+                (next_version, event_id, case_ref),
             )
             try:
                 db.execute(
                     "INSERT INTO hair_color_case_events VALUES(?,?,?,?,?,?)",
-                    (case_ref, event_id, "STOP_REQUESTED", row["case_version"], row["target_version"], payload),
+                    (case_ref, event_id, "STOP_REQUESTED", next_version, row["target_version"], payload),
                 )
             except sqlite3.IntegrityError as exc:
                 db.rollback()
@@ -423,14 +424,15 @@ class HairColorCaseStore:
                 db.rollback()
                 raise StaleCaseVersion("case version changed; refresh snapshot before closing")
             payload = json.dumps({"closure_reason": closure_reason}, ensure_ascii=False)
+            next_version = row["case_version"] + 1
             db.execute(
-                "UPDATE hair_color_cases SET state='CLOSED',updated_event_id=? WHERE case_ref=?",
-                (event_id, case_ref),
+                "UPDATE hair_color_cases SET case_version=?,state='CLOSED',updated_event_id=? WHERE case_ref=?",
+                (next_version, event_id, case_ref),
             )
             try:
                 db.execute(
                     "INSERT INTO hair_color_case_events VALUES(?,?,?,?,?,?)",
-                    (case_ref, event_id, "CASE_CLOSED", row["case_version"], row["target_version"], payload),
+                    (case_ref, event_id, "CASE_CLOSED", next_version, row["target_version"], payload),
                 )
             except sqlite3.IntegrityError as exc:
                 db.rollback()
