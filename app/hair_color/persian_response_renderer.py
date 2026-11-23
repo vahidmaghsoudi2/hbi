@@ -51,10 +51,17 @@ def render_persian_response(response: Mapping[str, Any]) -> dict[str, Any]:
             elif isinstance(item, str) and item.strip() and item not in missing_fields:
                 missing_fields.append(item)
 
+    try:
+        from .intake import INTAKE_FIELDS
+        display_missing = [INTAKE_FIELDS.get(field, field) for field in missing_fields]
+    except Exception:
+        display_missing = missing_fields
+
     return {
         "title": title,
         "message": message,
-        "missing_fields": missing_fields,
+        "missing_fields": display_missing,
+        "missing_field_keys": missing_fields,
         "next_step": "تکمیل داده‌های لازم یا ارجاع به متخصص؛ بدون توصیه رنگ یا دستور اجرا.",
         "options": [],
         "execution_authorized": False,
