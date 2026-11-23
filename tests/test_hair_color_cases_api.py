@@ -49,6 +49,15 @@ def test_persistent_synthetic_case_api_create_update_stop_restart_and_history(cl
         assert updated.status_code == 200
         assert updated.json()["case_version"] == 2
 
+        triage = client.post(
+            "/api/v1/hair/color-consultation/cases/SYNTHETIC-API-CASE-01/triage",
+            headers=_headers(),
+            json={"request_id": "SYNTHETIC-API-REQUEST-01", "triage_event_id": "SYNTHETIC-API-EVENT-TRIAGE-01"},
+        )
+        assert triage.status_code == 200
+        assert triage.json()["consultation"]["options"] == []
+        assert triage.json()["execution_authorized"] is False
+
         stale = client.patch(
             "/api/v1/hair/color-consultation/cases/SYNTHETIC-API-CASE-01/intake",
             headers=_headers(),
@@ -88,7 +97,7 @@ def test_persistent_synthetic_case_api_create_update_stop_restart_and_history(cl
         )
         assert history.status_code == 200
         assert [event["event_type"] for event in history.json()] == [
-            "CASE_CREATED", "INTAKE_UPDATED", "STOP_REQUESTED",
+            "CASE_CREATED", "INTAKE_UPDATED", "TRIAGE_RECORDED", "STOP_REQUESTED",
         ]
     finally:
         client.app.dependency_overrides.pop(get_hair_color_case_service, None)
