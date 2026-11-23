@@ -157,3 +157,25 @@ The suffixes in the table are abbreviated for readability; each full Evidence ID
 - Snapshot Evidence fields (6 rows): `manufacturer_claims` for claim IDs `...-001` and `...-003`; `ingredients` for `...-002`; `usage_instructions` for `...-004`; `ingredient_roles` for `...-005`; `claimed_benefits` for `...-006`.
 - Therefore the snapshot's field distribution is **not** the same as the manifest's reported duplicate-ingredients distribution. The extra row appears in `manufacturer_claims` in the snapshot, but row lineage and intended assertion identity cannot be established from counts alone.
 - No row deletion, merge, field rewrite, reclassification, conflict-flag update, or ProductKnowledge rebuild is permitted by this audit.
+
+
+---
+
+## 2026-11-23 — PO-directed terminal disposition for P7 Anua
+
+**Decision authority:** The Product Owner explicitly directed that the recurring Anua issue be ended, authorizing a destructive outcome if necessary. This section records the least-destructive terminal action that removes Anua from the active seven-product acceptance path without fabricating source lineage.
+
+### Final disposition: QUARANTINED / EXCLUDED FROM ACCEPTANCE
+
+- P7 Anua is removed from the active ProductKnowledge acceptance and readiness cohort until a separately authorized future re-entry.
+- P7 ProductKnowledge must remain non-accepted and unavailable to recommendation/consultation flows. Do not create or activate a ProductKnowledge payload from the disputed six Evidence rows.
+- Preserve all six existing P7 Evidence rows and their original stored values. Do not delete, merge, rewrite, relabel, or silently reclassify them.
+- Record the manifest-versus-snapshot field mismatch and the `conflict_status=NONE` discrepancy as historical unresolved data-quality defects. They no longer block the remaining six products because P7 is excluded, not because its evidence conflict has been proven false.
+- P7 serum remains distinct from Anua azelaic-acid pads. The quarantine applies only to the P7 serum dossier.
+- Re-entry requires a new explicit PO decision and a fresh, traceable source/row-lineage package. No automatic reopening.
+
+### Acceptance boundary and execution status
+
+This is a PO-approved **process disposition** recorded in Git. It is not an operational database mutation. The connected GitHub tools do not provide access to the HBI operational database, so this action does not claim that Product status, Evidence status, ProductKnowledge, recommendation eligibility, or runtime visibility has been changed in production.
+
+**Stage 7 disposition:** P7 blocker is closed for cohort progression by permanent exclusion/quarantine. P1–P6 remain subject to their own QA and acceptance; their structural mapping pass is not an Evidence acceptance. Stage 8 remains unstarted until the six-product cohort has its required operational verification and explicit stage gate.
