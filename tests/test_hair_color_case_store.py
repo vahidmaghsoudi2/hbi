@@ -209,7 +209,7 @@ def test_stop_guards_and_validation(store):
     store.stop_case(case_ref="CASE-STOP-EDGE", event_id="EV-4", expected_case_version=1)
     with pytest.raises(StoppedCase, match="already stopped"):
         store.stop_case(case_ref="CASE-STOP-EDGE", event_id="EV-5", expected_case_version=1)
-    with pytest.raises(StaleCaseVersion):
+    with pytest.raises(StoppedCase):
         store.stop_case(case_ref="CASE-STOP-EDGE", event_id="EV-6", expected_case_version=2)
 
 
@@ -241,11 +241,13 @@ def test_close_guards_and_duplicate_event_rollback(store):
     store.create_case(case_ref="CASE-CLOSE-EDGE", event_id="EV-1", intake={"goal": "test"})
     with pytest.raises(CaseNotFound):
         store.close_case(case_ref="CASE-MISSING", event_id="EV-2", expected_case_version=1, closure_reason="done")
+    with pytest.raises(StaleCaseVersion):
+        store.close_case(case_ref="CASE-CLOSE-EDGE", event_id="EV-STALE", expected_case_version=2, closure_reason="stale")
     closed = store.close_case(case_ref="CASE-CLOSE-EDGE", event_id="EV-3", expected_case_version=1, closure_reason="done")
     assert closed.state == "CLOSED"
     with pytest.raises(CaseStoreError, match="already closed"):
         store.close_case(case_ref="CASE-CLOSE-EDGE", event_id="EV-4", expected_case_version=1, closure_reason="again")
-    with pytest.raises(StaleCaseVersion):
+    with pytest.raises(CaseStoreError, match="already closed"):
         store.close_case(case_ref="CASE-CLOSE-EDGE", event_id="EV-5", expected_case_version=2, closure_reason="stale")
     store.create_case(case_ref="CASE-CLOSE-DUP", event_id="EV-6", intake={})
     with pytest.raises(CaseStoreError, match="unique within case"):
