@@ -91,6 +91,7 @@ class HairColorCaseService:
         self._synthetic_id(request_id, "request_id")
         self._synthetic_id(triage_event_id, "triage_event_id")
         snapshot = self.store.get_case(case_ref)
+        self._synthetic_payload(snapshot.intake)
         if snapshot.state != "ACTIVE":
             raise StoppedCase("stopped or closed case cannot be consulted")
         result = run_consultation_from_intake_persian(
