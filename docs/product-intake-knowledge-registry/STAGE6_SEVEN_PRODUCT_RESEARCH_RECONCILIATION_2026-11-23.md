@@ -133,9 +133,11 @@
 - **FACT:** Official Anua serum page declares 10% azelaic acid and provides an ingredient list including azelaic acid, panthenol, betaine salicylate, glycerin, allantoin, niacinamide, sodium hyaluronate, centella components, squalane, zinc PCA and ceramide NP.
 - **MANUFACTURER_CLAIM:** Official directions advise gradual introduction, starting 1–2 times per week and increasing as tolerated; page guidance describes use up to twice daily and daytime sunscreen. This is manufacturer guidance, not a personalized tolerance guarantee.
 - **INFERENCE:** Azelaic acid is the primary claim-linked active; humectants and soothing/conditioning ingredients are supportive. Ingredient presence does not establish treatment of rosacea, acne, PIH or persistent redness.
-- **CONFLICT (snapshot reconciliation):** Stage 5 snapshot has 6 Evidence rows for P7 versus 5 manifest assertions; two rows use `field=ingredients`. Manifest notes an ingredients-field conflict, but the captured rows both have `conflict_status=NONE`. This flag mismatch does not resolve the content conflict. Preserve both existing rows and keep conflict OPEN.
-- **UNKNOWN:** Which of the two stored ingredients assertions is correct for the exact physical unit/market; row-level source/version/package mapping; complete independent test protocol for any manufacturer tolerability/benefit claims.
-- **Scope:** Serum only; distinct from Anua azelaic-acid pads. No new assertion is inserted and no Evidence row is reclassified.
+- **CONFLICT (manifest-to-snapshot mapping):** Stage 5 snapshot has 6 Evidence rows for P7 versus 5 manifest assertions. The snapshot has one `ingredients` row (`...-002`) and two `manufacturer_claims` rows (`...-001`, `...-003`); the manifest's identity note incorrectly describes two conflicting `ingredients` rows. All six snapshot rows show `conflict_status=NONE`, so the manifest conflict note is not represented by row-level flags.
+- **DUPLICATE CANDIDATE:** `...-001` records only the manufacturer's 10% azelaic-acid declaration. `...-003` records that same 10% declaration plus the manufacturer's non-comedogenic/low-irritation test labels, with the same official product-page source. On content and source overlap, `...-001` is redundant and is the single best candidate for removal from the operational Evidence set. This is a mapping conclusion, not proof that deletion has been executed.
+- **PRESERVE:** `...-002` is the only `ingredients` row and contains the full US official-page INCI; it is not the extra record. Keep `...-003`, `...-004`, `...-005`, and `...-006` as the five manifest-aligned records.
+- **UNKNOWN:** Exact physical unit/market/lot/GTIN match; whether any additional package-only information differs from the US source page; full independent test protocol for manufacturer tolerability/benefit claims.
+- **Scope:** Serum only; distinct from Anua azelaic-acid pads. No operational Evidence row has been deleted or reclassified in this research stage.
 
 **Source:** Anua official: https://anuaglobal.co/products/azelaic-acid-10-hyaluron-redness-calming-serum  
 **Evidence status:** Official source-page declaration; claims remain manufacturer claims. Existing data conflict remains unresolved.
@@ -148,13 +150,13 @@
 |---|---|---|---|
 | C-01 | CONFLICT | P4 Korean/international formula vs US drug-label formula have distinct filter systems/INCI | Separate version dossiers; no cross-version data transfer |
 | C-02 | CONFLICT | P6 historical Clinique product vs replacement/current product | Keep historical 100 ml dossier separate |
-| C-03 | CONFLICT | P7 two stored `ingredients` Evidence rows; snapshot flags NONE while manifest documents conflict | Preserve both rows; conflict OPEN; no mutation |
+| C-03 | DATA-QUALITY / DUPLICATE | P7 has six Evidence rows for five manifest assertions; the extra row is the narrower `manufacturer_claims` row `...-001`, substantially subsumed by `...-003`; manifest incorrectly locates duplicate in `ingredients` | Preserve `...-002` ingredients row; remove `...-001` only through authorized, reference-safe cleanup; keep `...-003` |
 | U-01 | UNKNOWN | Physical package, GTIN, lot, market-to-source formula match across dossiers | Require package evidence for any future identity assertion |
 | U-02 | UNKNOWN | Full public protocols and independent replication for manufacturer study claims | Claims remain manufacturer-originated |
 | U-03 | UNKNOWN | P1 individual peptide concentrations | Not disclosed in reviewed source |
 | U-04 | UNKNOWN | P5 exact source-matched INCI for physical target | Not promoted from other market/formula pages |
 | U-05 | UNKNOWN | P6 exact physical historical formula/lot | Retailer snapshot only |
-| U-06 | UNKNOWN | P7 source/package mapping of conflicting stored ingredient assertions | Human QA required before any accepted knowledge rebuild |
+| U-06 | UNKNOWN | P7 physical package/market/lot/GTIN match and whether package-specific directions/INCI differ from the US page | Keep source-market and physical-unit identity separate until package evidence is checked |
 
 ## Stage 6 result and boundaries
 
