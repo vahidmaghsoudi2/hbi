@@ -101,7 +101,9 @@ def test_persistent_synthetic_case_api_create_update_stop_restart_and_history(cl
         assert history.status_code == 200
         assert [event["event_type"] for event in history.json()] == [
             "CASE_CREATED", "INTAKE_UPDATED", "TRIAGE_RECORDED", "STOP_REQUESTED",
+            "FRESH_RESTARTED_AS",
         ]
+        assert history.json()[-1]["payload"] == {"new_case_ref": "SYNTHETIC-API-CASE-02"}
     finally:
         client.app.dependency_overrides.pop(get_hair_color_case_service, None)
 
