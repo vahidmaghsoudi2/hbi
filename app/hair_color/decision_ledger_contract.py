@@ -75,8 +75,14 @@ def add_suggestion(
 def record_question(ledger: ConsultationLedger, *, event_id: str, question_ref: str) -> ConsultationLedger:
     if not isinstance(event_id, str) or not event_id.strip() or not isinstance(question_ref, str) or not question_ref.strip():
         raise LedgerContractError("question event requires event_id and question_ref")
+    _ensure_unique_event_id(ledger, event_id)
     event = DecisionEvent(event_id, "QUESTION", None, ledger.case_version, ledger.target_version, (question_ref,))
     return replace(ledger, events=ledger.events + (event,))
+
+
+def _ensure_unique_event_id(ledger: ConsultationLedger, event_id: str) -> None:
+    if any(event.event_id == event_id for event in ledger.events):
+        raise LedgerContractError("event_id must be unique within a case")
 
 
 def _get_suggestion(ledger: ConsultationLedger, suggestion_ref: str) -> SuggestionRecord:
@@ -97,6 +103,7 @@ def reject_suggestion(ledger: ConsultationLedger, *, event_id: str, suggestion_r
         raise LedgerContractError("stopped case cannot accept decision events")
     if not isinstance(event_id, str) or not event_id.strip() or record.status is not SuggestionStatus.REVIEWABLE:
         raise LedgerContractError("only a current reviewable suggestion can be rejected")
+    _ensure_unique_event_id(ledger, event_id)
     updated = _replace_suggestion(ledger, replace(record, status=SuggestionStatus.REJECTED))
     event = DecisionEvent(event_id, "REJECT", suggestion_ref, ledger.case_version, ledger.target_version)
     return replace(updated, events=updated.events + (event,))
@@ -110,6 +117,7 @@ def accept_suggestion(ledger: ConsultationLedger, *, event_id: str, suggestion_r
         raise LedgerContractError("only a current reviewable suggestion can be accepted")
     if (record.evaluated_case_version, record.evaluated_target_version) != (ledger.case_version, ledger.target_version):
         raise LedgerContractError("stale suggestion; fresh evaluation required")
+    _ensure_unique_event_id(ledger, event_id)
     updated = _replace_suggestion(ledger, replace(record, status=SuggestionStatus.ACCEPTED))
     event = DecisionEvent(event_id, "ACCEPT", suggestion_ref, ledger.case_version, ledger.target_version)
     return replace(updated, events=updated.events + (event,))
@@ -125,6 +133,7 @@ def grant_execution_consent(
         raise LedgerContractError("execution consent requires a separately accepted suggestion")
     if (record.evaluated_case_version, record.evaluated_target_version) != (ledger.case_version, ledger.target_version):
         raise LedgerContractError("stale suggestion; fresh evaluation required")
+    _ensure_unique_event_id(ledger, event_id)
     updated = _replace_suggestion(ledger, replace(record, status=SuggestionStatus.EXECUTION_CONSENTED))
     event = DecisionEvent(event_id, "EXECUTION_CONSENT", suggestion_ref, ledger.case_version, ledger.target_version)
     return replace(updated, events=updated.events + (event,))
@@ -133,6 +142,7 @@ def grant_execution_consent(
 def change_target(ledger: ConsultationLedger, *, event_id: str) -> ConsultationLedger:
     if not isinstance(event_id, str) or not event_id.strip() or ledger.stopped:
         raise LedgerContractError("target change requires an active case and event ID")
+    _ensure_unique_event_id(ledger, event_id)
     next_case, next_target = ledger.case_version + 1, ledger.target_version + 1
     records = tuple(replace(item, status=SuggestionStatus.INVALIDATED) for item in ledger.suggestions)
     event = DecisionEvent(event_id, "TARGET_CHANGED", None, next_case, next_target)
@@ -146,6 +156,7 @@ def change_data(ledger: ConsultationLedger, *, event_id: str, changed_fields: It
     fields = tuple(sorted({field for field in supplied_fields if field.strip()}))
     if not isinstance(event_id, str) or not event_id.strip() or not fields or ledger.stopped:
         raise LedgerContractError("data change requires active case, event ID, and field names")
+    _ensure_unique_event_id(ledger, event_id)
     next_case = ledger.case_version + 1
     changed = set(fields)
     records = tuple(
@@ -163,6 +174,7 @@ def change_data(ledger: ConsultationLedger, *, event_id: str, changed_fields: It
 def request_stop(ledger: ConsultationLedger, *, event_id: str, performed_step_refs: Iterable[str]) -> ConsultationLedger:
     if not isinstance(event_id, str) or not event_id.strip() or ledger.stopped:
         raise LedgerContractError("stop event requires active case and event ID")
+    _ensure_unique_event_id(ledger, event_id)
     refs = tuple(performed_step_refs)
     if any(not isinstance(ref, str) for ref in refs):
         raise LedgerContractError("performed step references must be strings")
@@ -178,6 +190,7 @@ def fresh_restart(ledger: ConsultationLedger, *, new_case_ref: str, event_id: st
         raise LedgerContractError("restart requires traceable event_id")
     if not isinstance(new_case_ref, str) or not new_case_ref.strip() or new_case_ref == ledger.case_ref:
         raise LedgerContractError("restart must use a distinct case reference")
+    _ensure_unique_event_id(ledger, event_id)
     next_case, next_target = ledger.case_version + 1, ledger.target_version + 1
     event = DecisionEvent(event_id, "FRESH_RESTART_FROM_STOP", None, next_case, next_target, (ledger.case_ref,))
     return ConsultationLedger(
