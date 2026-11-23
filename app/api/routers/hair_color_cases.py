@@ -54,6 +54,7 @@ class TargetChangeRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     event_id: str
     expected_case_version: int = Field(ge=1)
+    target_description: str
 
 
 class ClientDecisionRequest(BaseModel):
@@ -151,9 +152,12 @@ def change_hair_color_target(
     _auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
 ):
     try:
+        service._synthetic_id(case_ref, "case_ref")
+        service._synthetic_id(payload.event_id, "event_id")
         return _snapshot(service.change_target(
             case_ref=case_ref, event_id=payload.event_id,
             expected_case_version=payload.expected_case_version,
+            target_description=payload.target_description,
         ))
     except Exception as exc:
         raise _translate_error(exc) from exc
