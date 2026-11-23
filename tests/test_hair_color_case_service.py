@@ -15,10 +15,10 @@ def test_create_update_consult_persian_and_audit_safe_triage(service):
         case_ref="SYNTHETIC-CASE-001",
         event_id="SYNTHETIC-EVENT-001",
         intake={
-            "current_hair_state": "synthetic state",
-            "desired_result": "synthetic goal",
-            "service_history": "synthetic history",
-            "product_context": "synthetic product metadata",
+            "current_hair_state": "SYNTHETIC: state",
+            "desired_result": "SYNTHETIC: goal",
+            "service_history": "SYNTHETIC: history",
+            "product_context": "SYNTHETIC: product metadata",
         },
     )
     assert case.case_version == 1
@@ -39,21 +39,21 @@ def test_create_update_consult_persian_and_audit_safe_triage(service):
 
 
 def test_update_and_stale_version_rejected(service):
-    service.create_case(case_ref="SYNTHETIC-CASE-002", event_id="SYNTHETIC-EVENT-001", intake={"goal": "old"})
+    service.create_case(case_ref="SYNTHETIC-CASE-002", event_id="SYNTHETIC-EVENT-001", intake={"goal": "SYNTHETIC: old"})
     updated = service.update_intake(
         case_ref="SYNTHETIC-CASE-002", event_id="SYNTHETIC-EVENT-002",
-        expected_case_version=1, fields={"goal": "new"},
+        expected_case_version=1, fields={"goal": "SYNTHETIC: new"},
     )
     assert updated.case_version == 2
     with pytest.raises(StaleCaseVersion):
         service.update_intake(
             case_ref="SYNTHETIC-CASE-002", event_id="SYNTHETIC-EVENT-003",
-            expected_case_version=1, fields={"goal": "stale"},
+            expected_case_version=1, fields={"goal": "SYNTHETIC: stale"},
         )
 
 
 def test_target_change_stop_and_fresh_restart(service):
-    service.create_case(case_ref="SYNTHETIC-CASE-003", event_id="SYNTHETIC-EVENT-001", intake={"goal": "first"})
+    service.create_case(case_ref="SYNTHETIC-CASE-003", event_id="SYNTHETIC-EVENT-001", intake={"goal": "SYNTHETIC: first"})
     target = service.change_target(case_ref="SYNTHETIC-CASE-003", event_id="SYNTHETIC-EVENT-002", expected_case_version=1)
     assert (target.case_version, target.target_version) == (2, 2)
     stopped = service.stop_case(
@@ -65,7 +65,7 @@ def test_target_change_stop_and_fresh_restart(service):
         service.consult_persian(case_ref="SYNTHETIC-CASE-003", request_id="SYNTHETIC-REQ-02", triage_event_id="SYNTHETIC-EVENT-004")
     restarted = service.fresh_restart(
         source_case_ref="SYNTHETIC-CASE-003", new_case_ref="SYNTHETIC-CASE-004",
-        event_id="SYNTHETIC-EVENT-005", intake={"goal": "new fresh intake"},
+        event_id="SYNTHETIC-EVENT-005", intake={"goal": "SYNTHETIC: new fresh intake"},
     )
     assert restarted.case_ref == "SYNTHETIC-CASE-004"
     assert restarted.case_version == 1
@@ -75,15 +75,23 @@ def test_target_change_stop_and_fresh_restart(service):
 @pytest.mark.parametrize("identifier", ["CASE-REALISH", "", "synthetic-lowercase"])
 def test_service_rejects_non_synthetic_identifiers(service, identifier):
     with pytest.raises(HairColorCaseServiceError):
-        service.create_case(case_ref=identifier, event_id="SYNTHETIC-EVENT-1", intake={"goal": "synthetic"})
+        service.create_case(case_ref=identifier, event_id="SYNTHETIC-EVENT-1", intake={"goal": "SYNTHETIC: value"})
 
 
 def test_close_case_is_terminal(service):
     service.create_case(case_ref="SYNTHETIC-CASE-005", event_id="SYNTHETIC-EVENT-001", intake={"goal": "synthetic"})
     closed = service.close_case(
         case_ref="SYNTHETIC-CASE-005", event_id="SYNTHETIC-EVENT-002",
-        expected_case_version=1, closure_reason="synthetic closure",
+        expected_case_version=1, closure_reason="SYNTHETIC: closure",
     )
     assert closed.state == "CLOSED"
     with pytest.raises(StoppedCase):
         service.consult_persian(case_ref="SYNTHETIC-CASE-005", request_id="SYNTHETIC-REQ-5", triage_event_id="SYNTHETIC-EVENT-3")
+
+def test_service_rejects_unmarked_intake_values(service):
+    with pytest.raises(HairColorCaseServiceError, match="synthetic placeholder"):
+        service.create_case(
+            case_ref="SYNTHETIC-CASE-REAL-DATA-BLOCK",
+            event_id="SYNTHETIC-EVENT-REAL-DATA-BLOCK",
+            intake={"desired_result": "unmarked content"},
+        )
