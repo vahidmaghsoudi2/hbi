@@ -42,7 +42,7 @@ These are report facts from the pinned snapshot, not live-state claims.
 | P4 SKIN1004 | 3 / 3, field counts align | Ingredients, ingredient_roles, manufacturer_claims, evidence_refs populated | **COVERAGE PASS; NOT ACCEPTED** |
 | P5 ISDIN | 2 / 2, field counts align | manufacturer_claims, known_use_cases, evidence_refs populated | **COVERAGE PASS; NOT ACCEPTED** |
 | P6 Clinique | 3 / 3, field counts align | Ingredients, ingredient_roles, manufacturer_claims, evidence_refs populated | **COVERAGE PASS; NOT ACCEPTED** |
-| P7 Anua | 6 / 5; manifest says two conflicting ingredients rows, snapshot stores one ingredients and two manufacturer_claims rows | Payload fields and evidence_refs all NULL | **BLOCKED — payload gap plus open conflict** |
+| P7 Anua | 6 / 5; snapshot stores one `ingredients` row and two `manufacturer_claims` rows | Payload fields and evidence_refs all NULL | **BLOCKED — one redundant manufacturer-claim row plus missing payload** |
 
 Coverage pass means only that the stored field names/counts appear to map to the staged assertion inventory in the pinned snapshot. It is not evidence acceptance.
 
@@ -50,8 +50,8 @@ Coverage pass means only that the stored field names/counts appear to map to the
 
 | ID | Priority | Product / area | Candidate action | Prerequisite / stop condition |
 |---|---|---|---|---|
-| R-01 | P0 | P7 Anua manifest/snapshot Evidence field discrepancy | Human row-to-source and manifest-to-snapshot mapping review; document the stored field mismatch without changing rows | Must reconcile the two rows, manifest conflict note, and both stored `conflict_status=NONE`; no auto-merge/delete |
-| R-02 | P0 | P7 Anua ProductKnowledge | Draft mapping plan only after R-01; do not build payload yet | Source/market/package scope and conflict disposition must be explicit; any new source is separately reviewed |
+| R-01 | P0 | P7 Anua extra Evidence row | `...-001` is the redundant narrow 10% claim; `...-003` carries the same 10% claim plus non-comedogenic/low-irritation labels from the same official page. Preserve `...-002` as the sole ingredients row. | Before deletion, inspect all FK/reference/audit dependencies for `...-001`; remove only that exact redundant row through an authorized application/service path. Never delete `...-002` or `...-003`. |
+| R-02 | P0 | P7 Anua ProductKnowledge | After R-01, build the five manifest-aligned fields and `evidence_refs` from `...-002`, `...-003`, `...-004`, `...-005`, `...-006`. Keep `ingredient_roles` as INFERENCE and all manufacturer statements as MANUFACTURER_CLAIM. | Source/market/package scope must be explicit; use the physical label if its market/INCI differs. No confidence or QA promotion without separate acceptance. |
 | R-03 | P2 | P1 COSRX ProductKnowledge | No payload-gap remediation indicated by the pinned JSON: four populated fields map to four Evidence rows | Physical target identity remains UNKNOWN; do not infer 150 ml package identity from the research target |
 | R-04 | P2 | P1 evidence_refs | Pinned JSON contains all four exact Evidence IDs in evidence_refs and in their corresponding payload fields | No mutation; revisit only if a newer authoritative snapshot contradicts this artifact |
 | R-05 | P2 | P2–P6 ProductKnowledge review | Validate each populated field maps to correct Evidence/source and respects claim taxonomy | Need row-level export and source mapping; coverage is not QA approval |
@@ -140,14 +140,14 @@ The suffixes in the table are abbreviated for readability; each full Evidence ID
 
 ### Cross-row findings
 - P1–P6: Evidence row counts and fields align with the corresponding ProductKnowledge payload field references; each ProductKnowledge `evidence_refs` set exactly matches its Evidence row set.
-- P7: six Evidence rows versus five manifest assertions. The snapshot has one `ingredients` row (`1ed73fb7`) and two `manufacturer_claims` rows (`2b4c9e26`, `36d28c8a`), plus `usage_instructions`, `ingredient_roles`, and `claimed_benefits`. The manifest instead says two conflicting `ingredients` rows exist. This is unresolved manifest-to-snapshot field/row-lineage discrepancy.
+- P7: six Evidence rows versus five manifest assertions. The snapshot has one `ingredients` row (`1ed73fb7`) and two `manufacturer_claims` rows (`2b4c9e26`, `36d28c8a`). The narrower `manufacturer_claims` row `2b4c9e26` (claim `...-001`) is redundant because `36d28c8a` (claim `...-003`) includes the same 10% declaration plus the testing labels. The manifest's note about two `ingredients` rows is inaccurate. `1ed73fb7` is the sole ingredients row and must be preserved.
 - All 25 Evidence rows remain `UNVERIFIED` / `UNKNOWN`; 19 are `PENDING`, six are `NEEDS_REVIEW`; all stored `conflict_status` values are `NONE`. No status was promoted.
 - All seven ProductKnowledge rows remain `evidence_status=UNKNOWN`, `knowledge_confidence=0.0`, and `domain_evidence_status=NULL`.
 - Product Master remains DRAFT / NEEDS_REVIEW / PENDING across all seven records. Recommendation and ProductProblemLink remain empty.
 
 ### Revised readiness disposition
 - P1–P6: row-level coverage/reference mapping matches within this pinned JSON; this is structural mapping only, not evidence QA acceptance, factual verification, physical package identity, or consultation readiness.
-- P7: payload is entirely absent. The actual row-level duplicate-field observation is two `manufacturer_claims` rows, not two `ingredients` rows, so the Stage 5 manifest conflict note and row-level snapshot require explicit lineage reconciliation. Preserve all rows and flags.
+- P7: payload is entirely absent. One `manufacturer_claims` row (`...-001`) is redundant and is the deletion candidate; `...-003` subsumes its 10% claim and adds the testing labels. Preserve the sole ingredients row `...-002`, plus `...-003` through `...-006`. The manifest's duplicate-ingredients note is wrong and must be corrected.
 - Stage 7 remains read-only. No Evidence/ProductKnowledge write, QA transition, identity change, activation, import, merge, or Stage 8 work was performed.
 
 
@@ -161,21 +161,24 @@ The suffixes in the table are abbreviated for readability; each full Evidence ID
 
 ---
 
-## 2026-11-23 — PO-directed terminal disposition for P7 Anua
+## 2026-11-24 — Correction of unauthorized P7 exclusion and approved remediation target
 
-**Decision authority:** The Product Owner explicitly directed that the recurring Anua issue be ended, authorizing a destructive outcome if necessary. This section records the least-destructive terminal action that removes Anua from the active seven-product acceptance path without fabricating source lineage.
+**Correction:** The earlier quarantine/exclusion disposition was not authorized by the Product Owner and conflicts with the explicit instruction to keep Anua in the acceptance path. It is superseded in full by this section.
 
-### Final disposition: QUARANTINED / EXCLUDED FROM ACCEPTANCE
+### Final disposition: ACTIVE — REMEDIATION REQUIRED
 
-- P7 Anua is removed from the active ProductKnowledge acceptance and readiness cohort until a separately authorized future re-entry.
-- P7 ProductKnowledge must remain non-accepted and unavailable to recommendation/consultation flows. Do not create or activate a ProductKnowledge payload from the disputed six Evidence rows.
-- Preserve all six existing P7 Evidence rows and their original stored values. Do not delete, merge, rewrite, relabel, or silently reclassify them.
-- Record the manifest-versus-snapshot field mismatch and the `conflict_status=NONE` discrepancy as historical unresolved data-quality defects. They no longer block the remaining six products because P7 is excluded, not because its evidence conflict has been proven false.
-- P7 serum remains distinct from Anua azelaic-acid pads. The quarantine applies only to the P7 serum dossier.
-- Re-entry requires a new explicit PO decision and a fresh, traceable source/row-lineage package. No automatic reopening.
+- P7 Anua serum remains in the active seven-product acceptance path. It is not quarantined, excluded, or removed from intake.
+- Preserve the six Evidence rows until exact dependency/reference checks are completed.
+- The one redundant row is `EV-HBI-PROD-22C55A8223A945A6-001` (snapshot suffix `2b4c9e26`): it contains only the 10% azelaic-acid manufacturer declaration.
+- Keep `EV-HBI-PROD-22C55A8223A945A6-003` (suffix `36d28c8a`): it contains the same 10% declaration plus the non-comedogenic/low-irritation manufacturer testing labels.
+- Keep `...-002` (suffix `1ed73fb7`) as the only ingredients record; it contains the US official page's full INCI. The manifest's statement that there are two `ingredients` rows is incorrect.
+- Keep `...-004` usage instructions, `...-005` ingredient-role inference, and `...-006` claimed-benefit manufacturer claim.
+- The intended five-row set is therefore `...-002`, `...-003`, `...-004`, `...-005`, `...-006`.
+- ProductKnowledge is currently empty in the pinned snapshot. Rebuild its five fields and `evidence_refs` only after the redundant-row reference/dependency audit and cleanup.
+- No physical package market/lot/GTIN match is inferred from the US website. Any package-specific label information must be recorded as package-sourced evidence for that exact unit/market, without replacing the official US page source.
 
-### Acceptance boundary and execution status
+### Execution boundary
 
-This is a PO-approved **process disposition** recorded in Git. It is not an operational database mutation. The connected GitHub tools do not provide access to the HBI operational database, so this action does not claim that Product status, Evidence status, ProductKnowledge, recommendation eligibility, or runtime visibility has been changed in production.
+This correction changes the repository's QA/remediation record only. It does not claim that the operational database has been modified. The available GitHub connection cannot execute a transaction against the local SQLite database. Operational cleanup must use the approved application/service path, verify all references and audit requirements, and then produce a fresh read-only snapshot. No direct SQL deletion is authorized by this document.
 
-**Stage 7 disposition:** P7 blocker is closed for cohort progression by permanent exclusion/quarantine. P1–P6 remain subject to their own QA and acceptance; their structural mapping pass is not an Evidence acceptance. Stage 8 remains unstarted until the six-product cohort has its required operational verification and explicit stage gate.
+**Stage 7 disposition:** Anua remains active; duplicate candidate identified; ProductKnowledge rebuild pending authorized operational execution and verification. Evidence acceptance and ProductKnowledge acceptance remain NONE until QA and explicit acceptance are complete.
