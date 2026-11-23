@@ -116,6 +116,13 @@ def test_triage_event_requires_current_versions_and_unique_reasons(store):
         expected_target_version=1, request_id="REQ-1", consultation_status="NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW",
         reason_codes=("KNOWLEDGE_GAP",), safe_summary="synthetic safe summary",
     )
+    with pytest.raises(CaseStoreError, match="request_id must be unique"):
+        store.record_triage(
+            case_ref="CASE-TRIAGE", event_id="EV-REPLAY", expected_case_version=1,
+            expected_target_version=1, request_id="REQ-1", consultation_status="NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW",
+            reason_codes=("KNOWLEDGE_GAP",), safe_summary="replayed request",
+        )
+    assert [event["event_id"] for event in store.list_events("CASE-TRIAGE")] == ["EV-1", "EV-2"]
     with pytest.raises(CaseStoreError, match="unique"):
         store.record_triage(
             case_ref="CASE-TRIAGE", event_id="EV-3", expected_case_version=1,
