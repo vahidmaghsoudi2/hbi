@@ -268,6 +268,41 @@ class HairColorCaseStore:
             db.commit()
         return self.get_case(case_ref)
 
+    def close_case(
+        self, *, case_ref: str, event_id: str, expected_case_version: int,
+        closure_reason: str,
+    ) -> HairColorCaseSnapshot:
+        case_ref = self._required_text(case_ref, "case_ref")
+        event_id = self._required_text(event_id, "event_id")
+        closure_reason = self._required_text(closure_reason, "closure_reason")
+        with self._connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute("SELECT * FROM hair_color_cases WHERE case_ref=?", (case_ref,)).fetchone()
+            if row is None:
+                db.rollback()
+                raise CaseNotFound("case not found")
+            if row["state"] == "CLOSED":
+                db.rollback()
+                raise CaseStoreError("case is already closed")
+            if row["case_version"] != expected_case_version:
+                db.rollback()
+                raise StaleCaseVersion("case version changed; refresh snapshot before closing")
+            payload = json.dumps({"closure_reason": closure_reason}, ensure_ascii=False)
+            db.execute(
+                "UPDATE hair_color_cases SET state='CLOSED',updated_event_id=? WHERE case_ref=?",
+                (event_id, case_ref),
+            )
+            try:
+                db.execute(
+                    "INSERT INTO hair_color_case_events VALUES(?,?,?,?,?,?)",
+                    (case_ref, event_id, "CASE_CLOSED", row["case_version"], row["target_version"], payload),
+                )
+            except sqlite3.IntegrityError as exc:
+                db.rollback()
+                raise CaseStoreError("event_id must be unique within case") from exc
+            db.commit()
+        return self.get_case(case_ref)
+
     def fresh_restart(
         self, *, source_case_ref: str, new_case_ref: str, event_id: str,
         intake: Mapping[str, Any],
