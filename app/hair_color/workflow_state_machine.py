@@ -59,6 +59,7 @@ class CaseWorkflow:
     target_version: int
     state: WorkflowState
     last_transition_event: str | None = None
+    transition_event_ids: tuple[str, ...] = ()
 
 
 def transition(
@@ -72,8 +73,10 @@ def transition(
     execution_consent: bool = False,
 ) -> CaseWorkflow:
     """Perform a guarded transition; acceptance and execution consent are distinct."""
-    if not event_id.strip():
+    if not isinstance(event_id, str) or not event_id.strip():
         raise WorkflowTransitionError("transition requires a traceable event_id")
+    if event_id in case.transition_event_ids:
+        raise WorkflowTransitionError("transition event_id must be unique within case")
     if (case.case_version, case.target_version) != (expected_case_version, expected_target_version):
         raise WorkflowTransitionError("stale case/target version; fresh evaluation required")
     if next_state not in _ALLOWED[case.state]:
@@ -84,7 +87,7 @@ def transition(
         raise WorkflowTransitionError("approval requires separate client acceptance and execution consent")
     if case.state == WorkflowState.SAFETY_STOPPED and next_state != WorkflowState.CLOSED:
         raise WorkflowTransitionError("safety-stopped case cannot auto-resume")
-    return replace(case, state=next_state, last_transition_event=event_id)
+    return replace(case, state=next_state, last_transition_event=event_id, transition_event_ids=case.transition_event_ids + (event_id,))
 
 
 def restart_as_fresh_case_after_stop(case: CaseWorkflow, *, new_case_ref: str) -> CaseWorkflow:
@@ -99,4 +102,5 @@ def restart_as_fresh_case_after_stop(case: CaseWorkflow, *, new_case_ref: str) -
         target_version=case.target_version + 1,
         state=WorkflowState.INCOMPLETE_ACCEPTANCE,
         last_transition_event="FRESH_RESTART_FROM_STOP",
+        transition_event_ids=("FRESH_RESTART_FROM_STOP",),
     )
