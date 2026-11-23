@@ -78,6 +78,20 @@ def test_service_rejects_non_synthetic_identifiers(service, identifier):
         service.create_case(case_ref=identifier, event_id="SYNTHETIC-EVENT-1", intake={"goal": "SYNTHETIC: value"})
 
 
+def test_service_rejects_unmarked_stop_step_refs_and_closure_reason(service):
+    service.create_case(case_ref="SYNTHETIC-CASE-006", event_id="SYNTHETIC-EVENT-006", intake={"goal": "SYNTHETIC: goal"})
+    with pytest.raises(HairColorCaseServiceError, match="SYNTHETIC- identifiers"):
+        service.stop_case(
+            case_ref="SYNTHETIC-CASE-006", event_id="SYNTHETIC-EVENT-007",
+            expected_case_version=1, performed_step_refs=("unmarked-step",),
+        )
+    with pytest.raises(HairColorCaseServiceError, match="synthetic placeholder"):
+        service.close_case(
+            case_ref="SYNTHETIC-CASE-006", event_id="SYNTHETIC-EVENT-008",
+            expected_case_version=1, closure_reason="unmarked",
+        )
+
+
 def test_close_case_is_terminal(service):
     service.create_case(case_ref="SYNTHETIC-CASE-005", event_id="SYNTHETIC-EVENT-001", intake={"goal": "SYNTHETIC: value"})
     closed = service.close_case(
@@ -100,6 +114,16 @@ def test_service_refuses_triage_of_unmarked_data_in_internal_store(service):
             request_id="SYNTHETIC-REQ-UNMARKED",
             triage_event_id="SYNTHETIC-EVENT-TRIAGE-UNMARKED",
         )
+
+
+def test_service_get_case_blocks_unmarked_internal_payload(service):
+    service.store.create_case(
+        case_ref="SYNTHETIC-CASE-UNMARKED-READ",
+        event_id="SYNTHETIC-EVENT-UNMARKED-READ",
+        intake={"desired_result": "unmarked text"},
+    )
+    with pytest.raises(HairColorCaseServiceError, match="synthetic placeholder"):
+        service.get_case("SYNTHETIC-CASE-UNMARKED-READ")
 
 
 def test_service_rejects_unmarked_intake_values(service):
