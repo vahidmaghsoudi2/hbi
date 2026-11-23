@@ -1,6 +1,6 @@
 """Isolated hair-colour consultation integration boundary."""
 
-from .case_store import (
+from .case_service import HairColorCaseService, HairColorCaseServiceError\nfrom .case_store import (
     CaseNotFound,
     CaseStoreError,
     HairColorCaseSnapshot,
@@ -10,7 +10,7 @@ from .case_store import (
 )
 
 __all__ = [
-    "CaseNotFound",
+    "HairColorCaseService",\n    "HairColorCaseServiceError",\n    "CaseNotFound",
     "CaseStoreError",
     "HairColorCaseSnapshot",
     "HairColorCaseStore",
