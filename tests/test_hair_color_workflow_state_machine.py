@@ -65,3 +65,15 @@ def test_restart_rejected_for_non_stopped_case_and_same_case_reference():
 def test_illegal_transition_cannot_skip_specialist_and_client_confirmation_stages():
     with pytest.raises(WorkflowTransitionError, match="not allowed"):
         transition(case(WorkflowState.AWAITING_EVALUATION), WorkflowState.APPROVED_FOR_EXECUTION, event_id="EV-SYN-6", expected_case_version=1, expected_target_version=1, client_acceptance=True, execution_consent=True)
+
+
+def test_transition_event_ids_are_unique_within_case_history():
+    moved = transition(
+        case(), WorkflowState.AWAITING_EVALUATION, event_id="EV-SYN-DUP",
+        expected_case_version=1, expected_target_version=1,
+    )
+    with pytest.raises(WorkflowTransitionError, match="unique"):
+        transition(
+            moved, WorkflowState.READY_FOR_SPECIALIST_DECISION, event_id="EV-SYN-DUP",
+            expected_case_version=1, expected_target_version=1,
+        )
