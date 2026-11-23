@@ -78,6 +78,8 @@ def test_stop_is_a_terminal_record_for_updates_and_no_auto_resume(store):
         performed_step_refs=("step-a", "step-a", " "),
     )
     assert stopped.state == "STOPPED"
+    assert stopped.case_version == 2
+    assert store.list_events("CASE-STOP")[-1]["case_version"] == 2
     assert store.list_events("CASE-STOP")[-1]["payload"] == {"performed_step_refs": ["step-a"]}
     with pytest.raises(StoppedCase):
         store.update_intake(case_ref="CASE-STOP", event_id="EV-3", expected_case_version=1, fields={"goal": "b"})
@@ -135,7 +137,9 @@ def test_close_case_records_terminal_state_and_blocks_updates(store):
         closure_reason="synthetic completion",
     )
     assert closed.state == "CLOSED"
+    assert closed.case_version == 2
     assert store.list_events("CASE-CLOSE")[-1]["event_type"] == "CASE_CLOSED"
+    assert store.list_events("CASE-CLOSE")[-1]["case_version"] == 2
     with pytest.raises(StoppedCase):
         store.update_intake(case_ref="CASE-CLOSE", event_id="EV-3", expected_case_version=1, fields={"goal": "b"})
 
@@ -204,6 +208,7 @@ def test_duplicate_target_and_stop_event_ids_roll_back(store):
     with pytest.raises(CaseStoreError, match="unique within case"):
         store.stop_case(case_ref="CASE-DUP-EVENT", event_id="EV-1", expected_case_version=1)
     assert store.get_case("CASE-DUP-EVENT").state == "ACTIVE"
+    assert store.get_case("CASE-DUP-EVENT").case_version == 1
 
 
 def test_stop_guards_and_validation(store):
