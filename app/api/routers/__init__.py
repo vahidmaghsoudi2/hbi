@@ -18,11 +18,12 @@ from app.api.routers.product_problem_links import router as product_problem_link
 from app.api.routers.hair_catalog import router as hair_catalog_router
 from app.api.routers.hair_dialogue import router as hair_dialogue_router
 from app.api.routers.acceptance_reports import router as acceptance_reports_router
+from app.api.routers.hair_color_cases import router as hair_color_cases_router
 
 __all__ = [
     "auth_router", "products_router", "duplicate_checks_router", "customers_router", "cases_router",
     "recommendations_router", "inventory_router", "sales_router", "evidence_router",
     "payments_router", "returns_router", "fx_router", "reports_router",
     "specialist_router", "followups_router", "outcome_assessments_router", "product_problem_links_router", "hair_catalog_router", "hair_dialogue_router",
-    "acceptance_reports_router",
+    "acceptance_reports_router", "hair_color_cases_router",
 ]

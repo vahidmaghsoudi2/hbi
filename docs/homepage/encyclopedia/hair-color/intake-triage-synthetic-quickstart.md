@@ -1,0 +1,143 @@
+# Hair Color Intake/Triage — synthetic quickstart
+
+This is the **current safe runtime surface**. It is not a color-recommendation engine.
+
+## Public intake builder and entrypoint
+
+`app.hair_color.intake.build_intake_request` converts the user-facing intake fields into a validated adapter request and automatically marks blank or absent required fields. The required fields are current hair state, desired result, service history, and product context. Reference context is optional.
+
+The callable UI surface is `run_consultation_from_intake_persian(intake, request_id=..., case_ref=...)`. It runs the current fail-closed triage path and returns Persian presentation. Missing information routes to clarification; a complete intake still routes to specialist review because validated domain knowledge is unavailable. The safety flag routes to a safety stop. The response always has empty options and execution authorization false.
+
+Synthetic tests:
+
+```bash
+pytest -q tests/test_hair_color_intake.py
+```
+
+## Durable case intake and audit trail
+
+`app.hair_color.case_store.HairColorCaseStore` stores synthetic-only case snapshots in SQLite, with optimistic case-version checks and atomic audit events. It supports create/read, field updates, target-version changes, stop events, terminal closure, and a fresh case restart linked to a stopped source. Audit payloads for intake changes record field names, not changed values. A stopped case cannot be edited or resumed. Restart creation and source-link event are committed atomically.
+
+Example:
+
+```python
+from app.hair_color.case_store import HairColorCaseStore
+
+store = HairColorCaseStore("hair-color-synthetic.sqlite3")
+case = store.create_case(
+    case_ref="SYNTHETIC-CASE-001",
+    event_id="SYNTHETIC-EVENT-001",
+    intake={"desired_result": "SYNTHETIC: only"},
+)
+updated = store.update_intake(
+    case_ref=case.case_ref,
+    event_id="SYNTHETIC-EVENT-002",
+    expected_case_version=1,
+    fields={"service_history": "synthetic only"},
+)
+assert updated.case_version == 2
+```
+
+Test the persistence and versioning contract:
+
+```bash
+pytest -q tests/test_hair_color_case_store.py
+```
+
+This persistence component does not activate specialist advice, store real-client data, or authorize service execution. Project policy remains synthetic-only.
+
+## Case application service
+
+`HairColorCaseService` combines the SQLite case store and Persian triage entrypoint. Every case/request/event identifier must use the `SYNTHETIC-` prefix, and each intake field value, changed field value, and closure reason must start with `SYNTHETIC:`. It rejects unmarked payloads on create/update/read/restart/triage. It offers create/read/update/target-change/stop/close/restart and a persisted safe triage summary. The stored triage event records status, reason codes, summary, zero options, and execution-authorized false—not raw intake text, candidate claims, or formula data. Stale versions and stopped cases are rejected.
+
+Run the integration tests:
+
+```bash
+pytest -q tests/test_hair_color_case_service.py tests/test_hair_color_case_store.py
+```
+
+## Inactive knowledge bundle ingestion
+
+`app.hair_color.knowledge_bundle_ingestion.ingest_knowledge_bundle` accepts JSON text or a mapping envelope with `bundle_schema_version: "1.0"` and `bundle`. It checks schema version and metadata/provenance, and returns `INACTIVE_REVIEW_REQUIRED`. This is in-memory only; it cannot persist, activate, or publish domain knowledge.
+
+```bash
+pytest -q tests/test_hair_color_knowledge_bundle_ingestion.py
+```
+
+## Public callable
+
+`app.hair_color.consultation.run_consultation(request)` validates the contract and runs the fail-closed intake gate. The gate never emits color candidates, shade rankings, formulas, product equivalence, chemical/process parameters, or predicted outcomes.
+
+For a UI caller, the combined public callable is \`run_consultation_persian(request)\`; it returns the validated consultation result and a Persian presentation object, and hardcodes execution authorization to false.\n\nThe standalone Persian presentation helper is:
+
+`app.hair_color.persian_response_renderer.render_persian_response(response)`
+
+It returns a small UI-safe object: title, explanatory message, missing field identifiers, generic next step, an empty options list, and `execution_authorized=False`.
+
+## Response routing
+
+| Status | User-facing meaning | Candidate options |
+|---|---|---|
+| `SAFETY_STOP_NO_EXECUTION_SUGGESTION` | Stop and qualified review | None |
+| `OUT_OF_V1_SCOPE` | Outside current scope | None |
+| `NEEDS_INFORMATION_OR_TEST` | Clarify missing/conflicting intake data | None |
+| `NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW` | Evidence/knowledge gap; specialist review | None |
+| `SYSTEM_REASONED_SUGGESTION` | Reserved contract state; renderer still does not present execution advice | None |
+
+## Synthetic test
+
+Run the narrow test suite in a repository environment:
+
+```bash
+pytest -q tests/test_hair_color_policy_gate_engine.py tests/test_hair_color_persian_response_renderer.py
+```
+
+The test data must remain synthetic. Passing these tests proves only the intake/triage and rendering contract—not specialist validity, real product chemistry, runtime integration, consultation readiness, or release acceptance.
+
+## Activation gate for domain knowledge
+
+Any knowledge bundle must remain inactive unless it has exact source/product identity, version/market and applicability metadata, claim-level evidence links, a recorded specialist approval, and publication-gate checks. This document does not authorize or define operational hair-color chemistry.
+
+## Guarded case workflow (synthetic)
+
+The separate `workflow_state_machine` module models the ten case states and rejects illegal shortcuts. Transition calls require a traceable event ID and matching case/target versions. The transition to `APPROVED_FOR_EXECUTION` requires both client acceptance and explicit execution consent. A safety-stopped case cannot resume; the restart helper creates a distinct case reference with incremented versions and returns it to incomplete intake.
+
+Run the transition invariants:
+
+```bash
+pytest -q tests/test_hair_color_workflow_state_machine.py
+```
+
+This state model is not wired to a database, UI, or real execution service. The approval state is an abstract contract state only; no actual hair-color service is enabled.
+
+## Knowledge-bundle provenance metadata validator (synthetic)
+
+`app.hair_color.knowledge_bundle_provenance.validate_knowledge_bundle` checks exact product identity fields, source metadata, unique source/claim IDs, and claim-to-source links. It reports metadata readiness only. Even a synthetic bundle with an approval record remains `publishable=False` and `activation_allowed=False`; the validator has no activation/publication function and does not assess evidence quality or scientific validity.
+
+Run its tests:
+
+```bash
+pytest -q tests/test_hair_color_knowledge_bundle_provenance.py
+```
+
+## Decision-ledger contract (synthetic, in-memory)
+
+`app.hair_color.decision_ledger_contract` tests neutral question events, rejection non-reactivation, acceptance vs execution-consent separation, target-change invalidation, dependency-specific invalidation, stop recording, and restart as a distinct fresh case. It is not persistence and does not execute services. The case workflow state model is separate from this decision ledger contract.
+
+Run:
+
+```bash
+pytest -q tests/test_hair_color_decision_ledger_contract.py
+```
+
+Dependency-change semantics in the ledger contract: suggestions depending on changed fields are invalidated; unaffected suggestions retain their candidate record but receive the current case version and return to `REVIEWABLE`, so prior acceptance/consent is not carried forward. Rejected suggestions remain rejected.
+
+## Publication gate
+
+`app.hair_color.publication_gate.evaluate_publication_gate` permits only current, option-free, non-advice triage statuses. It blocks any candidate option, recommendation status, stale case/target snapshot, or invalid reason code and returns a specialist-review fallback. The combined Persian public callable now applies this gate before rendering. No recommendation publication path is enabled.
+
+Run:
+
+```bash
+pytest -q tests/test_hair_color_publication_gate.py
+```

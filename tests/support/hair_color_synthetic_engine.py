@@ -38,6 +38,21 @@ class SyntheticHairColorEngine:
             if isinstance(item, Mapping) and isinstance(item.get("evidence_ref"), str)
         ]
 
+        def synthetic_candidate(rank: int) -> dict[str, Any]:
+            evidence_ref = evidence_refs[0] if evidence_refs else "EVIDENCE-MOCK-UNBOUND"
+            return {
+                "candidate_key": f"CAND-SYN-{scenario_id}-{rank}",
+                "rank": rank,
+                "summary": f"Synthetic placeholder candidate {rank}; no domain assertion.",
+                "claims": [{
+                    "claim_ref": f"CLAIM-SYN-{scenario_id}-{rank}",
+                    "claim_text": "Synthetic placeholder claim; no domain assertion.",
+                    "rule_ref": f"RULE-SYN-{scenario_id}-{rank}",
+                    "evidence_refs": [evidence_ref],
+                    "support_status": "MOCK_SUPPORTED",
+                }],
+            }
+
         result = {
             "request_id": request["request_id"],
             "case_ref": request["case_ref"],
@@ -47,7 +62,7 @@ class SyntheticHairColorEngine:
             "consultation_status": "SYSTEM_REASONED_SUGGESTION",
             "reason_codes": [],
             "summary": f"Synthetic fixture {scenario_id}; not a product recommendation.",
-            "options": [{}],
+            "options": [synthetic_candidate(1)],
             "missing_information": [],
             "evidence_refs": evidence_refs[:1],
             "limitations": ["Synthetic-only test output; no scientific evidence."],
@@ -71,16 +86,28 @@ class SyntheticHairColorEngine:
                 options=[],
             )
 
+        if scenario_id in {"S02", "S04", "S05"}:
+            result["missing_information"] = [
+                {"field": f"SYNTHETIC_REQUIRED_DATA_{scenario_id}", "reason": "fixture-only"}
+            ]
+
         if scenario_id == "S08":
             result.update(
                 engine_state="STOP_OR_REFER_WITH_REASON",
-                consultation_status="NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW",
+                consultation_status="NEEDS_INFORMATION_OR_TEST",
+                reason_codes=["NO_VALID_OPTION"],
                 options=[],
             )
         elif scenario_id == "S09":
-            result["options"] = [{}, {}]
+            result["options"] = [synthetic_candidate(1), synthetic_candidate(2)]
         elif scenario_id in {"S11", "S12", "S14"}:
             result["options"] = []
+            if scenario_id in {"S12", "S14"}:
+                result.update(
+                    engine_state="STOP_OR_REFER_WITH_REASON",
+                    consultation_status="NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW",
+                    reason_codes=["KNOWLEDGE_GAP"],
+                )
         elif scenario_id == "S13":
             result["summary"] = "Fresh synthetic evaluation for the supplied case and target versions."
 
