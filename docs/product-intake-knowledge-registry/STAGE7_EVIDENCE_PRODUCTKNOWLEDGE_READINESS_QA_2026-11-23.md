@@ -93,7 +93,7 @@ Coverage pass means only that the stored field names/counts appear to map to the
 **ProductKnowledge acceptance: NONE.**  
 **Stage 8: NOT STARTED.**
 
-The next safe action is a row-level source-to-Evidence mapping review using a permitted read-only export, focusing first on P7 and P1. This would still be review-only; no mutation follows automatically.
+The next safe action is human row-lineage reconciliation for P7 using the pinned manifest and snapshot, followed by any source-mapping questions that remain for P2–P6. P1's mapping is already structurally aligned in this artifact. This remains review-only; no mutation follows automatically.
 
 
 ## Export-tool / runbook review (read-only source inspection)
@@ -134,13 +134,13 @@ All row IDs below are copied from the JSON snapshot. The audit compared each Evi
 | P4 SKIN1004 | `ab707983` ingredients; `bd9c4e47` ingredient_roles; `83a368c1` manufacturer_claims | All three corresponding fields populated; `evidence_refs` contains the same three IDs | **MATCH; NOT ACCEPTED** |
 | P5 ISDIN | `982bc851` manufacturer_claims; `c45194ac` known_use_cases | Both corresponding fields populated; `evidence_refs` contains the same two IDs | **MATCH; NOT ACCEPTED** |
 | P6 Clinique | `274f20c2` ingredients; `307d2efe` manufacturer_claims; `4f48ff5b` ingredient_roles | All three corresponding fields populated; `evidence_refs` contains the same three IDs | **MATCH; NOT ACCEPTED** |
-| P7 Anua | `2b4c9e26` manufacturer_claims; `1ed73fb7` ingredients; `36d28c8a` manufacturer_claims; `1d858e1c` usage_instructions; `3b14ff45` ingredient_roles; `526fa458` claimed_benefits | All ProductKnowledge payload fields and `evidence_refs` are NULL | **BLOCKED; duplicate ingredients row and manifest conflict remain OPEN** |
+| P7 Anua | `2b4c9e26` manufacturer_claims; `1ed73fb7` ingredients; `36d28c8a` manufacturer_claims; `1d858e1c` usage_instructions; `3b14ff45` ingredient_roles; `526fa458` claimed_benefits | All ProductKnowledge payload fields and `evidence_refs` are NULL | **BLOCKED; manifest-to-snapshot field mismatch and conflict note remain OPEN** |
 
 The suffixes in the table are abbreviated for readability; each full Evidence ID is `EV-HBI-PROD-{ProductID}-{suffix}`, with the ProductID corresponding to the row's canonical dossier. No IDs were inferred or generated.
 
 ### Cross-row findings
 - P1–P6: Evidence row counts and fields align with the corresponding ProductKnowledge payload field references; each ProductKnowledge `evidence_refs` set exactly matches its Evidence row set.
-- P7: six Evidence rows versus five manifest assertions. Two rows map to `field=ingredients`? **No**: the row-level snapshot actually has one `ingredients` row (`1ed73fb7`), while the other five fields are `manufacturer_claims` (two rows), `usage_instructions`, `ingredient_roles`, and `claimed_benefits`. This differs from the earlier manifest-level duplicate-ingredients description and must be checked against the manifest version and row lineage before declaring the discrepancy resolved. The two manufacturer_claims rows are `2b4c9e26` and `36d28c8a`.
+- P7: six Evidence rows versus five manifest assertions. The snapshot has one `ingredients` row (`1ed73fb7`) and two `manufacturer_claims` rows (`2b4c9e26`, `36d28c8a`), plus `usage_instructions`, `ingredient_roles`, and `claimed_benefits`. The manifest instead says two conflicting `ingredients` rows exist. This is unresolved manifest-to-snapshot field/row-lineage discrepancy.
 - All 25 Evidence rows remain `UNVERIFIED` / `UNKNOWN`; 19 are `PENDING`, six are `NEEDS_REVIEW`; all stored `conflict_status` values are `NONE`. No status was promoted.
 - All seven ProductKnowledge rows remain `evidence_status=UNKNOWN`, `knowledge_confidence=0.0`, and `domain_evidence_status=NULL`.
 - Product Master remains DRAFT / NEEDS_REVIEW / PENDING across all seven records. Recommendation and ProductProblemLink remain empty.
