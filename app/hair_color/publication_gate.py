@@ -30,6 +30,18 @@ def evaluate_publication_gate(
 ) -> dict[str, Any]:
     """Return a publication decision. Never publishes candidates or advice."""
     reasons: list[str] = []
+    if not isinstance(response, Mapping):
+        response = {}
+        reasons.append("RESPONSE_NOT_OBJECT")
+    for version_name, current_version in (
+        ("evaluated_case_version", current_case_version),
+        ("evaluated_target_version", current_target_version),
+    ):
+        response_version = response.get(version_name)
+        if isinstance(response_version, bool) or not isinstance(response_version, int) or response_version < 1:
+            reasons.append("INVALID_VERSION_FIELD")
+        if isinstance(current_version, bool) or not isinstance(current_version, int) or current_version < 1:
+            reasons.append("INVALID_CURRENT_VERSION")
     if response.get("evaluated_case_version") != current_case_version:
         reasons.append("STALE_CASE_VERSION")
     if response.get("evaluated_target_version") != current_target_version:
@@ -52,6 +64,31 @@ def evaluate_publication_gate(
         or any(not isinstance(code, str) or code not in _ALLOWED_REASON_CODES for code in reason_codes)
     ):
         reasons.append("INVALID_REASON_CODES")
+    elif len(reason_codes) != len(set(reason_codes)):
+        reasons.append("DUPLICATE_REASON_CODES")
+
+    # Validate status/reason compatibility independently of the adapter so the
+    # publication boundary cannot be bypassed with a hand-crafted response.
+    if status == "SAFETY_STOP_NO_EXECUTION_SUGGESTION" and reason_codes != ["SAFETY_CONCERN"]:
+        reasons.append("STATUS_REASON_MISMATCH")
+    if status == "OUT_OF_V1_SCOPE" and reason_codes != ["OUT_OF_SCOPE"]:
+        reasons.append("STATUS_REASON_MISMATCH")
+    if status == "NEEDS_INFORMATION_OR_TEST" and not set(reason_codes) <= {
+        "DATA_GAP", "CONFLICTING_DATA", "NO_VALID_OPTION"
+    }:
+        reasons.append("STATUS_REASON_MISMATCH")
+    if status == "NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW" and not set(reason_codes) <= {
+        "KNOWLEDGE_GAP", "CONFLICTING_DATA", "DATA_GAP", "STALE_CASE_VERSION"
+    }:
+        reasons.append("STATUS_REASON_MISMATCH")
+    if "DATA_GAP" in reason_codes and not response.get("missing_information"):
+        reasons.append("DATA_GAP_WITHOUT_DETAILS")
+    if not isinstance(response.get("summary"), str) or not response.get("summary", "").strip():
+        reasons.append("INVALID_SUMMARY")
+    if not isinstance(response.get("request_id"), str) or not response.get("request_id", "").strip():
+        reasons.append("INVALID_REQUEST_ID")
+    if not isinstance(response.get("case_ref"), str) or not response.get("case_ref", "").strip():
+        reasons.append("INVALID_CASE_REF")
 
     allowed = not reasons
     safe_response = dict(response) if allowed else {
