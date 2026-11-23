@@ -16,7 +16,7 @@ pytest -q tests/test_hair_color_intake.py
 
 ## Durable case intake and audit trail
 
-`app.hair_color.case_store.HairColorCaseStore` stores synthetic-only case snapshots in SQLite, with optimistic case-version checks and atomic audit events. It supports create/read, field updates, target-version changes, stop events, and a fresh case restart linked to a stopped source. Audit payloads for intake changes record field names, not changed values. A stopped case cannot be edited or resumed. Restart creation and source-link event are committed atomically.
+`app.hair_color.case_store.HairColorCaseStore` stores synthetic-only case snapshots in SQLite, with optimistic case-version checks and atomic audit events. It supports create/read, field updates, target-version changes, stop events, terminal closure, and a fresh case restart linked to a stopped source. Audit payloads for intake changes record field names, not changed values. A stopped case cannot be edited or resumed. Restart creation and source-link event are committed atomically.
 
 Example:
 
