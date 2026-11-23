@@ -98,7 +98,13 @@ def test_fresh_restart_creates_new_case_and_links_source(store):
     )
     assert new.case_ref == "CASE-NEW"
     assert new.case_version == 1
-    assert store.list_events("CASE-NEW")[-1]["payload"] == {"source_case_ref": "CASE-OLD"}
+    new_events = store.list_events("CASE-NEW")
+    assert [event["event_type"] for event in new_events] == ["CASE_CREATED", "FRESH_RESTART_FROM_STOP"]
+    assert new_events[-1]["payload"] == {"source_case_ref": "CASE-OLD"}
+    source_events = store.list_events("CASE-OLD")
+    assert source_events[-1]["event_type"] == "FRESH_RESTARTED_AS"
+    assert source_events[-1]["payload"] == {"new_case_ref": "CASE-NEW"}
+    assert store.get_case("CASE-OLD").updated_event_id == source_events[-1]["event_id"]
 
 
 def test_triage_event_requires_current_versions_and_unique_reasons(store):
@@ -267,3 +273,25 @@ def test_restart_guards_and_duplicate_restart_rollback(store):
         store.fresh_restart(source_case_ref="CASE-RESTART-SOURCE", new_case_ref="CASE-RESTART-EXISTS", event_id="EV-5", intake={})
     assert store.get_case("CASE-RESTART-SOURCE").state == "STOPPED"
     assert store.get_case("CASE-RESTART-EXISTS").state == "ACTIVE"
+
+
+
+def test_restart_rolls_back_new_case_when_source_backlink_event_id_collides(store):
+    store.create_case(case_ref="CASE-BACKLINK-SOURCE", event_id="EV-CREATE", intake={})
+    store.stop_case(
+        case_ref="CASE-BACKLINK-SOURCE",
+        event_id="EV-RESTART:RESTARTED_AS",
+        expected_case_version=1,
+    )
+    with pytest.raises(CaseStoreError, match="restart case or audit events"):
+        store.fresh_restart(
+            source_case_ref="CASE-BACKLINK-SOURCE",
+            new_case_ref="CASE-BACKLINK-NEW",
+            event_id="EV-RESTART",
+            intake={"goal": "fresh synthetic"},
+        )
+    with pytest.raises(CaseNotFound):
+        store.get_case("CASE-BACKLINK-NEW")
+    source_events = store.list_events("CASE-BACKLINK-SOURCE")
+    assert [event["event_type"] for event in source_events] == ["CASE_CREATED", "STOP_REQUESTED"]
+    assert store.get_case("CASE-BACKLINK-SOURCE").updated_event_id == "EV-RESTART:RESTARTED_AS"
