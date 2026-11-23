@@ -211,9 +211,11 @@ class HairColorCaseStore:
 
     def change_target(
         self, *, case_ref: str, event_id: str, expected_case_version: int,
+        target_description: str,
     ) -> HairColorCaseSnapshot:
         case_ref = self._required_text(case_ref, "case_ref")
         event_id = self._required_text(event_id, "event_id")
+        target_description = self._required_text(target_description, "target_description")
         self._validate_version(expected_case_version, "expected_case_version")
         with self._connect() as db:
             db.execute("BEGIN IMMEDIATE")
@@ -227,11 +229,18 @@ class HairColorCaseStore:
             if row["case_version"] != expected_case_version:
                 db.rollback()
                 raise StaleCaseVersion("case version changed; refresh snapshot before target change")
+            intake = json.loads(row["intake_json"])
+            previous_target = intake.get("desired_result")
+            intake["desired_result"] = target_description
             next_case, next_target = row["case_version"] + 1, row["target_version"] + 1
-            payload = json.dumps({"target_changed": True}, ensure_ascii=False)
+            payload = json.dumps({
+                "target_changed": True,
+                "previous_target": previous_target,
+                "new_target": target_description,
+            }, ensure_ascii=False)
             db.execute(
-                "UPDATE hair_color_cases SET case_version=?,target_version=?,updated_event_id=? WHERE case_ref=?",
-                (next_case, next_target, event_id, case_ref),
+                "UPDATE hair_color_cases SET case_version=?,target_version=?,intake_json=?,updated_event_id=? WHERE case_ref=?",
+                (next_case, next_target, json.dumps(intake, ensure_ascii=False), event_id, case_ref),
             )
             try:
                 db.execute(
