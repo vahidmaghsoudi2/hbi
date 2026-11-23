@@ -56,11 +56,17 @@ class HairColorCaseService:
             expected_case_version=expected_case_version, fields=fields,
         )
 
-    def change_target(self, *, case_ref: str, event_id: str, expected_case_version: int):
+    def change_target(
+        self, *, case_ref: str, event_id: str, expected_case_version: int,
+        target_description: str,
+    ):
         self._synthetic_id(case_ref, "case_ref")
         self._synthetic_id(event_id, "event_id")
+        if not isinstance(target_description, str) or not target_description.startswith("SYNTHETIC:"):
+            raise HairColorCaseServiceError("target_description must be synthetic placeholder text")
         return self.store.change_target(
             case_ref=case_ref, event_id=event_id, expected_case_version=expected_case_version,
+            target_description=target_description,
         )
 
     def stop_case(self, *, case_ref: str, event_id: str, expected_case_version: int, performed_step_refs: tuple[str, ...] = ()):
