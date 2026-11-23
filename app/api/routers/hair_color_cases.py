@@ -3,7 +3,7 @@
 This API exposes the existing case service, not specialist advice. Database path
 must be explicitly configured with HBI_HAIR_COLOR_CASE_DB; no default production
 storage is created. Only synthetic identifiers and placeholder intake values are
-accepted. Dialogue decisions remain in the stateless dialogue endpoint.
+accepted. Explicit synthetic client ACCEPT/REJECT decisions are persisted as audit events; acceptance never grants execution authority.
 """
 from __future__ import annotations
 
