@@ -2,6 +2,26 @@
 
 This is the **current safe runtime surface**. It is not a color-recommendation engine.
 
+## Public intake builder and entrypoint
+
+`app.hair_color.intake.build_intake_request` converts the user-facing intake fields into a validated adapter request and automatically marks blank or absent required fields. The required fields are current hair state, desired result, service history, and product context. Reference context is optional.
+
+The callable UI surface is `run_consultation_from_intake_persian(intake, request_id=..., case_ref=...)`. It runs the current fail-closed triage path and returns Persian presentation. Missing information routes to clarification; a complete intake still routes to specialist review because validated domain knowledge is unavailable. The safety flag routes to a safety stop. The response always has empty options and execution authorization false.
+
+Synthetic tests:
+
+```bash
+pytest -q tests/test_hair_color_intake.py
+```
+
+## Inactive knowledge bundle ingestion
+
+`app.hair_color.knowledge_bundle_ingestion.ingest_knowledge_bundle` accepts JSON text or a mapping envelope with `bundle_schema_version: "1.0"` and `bundle`. It checks schema version and metadata/provenance, and returns `INACTIVE_REVIEW_REQUIRED`. This is in-memory only; it cannot persist, activate, or publish domain knowledge.
+
+```bash
+pytest -q tests/test_hair_color_knowledge_bundle_ingestion.py
+```
+
 ## Public callable
 
 `app.hair_color.consultation.run_consultation(request)` validates the contract and runs the fail-closed intake gate. The gate never emits color candidates, shade rankings, formulas, product equivalence, chemical/process parameters, or predicted outcomes.
