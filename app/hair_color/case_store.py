@@ -277,7 +277,9 @@ class HairColorCaseStore:
         event_id = self._required_text(event_id, "event_id")
         if source_case_ref == new_case_ref:
             raise CaseStoreError("fresh restart must use a distinct case_ref")
-        self.get_case(source_case_ref)
+        source = self.get_case(source_case_ref)
+        if source.state != "STOPPED":
+            raise StoppedCase("fresh restart is permitted only from a stopped source case")
         new_snapshot = self.create_case(
             case_ref=new_case_ref,
             event_id=event_id,
