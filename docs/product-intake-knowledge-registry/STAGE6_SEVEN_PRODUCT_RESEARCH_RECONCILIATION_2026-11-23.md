@@ -130,8 +130,9 @@
 **Canonical ID:** `HBI-PROD-22C55A8223A945A6`
 
 ### Findings
-- **FACT:** Official Anua serum page declares 10% azelaic acid and provides an ingredient list including azelaic acid, panthenol, betaine salicylate, glycerin, allantoin, niacinamide, sodium hyaluronate, centella components, squalane, zinc PCA and ceramide NP.
-- **MANUFACTURER_CLAIM:** Official directions advise gradual introduction, starting 1–2 times per week and increasing as tolerated; page guidance describes use up to twice daily and daytime sunscreen. This is manufacturer guidance, not a personalized tolerance guarantee.
+- **FACT — US source-page INCI:** The current Anua US page declares this exact list: Water, Azelaic Acid, Propylene Glycol, Sodium Hydroxide, Dipropylene Glycol, 1,2-Hexanediol, Panthenol, Hydroxyethylcellulose, Betaine Salicylate, Glycerin, Biosaccharide Gum-1, Ethylhexylglycerin, Allantoin, Dipotassium Glycyrrhizate, Melia Azadirachta Leaf Extract, Camellia Sinensis Leaf Water, Sodium Hyaluronate, Melia Azadirachta Flower Extract, Niacinamide, Aloe Barbadensis Leaf Juice, Beta-Glucan, Centella Asiatica Extract, Centella Asiatica Leaf Extract, Centella Asiatica Root Extract, Madecassoside, Asiaticoside, Asiatic Acid, Madecassic Acid, Squalane, Zinc PCA, Butylene Glycol, Pentylene Glycol, Caprylyl/Capryl Glucoside, Hydrogenated Lecithin, Ceramide NP. This is the US webpage's declaration, not proof of the physical unit's market/lot formula.
+- **MANUFACTURER_CLAIM:** The official US product page states 10% azelaic acid and labels the serum non-comedogenic/low-irritation. Product-page graphics additionally report 108.6% improvement in troubled-spot area after four weeks, 90% agreement that redness was reduced, 90% agreement that red troubled spots improved, and 100% agreement of suitability for acne-prone skin. The related Anua routine page also reports the 90% red-troubled-spots result. Public pages reviewed do not provide the complete protocol, sample details, comparator, validated endpoints or statistical report; retain all numerical outcomes as manufacturer claims, not independently verified efficacy.
+- **MANUFACTURER_CLAIM:** Directions on the official US page advise starting 1–2 times weekly, gradually increasing up to twice daily, beginning with 1–2 drops and using up to 5 drops, applying between toner and moisturizer, and pairing with SPF 30+ in daytime. Physical package directions remain authoritative for the actual unit.
 - **INFERENCE:** Azelaic acid is the primary claim-linked active; humectants and soothing/conditioning ingredients are supportive. Ingredient presence does not establish treatment of rosacea, acne, PIH or persistent redness.
 - **CONFLICT (manifest-to-snapshot mapping):** Stage 5 snapshot has 6 Evidence rows for P7 versus 5 manifest assertions. The snapshot has one `ingredients` row (`...-002`) and two `manufacturer_claims` rows (`...-001`, `...-003`); the manifest's identity note incorrectly describes two conflicting `ingredients` rows. All six snapshot rows show `conflict_status=NONE`, so the manifest conflict note is not represented by row-level flags.
 - **DUPLICATE CANDIDATE:** `...-001` records only the manufacturer's 10% azelaic-acid declaration. `...-003` records that same 10% declaration plus the manufacturer's non-comedogenic/low-irritation test labels, with the same official product-page source. On content and source overlap, `...-001` is redundant and is the single best candidate for removal from the operational Evidence set. This is a mapping conclusion, not proof that deletion has been executed.
@@ -139,7 +140,7 @@
 - **UNKNOWN:** Exact physical unit/market/lot/GTIN match; whether any additional package-only information differs from the US source page; full independent test protocol for manufacturer tolerability/benefit claims.
 - **Scope:** Serum only; distinct from Anua azelaic-acid pads. No operational Evidence row has been deleted or reclassified in this research stage.
 
-**Source:** Anua official: https://anuaglobal.co/products/azelaic-acid-10-hyaluron-redness-calming-serum  
+**Sources:** Anua US product page: https://anua.com/products/azelaic-acid-10-hyaluron-redness-soothing-serum ; Anua US redness-prone routine page: https://pages.anua.com/solutions/redness-prone-routine-sensitive-skin . UK/EU retailer listings show a different INCI ordering/Disodium Azelate nomenclature; do not merge that list into the US source-scope dossier. 
 **Evidence status:** Official source-page declaration; claims remain manufacturer claims. Existing data conflict remains unresolved.
 
 ---
@@ -198,3 +199,9 @@ This appendix records a second verification pass against accessible public pages
 - All seven source URLs were rechecked in this pass where accessible. This is a link/content check only, not laboratory testing, package authentication, or independent clinical review.
 
 **QA pass status:** PASS WITH OPEN LIMITATIONS. No operational data was touched. Stage 6 remains a research deliverable pending PO review/acceptance; Stage 7 remains NOT STARTED.
+
+
+### P7 source-version note — 2026-11-24
+- The US Anua product page was re-opened and reviewed directly. Its full 35-entry INCI, directions and manufacturer testing labels are visible on the page. Product-page graphics contain additional manufacturer-reported metrics (108.6%, 90%, 90%, 100%); because the page does not disclose the full study protocol in the reviewed content, these remain MANUFACTURER_CLAIM.
+- A UK/EU retailer listing uses `Disodium Azelate` and places `Panthenol` before `Azelaic Acid`, unlike the US Anua page. This is a market/source discrepancy, not permission to combine lists. The P7 research dossier remains US-source scoped until the physical package market and label are matched.
+- The 30 ml size is a dossier research target; the reviewed Anua US page did not expose a readable size value in its page text. Do not claim physical 30 ml identity from that page alone.
