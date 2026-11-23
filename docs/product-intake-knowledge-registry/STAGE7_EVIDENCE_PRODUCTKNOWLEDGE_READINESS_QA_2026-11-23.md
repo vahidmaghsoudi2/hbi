@@ -94,3 +94,18 @@ Coverage pass means only that the stored field names/counts appear to map to the
 **Stage 8: NOT STARTED.**
 
 The next safe action is a row-level source-to-Evidence mapping review using a permitted read-only export, focusing first on P7 and P1. This would still be review-only; no mutation follows automatically.
+
+
+## Export-tool / runbook review (read-only source inspection)
+
+The existing PR #523 exporter and Windows PowerShell runbook were inspected as source code; they were **not executed** in this session because execution requires the operator's local database path and machine.
+
+Source-reviewed safeguards:
+- The exporter uses an allowlist for seven canonical product IDs and selected columns from Product, Evidence, ProductKnowledge, Inventory, Recommendation, and ProductProblemLink.
+- It does not open the source DB in SQLite; it hashes source DB/sidecars, copies DB plus WAL to an isolated temp path, then opens the copy read-only/query-only.
+- It rejects symlink sources, existing output overwrite, rollback journals, source changes during copy, and output paths that target source DB/sidecars.
+- It records structural integrity, foreign-key count, missing IDs/tables/columns, and row counts.
+- The runbook checks source hashes before/after, exporter exit code, integrity, FK violations, missing product IDs/tables/columns, and advises quarantining incomplete output.
+- It explicitly warns that a successful export is not product acceptance or E2E.
+
+**Operator boundary:** no local database path was supplied or accessed, and the exporter was not run. A row-level export is still required for the next mapping-review task. The JSON should be reviewed privately before sharing; it is product-scoped but includes claims and source references.
