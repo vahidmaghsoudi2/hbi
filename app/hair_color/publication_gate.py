@@ -42,11 +42,15 @@ def evaluate_publication_gate(
     status = response.get("consultation_status")
     state = response.get("engine_state")
     reason_codes = response.get("reason_codes")
-    if status not in _TRIAGE_STATUSES:
+    if not isinstance(status, str) or status not in _TRIAGE_STATUSES:
         reasons.append("STATUS_NOT_ALLOWED_FOR_PUBLICATION")
-    if state not in {"NEEDS_MORE_INFORMATION", "STOP_OR_REFER_WITH_REASON"}:
+    if not isinstance(state, str) or state not in {"NEEDS_MORE_INFORMATION", "STOP_OR_REFER_WITH_REASON"}:
         reasons.append("ENGINE_STATE_NOT_ALLOWED_FOR_TRIAGE_PUBLICATION")
-    if not isinstance(reason_codes, list) or not reason_codes or any(code not in _ALLOWED_REASON_CODES for code in reason_codes):
+    if (
+        not isinstance(reason_codes, list)
+        or not reason_codes
+        or any(not isinstance(code, str) or code not in _ALLOWED_REASON_CODES for code in reason_codes)
+    ):
         reasons.append("INVALID_REASON_CODES")
 
     allowed = not reasons
