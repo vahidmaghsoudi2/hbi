@@ -54,7 +54,8 @@ def test_update_and_stale_version_rejected(service):
 
 def test_target_change_stop_and_fresh_restart(service):
     service.create_case(case_ref="SYNTHETIC-CASE-003", event_id="SYNTHETIC-EVENT-001", intake={"goal": "SYNTHETIC: first"})
-    target = service.change_target(case_ref="SYNTHETIC-CASE-003", event_id="SYNTHETIC-EVENT-002", expected_case_version=1)
+    target = service.change_target(case_ref="SYNTHETIC-CASE-003", event_id="SYNTHETIC-EVENT-002", expected_case_version=1, target_description="SYNTHETIC: revised target")
+    assert target.intake["desired_result"] == "SYNTHETIC: revised target"
     assert (target.case_version, target.target_version) == (2, 2)
     stopped = service.stop_case(
         case_ref="SYNTHETIC-CASE-003", event_id="SYNTHETIC-EVENT-003",
