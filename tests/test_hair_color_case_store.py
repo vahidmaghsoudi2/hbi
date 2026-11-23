@@ -100,6 +100,27 @@ def test_fresh_restart_creates_new_case_and_links_source(store):
     assert store.list_events("CASE-NEW")[-1]["payload"] == {"source_case_ref": "CASE-OLD"}
 
 
+def test_triage_event_requires_current_versions_and_unique_reasons(store):
+    store.create_case(case_ref="CASE-TRIAGE", event_id="EV-1", intake={"goal": "synthetic"})
+    store.record_triage(
+        case_ref="CASE-TRIAGE", event_id="EV-2", expected_case_version=1,
+        expected_target_version=1, request_id="REQ-1", consultation_status="NEEDS_REVIEW",
+        reason_codes=("KNOWLEDGE_GAP",), safe_summary="synthetic safe summary",
+    )
+    with pytest.raises(CaseStoreError, match="unique"):
+        store.record_triage(
+            case_ref="CASE-TRIAGE", event_id="EV-3", expected_case_version=1,
+            expected_target_version=1, request_id="REQ-2", consultation_status="NEEDS_REVIEW",
+            reason_codes=("DATA_GAP", "DATA_GAP"), safe_summary="summary",
+        )
+    with pytest.raises(StaleCaseVersion):
+        store.record_triage(
+            case_ref="CASE-TRIAGE", event_id="EV-4", expected_case_version=2,
+            expected_target_version=1, request_id="REQ-3", consultation_status="NEEDS_REVIEW",
+            reason_codes=(), safe_summary="summary",
+        )
+
+
 def test_close_case_records_terminal_state_and_blocks_updates(store):
     store.create_case(case_ref="CASE-CLOSE", event_id="EV-1", intake={"goal": "a"})
     closed = store.close_case(
