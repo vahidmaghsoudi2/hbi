@@ -184,8 +184,10 @@ def test_update_and_target_change_edge_guards(store):
     store.stop_case(case_ref="CASE-EDGE", event_id="EV-EDGE-5", expected_case_version=1)
     with pytest.raises(StoppedCase):
         store.change_target(case_ref="CASE-EDGE", event_id="EV-EDGE-6", expected_case_version=1)
+    store.create_case(case_ref="CASE-STALE-TARGET", event_id="EV-EDGE-7", intake={})
+    store.change_target(case_ref="CASE-STALE-TARGET", event_id="EV-EDGE-8", expected_case_version=1)
     with pytest.raises(StaleCaseVersion):
-        store.change_target(case_ref="CASE-EDGE", event_id="EV-EDGE-7", expected_case_version=2)
+        store.change_target(case_ref="CASE-STALE-TARGET", event_id="EV-EDGE-9", expected_case_version=1)
 
 
 def test_duplicate_target_and_stop_event_ids_roll_back(store):
