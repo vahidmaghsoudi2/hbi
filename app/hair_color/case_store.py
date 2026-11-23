@@ -268,6 +268,50 @@ class HairColorCaseStore:
             db.commit()
         return self.get_case(case_ref)
 
+    def record_triage(
+        self, *, case_ref: str, event_id: str, expected_case_version: int,
+        expected_target_version: int, request_id: str, consultation_status: str,
+        reason_codes: tuple[str, ...], safe_summary: str,
+    ) -> HairColorCaseSnapshot:
+        case_ref = self._required_text(case_ref, "case_ref")
+        event_id = self._required_text(event_id, "event_id")
+        request_id = self._required_text(request_id, "request_id")
+        consultation_status = self._required_text(consultation_status, "consultation_status")
+        safe_summary = self._required_text(safe_summary, "safe_summary")
+        if not isinstance(reason_codes, tuple) or any(not isinstance(code, str) for code in reason_codes):
+            raise CaseStoreError("reason_codes must be a tuple of strings")
+        with self._connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute("SELECT * FROM hair_color_cases WHERE case_ref=?", (case_ref,)).fetchone()
+            if row is None:
+                db.rollback()
+                raise CaseNotFound("case not found")
+            if row["state"] != "ACTIVE":
+                db.rollback()
+                raise StoppedCase("stopped or closed case cannot be evaluated")
+            if (row["case_version"], row["target_version"]) != (expected_case_version, expected_target_version):
+                db.rollback()
+                raise StaleCaseVersion("case or target version changed; fresh evaluation required")
+            payload = json.dumps({
+                "request_id": request_id,
+                "consultation_status": consultation_status,
+                "reason_codes": list(reason_codes),
+                "safe_summary": safe_summary,
+                "options_count": 0,
+                "execution_authorized": False,
+            }, ensure_ascii=False)
+            try:
+                db.execute(
+                    "INSERT INTO hair_color_case_events VALUES(?,?,?,?,?,?)",
+                    (case_ref, event_id, "TRIAGE_RECORDED", row["case_version"], row["target_version"], payload),
+                )
+                db.execute("UPDATE hair_color_cases SET updated_event_id=? WHERE case_ref=?", (event_id, case_ref))
+            except sqlite3.IntegrityError as exc:
+                db.rollback()
+                raise CaseStoreError("event_id must be unique within case") from exc
+            db.commit()
+        return self.get_case(case_ref)
+
     def close_case(
         self, *, case_ref: str, event_id: str, expected_case_version: int,
         closure_reason: str,
