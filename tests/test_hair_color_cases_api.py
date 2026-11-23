@@ -243,11 +243,14 @@ def test_target_change_versions_case_and_invalidates_old_decision_context(client
         changed = client.post(
             "/api/v1/hair/color-consultation/cases/SYNTHETIC-TARGET-CASE/target-change",
             headers=_headers(),
-            json={"event_id": "SYNTHETIC-TARGET-CHANGE", "expected_case_version": 1},
+            json={"event_id": "SYNTHETIC-TARGET-CHANGE", "expected_case_version": 1,
+                  "target_description": "SYNTHETIC: revised target placeholder"},
         )
         assert changed.status_code == 200
         assert changed.json()["case_version"] == 2
         assert changed.json()["target_version"] == 2
+        assert changed.json()["intake"]["goal"] == "SYNTHETIC: initial target"
+        assert changed.json()["intake"]["desired_result"] == "SYNTHETIC: revised target placeholder"
         stale_decision = client.post(
             "/api/v1/hair/color-consultation/cases/SYNTHETIC-TARGET-CASE/decision",
             headers=_headers(),
@@ -261,6 +264,8 @@ def test_target_change_versions_case_and_invalidates_old_decision_context(client
             headers=_headers(),
         )
         assert [event["event_type"] for event in history.json()] == ["CASE_CREATED", "TARGET_CHANGED"]
+        assert history.json()[1]["payload"]["previous_target"] is None
+        assert history.json()[1]["payload"]["new_target"] == "SYNTHETIC: revised target placeholder"
     finally:
         client.app.dependency_overrides.pop(get_hair_color_case_service, None)
 
