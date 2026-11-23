@@ -383,12 +383,12 @@ class HairColorCaseStore:
             if (row["case_version"], row["target_version"]) != (expected_case_version, expected_target_version):
                 db.rollback()
                 raise StaleCaseVersion("case or target version changed; fresh evaluation required")
-            prior_request = db.execute(
-                "SELECT 1 FROM hair_color_case_events "
-                "WHERE case_ref=? AND event_type='TRIAGE_RECORDED' AND json_extract(payload_json, '$.request_id')=?",
-                (case_ref, request_id),
-            ).fetchone()
-            if prior_request is not None:
+            prior_triages = db.execute(
+                "SELECT payload_json FROM hair_color_case_events "
+                "WHERE case_ref=? AND event_type='TRIAGE_RECORDED'",
+                (case_ref,),
+            ).fetchall()
+            if any(json.loads(event["payload_json"]).get("request_id") == request_id for event in prior_triages):
                 db.rollback()
                 raise CaseStoreError("request_id has already been evaluated for this case")
             payload = json.dumps({
