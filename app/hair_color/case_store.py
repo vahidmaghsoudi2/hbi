@@ -89,6 +89,12 @@ class HairColorCaseStore:
         return value.strip()
 
     @staticmethod
+    def _validate_version(value: Any, name: str) -> int:
+        if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+            raise CaseStoreError(f"{name} must be a positive integer")
+        return value
+
+    @staticmethod
     def _normalize_intake(intake: Mapping[str, Any]) -> dict[str, str]:
         if not isinstance(intake, Mapping):
             raise CaseStoreError("intake must be a mapping")
@@ -98,7 +104,10 @@ class HairColorCaseStore:
                 raise CaseStoreError("intake keys must be non-empty strings")
             if not isinstance(value, str):
                 raise CaseStoreError("intake values must be strings")
-            normalized[key.strip()] = value.strip()
+            normalized_key = key.strip()
+            if normalized_key in normalized:
+                raise CaseStoreError("intake keys must be unique after normalization")
+            normalized[normalized_key] = value.strip()
         return normalized
 
     def create_case(self, *, case_ref: str, event_id: str, intake: Mapping[str, Any]) -> HairColorCaseSnapshot:
@@ -168,8 +177,7 @@ class HairColorCaseStore:
         updates = self._normalize_intake(fields)
         if not updates:
             raise CaseStoreError("at least one changed intake field is required")
-        if isinstance(expected_case_version, bool) or not isinstance(expected_case_version, int) or expected_case_version < 1:
-            raise CaseStoreError("expected_case_version must be a positive integer")
+        self._validate_version(expected_case_version, "expected_case_version")
         with self._connect() as db:
             db.execute("BEGIN IMMEDIATE")
             row = db.execute("SELECT * FROM hair_color_cases WHERE case_ref=?", (case_ref,)).fetchone()
@@ -206,6 +214,7 @@ class HairColorCaseStore:
     ) -> HairColorCaseSnapshot:
         case_ref = self._required_text(case_ref, "case_ref")
         event_id = self._required_text(event_id, "event_id")
+        self._validate_version(expected_case_version, "expected_case_version")
         with self._connect() as db:
             db.execute("BEGIN IMMEDIATE")
             row = db.execute("SELECT * FROM hair_color_cases WHERE case_ref=?", (case_ref,)).fetchone()
@@ -241,6 +250,7 @@ class HairColorCaseStore:
     ) -> HairColorCaseSnapshot:
         case_ref = self._required_text(case_ref, "case_ref")
         event_id = self._required_text(event_id, "event_id")
+        self._validate_version(expected_case_version, "expected_case_version")
         if not isinstance(performed_step_refs, tuple) or any(not isinstance(ref, str) for ref in performed_step_refs):
             raise CaseStoreError("performed_step_refs must be a tuple of strings")
         refs = list(dict.fromkeys(ref.strip() for ref in performed_step_refs if ref.strip()))
@@ -286,9 +296,11 @@ class HairColorCaseStore:
             raise CaseStoreError("reason_codes must be a tuple of non-empty strings")
         if len(set(reason_codes)) != len(reason_codes):
             raise CaseStoreError("reason_codes must be unique")
-        for version_name, version in (("expected_case_version", expected_case_version), ("expected_target_version", expected_target_version)):
-            if isinstance(version, bool) or not isinstance(version, int) or version < 1:
-                raise CaseStoreError(f"{version_name} must be a positive integer")
+        self._validate_version(expected_case_version, "expected_case_version")
+        self._validate_version(expected_target_version, "expected_target_version")
+        allowed_statuses = {"SAFETY_STOP_NO_EXECUTION_SUGGESTION", "OUT_OF_V1_SCOPE", "NEEDS_INFORMATION_OR_TEST", "NEEDS_IN_PERSON_OR_SPECIALIST_REVIEW"}
+        if consultation_status not in allowed_statuses:
+            raise CaseStoreError("consultation_status is not a triage-only status")
         with self._connect() as db:
             db.execute("BEGIN IMMEDIATE")
             row = db.execute("SELECT * FROM hair_color_cases WHERE case_ref=?", (case_ref,)).fetchone()
@@ -328,6 +340,7 @@ class HairColorCaseStore:
         case_ref = self._required_text(case_ref, "case_ref")
         event_id = self._required_text(event_id, "event_id")
         closure_reason = self._required_text(closure_reason, "closure_reason")
+        self._validate_version(expected_case_version, "expected_case_version")
         with self._connect() as db:
             db.execute("BEGIN IMMEDIATE")
             row = db.execute("SELECT * FROM hair_color_cases WHERE case_ref=?", (case_ref,)).fetchone()
