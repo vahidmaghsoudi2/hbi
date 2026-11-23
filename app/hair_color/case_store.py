@@ -391,12 +391,12 @@ class HairColorCaseStore:
             if any(json.loads(event["payload_json"]).get("request_id") == request_id for event in prior_triages):
                 db.rollback()
                 raise CaseStoreError("request_id has already been evaluated for this case")
-            prior_request = db.execute(
-                "SELECT 1 FROM hair_color_case_events "
-                "WHERE case_ref=? AND event_type='TRIAGE_RECORDED' AND json_extract(payload_json, '$.request_id')=?",
-                (case_ref, request_id),
-            ).fetchone()
-            if prior_request is not None:
+            prior_triage_events = db.execute(
+                "SELECT payload_json FROM hair_color_case_events "
+                "WHERE case_ref=? AND event_type='TRIAGE_RECORDED'",
+                (case_ref,),
+            ).fetchall()
+            if any(json.loads(item["payload_json"]).get("request_id") == request_id for item in prior_triage_events):
                 db.rollback()
                 raise CaseStoreError("request_id must be unique within case")
             payload = json.dumps({
