@@ -181,6 +181,15 @@ def test_persistent_client_accept_and_reject_are_audited_without_execution_autho
         assert events[1]["payload"]["client_acceptance"] is True
         assert events[1]["payload"]["execution_authorized"] is False
         assert events[2]["payload"]["decision"] == "REJECT"
+
+        reactivated = client.post(
+            "/api/v1/hair/color-consultation/cases/SYNTHETIC-DECISION-CASE/decision",
+            headers=_headers(),
+            json={"event_id": "SYNTHETIC-DECISION-REACTIVATE", "expected_case_version": 1,
+                  "expected_target_version": 1, "decision": "ACCEPT",
+                  "suggestion_ref": "SYNTHETIC-SUGGESTION-2"},
+        )
+        assert reactivated.status_code == 422
     finally:
         client.app.dependency_overrides.pop(get_hair_color_case_service, None)
 
