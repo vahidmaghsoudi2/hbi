@@ -36,7 +36,7 @@ These are report facts from the pinned snapshot, not live-state claims.
 
 | Product | Evidence rows vs manifest | ProductKnowledge payload | Readiness outcome |
 |---|---:|---|---|
-| P1 COSRX | 4 / 4, field counts align | Payload fields and evidence_refs all NULL | **BLOCKED — missing payload/reference mapping** |
+| P1 COSRX | 4 / 4, field counts align | ingredients, ingredient_roles, known_use_cases, manufacturer_claims and evidence_refs populated and row-linked | **COVERAGE PASS; NOT ACCEPTED** |
 | P2 Neutrogena | 4 / 4, field counts align | Ingredients, ingredient_roles, usage_instructions, manufacturer_claims, evidence_refs populated | **COVERAGE PASS; NOT ACCEPTED** |
 | P3 Garnier | 3 / 3, field counts align | Ingredients, ingredient_roles, known_use_cases, evidence_refs populated | **COVERAGE PASS; NOT ACCEPTED** |
 | P4 SKIN1004 | 3 / 3, field counts align | Ingredients, ingredient_roles, manufacturer_claims, evidence_refs populated | **COVERAGE PASS; NOT ACCEPTED** |
@@ -52,8 +52,8 @@ Coverage pass means only that the stored field names/counts appear to map to the
 |---|---|---|---|---|
 | R-01 | P0 | P7 Anua duplicate ingredients Evidence | Human row-to-source mapping review; document which assertion is which, without changing rows | Must reconcile the two rows, manifest conflict note, and both stored `conflict_status=NONE`; no auto-merge/delete |
 | R-02 | P0 | P7 Anua ProductKnowledge | Draft mapping plan only after R-01; do not build payload yet | Source/market/package scope and conflict disposition must be explicit; any new source is separately reviewed |
-| R-03 | P1 | P1 COSRX ProductKnowledge | Draft field-to-Evidence mapping and missing-payload report | Physical target identity remains UNKNOWN; avoid populating fields beyond the source-supported assertions |
-| R-04 | P1 | P1 evidence_refs | Establish traceable mapping from four Evidence rows to payload fields | IDs/row-level snapshot are not in this artifact; no guessed IDs |
+| R-03 | P2 | P1 COSRX ProductKnowledge | No payload-gap remediation indicated by the pinned JSON: four populated fields map to four Evidence rows | Physical target identity remains UNKNOWN; do not infer 150 ml package identity from the research target |
+| R-04 | P2 | P1 evidence_refs | Pinned JSON contains all four exact Evidence IDs in evidence_refs and in their corresponding payload fields | No mutation; revisit only if a newer authoritative snapshot contradicts this artifact |
 | R-05 | P2 | P2–P6 ProductKnowledge review | Validate each populated field maps to correct Evidence/source and respects claim taxonomy | Need row-level export and source mapping; coverage is not QA approval |
 | R-06 | P2 | All 7 ProductKnowledge | Keep evidence_status UNKNOWN and confidence 0.0 until QA gate is passed and PO-approved state transition is defined | No status/confidence changes in this Stage |
 | R-07 | P2 | Product Master metadata | Review size/source-market metadata gaps (P1 size, P4 market/size, P5 market/size, P6 market, P7 market) | Source markets cannot be promoted to physical package identity; package/GTIN evidence needed for physical identity |
@@ -76,7 +76,7 @@ Coverage pass means only that the stored field names/counts appear to map to the
 - [x] Stage 6 accepted input recorded.
 - [x] Snapshot-level counts and classifications transcribed from pinned Stage 5 reconciliation.
 - [x] All seven ProductKnowledge field-coverage states compared with the manifest.
-- [x] P1 and P7 payload/reference gaps identified.
+- [x] P7 payload/reference gap identified; P1 payload and all four Evidence references verified as populated and aligned.
 - [x] P7 duplicate-row/conflict-flag discrepancy preserved as OPEN.
 - [x] Remediation candidates and prerequisites documented.
 - [x] All non-acceptance labels and source/version boundaries preserved.
@@ -109,3 +109,43 @@ Source-reviewed safeguards:
 - It explicitly warns that a successful export is not product acceptance or E2E.
 
 **Operator boundary:** no local database path was supplied or accessed, and the exporter was not run. A row-level export is still required for the next mapping-review task. The JSON should be reviewed privately before sharing; it is product-scoped but includes claims and source references.
+
+
+## 2026-11-23 — Row-level snapshot mapping audit and correction
+
+**Correction / supersession:** the P1 statements in the initial QA table and remediation ledger above were incorrect. Re-reading the exact Stage 5 JSON artifact `hbi-stage5-snapshot-20261124-235415.json` shows that P1 COSRX ProductKnowledge is populated and all four Evidence IDs are present in both the corresponding field payloads and `evidence_refs`. The corrected P1 result is **COVERAGE PASS; NOT ACCEPTED**, not a payload gap. R-03/R-04 above are superseded by the corrected descriptions. No data was changed.
+
+### Snapshot identity and integrity (file-level)
+- File: `hbi-stage5-snapshot-20261124-235415.json` (64,473 bytes; 893 lines).
+- JSON `exported_at_utc`: `2026-11-24T20:24:16+00:00`.
+- Source DB SHA-256: `cb75363628cf3dd8320d5b40c324276b018b3075a18489b4ba4f1420fd541d1c`, matching the fingerprint recorded in the Stage 5 addendum.
+- `integrity_check=ok`; foreign-key violations 0; missing canonical Product IDs/tables/columns all empty.
+- **Timestamp remains a blocker for freshness claims:** the export timestamp and filename are future-dated relative to this 2026-11-23 review. The Library file metadata says it was created 2026-11-22, which does not resolve the content timestamp discrepancy. This artifact is treated only as the pinned Stage 5 content under review, not as a fresh 2026-11-23/24 operational readback.
+
+### Row-level Evidence-to-ProductKnowledge mapping
+
+All row IDs below are copied from the JSON snapshot. The audit compared each Evidence row's `evidence_id`, `claim_id`, `field`, `claim_type`, `source_type`, `market_region`, `qa_status`, and `conflict_status` with the corresponding ProductKnowledge payload references and `evidence_refs`.
+
+| Product | Evidence rows and field mapping | ProductKnowledge field mapping | Result |
+|---|---|---|---|
+| P1 COSRX | `87b3c09a` ingredients; `0af6e231` ingredient_roles; `22f74e31` manufacturer_claims; `7798e9e2` known_use_cases | All four fields populated with the matching Evidence IDs; `evidence_refs` contains the same four IDs | **MATCH; NOT ACCEPTED** |
+| P2 Neutrogena | `f525337a` ingredients; `b730645d` manufacturer_claims; `69df6282` ingredient_roles; `d956ff00` usage_instructions | All four corresponding fields populated; `evidence_refs` contains the same four IDs | **MATCH; NOT ACCEPTED** |
+| P3 Garnier | `993c35d8` ingredients; `bfa851e2` ingredient_roles; `9cf6c4dd` known_use_cases | All three corresponding fields populated; `evidence_refs` contains the same three IDs | **MATCH; NOT ACCEPTED** |
+| P4 SKIN1004 | `ab707983` ingredients; `bd9c4e47` ingredient_roles; `83a368c1` manufacturer_claims | All three corresponding fields populated; `evidence_refs` contains the same three IDs | **MATCH; NOT ACCEPTED** |
+| P5 ISDIN | `982bc851` manufacturer_claims; `c45194ac` known_use_cases | Both corresponding fields populated; `evidence_refs` contains the same two IDs | **MATCH; NOT ACCEPTED** |
+| P6 Clinique | `274f20c2` ingredients; `307d2efe` manufacturer_claims; `4f48ff5b` ingredient_roles | All three corresponding fields populated; `evidence_refs` contains the same three IDs | **MATCH; NOT ACCEPTED** |
+| P7 Anua | `2b4c9e26` manufacturer_claims; `1ed73fb7` ingredients; `36d28c8a` manufacturer_claims; `1d858e1c` usage_instructions; `3b14ff45` ingredient_roles; `526fa458` claimed_benefits | All ProductKnowledge payload fields and `evidence_refs` are NULL | **BLOCKED; duplicate ingredients row and manifest conflict remain OPEN** |
+
+The suffixes in the table are abbreviated for readability; each full Evidence ID is `EV-HBI-PROD-{ProductID}-{suffix}`, with the ProductID corresponding to the row's canonical dossier. No IDs were inferred or generated.
+
+### Cross-row findings
+- P1–P6: Evidence row counts and fields align with the corresponding ProductKnowledge payload field references; each ProductKnowledge `evidence_refs` set exactly matches its Evidence row set.
+- P7: six Evidence rows versus five manifest assertions. Two rows map to `field=ingredients`? **No**: the row-level snapshot actually has one `ingredients` row (`1ed73fb7`), while the other five fields are `manufacturer_claims` (two rows), `usage_instructions`, `ingredient_roles`, and `claimed_benefits`. This differs from the earlier manifest-level duplicate-ingredients description and must be checked against the manifest version and row lineage before declaring the discrepancy resolved. The two manufacturer_claims rows are `2b4c9e26` and `36d28c8a`.
+- All 25 Evidence rows remain `UNVERIFIED` / `UNKNOWN`; 19 are `PENDING`, six are `NEEDS_REVIEW`; all stored `conflict_status` values are `NONE`. No status was promoted.
+- All seven ProductKnowledge rows remain `evidence_status=UNKNOWN`, `knowledge_confidence=0.0`, and `domain_evidence_status=NULL`.
+- Product Master remains DRAFT / NEEDS_REVIEW / PENDING across all seven records. Recommendation and ProductProblemLink remain empty.
+
+### Revised readiness disposition
+- P1–P6: row-level coverage/reference mapping matches within this pinned JSON; this is structural mapping only, not evidence QA acceptance, factual verification, physical package identity, or consultation readiness.
+- P7: payload is entirely absent. The actual row-level duplicate-field observation is two `manufacturer_claims` rows, not two `ingredients` rows, so the Stage 5 manifest conflict note and row-level snapshot require explicit lineage reconciliation. Preserve all rows and flags.
+- Stage 7 remains read-only. No Evidence/ProductKnowledge write, QA transition, identity change, activation, import, merge, or Stage 8 work was performed.
