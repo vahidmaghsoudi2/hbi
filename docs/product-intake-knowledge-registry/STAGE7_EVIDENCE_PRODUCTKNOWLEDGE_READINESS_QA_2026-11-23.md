@@ -182,3 +182,35 @@ The suffixes in the table are abbreviated for readability; each full Evidence ID
 This correction changes the repository's QA/remediation record only. It does not claim that the operational database has been modified. The available GitHub connection cannot execute a transaction against the local SQLite database. Operational cleanup must use the approved application/service path, verify all references and audit requirements, and then produce a fresh read-only snapshot. No direct SQL deletion is authorized by this document.
 
 **Stage 7 disposition:** Anua remains active; duplicate candidate identified; ProductKnowledge rebuild pending authorized operational execution and verification. Evidence acceptance and ProductKnowledge acceptance remain NONE until QA and explicit acceptance are complete.
+
+## P7 Anua — prepared ProductKnowledge draft (not written to operational DB)
+
+**Canonical Product ID:** `HBI-PROD-22C55A8223A945A6`
+
+### Five-row Evidence target and references
+
+| ProductKnowledge field | Evidence ID | Stored claim ID | Classification |
+|---|---|---|---|
+| `ingredients` | `EV-HBI-PROD-22C55A8223A945A6-1ed73fb7` | `...-002` | MANUFACTURER_CLAIM — exact US-page INCI declaration |
+| `manufacturer_claims` | `EV-HBI-PROD-22C55A8223A945A6-36d28c8a` | `...-003` | MANUFACTURER_CLAIM — 10% azelaic acid and non-comedogenic/low-irritation labels |
+| `usage_instructions` | `EV-HBI-PROD-22C55A8223A945A6-1d858e1c` | `...-004` | MANUFACTURER_CLAIM — US-page use directions |
+| `ingredient_roles` | `EV-HBI-PROD-22C55A8223A945A6-3b14ff45` | `...-005` | INFERENCE — cautious ingredient-function mapping |
+| `claimed_benefits` | `EV-HBI-PROD-22C55A8223A945A6-526fa458` | `...-006` | MANUFACTURER_CLAIM — separate official routine-page study statement |
+
+**Excluded redundant candidate:** `EV-HBI-PROD-22C55A8223A945A6-2b4c9e26` / claim `...-001`. It is not part of the target five-row set. Delete only after reference/dependency checks and only through the authorized application/service transaction.
+
+### Draft field contents
+
+- `ingredients`: the complete 35-entry US Anua INCI transcribed in the Stage 6 P7 section. Do not merge UK/EU retailer INCI ordering or `Disodium Azelate` naming into this US-scoped value.
+- `manufacturer_claims`: manufacturer declares 10% azelaic acid; product page labels the serum non-comedogenic and low-irritation. Retain the manufacturer's exact scope; no independent efficacy or safety certification is implied.
+- `usage_instructions`: begin 1–2 times weekly; gradually increase as tolerated up to twice daily; begin with 1–2 drops, up to 5 drops; apply between toner and moisturizer; if used in daytime, pair with SPF 30 or higher. Physical package directions take precedence for the actual unit.
+- `ingredient_roles`: retain the cautious analyst mapping from claim `...-005`; it is inference, not proof of finished-product efficacy. Keep roles limited to disclosed ingredients and avoid invented concentrations.
+- `claimed_benefits`: keep the separate Anua routine-page 90% participant-agreement statement as a manufacturer claim. The current US product page also displays manufacturer-reported 108.6% troubled-spot-area improvement after four weeks, 90% redness reduction, 90% red-troubled-spot improvement agreement, and 100% acne-prone suitability agreement; methodology is not fully disclosed, so do not convert these to independently verified outcomes.
+
+### Knowledge-state controls
+
+- `evidence_refs` must contain exactly the five Evidence IDs listed above after the redundant row is safely removed.
+- Fields not supported by the five-row manifest (including `known_use_cases`, `contraindications`, `other_attributes`, and `domain_evidence_status`) remain NULL/UNKNOWN rather than being filled speculatively.
+- Keep `evidence_status=UNKNOWN` and `knowledge_confidence=0.0` until separate QA and PO acceptance criteria are met.
+- Product identity remains US source-scope only. The 30 ml research target is not proof of the physical unit's market, GTIN, lot, or formula.
+- No operational write has been made by preparing this draft.
