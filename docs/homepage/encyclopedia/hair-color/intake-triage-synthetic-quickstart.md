@@ -27,7 +27,7 @@ store = HairColorCaseStore("hair-color-synthetic.sqlite3")
 case = store.create_case(
     case_ref="SYNTHETIC-CASE-001",
     event_id="SYNTHETIC-EVENT-001",
-    intake={"desired_result": "synthetic only"},
+    intake={"desired_result": "SYNTHETIC: only"},
 )
 updated = store.update_intake(
     case_ref=case.case_ref,
