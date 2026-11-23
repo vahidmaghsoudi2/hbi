@@ -236,7 +236,7 @@ def validate_response(request: Mapping[str, Any], response: Mapping[str, Any]) -
             raise AdapterContractError("request evidence_context references must be unique")
         supplied_evidence_refs.add(evidence_ref)
     if response["options"] and not response["evidence_refs"]:
-        raise AdapterContractError("candidate options require traceable evidence references")
+        raise AdapterContractError("candidate claim evidence must be included in response evidence_refs; candidate options require traceable evidence references")
     if any(ref not in supplied_evidence_refs for ref in response["evidence_refs"]):
         raise AdapterContractError("engine response references evidence absent from the request context")
 
