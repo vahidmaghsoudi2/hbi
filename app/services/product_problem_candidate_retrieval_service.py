@@ -99,6 +99,7 @@ class ProductProblemCandidateRetrievalService:
                 "evidence_id": evidence.evidence_id,
                 "claim_id": evidence.claim_id,
                 "evidence_claim": evidence.claim,
+                "evidence_claim_type": evidence.claim_type,
                 "evidence_source_type": evidence.source_type,
                 "evidence_source_reference": evidence.source_reference,
                 "evidence_market_region": evidence.market_region,
