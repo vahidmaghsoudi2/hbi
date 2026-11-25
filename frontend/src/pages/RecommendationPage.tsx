@@ -213,7 +213,7 @@ export default function RecommendationPage() {
           <p>
             وضعیت: {consultationOutput.recommendation_status === "RECOMMENDATIONS_AVAILABLE"
               ? "پیشنهادهای واجد شرایط موجود است"
-              : "در حال حاضر پیشنهاد تأییدشده‌ای وجود ندارد"}
+              : "در حال حاضر پیشنهاد واجد شرایطی وجود ندارد"}
           </p>
           <p>اطلاعات فرم مشاوره: {consultationOutput.consultation_context_status === "PRESENT" ? "ثبت شده" : "ثبت نشده"}</p>
           {consultationOutput.consultation_context && (
