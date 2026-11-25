@@ -141,7 +141,8 @@ class HairColorCaseStore:
                 try:
                     source.backup(backup_db)
                     check = backup_db.execute("PRAGMA integrity_check").fetchone()[0]
-                    if check != "ok":
+                    foreign_key_errors = backup_db.execute("PRAGMA foreign_key_check").fetchall()
+                    if check != "ok" or foreign_key_errors:
                         raise CaseStoreError("backup integrity check failed")
                 finally:
                     backup_db.close()
@@ -174,8 +175,9 @@ class HairColorCaseStore:
             source_db = sqlite3.connect(str(source))
             try:
                 integrity = source_db.execute("PRAGMA integrity_check").fetchone()[0]
+                foreign_key_errors = source_db.execute("PRAGMA foreign_key_check").fetchall()
                 version = source_db.execute("PRAGMA user_version").fetchone()[0]
-                if integrity != "ok" or version != 2:
+                if integrity != "ok" or foreign_key_errors or version != 2:
                     raise CaseStoreError("restore source is not a verified schema-v2 backup")
                 destination_db = sqlite3.connect(str(target))
                 try:
