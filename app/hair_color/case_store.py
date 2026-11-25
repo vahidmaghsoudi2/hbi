@@ -125,18 +125,24 @@ class HairColorCaseStore:
         target = Path(destination)
         if target.resolve() == Path(self.database_path).resolve():
             raise CaseStoreError("backup destination must differ from source database")
-        if target.exists():
-            raise CaseStoreError("backup destination already exists; choose a new backup filename")
-        target.parent.mkdir(parents=True, exist_ok=True)
-        with self._connect() as source:
-            backup_db = sqlite3.connect(str(target))
-            try:
-                source.backup(backup_db)
-                check = backup_db.execute("PRAGMA integrity_check").fetchone()[0]
-                if check != "ok":
-                    raise CaseStoreError("backup integrity check failed")
-            finally:
-                backup_db.close()
+        if target.is_symlink() or target.exists():
+            raise CaseStoreError("backup destination already exists or is a symlink; choose a new backup filename")
+        target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        if os.name == "posix" and target.parent.stat().st_mode & 0o077:
+            raise CaseStoreError("backup directory must be private (mode 0700 or stricter)")
+        try:
+            with self._connect() as source:
+                backup_db = sqlite3.connect(str(target))
+                try:
+                    source.backup(backup_db)
+                    check = backup_db.execute("PRAGMA integrity_check").fetchone()[0]
+                    if check != "ok":
+                        raise CaseStoreError("backup integrity check failed")
+                finally:
+                    backup_db.close()
+        except Exception:
+            target.unlink(missing_ok=True)
+            raise
         try:
             os.chmod(target, 0o600)
         except OSError:
