@@ -83,7 +83,7 @@ def test_store_integrity_backup_and_private_file_permissions(tmp_path):
     assert backup_path.exists()
     with sqlite3.connect(backup_path) as backup:
         assert backup.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
-        assert backup.execute("PRAGMA user_version").fetchone()[0] == 1
+        assert backup.execute("PRAGMA user_version").fetchone()[0] == 2
         assert backup.execute("SELECT COUNT(*) FROM hair_color_case_events").fetchone()[0] == 2
 
     if hasattr(source_path, "stat"):
@@ -116,6 +116,45 @@ def test_unsupported_schema_version_fails_closed(tmp_path):
         db.execute("PRAGMA user_version = 99")
     with pytest.raises(CaseStoreError, match="unsupported"):
         HairColorCaseStore(path)
+
+
+def test_schema_v1_migrates_and_preserves_events_with_legacy_timestamp_marker(tmp_path):
+    path = tmp_path / "legacy.sqlite"
+    with sqlite3.connect(path) as db:
+        db.executescript(
+            """
+            CREATE TABLE hair_color_cases (
+                case_ref TEXT PRIMARY KEY,
+                case_version INTEGER NOT NULL,
+                target_version INTEGER NOT NULL,
+                state TEXT NOT NULL,
+                intake_json TEXT NOT NULL,
+                created_event_id TEXT NOT NULL,
+                updated_event_id TEXT NOT NULL
+            );
+            CREATE TABLE hair_color_case_events (
+                case_ref TEXT NOT NULL,
+                event_id TEXT NOT NULL,
+                event_type TEXT NOT NULL,
+                case_version INTEGER NOT NULL,
+                target_version INTEGER NOT NULL,
+                payload_json TEXT NOT NULL,
+                PRIMARY KEY(case_ref,event_id),
+                FOREIGN KEY(case_ref) REFERENCES hair_color_cases(case_ref)
+            );
+            INSERT INTO hair_color_cases VALUES ('SYNTHETIC-LEGACY',1,1,'ACTIVE','{}','SYNTHETIC-CREATE','SYNTHETIC-CREATE');
+            INSERT INTO hair_color_case_events VALUES ('SYNTHETIC-LEGACY','SYNTHETIC-CREATE','CASE_CREATED',1,1,'{}');
+            PRAGMA user_version = 1;
+            """
+        )
+    migrated = HairColorCaseStore(path)
+    events = migrated.list_events("SYNTHETIC-LEGACY")
+    assert events[0]["event_type"] == "CASE_CREATED"
+    assert events[0]["occurred_at"] == "LEGACY-UNKNOWN"
+    assert migrated.integrity_check() == "ok"
+    migrated.create_case(case_ref="SYNTHETIC-NEW", event_id="SYNTHETIC-NEW-EVENT", intake={})
+    new_event = migrated.list_events("SYNTHETIC-NEW")[0]
+    assert new_event["occurred_at"] != "LEGACY-UNKNOWN"
 
 
 def test_duplicate_event_rolls_back_snapshot_mutation(tmp_path):
