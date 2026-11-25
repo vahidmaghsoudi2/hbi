@@ -7,7 +7,6 @@ from app.models.case import Case
 from app.models.customer import Customer
 from app.models.evidence import Evidence
 from app.models.product import Product
-from app.models.product_problem_link import ProductProblemLink
 from app.models.recommendation import Recommendation
 from app.services.case_service import CaseService
 from app.services.explainable_suitability_service import ExplainableSuitabilityService
