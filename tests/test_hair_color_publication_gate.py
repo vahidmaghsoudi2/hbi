@@ -124,6 +124,7 @@ def test_gate_rejects_duplicate_reason_codes_and_invalid_version_types():
     [
         ("missing_information", "not-an-array", "INVALID_MISSING_INFORMATION"),
         ("missing_information", [None], "INVALID_MISSING_INFORMATION"),
+        ("missing_information", [{"field": "hair_history"}], "INVALID_MISSING_INFORMATION"),
         ("evidence_refs", "not-an-array", "INVALID_EVIDENCE_REFS"),
         ("evidence_refs", ["", "EV-1"], "INVALID_EVIDENCE_REFS"),
         ("evidence_refs", ["EV-1", "EV-1"], "DUPLICATE_EVIDENCE_REFS"),
@@ -187,4 +188,26 @@ def test_gate_rejects_mismatched_versions(response,current_case,current_target,e
     assert gate["publication_allowed"] is False
     assert expected_reason in gate["reason_codes"]
     assert gate["safe_response"]["options"] == []
+    assert gate["execution_authorized"] is False
+
+
+
+def test_gate_accepts_policy_engine_missing_information_object_shape():
+    response = triage_response(
+        engine_state="NEEDS_MORE_INFORMATION",
+        consultation_status="NEEDS_INFORMATION_OR_TEST",
+        reason_codes=["DATA_GAP"],
+        missing_information=[
+            {"field": "current_hair_state", "reason": "Required intake field not supplied."}
+        ],
+        next_step={
+            "action": "ASK_AND_CLARIFY",
+            "missing_fields": ["current_hair_state"],
+            "conflicting_fields": [],
+        },
+    )
+    gate = evaluate_publication_gate(response, current_case_version=1, current_target_version=1)
+    assert gate["publication_allowed"] is True
+    assert gate["publication_kind"] == "TRIAGE_ONLY"
+    assert gate["safe_response"]["missing_information"] == response["missing_information"]
     assert gate["execution_authorized"] is False
