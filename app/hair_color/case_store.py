@@ -8,6 +8,7 @@ replace it behind this API with a production database adapter.
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
@@ -51,15 +52,28 @@ class HairColorCaseStore:
         path.parent.mkdir(parents=True, exist_ok=True)
         self.database_path = str(path)
         self._initialize()
+        # Keep local case data private to the service account on POSIX systems.
+        try:
+            os.chmod(self.database_path, 0o600)
+        except OSError:
+            # Permission enforcement is platform/filesystem-specific; callers must
+            # still provision the parent directory and database securely.
+            pass
 
     def _connect(self) -> sqlite3.Connection:
         connection = sqlite3.connect(self.database_path, timeout=10.0)
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA foreign_keys = ON")
+        connection.execute("PRAGMA busy_timeout = 10000")
+        connection.execute("PRAGMA journal_mode = WAL")
+        connection.execute("PRAGMA synchronous = FULL")
         return connection
 
     def _initialize(self) -> None:
         with self._connect() as db:
+            current_version = db.execute("PRAGMA user_version").fetchone()[0]
+            if current_version not in (0, 1):
+                raise CaseStoreError(f"unsupported case-store schema version: {current_version}")
             db.executescript("""
                 CREATE TABLE IF NOT EXISTS hair_color_cases (
                     case_ref TEXT PRIMARY KEY,
@@ -81,6 +95,31 @@ class HairColorCaseStore:
                     FOREIGN KEY(case_ref) REFERENCES hair_color_cases(case_ref)
                 );
             """)
+            db.execute("PRAGMA user_version = 1")
+
+    def integrity_check(self) -> str:
+        """Return SQLite's integrity-check result; expected value is 'ok'."""
+        with self._connect() as db:
+            result = db.execute("PRAGMA integrity_check").fetchone()[0]
+        return str(result)
+
+    def backup_to(self, destination: str | Path) -> Path:
+        """Create a consistent SQLite backup and verify its integrity before returning."""
+        target = Path(destination)
+        if target.resolve() == Path(self.database_path).resolve():
+            raise CaseStoreError("backup destination must differ from source database")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        with self._connect() as source:
+            with sqlite3.connect(str(target)) as backup_db:
+                source.backup(backup_db)
+                check = backup_db.execute("PRAGMA integrity_check").fetchone()[0]
+                if check != "ok":
+                    raise CaseStoreError("backup integrity check failed")
+        try:
+            os.chmod(target, 0o600)
+        except OSError:
+            pass
+        return target
 
     @staticmethod
     def _required_text(value: Any, field: str) -> str:
