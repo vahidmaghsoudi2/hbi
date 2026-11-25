@@ -13,6 +13,8 @@ import type {
   ProductDTO,
   RecommendationDTO,
   RecommendationRequest,
+  ConsultationOutputDTO,
+  ExplainableSuitabilityDTO,
   TokenPair,
   SaleCreateRequest,
   SaleDTO,
