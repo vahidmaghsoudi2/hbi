@@ -50,7 +50,15 @@ class HairColorCaseStore:
         path = Path(database_path)
         if str(path) == ":memory:":
             raise CaseStoreError("SQLite case store requires a persistent file path")
-        path.parent.mkdir(parents=True, exist_ok=True)
+        if not path.is_absolute():
+            raise CaseStoreError("SQLite case store path must be absolute")
+        if path.is_symlink():
+            raise CaseStoreError("SQLite case store must not be a symlink")
+        path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        if os.name == "posix":
+            parent_mode = path.parent.stat().st_mode & 0o777
+            if parent_mode & 0o077:
+                raise CaseStoreError("SQLite case-store directory must be private (mode 0700 or stricter)")
         self.database_path = str(path)
         self._initialize()
         # Keep local case data private to the service account on POSIX systems.
