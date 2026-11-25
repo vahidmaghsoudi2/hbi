@@ -26,7 +26,8 @@ backup = store.backup_to("/restricted/backups/hair-color-case-YYYYMMDD-HHMMSS.sq
 - Backups are made using SQLite's backup API (consistent snapshot), then integrity-checked.
 - Backup filenames must be unique; existing destination files and symlinks are not overwritten. Backup directories must also be private on POSIX.
 - Store and backup file permissions are attempted as `0600`.
-- A synthetic restore path is implemented and tested: restore only accepts verified schema-v2 backup files, creates a new destination, and re-checks integrity. It has not been rehearsed on a separate host or production-like infrastructure.\n- This prototype does **not** schedule backups, rotate them, encrypt them, upload them off-host, provide idempotent API retries, or verify restoration on a separate machine. Those controls require a deployment owner and approved infrastructure.
+- A synthetic restore path is implemented and tested: restore only accepts verified schema-v2 backup files, creates a new destination, and re-checks integrity. It has not been rehearsed on a separate host or production-like infrastructure.
+- This prototype does **not** schedule backups, rotate them, encrypt them, upload them off-host, provide idempotent API retries, or verify restoration on a separate machine. Those controls require a deployment owner and approved infrastructure.
 - Recovery rehearsal is not yet verified. Restore only to an isolated synthetic test environment and confirm `PRAGMA integrity_check`, event history, and case snapshots before any further use.
 
 ## Data and access restrictions
