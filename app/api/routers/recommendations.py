@@ -1,6 +1,6 @@
 from typing import Dict, Any, List, Union
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -13,6 +13,8 @@ from app.services.profile_fact_context_service import ProfileFactContextService
 from app.services.outcome_assessment_context_service import OutcomeAssessmentContextService
 from app.services.skin_next_question_service import SkinNextQuestionService
 from app.interface.errors import NotFoundError, BusinessRuleError
+from app.core.exceptions import ValidationError
+from app.services.explainable_suitability_service import ExplainableSuitabilityService
 from app.services.recommendation_trust_trace_service import RecommendationTrustTraceService, TrustTraceIntegrityError
 
 
@@ -183,4 +185,45 @@ async def answer_next_skin_question(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(e),
+        )
+
+
+
+@router.get("/case/{case_id}/consultation-output")
+async def get_consultation_output(
+    case_id: str,
+    db: Session = Depends(get_db),
+    customer_id: str = Depends(get_current_customer_id),
+) -> dict:
+    """Read-only, customer-owned consultation result projection."""
+    case = _assert_case_owned(db, case_id, customer_id)
+    _assert_not_hair_legacy_path(case)
+    try:
+        return ExplainableSuitabilityService(db).consultation_output(case_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+
+@router.get("/case/{case_id}/suitability/{problem_id}")
+async def get_explainable_suitability(
+    case_id: str,
+    problem_id: str,
+    market_region: Union[str, None] = Query(default=None, min_length=2, max_length=64),
+    variant: Union[str, None] = Query(default=None, pattern=r"^(COLOR|NON_COLOR|UNKNOWN)$"),
+    db: Session = Depends(get_db),
+    customer_id: str = Depends(get_current_customer_id),
+) -> dict:
+    """Explain current ProductProblemLink candidates without approving them."""
+    case = _assert_case_owned(db, case_id, customer_id)
+    _assert_not_hair_legacy_path(case)
+    try:
+        return ExplainableSuitabilityService(db).evaluate(
+            problem_id,
+            market_region=market_region,
+            variant=variant,
+        )
+    except ValidationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
         )
