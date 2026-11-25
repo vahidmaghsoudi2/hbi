@@ -149,6 +149,46 @@ class HairColorCaseStore:
             pass
         return target
 
+    @classmethod
+    def restore_from_backup(cls, source_backup: str | Path, destination: str | Path) -> Path:
+        """Restore a verified v2 backup to a new private SQLite file."""
+        source = Path(source_backup)
+        target = Path(destination)
+        if not source.is_file():
+            raise CaseStoreError("backup source file does not exist")
+        if not target.is_absolute():
+            raise CaseStoreError("restore destination path must be absolute")
+        if source.resolve() == target.resolve():
+            raise CaseStoreError("restore destination must differ from backup source")
+        if target.is_symlink() or target.exists():
+            raise CaseStoreError("restore destination already exists or is a symlink")
+        target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        if os.name == "posix" and target.parent.stat().st_mode & 0o077:
+            raise CaseStoreError("restore directory must be private (mode 0700 or stricter)")
+        try:
+            source_db = sqlite3.connect(str(source))
+            try:
+                integrity = source_db.execute("PRAGMA integrity_check").fetchone()[0]
+                version = source_db.execute("PRAGMA user_version").fetchone()[0]
+                if integrity != "ok" or version != 2:
+                    raise CaseStoreError("restore source is not a verified schema-v2 backup")
+                destination_db = sqlite3.connect(str(target))
+                try:
+                    source_db.backup(destination_db)
+                    if destination_db.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
+                        raise CaseStoreError("restored database integrity check failed")
+                finally:
+                    destination_db.close()
+            finally:
+                source_db.close()
+            restored = cls(target)
+            if restored.integrity_check() != "ok":
+                raise CaseStoreError("restored database integrity check failed")
+        except Exception:
+            target.unlink(missing_ok=True)
+            raise
+        return target
+
     @staticmethod
     def _required_text(value: Any, field: str) -> str:
         if not isinstance(value, str) or not value.strip():
