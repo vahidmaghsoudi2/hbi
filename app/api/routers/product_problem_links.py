@@ -11,6 +11,7 @@ from app.interface.product_problem_link_schemas import (
     ProductProblemLinkCreate,
     ProductProblemLinkReassess,
     ProductProblemLinkResponse,
+    ProductProblemCandidateRetrievalResponse,
 )
 from app.models.user_role import ROLE_ADMIN, ROLE_PO, ROLE_REVIEWER_QA
 from app.services.product_problem_link_service import ProductProblemLinkService
