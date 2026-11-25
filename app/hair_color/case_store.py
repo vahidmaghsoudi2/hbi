@@ -10,9 +10,10 @@ from __future__ import annotations
 import json
 import os
 import sqlite3
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Iterator, Mapping
 
 
 class CaseStoreError(ValueError):
@@ -60,17 +61,21 @@ class HairColorCaseStore:
             # still provision the parent directory and database securely.
             pass
 
-    def _connect(self) -> sqlite3.Connection:
+    @contextmanager
+    def _connect(self) -> Iterator[sqlite3.Connection]:
         connection = sqlite3.connect(self.database_path, timeout=10.0)
-        connection.row_factory = sqlite3.Row
-        connection.execute("PRAGMA foreign_keys = ON")
-        connection.execute("PRAGMA busy_timeout = 10000")
-        connection.execute("PRAGMA journal_mode = WAL")
-        connection.execute("PRAGMA synchronous = FULL")
-        return connection
+        try:
+            connection.row_factory = sqlite3.Row
+            connection.execute("PRAGMA foreign_keys = ON")
+            connection.execute("PRAGMA busy_timeout = 10000")
+            connection.execute("PRAGMA synchronous = FULL")
+            yield connection
+        finally:
+            connection.close()
 
     def _initialize(self) -> None:
         with self._connect() as db:
+            db.execute("PRAGMA journal_mode = WAL")
             current_version = db.execute("PRAGMA user_version").fetchone()[0]
             if current_version not in (0, 1):
                 raise CaseStoreError(f"unsupported case-store schema version: {current_version}")
@@ -108,6 +113,8 @@ class HairColorCaseStore:
         target = Path(destination)
         if target.resolve() == Path(self.database_path).resolve():
             raise CaseStoreError("backup destination must differ from source database")
+        if target.exists():
+            raise CaseStoreError("backup destination already exists; choose a new backup filename")
         target.parent.mkdir(parents=True, exist_ok=True)
         with self._connect() as source:
             with sqlite3.connect(str(target)) as backup_db:
