@@ -27,10 +27,10 @@ backup = store.backup_to("/restricted/backups/hair-color-case-YYYYMMDD-HHMMSS.sq
 - Backup filenames must be unique; existing destination files and symlinks are not overwritten. Backup directories must also be private on POSIX.
 - Store and backup file permissions are attempted as `0600`.
 - A synthetic restore path is implemented and tested: restore only accepts verified schema-v2 backup files, creates a new destination, and re-checks integrity. It has not been rehearsed on a separate host or production-like infrastructure.
-- This prototype does **not** schedule backups, rotate them, encrypt them, upload them off-host, provide idempotent API retries, or verify restoration on a separate machine. Those controls require a deployment owner and approved infrastructure.
+- Added a backup/rotation CLI: `python scripts/hair_color_case_backup.py --backup-dir /restricted/backups/hair-color --retain 14`. It verifies source integrity, creates a timestamped backup, validates it through the store, and prunes older files after successful creation. It is not scheduled by the repository; a deployment owner must configure a scheduler.\n- This prototype does **not** encrypt backups, upload them off-host, provide idempotent API retries, or verify restoration on a separate machine. Those controls require approved infrastructure.
 - Recovery rehearsal is not yet verified. Restore only to an isolated synthetic test environment and confirm `PRAGMA integrity_check`, event history, and case snapshots before any further use.
 
-## Data and access restrictions
+## Scheduling example (operator-owned)\n\nExample daily scheduler entry, only after provisioning private directories and explicit DB/backup paths:\n\n```cron\n0 2 * * * HBI_HAIR_COLOR_CASE_DB=/restricted/app/hair-color.sqlite /usr/bin/python /opt/hbi/scripts/hair_color_case_backup.py --backup-dir /restricted/backups/hair-color --retain 14\n```\n\nThis is an example configuration only; no scheduler has been installed or activated.\n\n## Data and access restrictions
 
 - API accepts only `SYNTHETIC-` identifiers and `SYNTHETIC:` placeholder values.
 - Role authorization is required (Reviewer QA, PO, or Admin); no user-facing consultation, real customer intake, candidate publication, or execution authorization is enabled.
