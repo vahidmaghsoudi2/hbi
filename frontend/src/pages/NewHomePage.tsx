@@ -7,6 +7,7 @@ import {
   pilotOperatorToken,
   pilotPoToken,
   customerIntake,
+  saveCaseConsultation,
   createGuest,
   generateRecommendations,
   getSkinNextQuestion,
@@ -34,6 +35,7 @@ import type {
   RecommendationDTO,
   PilotTokenRequest,
   CustomerIntakeRequest,
+  SkinConsultationContext,
   GuestCreateRequest,
   CustomerSearchResult,
   SaleDTO,
@@ -78,6 +80,11 @@ export default function NewHomePage() {
   const [concerns, setConcerns] = useState<string[]>([]);
   const [skin, setSkin] = useState<string[]>([]);
   const [note, setNote] = useState("");
+  const [affectedAreas, setAffectedAreas] = useState("");
+  const [symptomDuration, setSymptomDuration] = useState("");
+  const [symptomSeverity, setSymptomSeverity] = useState<number | "">("");
+  const [aggravatingFactors, setAggravatingFactors] = useState("");
+  const [currentProducts, setCurrentProducts] = useState("");
   const [busy, setBusy] = useState(false);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -366,6 +373,11 @@ export default function NewHomePage() {
       setConcerns(customer.concerns ? customer.concerns.split(",").map((x) => x.trim()).filter(Boolean) : []);
       setSkin(customer.skin_profile ? customer.skin_profile.split(",").map((x) => x.trim()).filter(Boolean) : []);
       setNote("");
+    setAffectedAreas("");
+    setSymptomDuration("");
+    setSymptomSeverity("");
+    setAggravatingFactors("");
+    setCurrentProducts("");
       setRecs([]);
       setRecDone(false);
       setShowAllRecommendations(false);
@@ -618,7 +630,16 @@ export default function NewHomePage() {
       if (!newCaseId) throw new Error("پرونده مشاوره ساخته نشد.");
       sessionStorage.setItem("hbi_case_id", newCaseId);
       setCaseId(newCaseId);
-      setStatusMsg("مراجعه ثبت شد. در حال دریافت پیشنهاد…");
+      const consultationContext: SkinConsultationContext = {
+        affected_areas: affectedAreas.split(/[،,\\n]/).map((value) => value.trim()).filter(Boolean),
+        duration: symptomDuration.trim() || null,
+        severity: symptomSeverity === "" ? null : symptomSeverity,
+        aggravating_factors: aggravatingFactors.split(/[،,\\n]/).map((value) => value.trim()).filter(Boolean),
+        current_products: currentProducts.split(/[،,\\n]/).map((value) => value.trim()).filter(Boolean),
+        notes: note.trim() || null,
+      };
+      await saveCaseConsultation(newCaseId, consultationContext, currentToken);
+      setStatusMsg("اطلاعات مراجعه در پرونده ذخیره شد. در حال دریافت پیشنهاد…");
       // Every selected Need must first be captured as explicit Case-owned evidence.
       const nextQuestion = await getSkinNextQuestion(newCaseId, currentToken);
       if (nextQuestion.status !== "QUESTION_REQUIRED" || !nextQuestion.question) {
@@ -1204,7 +1225,33 @@ export default function NewHomePage() {
                 </div>
               </fieldset>
               <fieldset className="pro-fieldset">
-                <legend>۵) توضیح</legend>
+                <legend>۵) جزئیات مشکل پوستی</legend>
+                <div className="pro-grid-2">
+                  <div>
+                    <label className="pro-label" htmlFor="affected-areas">محل درگیری</label>
+                    <input id="affected-areas" className="pro-input" value={affectedAreas} onChange={(e) => setAffectedAreas(e.target.value)} placeholder="مثلاً گونه، پیشانی، چانه" />
+                  </div>
+                  <div>
+                    <label className="pro-label" htmlFor="symptom-duration">مدت مشاهده مشکل</label>
+                    <input id="symptom-duration" className="pro-input" value={symptomDuration} onChange={(e) => setSymptomDuration(e.target.value)} placeholder="مثلاً دو هفته، چند ماه" />
+                  </div>
+                  <div>
+                    <label className="pro-label" htmlFor="symptom-severity">شدت از نگاه مشتری (۰ تا ۱۰)</label>
+                    <select id="symptom-severity" className="pro-input" value={symptomSeverity} onChange={(e) => setSymptomSeverity(e.target.value === "" ? "" : Number(e.target.value))}>
+                      <option value="">ثبت نشده</option>
+                      {Array.from({ length: 11 }, (_, index) => <option key={index} value={index}>{index}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="pro-label" htmlFor="aggravating-factors">عوامل تشدیدکننده</label>
+                    <input id="aggravating-factors" className="pro-input" value={aggravatingFactors} onChange={(e) => setAggravatingFactors(e.target.value)} placeholder="با ویرگول جدا کنید" />
+                  </div>
+                </div>
+                <label className="pro-label" htmlFor="current-products">محصولات فعلی مصرفی</label>
+                <textarea id="current-products" className="pro-input pro-textarea" value={currentProducts} onChange={(e) => setCurrentProducts(e.target.value)} rows={2} placeholder="نام محصولات را با ویرگول جدا کنید" />
+              </fieldset>
+              <fieldset className="pro-fieldset">
+                <legend>۶) توضیحات تکمیلی</legend>
                 <textarea className="pro-input pro-textarea" value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder="نکته اختیاری…" />
                 {concernsText ? (
                   <p className="pro-summary">
