@@ -38,7 +38,7 @@ def test_consultation_output_api_is_customer_owned_and_read_only(client, db_sess
     body = response.json()
     assert body["case_id"] == "OUTPUT-CASE"
     assert body["consultation_context_status"] == "NOT_RECORDED"
-    assert body["recommendation_status"] == "NO_APPROVED_RECOMMENDATION"
+    assert body["recommendation_status"] == "NO_ELIGIBLE_RECOMMENDATION"
     assert body["recommendation_count"] == 0
     assert body["computed_only"] is True
 
