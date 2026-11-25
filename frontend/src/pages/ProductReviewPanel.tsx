@@ -5,6 +5,8 @@ import {
   getProduct,
   getProductEvidence,
   getProductMutationLog,
+  getInventoryByProduct,
+  getProductKnowledge,
   rejectProduct,
   resolveEvidenceConflict,
   setProductQa,
@@ -73,6 +75,8 @@ export default function ProductReviewPanel({
   const [rejectReason, setRejectReason] = useState("");
   const [conflictResolutionReason, setConflictResolutionReason] = useState("");
   const [selectedId, setSelectedId] = useState(productId ?? "");
+  const [inventoryInfo, setInventoryInfo] = useState<Record<string, unknown> | null>(null);
+  const [knowledgeHint, setKnowledgeHint] = useState<string | null>(null);
 
   const load = async (id: string) => {
     if (!id) {
@@ -95,6 +99,19 @@ export default function ProductReviewPanel({
       setEvidences(Array.isArray(ev) ? ev : []);
       setLogs(Array.isArray(log) ? log : []);
       setSelectedId(id);
+      try {
+        const inv = await getInventoryByProduct(id, opToken);
+        setInventoryInfo(inv as unknown as Record<string, unknown>);
+      } catch {
+        setInventoryInfo(null);
+      }
+      try {
+        const pk = await getProductKnowledge(id, opToken);
+        const keys = pk ? Object.keys(pk as object).filter((k) => k !== "product_id") : [];
+        setKnowledgeHint(keys.length ? `ProductKnowledge: ${keys.length} فیلد خوانده شد` : "ProductKnowledge خالی یا ناقص");
+      } catch {
+        setKnowledgeHint("ProductKnowledge در دسترس نیست یا خوانده نشد");
+      }
       setIdentityStatus(upper(p.identity_status) || "NEEDS_REVIEW");
       setIdentityRefs(text((p as { identity_source_refs?: unknown }).identity_source_refs));
       const confidence = (p as { identity_confidence?: unknown }).identity_confidence;
@@ -231,7 +248,7 @@ export default function ProductReviewPanel({
     <section className="pro-panel">
       <div className="pro-panel-head">
         <div>
-          <h1>بررسی پرونده محصول</h1>
+          <h1>پرونده محصول</h1>
           <p className="pro-lead">یک dossier عملیاتی برای همان Product Master؛ Transitionها را سرور انجام می‌دهد.</p>
         </div>
         <button
@@ -250,7 +267,7 @@ export default function ProductReviewPanel({
       {!product && !loading ? (
         <div className="pro-empty">
           <strong>محصولی برای بررسی انتخاب نشده است.</strong>
-          <p>از بخش «محصولات» یک Product را انتخاب کنید.</p>
+          <p>از «فهرست کالاها» یک محصول را انتخاب کنید.</p>
         </div>
       ) : null}
 
@@ -281,6 +298,23 @@ export default function ProductReviewPanel({
                   <p style={{ marginBottom: 0 }}>خطاهای دقیق Transition نیز از پاسخ سرور نمایش داده می‌شوند.</p>
                 </div>
               )}
+            </article>
+            <article className="pro-product-card">
+              <h3>نمای موجودی مرتبط</h3>
+              {inventoryInfo ? (
+                <div className="pro-tags">
+                  {Object.entries(inventoryInfo).slice(0, 12).map(([k, v]) => (
+                    <span key={k} className="pro-tag">{k}: {formatJson(v)}</span>
+                  ))}
+                </div>
+              ) : (
+                <p className="pro-muted">موجودی از API خوانده نشد یا ردیف ندارد.</p>
+              )}
+            </article>
+            <article className="pro-product-card">
+              <h3>دانش و منابع</h3>
+              <p className="pro-muted">{knowledgeHint ?? "—"}</p>
+              <p className="pro-muted">دانشنامه جایگزین Evidence نیست. ProductProblemLink در UI کامل نیست.</p>
             </article>
           </div>
 
