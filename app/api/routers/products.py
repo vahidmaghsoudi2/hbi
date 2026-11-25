@@ -195,16 +195,6 @@ async def reject_product(product_id: str, body: ProductRejectRequest, db: Sessio
         _http_from_domain(e)
 
 
-@router.post("/{product_id}/activate")
-async def activate_product(product_id: str, db: Session = Depends(get_db),
-    auth=Depends(require_any_role(ROLE_PO))):
-    subject_id, roles = auth
-    try:
-        return _to_dict(ProductTransitionService(db).activate(product_id, subject_id, roles))
-    except Exception as e:
-        _http_from_domain(e)
-
-
 @router.post("/{product_id}/archive")
 async def archive_product(product_id: str, body: ProductTransitionRequest = None,
     db: Session = Depends(get_db), auth=Depends(require_any_role(ROLE_PO))):
