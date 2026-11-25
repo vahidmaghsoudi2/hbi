@@ -116,3 +116,75 @@ def test_gate_rejects_duplicate_reason_codes_and_invalid_version_types():
     )
     assert not invalid["publication_allowed"]
     assert "INVALID_VERSION_FIELD" in invalid["reason_codes"]
+
+
+
+@pytest.mark.parametrize(
+    "field,value,expected_reason",
+    [
+        ("missing_information", "not-an-array", "INVALID_MISSING_INFORMATION"),
+        ("missing_information", [None], "INVALID_MISSING_INFORMATION"),
+        ("evidence_refs", "not-an-array", "INVALID_EVIDENCE_REFS"),
+        ("evidence_refs", ["", "EV-1"], "INVALID_EVIDENCE_REFS"),
+        ("evidence_refs", ["EV-1", "EV-1"], "DUPLICATE_EVIDENCE_REFS"),
+        ("limitations", [], "INVALID_LIMITATIONS"),
+        ("limitations", ["  "], "INVALID_LIMITATIONS"),
+        ("next_step", None, "INVALID_NEXT_STEP"),
+        ("next_step", {"action": ""}, "INVALID_NEXT_STEP"),
+        ("next_step", {"action": "SPECIALIST_REVIEW", "reason": []}, "INVALID_NEXT_STEP"),
+    ],
+)
+def test_gate_blocks_malformed_publication_structure(field, value, expected_reason):
+    gate = evaluate_publication_gate(
+        triage_response(**{field: value}), current_case_version=1, current_target_version=1
+    )
+    assert gate["publication_allowed"] is False
+    assert gate["publication_kind"] == "BLOCKED"
+    assert expected_reason in gate["reason_codes"]
+    assert gate["safe_response"]["options"] == []
+    assert gate["execution_authorized"] is False
+
+
+@pytest.mark.parametrize("value", [True, 1.0, "1", 0, -1])
+def test_gate_rejects_invalid_evaluated_versions_even_when_comparable(value):
+    gate = evaluate_publication_gate(
+        triage_response(evaluated_case_version=value),
+        current_case_version=1,
+        current_target_version=1,
+    )
+    assert gate["publication_allowed"] is False
+    assert "INVALID_VERSION_FIELD" in gate["reason_codes"]
+    assert gate["safe_response"]["options"] == []
+    assert gate["execution_authorized"] is False
+
+
+@pytest.mark.parametrize("value", [True, 1.0, "1", 0, -1])
+def test_gate_rejects_invalid_current_versions(value):
+    gate = evaluate_publication_gate(
+        triage_response(),
+        current_case_version=value,
+        current_target_version=1,
+    )
+    assert gate["publication_allowed"] is False
+    assert "INVALID_CURRENT_VERSION" in gate["reason_codes"]
+    assert gate["safe_response"]["options"] == []
+    assert gate["execution_authorized"] is False
+
+
+@pytest.mark.parametrize(
+    "response,current_case,current_target,expected_reason",
+    [
+        (triage_response(evaluated_case_version=2), 1, 1, "STALE_CASE_VERSION"),
+        (triage_response(evaluated_target_version=2), 1, 1, "STALE_TARGET_VERSION"),
+        (triage_response(evaluated_case_version=1), 2, 1, "STALE_CASE_VERSION"),
+        (triage_response(evaluated_target_version=1), 1, 2, "STALE_TARGET_VERSION"),
+    ],
+)
+def test_gate_rejects_mismatched_versions(response,current_case,current_target,expected_reason):
+    gate = evaluate_publication_gate(
+        response, current_case_version=current_case, current_target_version=current_target
+    )
+    assert gate["publication_allowed"] is False
+    assert expected_reason in gate["reason_codes"]
+    assert gate["safe_response"]["options"] == []
+    assert gate["execution_authorized"] is False
