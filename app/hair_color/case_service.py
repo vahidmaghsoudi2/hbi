@@ -35,11 +35,11 @@ class HairColorCaseService:
                 raise HairColorCaseServiceError("all intake fields must contain synthetic placeholder values")
         return intake
 
-    def create_case(self, *, case_ref: str, event_id: str, intake: Mapping[str, Any]):
+    def create_case(self, *, case_ref: str, event_id: str, intake: Mapping[str, Any], actor_id: str | None = None):
         self._synthetic_id(case_ref, "case_ref")
         self._synthetic_id(event_id, "event_id")
         self._synthetic_payload(intake)
-        return self.store.create_case(case_ref=case_ref, event_id=event_id, intake=intake)
+        return self.store.create_case(case_ref=case_ref, event_id=event_id, intake=intake, actor_id=actor_id)
 
     def get_case(self, case_ref: str):
         self._synthetic_id(case_ref, "case_ref")
@@ -47,18 +47,19 @@ class HairColorCaseService:
         self._synthetic_payload(snapshot.intake)
         return snapshot
 
-    def update_intake(self, *, case_ref: str, event_id: str, expected_case_version: int, fields: Mapping[str, Any]):
+    def update_intake(self, *, case_ref: str, event_id: str, expected_case_version: int, fields: Mapping[str, Any], actor_id: str | None = None):
         self._synthetic_id(case_ref, "case_ref")
         self._synthetic_id(event_id, "event_id")
         self._synthetic_payload(fields)
         return self.store.update_intake(
             case_ref=case_ref, event_id=event_id,
-            expected_case_version=expected_case_version, fields=fields,
+            expected_case_version=expected_case_version, fields=fields, actor_id=actor_id,
         )
 
     def change_target(
         self, *, case_ref: str, event_id: str, expected_case_version: int,
         target_description: str,
+        actor_id: str | None = None,
     ):
         self._synthetic_id(case_ref, "case_ref")
         self._synthetic_id(event_id, "event_id")
@@ -66,7 +67,7 @@ class HairColorCaseService:
             raise HairColorCaseServiceError("target_description must be synthetic placeholder text")
         return self.store.change_target(
             case_ref=case_ref, event_id=event_id, expected_case_version=expected_case_version,
-            target_description=target_description,
+            target_description=target_description, actor_id=actor_id,
         )
 
     def stop_case(self, *, case_ref: str, event_id: str, expected_case_version: int, performed_step_refs: tuple[str, ...] = ()):
@@ -76,29 +77,29 @@ class HairColorCaseService:
             raise HairColorCaseServiceError("performed_step_refs must use SYNTHETIC- identifiers")
         return self.store.stop_case(
             case_ref=case_ref, event_id=event_id, expected_case_version=expected_case_version,
-            performed_step_refs=performed_step_refs,
+            performed_step_refs=performed_step_refs, actor_id=actor_id,
         )
 
-    def close_case(self, *, case_ref: str, event_id: str, expected_case_version: int, closure_reason: str):
+    def close_case(self, *, case_ref: str, event_id: str, expected_case_version: int, closure_reason: str, actor_id: str | None = None):
         self._synthetic_id(case_ref, "case_ref")
         self._synthetic_id(event_id, "event_id")
         if not isinstance(closure_reason, str) or not closure_reason.startswith("SYNTHETIC:"):
             raise HairColorCaseServiceError("closure_reason must be synthetic placeholder text")
         return self.store.close_case(
             case_ref=case_ref, event_id=event_id, expected_case_version=expected_case_version,
-            closure_reason=closure_reason,
+            closure_reason=closure_reason, actor_id=actor_id,
         )
 
-    def fresh_restart(self, *, source_case_ref: str, new_case_ref: str, event_id: str, intake: Mapping[str, Any]):
+    def fresh_restart(self, *, source_case_ref: str, new_case_ref: str, event_id: str, intake: Mapping[str, Any], actor_id: str | None = None):
         self._synthetic_id(source_case_ref, "source_case_ref")
         self._synthetic_id(new_case_ref, "new_case_ref")
         self._synthetic_id(event_id, "event_id")
         self._synthetic_payload(intake)
         return self.store.fresh_restart(
-            source_case_ref=source_case_ref, new_case_ref=new_case_ref, event_id=event_id, intake=intake,
+            source_case_ref=source_case_ref, new_case_ref=new_case_ref, event_id=event_id, intake=intake, actor_id=actor_id,
         )
 
-    def consult_persian(self, *, case_ref: str, request_id: str, triage_event_id: str):
+    def consult_persian(self, *, case_ref: str, request_id: str, triage_event_id: str, actor_id: str | None = None):
         self._synthetic_id(case_ref, "case_ref")
         self._synthetic_id(request_id, "request_id")
         self._synthetic_id(triage_event_id, "triage_event_id")
@@ -122,6 +123,6 @@ class HairColorCaseService:
             request_id=request_id,
             consultation_status=raw["consultation_status"],
             reason_codes=tuple(raw["reason_codes"]),
-            safe_summary=raw["summary"],
+            safe_summary=raw["summary"], actor_id=actor_id,
         )
         return result
