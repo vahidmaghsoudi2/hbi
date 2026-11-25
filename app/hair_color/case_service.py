@@ -70,7 +70,7 @@ class HairColorCaseService:
             target_description=target_description, actor_id=actor_id,
         )
 
-    def stop_case(self, *, case_ref: str, event_id: str, expected_case_version: int, performed_step_refs: tuple[str, ...] = ()):
+    def stop_case(self, *, case_ref: str, event_id: str, expected_case_version: int, performed_step_refs: tuple[str, ...] = (), actor_id: str | None = None):
         self._synthetic_id(case_ref, "case_ref")
         self._synthetic_id(event_id, "event_id")
         if not isinstance(performed_step_refs, tuple) or any(not isinstance(ref, str) or not ref.startswith("SYNTHETIC-") for ref in performed_step_refs):
