@@ -142,7 +142,7 @@ class ExplainableSuitabilityService:
             ),
             "recommendation_status": (
                 "RECOMMENDATIONS_AVAILABLE"
-                if recommendations else "NO_APPROVED_RECOMMENDATION"
+                if recommendations else "NO_ELIGIBLE_RECOMMENDATION"
             ),
             "recommendation_count": len(recommendations),
             "recommendations": recommendations,
