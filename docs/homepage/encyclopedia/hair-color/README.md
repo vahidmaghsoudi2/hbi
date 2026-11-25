@@ -53,6 +53,7 @@
 | قرارداد Adapter 0.3 و مشخصات فنی synthetic-only (Draft) | [پیشنهاد اصلاح قرارداد](./adapter-contract-v0.3-revision-proposal-20261122.md) · [مشخصات فنی](./adapter-contract-v0.3-technical-spec-synthetic-20261122.md) |
 | ممیزی H1 و مدل مالکیت داده/Publication Gate (Draft) | [H1 audit](./h1-audit-model-data-next-20261122.md) · [پیشنهاد مدل داده](./model-data-ownership-publication-gates-draft-20261122.md) |
 | راهنمای اجرای مسیر مصنوعی Intake/Triage | [Quickstart](./intake-triage-synthetic-quickstart.md) |
+| عملیات ذخیره‌سازی synthetic-only، بکاپ/restore، و محدودیت‌های Actor Audit | [Operations](./case-store-operations-synthetic.md) · [Backup drill workflow](../../../../.github/workflows/hair-color-synthetic-backup-drill.yml) |
 
 **مرز اعتبار لینک‌ها:** فایل‌های فنی بالا در شاخهٔ Draft مربوط به PR #535 و در commit ثابت `bde6dd7142ba` قرار دارند؛ آن‌ها مرجع مستقل تصمیم یا وضعیت پروژه نیستند. تصمیم‌های PO، وضعیت جاری و تقدم قواعد فقط از همین README پیگیری می‌شوند. پیشنهاد سیاست شواهد همچنان پیش‌نویس است. هیچ‌یک از این لینک‌ها به معنی ادغام یا مجوز اجرا نیست.
 
