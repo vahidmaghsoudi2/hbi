@@ -142,7 +142,9 @@ async def retrieve_product_problem_candidates(
     except (NotFoundError, ValidationError, ConflictError) as exc:
         _raise_http_domain_error(exc)
     return result
-\n\n@router.get("/{link_id}/history")
+
+
+@router.get("/{link_id}/history")
 async def get_product_problem_link_history(
     link_id: str,
     db: Session = Depends(get_db),
