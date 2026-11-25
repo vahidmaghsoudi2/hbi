@@ -85,7 +85,7 @@ class HairColorCaseStore:
         with self._connect() as db:
             db.execute("PRAGMA journal_mode = WAL")
             current_version = db.execute("PRAGMA user_version").fetchone()[0]
-            if current_version not in (0, 1):
+            if current_version not in (0, 1, 2):
                 raise CaseStoreError(f"unsupported case-store schema version: {current_version}")
             db.executescript("""
                 CREATE TABLE IF NOT EXISTS hair_color_cases (
@@ -104,11 +104,14 @@ class HairColorCaseStore:
                     case_version INTEGER NOT NULL,
                     target_version INTEGER NOT NULL,
                     payload_json TEXT NOT NULL,
+                    occurred_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     PRIMARY KEY(case_ref, event_id),
                     FOREIGN KEY(case_ref) REFERENCES hair_color_cases(case_ref)
                 );
             """)
-            db.execute("PRAGMA user_version = 1")
+            if current_version == 1:
+                db.execute("ALTER TABLE hair_color_case_events ADD COLUMN occurred_at TEXT NOT NULL DEFAULT 'LEGACY-UNKNOWN'")
+            db.execute("PRAGMA user_version = 2")
 
     def integrity_check(self) -> str:
         """Return SQLite's integrity-check result; expected value is 'ok'."""
@@ -180,7 +183,7 @@ class HairColorCaseStore:
                     (case_ref, 1, 1, "ACTIVE", json.dumps(normalized, ensure_ascii=False), event_id, event_id),
                 )
                 db.execute(
-                    "INSERT INTO hair_color_case_events VALUES(?,?,?,?,?,?)",
+                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json) VALUES(?,?,?,?,?,?)",
                     (case_ref, event_id, "CASE_CREATED", 1, 1, payload),
                 )
                 db.commit()
@@ -210,7 +213,7 @@ class HairColorCaseStore:
         self.get_case(case_ref)
         with self._connect() as db:
             rows = db.execute(
-                "SELECT event_id,event_type,case_version,target_version,payload_json "
+                "SELECT event_id,event_type,case_version,target_version,payload_json,occurred_at "
                 "FROM hair_color_case_events WHERE case_ref=? ORDER BY rowid",
                 (case_ref,),
             ).fetchall()
@@ -218,6 +221,7 @@ class HairColorCaseStore:
             {
                 "event_id": row["event_id"],
                 "event_type": row["event_type"],
+                "occurred_at": row["occurred_at"],
                 "case_version": row["case_version"],
                 "target_version": row["target_version"],
                 "payload": json.loads(row["payload_json"]),
