@@ -52,6 +52,15 @@ def test_backup_destination_must_not_be_source(tmp_path):
         store.backup_to(tmp_path / "same.sqlite")
 
 
+def test_backup_refuses_to_overwrite_existing_file(tmp_path):
+    store = HairColorCaseStore(tmp_path / "source.sqlite")
+    destination = tmp_path / "existing-backup.sqlite"
+    destination.write_text("preserve-existing-file", encoding="utf-8")
+    with pytest.raises(CaseStoreError, match="already exists"):
+        store.backup_to(destination)
+    assert destination.read_text(encoding="utf-8") == "preserve-existing-file"
+
+
 def test_unsupported_schema_version_fails_closed(tmp_path):
     path = tmp_path / "version.sqlite"
     HairColorCaseStore(path)
