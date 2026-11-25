@@ -19,7 +19,12 @@
     "contraindications": null,
     "unknown_policy": "Null fields remain UNKNOWN; absence of a contraindication assertion is not a safety clearance.",
     "no_product_master_identity_or_lifecycle_or_inventory_changes": true,
-    "no_recommendation_or_product_problem_link_activation": true
+    "no_recommendation_or_product_problem_link_activation": true,
+    "operational_write_authorization_required": {
+      "required_permission": "Explicit Product Owner authorization for an operator with the approved HBI operational Admin/Editor permission to execute the seven prepared ProductKnowledge writes through the existing ResearchDraft/Evidence application service in the designated operational environment, followed by read-back verification.",
+      "forbidden": "Direct SQL writes, migrations, seeds, imports, Product Master identity/lifecycle changes, QA promotion, or recommendation activation are not authorized by this draft.",
+      "p7_specific_precondition": "Before P7 write: complete dependency/reference audit for EV-HBI-PROD-22C55A8223A945A6-2b4c9e26 and, only if approved, remove that exact redundant row via the authorized application/service path; preserve ...-002 and ...-003. Then write the five-field P7 payload and verify all five Evidence references."
+    }
   },
   "products": [
     {
