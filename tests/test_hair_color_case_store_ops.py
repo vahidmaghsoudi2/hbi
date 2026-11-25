@@ -96,6 +96,25 @@ def test_store_integrity_backup_and_private_file_permissions(tmp_path):
             assert source_path.stat().st_mode & 0o077 == 0
 
 
+def test_verified_backup_restore_preserves_case_and_history(tmp_path):
+    original = HairColorCaseStore(tmp_path / "original.sqlite")
+    _create(original)
+    original.update_intake(
+        case_ref="SYNTHETIC-OPS-CASE",
+        event_id="SYNTHETIC-OPS-UPDATE",
+        expected_case_version=1,
+        fields={"history": "SYNTHETIC: placeholder"},
+    )
+    backup = original.backup_to(tmp_path / "backups" / "verified.sqlite")
+    restored_path = HairColorCaseStore.restore_from_backup(backup, tmp_path / "restore" / "restored.sqlite")
+    restored = HairColorCaseStore(restored_path)
+    assert restored.integrity_check() == "ok"
+    assert restored.get_case("SYNTHETIC-OPS-CASE").case_version == 2
+    assert [event["event_type"] for event in restored.list_events("SYNTHETIC-OPS-CASE")] == [
+        "CASE_CREATED", "INTAKE_UPDATED",
+    ]
+
+
 def test_backup_destination_must_not_be_source(tmp_path):
     store = HairColorCaseStore(tmp_path / "same.sqlite")
     with pytest.raises(CaseStoreError, match="differ"):
