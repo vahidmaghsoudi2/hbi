@@ -83,7 +83,10 @@ class ProductProblemCandidateRetrievalService:
                 blockers.append("PRODUCT_NOT_ACTIVE")
             if (evidence.qa_status or "").strip().upper() != "VERIFIED":
                 blockers.append("EVIDENCE_NOT_VERIFIED")
-            if (evidence.conflict_status or "NONE").strip().upper() == "CONFLICT":
+            if (
+                (evidence.conflict_status or "NONE").strip().upper() == "CONFLICT"
+                or (evidence.claim_type or "").strip().upper() == "CONFLICT"
+            ):
                 blockers.append("EVIDENCE_CONFLICT")
             if (link.variant or "").strip().upper() == "UNKNOWN":
                 blockers.append("VARIANT_UNKNOWN")
