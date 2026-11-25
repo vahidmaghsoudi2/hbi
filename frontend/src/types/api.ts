@@ -440,7 +440,7 @@ export interface ConsultationOutputDTO {
   case_type?: string | null;
   consultation_context: SkinConsultationContext | null;
   consultation_context_status: "PRESENT" | "NOT_RECORDED";
-  recommendation_status: "RECOMMENDATIONS_AVAILABLE" | "NO_APPROVED_RECOMMENDATION";
+  recommendation_status: "RECOMMENDATIONS_AVAILABLE" | "NO_ELIGIBLE_RECOMMENDATION";
   recommendation_count: number;
   recommendations: Array<{
     recommendation_id: string;
