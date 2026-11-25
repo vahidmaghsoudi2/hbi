@@ -5,6 +5,7 @@
 import type {
   CaseCreateRequest,
   CaseDTO,
+  SkinConsultationContext,
   CustomerIntakeRequest,
   CustomerSearchResult,
   GuestCreateRequest,
@@ -107,6 +108,24 @@ export function listCasesByCustomer(
   token: string
 ): Promise<CaseDTO[]> {
   return request<CaseDTO[]>(`/cases/customer/${customerId}`, {}, token);
+}
+
+export function saveCaseConsultation(
+  caseId: string,
+  body: SkinConsultationContext,
+  token: string
+): Promise<{ case_id: string; consultation_context: SkinConsultationContext }> {
+  return request(`/cases/${encodeURIComponent(caseId)}/consultation`, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  }, token);
+}
+
+export function getCaseConsultation(
+  caseId: string,
+  token: string
+): Promise<{ case_id: string; consultation_context: SkinConsultationContext | null }> {
+  return request(`/cases/${encodeURIComponent(caseId)}/consultation`, {}, token);
 }
 
 /** Active customer profile — requires the active customer token. */
