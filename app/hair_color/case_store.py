@@ -109,7 +109,8 @@ class HairColorCaseStore:
                     FOREIGN KEY(case_ref) REFERENCES hair_color_cases(case_ref)
                 );
             """)
-            if current_version == 1:
+            event_columns = {row["name"] for row in db.execute("PRAGMA table_info(hair_color_case_events)").fetchall()}
+            if "occurred_at" not in event_columns:
                 db.execute("ALTER TABLE hair_color_case_events ADD COLUMN occurred_at TEXT NOT NULL DEFAULT 'LEGACY-UNKNOWN'")
             db.execute("PRAGMA user_version = 2")
 
