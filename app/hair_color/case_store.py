@@ -197,6 +197,15 @@ class HairColorCaseStore:
         return target
 
     @staticmethod
+    @staticmethod
+    def _audit_actor_payload(payload: dict[str, Any], actor_id: str | None) -> dict[str, Any]:
+        if actor_id is None:
+            return payload
+        if not isinstance(actor_id, str) or not actor_id.strip():
+            raise CaseStoreError("actor_id must be a non-empty authenticated subject")
+        return {**payload, "actor_id": actor_id.strip()}
+
+    @staticmethod
     def _required_text(value: Any, field: str) -> str:
         if not isinstance(value, str) or not value.strip():
             raise CaseStoreError(f"{field} must be a non-empty string")
@@ -224,11 +233,11 @@ class HairColorCaseStore:
             normalized[normalized_key] = value.strip()
         return normalized
 
-    def create_case(self, *, case_ref: str, event_id: str, intake: Mapping[str, Any]) -> HairColorCaseSnapshot:
+    def create_case(self, *, case_ref: str, event_id: str, intake: Mapping[str, Any], actor_id: str | None = None) -> HairColorCaseSnapshot:
         case_ref = self._required_text(case_ref, "case_ref")
         event_id = self._required_text(event_id, "event_id")
         normalized = self._normalize_intake(intake)
-        payload = json.dumps({"intake_fields": sorted(normalized)}, ensure_ascii=False)
+        payload = json.dumps(self._audit_actor_payload({"intake_fields": sorted(normalized)}, actor_id), ensure_ascii=False)
         with self._connect() as db:
             try:
                 db.execute("BEGIN IMMEDIATE")
@@ -286,6 +295,7 @@ class HairColorCaseStore:
     def update_intake(
         self, *, case_ref: str, event_id: str, expected_case_version: int,
         fields: Mapping[str, Any],
+        actor_id: str | None = None,
     ) -> HairColorCaseSnapshot:
         case_ref = self._required_text(case_ref, "case_ref")
         event_id = self._required_text(event_id, "event_id")
@@ -308,7 +318,7 @@ class HairColorCaseStore:
             old = json.loads(row["intake_json"])
             old.update(updates)
             next_version = row["case_version"] + 1
-            payload = json.dumps({"changed_fields": sorted(updates)}, ensure_ascii=False)
+            payload = json.dumps(self._audit_actor_payload({"changed_fields": sorted(updates)}, actor_id), ensure_ascii=False)
             db.execute(
                 "UPDATE hair_color_cases SET case_version=?,intake_json=?,updated_event_id=? WHERE case_ref=?",
                 (next_version, json.dumps(old, ensure_ascii=False), event_id, case_ref),
@@ -327,6 +337,7 @@ class HairColorCaseStore:
     def change_target(
         self, *, case_ref: str, event_id: str, expected_case_version: int,
         target_description: str,
+        actor_id: str | None = None,
     ) -> HairColorCaseSnapshot:
         case_ref = self._required_text(case_ref, "case_ref")
         event_id = self._required_text(event_id, "event_id")
@@ -348,11 +359,11 @@ class HairColorCaseStore:
             previous_target = intake.get("desired_result")
             intake["desired_result"] = target_description
             next_case, next_target = row["case_version"] + 1, row["target_version"] + 1
-            payload = json.dumps({
+            payload = json.dumps(self._audit_actor_payload({
                 "target_changed": True,
                 "previous_target": previous_target,
                 "new_target": target_description,
-            }, ensure_ascii=False)
+            }, actor_id), ensure_ascii=False)
             db.execute(
                 "UPDATE hair_color_cases SET case_version=?,target_version=?,intake_json=?,updated_event_id=? WHERE case_ref=?",
                 (next_case, next_target, json.dumps(intake, ensure_ascii=False), event_id, case_ref),
@@ -371,6 +382,7 @@ class HairColorCaseStore:
     def stop_case(
         self, *, case_ref: str, event_id: str, expected_case_version: int,
         performed_step_refs: tuple[str, ...] = (),
+        actor_id: str | None = None,
     ) -> HairColorCaseSnapshot:
         case_ref = self._required_text(case_ref, "case_ref")
         event_id = self._required_text(event_id, "event_id")
@@ -390,7 +402,7 @@ class HairColorCaseStore:
             if row["case_version"] != expected_case_version:
                 db.rollback()
                 raise StaleCaseVersion("case version changed; refresh snapshot before stopping")
-            payload = json.dumps({"performed_step_refs": refs}, ensure_ascii=False)
+            payload = json.dumps(self._audit_actor_payload({"performed_step_refs": refs}, actor_id), ensure_ascii=False)
             next_version = row["case_version"] + 1
             db.execute(
                 "UPDATE hair_color_cases SET case_version=?,state='STOPPED',updated_event_id=? WHERE case_ref=?",
@@ -411,7 +423,7 @@ class HairColorCaseStore:
     def record_client_decision(
         self, *, case_ref: str, event_id: str, expected_case_version: int,
         expected_target_version: int, decision: str, suggestion_ref: str,
-        reason: str | None = None,
+        reason: str | None = None, actor_id: str | None = None,
     ) -> HairColorCaseSnapshot:
         """Persist an explicit accept/reject decision; acceptance never authorizes execution."""
         case_ref = self._required_text(case_ref, "case_ref")
@@ -447,13 +459,13 @@ class HairColorCaseStore:
                     raise CaseStoreError(
                         "a client decision is already recorded for this suggestion; rejected suggestions cannot be reactivated"
                     )
-            payload = json.dumps({
+            payload = json.dumps(self._audit_actor_payload({
                 "decision": decision,
                 "suggestion_ref": suggestion_ref,
                 "reason": reason,
                 "client_acceptance": decision == "ACCEPT",
                 "execution_authorized": False,
-            }, ensure_ascii=False)
+            }, actor_id), ensure_ascii=False)
             try:
                 db.execute(
                     "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json,occurred_at) VALUES(?,?,?,?,?,?,CURRENT_TIMESTAMP)",
@@ -470,7 +482,7 @@ class HairColorCaseStore:
     def record_triage(
         self, *, case_ref: str, event_id: str, expected_case_version: int,
         expected_target_version: int, request_id: str, consultation_status: str,
-        reason_codes: tuple[str, ...], safe_summary: str,
+        reason_codes: tuple[str, ...], safe_summary: str, actor_id: str | None = None,
     ) -> HairColorCaseSnapshot:
         case_ref = self._required_text(case_ref, "case_ref")
         event_id = self._required_text(event_id, "event_id")
@@ -506,14 +518,14 @@ class HairColorCaseStore:
             if any(json.loads(event["payload_json"]).get("request_id") == request_id for event in prior_triages):
                 db.rollback()
                 raise CaseStoreError("request_id has already been evaluated for this case")
-            payload = json.dumps({
+            payload = json.dumps(self._audit_actor_payload({
                 "request_id": request_id,
                 "consultation_status": consultation_status,
                 "reason_codes": list(reason_codes),
                 "safe_summary": safe_summary,
                 "options_count": 0,
                 "execution_authorized": False,
-            }, ensure_ascii=False)
+            }, actor_id), ensure_ascii=False)
             try:
                 db.execute(
                     "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json,occurred_at) VALUES(?,?,?,?,?,?,CURRENT_TIMESTAMP)",
@@ -529,6 +541,7 @@ class HairColorCaseStore:
     def close_case(
         self, *, case_ref: str, event_id: str, expected_case_version: int,
         closure_reason: str,
+        actor_id: str | None = None,
     ) -> HairColorCaseSnapshot:
         case_ref = self._required_text(case_ref, "case_ref")
         event_id = self._required_text(event_id, "event_id")
@@ -546,7 +559,7 @@ class HairColorCaseStore:
             if row["case_version"] != expected_case_version:
                 db.rollback()
                 raise StaleCaseVersion("case version changed; refresh snapshot before closing")
-            payload = json.dumps({"closure_reason": closure_reason}, ensure_ascii=False)
+            payload = json.dumps(self._audit_actor_payload({"closure_reason": closure_reason}, actor_id), ensure_ascii=False)
             next_version = row["case_version"] + 1
             db.execute(
                 "UPDATE hair_color_cases SET case_version=?,state='CLOSED',updated_event_id=? WHERE case_ref=?",
@@ -566,6 +579,7 @@ class HairColorCaseStore:
     def fresh_restart(
         self, *, source_case_ref: str, new_case_ref: str, event_id: str,
         intake: Mapping[str, Any],
+        actor_id: str | None = None,
     ) -> HairColorCaseSnapshot:
         source_case_ref = self._required_text(source_case_ref, "source_case_ref")
         new_case_ref = self._required_text(new_case_ref, "new_case_ref")
@@ -582,9 +596,9 @@ class HairColorCaseStore:
             if source["state"] != "STOPPED":
                 db.rollback()
                 raise StoppedCase("fresh restart is permitted only from a stopped source case")
-            created_payload = json.dumps({"intake_fields": sorted(normalized)}, ensure_ascii=False)
-            source_payload = json.dumps({"source_case_ref": source_case_ref}, ensure_ascii=False)
-            backlink_payload = json.dumps({"new_case_ref": new_case_ref}, ensure_ascii=False)
+            created_payload = json.dumps(self._audit_actor_payload({"intake_fields": sorted(normalized)}, actor_id), ensure_ascii=False)
+            source_payload = json.dumps(self._audit_actor_payload({"source_case_ref": source_case_ref}, actor_id), ensure_ascii=False)
+            backlink_payload = json.dumps(self._audit_actor_payload({"new_case_ref": new_case_ref}, actor_id), ensure_ascii=False)
             source_event_id = f"{event_id}:RESTARTED_AS"
             new_case_source_event_id = f"{event_id}:SOURCE"
             try:
