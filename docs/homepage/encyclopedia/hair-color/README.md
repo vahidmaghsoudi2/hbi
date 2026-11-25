@@ -604,3 +604,9 @@
 - **معیار اتمام سامان‌دهی مستندات:** یک مرجع مدیریتی، نقشهٔ دسترسی مستقیم به اسناد پشتیبان، وضعیت جاری بدون تعارض آشکار، و لینک‌های قابل ردیابی.
 - **قاعدهٔ پاکیزگی مرجع:** هر موضوع فقط در جایگاه موضوعی خودش به‌روزرسانی شود؛ سند یا فهرست موازی ساخته نشود.
 
+
+
+## Synthetic case API operations
+
+- [Synthetic case-store operational boundaries, integrity, backup, and recovery notes](case-store-operations-synthetic.md)
+- Automated backup scheduling, retention, restore rehearsal, and production infrastructure remain unimplemented and unauthorized for production.
