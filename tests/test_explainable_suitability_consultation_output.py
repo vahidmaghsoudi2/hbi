@@ -200,6 +200,6 @@ def test_consultation_output_reports_no_approved_recommendation(db_session):
     result = ExplainableSuitabilityService(db_session).consultation_output("XS-CASE-EMPTY")
 
     assert result["consultation_context_status"] == "NOT_RECORDED"
-    assert result["recommendation_status"] == "NO_APPROVED_RECOMMENDATION"
+    assert result["recommendation_status"] == "NO_ELIGIBLE_RECOMMENDATION"
     assert result["recommendation_count"] == 0
     assert result["recommendations"] == []
