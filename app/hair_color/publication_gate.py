@@ -22,6 +22,18 @@ _ALLOWED_REASON_CODES = frozenset({
 })
 
 
+def _nonempty_string(value: Any) -> bool:
+    return isinstance(value, str) and bool(value.strip())
+
+
+def _string_list(value: Any, *, allow_empty: bool = True) -> bool:
+    return (
+        isinstance(value, list)
+        and (allow_empty or bool(value))
+        and all(_nonempty_string(item) for item in value)
+    )
+
+
 def evaluate_publication_gate(
     response: Mapping[str, Any],
     *,
@@ -33,6 +45,7 @@ def evaluate_publication_gate(
     if not isinstance(response, Mapping):
         response = {}
         reasons.append("RESPONSE_NOT_OBJECT")
+
     for version_name, current_version in (
         ("evaluated_case_version", current_case_version),
         ("evaluated_target_version", current_target_version),
@@ -84,13 +97,31 @@ def evaluate_publication_gate(
         "KNOWLEDGE_GAP", "CONFLICTING_DATA", "DATA_GAP", "STALE_CASE_VERSION"
     }:
         reasons.append("STATUS_REASON_MISMATCH")
-    if reason_codes_valid and "DATA_GAP" in reason_codes and not response.get("missing_information"):
+
+    missing_information = response.get("missing_information")
+    evidence_refs = response.get("evidence_refs")
+    limitations = response.get("limitations")
+    next_step = response.get("next_step")
+    if not _string_list(missing_information):
+        reasons.append("INVALID_MISSING_INFORMATION")
+    if not _string_list(evidence_refs):
+        reasons.append("INVALID_EVIDENCE_REFS")
+    elif len(evidence_refs) != len(set(evidence_refs)):
+        reasons.append("DUPLICATE_EVIDENCE_REFS")
+    if not _string_list(limitations, allow_empty=False):
+        reasons.append("INVALID_LIMITATIONS")
+    if not isinstance(next_step, Mapping) or not _nonempty_string(next_step.get("action")):
+        reasons.append("INVALID_NEXT_STEP")
+    elif "reason" in next_step and not _nonempty_string(next_step.get("reason")):
+        reasons.append("INVALID_NEXT_STEP")
+
+    if reason_codes_valid and "DATA_GAP" in reason_codes and not _string_list(missing_information, allow_empty=False):
         reasons.append("DATA_GAP_WITHOUT_DETAILS")
-    if not isinstance(response.get("summary"), str) or not response.get("summary", "").strip():
+    if not _nonempty_string(response.get("summary")):
         reasons.append("INVALID_SUMMARY")
-    if not isinstance(response.get("request_id"), str) or not response.get("request_id", "").strip():
+    if not _nonempty_string(response.get("request_id")):
         reasons.append("INVALID_REQUEST_ID")
-    if not isinstance(response.get("case_ref"), str) or not response.get("case_ref", "").strip():
+    if not _nonempty_string(response.get("case_ref")):
         reasons.append("INVALID_CASE_REF")
 
     allowed = not reasons
