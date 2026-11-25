@@ -1,0 +1,75 @@
+name: Hair Color Synthetic Backup Drill
+
+on:
+  pull_request:
+    branches: [ master ]
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-backup-drill:
+    name: synthetic-backup-drill
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install project dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Create isolated synthetic database and verified backup
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p /tmp/hbi-hair-color-drill/db /tmp/hbi-hair-color-drill/backups /tmp/hbi-hair-color-drill/restore
+          chmod 700 /tmp/hbi-hair-color-drill/db /tmp/hbi-hair-color-drill/backups /tmp/hbi-hair-color-drill/restore
+          export HBI_HAIR_COLOR_CASE_DB=/tmp/hbi-hair-color-drill/db/cases.sqlite
+          python - <<'PY'
+          import os
+          from app.hair_color.case_store import HairColorCaseStore
+          store = HairColorCaseStore(os.environ["HBI_HAIR_COLOR_CASE_DB"])
+          store.create_case(
+              case_ref="SYNTHETIC-BACKUP-DRILL-CASE",
+              event_id="SYNTHETIC-BACKUP-DRILL-CREATE",
+              intake={"goal": "SYNTHETIC: backup and restore drill"},
+            )
+          store.update_intake(
+              case_ref="SYNTHETIC-BACKUP-DRILL-CASE",
+              event_id="SYNTHETIC-BACKUP-DRILL-UPDATE",
+              expected_case_version=1,
+              fields={"test_note": "SYNTHETIC: verifies history survives restore"},
+            )
+          assert store.integrity_check() == "ok"
+          assert len(store.list_events("SYNTHETIC-BACKUP-DRILL-CASE")) == 2
+          PY
+          python scripts/hair_color_case_backup.py --backup-dir /tmp/hbi-hair-color-drill/backups --retain 14
+          backup_file="$(find /tmp/hbi-hair-color-drill/backups -name 'hair-color-case-*.sqlite' -type f -print -quit)"
+          test -n "$backup_file"
+          python - "$backup_file" <<'PY'
+          import sys
+          from pathlib import Path
+          from app.hair_color.case_store import HairColorCaseStore
+          source = Path(sys.argv[1])
+          restored = HairColorCaseStore.restore_from_backup(source, "/tmp/hbi-hair-color-drill/restore/restored.sqlite")
+          store = HairColorCaseStore(restored)
+          assert store.integrity_check() == "ok"
+          snapshot = store.get_case("SYNTHETIC-BACKUP-DRILL-CASE")
+          assert snapshot.case_version == 2
+          events = store.list_events(snapshot.case_ref)
+          assert [event["event_type"] for event in events] == ["CASE_CREATED", "INTAKE_UPDATED"]
+          print("Synthetic backup restore drill passed: integrity, case snapshot, and event history verified.")
+          PY
+      - name: Upload verified synthetic backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hair-color-synthetic-backup-drill-${{ github.run_id }}
+          path: /tmp/hbi-hair-color-drill/backups/hair-color-case-*.sqlite
+          if-no-files-found: error
+          retention-days: 14
