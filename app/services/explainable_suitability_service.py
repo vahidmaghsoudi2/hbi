@@ -9,10 +9,8 @@ from typing import Any, Dict, Optional
 
 from sqlalchemy.orm import Session
 
-from app.core.exceptions import ValidationError
 from app.models.case import Case
 from app.models.product import Product
-from app.models.recommendation import Recommendation
 from app.repositories.recommendation_repository import RecommendationRepository
 from app.services.product_problem_candidate_retrieval_service import (
     ProductProblemCandidateRetrievalService,
