@@ -115,10 +115,15 @@ class HairColorCaseStore:
             db.execute("PRAGMA user_version = 2")
 
     def integrity_check(self) -> str:
-        """Return SQLite's integrity-check result; expected value is 'ok'."""
+        """Check SQLite integrity and foreign-key consistency; expected value is 'ok'."""
         with self._connect() as db:
             result = db.execute("PRAGMA integrity_check").fetchone()[0]
-        return str(result)
+            foreign_key_errors = db.execute("PRAGMA foreign_key_check").fetchall()
+        if result != "ok":
+            return str(result)
+        if foreign_key_errors:
+            return f"foreign-key violations: {len(foreign_key_errors)}"
+        return "ok"
 
     def backup_to(self, destination: str | Path) -> Path:
         """Create a consistent SQLite backup and verify its integrity before returning."""
@@ -175,7 +180,7 @@ class HairColorCaseStore:
                 destination_db = sqlite3.connect(str(target))
                 try:
                     source_db.backup(destination_db)
-                    if destination_db.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
+                    if destination_db.execute("PRAGMA integrity_check").fetchone()[0] != "ok" or destination_db.execute("PRAGMA foreign_key_check").fetchall():
                         raise CaseStoreError("restored database integrity check failed")
                 finally:
                     destination_db.close()
