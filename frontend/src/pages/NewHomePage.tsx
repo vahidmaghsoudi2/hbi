@@ -631,11 +631,11 @@ export default function NewHomePage() {
       sessionStorage.setItem("hbi_case_id", newCaseId);
       setCaseId(newCaseId);
       const consultationContext: SkinConsultationContext = {
-        affected_areas: affectedAreas.split(/[،,\\n]/).map((value) => value.trim()).filter(Boolean),
+        affected_areas: affectedAreas.split(/[،,\n]/).map((value) => value.trim()).filter(Boolean),
         duration: symptomDuration.trim() || null,
         severity: symptomSeverity === "" ? null : symptomSeverity,
-        aggravating_factors: aggravatingFactors.split(/[،,\\n]/).map((value) => value.trim()).filter(Boolean),
-        current_products: currentProducts.split(/[،,\\n]/).map((value) => value.trim()).filter(Boolean),
+        aggravating_factors: aggravatingFactors.split(/[،,\n]/).map((value) => value.trim()).filter(Boolean),
+        current_products: currentProducts.split(/[،,\n]/).map((value) => value.trim()).filter(Boolean),
         notes: note.trim() || null,
       };
       await saveCaseConsultation(newCaseId, consultationContext, currentToken);
