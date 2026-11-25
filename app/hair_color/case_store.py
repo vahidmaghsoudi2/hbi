@@ -237,7 +237,7 @@ class HairColorCaseStore:
                     (case_ref, 1, 1, "ACTIVE", json.dumps(normalized, ensure_ascii=False), event_id, event_id),
                 )
                 db.execute(
-                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json) VALUES(?,?,?,?,?,?)",
+                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json,occurred_at) VALUES(?,?,?,?,?,?,CURRENT_TIMESTAMP)",
                     (case_ref, event_id, "CASE_CREATED", 1, 1, payload),
                 )
                 db.commit()
@@ -315,7 +315,7 @@ class HairColorCaseStore:
             )
             try:
                 db.execute(
-                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json) VALUES(?,?,?,?,?,?)",
+                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json,occurred_at) VALUES(?,?,?,?,?,?,CURRENT_TIMESTAMP)",
                     (case_ref, event_id, "INTAKE_UPDATED", next_version, row["target_version"], payload),
                 )
             except sqlite3.IntegrityError as exc:
@@ -359,7 +359,7 @@ class HairColorCaseStore:
             )
             try:
                 db.execute(
-                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json) VALUES(?,?,?,?,?,?)",
+                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json,occurred_at) VALUES(?,?,?,?,?,?,CURRENT_TIMESTAMP)",
                     (case_ref, event_id, "TARGET_CHANGED", next_case, next_target, payload),
                 )
             except sqlite3.IntegrityError as exc:
@@ -398,7 +398,7 @@ class HairColorCaseStore:
             )
             try:
                 db.execute(
-                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json) VALUES(?,?,?,?,?,?)",
+                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json,occurred_at) VALUES(?,?,?,?,?,?,CURRENT_TIMESTAMP)",
                     (case_ref, event_id, "STOP_REQUESTED", next_version, row["target_version"], payload),
                 )
             except sqlite3.IntegrityError as exc:
@@ -456,7 +456,7 @@ class HairColorCaseStore:
             }, ensure_ascii=False)
             try:
                 db.execute(
-                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json) VALUES(?,?,?,?,?,?)",
+                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json,occurred_at) VALUES(?,?,?,?,?,?,CURRENT_TIMESTAMP)",
                     (case_ref, event_id, f"CLIENT_{decision}ED" if decision == "ACCEPT" else "CLIENT_REJECTED",
                      row["case_version"], row["target_version"], payload),
                 )
@@ -516,7 +516,7 @@ class HairColorCaseStore:
             }, ensure_ascii=False)
             try:
                 db.execute(
-                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json) VALUES(?,?,?,?,?,?)",
+                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json,occurred_at) VALUES(?,?,?,?,?,?,CURRENT_TIMESTAMP)",
                     (case_ref, event_id, "TRIAGE_RECORDED", row["case_version"], row["target_version"], payload),
                 )
                 db.execute("UPDATE hair_color_cases SET updated_event_id=? WHERE case_ref=?", (event_id, case_ref))
@@ -554,7 +554,7 @@ class HairColorCaseStore:
             )
             try:
                 db.execute(
-                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json) VALUES(?,?,?,?,?,?)",
+                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json,occurred_at) VALUES(?,?,?,?,?,?,CURRENT_TIMESTAMP)",
                     (case_ref, event_id, "CASE_CLOSED", next_version, row["target_version"], payload),
                 )
             except sqlite3.IntegrityError as exc:
@@ -594,15 +594,15 @@ class HairColorCaseStore:
                      event_id, new_case_source_event_id),
                 )
                 db.execute(
-                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json) VALUES(?,?,?,?,?,?)",
+                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json,occurred_at) VALUES(?,?,?,?,?,?,CURRENT_TIMESTAMP)",
                     (new_case_ref, event_id, "CASE_CREATED", 1, 1, created_payload),
                 )
                 db.execute(
-                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json) VALUES(?,?,?,?,?,?)",
+                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json,occurred_at) VALUES(?,?,?,?,?,?,CURRENT_TIMESTAMP)",
                     (new_case_ref, new_case_source_event_id, "FRESH_RESTART_FROM_STOP", 1, 1, source_payload),
                 )
                 db.execute(
-                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json) VALUES(?,?,?,?,?,?)",
+                    "INSERT INTO hair_color_case_events (case_ref,event_id,event_type,case_version,target_version,payload_json,occurred_at) VALUES(?,?,?,?,?,?,CURRENT_TIMESTAMP)",
                     (source_case_ref, source_event_id, "FRESH_RESTARTED_AS",
                      source["case_version"], source["target_version"], backlink_payload),
                 )
