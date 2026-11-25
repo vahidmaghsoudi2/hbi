@@ -19,6 +19,33 @@ def _create(store):
     )
 
 
+def test_store_rejects_relative_path(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(CaseStoreError, match="absolute"):
+        HairColorCaseStore("relative.sqlite")
+
+
+def test_store_rejects_symlink_database_path(tmp_path):
+    if not hasattr(Path, "symlink_to"):
+        pytest.skip("symlinks are not supported")
+    real = tmp_path / "real.sqlite"
+    HairColorCaseStore(real)
+    alias = tmp_path / "alias.sqlite"
+    alias.symlink_to(real)
+    with pytest.raises(CaseStoreError, match="symlink"):
+        HairColorCaseStore(alias)
+
+
+def test_store_rejects_non_private_directory(tmp_path):
+    if __import__("os").name != "posix":
+        pytest.skip("POSIX directory permission check")
+    unsafe = tmp_path / "unsafe"
+    unsafe.mkdir(mode=0o755)
+    unsafe.chmod(0o755)
+    with pytest.raises(CaseStoreError, match="directory must be private"):
+        HairColorCaseStore(unsafe / "case.sqlite")
+
+
 def test_store_integrity_backup_and_private_file_permissions(tmp_path):
     source_path = tmp_path / "store.sqlite"
     store = HairColorCaseStore(source_path)
