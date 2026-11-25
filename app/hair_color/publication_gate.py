@@ -34,6 +34,20 @@ def _string_list(value: Any, *, allow_empty: bool = True) -> bool:
     )
 
 
+def _missing_information_list(value: Any, *, allow_empty: bool = True) -> bool:
+    if not isinstance(value, list) or (not allow_empty and not value):
+        return False
+    return all(
+        _nonempty_string(item)
+        or (
+            isinstance(item, Mapping)
+            and _nonempty_string(item.get("field"))
+            and _nonempty_string(item.get("reason"))
+        )
+        for item in value
+    )
+
+
 def evaluate_publication_gate(
     response: Mapping[str, Any],
     *,
@@ -102,7 +116,7 @@ def evaluate_publication_gate(
     evidence_refs = response.get("evidence_refs")
     limitations = response.get("limitations")
     next_step = response.get("next_step")
-    if not _string_list(missing_information):
+    if not _missing_information_list(missing_information):
         reasons.append("INVALID_MISSING_INFORMATION")
     if not _string_list(evidence_refs):
         reasons.append("INVALID_EVIDENCE_REFS")
@@ -115,7 +129,7 @@ def evaluate_publication_gate(
     elif "reason" in next_step and not _nonempty_string(next_step.get("reason")):
         reasons.append("INVALID_NEXT_STEP")
 
-    if reason_codes_valid and "DATA_GAP" in reason_codes and not _string_list(missing_information, allow_empty=False):
+    if reason_codes_valid and "DATA_GAP" in reason_codes and not _missing_information_list(missing_information, allow_empty=False):
         reasons.append("DATA_GAP_WITHOUT_DETAILS")
     if not _nonempty_string(response.get("summary")):
         reasons.append("INVALID_SUMMARY")
