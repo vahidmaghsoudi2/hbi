@@ -73,6 +73,7 @@ class ProductProblemCandidateItem(BaseModel):
     evidence_id: str
     claim_id: Optional[str] = None
     evidence_claim: str
+    evidence_claim_type: Optional[str] = None
     evidence_source_type: str
     evidence_source_reference: str
     evidence_market_region: Optional[str] = None
