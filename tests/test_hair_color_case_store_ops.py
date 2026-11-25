@@ -3,7 +3,9 @@ from pathlib import Path
 import sqlite3
 
 import pytest
+from fastapi import HTTPException
 
+from app.api.routers.hair_color_cases import get_hair_color_case_service
 from app.hair_color.case_store import (
     CaseStoreError,
     HairColorCaseStore,
@@ -17,6 +19,25 @@ def _create(store):
         event_id="SYNTHETIC-OPS-CREATE",
         intake={"goal": "SYNTHETIC: sample"},
     )
+
+
+def test_api_storage_dependency_returns_503_when_path_missing(monkeypatch):
+    monkeypatch.delenv("HBI_HAIR_COLOR_CASE_DB", raising=False)
+    with pytest.raises(HTTPException) as error:
+        get_hair_color_case_service()
+    assert error.value.status_code == 503
+
+
+def test_api_storage_dependency_sanitizes_storage_error(monkeypatch, tmp_path):
+    unsafe = tmp_path / "unsafe"
+    unsafe.mkdir(mode=0o755)
+    unsafe.chmod(0o755)
+    monkeypatch.setenv("HBI_HAIR_COLOR_CASE_DB", str(unsafe / "case.sqlite"))
+    with pytest.raises(HTTPException) as error:
+        get_hair_color_case_service()
+    assert error.value.status_code == 503
+    assert "storage is unavailable" in error.value.detail
+    assert str(tmp_path) not in error.value.detail
 
 
 def test_store_rejects_relative_path(tmp_path, monkeypatch):
