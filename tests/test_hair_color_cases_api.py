@@ -104,7 +104,8 @@ def test_persistent_synthetic_case_api_create_update_stop_restart_and_history(cl
             "CASE_CREATED", "INTAKE_UPDATED", "TRIAGE_RECORDED", "STOP_REQUESTED",
             "FRESH_RESTARTED_AS",
         ]
-        assert history.json()[-1]["payload"] == {"new_case_ref": "SYNTHETIC-API-CASE-02"}
+        assert history.json()[-1]["payload"]["new_case_ref"] == "SYNTHETIC-API-CASE-02"
+        assert all(event["payload"]["actor_id"] == "hair-color-cases-api-test" for event in history.json())
     finally:
         client.app.dependency_overrides.pop(get_hair_color_case_service, None)
 
@@ -187,6 +188,7 @@ def test_persistent_client_accept_and_reject_are_audited_without_execution_autho
         assert events[1]["payload"]["client_acceptance"] is True
         assert events[1]["payload"]["execution_authorized"] is False
         assert events[2]["payload"]["decision"] == "REJECT"
+        assert all(event["payload"]["actor_id"] == "hair-color-cases-api-test" for event in events)
 
         reactivated = client.post(
             "/api/v1/hair/color-consultation/cases/SYNTHETIC-DECISION-CASE/decision",
