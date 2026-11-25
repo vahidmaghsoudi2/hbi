@@ -61,3 +61,50 @@ class ProductProblemLinkResponse(BaseModel):
     updated_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+class ProductProblemCandidateItem(BaseModel):
+    link_id: str
+    product_id: str
+    brand: str
+    product_name: str
+    product_identity_status: str
+    product_qa_verdict: str
+    product_lifecycle_status: str
+    evidence_id: str
+    claim_id: Optional[str] = None
+    evidence_claim: str
+    evidence_claim_type: Optional[str] = None
+    evidence_source_type: str
+    evidence_source_reference: str
+    evidence_market_region: Optional[str] = None
+    evidence_qa_status: Optional[str] = None
+    evidence_conflict_status: Optional[str] = None
+    problem_id: str
+    problem_type: str
+    problem_definition_ref: str
+    problem_map_version: str
+    relationship_role: str
+    relationship_status: str
+    variant: str
+    market_region: str
+    feature_basis: Optional[str] = None
+    outcome: Optional[str] = None
+    semantic_basis: str
+    limitations: str
+    decision_basis: str
+    revision_no: Optional[int] = None
+    supersedes_link_id: Optional[str] = None
+    review_gate: Literal["HUMAN_REVIEW_ONLY"]
+    product_gate_blockers: list[str]
+    product_gate_status: Literal["BLOCKED", "REVIEWABLE_NOT_APPROVED"]
+
+
+class ProductProblemCandidateRetrievalResponse(BaseModel):
+    problem_id: str
+    problem_map_version: str
+    retrieval_mode: Literal["CURRENT_CANDIDATES_ONLY"]
+    review_gate: Literal["HUMAN_REVIEW_ONLY"]
+    recommendation_eligible: Literal[False]
+    candidate_count: int
+    excluded_integrity_count: int
+    candidates: list[ProductProblemCandidateItem]

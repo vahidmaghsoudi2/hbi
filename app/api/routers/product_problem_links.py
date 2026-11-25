@@ -11,9 +11,11 @@ from app.interface.product_problem_link_schemas import (
     ProductProblemLinkCreate,
     ProductProblemLinkReassess,
     ProductProblemLinkResponse,
+    ProductProblemCandidateRetrievalResponse,
 )
 from app.models.user_role import ROLE_ADMIN, ROLE_PO, ROLE_REVIEWER_QA
 from app.services.product_problem_link_service import ProductProblemLinkService
+from app.services.product_problem_candidate_retrieval_service import ProductProblemCandidateRetrievalService
 
 router = APIRouter()
 
@@ -115,6 +117,31 @@ async def reassess_product_problem_link(
         },
     )
     return ProductProblemLinkResponse.model_validate(record)
+
+
+
+
+@router.get(
+    "/candidates",
+    response_model=ProductProblemCandidateRetrievalResponse,
+)
+async def retrieve_product_problem_candidates(
+    problem_id: str = Query(..., min_length=3, max_length=3, pattern=r"^P\d{2}$"),
+    market_region: Optional[str] = Query(default=None, min_length=2, max_length=64),
+    variant: Optional[str] = Query(default=None, min_length=1, max_length=16, pattern=r"^(COLOR|NON_COLOR)$"),
+    db: Session = Depends(get_db),
+    auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
+):
+    """Read current CANDIDATE links for controlled human review only."""
+    try:
+        result = ProductProblemCandidateRetrievalService(db).retrieve(
+            problem_id,
+            market_region=market_region,
+            variant=variant,
+        )
+    except (NotFoundError, ValidationError, ConflictError) as exc:
+        _raise_http_domain_error(exc)
+    return result
 
 
 @router.get("/{link_id}/history")
