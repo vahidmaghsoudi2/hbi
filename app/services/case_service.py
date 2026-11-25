@@ -1,4 +1,5 @@
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
+import json
 from sqlalchemy.orm import Session
 from app.models.case import Case
 from app.repositories.case_repository import CaseRepository
@@ -30,6 +31,35 @@ class CaseService(BaseService[Case, CaseRepository]):
             customer_id=customer_id,
             case_type=case_type
         )
+
+    def save_consultation_context(self, case_id: str, context: Dict[str, Any]) -> Optional[Case]:
+        case = self.repository.get_by_id(case_id)
+        if case is None:
+            return None
+        raw = case.evidence_gaps
+        try:
+            envelope = json.loads(raw) if raw else {}
+            if not isinstance(envelope, dict):
+                envelope = {"legacy_value": raw}
+        except (TypeError, ValueError):
+            envelope = {"legacy_value": raw}
+        envelope["consultation_v1"] = context
+        case.evidence_gaps = json.dumps(envelope, ensure_ascii=False, separators=(",", ":"))
+        self.db.flush()
+        return case
+
+    def get_consultation_context(self, case_id: str) -> Optional[Dict[str, Any]]:
+        case = self.repository.get_by_id(case_id)
+        if case is None:
+            return None
+        try:
+            envelope = json.loads(case.evidence_gaps or "{}")
+        except (TypeError, ValueError):
+            return None
+        if not isinstance(envelope, dict):
+            return None
+        context = envelope.get("consultation_v1")
+        return context if isinstance(context, dict) else None
 
     def close_case(self, case_id: str) -> Optional[Case]:
         return self.update(case_id, case_type="CLOSED")
