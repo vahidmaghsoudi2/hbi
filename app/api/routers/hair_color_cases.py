@@ -115,7 +115,7 @@ def create_hair_color_case(
     _auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
 ):
     try:
-        return _snapshot(service.create_case(case_ref=payload.case_ref, event_id=payload.event_id, intake=payload.intake, actor_id=_auth[0], actor_id=_auth[0]))
+        return _snapshot(service.create_case(case_ref=payload.case_ref, event_id=payload.event_id, intake=payload.intake, actor_id=_auth[0]))
     except Exception as exc:
         raise _translate_error(exc) from exc
 
