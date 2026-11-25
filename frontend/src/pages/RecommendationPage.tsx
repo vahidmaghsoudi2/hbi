@@ -31,6 +31,8 @@ export default function RecommendationPage() {
     setError(null);
     setInfo(null);
     setItems([]);
+    setConsultationOutput(null);
+    setSuitability(null);
     setShowAll(false);
     setBusy(true);
     const token = sessionStorage.getItem("hbi_access_token");
