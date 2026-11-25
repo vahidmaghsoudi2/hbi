@@ -204,6 +204,31 @@ export function listRecommendationsByCase(
   );
 }
 
+/** Read-only structured output for the customer's current consultation. */
+export function getConsultationOutput(
+  caseId: string,
+  token: string
+): Promise<ConsultationOutputDTO> {
+  return request<ConsultationOutputDTO>(
+    `/recommendations/case/${encodeURIComponent(caseId)}/consultation-output`,
+    {},
+    token
+  );
+}
+
+/** Read-only explainability for one P01-P61 ProductProblemLink problem scope. */
+export function getExplainableSuitability(
+  caseId: string,
+  problemId: string,
+  token: string
+): Promise<ExplainableSuitabilityDTO> {
+  return request<ExplainableSuitabilityDTO>(
+    `/recommendations/case/${encodeURIComponent(caseId)}/suitability/${encodeURIComponent(problemId)}`,
+    {},
+    token
+  );
+}
+
 /** Internal operator view — includes eligible and rejected evaluation records. */
 export function listInternalEvaluationsByCase(
   caseId: string,
