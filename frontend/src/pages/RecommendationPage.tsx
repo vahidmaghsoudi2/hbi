@@ -5,8 +5,14 @@ import {
   listRecommendationsByCase,
   createSpecialistOverride,
   createFeedback,
+  getConsultationOutput,
+  getExplainableSuitability,
 } from "../api/client";
-import type { RecommendationDTO } from "../types/api";
+import type {
+  RecommendationDTO,
+  ConsultationOutputDTO,
+  ExplainableSuitabilityDTO,
+} from "../types/api";
 
 export default function RecommendationPage() {
   const [caseId, setCaseId] = useState(() => sessionStorage.getItem("hbi_case_id") ?? "");
@@ -16,6 +22,9 @@ export default function RecommendationPage() {
   const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [showAll, setShowAll] = useState(false);
+  const [consultationOutput, setConsultationOutput] = useState<ConsultationOutputDTO | null>(null);
+  const [problemId, setProblemId] = useState("P17");
+  const [suitability, setSuitability] = useState<ExplainableSuitabilityDTO | null>(null);
 
   async function onGenerate(e: FormEvent) {
     e.preventDefault();
@@ -38,11 +47,40 @@ export default function RecommendationPage() {
       await generateRecommendations(request, token);
       // Render the persisted customer-facing view, not only the POST response.
       const persisted = await listRecommendationsByCase(caseId.trim(), token);
+      const output = await getConsultationOutput(caseId.trim(), token);
       setItems(persisted);
+      setConsultationOutput(output);
       setShowAll(false);
       sessionStorage.setItem("hbi_case_id", caseId.trim());
       sessionStorage.setItem("hbi_concerns", concerns.trim());
       setInfo(`تولید انجام شد؛ ${persisted.length} پیشنهاد واجد شرایط از سوابق ذخیره‌شده بازخوانی شد.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onLoadSuitability() {
+    setError(null);
+    setSuitability(null);
+    const token = sessionStorage.getItem("hbi_access_token");
+    if (!token) {
+      setError("توکن موجود نیست.");
+      return;
+    }
+    if (!/^P(?:0[1-9]|[1-5][0-9]|6[01])$/.test(problemId.trim().toUpperCase())) {
+      setError("کد مسئله باید بین P01 تا P61 باشد.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const result = await getExplainableSuitability(
+        caseId.trim(),
+        problemId.trim().toUpperCase(),
+        token
+      );
+      setSuitability(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -146,7 +184,9 @@ export default function RecommendationPage() {
             }
             try {
               const persisted = await listRecommendationsByCase(caseId.trim(), token);
+              const output = await getConsultationOutput(caseId.trim(), token);
               setItems(persisted);
+              setConsultationOutput(output);
               setShowAll(false);
               sessionStorage.setItem("hbi_case_id", caseId.trim());
               setInfo(`از سوابق ذخیره‌شده ${persisted.length} پیشنهاد واجد شرایط بازخوانی شد.`);
@@ -165,6 +205,59 @@ export default function RecommendationPage() {
       </form>
       {error && <div className="alert error">{error}</div>}
       {info && <div className="alert">{info}</div>}
+      {consultationOutput && (
+        <section className="card" aria-label="خروجی مشاوره">
+          <h2>خروجی مشاوره</h2>
+          <p>
+            وضعیت: {consultationOutput.recommendation_status === "RECOMMENDATIONS_AVAILABLE"
+              ? "پیشنهادهای واجد شرایط موجود است"
+              : "در حال حاضر پیشنهاد تأییدشده‌ای وجود ندارد"}
+          </p>
+          <p>اطلاعات فرم مشاوره: {consultationOutput.consultation_context_status === "PRESENT" ? "ثبت شده" : "ثبت نشده"}</p>
+          {consultationOutput.consultation_context && (
+            <ul>
+              <li>ناحیه‌ها: {consultationOutput.consultation_context.affected_areas.join("، ") || "ثبت نشده"}</li>
+              <li>مدت: {consultationOutput.consultation_context.duration || "ثبت نشده"}</li>
+              <li>شدت: {consultationOutput.consultation_context.severity ?? "ثبت نشده"}</li>
+              <li>عوامل تشدیدکننده: {consultationOutput.consultation_context.aggravating_factors.join("، ") || "ثبت نشده"}</li>
+              <li>محصولات فعلی: {consultationOutput.consultation_context.current_products.join("، ") || "ثبت نشده"}</li>
+            </ul>
+          )}
+          <p>این خروجی فقط از اطلاعات ثبت‌شده پرونده و پیشنهادهای واجد شرایط ساخته شده است.</p>
+        </section>
+      )}
+      <section className="card" aria-label="توضیح تناسب محصول">
+        <h2>توضیح تناسب محصول</h2>
+        <p>کد مسئله از بانک P01 تا P61 را وارد کنید. این بررسی فقط کاندیداها و موانع را توضیح می‌دهد و توصیه صادر نمی‌کند.</p>
+        <label htmlFor="suitability_problem_id">کد مسئله</label>
+        <input
+          id="suitability_problem_id"
+          value={problemId}
+          onChange={(e) => setProblemId(e.target.value.toUpperCase())}
+          maxLength={3}
+        />
+        <button type="button" disabled={busy || !caseId.trim()} onClick={onLoadSuitability}>
+          {busy ? "…" : "بررسی و نمایش دلایل"}
+        </button>
+        {suitability && (
+          <div className="results">
+            <p>کاندیدای جاری: {suitability.candidate_count}</p>
+            {suitability.candidates.length === 0 && (
+              <p>برای این مسئله ProductProblemLink کاندیدای جاری ثبت نشده است. این نتیجه به معنی نامناسب بودن محصول نیست.</p>
+            )}
+            {suitability.candidates.map((candidate) => (
+              <article className="rec-item" key={candidate.link_id}>
+                <strong>{candidate.brand} · {candidate.product_name}</strong>
+                <p>وضعیت تناسب: {candidate.suitability_status}</p>
+                <ul>{candidate.explanations.map((reason, index) => <li key={index}>{reason}</li>)}</ul>
+                <p>شاهد: {candidate.evidence_claim}</p>
+                <p>منبع: {candidate.evidence_source_reference}</p>
+                <p>توصیه‌پذیر: خیر، بررسی انسانی الزامی است.</p>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
       {items.length > 0 && (
         <div className="results">
           {items.slice(0, showAll ? items.length : 5).map((r) => (
