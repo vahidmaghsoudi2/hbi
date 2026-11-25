@@ -8,6 +8,7 @@ accepted. Explicit synthetic client ACCEPT/REJECT decisions are persisted as aud
 from __future__ import annotations
 
 import os
+import sqlite3
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -27,7 +28,11 @@ def get_hair_color_case_service() -> HairColorCaseService:
     database_path = os.getenv("HBI_HAIR_COLOR_CASE_DB", "").strip()
     if not database_path:
         raise HTTPException(status_code=503, detail="Synthetic Hair Color case storage is not configured.")
-    return HairColorCaseService(HairColorCaseStore(database_path))
+    try:
+        return HairColorCaseService(HairColorCaseStore(database_path))
+    except (OSError, sqlite3.Error, CaseStoreError) as exc:
+        # Do not leak storage paths or database diagnostics through the API.
+        raise HTTPException(status_code=503, detail="Synthetic Hair Color case storage is unavailable.") from exc
 
 
 class CreateCaseRequest(BaseModel):
