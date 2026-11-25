@@ -43,15 +43,15 @@ def session():
         Base.metadata.drop_all(bind=engine)
 
 
-def _seed(session, pid="P-SI-1", qty=5, prior_fx=900_000.0):
+def _seed(session, pid="P-SI-1", qty=5, prior_fx=900_000.0, status="ACTIVE", qa_verdict="VALID"):
     session.add(
         Product(
             product_id=pid,
             brand="T",
             product_name="N",
             identity_status="VERIFIED",
-            qa_verdict="PENDING",
-            status="ACTIVE",
+            qa_verdict=qa_verdict,
+            status=status,
         )
     )
     session.flush()
@@ -99,6 +99,20 @@ def test_successful_stock_in(session):
     assert mov.quantity_after == 8
     assert mov.product_id == "P-SI-1"
     assert mov.inventory_id == "INV-P-SI-1"
+
+
+@pytest.mark.parametrize("status", ["DRAFT", "SUBMITTED", "QA_REVIEW", "APPROVED", "REJECTED"])
+def test_stock_in_rejects_unapproved_product_status(session, status):
+    _seed(session, qty=5, status=status)
+    with pytest.raises(ValueError, match="Stock-In requires Product Owner-approved ACTIVE product"):
+        StockInService(session).stock_in(
+            product_id="P-SI-1",
+            quantity=2,
+            purchase_price_usd=10.0,
+            fx_rate_usd_to_irr=1_000_000.0,
+        )
+    assert session.get(Inventory, "INV-P-SI-1").quantity_available == 5
+    assert session.query(StockMovement).filter_by(product_id="P-SI-1").count() == 0
 
 
 def test_inventory_quantity_increase(session):

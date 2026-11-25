@@ -60,6 +60,8 @@ class StockInService:
         )
         if not product:
             raise ValueError(f"Product {product_id} not found")
+        if product.status != "ACTIVE":
+            raise ValueError("Stock-In requires Product Owner-approved ACTIVE product")
 
         inv = (
             self.db.query(Inventory).filter(Inventory.product_id == product_id).first()

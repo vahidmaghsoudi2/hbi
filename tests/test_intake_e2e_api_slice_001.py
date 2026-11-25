@@ -51,7 +51,7 @@ def _create_product(client, headers, product_id, **extra):
 # ---------------------------------------------------------------------------
 
 
-def test_product_intake_requires_explicit_stock_in_api(client, db_session):
+def test_product_intake_requires_po_approval_before_stock_in_api(client, db_session):
     editor = _auth(db_session, "intake_stock_editor", ROLE_EDITOR, ROLE_PO)
     admin = _auth(db_session, "intake_stock_admin", ROLE_ADMIN)
     pid = "INTAKE-STOCK-API-001"
@@ -61,6 +61,9 @@ def test_product_intake_requires_explicit_stock_in_api(client, db_session):
         product_name="Explicit Stock-In Product",
         product_line="SKIN",
     )
+    # Persist the created DRAFT before the rejected Stock-In request; the API
+    # correctly rolls back its request transaction on validation failure.
+    db_session.commit()
 
     inventory = db_session.query(Inventory).filter(Inventory.product_id == pid).one()
     assert inventory.quantity_available == 0
@@ -80,13 +83,11 @@ def test_product_intake_requires_explicit_stock_in_api(client, db_session):
             "reference_id": "INTAKE-STOCK-API-001",
         },
     )
-    assert stock_in.status_code == 200, stock_in.text
-    body = stock_in.json()
-    assert body["before_quantity"] == 0
-    assert body["inventory"]["quantity_available"] == 3
-    assert body["movement"]["quantity_delta"] == 3
-    assert body["movement"]["quantity_after"] == 3
-    assert body["movement"]["movement_type"] == "STOCK_IN"
+    assert stock_in.status_code == 422, stock_in.text
+    assert "Product Owner-approved ACTIVE product" in stock_in.json()["detail"]
+    db_session.expire_all()
+    assert db_session.query(Inventory).filter(Inventory.product_id == pid).one().quantity_available == 0
+    assert db_session.query(StockMovement).filter(StockMovement.product_id == pid).count() == 0
 
 
 # ---------------------------------------------------------------------------
@@ -220,7 +221,7 @@ def test_duplicate_different_variant_or_size_is_distinct_not_possible_match(
 
 def test_intake_api_vertical_slice_reaches_active(client, db_session):
     """CREATE → DUPLICATE → RESEARCH DRAFT → EVIDENCE → VERIFY → SUBMIT →
-    QA VALID → IDENTITY VERIFIED → APPROVE → ACTIVATE → ACTIVE.
+    QA VALID → IDENTITY VERIFIED → PO APPROVE (direct ACTIVE) → STOCK-IN.
     """
     po = _auth(db_session, "slice_po", ROLE_PO, ROLE_REVIEWER_QA, ROLE_EDITOR)
     pid = "SLICE-E2E-001"
@@ -244,28 +245,6 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
     assert inventory.quantity_available == 0
     assert inventory.stock_status == "OUT_OF_STOCK"
     assert db_session.query(StockMovement).filter(StockMovement.product_id == pid).count() == 0
-
-    # A physical receipt is a separate operation and must create a ledger movement.
-    stock_result = StockInService(db_session).stock_in(
-        product_id=pid,
-        quantity=3,
-        purchase_price_usd=2.5,
-        fx_rate_usd_to_irr=500000,
-        note="test physical receipt",
-        reference_type="TEST",
-        reference_id="INTAKE-E2E",
-    )
-    db_session.commit()
-    db_session.refresh(inventory)
-    assert stock_result["before_quantity"] == 0
-    assert inventory.quantity_available == 3
-    assert inventory.stock_status != "OUT_OF_STOCK"
-    movement = db_session.query(StockMovement).filter(
-        StockMovement.product_id == pid,
-        StockMovement.movement_type == "STOCK_IN",
-    ).one()
-    assert movement.quantity_delta == 3
-    assert movement.quantity_after == 3
 
     # DUPLICATE CHECK (same product_id → EXISTING / EXACT_PRODUCT_ID)
     dup = client.post(
@@ -324,7 +303,7 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
     assert ev.status_code == 201, ev.text
     evidence_id = ev.json()["evidence_id"]
 
-    # WP-02: verified contraindications required for SKIN before APPROVE/ACTIVATE.
+    # WP-02: verified contraindications are required before PO approval.
     safe = client.post(
         "/api/v1/evidence/",
         headers=po,
@@ -380,17 +359,35 @@ def test_intake_api_vertical_slice_reaches_active(client, db_session):
     assert ident.status_code == 200, ident.text
     assert ident.json()["identity_status"] == "VERIFIED"
 
-    # APPROVE → ACTIVATE
+    # PO APPROVE directly transitions QA_REVIEW → ACTIVE.
     ap = client.post(f"/api/v1/products/{pid}/approve", headers=po)
     assert ap.status_code == 200, ap.text
-    assert ap.json()["status"] == "APPROVED"
+    assert ap.json()["status"] == "ACTIVE"
 
-    act = client.post(f"/api/v1/products/{pid}/activate", headers=po)
-    assert act.status_code == 200, act.text
-    assert act.json()["status"] == "ACTIVE"
+    # Stock-In is permitted only after PO approval has made the product ACTIVE.
+    stock_result = StockInService(db_session).stock_in(
+        product_id=pid,
+        quantity=3,
+        purchase_price_usd=2.5,
+        fx_rate_usd_to_irr=500000,
+        note="test physical receipt after PO approval",
+        reference_type="TEST",
+        reference_id="INTAKE-E2E",
+    )
+    db_session.commit()
+    db_session.refresh(inventory)
+    assert stock_result["before_quantity"] == 0
+    assert inventory.quantity_available == 3
+    assert inventory.stock_status != "OUT_OF_STOCK"
+    movement = db_session.query(StockMovement).filter(
+        StockMovement.product_id == pid,
+        StockMovement.movement_type == "STOCK_IN",
+    ).one()
+    assert movement.quantity_delta == 3
+    assert movement.quantity_after == 3
 
     # Final explicit assert against persisted Product.status (DTO GET omits status)
-    assert act.json()["status"] == "ACTIVE"
+    assert ap.json()["status"] == "ACTIVE"
     db_session.expire_all()
     product = db_session.query(Product).filter(Product.product_id == pid).one()
     assert product.status == "ACTIVE"

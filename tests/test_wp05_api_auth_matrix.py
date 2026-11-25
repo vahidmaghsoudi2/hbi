@@ -59,11 +59,11 @@ def test_api_editor_cannot_approve_403(client, db_session):
     assert r.status_code == 403
 
 
-def test_api_editor_cannot_activate_403(client, db_session):
+def test_activate_endpoint_removed_for_editor_404(client, db_session):
     _make_product(db_session, "P_WP05_ED_ACT", status="APPROVED")
     _seed_role(db_session, "ed_wp05d", ROLE_EDITOR, "UR_WP05_ED4")
     r = client.post("/api/v1/products/P_WP05_ED_ACT/activate", headers=_auth_header("ed_wp05d"))
-    assert r.status_code == 403
+    assert r.status_code == 404
 
 
 def test_api_editor_cannot_reject_403(client, db_session):
@@ -95,11 +95,11 @@ def test_api_reviewer_cannot_approve_403(client, db_session):
     assert r.status_code == 403
 
 
-def test_api_reviewer_cannot_activate_403(client, db_session):
+def test_activate_endpoint_removed_for_reviewer_404(client, db_session):
     _make_product(db_session, "P_WP05_RV_ACT", status="APPROVED")
     _seed_role(db_session, "rv_wp05b", ROLE_REVIEWER_QA, "UR_WP05_RV2")
     r = client.post("/api/v1/products/P_WP05_RV_ACT/activate", headers=_auth_header("rv_wp05b"))
-    assert r.status_code == 403
+    assert r.status_code == 404
 
 
 def test_api_reviewer_cannot_archive_403(client, db_session):
@@ -120,11 +120,11 @@ def test_api_admin_cannot_approve_403(client, db_session):
     assert r.status_code == 403
 
 
-def test_api_admin_cannot_activate_403(client, db_session):
+def test_activate_endpoint_removed_for_admin_404(client, db_session):
     _make_product(db_session, "P_WP05_AD_ACT", status="APPROVED")
     _seed_role(db_session, "ad_wp05b", ROLE_ADMIN, "UR_WP05_AD2")
     r = client.post("/api/v1/products/P_WP05_AD_ACT/activate", headers=_auth_header("ad_wp05b"))
-    assert r.status_code == 403
+    assert r.status_code == 404
 
 
 def test_api_admin_cannot_reject_403(client, db_session):
