@@ -30,6 +30,16 @@ export interface CaseDTO {
   [key: string]: unknown;
 }
 
+/** Structured data owned by one skin consultation visit. */
+export interface SkinConsultationContext {
+  affected_areas: string[];
+  duration?: string | null;
+  severity?: number | null;
+  aggravating_factors: string[];
+  current_products: string[];
+  notes?: string | null;
+}
+
 /**
  * POST /api/v1/recommendations/generate body
  * concerns belong here (customer_profile), NOT on CaseCreateRequest.
