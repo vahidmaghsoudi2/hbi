@@ -1,6 +1,8 @@
 """Operational safety tests for synthetic Hair Color SQLite persistence."""
 from pathlib import Path
 import sqlite3
+from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier
 
 import pytest
 from fastapi import HTTPException
@@ -193,3 +195,33 @@ def test_stale_concurrent_update_rejected_and_no_overwrite(tmp_path):
     assert current.case_version == 2
     assert current.intake["goal"] == "SYNTHETIC: winner"
     assert store.integrity_check() == "ok"
+
+
+def test_two_simultaneous_updates_with_same_version_have_one_winner(tmp_path):
+    store = HairColorCaseStore(tmp_path / "concurrent.sqlite")
+    _create(store)
+    barrier = Barrier(2)
+
+    def update(event_id, value):
+        barrier.wait(timeout=5)
+        try:
+            result = store.update_intake(
+                case_ref="SYNTHETIC-OPS-CASE",
+                event_id=event_id,
+                expected_case_version=1,
+                fields={"goal": value},
+            )
+            return ("success", result.intake["goal"])
+        except StaleCaseVersion:
+            return ("stale", None)
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(
+            lambda args: update(*args),
+            (("SYNTHETIC-RACE-1", "SYNTHETIC: first"), ("SYNTHETIC-RACE-2", "SYNTHETIC: second")),
+        ))
+    assert sorted(result[0] for result in results) == ["stale", "success"]
+    current = store.get_case("SYNTHETIC-OPS-CASE")
+    assert current.case_version == 2
+    assert current.intake["goal"] in {"SYNTHETIC: first", "SYNTHETIC: second"}
+    assert len(store.list_events(current.case_ref)) == 2
