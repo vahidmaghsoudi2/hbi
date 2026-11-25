@@ -75,3 +75,47 @@ class ProductProblemLinkRepository:
             ProductProblemLinkAssessmentEvent.link_id.in_(link_ids)
         ).order_by(ProductProblemLinkAssessmentEvent.timestamp.asc(),
                    ProductProblemLinkAssessmentEvent.event_id.asc()).all()
+
+    def list_latest_candidate_rows(self, problem_id: str):
+        """Return current CANDIDATE revisions joined to their Product and Evidence.
+
+        Superseded revisions are never surfaced. Legacy unversioned rows are
+        included only when they have no successor assessment.
+        """
+        from sqlalchemy import and_, exists, func, or_, select
+        from sqlalchemy.orm import aliased
+
+        from app.models.evidence import Evidence
+        from app.models.product import Product
+
+        current = ProductProblemLink
+        revision = aliased(ProductProblemLink)
+        latest_revision_no = (
+            select(func.max(revision.revision_no))
+            .where(revision.assertion_key == current.assertion_key)
+            .correlate(current)
+            .scalar_subquery()
+        )
+        has_successor = exists(
+            select(1).where(ProductProblemLink.supersedes_link_id == current.link_id)
+        )
+        current_revision = or_(
+            and_(
+                current.assertion_key.is_not(None),
+                current.revision_no == latest_revision_no,
+            ),
+            and_(current.assertion_key.is_(None), ~has_successor),
+        )
+        return (
+            self.db.query(current, Product, Evidence)
+            .join(Product, Product.product_id == current.product_id)
+            .join(Evidence, Evidence.evidence_id == current.evidence_id)
+            .filter(
+                current.problem_id == problem_id,
+                current.relationship_status == "CANDIDATE",
+                current.problem_map_version == "SKIN_PROBLEM_SPACE_MAP_V0.1",
+                current_revision,
+            )
+            .order_by(current.created_at.desc(), current.link_id.asc())
+            .all()
+        )
