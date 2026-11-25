@@ -16,11 +16,11 @@ class CaseCreateRequest(BaseModel):
     case_type: str = "OPEN"
 
 class ConsultationContextRequest(BaseModel):
-    affected_areas: List[str] = Field(default_factory=list, max_items=20)
+    affected_areas: List[str] = Field(default_factory=list, max_length=20)
     duration: Optional[str] = Field(default=None, max_length=120)
     severity: Optional[int] = Field(default=None, ge=0, le=10)
-    aggravating_factors: List[str] = Field(default_factory=list, max_items=30)
-    current_products: List[str] = Field(default_factory=list, max_items=50)
+    aggravating_factors: List[str] = Field(default_factory=list, max_length=30)
+    current_products: List[str] = Field(default_factory=list, max_length=50)
     notes: Optional[str] = Field(default=None, max_length=4000)
 
 
@@ -83,7 +83,7 @@ async def save_case_consultation(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Case not found")
     if case.customer_id != customer_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
-    context = data.dict()
+    context = data.model_dump()
     service.save_consultation_context(case_id, context)
     db.commit()
     return {"case_id": case_id, "consultation_context": context}
