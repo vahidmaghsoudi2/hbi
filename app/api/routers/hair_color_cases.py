@@ -115,7 +115,7 @@ def create_hair_color_case(
     _auth=Depends(require_any_role(ROLE_REVIEWER_QA, ROLE_PO, ROLE_ADMIN)),
 ):
     try:
-        return _snapshot(service.create_case(case_ref=payload.case_ref, event_id=payload.event_id, intake=payload.intake))
+        return _snapshot(service.create_case(case_ref=payload.case_ref, event_id=payload.event_id, intake=payload.intake, actor_id=_auth[0], actor_id=_auth[0]))
     except Exception as exc:
         raise _translate_error(exc) from exc
 
@@ -142,7 +142,7 @@ def update_hair_color_intake(
     try:
         return _snapshot(service.update_intake(
             case_ref=case_ref, event_id=payload.event_id,
-            expected_case_version=payload.expected_case_version, fields=payload.fields,
+            expected_case_version=payload.expected_case_version, fields=payload.fields, actor_id=_auth[0],
         ))
     except Exception as exc:
         raise _translate_error(exc) from exc
@@ -162,7 +162,7 @@ def change_hair_color_target(
         return _snapshot(service.change_target(
             case_ref=case_ref, event_id=payload.event_id,
             expected_case_version=payload.expected_case_version,
-            target_description=payload.target_description,
+            target_description=payload.target_description, actor_id=_auth[0],
         ))
     except Exception as exc:
         raise _translate_error(exc) from exc
@@ -177,7 +177,7 @@ def run_synthetic_hair_color_triage(
 ):
     try:
         result = service.consult_persian(
-            case_ref=case_ref, request_id=payload.request_id, triage_event_id=payload.triage_event_id,
+            case_ref=case_ref, request_id=payload.request_id, triage_event_id=payload.triage_event_id, actor_id=_auth[0],
         )
         consultation = result.get("consultation", {})
         if consultation.get("options") or result.get("execution_authorized") is not False:
@@ -206,7 +206,7 @@ def record_hair_color_client_decision(
             expected_case_version=payload.expected_case_version,
             expected_target_version=payload.expected_target_version,
             decision=payload.decision, suggestion_ref=payload.suggestion_ref,
-            reason=payload.reason,
+            reason=payload.reason, actor_id=_auth[0],
         )
         return {**_snapshot(snapshot), "execution_authorized": False}
     except Exception as exc:
@@ -224,7 +224,7 @@ def stop_hair_color_case(
         return _snapshot(service.stop_case(
             case_ref=case_ref, event_id=payload.event_id,
             expected_case_version=payload.expected_case_version,
-            performed_step_refs=payload.performed_step_refs,
+            performed_step_refs=payload.performed_step_refs, actor_id=_auth[0],
         ))
     except Exception as exc:
         raise _translate_error(exc) from exc
