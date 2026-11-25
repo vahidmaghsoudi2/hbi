@@ -512,10 +512,10 @@
       },
       "identity_limits": [
         "US official source is a source scope only; physical package market/formula match UNKNOWN",
-        "Keep separate from Anua Azelaic 10 Hyaluron pads",
-        "Existing two Evidence rows conflict on field=ingredients; do not add another conflicting ingredients assertion before human reclassification"
+        "Keep this serum separate from Anua Azelaic 10 Hyaluron pads",
+        "The pinned snapshot has six Evidence rows for five retained assertions: preserve ingredients claim ...-002 and manufacturer claim ...-003; ...-001 is the redundant narrow 10% claim candidate and must not be deleted until dependency/reference checks and authorized application-path cleanup are complete"
       ],
-      "execution_gate": "PREPARED_ONLY: exact redundant Evidence row EV-HBI-PROD-22C55A8223A945A6-2b4c9e26 / claim ...-001 remains preserved until dependency/reference checks and authorized application-path cleanup. This draft intentionally references the five retained rows only; do not write it before that prerequisite is completed.",
+      "execution_gate": "PREPARED_ONLY: do not write until dependency/reference checks are completed and the exact redundant Evidence row EV-HBI-PROD-22C55A8223A945A6-2b4c9e26 / claim ...-001 is handled through an explicitly authorized application/service path. Keep ...-002 as the sole ingredients row and ...-003 as manufacturer claims.",
       "omitted_redundant_evidence": "EV-HBI-PROD-22C55A8223A945A6-2b4c9e26"
     }
   ]
