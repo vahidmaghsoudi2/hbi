@@ -240,7 +240,7 @@ def fresh_restart_hair_color_case(
     try:
         return _snapshot(service.fresh_restart(
             source_case_ref=case_ref, new_case_ref=payload.new_case_ref,
-            event_id=payload.event_id, intake=payload.intake,
+            event_id=payload.event_id, intake=payload.intake, actor_id=_auth[0],
         ))
     except Exception as exc:
         raise _translate_error(exc) from exc
