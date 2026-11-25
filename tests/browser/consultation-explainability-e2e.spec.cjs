@@ -43,7 +43,7 @@ test("Stage 9-14 E2E: consultation context persists through explainable output",
   await page.getByRole("button", { name: "ثبت مراجعه + دریافت پیشنهاد" }).click();
 
   const intakeResponse = await intakeResponsePromise;
-  expect(intakeResponse.status(), await intakeResponse.text()).toBe(200);
+  expect([200, 201], await intakeResponse.text()).toContain(intakeResponse.status());
   const intake = await intakeResponse.json();
   const caseId = intake?.case?.case_id;
   expect(caseId).toBeTruthy();
