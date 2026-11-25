@@ -154,8 +154,8 @@ class HairColorCaseStore:
         """Restore a verified v2 backup to a new private SQLite file."""
         source = Path(source_backup)
         target = Path(destination)
-        if not source.is_file():
-            raise CaseStoreError("backup source file does not exist")
+        if source.is_symlink() or not source.is_file():
+            raise CaseStoreError("backup source file does not exist or is a symlink")
         if not target.is_absolute():
             raise CaseStoreError("restore destination path must be absolute")
         if source.resolve() == target.resolve():
