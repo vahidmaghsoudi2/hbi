@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import os
 import sqlite3
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterator, Mapping
@@ -117,11 +117,14 @@ class HairColorCaseStore:
             raise CaseStoreError("backup destination already exists; choose a new backup filename")
         target.parent.mkdir(parents=True, exist_ok=True)
         with self._connect() as source:
-            with sqlite3.connect(str(target)) as backup_db:
+            backup_db = sqlite3.connect(str(target))
+            try:
                 source.backup(backup_db)
                 check = backup_db.execute("PRAGMA integrity_check").fetchone()[0]
                 if check != "ok":
                     raise CaseStoreError("backup integrity check failed")
+            finally:
+                backup_db.close()
         try:
             os.chmod(target, 0o600)
         except OSError:
