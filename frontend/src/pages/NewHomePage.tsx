@@ -8,6 +8,7 @@ import {
   pilotPoToken,
   customerIntake,
   saveCaseConsultation,
+  getCaseConsultation,
   createGuest,
   generateRecommendations,
   getSkinNextQuestion,
@@ -285,6 +286,23 @@ export default function NewHomePage() {
   }, [active, refreshDashboard]);
 
   const concernsText = useMemo(() => concerns.join(", "), [concerns]);
+
+  useEffect(() => {
+    if (active !== "consult" || !caseId || !token) return;
+    let cancelled = false;
+    getCaseConsultation(caseId, token).then(({ consultation_context }) => {
+      if (cancelled || !consultation_context) return;
+      setAffectedAreas(consultation_context.affected_areas.join(", "));
+      setSymptomDuration(consultation_context.duration ?? "");
+      setSymptomSeverity(consultation_context.severity ?? "");
+      setAggravatingFactors(consultation_context.aggravating_factors.join(", "));
+      setCurrentProducts(consultation_context.current_products.join(", "));
+      setNote(consultation_context.notes ?? "");
+    }).catch(() => {
+      // A missing/older consultation payload must not block the intake form.
+    });
+    return () => { cancelled = true; };
+  }, [active, caseId, token]);
 
   function toggleIn(list: string[], value: string, setter: (v: string[]) => void) {
     setter(list.includes(value) ? list.filter((x) => x !== value) : [...list, value]);
