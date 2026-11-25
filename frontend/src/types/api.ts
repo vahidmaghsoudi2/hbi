@@ -432,3 +432,53 @@ export interface HairSpecialistPreviewResponse {
   review_controls: { specialist_review_required_by_this_slice: boolean; specialist_review_recorded: boolean; acceptance_inherited: boolean; execution_consent_inherited: boolean; available_actions: string[] };
   limitations: string[];
 }
+
+
+/** GET /api/v1/recommendations/case/{case_id}/consultation-output */
+export interface ConsultationOutputDTO {
+  case_id: string;
+  case_type?: string | null;
+  consultation_context: SkinConsultationContext | null;
+  consultation_context_status: "PRESENT" | "NOT_RECORDED";
+  recommendation_status: "RECOMMENDATIONS_AVAILABLE" | "NO_APPROVED_RECOMMENDATION";
+  recommendation_count: number;
+  recommendations: Array<{
+    recommendation_id: string;
+    product_id: string;
+    brand?: string | null;
+    product_name?: string | null;
+    eligibility_status: "ELIGIBLE";
+    need_match_score?: number | null;
+    evidence_score?: number | null;
+    ranking_score?: number | null;
+    warnings: unknown[];
+  }>;
+  generated_from: string;
+  computed_only: boolean;
+}
+
+/** GET /api/v1/recommendations/case/{case_id}/suitability/{problem_id} */
+export interface ExplainableSuitabilityDTO {
+  problem_id: string;
+  problem_map_version: string;
+  evaluation_mode: "EXPLAINABLE_HUMAN_REVIEW_ONLY";
+  computed_only: boolean;
+  recommendation_eligible: false;
+  candidate_count: number;
+  excluded_integrity_count: number;
+  empty_result_reason?: string | null;
+  candidates: Array<{
+    link_id: string;
+    product_id: string;
+    brand: string;
+    product_name: string;
+    evidence_id: string;
+    evidence_claim: string;
+    evidence_source_reference: string;
+    relationship_status: "CANDIDATE";
+    suitability_status: "BLOCKED" | "HUMAN_REVIEW_REQUIRED";
+    product_gate_blockers: string[];
+    explanations: string[];
+    recommendation_eligible: false;
+  }>;
+}
