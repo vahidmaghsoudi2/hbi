@@ -23,7 +23,7 @@ class ProductProblemCandidateRetrievalService:
     @staticmethod
     def _normalize_problem_id(problem_id: str) -> str:
         value = (problem_id or "").strip().upper()
-        match = re.fullmatch(r"P(\\d{2})", value)
+        match = re.fullmatch(r"P(\d{2})", value)
         if not match or not 1 <= int(match.group(1)) <= 61:
             raise ValidationError("problem_id must reference an existing P01-P61 identifier.")
         if value == "P22":
