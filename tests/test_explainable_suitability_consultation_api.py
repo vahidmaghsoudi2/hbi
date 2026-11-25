@@ -53,7 +53,7 @@ def test_explainable_suitability_api_rejects_p22_and_enforces_case_ownership(cli
     )
     assert invalid_problem.status_code == 422
 
-    other_customer = _create_customer_case(
+    _create_customer_case(
         db_session, "OTHER-SUITABILITY-CUSTOMER", "OTHER-SUITABILITY-CASE"
     )
     denied = client.get(
