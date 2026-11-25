@@ -197,7 +197,6 @@ class HairColorCaseStore:
         return target
 
     @staticmethod
-    @staticmethod
     def _audit_actor_payload(payload: dict[str, Any], actor_id: str | None) -> dict[str, Any]:
         if actor_id is None:
             return payload
