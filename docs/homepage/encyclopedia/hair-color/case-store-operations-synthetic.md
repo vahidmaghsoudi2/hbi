@@ -10,6 +10,7 @@ This document applies only to the **synthetic-only** case API in PR #656. It is 
 - The SQLite store uses WAL mode, a 10-second busy timeout, foreign-key enforcement, and full synchronous durability.
 - The schema version is stored in SQLite `user_version` (currently v2). Unknown versions fail closed rather than silently running.
 - Audit events include UTC SQLite timestamps. Migrated v1 records are marked `LEGACY-UNKNOWN` rather than assigned invented timestamps.
+- Authenticated API mutation events now include the authenticated subject identifier (`actor_id`) in the event payload. Direct store/service calls without API auth may have no actor attribution; no names, email addresses, or client data are stored as actor metadata.
 
 ## Integrity and backup
 
@@ -27,7 +28,7 @@ backup = store.backup_to("/restricted/backups/hair-color-case-YYYYMMDD-HHMMSS.sq
 - Backup filenames must be unique; existing destination files and symlinks are not overwritten. Backup directories must also be private on POSIX.
 - Store and backup file permissions are attempted as `0600`.
 - A synthetic restore path is implemented and tested: restore only accepts verified schema-v2 backup files, creates a new destination, and re-checks integrity. It has not been rehearsed on a separate host or production-like infrastructure.
-- Added a backup/rotation CLI: `python scripts/hair_color_case_backup.py --backup-dir /restricted/backups/hair-color --retain 14`. It verifies source integrity, creates a timestamped backup, validates it through the store, and prunes older files after successful creation. It is not scheduled by the repository; a deployment owner must configure a scheduler.\n- This prototype does **not** encrypt backups, upload them off-host, provide idempotent API retries, or verify restoration on a separate machine. Those controls require approved infrastructure.
+- Added a backup/rotation CLI: `python scripts/hair_color_case_backup.py --backup-dir /restricted/backups/hair-color --retain 14`. It verifies source integrity, creates a timestamped backup, validates it through the store, and prunes older files after successful creation. It is not scheduled by the repository; a deployment owner must configure a scheduler.\n- This prototype does **not** encrypt backups, upload an operational database off-host, or provide idempotent API retry responses. Those controls require approved infrastructure. A new GitHub Actions backup-drill workflow creates and restores only a synthetic fixture, then uploads the verified fixture backup as a 14-day artifact; its daily schedule activates only if the workflow is merged to the default branch. This is a test drill, not an operational database backup.
 - Recovery rehearsal is not yet verified. Restore only to an isolated synthetic test environment and confirm `PRAGMA integrity_check`, event history, and case snapshots before any further use.
 
 ## Scheduling example (operator-owned)\n\nExample daily scheduler entry, only after provisioning private directories and explicit DB/backup paths:\n\n```cron\n0 2 * * * HBI_HAIR_COLOR_CASE_DB=/restricted/app/hair-color.sqlite /usr/bin/python /opt/hbi/scripts/hair_color_case_backup.py --backup-dir /restricted/backups/hair-color --retain 14\n```\n\nThis is an example configuration only; no scheduler has been installed or activated.\n\n## Data and access restrictions
