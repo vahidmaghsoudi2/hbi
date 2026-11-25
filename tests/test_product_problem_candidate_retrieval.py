@@ -132,6 +132,7 @@ def test_retrieval_rejects_p22_context_only_and_invalid_problem_ids(db_session):
 
 def test_candidate_retrieval_api_is_role_protected_and_read_only(client, db_session):
     _product, _evidence, _link, _payload = _seed(db_session, "api")
+    db_session.commit()
     subject = "candidate-retrieval-reviewer"
     db_session.add(UserRole(
         user_role_id=f"TEST-{subject}-REVIEWER_QA",
