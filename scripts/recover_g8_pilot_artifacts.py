@@ -116,6 +116,8 @@ def recover(
     output_zip = output_zip.expanduser().resolve()
     if output_zip == session_folder or session_folder in output_zip.parents:
         raise RuntimeError("recovery output must not be written inside the source evidence session")
+    if output_zip.exists() or output_zip.is_symlink():
+        raise RuntimeError(f"recovery output already exists; refusing overwrite: {output_zip}")
     output_zip.parent.mkdir(parents=True, exist_ok=True)
 
     temp_package = output_zip.with_suffix(output_zip.suffix + ".working")
