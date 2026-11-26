@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import sqlite3
+import socket
 import zipfile
 from pathlib import Path
 
@@ -186,3 +187,20 @@ def test_recovery_refuses_dangling_output_symlink(tmp_path: Path) -> None:
 
     assert output.is_symlink()
     assert not target.exists()
+
+
+def test_recovery_refuses_when_pilot_api_port_is_active() -> None:
+    from scripts.recover_g8_pilot_artifacts import _refuse_if_pilot_api_running
+
+    listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        listener.bind(("127.0.0.1", 8765))
+        listener.listen(1)
+    except OSError as exc:
+        listener.close()
+        pytest.skip(f"pilot port 8765 is already occupied; cannot isolate this test: {exc}")
+    try:
+        with pytest.raises(RuntimeError, match="pilot API appears active"):
+            _refuse_if_pilot_api_running()
+    finally:
+        listener.close()
