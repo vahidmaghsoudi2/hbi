@@ -204,3 +204,29 @@ def test_recovery_refuses_when_pilot_api_port_is_active() -> None:
             _refuse_if_pilot_api_running()
     finally:
         listener.close()
+
+
+def test_recovery_supports_explicit_backup_paths(tmp_path: Path) -> None:
+    evidence_root, pilot_root, temp_root = _roots(tmp_path)
+    backup_session = tmp_path / "backup-session"
+    backup_session.mkdir()
+    (backup_session / "api.log").write_text(f"candidate={CANDIDATE}\\n", encoding="utf-8")
+    backup_db = tmp_path / "backup-pilot.sqlite"
+    with sqlite3.connect(backup_db) as connection:
+        connection.execute("CREATE TABLE product (product_id TEXT, lifecycle TEXT)")
+        connection.execute("INSERT INTO product VALUES (?, ?)", (CANDIDATE, "DRAFT"))
+    output = tmp_path / "backup-recovery.zip"
+
+    result = recover(
+        temp_root=temp_root,
+        candidate=CANDIDATE,
+        output_zip=output,
+        source_session=backup_session,
+        database_path=backup_db,
+    )
+
+    assert result["matched_session"] == backup_session.name
+    assert result["database_backup"] is True
+    with zipfile.ZipFile(output) as archive:
+        assert "source-evidence/api.log" in archive.namelist()
+        assert "recovered-database/pilot-readonly-backup.sqlite" in archive.namelist()
