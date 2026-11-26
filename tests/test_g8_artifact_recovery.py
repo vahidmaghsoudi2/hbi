@@ -127,3 +127,13 @@ def test_recovery_refuses_to_overwrite_existing_output(tmp_path: Path) -> None:
         recover(temp_root=temp_root, candidate=CANDIDATE, output_zip=output)
 
     assert output.read_bytes() == b"preserve-me"
+
+
+def test_candidate_scan_finds_token_after_multiple_chunks(tmp_path: Path) -> None:
+    from scripts.recover_g8_pilot_artifacts import _file_contains_token
+
+    file_path = tmp_path / "large-readback.json"
+    token = CANDIDATE.casefold().encode("utf-8")
+    file_path.write_bytes(b"x" * (1024 * 1024 + 17) + token + b"y")
+
+    assert _file_contains_token(file_path, token)
