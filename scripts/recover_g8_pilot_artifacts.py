@@ -204,6 +204,8 @@ def recover(
                     "sha256": _sha256(source),
                 })
 
+            if database_path is not None and database_path.is_symlink():
+                raise RuntimeError("explicit database source must not be a symlink")
             db_source = (
                 database_path.expanduser().resolve()
                 if database_path is not None
