@@ -20,7 +20,7 @@ Run recovery only after the pilot API process is confirmed stopped; do not termi
 From the repository checkout containing this utility (after bringing in PR #665's branch or approved version), run this single PowerShell command:
 
 ```powershell
-..venvScriptspython.exe scriptsecover_g8_pilot_artifacts.py --candidate G8-NUMBUZIN-NO9-20261018 --output "$env:TEMP\hbi-g8-recovered-20261018.zip"
+./.venv/Scripts/python.exe scripts/recover_g8_pilot_artifacts.py --candidate G8-NUMBUZIN-NO9-20261018 --output "$env:TEMP/hbi-g8-recovered-20261018.zip"
 ```
 
 The output path must not already exist. On success, the utility prints `RECOVERY=PASS` and a JSON summary. On zero or multiple matches, unsafe roots, integrity failure, or file-size limits, it prints `RECOVERY_REFUSED` and exits without modifying source files.
