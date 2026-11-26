@@ -230,3 +230,25 @@ def test_recovery_supports_explicit_backup_paths(tmp_path: Path) -> None:
     with zipfile.ZipFile(output) as archive:
         assert "source-evidence/api.log" in archive.namelist()
         assert "recovered-database/pilot-readonly-backup.sqlite" in archive.namelist()
+
+
+def test_recovery_refuses_explicit_database_symlink(tmp_path: Path) -> None:
+    evidence_root, pilot_root, temp_root = _roots(tmp_path)
+    backup_session = tmp_path / "backup-db-symlink-session"
+    backup_session.mkdir()
+    (backup_session / "api.log").write_text(CANDIDATE, encoding="utf-8")
+    real_db = tmp_path / "real-db.sqlite"
+    with sqlite3.connect(real_db) as connection:
+        connection.execute("CREATE TABLE data (value TEXT)")
+    db_link = tmp_path / "linked-db.sqlite"
+    try:
+        db_link.symlink_to(real_db)
+    except OSError as exc:
+        pytest.skip(f"symlink creation unavailable: {exc}")
+    output = tmp_path / "refused-db-link.zip"
+
+    with pytest.raises(RuntimeError, match="database source must not be a symlink"):
+        recover(temp_root=temp_root, candidate=CANDIDATE, output_zip=output, source_session=backup_session, database_path=db_link)
+
+    assert db_link.is_symlink()
+    assert not output.exists()
