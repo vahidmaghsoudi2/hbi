@@ -169,3 +169,20 @@ def test_readonly_backup_handles_wal_sidecar_and_leaves_source_untouched(tmp_pat
             assert hashlib.sha256((tmp_path / name).read_bytes()).hexdigest() == digest
     finally:
         connection.close()
+
+
+def test_recovery_refuses_dangling_output_symlink(tmp_path: Path) -> None:
+    evidence_root, pilot_root, temp_root = _roots(tmp_path)
+    _session(evidence_root, pilot_root, "session-output-symlink")
+    target = tmp_path / "not-created.zip"
+    output = tmp_path / "dangling-link.zip"
+    try:
+        output.symlink_to(target)
+    except OSError as exc:
+        pytest.skip(f"symlink creation unavailable: {exc}")
+
+    with pytest.raises(RuntimeError, match="symlink"):
+        recover(temp_root=temp_root, candidate=CANDIDATE, output_zip=output)
+
+    assert output.is_symlink()
+    assert not target.exists()
