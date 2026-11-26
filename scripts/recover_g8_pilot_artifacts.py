@@ -211,6 +211,19 @@ def recover(
                 if database_path is not None
                 else pilot_root / f"live-{session_folder.name}" / "pilot.db"
             )
+            if db_source.is_symlink():
+                raise RuntimeError(f"database source must not be a symlink: {db_source}")
+            if db_source.exists() and not db_source.is_file():
+                raise RuntimeError(f"database source is not a regular file: {db_source}")
+            if database_path is not None and not db_source.is_file():
+                raise RuntimeError(f"explicit database source is missing: {db_source}")
+            if database_path is None and db_source.parent.is_symlink():
+                raise RuntimeError(f"pilot session database directory must not be a symlink: {db_source.parent}")
+            if database_path is None:
+                try:
+                    db_source.resolve().relative_to(pilot_root.resolve())
+                except ValueError as exc:
+                    raise RuntimeError(f"pilot database path escapes its isolated root: {db_source}") from exc
             db_info: dict[str, object] | None = None
             if db_source.is_file() and not db_source.is_symlink():
                 db_copy = output_zip.parent / (output_zip.stem + ".recovered.sqlite")
