@@ -137,3 +137,35 @@ def test_candidate_scan_finds_token_after_multiple_chunks(tmp_path: Path) -> Non
     file_path.write_bytes(b"x" * (1024 * 1024 + 17) + token + b"y")
 
     assert _file_contains_token(file_path, token)
+
+
+def test_readonly_backup_handles_wal_sidecar_and_leaves_source_untouched(tmp_path: Path) -> None:
+    from scripts.recover_g8_pilot_artifacts import _sqlite_readonly_backup
+
+    source = tmp_path / "pilot-wal.db"
+    connection = sqlite3.connect(source)
+    connection.execute("PRAGMA journal_mode=WAL")
+    connection.execute("CREATE TABLE claims (claim TEXT)")
+    connection.execute("INSERT INTO claims VALUES ('kept in WAL')")
+    connection.commit()
+    wal = Path(str(source) + "-wal")
+    assert wal.exists()
+    original_hashes = {
+        path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in (source, wal, Path(str(source) + "-shm"))
+        if path.exists()
+    }
+    backup = tmp_path / "readonly-backup.sqlite"
+
+    try:
+        info = _sqlite_readonly_backup(source, backup)
+        assert info["integrity_check"] == "ok"
+        with sqlite3.connect(backup) as copy:
+            assert copy.execute("SELECT claim FROM claims").fetchone()[0] == "kept in WAL"
+        assert not Path(str(backup) + ".source-copy").exists()
+        assert not Path(str(backup) + ".source-copy-wal").exists()
+        assert not Path(str(backup) + ".source-copy-shm").exists()
+        for name, digest in original_hashes.items():
+            assert hashlib.sha256((tmp_path / name).read_bytes()).hexdigest() == digest
+    finally:
+        connection.close()
