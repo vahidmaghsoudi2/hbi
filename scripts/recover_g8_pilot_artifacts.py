@@ -93,7 +93,8 @@ def _sqlite_readonly_backup(source_db: Path, output_db: Path) -> dict[str, objec
             if sidecar.is_symlink():
                 raise RuntimeError(f"refusing source sidecar symlink: {sidecar}")
             if sidecar.is_file():
-                copied = Path(str(source_copy) + sidecar.suffix)
+                suffix = sidecar.name[len(source_db.name):]
+                copied = Path(str(source_copy) + suffix)
                 shutil.copy2(sidecar, copied)
                 copied_sidecars.append(copied)
         uri = source_copy.resolve().as_uri() + "?mode=ro"
