@@ -252,3 +252,14 @@ def test_recovery_refuses_explicit_database_symlink(tmp_path: Path) -> None:
 
     assert db_link.is_symlink()
     assert not output.exists()
+
+
+def test_recovery_refuses_missing_default_evidence_root(tmp_path: Path) -> None:
+    pilot_root = tmp_path / "hbi-g8-pilot"
+    pilot_root.mkdir()
+    output = tmp_path / "missing-root.zip"
+
+    with pytest.raises(RuntimeError, match="evidence root not found"):
+        recover(temp_root=tmp_path, candidate=CANDIDATE, output_zip=output)
+
+    assert not output.exists()
