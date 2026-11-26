@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 import shutil
+import socket
 import sqlite3
 import tempfile
 import zipfile
@@ -23,6 +24,20 @@ DEFAULT_CANDIDATE = "G8-NUMBUZIN-NO9-20261018"
 MAX_SEARCH_SCAN_BYTES = 256 * 1024 * 1024
 MAX_PACKAGE_FILE_BYTES = 100 * 1024 * 1024
 MAX_PACKAGE_TOTAL_BYTES = 500 * 1024 * 1024
+PILOT_HOST = "127.0.0.1"
+PILOT_PORT = 8765
+
+
+def _refuse_if_pilot_api_running() -> None:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+        probe.settimeout(0.25)
+        try:
+            probe.connect((PILOT_HOST, PILOT_PORT))
+        except OSError:
+            return
+        raise RuntimeError(
+            f"pilot API appears active at {PILOT_HOST}:{PILOT_PORT}; stop it normally before artifact recovery"
+        )
 
 
 def _utc_now() -> str:
@@ -131,6 +146,7 @@ def recover(
     candidate: str,
     output_zip: Path,
 ) -> dict[str, object]:
+    _refuse_if_pilot_api_running()
     temp_root = temp_root.resolve()
     evidence_root = temp_root / "hbi-g8-pilot-evidence"
     pilot_root = temp_root / "hbi-g8-pilot"
