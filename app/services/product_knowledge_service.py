@@ -44,7 +44,7 @@ def version_scope_key(
 def _join_claims(claims: Set[str]) -> Optional[str]:
     """Join complete source claims without treating prose commas as delimiters."""
     normalized = {claim.strip() for claim in claims if claim and claim.strip()}
-    return "\\n".join(sorted(normalized)) if normalized else None
+    return "\n".join(sorted(normalized)) if normalized else None
 
 
 def parse_role_entries(claim: str) -> List[Dict[str, str]]:
