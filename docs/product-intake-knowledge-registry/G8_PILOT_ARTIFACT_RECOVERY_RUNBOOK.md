@@ -39,7 +39,7 @@ Upload/share the ZIP for independent review. Do not call the live pilot API, res
 
 ## Safety limits
 
-- No API or network calls.
+- No outbound/network API calls; it performs a local loopback port check to refuse recovery while the pilot API is active.
 - Source SQLite is opened read-only; the backup is written separately and verified.
 - Symlinked roots/files are refused or skipped.
 - Exactly one matching session is required.
