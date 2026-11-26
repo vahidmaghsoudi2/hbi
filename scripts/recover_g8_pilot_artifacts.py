@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Iterable
 
 DEFAULT_CANDIDATE = "G8-NUMBUZIN-NO9-20261018"
-MAX_SEARCH_FILE_BYTES = 2 * 1024 * 1024
+MAX_SEARCH_SCAN_BYTES = 256 * 1024 * 1024
 MAX_PACKAGE_FILE_BYTES = 100 * 1024 * 1024
 MAX_PACKAGE_TOTAL_BYTES = 500 * 1024 * 1024
 
@@ -38,18 +38,32 @@ def _safe_files(root: Path) -> Iterable[Path]:
             yield path
 
 
+def _file_contains_token(path: Path, token: bytes) -> bool:
+    try:
+        size = path.stat().st_size
+        if size > MAX_SEARCH_SCAN_BYTES:
+            return False
+        overlap = max(0, len(token) - 1)
+        tail = b""
+        with path.open("rb") as stream:
+            while True:
+                chunk = stream.read(1024 * 1024)
+                if not chunk:
+                    return False
+                combined = tail + chunk
+                if token in combined.lower():
+                    return True
+                tail = combined[-overlap:] if overlap else b""
+    except OSError:
+        return False
+
+
 def _contains_candidate(folder: Path, candidate: str) -> bool:
-    token = candidate.casefold()
+    token = candidate.casefold().encode("utf-8")
     for path in _safe_files(folder):
         if path.suffix.casefold() not in {".json", ".log", ".txt", ".md"}:
             continue
-        try:
-            if path.stat().st_size > MAX_SEARCH_FILE_BYTES:
-                continue
-            content = path.read_text(encoding="utf-8", errors="replace")
-        except OSError:
-            continue
-        if token in content.casefold():
+        if _file_contains_token(path, token):
             return True
     return False
 
