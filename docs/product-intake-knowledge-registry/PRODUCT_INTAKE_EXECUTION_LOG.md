@@ -1,8 +1,7 @@
 # Product Intake Execution Log
 
-**Current status:** Phase 0 / SSOT placement = COMPLETE; isolated pilot preparation = BLOCKED pending proven isolation and evidence capture; G8 = **BLOCKED / NOT VERIFIED**.  
-**Historical master SHA verified on 2026-10-16:** `335fd6e472dde72b9907366acaa04db28ebed943` (included PR #369 and the subsequent G8 smoke-evidence finalization fix).  
-**Live master SHA last checked on 2026-10-20:** `624811fae2112213b8c4c8c59d2ff1011e343e94` (includes merged PR #414). Historical entries retain the SHA that was verified at their original timestamps; this line is a dated observation, not a substitute for checking GitHub before later work.
+**Current status:** Phase 0 / SSOT placement = COMPLETE; a limited isolated operator session is reported on 2026-10-18 but its raw evidence is not linked in the canonical package; preflight/recovery is BLOCKED; G8 = **BLOCKED / NOT VERIFIED**.  
+**Live master SHA checked for this reconciliation (2026-11-26):** `af28aa4c61db77703a8a3f52f7092b47447e000a`. Historical entries retain their original verified SHAs.
 **Governing tracker:** [Issue #283](https://github.com/vahidmaghsoudi2/hbi/issues/283)  
 **Roadmap:** [PRODUCT_INTAKE_ROADMAP.md](PRODUCT_INTAKE_ROADMAP.md)  
 **Acceptance ledger:** [G8_ACCEPTANCE_EVIDENCE.md](G8_ACCEPTANCE_EVIDENCE.md)  
@@ -40,7 +39,7 @@ At the time this entry was drafted, PR #364 had not yet been merged, so Phase 0 
 
 ## Pilot execution entries
 
-The real operator pilot has not yet been proven complete. Append a dated entry only when supported by raw artifacts, exact SHA/environment, operator/session context, and readback evidence. Never backfill assumptions as observed facts.
+A limited isolated operator session is reported in Issue #386 on 2026-10-18, but it is not proven complete and its raw artifacts/exact SHA/environment are not linked here. Record this as a reported historical session, not verified criterion evidence. Append a dated entry only when supported by raw artifacts, exact SHA/environment, operator/session context, and readback evidence. Never backfill assumptions as observed facts.
 
 Required fields per runtime entry:
 - Date/time and operator role
@@ -136,3 +135,12 @@ Required fields per runtime entry:
 - G1 remains NOT RECOVERED: the exact accepted refined list is still not available in the reviewed canonical source. Do not reconstruct it from summaries or the structural map.
 - G8 remains BLOCKED / NOT VERIFIED. The PR's successful CI does not establish real-pilot A1–A9 evidence or authorize product recommendations.
 - No application, database, schema, API, product records, clinical content, or G8 state was changed by the merge.
+
+
+## Entry 2026-11-26 — Reconciliation of reported 2026-10-18 isolated pilot session
+
+- Issue [#386](https://github.com/vahidmaghsoudi2/hbi/issues/386) reports that an isolated operator pilot session occurred on 2026-10-18 for candidate `G8-NUMBUZIN-NO9-20261018` and captured two source-attributed `MANUFACTURER_CLAIM` assertions from the same official product URL. This conflicts with older tracker wording that the real operator pilot had not started.
+- Issue #386 also records that the product remained `DRAFT / NEEDS_REVIEW / PENDING` and that a same-source wording difference was incorrectly flagged as a HIGH unresolved evidence conflict. This is a reported observation; raw session artifacts, exact session SHA/environment, and independent readback are not linked in the canonical execution package.
+- The session is therefore recorded as **reported / incomplete / not independently verified**, not as G8 acceptance or a completed operator pilot. A1–A9 dispositions remain unchanged.
+- The next useful work is recovery of the raw 2026-10-18 artifacts and session provenance from the isolated environment, if they still exist, before any fresh pilot attempt. Do not mutate or reinitialize the pilot DB to recover evidence; preserve the existing fail-closed boundary.
+- No production DB, schema, product, activation, scoring, or merge action was performed by this documentation reconciliation.
