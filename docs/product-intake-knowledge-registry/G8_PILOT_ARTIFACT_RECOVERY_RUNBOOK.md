@@ -15,6 +15,8 @@ It matches exactly one evidence-session folder by finding the candidate ID in te
 
 ## Run on the operator machine
 
+Run recovery only after the pilot API process is confirmed stopped; do not terminate an active process to force recovery. The utility copies the SQLite main file and existing WAL/SHM sidecars to a temporary recovery workspace, opens only that copy read-only, and removes only its own temporary copy after a verified backup.
+
 From the repository checkout containing this utility (after bringing in PR #665's branch or approved version), run this single PowerShell command:
 
 ```powershell
