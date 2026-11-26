@@ -281,8 +281,10 @@ def test_recovery_refuses_missing_explicit_database(tmp_path: Path) -> None:
 
 def test_recovery_refuses_default_database_directory_symlink(tmp_path: Path) -> None:
     evidence_root, pilot_root, temp_root = _roots(tmp_path)
-    _session(evidence_root, pilot_root, "session-db-dir-symlink")
-    session_db_dir = pilot_root / "live-session-db-dir-symlink"
+    _, existing_db = _session(evidence_root, pilot_root, "session-db-dir-symlink")
+    existing_db.unlink()
+    session_db_dir = existing_db.parent
+    session_db_dir.rmdir()
     target_dir = tmp_path / "redirected-db-dir"
     target_dir.mkdir()
     try:
