@@ -8,10 +8,10 @@ Recover the original 2026-10-18 isolated G8 pilot artifacts, if they still exist
 
 The utility reads these directories under the Windows temporary root:
 
-- `%TEMP%\\hbi-g8-pilot-evidence\\`
-- `%TEMP%\\hbi-g8-pilot\\`
+- `%TEMP%/hbi-g8-pilot-evidence/`
+- `%TEMP%/hbi-g8-pilot/`
 
-It matches exactly one evidence-session folder by finding the candidate ID in text/JSON/log files. It archives the source evidence as-is and, if a matching `live-<session-folder>\\pilot.db` exists, creates a read-only SQLite backup snapshot in the package. Source files are never moved, deleted, or edited.
+It matches exactly one evidence-session folder by finding the candidate ID in text/JSON/log files. It archives the source evidence as-is and, if a matching `live-<session-folder>/pilot.db` exists, creates a read-only SQLite backup snapshot in the package. Source files are never moved, deleted, or edited.
 
 ## Run on the operator machine
 
