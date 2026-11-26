@@ -240,6 +240,8 @@ def recover(
                     "evidence_root": str(evidence_root),
                     "pilot_root": str(pilot_root),
                 },
+                "source_session_directory": str(session_folder.resolve()),
+                "database_source_path": str(db_source.resolve()) if db_info is not None else None,
                 "database_backup": db_info,
                 "source_files_are_unchanged": True,
                 "artifacts": artifact_manifest,
