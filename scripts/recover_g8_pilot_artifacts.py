@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import sqlite3
 import tempfile
 import zipfile
@@ -79,28 +80,48 @@ def _sha256(path: Path) -> str:
 def _sqlite_readonly_backup(source_db: Path, output_db: Path) -> dict[str, object]:
     if source_db.is_symlink() or not source_db.is_file():
         raise RuntimeError(f"unsafe or missing source database: {source_db}")
-    uri = source_db.resolve().as_uri() + "?mode=ro"
-    source = sqlite3.connect(uri, uri=True, timeout=5)
-    destination = sqlite3.connect(str(output_db))
+    # Work on byte-copies so SQLite cannot create/change source WAL/SHM files
+    # while opening a read-only source connection.
+    source_copy = output_db.with_name(output_db.name + ".source-copy")
+    source_sidecars = [Path(str(source_db) + suffix) for suffix in ("-wal", "-shm")]
+    copied_sidecars: list[Path] = []
     try:
-        integrity = source.execute("PRAGMA integrity_check").fetchone()[0]
-        if integrity != "ok":
-            raise RuntimeError(f"source SQLite integrity_check failed: {integrity}")
-        source.backup(destination)
-        destination.commit()
+        if source_copy.exists() or source_copy.is_symlink():
+            raise RuntimeError(f"temporary source copy already exists: {source_copy}")
+        shutil.copy2(source_db, source_copy)
+        for sidecar in source_sidecars:
+            if sidecar.is_symlink():
+                raise RuntimeError(f"refusing source sidecar symlink: {sidecar}")
+            if sidecar.is_file():
+                copied = Path(str(source_copy) + sidecar.suffix)
+                shutil.copy2(sidecar, copied)
+                copied_sidecars.append(copied)
+        uri = source_copy.resolve().as_uri() + "?mode=ro"
+        source = sqlite3.connect(uri, uri=True, timeout=5)
+        destination = sqlite3.connect(str(output_db))
+        try:
+            integrity = source.execute("PRAGMA integrity_check").fetchone()[0]
+            if integrity != "ok":
+                raise RuntimeError(f"source SQLite integrity_check failed: {integrity}")
+            source.backup(destination)
+            destination.commit()
+        finally:
+            destination.close()
+            source.close()
+        with sqlite3.connect(str(output_db)) as verify:
+            integrity_copy = verify.execute("PRAGMA integrity_check").fetchone()[0]
+            tables = [
+                row[0] for row in verify.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
+                )
+            ]
+        if integrity_copy != "ok":
+            raise RuntimeError(f"recovery SQLite backup integrity check failed: {integrity_copy}")
+        return {"integrity_check": "ok", "table_names": tables}
     finally:
-        destination.close()
-        source.close()
-    with sqlite3.connect(str(output_db)) as verify:
-        integrity_copy = verify.execute("PRAGMA integrity_check").fetchone()[0]
-        tables = [
-            row[0] for row in verify.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
-            )
-        ]
-    if integrity_copy != "ok":
-        raise RuntimeError(f"recovery SQLite backup integrity check failed: {integrity_copy}")
-    return {"integrity_check": "ok", "table_names": tables}
+        source_copy.unlink(missing_ok=True)
+        for copied in copied_sidecars:
+            copied.unlink(missing_ok=True)
 
 
 def recover(
