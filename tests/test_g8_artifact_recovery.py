@@ -115,3 +115,15 @@ def test_recovery_refuses_symlinked_evidence_root(tmp_path: Path) -> None:
 
     assert list(redirected.iterdir()) == []
     assert not output.exists()
+
+
+def test_recovery_refuses_to_overwrite_existing_output(tmp_path: Path) -> None:
+    evidence_root, pilot_root, temp_root = _roots(tmp_path)
+    _session(evidence_root, pilot_root, "session-existing-output")
+    output = tmp_path / "existing.zip"
+    output.write_bytes(b"preserve-me")
+
+    with pytest.raises(RuntimeError, match="refusing overwrite"):
+        recover(temp_root=temp_root, candidate=CANDIDATE, output_zip=output)
+
+    assert output.read_bytes() == b"preserve-me"
