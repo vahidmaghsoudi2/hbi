@@ -47,7 +47,7 @@ The pilot must demonstrate actual permitted transitions and persisted readback. 
 
 ## 4. Phase 1 — isolated G8 execution pilot
 
-**Status: BLOCKED — incomplete isolated pilot session reported on 2026-10-18; required raw evidence package is not available in the canonical records.** The session is not accepted as a complete real operator pilot. Current preparation remains blocked pending recoverable raw evidence and proof of the disposable environment/evidence-capture boundary.
+**Status: BLOCKED — incomplete isolated pilot session reported on 2026-10-18; required raw evidence package is not available in the canonical records.** The session is not accepted as a complete real operator pilot. Current preparation remains blocked pending original artifact recovery from the operator environment/backup if retained; the accessible GitHub/Library sources do not contain the raw session package.
 
 ### Scope
 
