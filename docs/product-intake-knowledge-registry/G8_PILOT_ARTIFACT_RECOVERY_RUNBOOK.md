@@ -25,6 +25,8 @@ From the repository checkout containing this utility (after bringing in PR #665'
 
 The output path must not already exist. On success, the utility prints `RECOVERY=PASS` and a JSON summary. On zero or multiple matches, unsafe roots, integrity failure, or file-size limits, it prints `RECOVERY_REFUSED` and exits without modifying source files.
 
+For files restored from a backup at non-default locations, the utility also accepts explicit `--source-session` and `--database` paths. Use those only for the actual backup evidence directory and DB file; paths are read-only and symlink sources are refused. The output ZIP must still be a new path outside the source session.
+
 ## Package contents
 
 - Original evidence files from the matched evidence session folder, including API logs/raw HTTP capture/readback/metadata/manifests if present.
