@@ -246,7 +246,7 @@ def recover(
             }
             archive.writestr(
                 "recovery-manifest.json",
-                json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\\n",
+                json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
             )
         # Re-open and verify every archived artifact before publishing the ZIP.
         with zipfile.ZipFile(temp_package, "r") as verification:
