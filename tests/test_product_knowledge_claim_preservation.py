@@ -34,6 +34,10 @@ def test_update_from_evidence_keeps_free_text_claims_intact():
         "The reported study ran from 2023-09-18 to 2023-10-31, "
         "with full protocol, comparator, and analysis unavailable."
     )
+    generic_claim = (
+        "The manufacturer reports a +12% improvement, based on its internal assessment, "
+        "with the detailed protocol unavailable."
+    )
 
     evidence = [
         SimpleNamespace(
@@ -84,6 +88,18 @@ def test_update_from_evidence_keeps_free_text_claims_intact():
             claim_id="claim-004",
             evidence_strength="STRONG",
         ),
+        SimpleNamespace(
+            product_id=product_id,
+            field="claim",
+            claim=generic_claim,
+            qa_status="VERIFIED",
+            conflict_status="NONE",
+            market_region=None,
+            packaging_version=None,
+            claim_type="MANUFACTURER_CLAIM",
+            claim_id="claim-005",
+            evidence_strength="STRONG",
+        ),
     ]
 
     class EvidenceRepo:
@@ -108,7 +124,7 @@ def test_update_from_evidence_keeps_free_text_claims_intact():
     assert result["ingredients"] == ingredients
     assert result["known_use_cases"] == use_case
     assert result["manufacturer_claims"] == "\n".join(
-        sorted([manufacturer_claim, second_manufacturer_claim])
+        sorted([manufacturer_claim, second_manufacturer_claim, generic_claim])
     )
     assert "evidence-001" not in result["evidence_refs"]
-    assert result["evidence_refs"] == "claim-001, claim-002, claim-003, claim-004"
+    assert result["evidence_refs"] == "claim-001, claim-002, claim-003, claim-004, claim-005"
