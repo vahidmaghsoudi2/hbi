@@ -145,6 +145,8 @@ def recover(
     temp_root: Path,
     candidate: str,
     output_zip: Path,
+    source_session: Path | None = None,
+    database_path: Path | None = None,
 ) -> dict[str, object]:
     _refuse_if_pilot_api_running()
     temp_root = temp_root.resolve()
@@ -152,13 +154,20 @@ def recover(
     pilot_root = temp_root / "hbi-g8-pilot"
     if evidence_root.is_symlink() or pilot_root.is_symlink():
         raise RuntimeError("refusing symlinked G8 temporary roots")
-    if not evidence_root.is_dir():
-        raise RuntimeError(f"evidence root not found: {evidence_root}")
-
-    matches = [
-        folder for folder in evidence_root.iterdir()
-        if folder.is_dir() and not folder.is_symlink() and _contains_candidate(folder, candidate)
-    ]
+    if source_session is not None:
+        if source_session.is_symlink():
+            raise RuntimeError("explicit source session must not be a symlink")
+        source_folder = source_session.expanduser().resolve()
+        if not source_folder.is_dir() or not _contains_candidate(source_folder, candidate):
+            raise RuntimeError(f"explicit source session is missing or candidate not found: {source_folder}")
+        matches = [source_folder]
+    else:
+        if not evidence_root.is_dir():
+            raise RuntimeError(f"evidence root not found: {evidence_root}")
+        matches = [
+            folder for folder in evidence_root.iterdir()
+            if folder.is_dir() and not folder.is_symlink() and _contains_candidate(folder, candidate)
+        ]
     if len(matches) != 1:
         raise RuntimeError(
             f"expected exactly one evidence session matching candidate {candidate!r}; found {len(matches)}. "
@@ -195,7 +204,11 @@ def recover(
                     "sha256": _sha256(source),
                 })
 
-            db_source = pilot_root / f"live-{session_folder.name}" / "pilot.db"
+            db_source = (
+                database_path.expanduser().resolve()
+                if database_path is not None
+                else pilot_root / f"live-{session_folder.name}" / "pilot.db"
+            )
             db_info: dict[str, object] | None = None
             if db_source.is_file() and not db_source.is_symlink():
                 db_copy = output_zip.parent / (output_zip.stem + ".recovered.sqlite")
@@ -250,10 +263,18 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--candidate", default=DEFAULT_CANDIDATE)
     parser.add_argument("--temp-root", type=Path, default=Path(tempfile.gettempdir()))
+    parser.add_argument("--source-session", type=Path, help="Optional explicit evidence folder (for a backup/export)")
+    parser.add_argument("--database", type=Path, help="Optional explicit SQLite DB path (opened read-only via a copied working set)")
     parser.add_argument("--output", type=Path, required=True, help="Recovery ZIP path; must be outside source session")
     args = parser.parse_args()
     try:
-        result = recover(temp_root=args.temp_root, candidate=args.candidate, output_zip=args.output)
+        result = recover(
+            temp_root=args.temp_root,
+            candidate=args.candidate,
+            output_zip=args.output,
+            source_session=args.source_session,
+            database_path=args.database,
+        )
     except (OSError, RuntimeError, sqlite3.Error, zipfile.BadZipFile) as exc:
         print(f"RECOVERY_REFUSED: {type(exc).__name__}: {exc}")
         return 2
