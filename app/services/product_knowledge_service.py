@@ -41,6 +41,12 @@ def version_scope_key(
     return f"market={market}|pack={pack}"
 
 
+def _join_claims(claims: Set[str]) -> Optional[str]:
+    """Join complete source claims without treating prose commas as delimiters."""
+    normalized = {claim.strip() for claim in claims if claim and claim.strip()}
+    return "\n".join(sorted(normalized)) if normalized else None
+
+
 def parse_role_entries(claim: str) -> List[Dict[str, str]]:
     """
     Structured role entries only.
@@ -285,7 +291,7 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
             touch_domain(field_l or "general", approved_hit=True, evaluated=True)
 
             if field_l == "ingredients" and claim:
-                ingredients.update([i.strip() for i in claim.split(",") if i.strip()])
+                ingredients.add(claim)
             elif field_l in ("ingredient_roles", "ingredient_role") and claim:
                 structured = parse_role_entries(claim)
                 if structured:
@@ -315,13 +321,13 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
                 for token in parse_legacy_role_tokens(claim):
                     legacy_role_tokens.add(token)
             elif field_l in ("claimed_benefits", "benefit") and claim:
-                benefits.update([b.strip() for b in claim.split(",") if b.strip()])
+                benefits.add(claim)
             elif field_l in ("known_use_cases", "use_case") and claim:
-                use_cases.update([u.strip() for u in claim.split(",") if u.strip()])
+                use_cases.add(claim)
             elif field_l == "contraindications" and claim:
-                contraindications.update([c.strip() for c in claim.split(",") if c.strip()])
+                contraindications.add(claim)
             elif field_l in ("usage_instructions", "usage_instruction", "usage") and claim:
-                usage_instructions.update([u.strip() for u in claim.split(",") if u.strip()])
+                usage_instructions.add(claim)
             elif field_l in ("other_attributes", "other_attribute") and claim:
                 if claim.startswith("{"):
                     try:
@@ -354,13 +360,13 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
                 and claim
                 and (getattr(ev, "claim_type", None) or "").strip().upper() == "MANUFACTURER_CLAIM"
             ):
-                manufacturer_claims.update([m.strip() for m in claim.split(",") if m.strip()])
+                manufacturer_claims.add(claim)
             elif (
                 field_l == "claim"
                 and (getattr(ev, "claim_type", None) or "").strip().upper() == "MANUFACTURER_CLAIM"
                 and claim
             ):
-                manufacturer_claims.update([m.strip() for m in claim.split(",") if m.strip()])
+                manufacturer_claims.add(claim)
 
             if ev.claim_id:
                 evidence_refs.append(ev.claim_id)
@@ -435,13 +441,13 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
             ingredient_roles_value = None
 
         update_data = {
-            "ingredients": ", ".join(sorted(ingredients)) if ingredients else None,
+            "ingredients": _join_claims(ingredients),
             "ingredient_roles": ingredient_roles_value,
-            "claimed_benefits": ", ".join(sorted(benefits)) if benefits else None,
-            "known_use_cases": ", ".join(sorted(use_cases)) if use_cases else None,
-            "contraindications": ", ".join(sorted(contraindications)) if contraindications else None,
-            "usage_instructions": ", ".join(sorted(usage_instructions)) if usage_instructions else None,
-            "manufacturer_claims": ", ".join(sorted(manufacturer_claims)) if manufacturer_claims else None,
+            "claimed_benefits": _join_claims(benefits),
+            "known_use_cases": _join_claims(use_cases),
+            "contraindications": _join_claims(contraindications),
+            "usage_instructions": _join_claims(usage_instructions),
+            "manufacturer_claims": _join_claims(manufacturer_claims),
             "other_attributes": json.dumps(other_attributes, ensure_ascii=False) if other_attributes else None,
             "evidence_refs": ", ".join(evidence_refs) if evidence_refs else None,
             "evidence_status": overall,
