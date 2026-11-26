@@ -366,7 +366,7 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
                 and (getattr(ev, "claim_type", None) or "").strip().upper() == "MANUFACTURER_CLAIM"
                 and claim
             ):
-                manufacturer_claims.update([m.strip() for m in claim.split(",") if m.strip()])
+                manufacturer_claims.add(claim)
 
             if ev.claim_id:
                 evidence_refs.append(ev.claim_id)
