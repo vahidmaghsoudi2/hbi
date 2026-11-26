@@ -246,8 +246,23 @@ def recover(
             }
             archive.writestr(
                 "recovery-manifest.json",
-                json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+                json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\\n",
             )
+        # Re-open and verify every archived artifact before publishing the ZIP.
+        with zipfile.ZipFile(temp_package, "r") as verification:
+            for item in artifact_manifest:
+                archived_path = str(item["path"])
+                digest = hashlib.sha256()
+                size = 0
+                with verification.open(archived_path) as stream:
+                    for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                        digest.update(chunk)
+                        size += len(chunk)
+                if digest.hexdigest() != item["sha256"] or size != item["size_bytes"]:
+                    raise RuntimeError(f"recovery ZIP integrity verification failed: {archived_path}")
+            parsed_manifest = json.loads(verification.read("recovery-manifest.json"))
+            if parsed_manifest.get("candidate") != candidate or len(parsed_manifest.get("artifacts", [])) != len(artifact_manifest):
+                raise RuntimeError("recovery ZIP manifest verification failed")
         os.replace(temp_package, output_zip)
     except Exception:
         temp_package.unlink(missing_ok=True)
