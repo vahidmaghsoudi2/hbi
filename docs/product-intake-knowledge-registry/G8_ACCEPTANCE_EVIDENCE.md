@@ -9,10 +9,10 @@ A criterion is PASS only when raw evidence is linked, tied to an exact SHA/envir
 
 | Criterion | Required evidence | Current status | Missing proof / note |
 |---|---|---|---|
-| A1 | Explicit product identity and operator-selected `product_line=SKIN`; no inference | PARTIAL | API test only; real operator session not evidenced |
-| A2 | Duplicate check before create, including duplicate/unknown identity cases | PARTIAL | New-path test exists; negative/edge cases and real UI path not evidenced |
-| A3 | Lifecycle state persisted and read back; no premature transition | PARTIAL | Draft state API/ORM test only |
-| A4 | Source-attributed research and claims persisted/read back | PARTIAL | Draft assertions tested; real runtime record not evidenced |
+| A1 | Explicit product identity and operator-selected `product_line=SKIN`; no inference | PARTIAL | API test; a limited 2026-10-18 session is reported in Issue #386, but raw operator identity/product-line artifact is not linked |
+| A2 | Duplicate check before create, including duplicate/unknown identity cases | PARTIAL | New-path test exists; reported session has no linked raw duplicate-check capture; negative/edge cases remain unverified |
+| A3 | Lifecycle state persisted and read back; no premature transition | PARTIAL | API/ORM draft test; Issue #386 reports DRAFT / NEEDS_REVIEW / PENDING for the isolated candidate, but no raw readback artifact is linked |
+| A4 | Source-attributed research and claims persisted/read back | PARTIAL | Issue #386 reports two source-attributed MANUFACTURER_CLAIM assertions in the isolated session; raw evidence/readback is not available in this canonical package |
 | A5 | Invalid claim types/mappings rejected; required FACT provenance enforced | NOT VERIFIED | Negative validation evidence package missing |
 | A6 | Safety, review, permission and approval gates enforced | NOT VERIFIED | Runtime gate-denial evidence missing |
 | A7 | Authorized approval/activation and resulting state/audit readback | NOT VERIFIED | No approved real pilot transition evidenced |
