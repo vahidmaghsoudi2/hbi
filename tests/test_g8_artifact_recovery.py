@@ -263,3 +263,37 @@ def test_recovery_refuses_missing_default_evidence_root(tmp_path: Path) -> None:
         recover(temp_root=tmp_path, candidate=CANDIDATE, output_zip=output)
 
     assert not output.exists()
+
+
+def test_recovery_refuses_missing_explicit_database(tmp_path: Path) -> None:
+    evidence_root, pilot_root, temp_root = _roots(tmp_path)
+    backup_session = tmp_path / "backup-missing-db-session"
+    backup_session.mkdir()
+    (backup_session / "api.log").write_text(CANDIDATE, encoding="utf-8")
+    missing_db = tmp_path / "missing-pilot.db"
+    output = tmp_path / "missing-db.zip"
+
+    with pytest.raises(RuntimeError, match="explicit database source is missing"):
+        recover(temp_root=temp_root, candidate=CANDIDATE, output_zip=output, source_session=backup_session, database_path=missing_db)
+
+    assert not output.exists()
+
+
+def test_recovery_refuses_default_database_directory_symlink(tmp_path: Path) -> None:
+    evidence_root, pilot_root, temp_root = _roots(tmp_path)
+    _session(evidence_root, pilot_root, "session-db-dir-symlink")
+    session_db_dir = pilot_root / "live-session-db-dir-symlink"
+    target_dir = tmp_path / "redirected-db-dir"
+    target_dir.mkdir()
+    try:
+        session_db_dir.symlink_to(target_dir, target_is_directory=True)
+    except OSError as exc:
+        pytest.skip(f"symlink creation unavailable: {exc}")
+    output = tmp_path / "refused-default-db-dir-link.zip"
+
+    with pytest.raises(RuntimeError, match="database directory must not be a symlink"):
+        recover(temp_root=temp_root, candidate=CANDIDATE, output_zip=output)
+
+    assert session_db_dir.is_symlink()
+    assert list(target_dir.iterdir()) == []
+    assert not output.exists()
