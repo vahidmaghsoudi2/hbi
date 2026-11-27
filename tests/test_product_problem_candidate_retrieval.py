@@ -88,20 +88,19 @@ def test_retrieval_returns_only_current_candidate_and_exposes_all_blockers(db_se
     }
 
 
-def test_retrieval_filters_market_and_variant_without_cross_market_fallback(db_session):
+def test_retrieval_is_market_neutral_but_keeps_variant_filter(db_session):
     _seed(db_session, "mx", market="MEXICO", variant="COLOR")
     _seed(db_session, "uk", market="UK", variant="NON_COLOR")
     service = ProductProblemCandidateRetrievalService(db_session)
 
     mexico = service.retrieve("P17", market_region="mexico", variant="COLOR")
     uk = service.retrieve("P17", market_region="UK", variant="NON_COLOR")
-    no_cross_market = service.retrieve("P17", market_region="CANADA")
+    canada = service.retrieve("P17", market_region="CANADA")
 
     assert [row["market_region"] for row in mexico["candidates"]] == ["MEXICO"]
     assert [row["market_region"] for row in uk["candidates"]] == ["UK"]
-    assert no_cross_market["candidate_count"] == 0
-
-
+    assert canada["candidate_count"] == 2
+    assert {row["market_region"] for row in canada["candidates"]} == {"MEXICO", "UK"}
 def test_retrieval_uses_latest_revision_and_hides_superseded_candidate(db_session):
     product, evidence, first, payload = _seed(db_session, "revision")
     revised_payload = dict(payload)

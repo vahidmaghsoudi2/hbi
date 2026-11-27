@@ -45,7 +45,6 @@ class ProductProblemCandidateRetrievalService:
         variant: Optional[str] = None,
     ) -> Dict[str, Any]:
         problem_id = self._normalize_problem_id(problem_id)
-        market_filter = self._known_scope(market_region)
         variant_filter = self._known_scope(variant)
         if variant_filter and variant_filter not in {"COLOR", "NON_COLOR"}:
             raise ValidationError("variant filter must be COLOR or NON_COLOR.")
@@ -55,22 +54,11 @@ class ProductProblemCandidateRetrievalService:
         excluded_integrity_count = 0
 
         for link, product, evidence in rows:
-            if market_filter and (link.market_region or "").strip().upper() != market_filter:
-                continue
             if variant_filter and (link.variant or "").strip().upper() != variant_filter:
                 continue
 
             # Defend the read path against legacy/manual rows that bypassed service validation.
             if evidence.product_id != link.product_id or not evidence.claim_id or evidence.claim_id != link.claim_id:
-                excluded_integrity_count += 1
-                continue
-            link_market = self._known_scope(link.market_region)
-            product_market = self._known_scope(product.market_region)
-            evidence_market = self._known_scope(evidence.market_region)
-            if (
-                (product_market and link_market and product_market != link_market)
-                or (evidence_market and link_market and evidence_market != link_market)
-            ):
                 excluded_integrity_count += 1
                 continue
 

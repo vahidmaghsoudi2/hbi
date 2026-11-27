@@ -166,11 +166,16 @@ def test_unknown_problem_code_is_rejected(db_session):
         )
 
 
-def test_product_and_evidence_market_must_match_link_market(db_session):
+def test_product_and_evidence_market_do_not_block_link_creation(db_session):
     product = _product(db_session, market_region="EUROPE")
     evidence = _evidence(db_session, product.product_id, market_region="MEXICO")
-    with pytest.raises(ValidationError, match="Product market"):
-        ProductProblemLinkService(db_session).create_link(**_candidate_payload(product, evidence))
+    payload = _candidate_payload(product, evidence)
+
+    link = ProductProblemLinkService(db_session).create_link(**payload)
+
+    assert product.market_region == "EUROPE"
+    assert evidence.market_region == "MEXICO"
+    assert link.market_region == payload["market_region"]
 
 
 def test_conflicted_or_rejected_evidence_cannot_anchor_a_link(db_session):
