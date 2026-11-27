@@ -44,11 +44,13 @@ The current `NewHomePage.tsx` snapshot shows nine main menu cards:
 2. مشتریان
 3. مشاوره
 4. فروش
-5. مدیریت محصولات → [product-management/](product-management/)
-6. کالا و موجودی
-7. خرید
+5. مدیریت محصولات → [product-management/](product-management/) — **Product Master** (identity, attributes, evidence, QA, lifecycle)
+6. کالا و موجودی — physical stock operations only
+7. خرید — physical stock-in / supply; only for already-approved products
 8. حسابداری و گزارش‌ها
 9. دانشنامه
+
+**Critical boundary:** «مدیریت محصولات» defines the product. «خرید» and «کالا و موجودی» move physical quantity of an already-defined product. These flows must not be mixed.
 
 The prototype also identifies the top actions separately. «تنظیمات» is not treated as an active main-menu card because it is not present among those nine cards in the inspected source snapshot.
 
