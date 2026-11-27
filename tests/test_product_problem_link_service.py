@@ -111,6 +111,24 @@ def test_idempotency_retry_returns_same_assessment_and_mismatch_conflicts(db_ses
         service.create_link(**{**payload, "outcome": "Changed outcome"})
 
 
+def test_market_does_not_create_a_second_assertion_family(db_session):
+    product = _product(db_session, market_region="EUROPE")
+    evidence = _evidence(db_session, product.product_id, market_region="MEXICO")
+    service = ProductProblemLinkService(db_session)
+    first = service.create_link(**_candidate_payload(product, evidence))
+
+    second_payload = _candidate_payload(
+        product, evidence,
+        market_region="CANADA",
+        idempotency_key="test-key-same-assertion-new-market",
+    )
+    with pytest.raises(ConflictError, match="assertion already exists"):
+        service.create_link(**second_payload)
+
+    assert db_session.query(ProductProblemLink).count() == 1
+    assert first.market_region == "UNSCOPED"
+
+
 def test_stale_revision_is_rejected(db_session):
     product = _product(db_session)
     evidence = _evidence(db_session, product.product_id)
