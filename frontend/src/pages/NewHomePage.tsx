@@ -1058,15 +1058,20 @@ export default function NewHomePage() {
               <div className="pro-product-card">
                 <ul className="pro-ol" style={{ marginBottom: "0.75rem" }}>
                   {dashboardLowStock && dashboardLowStock.length > 0 ? (
-                    <li>{dashboardLowStock.length.toLocaleString("fa-IR")} کالای با موجودی کم (≤ ۵)</li>
+                    <li>
+                      <strong>{dashboardLowStock.length.toLocaleString("fa-IR")}</strong> کالای با موجودی کم (≤ ۵)
+                    </li>
                   ) : (
-                    <li className="pro-muted">کالای با موجودی کم ثبت نشده است.</li>
+                    <li className="pro-muted">مورد فوری از نظر موجودی کم ثبت نشده است.</li>
                   )}
-                  <li className="pro-muted">مشاوره‌های ناتمام و محصولات در انتظار QA در این نسخه عددگذاری نشده‌اند (API تجمیعی تأییدشده هنوز موجود نیست).</li>
                 </ul>
                 {dashboardLowStock && dashboardLowStock.length > 0 ? (
                   <Link to="/inventory?section=low-stock" className="pro-btn-primary">بازکردن کمبود موجودی</Link>
-                ) : null}
+                ) : (
+                  <p className="pro-muted" style={{ marginTop: "0.5rem", marginBottom: 0 }}>
+                    مشاوره‌های ناتمام و محصولات در انتظار QA پس از فراهم شدن API تجمیعی اضافه می‌شوند.
+                  </p>
+                )}
               </div>
             </section>
 

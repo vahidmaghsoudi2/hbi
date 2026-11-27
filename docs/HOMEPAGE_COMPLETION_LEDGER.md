@@ -16,8 +16,8 @@ Before homepage work, read this ledger and inspect only items marked OPEN/BLOCKE
 | HP-02 | Remove standalone catalog entry and redirect obsolete `/catalog` route | Implementation commit `e16cccfc0d338d4ea61cca6a8648bc15dc34241d`; earlier CI https://github.com/actions/runs/38868660433 and browser proof https://github.com/actions/runs/38868660269. Final browser proof also passed on the merged PR head. | VERIFIED |
 | HP-03 | Remove placeholder Settings and place Admin logout in fixed header | Implementation commit `dd5648cec489f5e56be293720157be87ae2b49dd`; obsolete Settings assertion removed; final browser proof passed at `1b53fb7890e7671f404b33cdd857e26e1da34632`. | VERIFIED (superseded by HP-05) |
 | HP-04 | Reconcile PR with current master, verify checks, merge and post-merge verify | PR #363 merged: `0463044d7b49b4847b70d388766484fce5504392`. GitHub reported conflict-free before merge; CI, browser proof, and auto evidence all passed on final PR head. | MERGED; post-merge local runtime check remains separate |
-| HP-05 | Remove all management-account logout buttons from homepage surfaces | PO direction 2026-11-15: buttons are not useful. **Authoritative change:** `docs/homepage/HP-05-logout-removal.patch` (exact 3-hunk surgical removal on NewHomePage.tsx only). No other pages contained the button. | READY — apply patch to production code |
-| HP-06 | Align dashboard (page-1 of gallery home) with approved system diagram / operational mock | Diagram provided by PO (system modules + dashboard KPIs + quick actions + attention + recent activity + domain map). Current NewHomePage home panel already has live KPIs and quick actions; further visual/structural alignment required without introducing fake data. | OPEN |
+| HP-05 | Remove all management-account logout buttons from homepage surfaces | PO direction 2026-11-15. Code inspection on master `b2f6964bb76155eed0ac7aa9268f5948dc1b14bc` (2026-11-27): no `useNavigate`, no `logout` function, no "خروج از حساب مدیر" button remains in `NewHomePage.tsx`. Patch content already present. | **DONE** |
+| HP-06 | Align dashboard (page-1 of gallery home) with approved system diagram / operational mock | Diagram provided by PO (system modules + dashboard KPIs + quick actions + attention + recent activity + domain map). Current NewHomePage home panel already has live KPIs and quick actions; further visual/structural alignment required without introducing fake data. | **OPEN — CURRENT PRIORITY** |
 
 ## Closure gate and verification boundary
 - **Code integration:** VERIFIED in `master` at merge commit `0463044d7b49b4847b70d388766484fce5504392`.
@@ -25,5 +25,10 @@ Before homepage work, read this ledger and inspect only items marked OPEN/BLOCKE
 - **Local Windows runtime/database:** not claimed as tested from GitHub workflows.
 - If a post-merge regression appears, reopen only the affected item and attach the new evidence. Do not restart HP-01 through HP-03 without cause.
 
+## Current priority (Manager decision 2026-11-27)
+1. **HP-06** — Close cleanly and professionally.
+2. Elevate Skin Intake Template Forms V1 from DRAFT to executable baseline.
+3. No other homepage work until the two items above are closed.
+
 ## Handoff
-Homepage integration is merged. Next work must start from current `master`, read this ledger first, and continue only any newly evidenced post-merge runtime issue or new OPEN items (HP-05, HP-06). No repeat audit of completed items.
+HP-05 is closed. Next executable work starts from current `master` (or this branch) and focuses exclusively on HP-06. No repeat audit of completed items.
