@@ -166,11 +166,11 @@ def test_unknown_problem_code_is_rejected(db_session):
         )
 
 
-def test_product_and_evidence_market_must_match_link_market(db_session):
+def test_product_and_evidence_market_do_not_gate_consultation_link(db_session):
     product = _product(db_session, market_region="EUROPE")
     evidence = _evidence(db_session, product.product_id, market_region="MEXICO")
-    with pytest.raises(ValidationError, match="Product market"):
-        ProductProblemLinkService(db_session).create_link(**_candidate_payload(product, evidence))
+    link = ProductProblemLinkService(db_session).create_link(**_candidate_payload(product, evidence))
+    assert link.market_region == "UNSCOPED"
 
 
 def test_conflicted_or_rejected_evidence_cannot_anchor_a_link(db_session):
@@ -186,13 +186,15 @@ def test_conflicted_or_rejected_evidence_cannot_anchor_a_link(db_session):
     assert db_session.query(ProductProblemLink).count() == 0
 
 
-def test_market_and_semantic_fields_are_required(db_session):
+def test_semantic_fields_are_required_and_market_is_ignored(db_session):
     product = _product(db_session)
     evidence = _evidence(db_session, product.product_id)
     with pytest.raises(ValidationError, match="semantic_basis is required"):
         ProductProblemLinkService(db_session).create_link(**_candidate_payload(product, evidence, semantic_basis=" "))
-    with pytest.raises(ValidationError, match="market_region is required"):
-        ProductProblemLinkService(db_session).create_link(**_candidate_payload(product, evidence, market_region=""))
+    payload = _candidate_payload(product, evidence)
+    payload.pop("market_region")
+    link = ProductProblemLinkService(db_session).create_link(**payload)
+    assert link.market_region == "UNSCOPED"
 
 
 def test_supported_status_is_blocked_by_database_constraint(db_session):
