@@ -56,7 +56,7 @@ class ProductProblemLinkService:
     def _family_key(data):
         stable = {key: data[key] for key in (
             "product_id", "evidence_id", "claim_id", "problem_id",
-            "relationship_role", "variant", "market_region", "problem_map_version",
+            "relationship_role", "variant", "problem_map_version",
             "feature_basis", "outcome",
         )}
         raw = json.dumps(stable, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
@@ -73,13 +73,14 @@ class ProductProblemLinkService:
             "product_id", "evidence_id", "claim_id", "problem_id", "problem_type",
             "problem_definition_ref", "feature_basis", "outcome", "semantic_basis",
             "limitations", "decision_basis", "reason", "problem_map_version",
-            "market_region", "variant", "relationship_role", "relationship_status",
+            "variant", "relationship_role", "relationship_status",
             "idempotency_key",
         )
         for field in text_fields:
             data[field] = self._required_text(data.get(field), field)
         data["problem_id"] = data["problem_id"].upper()
-        data["market_region"] = data["market_region"].upper()
+        # Legacy non-null storage field only; never a consultation dimension.
+        data["market_region"] = "UNSCOPED"
         data["variant"] = data["variant"].upper()
         data["relationship_role"] = data["relationship_role"].lower()
         data["relationship_status"] = data["relationship_status"].upper()
@@ -112,12 +113,7 @@ class ProductProblemLinkService:
             raise ValidationError("Conflicted Evidence cannot anchor a ProductProblemLink.")
         if (evidence.qa_status or "PENDING").strip().upper() == "REJECTED":
             raise ValidationError("Rejected Evidence cannot anchor a ProductProblemLink.")
-        product_market = (product.market_region or "").strip().upper()
-        evidence_market = (evidence.market_region or "").strip().upper()
-        if product_market and product_market != "UNKNOWN" and product_market != data["market_region"]:
-            raise ValidationError("Link market_region does not match the Product market.")
-        if evidence_market and evidence_market != "UNKNOWN" and evidence_market != data["market_region"]:
-            raise ValidationError("Link market_region does not match the Evidence market.")
+        # Product/Evidence market metadata never gates consultation links.
 
     def _existing_idempotent(self, key, fingerprint):
         existing = self.repository.find_by_idempotency_key(key)
@@ -136,8 +132,8 @@ class ProductProblemLinkService:
         if predecessor is not None and latest is not None and latest.link_id != predecessor.link_id:
             raise ConflictError("This assertion revision already exists or is not the latest.")
         revision_no = 1
-        if predecessor is not None and latest is not None and latest.link_id == predecessor.link_id:
-            revision_no = (predecessor.revision_no or 0) + 1
+        if predecessor is not None and predecessor.revision_no is not None:
+            revision_no = predecessor.revision_no + 1
         fingerprint = self._fingerprint(data)
         row = self.repository.create(
             link_id=f"PPL-{uuid.uuid4().hex}",
@@ -205,7 +201,7 @@ class ProductProblemLinkService:
             raise ConflictError("Stale assessment revision; reload the latest revision before reassessing.")
         if self.repository.find_successor(predecessor.link_id) is not None:
             raise ConflictError("Stale assessment revision: this assessment already has a successor; reassess the latest assessment.")
-        immutable_scope = ("product_id", "problem_id", "relationship_role", "variant", "market_region")
+        immutable_scope = ("product_id", "problem_id", "relationship_role", "variant")
         if any(getattr(predecessor, field) != data[field] for field in immutable_scope):
             raise ValidationError("Reassessment must keep the same product/problem/role/variant/market scope.")
         if predecessor.assertion_key:
