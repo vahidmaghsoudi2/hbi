@@ -102,6 +102,22 @@ def test_retrieval_ignores_market_but_keeps_variant_filter(db_session):
     assert color_only["candidates"][0]["variant"] == "COLOR"
 
 
+def test_retrieval_keeps_candidate_when_product_and_evidence_markets_differ(db_session):
+    product, evidence, link, _ = _seed(db_session, "cross-market", market="MEXICO", variant="COLOR")
+    product.market_region = "EUROPE"
+    evidence.market_region = "MEXICO"
+    link.market_region = "UNSCOPED"
+    db_session.flush()
+
+    result = ProductProblemCandidateRetrievalService(db_session).retrieve(
+        "P17", market_region="CANADA"
+    )
+
+    assert result["candidate_count"] == 1
+    assert result["excluded_integrity_count"] == 0
+    assert result["candidates"][0]["product_id"] == product.product_id
+
+
 def test_retrieval_uses_latest_revision_and_hides_superseded_candidate(db_session):
     product, evidence, first, payload = _seed(db_session, "revision")
     revised_payload = dict(payload)
