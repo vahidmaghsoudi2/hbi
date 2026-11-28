@@ -1077,7 +1077,7 @@ export default function NewHomePage() {
                     {dashboardLowStock.length > 5 ? (
                       <p className="pro-muted">و { (dashboardLowStock.length - 5).toLocaleString("fa-IR") } قلم دیگر.</p>
                     ) : null}
-                    <Link to="/inventory?section=low-stock" className="pro-btn-primary">بازکردن گزارش کمبود موجودی</Link>
+                    <Link to="/inventory?section=low-stock" className="pro-btn-primary">بازکردن کمبود موجودی</Link>
                   </>
                 )}
                 <p className="pro-muted" style={{ marginTop: "0.75rem", marginBottom: 0 }}>
