@@ -78,6 +78,9 @@ def test_explainable_suitability_exposes_blockers_without_approving_candidate(db
 
     assert result["evaluation_mode"] == "EXPLAINABLE_HUMAN_REVIEW_ONLY"
     assert result["computed_only"] is True
+    assert result["market_scope_mode"] == "MARKET_NEUTRAL"
+    assert result["market_filter_applied"] is False
+    assert result["requested_market_region"] == "MEXICO"
     assert result["recommendation_eligible"] is False
     assert result["candidate_count"] == 1
     candidate = result["candidates"][0]
