@@ -1,9 +1,9 @@
 # HBI Product Intake Roadmap and Phase 1 Execution Record
 
-**Status:** Phase 0 = COMPLETE (SSOT files merged); Phase 1 = PREPARATION / real operator pilot NOT STARTED; G8 = **BLOCKED / NOT VERIFIED**  
+**Status:** Phase 0 = COMPLETE (SSOT files merged); Phase 1 = BLOCKED / incomplete isolated pilot session reported on 2026-10-18; G8 = **BLOCKED / NOT VERIFIED**  
 **Source of truth:** GitHub repository `vahidmaghsoudi2/hbi`  
-**Verified master baseline for this correction:** `335fd6e472dde72b9907366acaa04db28ebed943` (live `master` HEAD verified 2026-10-16; PR #393 base SHA matches this baseline)  
-**Last updated:** 2026-10-16
+**Verified master baseline for this reconciliation:** `b2f6964bb76155eed0ac7aa9268f5948dc1b14bc` (live master checked 2026-11-28)  
+**Last updated:** 2026-11-28
 
 ## 1. Purpose and authority
 
@@ -47,7 +47,7 @@ The pilot must demonstrate actual permitted transitions and persisted readback. 
 
 ## 4. Phase 1 — isolated G8 execution pilot
 
-**Status: PREPARATION; real operator pilot NOT STARTED.** Phase 0 is complete. Pilot execution remains blocked until the isolated runner, environment, and evidence-capture process are verified; no real operator session is claimed.
+**Status: BLOCKED — incomplete isolated pilot session reported on 2026-10-18; required raw evidence package is not available in the canonical records.** The session is not accepted as a complete real operator pilot. Current preparation remains blocked pending original artifact recovery from the operator environment/backup if retained; accessible GitHub/Library sources do not contain the raw session package.
 
 ### Scope
 
@@ -71,10 +71,10 @@ Every row requires a raw artifact or reproducible log, timestamp/context, exact 
 
 | ID | Required proof | Current disposition |
 |---|---|---|
-| A1 | Explicit product identity and operator-selected `product_line=SKIN`; no inference. Physical package/market identity unknowns remain explicit. | PARTIAL — API test only |
-| A2 | DuplicateCheck executed before creation; duplicate and unknown-identity cases handled safely. | PARTIAL — NEW path tested; negative/edge cases not proven here |
-| A3 | Initial lifecycle state persisted and read back; no premature state transition. | PARTIAL — draft state tested via ORM readback |
-| A4 | Source-attributed research/evidence persisted; manufacturer claims remain claims, unknowns remain unknown. | PARTIAL — three draft assertions tested |
+| A1 | Explicit product identity and operator-selected `product_line=SKIN`; no inference. Physical package/market identity unknowns remain explicit. | PARTIAL — API test plus 2026-10-18 isolated session reported; raw operator artifact not available |
+| A2 | DuplicateCheck executed before creation; duplicate and unknown-identity cases handled safely. | PARTIAL — API NEW-path test; reported session lacks raw DuplicateCheck request/response and negative-case proof |
+| A3 | Initial lifecycle state persisted and read back; no premature state transition. | PARTIAL — API/ORM test; Issue #386 reports candidate remained DRAFT / NEEDS_REVIEW / PENDING, but raw readback artifact is unavailable |
+| A4 | Source-attributed research/evidence persisted; manufacturer claims remain claims, unknowns remain unknown. | PARTIAL — API test plus Issue #386 reports two source-attributed MANUFACTURER_CLAIM rows; raw evidence/readback is not linked in the canonical package |
 | A5 | Invalid claim types/mappings rejected; required FACT provenance rules preserved; conflict handling evidenced. | NOT VERIFIED by PR #355 |
 | A6 | Safety, review, permissions, and approval gates enforced; unauthorized/premature transitions denied. | NOT VERIFIED by PR #355 |
 | A7 | Authorized approval/activation only after prerequisites; resulting state and audit history read back. | NOT VERIFIED; current test intentionally stops before approval/activation |
@@ -119,7 +119,7 @@ Do not substitute a narrative summary for raw artifacts.
 
 ## 7. Current decision
 
-Phase 0 SSOT placement is COMPLETE following merged PR #364. Phase 1 is in preparation; the real operator pilot has NOT STARTED. PR #355 is supporting API-test evidence only, not the real pilot and not G8 proof.
+Phase 0 SSOT placement is COMPLETE following merged PR #364. A limited isolated operator session is reported in Issue #386 as having occurred on 2026-10-18; it surfaced an evidence-conflict classification defect and is not a completed/accepted pilot. Raw artifacts, exact session SHA/environment, and complete A1–A9 proof are not linked in the canonical package. PR #355 remains supporting API-test evidence, not G8 acceptance.
 
 **Current gate: G8 = BLOCKED / NOT VERIFIED.**
 
