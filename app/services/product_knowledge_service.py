@@ -33,12 +33,12 @@ def version_scope_key(
     product_market: Optional[str],
     packaging_version: Optional[str],
 ) -> str:
-    """Build descriptive scope metadata; market arguments are compatibility-only."""
-    # Market is provenance only and never partitions ProductKnowledge.
-    # Evidence currently has no independent packaging-version field, so the
-    # Product-level packaging value is retained as descriptive scope metadata.
+    """Build an Evidence-owned scope key; never infer its market from Product."""
+    # product_market remains in the signature for compatibility with existing
+    # callers, but is deliberately not a fallback for missing Evidence scope.
+    market = (evidence_market or "").strip().upper()
     pack = (packaging_version or "").strip()
-    return f"pack={pack}"
+    return f"market={market}|pack={pack}"
 
 
 def _join_claims(claims: Set[str]) -> Optional[str]:
@@ -214,12 +214,33 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
 
         knowledge = self.get_or_create(product_id)
 
-        # Evidence is already bound to this exact Product by product_id.
-        # Its market_region remains provenance and must not partition knowledge.
-        # Evidence has no independent packaging-version field, so this service
-        # cannot safely invent a second package scope from Product metadata.
-        primary_list = evidences
-        other_scopes: Dict[str, List[Evidence]] = {}
+        product_market = getattr(product, "market_region", None) if product else None
+        packaging_version = getattr(product, "packaging_version", None) if product else None
+
+        scopes: Dict[str, List[Evidence]] = {}
+        for ev in evidences:
+            key = version_scope_key(
+                evidence_market=getattr(ev, "market_region", None),
+                product_market=product_market,
+                packaging_version=packaging_version,
+            )
+            scopes.setdefault(key, []).append(ev)
+
+        preferred = version_scope_key(
+            # The Product's own market defines the preferred target scope; an
+            # Evidence row must independently carry that same market to join it.
+            evidence_market=product_market,
+            product_market=None,
+            packaging_version=packaging_version,
+        )
+        if preferred in scopes:
+            primary_list = scopes[preferred]
+            other_scopes = {k: v for k, v in scopes.items() if k != preferred}
+        else:
+            # A lone evidence scope does not prove that it belongs to this Product.
+            # Never infer the Product market from evidence carrying another market.
+            primary_list = []
+            other_scopes = scopes
 
         approved: List[Evidence] = []
         ingredients: Set[str] = set()
@@ -361,11 +382,15 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
                 qa = (getattr(ev, "qa_status", None) or "").strip().upper()
                 conflict = (getattr(ev, "conflict_status", None) or "NONE").strip().upper()
                 field_l = (ev.field or "general").strip().lower()
-                # Reserved for future independently versioned Evidence rows.
-                # Current Evidence has no package-version field, and market alone
-                # never creates an out-of-scope ProductKnowledge partition.
+                # Evidence from another market/version must never inject its
+                # conflict verdict into this ProductKnowledge scope. It can,
+                # however, make an otherwise populated domain PARTIAL because
+                # potentially relevant evidence was deliberately excluded.
+                claim_type = (getattr(ev, "claim_type", None) or "").strip().upper()
                 if field_l in BLOCKING_KNOWLEDGE_FIELDS and (
-                    conflict == "CONFLICT" or qa in self._QA_APPROVED
+                    conflict == "CONFLICT"
+                    or claim_type == "CONFLICT"
+                    or qa in self._QA_APPROVED
                 ):
                     domain_has_out_of_scope.add(field_l)
 

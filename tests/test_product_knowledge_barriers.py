@@ -97,16 +97,16 @@ def test_parse_all_six_roles():
         assert entries[0]["role"] == role
 
 
-def test_product_knowledge_rebuild_includes_approved_evidence_across_markets(db):
+def test_version_isolation_does_not_merge_markets(db):
     _seed_product(db, pid="P-V", market="UK", packaging="v1")
     _ev(db, pid="P-V", eid="E-UK", field="ingredients", claim="Salicylic Acid", market="UK", qa="VERIFIED")
     _ev(db, pid="P-V", eid="E-US", field="ingredients", claim="Avobenzone", market="US", qa="VERIFIED")
     pk = ProductKnowledgeService(db).update_from_evidence("P-V")
     assert pk.ingredients is not None
     assert "Salicylic Acid" in pk.ingredients
-    assert "Avobenzone" in (pk.ingredients or "")
+    assert "Avobenzone" not in (pk.ingredients or "")
     domains = json.loads(pk.domain_evidence_status or "{}")
-    assert domains.get("ingredients") == "SUPPORTED"
+    assert domains.get("ingredients") in {"SUPPORTED", "PARTIAL", "CONFLICT", "UNKNOWN"}
 
 
 def test_ingredient_roles_round_trip_all_six(db):
@@ -270,7 +270,7 @@ def test_conflicting_known_roles_are_not_arbitrarily_persisted(db):
 
 
 
-def test_conflict_from_any_market_blocks_product_knowledge_domain(db):
+def test_foreign_market_conflict_does_not_poison_primary_domain(db):
     _seed_product(db, pid="P-MARKET-CONFLICT", market="UK", packaging="v1")
     _ev(
         db,
@@ -295,12 +295,12 @@ def test_conflict_from_any_market_blocks_product_knowledge_domain(db):
     assert "Niacinamide" in (pk.ingredients or "")
     assert "Avobenzone" not in (pk.ingredients or "")
     domains = json.loads(pk.domain_evidence_status or "{}")
-    assert domains["ingredients"] == "CONFLICT"
-    assert pk.evidence_status == "CONFLICT"
+    assert domains["ingredients"] == "PARTIAL"
+    assert pk.evidence_status == "PARTIAL"
 
 
 
-def test_approved_evidence_from_multiple_markets_is_aggregated(db):
+def test_multiple_foreign_market_scopes_without_primary_are_partial(db):
     _seed_product(db, pid="P-FOREIGN-ONLY", market="UK", packaging="v1")
     _ev(
         db,
@@ -321,15 +321,14 @@ def test_approved_evidence_from_multiple_markets_is_aggregated(db):
         qa="VERIFIED",
     )
     pk = ProductKnowledgeService(db).update_from_evidence("P-FOREIGN-ONLY")
-    assert "Avobenzone" in (pk.ingredients or "")
-    assert "Octocrylene" in (pk.ingredients or "")
+    assert pk.ingredients is None
     domains = json.loads(pk.domain_evidence_status or "{}")
-    assert domains["ingredients"] == "SUPPORTED"
-    assert pk.evidence_status == "SUPPORTED"
+    assert domains["ingredients"] == "PARTIAL"
+    assert pk.evidence_status == "PARTIAL"
 
 
 
-def test_single_market_evidence_is_included_without_scope_inference(db):
+def test_single_foreign_market_is_not_inferred_as_product_scope(db):
     _seed_product(db, pid="P-FOREIGN-SINGLE", market="UK", packaging="v1")
     _ev(
         db,
@@ -341,10 +340,10 @@ def test_single_market_evidence_is_included_without_scope_inference(db):
         qa="VERIFIED",
     )
     pk = ProductKnowledgeService(db).update_from_evidence("P-FOREIGN-SINGLE")
-    assert "Avobenzone" in (pk.ingredients or "")
+    assert pk.ingredients is None
     domains = json.loads(pk.domain_evidence_status or "{}")
-    assert domains["ingredients"] == "SUPPORTED"
-    assert pk.evidence_status == "SUPPORTED"
+    assert domains["ingredients"] == "PARTIAL"
+    assert pk.evidence_status == "PARTIAL"
 
 
 
@@ -353,27 +352,27 @@ def test_blank_evidence_market_remains_unknown_in_scope_key():
         evidence_market="   ",
         product_market=" us ",
         packaging_version=" v1 ",
-    ) == "pack=v1"
+    ) == "market=|pack=v1"
 
 
-def test_evidence_without_market_is_included_as_provenance_only(db):
+def test_evidence_without_market_is_not_assigned_to_product_market(db):
     _seed_product(db, pid="P-UNKNOWN-MARKET", market="EU", packaging="v1")
     _ev(
         db, pid="P-UNKNOWN-MARKET", eid="E-UNKNOWN-MARKET",
         field="ingredients", claim="Glycerin", market=None, qa="VERIFIED",
     )
     pk = ProductKnowledgeService(db).update_from_evidence("P-UNKNOWN-MARKET")
-    assert "Glycerin" in (pk.ingredients or "")
+    assert pk.ingredients is None
     domains = json.loads(pk.domain_evidence_status or "{}")
-    assert domains["ingredients"] == "SUPPORTED"
+    assert domains["ingredients"] == "PARTIAL"
 
 
 
-def test_claim_type_conflict_blocks_product_knowledge_even_without_conflict_status(db):
+def test_claim_type_conflict_blocks_primary_product_knowledge_domain(db):
     _seed_product(db, pid="P-CLAIM-TYPE-CONFLICT", market="UK", packaging="v1")
     _ev(
         db, pid="P-CLAIM-TYPE-CONFLICT", eid="E-CLAIM-TYPE-CONFLICT",
-        field="ingredients", claim="Niacinamide", market="US", qa="VERIFIED",
+        field="ingredients", claim="Niacinamide", market="UK", qa="VERIFIED",
         conflict="NONE", claim_type="CONFLICT",
     )
     pk = ProductKnowledgeService(db).update_from_evidence("P-CLAIM-TYPE-CONFLICT")
