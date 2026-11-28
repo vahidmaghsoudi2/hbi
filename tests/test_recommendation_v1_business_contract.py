@@ -290,7 +290,7 @@ def test_recommendation_reasoning_is_market_neutral_and_keeps_all_conflicts(db_s
         qa_verdict="VALID",
         status="ACTIVE",
     )
-    claim_ids = [f"CLAIM-MN-{index}" for index in range(1, 6)]
+    claim_ids = [f"CLAIM-MN-{index}" for index in range(1, 7)]
     knowledge = ProductKnowledge(
         product_knowledge_id="PK-PROD-MN-001",
         product_id=product.product_id,
@@ -310,7 +310,6 @@ def test_recommendation_reasoning_is_market_neutral_and_keeps_all_conflicts(db_s
         knowledge_confidence=1.0,
     )
     evidence_rows = []
-    claim_ids.append("CLAIM-MN-6")
     evidence_markets = ["US", "MEXICO", None, "JAPAN", "UK", "CANADA"]
     for index, (claim_id, market) in enumerate(zip(claim_ids, evidence_markets), start=1):
         is_conflict = index in {4, 5}
