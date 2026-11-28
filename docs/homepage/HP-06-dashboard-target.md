@@ -45,10 +45,10 @@ The top system map is the existing nine main-menu cards. The full domain relatio
 
 ## Exact verification
 
-- Commit: `152d00b5a2ad64826a6e25a7731416569b8f6310`
-- [HBI CI](https://github.com/vahidmaghsoudi2/hbi/actions/runs/46177764454): **1,076 passed, 829 warnings, 2 subtests passed; 89% coverage**, frontend build and G8 regression/governance jobs successful.
-- [HBI Auto Tasks](https://github.com/vahidmaghsoudi2/hbi/actions/runs/46177764438): successful.
-- [HBI Pilot Browser Proof](https://github.com/vahidmaghsoudi2/hbi/actions/runs/46177764505): **29 passed**, including HP-06 live-low-stock and unavailable-state checks; screenshot evidence uploaded.
+- Commit: `38bb45b42792afc0f133ec0a562ce451f1fd0d33`
+- [HBI CI](https://github.com/vahidmaghsoudi2/hbi/actions/runs/46177982812): **1,076 passed, 829 warnings, 2 subtests passed; 89% coverage**, frontend build and G8 regression/governance jobs successful.
+- [HBI Auto Tasks](https://github.com/vahidmaghsoudi2/hbi/actions/runs/46177982876): successful.
+- [HBI Pilot Browser Proof](https://github.com/vahidmaghsoudi2/hbi/actions/runs/46177982828): **29 passed**, including HP-06 live-low-stock and unavailable-state checks; screenshot evidence uploaded.
 
 ## Integration boundary
 
