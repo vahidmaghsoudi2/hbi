@@ -107,6 +107,8 @@ test("Dashboard report shortcuts preserve their own report destinations", async 
   await page.getByRole("button", { name: "بازکردن داشبورد" }).click();
   await expect(page.getByRole("heading", { name: "صفحه اول (داشبورد) - نمای کلی", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "وضعیت عملیات" })).toBeVisible();
+  await expect(page.getByText("P-LOW-1", { exact: true })).toBeVisible();
+  await expect(page.getByText("موجودی قابل عرضه: ۲", { exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "بازکردن کمبود موجودی" })).toHaveAttribute("href", "/inventory?section=low-stock");
   await expect(page.getByRole("link", { name: "مشاهده همه گردش‌ها" })).toHaveAttribute("href", "/inventory?section=stock-flow");
   await page.getByRole("link", { name: "بازکردن کمبود موجودی" }).click();
@@ -182,4 +184,21 @@ test("Product menu uses list as primary entry without independent QA menu", asyn
   await expect(page.getByRole("button", { name: "بازکردن فهرست کالاها" })).toBeVisible();
   await expect(page.getByRole("button", { name: "شروع ورود محصول" })).toBeVisible();
   await expect(page.getByRole("button", { name: "انتخاب محصول برای QA" })).toHaveCount(0);
+});
+
+
+test("Dashboard reports unknown state when low-stock data cannot load", async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem("hbi_admin_access_token", "homepage-dashboard-unavailable-token");
+  });
+  await page.route("**/reports/inventory/low-stock*", (route) => route.fulfill({
+    status: 503,
+    contentType: "application/json",
+    body: JSON.stringify({ detail: "Unavailable" }),
+  }));
+  await page.goto("/");
+  await page.getByRole("button", { name: "بازکردن داشبورد" }).click();
+  await expect(page.getByText("گزارش کمبود موجودی دریافت نشده است؛ وضعیت کمبود نامشخص است.", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "بازکردن کمبود موجودی" })).toHaveCount(0);
+  await expect(page.getByText("کالای با موجودی کم ثبت نشده است.", { exact: true })).toHaveCount(0);
 });
