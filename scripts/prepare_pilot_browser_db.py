@@ -64,7 +64,7 @@ init_db()
 db = SessionLocal()
 try:
     seed(db)
-    # Canonical P1-P7 Product IDs exist only in this disposable browser fixture.
+    # The six in-scope canonical Skin Product IDs exist only in this disposable browser fixture.
     # These rows are test fixtures, not writes to the user's Product Master database.
     canonical_skin_products = [
         ("HBI-PROD-FE320FA135B843B6", "COSRX", "The 6 Peptide Skin Booster Serum"),
@@ -73,7 +73,6 @@ try:
         ("HBI-PROD-7F55ED88F41144F1", "SKIN1004", "Madagascar Centella Hyalu-Cica Water-Fit Sun Serum"),
         ("HBI-PROD-96788ADC488942E3", "ISDIN", "FotoUltra 100 Active Unify SPF50+"),
         ("HBI-PROD-70EEE418BE0F4DAB", "Clinique", "Even Better Clinical Radical Dark Spot Corrector + Interrupter (historical target)"),
-        ("HBI-PROD-22C55A8223A945A6", "Anua", "Azelaic Acid 10% + Hyaluron Redness Soothing Serum"),
     ]
     for product_id, brand, product_name in canonical_skin_products:
         if db.get(Product, product_id) is None:
