@@ -111,6 +111,7 @@ test("Dashboard report shortcuts preserve their own report destinations", async 
   await expect(page.getByText(/موجودی قابل عرضه: ۲/)).toBeVisible();
   await expect(page.getByRole("link", { name: "بازکردن کمبود موجودی" })).toHaveAttribute("href", "/inventory?section=low-stock");
   await expect(page.getByRole("link", { name: "مشاهده همه گردش‌ها" })).toHaveAttribute("href", "/inventory?section=stock-flow");
+  await page.screenshot({ path: "test-results/hp06-dashboard-low-stock.png", fullPage: true });
   await page.getByRole("link", { name: "بازکردن کمبود موجودی" }).click();
   await expect(page).toHaveURL(/\/inventory\?section=low-stock$/);
   await expect(page.getByRole("heading", { name: "کمبود موجودی", exact: true })).toBeVisible();
