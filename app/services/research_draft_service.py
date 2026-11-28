@@ -11,7 +11,6 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import NotFoundError, ValidationError
 from app.models.product import Product
 from app.services.evidence_service import EvidenceService
-from app.services.product_knowledge_service import ProductKnowledgeService
 
 
 _ALLOWED_CLAIM_TYPES = {
@@ -73,8 +72,11 @@ class ResearchDraftService:
                 )
             )
 
-        # PENDING research assertions are intentionally excluded from Knowledge.
-        ProductKnowledgeService(self.db).update_from_evidence(product_id)
+        # PENDING research assertions are not a Knowledge evaluation.
+        # Do not rebuild ProductKnowledge here: even if other approved Evidence
+        # already exists, adding a draft must leave the current Knowledge snapshot
+        # unchanged. EvidenceService still rebuilds when conflict detection changes
+        # the eligibility of existing Evidence.
         return created
 
     @staticmethod
