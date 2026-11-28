@@ -325,3 +325,27 @@ def test_market_neutral_mode_does_not_bypass_product_identity_or_qa_review():
     )
     assert wrong_product_item["status"] == "PARTIAL"
     assert pending_item["status"] == "PARTIAL"
+
+
+
+def test_claim_type_conflict_is_reported_without_conflict_status():
+    evidence = [SimpleNamespace(
+        claim_id="claim-1", product_id="synthetic-product",
+        market_region="EU", conflict_status="NONE",
+        claim_type="CONFLICT", qa_status="PENDING",
+    )]
+    report = build_product_knowledge_gap_report(_pk(), evidence)
+    item = next(entry for entry in report if entry["field"] == "evidence_refs")
+    assert item["status"] == "CONFLICT"
+
+
+def test_market_neutral_gap_report_surfaces_foreign_market_claim_type_conflict():
+    evidence = [SimpleNamespace(
+        claim_id="claim-1", product_id="synthetic-product",
+        market_region="US", conflict_status="NONE",
+        claim_type="CONFLICT", qa_status="PENDING",
+    )]
+    report = build_product_knowledge_gap_report(_pk(), evidence, market_neutral=True)
+    item = next(entry for entry in report if entry["field"] == "evidence_refs")
+    assert item["status"] == "CONFLICT"
+    assert "صرف‌نظر از بازار" in item["message"]

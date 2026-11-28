@@ -146,6 +146,8 @@ def build_product_knowledge_gap_report(
             if any(
                 (getattr(by_claim[ref], "conflict_status", None) or "").strip().upper()
                 == "CONFLICT"
+                or (getattr(by_claim[ref], "claim_type", None) or "").strip().upper()
+                == "CONFLICT"
                 for ref in in_scope_refs
             ):
                 report.append({
