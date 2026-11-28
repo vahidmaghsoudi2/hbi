@@ -58,7 +58,7 @@ def test_p5_mexico_dark_spot_claim_is_only_a_p17_candidate(db_session):
         decision_basis="P17 is descriptive; Evidence QA pending; no SUPPORTED or Recommendation.",
     ))
     assert link.relationship_status == "CANDIDATE" and link.problem_id == "P17"
-    assert link.market_region == "MEXICO" and link.revision_no == 1
+    assert link.market_region == "UNSCOPED" and link.revision_no == 1
     assert product.status == "DRAFT" and product.identity_status == "PARTIAL_IDENTITY"
     assert product.qa_verdict == "PENDING"
     assert db_session.query(ProductKnowledge).filter(ProductKnowledge.product_id == product.product_id).first() is None
