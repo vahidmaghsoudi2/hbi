@@ -13,6 +13,7 @@ import json
 import os
 import socket
 import sqlite3
+from contextlib import closing
 import subprocess
 import sys
 import tempfile
@@ -148,7 +149,7 @@ def _export_database_readback(db_path: Path, output_path: Path) -> dict[str, int
     if db_path.is_symlink() or not db_path.is_file():
         raise RuntimeError(f"isolated database is missing or unsafe: {db_path}")
     uri = db_path.resolve().as_uri() + "?mode=ro"
-    with sqlite3.connect(uri, uri=True, timeout=5) as connection:
+    with closing(sqlite3.connect(uri, uri=True, timeout=5)) as connection:
         connection.row_factory = sqlite3.Row
         integrity = connection.execute("PRAGMA integrity_check").fetchone()[0]
         if integrity != "ok":
@@ -329,6 +330,15 @@ def _finalize_evidence(
 
 def _remove_disposable_db(session_dir: Path, db_path: Path) -> bool:
     """Remove only the exact session database and sidecars after evidence is finalized."""
+    # Ensure SQLite WAL contents are checkpointed before deleting the disposable DB.
+    try:
+        if db_path.is_file() and not db_path.is_symlink():
+            with closing(sqlite3.connect(str(db_path), timeout=5)) as connection:
+                connection.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+    except sqlite3.Error as exc:
+        print(f"CLEANUP ERROR: SQLite checkpoint failed: {exc}", flush=True)
+        return False
+
     for suffix in ("", "-wal", "-shm", "-journal"):
         candidate = Path(str(db_path) + suffix)
         try:
