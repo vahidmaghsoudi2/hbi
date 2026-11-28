@@ -44,7 +44,13 @@ class ProductProblemCandidateRetrievalService:
         market_region: Optional[str] = None,
         variant: Optional[str] = None,
     ) -> Dict[str, Any]:
+        """Retrieve candidates without applying market as a decision filter.
+
+        market_region is retained as request context for API compatibility.
+        Product, Evidence, and link markets remain separate provenance fields.
+        """
         problem_id = self._normalize_problem_id(problem_id)
+        requested_market_region = (market_region or "").strip().upper() or None
         variant_filter = self._known_scope(variant)
         if variant_filter and variant_filter not in {"COLOR", "NON_COLOR"}:
             raise ValidationError("variant filter must be COLOR or NON_COLOR.")
@@ -84,6 +90,7 @@ class ProductProblemCandidateRetrievalService:
                 "product_id": product.product_id,
                 "brand": product.brand,
                 "product_name": product.product_name,
+                "product_market_region": product.market_region,
                 "product_identity_status": product.identity_status,
                 "product_qa_verdict": product.qa_verdict,
                 "product_lifecycle_status": product.status,
@@ -120,6 +127,9 @@ class ProductProblemCandidateRetrievalService:
             "problem_id": problem_id,
             "problem_map_version": self.PROBLEM_MAP_VERSION,
             "retrieval_mode": "CURRENT_CANDIDATES_ONLY",
+            "market_scope_mode": "MARKET_NEUTRAL",
+            "market_filter_applied": False,
+            "requested_market_region": requested_market_region,
             "review_gate": "HUMAN_REVIEW_ONLY",
             "recommendation_eligible": False,
             "candidate_count": len(candidates),
