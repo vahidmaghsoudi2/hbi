@@ -59,6 +59,8 @@ from app.models.evidence import Evidence
 from app.models.inventory import Inventory
 from app.models.product import Product
 from app.models.product_knowledge import ProductKnowledge
+from app.models.product_problem_link import ProductProblemLink
+from app.services.product_problem_link_service import ProductProblemLinkService
 
 init_db()
 db = SessionLocal()
@@ -73,7 +75,6 @@ try:
         ("HBI-PROD-7F55ED88F41144F1", "SKIN1004", "Madagascar Centella Hyalu-Cica Water-Fit Sun Serum"),
         ("HBI-PROD-96788ADC488942E3", "ISDIN", "FotoUltra 100 Active Unify SPF50+"),
         ("HBI-PROD-70EEE418BE0F4DAB", "Clinique", "Even Better Clinical Radical Dark Spot Corrector + Interrupter (historical target)"),
-        ("HBI-PROD-22C55A8223A945A6", "Anua", "Azelaic Acid 10% + Hyaluron Redness Soothing Serum"),
     ]
     for product_id, brand, product_name in canonical_skin_products:
         if db.get(Product, product_id) is None:
@@ -133,6 +134,57 @@ try:
             qa_status="APPROVED",
             conflict_status="NONE",
         ))
+    # Synthetic candidate fixture: exercises the human-review gate only.
+    # This is isolated test data on one of the six canonical in-scope products.
+    candidate_product = db.get(Product, "HBI-PROD-FE320FA135B843B6")
+    candidate_product.identity_status = "VERIFIED"
+    candidate_product.qa_verdict = "VALID"
+    candidate_product.status = "ACTIVE"
+    candidate_evidence = db.get(Evidence, "EV-PILOT-BROWSER-CANDIDATE-001")
+    if candidate_evidence is None:
+        candidate_evidence = Evidence(
+            evidence_id="EV-PILOT-BROWSER-CANDIDATE-001",
+            product_id=candidate_product.product_id,
+            claim_id="CLM-PILOT-BROWSER-CANDIDATE-001",
+            source_type="INDEPENDENT",
+            source_reference="TEST-ONLY-SYNTHETIC-CANDIDATE",
+            claim="Synthetic browser-test claim; not manufacturer or product efficacy evidence.",
+            field="claim",
+            market_region="US",
+            claim_type="FACT",
+            evidence_status="SUPPORTED",
+            evidence_strength="VERIFIED",
+            qa_status="VERIFIED",
+            conflict_status="NONE",
+        )
+        db.add(candidate_evidence)
+        db.flush()
+    candidate_link = db.query(ProductProblemLink).filter_by(
+        product_id=candidate_product.product_id,
+        evidence_id=candidate_evidence.evidence_id,
+        problem_id="P17",
+    ).first()
+    if candidate_link is None:
+        ProductProblemLinkService(db).create_link(
+            product_id=candidate_product.product_id,
+            evidence_id=candidate_evidence.evidence_id,
+            claim_id=candidate_evidence.claim_id,
+            problem_id="P17",
+            problem_type="Synthetic browser-test presentation",
+            problem_definition_ref="TEST_ONLY_SYNTHETIC_P17",
+            relationship_role="presentation",
+            relationship_status="CANDIDATE",
+            feature_basis="Synthetic test-only feature basis.",
+            outcome="No efficacy or suitability assertion; browser workflow fixture only.",
+            semantic_basis="Synthetic candidate to exercise the human-review gate.",
+            limitations="Test fixture only; not product evidence and not a clinical conclusion.",
+            decision_basis="Must remain HUMAN_REVIEW_REQUIRED and recommendation_eligible=false.",
+            reason="Disposable Playwright candidate gate proof.",
+            idempotency_key="pilot-browser-candidate-p17-001",
+            problem_map_version="SKIN_PROBLEM_SPACE_MAP_V0.1",
+            variant="NON_COLOR",
+            market_region="US",
+        )
     if db.get(Customer, "CUST-PILOT-1") is None:
         db.add(Customer(customer_id="CUST-PILOT-1", name="Browser Pilot User"))
     db.commit()
