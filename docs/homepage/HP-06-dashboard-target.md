@@ -1,45 +1,55 @@
 # HP-06 — Target for Gallery Home Page 1 (Dashboard)
 
-**Status:** OPEN  
+**Status:** DONE — implementation and exact-head verification complete on PR #674; master integration pending  
 **Authority:** Product Owner direction 2026-11-15 + previously supplied system diagram  
 **Related:** HOMEPAGE_COMPLETION_LEDGER.md (HP-06)
 
-## Goal
+## Goal and section structure
 
-Make the first page of the HBI gallery homepage (the operational dashboard shown when the user enters «خانه و داشبورد») match the structure of the approved diagram:
+The first gallery-home page has four operational sections in order:
 
-1. **Top system map** (already largely reflected by the nine main-menu cards)
-2. **Operational dashboard panel** containing:
-   - KPI cards (live data only — sales today, consultations today if available, monthly sales, low-stock count)
-   - Quick-action buttons (ثبت فروش مستقیم، مشاوره جدید، ثبت مشتری جدید، ثبت خرید / ورود کالا)
-   - Attention / نیازمند توجه list (real items only: incomplete consultations, low stock, products waiting QA, etc.)
-   - Recent activity table (fed from real recent movements / sales / consultations — no fake rows)
-3. **Domain relationship map** (optional secondary view or collapsible section; not required for the first landing view)
+1. KPI strip — live today/month sales, low-stock count, and inventory report rows.
+2. Quick Actions — direct sale, new consultation, new customer, purchase/stock-in.
+3. Attention — real low-stock rows from the existing endpoint only.
+4. Recent Activity — latest real stock movements from the existing endpoint (up to eight).
 
-## Constraints (from existing ADR)
+The top system map is the existing nine main-menu cards. The full domain relationship map remains optional and outside this bounded completion.
 
-- No fake data or placeholder counters.
-- Only LIVE / PARTIALLY_CONNECTED / PLANNED states.
-- Reuse existing backend contracts (`getSalesPeriod`, `getLowStockReport`, `getStockMovements`, etc.).
-- Do not invent new status fields.
+## Constraints
 
-## Current baseline in `NewHomePage.tsx`
+- No fake data or placeholder counters/rows.
+- Only existing live endpoints and data contracts; no new endpoints.
+- No invented status fields.
+- Consultation-incomplete and product-QA-pending counts are omitted because no approved aggregate endpoint exists.
+- No ProductKnowledge, Evidence, lifecycle, or recommendation changes.
 
-- Main menu cards already cover the seven top-level domains + encyclopedia + product management.
-- Home panel already loads live sales / inventory / low-stock / movements.
-- Quick actions for sales, customers and consultation exist.
-- Missing or incomplete relative to the diagram: structured recent-activity table, clearer attention list, explicit “consultations today” KPI if a real endpoint exists, and visual hierarchy closer to the supplied mock.
+## Implemented
 
-## Implementation sequence (after HP-05 lands)
+- Existing KPI refresh/live data loading retained.
+- Quick-action section header and hierarchy clarified.
+- Attention block shows total low-stock count and up to five product IDs with available quantity; remaining count shown when needed.
+- Low-stock report failure renders UNKNOWN/unavailable rather than falsely asserting zero items.
+- Recent Activity remains a real movements table driven only by `dashboardMovements`, with an explicit eight-record limit.
+- Browser regression covers low-stock details, report destination, and unavailable-report state.
+- A full-page dashboard screenshot is captured by Playwright as `test-results/hp06-dashboard-low-stock.png` and included in the workflow artifact.
 
-1. Apply the logout-removal patch (HP-05).
-2. Strengthen the existing home panel layout to match the diagram sections without removing any live data paths.
-3. Add a real recent-activity table driven by `dashboardMovements` (and any other already-available recent records).
-4. Expand the attention list using only data that is already fetched or can be fetched with existing contracts.
-5. Browser evidence + update this file and the Ledger when done.
+## Acceptance — VERIFIED on PR #674 head
 
-## Non-goals for this stage
+- [x] Live data only; no fabricated KPI or rows.
+- [x] KPI strip → Quick Actions → Attention → Recent Activity are clearly labelled.
+- [x] Recent Activity is driven only by existing live stock movements.
+- [x] Attention is driven only by real low-stock data available from the existing report; unavailable is distinct from zero.
+- [x] No backend endpoint added.
+- [x] Existing KPI loading preserved.
+- [x] Browser proof and screenshot evidence attached to workflow artifact.
 
-- Building the full domain-relationship interactive map as a separate page.
-- Adding new backend endpoints solely for decorative KPIs.
-- Changing the main-menu information architecture beyond what is already observed.
+## Exact verification
+
+- Commit: `152d00b5a2ad64826a6e25a7731416569b8f6310`
+- [HBI CI](https://github.com/vahidmaghsoudi2/hbi/actions/runs/46177764454): **1,076 passed, 829 warnings, 2 subtests passed; 89% coverage**, frontend build and G8 regression/governance jobs successful.
+- [HBI Auto Tasks](https://github.com/vahidmaghsoudi2/hbi/actions/runs/46177764438): successful.
+- [HBI Pilot Browser Proof](https://github.com/vahidmaghsoudi2/hbi/actions/runs/46177764505): **29 passed**, including HP-06 live-low-stock and unavailable-state checks; screenshot evidence uploaded.
+
+## Integration boundary
+
+This item is DONE on the verified PR branch. PR #674 remains open pending review/merge; this ledger does not authorize merging. Local Windows runtime/database validation is not claimed. No further homepage work is authorized until integration; next priority is the Skin Intake Template Forms V1 baseline.
