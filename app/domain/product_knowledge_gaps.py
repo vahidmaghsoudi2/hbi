@@ -78,6 +78,7 @@ def build_product_knowledge_gap_report(
     pk: Any,
     evidences: Optional[List[Any]] = None,
     product_market_region: Optional[str] = None,
+    market_neutral: bool = False,
 ) -> List[Dict[str, str]]:
     """Return field-level status records without mutating any model or data."""
     evidences = evidences or []
@@ -117,33 +118,45 @@ def build_product_knowledge_gap_report(
                 })
                 continue
 
-            product_market = (
-                product_market_region or getattr(pk, "market_region", None) or ""
-            ).strip().casefold()
-            in_scope_refs = []
-            scope_unknown = False
-            scope_mismatch = False
-            for ref in refs:
-                evidence_market = (
-                    getattr(by_claim[ref], "market_region", None) or ""
+            if market_neutral:
+                # Market is provenance only: every reference for this product
+                # remains in scope, including references with unknown markets.
+                in_scope_refs = refs
+                scope_unknown = False
+                scope_mismatch = False
+            else:
+                product_market = (
+                    product_market_region or getattr(pk, "market_region", None) or ""
                 ).strip().casefold()
-                if not product_market or not evidence_market:
-                    scope_unknown = True
-                elif product_market != evidence_market:
-                    scope_mismatch = True
-                else:
-                    in_scope_refs.append(ref)
+                in_scope_refs = []
+                scope_unknown = False
+                scope_mismatch = False
+                for ref in refs:
+                    evidence_market = (
+                        getattr(by_claim[ref], "market_region", None) or ""
+                    ).strip().casefold()
+                    if not product_market or not evidence_market:
+                        scope_unknown = True
+                    elif product_market != evidence_market:
+                        scope_mismatch = True
+                    else:
+                        in_scope_refs.append(ref)
 
-            # An explicit in-scope conflict is more important than QA status.
-            # Unknown or foreign-market conflicts must not leak into this scope.
+            # Any in-scope conflict takes precedence over QA status.
             if any(
                 (getattr(by_claim[ref], "conflict_status", None) or "").strip().upper()
+                == "CONFLICT"
+                or (getattr(by_claim[ref], "claim_type", None) or "").strip().upper()
                 == "CONFLICT"
                 for ref in in_scope_refs
             ):
                 report.append({
                     "field": field, "label": label, "status": "CONFLICT",
-                    "message": "در مراجع شواهد همین محصول و بازار تعارض ثبت شده است.",
+                    "message": (
+                        "در مراجع شواهد همین محصول، صرف‌نظر از بازار، تعارض ثبت شده است."
+                        if market_neutral
+                        else "در مراجع شواهد همین محصول و بازار تعارض ثبت شده است."
+                    ),
                 })
                 continue
 
@@ -173,7 +186,11 @@ def build_product_knowledge_gap_report(
 
             report.append({
                 "field": field, "label": label, "status": "SUPPORTED",
-                "message": "مراجع به شواهد تأییدشده همین محصول و بازار متصل شدند؛ ردیابی نسخه بسته‌بندی در مدل فعلی قابل اثبات نیست.",
+                "message": (
+                    "مراجع به شواهد QA تأییدشده همین محصول متصل شدند؛ بازار صرفاً provenance است و ردیابی نسخه بسته‌بندی در مدل فعلی قابل اثبات نیست."
+                    if market_neutral
+                    else "مراجع به شواهد تأییدشده همین محصول و بازار متصل شدند؛ ردیابی نسخه بسته‌بندی در مدل فعلی قابل اثبات نیست."
+                ),
             })
             continue
 
@@ -202,10 +219,13 @@ def evaluate_product_knowledge_completeness(
     pk: Any,
     evidences: Optional[List[Any]] = None,
     product_market_region: Optional[str] = None,
+    market_neutral: bool = False,
 ) -> Dict[str, Any]:
     """Return completeness and field-level gaps; never decide candidate eligibility."""
     report = build_product_knowledge_gap_report(
-        pk, evidences, product_market_region=product_market_region
+        pk, evidences,
+        product_market_region=product_market_region,
+        market_neutral=market_neutral,
     )
     incomplete = [item for item in report if item["status"] != "SUPPORTED"]
     missing_domains = [

@@ -269,3 +269,98 @@ def test_service_guard_rejects_zero_sellable_missing_and_out_of_stock(db_session
 
     assert recs == []
     assert db_session.query(Recommendation).filter_by(case_id=case.case_id).count() == 0
+
+
+
+def test_recommendation_reasoning_is_market_neutral_and_keeps_all_conflicts(db_session):
+    customer = Customer(customer_id="CUST-MN-001", name="Market Neutral Customer")
+    case = Case(
+        case_id="CASE-MN-001",
+        customer_id=customer.customer_id,
+        case_type="SKIN",
+    )
+    product = Product(
+        product_id="PROD-MN-001",
+        brand="HBI Market Neutral Test",
+        product_name="Market Neutral Test Product",
+        market_region="EU",
+        product_line="SKIN",
+        identity_status="VERIFIED",
+        identity_confidence=1.0,
+        qa_verdict="VALID",
+        status="ACTIVE",
+    )
+    claim_ids = [f"CLAIM-MN-{index}" for index in range(1, 7)]
+    knowledge = ProductKnowledge(
+        product_knowledge_id="PK-PROD-MN-001",
+        product_id=product.product_id,
+        ingredients="glycerin",
+        known_use_cases="sun protection",
+        claimed_benefits="market-neutral regression test",
+        usage_instructions="apply daily",
+        contraindications="avoid eye area",
+        evidence_refs=json.dumps(claim_ids),
+        evidence_status="SUPPORTED",
+        domain_evidence_status=json.dumps({
+            "ingredients": "SUPPORTED",
+            "known_use_cases": "SUPPORTED",
+            "usage_instructions": "SUPPORTED",
+            "contraindications": "SUPPORTED",
+        }),
+        knowledge_confidence=1.0,
+    )
+    evidence_rows = []
+    evidence_markets = ["US", "MEXICO", None, "JAPAN", "UK", "CANADA"]
+    for index, (claim_id, market) in enumerate(zip(claim_ids, evidence_markets), start=1):
+        is_conflict = index in {4, 5}
+        evidence_rows.append(Evidence(
+            evidence_id=f"EV-MN-{index}",
+            product_id=product.product_id,
+            claim_id=claim_id,
+            source_type="OFFICIAL_MANUFACTURER",
+            source_reference=f"test://market-neutral/{index}",
+            claim=f"market-neutral claim {index}",
+            field="claimed_benefits",
+            market_region=market,
+            claim_type="CONFLICT" if index == 6 else "BENEFIT",
+            evidence_strength="HIGH",
+            qa_status="PENDING" if index == 5 else "APPROVED",
+            conflict_status="CONFLICT" if is_conflict else "NONE",
+        ))
+    inventory = Inventory(
+        inventory_id="INV-PROD-MN-001",
+        product_id=product.product_id,
+        quantity_available=10,
+        quantity_reserved=0,
+        quantity_damaged=0,
+        stock_status="active",
+        sale_price_usd=10.0,
+    )
+    db_session.add_all([customer, case, product, knowledge, *evidence_rows])
+    db_session.commit()
+    db_session.add(inventory)
+    db_session.commit()
+    _record_skin_consultation_answer(db_session, case, value="sun_protection")
+
+    returned = RecommendationService(db_session).generate_recommendations(
+        case.case_id,
+        {"concerns": "ضدآفتاب"},
+    )
+
+    assert returned == []
+    persisted = db_session.query(Recommendation).filter_by(
+        case_id=case.case_id, product_id=product.product_id
+    ).one()
+    assert persisted.evidence_score == 0.6
+    assert persisted.eligibility_status == "INELIGIBLE_PENDING_REVIEW"
+    assert "Evidence items considered: 6" in persisted.ranking_reasons
+    assert "Conflicts detected: 3" in persisted.ranking_reasons
+    assert "product_conflicts=3" in persisted.ranking_reasons
+    evidence_trace = json.loads(persisted.evidence_refs)
+    assert {
+        item["evidence_id"]: item["market_region"]
+        for item in evidence_trace
+    } == {
+        f"EV-MN-{index}": market
+        for index, market in enumerate(evidence_markets, start=1)
+    }

@@ -267,3 +267,85 @@ def test_absent_pk_record_uses_one_severe_warning_with_safety_meaning():
     assert "هشدار جدی PK" in warnings[0]
     assert "هر پنج حوزه نامعلوم‌اند" in warnings[0]
     assert "این به معنی نبود منع مصرف نیست" in warnings[0]
+
+
+
+def test_market_neutral_mode_accepts_approved_evidence_from_another_market():
+    evidence = [SimpleNamespace(
+        claim_id="claim-1", product_id="synthetic-product",
+        market_region="US", conflict_status="NONE", qa_status="APPROVED"
+    )]
+    report = build_product_knowledge_gap_report(_pk(), evidence, market_neutral=True)
+    item = next(entry for entry in report if entry["field"] == "evidence_refs")
+    assert item["status"] == "SUPPORTED"
+    assert "بازار صرفاً provenance است" in item["message"]
+
+
+def test_market_neutral_mode_accepts_approved_evidence_with_unknown_market():
+    evidence = [SimpleNamespace(
+        claim_id="claim-1", product_id="synthetic-product",
+        market_region=None, conflict_status="NONE", qa_status="VERIFIED"
+    )]
+    result = evaluate_product_knowledge_completeness(
+        _pk(), evidence, market_neutral=True
+    )
+    assert result["status"] == "complete"
+    assert result["missing_domains"] == []
+
+
+def test_market_neutral_mode_surfaces_conflict_from_any_market_before_qa():
+    evidence = [SimpleNamespace(
+        claim_id="claim-1", product_id="synthetic-product",
+        market_region="US", conflict_status="CONFLICT", qa_status="PENDING"
+    )]
+    report = build_product_knowledge_gap_report(_pk(), evidence, market_neutral=True)
+    item = next(entry for entry in report if entry["field"] == "evidence_refs")
+    assert item["status"] == "CONFLICT"
+    assert "صرف‌نظر از بازار" in item["message"]
+
+
+def test_market_neutral_mode_does_not_bypass_product_identity_or_qa_review():
+    wrong_product = [SimpleNamespace(
+        claim_id="claim-1", product_id="another-product",
+        market_region="US", conflict_status="NONE", qa_status="APPROVED"
+    )]
+    pending = [SimpleNamespace(
+        claim_id="claim-1", product_id="synthetic-product",
+        market_region="US", conflict_status="NONE", qa_status="PENDING"
+    )]
+    wrong_product_item = next(
+        item for item in build_product_knowledge_gap_report(
+            _pk(), wrong_product, market_neutral=True
+        ) if item["field"] == "evidence_refs"
+    )
+    pending_item = next(
+        item for item in build_product_knowledge_gap_report(
+            _pk(), pending, market_neutral=True
+        ) if item["field"] == "evidence_refs"
+    )
+    assert wrong_product_item["status"] == "PARTIAL"
+    assert pending_item["status"] == "PARTIAL"
+
+
+
+def test_claim_type_conflict_is_reported_without_conflict_status():
+    evidence = [SimpleNamespace(
+        claim_id="claim-1", product_id="synthetic-product",
+        market_region="EU", conflict_status="NONE",
+        claim_type="CONFLICT", qa_status="PENDING",
+    )]
+    report = build_product_knowledge_gap_report(_pk(), evidence)
+    item = next(entry for entry in report if entry["field"] == "evidence_refs")
+    assert item["status"] == "CONFLICT"
+
+
+def test_market_neutral_gap_report_surfaces_foreign_market_claim_type_conflict():
+    evidence = [SimpleNamespace(
+        claim_id="claim-1", product_id="synthetic-product",
+        market_region="US", conflict_status="NONE",
+        claim_type="CONFLICT", qa_status="PENDING",
+    )]
+    report = build_product_knowledge_gap_report(_pk(), evidence, market_neutral=True)
+    item = next(entry for entry in report if entry["field"] == "evidence_refs")
+    assert item["status"] == "CONFLICT"
+    assert "صرف‌نظر از بازار" in item["message"]

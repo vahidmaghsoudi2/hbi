@@ -334,7 +334,7 @@ def test_malformed_pk_evidence_refs_warn_but_do_not_remove_candidate(db_session)
     assert any("مراجع شواهد" in warning for warning in warnings)
 
 
-def test_recommendation_service_scopes_evidence_and_conflicts_to_product_market(db_session):
+def test_recommendation_service_passes_all_market_evidence_and_conflicts_to_reasoning_engine(db_session):
     _seed_case_and_products(db_session, ["PROD_MARKET_SCOPE"])
     svc = _svc_with_real_db(db_session)
     product = SimpleNamespace(product_id="PROD_MARKET_SCOPE", market_region="EU")
@@ -384,10 +384,15 @@ def test_recommendation_service_scopes_evidence_and_conflicts_to_product_market(
     svc.generate_recommendations("CASE1", {"concerns": "dry skin"})
 
     kwargs = svc.reasoning_engine.run.call_args.kwargs
-    assert kwargs["evidence_score"] == 1.0
+    assert kwargs["evidence_score"] == 0.6
     assert [item["evidence_id"] for item in kwargs["evidence_list"]] == [
-        "EV-EU-APPROVED", "EV-EU-CONFLICT"
+        "EV-EU-APPROVED",
+        "EV-US-APPROVED",
+        "EV-UNKNOWN-APPROVED",
+        "EV-US-CONFLICT",
+        "EV-EU-CONFLICT",
     ]
     assert [item["evidence_refs"][0] for item in kwargs["existing_conflicts"]] == [
-        "EV-EU-CONFLICT"
+        "EV-US-CONFLICT",
+        "EV-EU-CONFLICT",
     ]

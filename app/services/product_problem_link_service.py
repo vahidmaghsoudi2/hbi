@@ -108,16 +108,14 @@ class ProductProblemLinkService:
             raise ValidationError("Evidence must belong to the same product as the link.")
         if not evidence.claim_id or evidence.claim_id != data["claim_id"]:
             raise ValidationError("claim_id must exactly match the selected Evidence claim_id.")
-        if (evidence.conflict_status or "NONE").strip().upper() == "CONFLICT":
+        if (
+            (evidence.conflict_status or "NONE").strip().upper() == "CONFLICT"
+            or (evidence.claim_type or "").strip().upper() == "CONFLICT"
+        ):
             raise ValidationError("Conflicted Evidence cannot anchor a ProductProblemLink.")
         if (evidence.qa_status or "PENDING").strip().upper() == "REJECTED":
             raise ValidationError("Rejected Evidence cannot anchor a ProductProblemLink.")
-        product_market = (product.market_region or "").strip().upper()
-        evidence_market = (evidence.market_region or "").strip().upper()
-        if product_market and product_market != "UNKNOWN" and product_market != data["market_region"]:
-            raise ValidationError("Link market_region does not match the Product market.")
-        if evidence_market and evidence_market != "UNKNOWN" and evidence_market != data["market_region"]:
-            raise ValidationError("Link market_region does not match the Evidence market.")
+
 
     def _existing_idempotent(self, key, fingerprint):
         existing = self.repository.find_by_idempotency_key(key)

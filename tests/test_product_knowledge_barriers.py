@@ -365,3 +365,18 @@ def test_evidence_without_market_is_not_assigned_to_product_market(db):
     assert pk.ingredients is None
     domains = json.loads(pk.domain_evidence_status or "{}")
     assert domains["ingredients"] == "PARTIAL"
+
+
+
+def test_claim_type_conflict_blocks_primary_product_knowledge_domain(db):
+    _seed_product(db, pid="P-CLAIM-TYPE-CONFLICT", market="UK", packaging="v1")
+    _ev(
+        db, pid="P-CLAIM-TYPE-CONFLICT", eid="E-CLAIM-TYPE-CONFLICT",
+        field="ingredients", claim="Niacinamide", market="UK", qa="VERIFIED",
+        conflict="NONE", claim_type="CONFLICT",
+    )
+    pk = ProductKnowledgeService(db).update_from_evidence("P-CLAIM-TYPE-CONFLICT")
+    assert pk.ingredients is None
+    domains = json.loads(pk.domain_evidence_status or "{}")
+    assert domains["ingredients"] == "CONFLICT"
+    assert pk.evidence_status == "CONFLICT"

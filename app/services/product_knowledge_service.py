@@ -147,6 +147,7 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
         evidences = self.evidence_repo.find_by_product(product_id)
         if any(
             (getattr(ev, "conflict_status", None) or "NONE").strip().upper() == "CONFLICT"
+            or (getattr(ev, "claim_type", None) or "").strip().upper() == "CONFLICT"
             for ev in evidences
         ):
             return knowledge
@@ -200,6 +201,7 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
 
         evaluated = any(
             (getattr(ev, "conflict_status", None) or "NONE").strip().upper() == "CONFLICT"
+            or (getattr(ev, "claim_type", None) or "").strip().upper() == "CONFLICT"
             or (getattr(ev, "qa_status", None) or "").strip().upper() in (
                 self._QA_APPROVED | frozenset({"REJECTED", "INVALID", "NEEDS_REVIEW"})
             )
@@ -274,7 +276,8 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
             field_l = field.lower()
             claim = (ev.claim or "").strip()
 
-            if conflict == "CONFLICT":
+            claim_type = (getattr(ev, "claim_type", None) or "").strip().upper()
+            if conflict == "CONFLICT" or claim_type == "CONFLICT":
                 touch_domain(field_l or "general", conflict=True, evaluated=True)
                 return
 
@@ -383,8 +386,11 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
                 # conflict verdict into this ProductKnowledge scope. It can,
                 # however, make an otherwise populated domain PARTIAL because
                 # potentially relevant evidence was deliberately excluded.
+                claim_type = (getattr(ev, "claim_type", None) or "").strip().upper()
                 if field_l in BLOCKING_KNOWLEDGE_FIELDS and (
-                    conflict == "CONFLICT" or qa in self._QA_APPROVED
+                    conflict == "CONFLICT"
+                    or claim_type == "CONFLICT"
+                    or qa in self._QA_APPROVED
                 ):
                     domain_has_out_of_scope.add(field_l)
 

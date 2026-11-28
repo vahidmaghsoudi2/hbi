@@ -44,15 +44,36 @@ test("Stage 15-16: customer consultation survives API round-trip and renders exp
   await expect(page.getByText("three weeks", { exact: false })).toBeVisible();
   await expect(page.getByText("در حال حاضر پیشنهاد واجد شرایطی وجود ندارد")).toBeVisible();
 
+  // Keep the empty-result path covered independently.
+  await page.locator("#suitability_problem_id").fill("P43");
+  const emptyResponse = page.waitForResponse((response) =>
+    response.url().includes(`/recommendations/case/${caseId}/suitability/P43`) &&
+    response.request().method() === "GET"
+  );
+  await page.getByRole("button", { name: "بررسی و نمایش دلایل" }).click();
+  expect((await emptyResponse).status()).toBe(200);
+  await expect(page.getByText("کاندیدای جاری: 0")).toBeVisible();
+  await expect(page.getByText(/این نتیجه به معنی نامناسب بودن محصول نیست/)).toBeVisible();
+
+  // Positive browser path: candidate is visible but never becomes a recommendation.
   await page.locator("#suitability_problem_id").fill("P17");
   const suitabilityResponse = page.waitForResponse((response) =>
     response.url().includes(`/recommendations/case/${caseId}/suitability/P17`) &&
     response.request().method() === "GET"
   );
   await page.getByRole("button", { name: "بررسی و نمایش دلایل" }).click();
-  expect((await suitabilityResponse).status()).toBe(200);
-  await expect(page.getByText("کاندیدای جاری: 0")).toBeVisible();
-  await expect(page.getByText(/این نتیجه به معنی نامناسب بودن محصول نیست/)).toBeVisible();
+  const candidateResponse = await suitabilityResponse;
+  expect(candidateResponse.status()).toBe(200);
+  const suitabilityBody = await candidateResponse.json();
+  expect(suitabilityBody.candidate_count).toBe(1);
+  expect(suitabilityBody.recommendation_eligible).toBe(false);
+  expect(suitabilityBody.candidates[0].review_gate).toBe("HUMAN_REVIEW_ONLY");
+  expect(suitabilityBody.candidates[0].suitability_status).toBe("HUMAN_REVIEW_REQUIRED");
+  expect(suitabilityBody.candidates[0].product_gate_blockers).toEqual([]);
+  await expect(page.getByText("کاندیدای جاری: 1")).toBeVisible();
+  await expect(page.getByText("COSRX · The 6 Peptide Skin Booster Serum")).toBeVisible();
+  await expect(page.getByText("وضعیت تناسب: HUMAN_REVIEW_REQUIRED")).toBeVisible();
+  await expect(page.getByText("توصیه‌پذیر: خیر، بررسی انسانی الزامی است.")).toBeVisible();
 
   await page.locator("#suitability_problem_id").fill("P22");
   const rejectedProblem = page.waitForResponse((response) =>

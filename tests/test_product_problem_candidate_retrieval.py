@@ -88,18 +88,40 @@ def test_retrieval_returns_only_current_candidate_and_exposes_all_blockers(db_se
     }
 
 
-def test_retrieval_filters_market_and_variant_without_cross_market_fallback(db_session):
+def test_retrieval_is_market_neutral_but_keeps_variant_filter(db_session):
     _seed(db_session, "mx", market="MEXICO", variant="COLOR")
     _seed(db_session, "uk", market="UK", variant="NON_COLOR")
     service = ProductProblemCandidateRetrievalService(db_session)
 
     mexico = service.retrieve("P17", market_region="mexico", variant="COLOR")
     uk = service.retrieve("P17", market_region="UK", variant="NON_COLOR")
-    no_cross_market = service.retrieve("P17", market_region="CANADA")
+    canada = service.retrieve("P17", market_region="CANADA")
 
     assert [row["market_region"] for row in mexico["candidates"]] == ["MEXICO"]
     assert [row["market_region"] for row in uk["candidates"]] == ["UK"]
-    assert no_cross_market["candidate_count"] == 0
+    assert canada["candidate_count"] == 2
+    assert {row["market_region"] for row in canada["candidates"]} == {"MEXICO", "UK"}
+    assert canada["market_scope_mode"] == "MARKET_NEUTRAL"
+    assert canada["market_filter_applied"] is False
+    assert canada["requested_market_region"] == "CANADA"
+
+
+def test_retrieval_preserves_product_evidence_and_link_market_provenance(db_session):
+    product, evidence, link, _ = _seed(db_session, "provenance", market="MEXICO")
+    product.market_region = "EU"
+    evidence.market_region = "US"
+    link.market_region = "MEXICO"
+    db_session.flush()
+
+    result = ProductProblemCandidateRetrievalService(db_session).retrieve(
+        "P17", market_region="CANADA"
+    )
+
+    candidate = result["candidates"][0]
+    assert result["market_filter_applied"] is False
+    assert candidate["product_market_region"] == "EU"
+    assert candidate["evidence_market_region"] == "US"
+    assert candidate["market_region"] == "MEXICO"
 
 
 def test_retrieval_uses_latest_revision_and_hides_superseded_candidate(db_session):
@@ -148,7 +170,7 @@ def test_candidate_retrieval_api_is_role_protected_and_read_only(client, db_sess
     )
     response = client.get(
         "/api/v1/product-problem-links/candidates",
-        params={"problem_id": "P17"},
+        params={"problem_id": "P17", "market_region": "CANADA"},
         headers=headers,
     )
 
@@ -156,5 +178,9 @@ def test_candidate_retrieval_api_is_role_protected_and_read_only(client, db_sess
     assert response.status_code == 200, response.text
     body = response.json()
     assert body["candidate_count"] == 1
+    assert body["market_scope_mode"] == "MARKET_NEUTRAL"
+    assert body["market_filter_applied"] is False
+    assert body["requested_market_region"] == "CANADA"
+    assert body["candidates"][0]["product_market_region"] == "MEXICO"
     assert body["recommendation_eligible"] is False
     assert body["candidates"][0]["review_gate"] == "HUMAN_REVIEW_ONLY"

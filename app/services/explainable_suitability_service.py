@@ -10,6 +10,8 @@ from typing import Any, Dict, Optional
 from sqlalchemy.orm import Session
 
 from app.models.case import Case
+from app.models.evidence import Evidence
+from app.models.inventory import Inventory
 from app.models.product import Product
 from app.repositories.recommendation_repository import RecommendationRepository
 from app.services.product_problem_candidate_retrieval_service import (
@@ -72,6 +74,9 @@ class ExplainableSuitabilityService:
             "problem_id": retrieved["problem_id"],
             "problem_map_version": retrieved["problem_map_version"],
             "evaluation_mode": "EXPLAINABLE_HUMAN_REVIEW_ONLY",
+            "market_scope_mode": retrieved["market_scope_mode"],
+            "market_filter_applied": retrieved["market_filter_applied"],
+            "requested_market_region": retrieved["requested_market_region"],
             "computed_only": True,
             "recommendation_eligible": False,
             "candidate_count": retrieved["candidate_count"],
@@ -92,6 +97,55 @@ class ExplainableSuitabilityService:
         except (TypeError, ValueError):
             return []
         return decoded if isinstance(decoded, list) else []
+
+    def _is_currently_eligible(self, row, product: Optional[Product]) -> bool:
+        """Recheck mutable product, stock, and evidence gates at read time.
+
+        Recommendation.eligibility_status is an evaluation snapshot. It must not
+        outlive a later product deactivation, stock-out, or evidence conflict.
+        This projection stays read-only and never upgrades a stored row.
+        """
+        if product is None:
+            return False
+        if (product.identity_status or "").strip().upper() != "VERIFIED":
+            return False
+        if (product.qa_verdict or "").strip().upper() != "VALID":
+            return False
+        if (product.status or "").strip().upper() != "ACTIVE":
+            return False
+
+        inventory = (
+            self.db.query(Inventory)
+            .filter(Inventory.product_id == product.product_id)
+            .first()
+        )
+        if inventory is None:
+            return False
+        if (inventory.stock_status or "").strip().upper() == "OUT_OF_STOCK":
+            return False
+        available = inventory.quantity_available or 0
+        reserved = inventory.quantity_reserved or 0
+        if available - reserved <= 0:
+            return False
+
+        evidences = (
+            self.db.query(Evidence)
+            .filter(Evidence.product_id == product.product_id)
+            .all()
+        )
+        # RecommendationService treats every unresolved conflict as a hard
+        # review gate, regardless of market provenance.
+        if any(
+            (ev.conflict_status or "").strip().upper() == "CONFLICT"
+            or (ev.claim_type or "").strip().upper() == "CONFLICT"
+            for ev in evidences
+        ):
+            return False
+        has_approved_evidence = any(
+            (ev.qa_status or "").strip().upper() in {"APPROVED", "VERIFIED"}
+            for ev in evidences
+        )
+        return has_approved_evidence and (row.evidence_score or 0.0) > 0.0
 
     def consultation_output(self, case_id: str) -> Dict[str, Any]:
         """Return the visit context and only already-eligible persisted recommendations."""
@@ -119,8 +173,12 @@ class ExplainableSuitabilityService:
             reverse=True,
         )
         recommendations = []
+        excluded_stale_recommendation_count = 0
         for row in eligible_rows:
             product = self.db.get(Product, row.product_id)
+            if not self._is_currently_eligible(row, product):
+                excluded_stale_recommendation_count += 1
+                continue
             recommendations.append({
                 "recommendation_id": row.recommendation_id,
                 "product_id": row.product_id,
@@ -145,6 +203,7 @@ class ExplainableSuitabilityService:
                 if recommendations else "NO_ELIGIBLE_RECOMMENDATION"
             ),
             "recommendation_count": len(recommendations),
+            "excluded_stale_recommendation_count": excluded_stale_recommendation_count,
             "recommendations": recommendations,
             "generated_from": "PERSISTED_CASE_AND_RECOMMENDATION_RECORDS",
             "computed_only": True,

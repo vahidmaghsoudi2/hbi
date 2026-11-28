@@ -68,6 +68,7 @@ class ReasoningEngine:
                 "field": ev.get("field"),
                 "claim_type": ev.get("claim_type"),
                 "source": ev.get("source_reference") or ev.get("source"),
+                "market_region": ev.get("market_region"),
                 "source_type": ev.get("source_type"),
                 "evidence_strength": ev.get("evidence_strength"),
                 "qa_status": ev.get("qa_status"),
