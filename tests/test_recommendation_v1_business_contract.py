@@ -356,3 +356,11 @@ def test_recommendation_reasoning_is_market_neutral_and_keeps_all_conflicts(db_s
     assert "Evidence items considered: 6" in persisted.ranking_reasons
     assert "Conflicts detected: 3" in persisted.ranking_reasons
     assert "product_conflicts=3" in persisted.ranking_reasons
+    evidence_trace = json.loads(persisted.evidence_refs)
+    assert {
+        item["evidence_id"]: item["market_region"]
+        for item in evidence_trace
+    } == {
+        f"EV-MN-{index}": market
+        for index, market in enumerate(evidence_markets, start=1)
+    }
