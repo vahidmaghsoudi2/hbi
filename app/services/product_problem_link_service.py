@@ -108,7 +108,10 @@ class ProductProblemLinkService:
             raise ValidationError("Evidence must belong to the same product as the link.")
         if not evidence.claim_id or evidence.claim_id != data["claim_id"]:
             raise ValidationError("claim_id must exactly match the selected Evidence claim_id.")
-        if (evidence.conflict_status or "NONE").strip().upper() == "CONFLICT":
+        if (
+            (evidence.conflict_status or "NONE").strip().upper() == "CONFLICT"
+            or (evidence.claim_type or "").strip().upper() == "CONFLICT"
+        ):
             raise ValidationError("Conflicted Evidence cannot anchor a ProductProblemLink.")
         if (evidence.qa_status or "PENDING").strip().upper() == "REJECTED":
             raise ValidationError("Rejected Evidence cannot anchor a ProductProblemLink.")

@@ -24,12 +24,13 @@ def _product(db, product_id="PPL-PRODUCT-001", market_region=None):
 
 
 def _evidence(db, product_id, evidence_id="EV-PPL-001", claim_id="EV-PPL-CLAIM-001",
-              market_region="MEXICO", qa_status="PENDING", conflict_status="NONE"):
+              market_region="MEXICO", qa_status="PENDING", conflict_status="NONE",
+              claim_type="MANUFACTURER_CLAIM"):
     evidence = Evidence(
         evidence_id=evidence_id, product_id=product_id, claim_id=claim_id,
         source_type="MANUFACTURER", source_reference="manufacturer-data-on-file",
         claim="Manufacturer-reported reduction in visible dark-spot intensity.",
-        field="claim", market_region=market_region, claim_type="MANUFACTURER_CLAIM",
+        field="claim", market_region=market_region, claim_type=claim_type,
         evidence_status="UNKNOWN", evidence_strength="UNVERIFIED",
         qa_status=qa_status, conflict_status=conflict_status,
     )
@@ -188,6 +189,16 @@ def test_conflicted_or_rejected_evidence_cannot_anchor_a_link(db_session):
                          claim_id="EV-PPL-REJECTED-CLAIM", qa_status="REJECTED")
     with pytest.raises(ValidationError, match="Rejected Evidence"):
         ProductProblemLinkService(db_session).create_link(**_candidate_payload(product, rejected))
+    conflict_typed = _evidence(
+        db_session, product.product_id,
+        evidence_id="EV-PPL-CONFLICT-TYPE",
+        claim_id="EV-PPL-CONFLICT-TYPE-CLAIM",
+        claim_type="CONFLICT",
+    )
+    with pytest.raises(ValidationError, match="Conflicted Evidence"):
+        ProductProblemLinkService(db_session).create_link(
+            **_candidate_payload(product, conflict_typed)
+        )
     assert db_session.query(ProductProblemLink).count() == 0
 
 
