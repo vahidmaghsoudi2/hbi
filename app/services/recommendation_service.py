@@ -461,6 +461,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
                 "field": ev.field,
                 "claim_type": ev.claim_type,
                 "source_reference": ev.source_reference,
+                "market_region": getattr(ev, "market_region", None),
                 "source_type": ev.source_type,
                 "evidence_strength": ev.evidence_strength,
                 "qa_status": ev.qa_status,
