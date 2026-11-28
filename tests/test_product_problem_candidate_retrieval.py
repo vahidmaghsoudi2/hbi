@@ -170,7 +170,7 @@ def test_candidate_retrieval_api_is_role_protected_and_read_only(client, db_sess
     )
     response = client.get(
         "/api/v1/product-problem-links/candidates",
-        params={"problem_id": "P17"},
+        params={"problem_id": "P17", "market_region": "CANADA"},
         headers=headers,
     )
 
@@ -178,5 +178,9 @@ def test_candidate_retrieval_api_is_role_protected_and_read_only(client, db_sess
     assert response.status_code == 200, response.text
     body = response.json()
     assert body["candidate_count"] == 1
+    assert body["market_scope_mode"] == "MARKET_NEUTRAL"
+    assert body["market_filter_applied"] is False
+    assert body["requested_market_region"] == "CANADA"
+    assert body["candidates"][0]["product_market_region"] == "MEXICO"
     assert body["recommendation_eligible"] is False
     assert body["candidates"][0]["review_gate"] == "HUMAN_REVIEW_ONLY"
