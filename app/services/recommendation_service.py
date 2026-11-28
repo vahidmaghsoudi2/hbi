@@ -245,6 +245,7 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
             ev for ev in evidences
             if (getattr(ev, "qa_status", None) or "").strip().upper() in {"APPROVED", "VERIFIED"}
             and (getattr(ev, "conflict_status", None) or "NONE").strip().upper() == "NONE"
+            and (getattr(ev, "claim_type", None) or "").strip().upper() != "CONFLICT"
         ]
         if not approved_evidences:
             return 0.0
@@ -392,7 +393,8 @@ class RecommendationService(BaseService[Recommendation, RecommendationRepository
         conflicts: List[Dict[str, Any]] = []
         for ev in evidences or []:
             status = (getattr(ev, "conflict_status", None) or "").strip().upper()
-            if status != "CONFLICT":
+            claim_type = (getattr(ev, "claim_type", None) or "").strip().upper()
+            if status != "CONFLICT" and claim_type != "CONFLICT":
                 continue
             conflicts.append({
                 "field": (getattr(ev, "field", None) or "general"),

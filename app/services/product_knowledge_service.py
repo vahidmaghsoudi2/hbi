@@ -34,11 +34,11 @@ def version_scope_key(
     packaging_version: Optional[str],
 ) -> str:
     """Build an Evidence-owned scope key; never infer its market from Product."""
-    # product_market remains in the signature for compatibility with existing
-    # callers, but is deliberately not a fallback for missing Evidence scope.
-    market = (evidence_market or "").strip().upper()
+    # Market is provenance only and never partitions ProductKnowledge.
+    # Evidence currently has no independent packaging-version field, so the
+    # Product-level packaging value is retained as descriptive scope metadata.
     pack = (packaging_version or "").strip()
-    return f"market={market}|pack={pack}"
+    return f"pack={pack}"
 
 
 def _join_claims(claims: Set[str]) -> Optional[str]:
@@ -147,6 +147,7 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
         evidences = self.evidence_repo.find_by_product(product_id)
         if any(
             (getattr(ev, "conflict_status", None) or "NONE").strip().upper() == "CONFLICT"
+            or (getattr(ev, "claim_type", None) or "").strip().upper() == "CONFLICT"
             for ev in evidences
         ):
             return knowledge
@@ -200,6 +201,7 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
 
         evaluated = any(
             (getattr(ev, "conflict_status", None) or "NONE").strip().upper() == "CONFLICT"
+            or (getattr(ev, "claim_type", None) or "").strip().upper() == "CONFLICT"
             or (getattr(ev, "qa_status", None) or "").strip().upper() in (
                 self._QA_APPROVED | frozenset({"REJECTED", "INVALID", "NEEDS_REVIEW"})
             )
@@ -274,7 +276,8 @@ class ProductKnowledgeService(BaseService[ProductKnowledge, ProductKnowledgeRepo
             field_l = field.lower()
             claim = (ev.claim or "").strip()
 
-            if conflict == "CONFLICT":
+            claim_type = (getattr(ev, "claim_type", None) or "").strip().upper()
+            if conflict == "CONFLICT" or claim_type == "CONFLICT":
                 touch_domain(field_l or "general", conflict=True, evaluated=True)
                 return
 

@@ -310,7 +310,8 @@ def test_recommendation_reasoning_is_market_neutral_and_keeps_all_conflicts(db_s
         knowledge_confidence=1.0,
     )
     evidence_rows = []
-    evidence_markets = ["US", "MEXICO", None, "JAPAN", "UK"]
+    claim_ids.append("CLAIM-MN-6")
+    evidence_markets = ["US", "MEXICO", None, "JAPAN", "UK", "CANADA"]
     for index, (claim_id, market) in enumerate(zip(claim_ids, evidence_markets), start=1):
         is_conflict = index in {4, 5}
         evidence_rows.append(Evidence(
@@ -322,7 +323,7 @@ def test_recommendation_reasoning_is_market_neutral_and_keeps_all_conflicts(db_s
             claim=f"market-neutral claim {index}",
             field="claimed_benefits",
             market_region=market,
-            claim_type="BENEFIT",
+            claim_type="CONFLICT" if index == 6 else "BENEFIT",
             evidence_strength="HIGH",
             qa_status="PENDING" if index == 5 else "APPROVED",
             conflict_status="CONFLICT" if is_conflict else "NONE",
@@ -353,6 +354,6 @@ def test_recommendation_reasoning_is_market_neutral_and_keeps_all_conflicts(db_s
     ).one()
     assert persisted.evidence_score == 0.6
     assert persisted.eligibility_status == "INELIGIBLE_PENDING_REVIEW"
-    assert "Evidence items considered: 5" in persisted.ranking_reasons
-    assert "Conflicts detected: 2" in persisted.ranking_reasons
-    assert "product_conflicts=2" in persisted.ranking_reasons
+    assert "Evidence items considered: 6" in persisted.ranking_reasons
+    assert "Conflicts detected: 3" in persisted.ranking_reasons
+    assert "product_conflicts=3" in persisted.ranking_reasons
