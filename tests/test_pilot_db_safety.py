@@ -82,9 +82,13 @@ def _make_session(tmp_path: Path):
     evidence_dir.mkdir()
     (evidence_dir / "raw-http").mkdir()
     db_path = session_dir / "pilot.db"
-    with sqlite3.connect(db_path) as connection:
+    connection = sqlite3.connect(db_path)
+    try:
         connection.execute("CREATE TABLE products (id INTEGER PRIMARY KEY, name TEXT, lifecycle TEXT)")
         connection.execute("INSERT INTO products (name, lifecycle) VALUES ('Pilot-only test', 'DRAFT')")
+        connection.commit()
+    finally:
+        connection.close()
     api_log = evidence_dir / "api.log"
     api_log.write_text("startup log\n", encoding="utf-8")
     return session_dir, evidence_dir, db_path, api_log

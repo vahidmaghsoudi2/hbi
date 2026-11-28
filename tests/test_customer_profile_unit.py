@@ -1,19 +1,38 @@
 """Customer Profile unit — isolated tests (no recommendation/scoring changes)."""
 import pytest
-from app.database import SessionLocal, init_db
+from sqlalchemy import create_engine, event
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
+from app.models.base import Base
 from app.services.customer_service import CustomerService
 from app.services.case_service import CaseService
 
 
 @pytest.fixture()
 def db():
-    init_db()
-    session = SessionLocal()
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+
+    @event.listens_for(engine, "connect")
+    def _enable_foreign_keys(connection, record):
+        cursor = connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
+    Base.metadata.create_all(bind=engine)
+    Session = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+    session = Session()
+
     try:
         yield session
         session.commit()
     finally:
         session.close()
+        Base.metadata.drop_all(bind=engine)
+        engine.dispose()
 
 
 def test_register_guest_and_profile(db):
