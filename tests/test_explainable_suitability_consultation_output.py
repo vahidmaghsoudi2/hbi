@@ -303,3 +303,40 @@ def test_consultation_output_excludes_recommendations_with_stale_live_gates(db_s
     assert result["recommendation_count"] == 0
     assert result["recommendations"] == []
     assert result["excluded_stale_recommendation_count"] == 3
+
+
+
+def test_candidate_suitability_never_becomes_consultation_recommendation(db_session):
+    customer = Customer(
+        customer_id="XS-CUSTOMER-CANDIDATE-ONLY",
+        name="Candidate Only Customer",
+        consent_to_store_data=1,
+    )
+    case = Case(
+        case_id="XS-CASE-CANDIDATE-ONLY",
+        customer_id=customer.customer_id,
+        case_type="SKIN",
+    )
+    db_session.add_all([customer, case])
+    db_session.flush()
+    _seed_candidate(
+        db_session,
+        suffix="candidate-only",
+        product_state="ACTIVE",
+        qa="VALID",
+        identity="VERIFIED",
+        evidence_qa="VERIFIED",
+        variant="NON_COLOR",
+    )
+
+    suitability = ExplainableSuitabilityService(db_session).evaluate(
+        "P17", market_region="MEXICO", variant="NON_COLOR"
+    )
+    output = ExplainableSuitabilityService(db_session).consultation_output(case.case_id)
+
+    assert suitability["candidate_count"] == 1
+    assert suitability["recommendation_eligible"] is False
+    assert suitability["candidates"][0]["suitability_status"] == "HUMAN_REVIEW_REQUIRED"
+    assert output["recommendation_status"] == "NO_ELIGIBLE_RECOMMENDATION"
+    assert output["recommendation_count"] == 0
+    assert output["recommendations"] == []
