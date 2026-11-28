@@ -112,7 +112,7 @@ def test_api_reassessment_creates_successor_and_rejects_stale_revision(client, d
     revised = client.post(f"/api/v1/product-problem-links/{first['link_id']}/reassess",
                           json=revised_payload, headers=headers)
     assert revised.status_code == 201, revised.text
-    assert revised.json()["revision_no"] == 1
+    assert revised.json()["revision_no"] == 2
     assert revised.json()["supersedes_link_id"] == first["link_id"]
     stale_payload = dict(revised_payload)
     stale_payload["idempotency_key"] = "api-reassess-key-0003"

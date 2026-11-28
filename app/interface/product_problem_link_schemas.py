@@ -27,7 +27,7 @@ class ProductProblemLinkCreate(BaseModel):
     idempotency_key: str = Field(min_length=8, max_length=128)
     problem_map_version: str = Field(default="SKIN_PROBLEM_SPACE_MAP_V0.1", min_length=1, max_length=128)
     variant: Variant = "UNKNOWN"
-    market_region: str = Field(min_length=1, max_length=64)
+    market_region: str = Field(default="UNSCOPED", min_length=1, max_length=64)
 
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 

@@ -25,6 +25,8 @@ class ProductProblemLinkRepository:
         return self.db.query(ProductProblemLink).filter(ProductProblemLink.idempotency_key == key).first()
 
     def find_legacy_duplicate_scope(self, **scope) -> Optional[ProductProblemLink]:
+        # Market is legacy metadata, not part of a consultation-link identity.
+        scope.pop("market_region", None)
         return self.db.query(ProductProblemLink).filter_by(
             **scope, assertion_key=None
         ).first()
