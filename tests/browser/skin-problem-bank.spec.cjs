@@ -10,6 +10,9 @@ test("Skin problem bank renders all 61 source-backed records and searches across
 
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "فضای کاری مدیر" })).toBeVisible();
+  // Allow the homepage’s independent product bootstrap requests to settle before
+  // measuring requests caused specifically by opening the static skin-problem bank.
+  await page.waitForLoadState("networkidle");
   await page.getByRole("button", { name: "ورود به دانشنامه" }).click();
   await page.getByRole("button", { name: "ورود به دانش پوست" }).click();
   await expect(page.getByRole("heading", { name: "دانش پوست" })).toBeVisible();
