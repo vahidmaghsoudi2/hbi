@@ -1014,7 +1014,7 @@ export default function NewHomePage() {
                   </p>
                 </article>
                 <article className="pro-product-card">
-                  <h3>ردیف موجودی</h3>
+                  <h3>اقلام در گزارش موجودی</h3>
                   <p className="pro-summary">
                     {dashboardInventory ? dashboardInventory.length.toLocaleString("fa-IR") : "—"}
                   </p>
@@ -1027,7 +1027,7 @@ export default function NewHomePage() {
 
             {/* میانبرهای عملیات سریع */}
             <section aria-labelledby="dashboard-actions-title" style={{ marginTop: "1.5rem" }}>
-              <h2 id="dashboard-actions-title">میانبرهای عملیات سریع</h2>
+              <div className="pro-section-head"><h2 id="dashboard-actions-title">میانبرهای عملیات سریع</h2><span className="pro-muted">دسترسی مستقیم به عملیات اصلی</span></div>
               <div className="pro-product-grid">
                 <article className="pro-product-card">
                   <h3>ثبت فروش مستقیم</h3>
@@ -1052,27 +1052,46 @@ export default function NewHomePage() {
               </div>
             </section>
 
-            {/* نیازمند توجه */}
-            <section aria-labelledby="dashboard-alerts-title" style={{ marginTop: "1.5rem" }}>
-              <h2 id="dashboard-alerts-title">نیازمند توجه</h2>
+            {/* نیازمند توجه — فقط موارد برگشتی از گزارش زنده */}
+            <section aria-labelledby="dashboard-alerts-title" style={{ marginTop: "1.5rem", borderTop: "1px solid #dce2eb", paddingTop: "1rem" }}>
+              <div className="pro-section-head">
+                <h2 id="dashboard-alerts-title">نیازمند توجه</h2>
+                <span className="pro-muted">فقط موارد واقعی گزارش موجودی</span>
+              </div>
               <div className="pro-product-card">
-                <ul className="pro-ol" style={{ marginBottom: "0.75rem" }}>
-                  {dashboardLowStock && dashboardLowStock.length > 0 ? (
-                    <li>{dashboardLowStock.length.toLocaleString("fa-IR")} کالای با موجودی کم (≤ ۵)</li>
-                  ) : (
-                    <li className="pro-muted">کالای با موجودی کم ثبت نشده است.</li>
-                  )}
-                  <li className="pro-muted">مشاوره‌های ناتمام و محصولات در انتظار QA در این نسخه عددگذاری نشده‌اند (API تجمیعی تأییدشده هنوز موجود نیست).</li>
-                </ul>
-                {dashboardLowStock && dashboardLowStock.length > 0 ? (
-                  <Link to="/inventory?section=low-stock" className="pro-btn-primary">بازکردن کمبود موجودی</Link>
-                ) : null}
+                {dashboardLowStock === null ? (
+                  <p className="pro-muted" role="status">گزارش کمبود موجودی دریافت نشده است؛ وضعیت کمبود نامشخص است.</p>
+                ) : dashboardLowStock.length === 0 ? (
+                  <p className="pro-muted">طبق گزارش زنده، قلمی با موجودی ≤ ۵ ثبت نشده است.</p>
+                ) : (
+                  <>
+                    <p><strong>{dashboardLowStock.length.toLocaleString("fa-IR")}</strong> قلم با موجودی کم (آستانهٔ گزارش: ۵)</p>
+                    <ul className="pro-ol" style={{ marginBottom: "0.75rem" }}>
+                      {dashboardLowStock.slice(0, 5).map((row) => (
+                        <li key={row.inventory_id}>
+                          <strong>{row.product_id}</strong> — موجودی قابل عرضه: {row.quantity_available.toLocaleString("fa-IR")}
+                          {row.stock_status ? <span className="pro-muted"> · {row.stock_status}</span> : null}
+                        </li>
+                      ))}
+                    </ul>
+                    {dashboardLowStock.length > 5 ? (
+                      <p className="pro-muted">و { (dashboardLowStock.length - 5).toLocaleString("fa-IR") } قلم دیگر.</p>
+                    ) : null}
+                    <Link to="/inventory?section=low-stock" className="pro-btn-primary">بازکردن گزارش کمبود موجودی</Link>
+                  </>
+                )}
+                <p className="pro-muted" style={{ marginTop: "0.75rem", marginBottom: 0 }}>
+                  مشاوره‌های ناتمام و محصولات در انتظار QA نمایش داده نمی‌شوند؛ endpoint تجمیعی قابل استفاده در این داشبورد موجود نیست.
+                </p>
               </div>
             </section>
 
-            {/* فعالیت‌های اخیر */}
-            <section aria-labelledby="dashboard-activity-title" style={{ marginTop: "1.5rem" }}>
-              <h2 id="dashboard-activity-title">فعالیت‌های اخیر</h2>
+            {/* فعالیت‌های اخیر — گردش زنده انبار */}
+            <section aria-labelledby="dashboard-activity-title" style={{ marginTop: "1.5rem", borderTop: "1px solid #dce2eb", paddingTop: "1rem" }}>
+              <div className="pro-section-head">
+                <h2 id="dashboard-activity-title">فعالیت‌های اخیر</h2>
+                <span className="pro-muted">گردش‌های زندهٔ انبار · حداکثر ۸ رکورد</span>
+              </div>
               <div className="pro-product-card">
                 {dashboardMovements === null ? (
                   <p className="pro-muted">گردش اخیر در دسترس نیست؛ گزارش گردش کالا را در بخش «کالا و موجودی» بررسی کنید.</p>
