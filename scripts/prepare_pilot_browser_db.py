@@ -73,6 +73,7 @@ try:
         ("HBI-PROD-7F55ED88F41144F1", "SKIN1004", "Madagascar Centella Hyalu-Cica Water-Fit Sun Serum"),
         ("HBI-PROD-96788ADC488942E3", "ISDIN", "FotoUltra 100 Active Unify SPF50+"),
         ("HBI-PROD-70EEE418BE0F4DAB", "Clinique", "Even Better Clinical Radical Dark Spot Corrector + Interrupter (historical target)"),
+        ("HBI-PROD-22C55A8223A945A6", "Anua", "Azelaic Acid 10% + Hyaluron Redness Soothing Serum"),
     ]
     for product_id, brand, product_name in canonical_skin_products:
         if db.get(Product, product_id) is None:
