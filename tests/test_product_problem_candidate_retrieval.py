@@ -101,6 +101,29 @@ def test_retrieval_is_market_neutral_but_keeps_variant_filter(db_session):
     assert [row["market_region"] for row in uk["candidates"]] == ["UK"]
     assert canada["candidate_count"] == 2
     assert {row["market_region"] for row in canada["candidates"]} == {"MEXICO", "UK"}
+    assert canada["market_scope_mode"] == "MARKET_NEUTRAL"
+    assert canada["market_filter_applied"] is False
+    assert canada["requested_market_region"] == "CANADA"
+
+
+def test_retrieval_preserves_product_evidence_and_link_market_provenance(db_session):
+    product, evidence, link, _ = _seed(db_session, "provenance", market="MEXICO")
+    product.market_region = "EU"
+    evidence.market_region = "US"
+    link.market_region = "MEXICO"
+    db_session.flush()
+
+    result = ProductProblemCandidateRetrievalService(db_session).retrieve(
+        "P17", market_region="CANADA"
+    )
+
+    candidate = result["candidates"][0]
+    assert result["market_filter_applied"] is False
+    assert candidate["product_market_region"] == "EU"
+    assert candidate["evidence_market_region"] == "US"
+    assert candidate["market_region"] == "MEXICO"
+
+
 def test_retrieval_uses_latest_revision_and_hides_superseded_candidate(db_session):
     product, evidence, first, payload = _seed(db_session, "revision")
     revised_payload = dict(payload)
