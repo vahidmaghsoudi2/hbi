@@ -6,6 +6,7 @@ from app.core.exceptions import ValidationError
 from app.models.case import Case
 from app.models.customer import Customer
 from app.models.evidence import Evidence
+from app.models.inventory import Inventory
 from app.models.product import Product
 from app.models.recommendation import Recommendation
 from app.services.case_service import CaseService
@@ -143,6 +144,29 @@ def test_consultation_output_preserves_visit_context_and_hides_rejected_rows(db_
     db_session.add_all([eligible, rejected])
     db_session.flush()
     db_session.add_all([
+        Evidence(
+            evidence_id="XS-ELIGIBLE-EVIDENCE",
+            product_id=eligible.product_id,
+            claim_id="XS-ELIGIBLE-CLAIM",
+            source_type="MANUFACTURER",
+            source_reference="test://eligible",
+            claim="Approved test claim.",
+            field="claimed_benefits",
+            claim_type="BENEFIT",
+            qa_status="APPROVED",
+            conflict_status="NONE",
+        ),
+        Inventory(
+            inventory_id="XS-ELIGIBLE-INVENTORY",
+            product_id=eligible.product_id,
+            quantity_available=5,
+            quantity_reserved=0,
+            quantity_damaged=0,
+            stock_status="active",
+        ),
+    ])
+    db_session.flush()
+    db_session.add_all([
         Recommendation(
             recommendation_id="XS-REC-ELIGIBLE",
             case_id=case.case_id,
@@ -203,3 +227,79 @@ def test_consultation_output_reports_no_approved_recommendation(db_session):
     assert result["recommendation_status"] == "NO_ELIGIBLE_RECOMMENDATION"
     assert result["recommendation_count"] == 0
     assert result["recommendations"] == []
+
+
+
+def test_consultation_output_excludes_recommendations_with_stale_live_gates(db_session):
+    customer = Customer(
+        customer_id="XS-CUSTOMER-STALE",
+        name="Stale Recommendation Customer",
+        consent_to_store_data=1,
+    )
+    case = Case(
+        case_id="XS-CASE-STALE",
+        customer_id=customer.customer_id,
+        case_type="SKIN",
+    )
+    db_session.add_all([customer, case])
+    db_session.flush()
+
+    products = []
+    for suffix in ("INACTIVE", "OUT", "CONFLICT"):
+        product = Product(
+            product_id=f"XS-STALE-{suffix}",
+            brand="Test Brand",
+            product_name=f"Stale {suffix} Product",
+            identity_status="VERIFIED",
+            qa_verdict="VALID",
+            status="ACTIVE",
+        )
+        evidence = Evidence(
+            evidence_id=f"XS-STALE-EVIDENCE-{suffix}",
+            product_id=product.product_id,
+            claim_id=f"XS-STALE-CLAIM-{suffix}",
+            source_type="MANUFACTURER",
+            source_reference=f"test://stale/{suffix}",
+            claim=f"Approved claim {suffix}.",
+            field="claimed_benefits",
+            claim_type="BENEFIT",
+            qa_status="APPROVED",
+            conflict_status="NONE",
+        )
+        inventory = Inventory(
+            inventory_id=f"XS-STALE-INVENTORY-{suffix}",
+            product_id=product.product_id,
+            quantity_available=5,
+            quantity_reserved=0,
+            quantity_damaged=0,
+            stock_status="active",
+        )
+        db_session.add_all([product, evidence, inventory])
+        db_session.flush()
+        db_session.add(Recommendation(
+            recommendation_id=f"XS-STALE-REC-{suffix}",
+            case_id=case.case_id,
+            product_id=product.product_id,
+            eligibility_status="ELIGIBLE",
+            need_match_score=0.8,
+            evidence_score=0.9,
+            ranking_score=0.85,
+        ))
+        products.append((product, evidence, inventory, suffix))
+    db_session.flush()
+
+    for product, evidence, inventory, suffix in products:
+        if suffix == "INACTIVE":
+            product.status = "ARCHIVED"
+        elif suffix == "OUT":
+            inventory.quantity_available = 0
+        else:
+            evidence.conflict_status = "CONFLICT"
+    db_session.flush()
+
+    result = ExplainableSuitabilityService(db_session).consultation_output(case.case_id)
+
+    assert result["recommendation_status"] == "NO_ELIGIBLE_RECOMMENDATION"
+    assert result["recommendation_count"] == 0
+    assert result["recommendations"] == []
+    assert result["excluded_stale_recommendation_count"] == 3
