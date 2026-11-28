@@ -1,8 +1,8 @@
 # Product Intake Execution Log
 
-**Current status:** Phase 0 / SSOT placement = COMPLETE; isolated pilot preparation = BLOCKED pending proven isolation and evidence capture; G8 = **BLOCKED / NOT VERIFIED**.  
+**Current status:** Phase 0 / SSOT placement = COMPLETE; a limited isolated operator session is reported on 2026-10-18 but its raw evidence is not linked in the canonical package; preflight/recovery is BLOCKED; G8 = **BLOCKED / NOT VERIFIED**.  
 **Historical master SHA verified on 2026-10-16:** `335fd6e472dde72b9907366acaa04db28ebed943` (included PR #369 and the subsequent G8 smoke-evidence finalization fix).  
-**Live master SHA last checked on 2026-10-20:** `624811fae2112213b8c4c8c59d2ff1011e343e94` (includes merged PR #414). Historical entries retain the SHA that was verified at their original timestamps; this line is a dated observation, not a substitute for checking GitHub before later work.
+**Live master SHA checked for this reconciliation (2026-11-28):** `b2f6964bb76155eed0ac7aa9268f5948dc1b14bc`. Historical entries retain their original verified SHAs.
 **Governing tracker:** [Issue #283](https://github.com/vahidmaghsoudi2/hbi/issues/283)  
 **Roadmap:** [PRODUCT_INTAKE_ROADMAP.md](PRODUCT_INTAKE_ROADMAP.md)  
 **Acceptance ledger:** [G8_ACCEPTANCE_EVIDENCE.md](G8_ACCEPTANCE_EVIDENCE.md)  
@@ -136,3 +136,12 @@ Required fields per runtime entry:
 - G1 remains NOT RECOVERED: the exact accepted refined list is still not available in the reviewed canonical source. Do not reconstruct it from summaries or the structural map.
 - G8 remains BLOCKED / NOT VERIFIED. The PR's successful CI does not establish real-pilot A1–A9 evidence or authorize product recommendations.
 - No application, database, schema, API, product records, clinical content, or G8 state was changed by the merge.
+
+
+## Entry 2026-11-28 — Reconciliation of reported 2026-10-18 isolated pilot session
+
+- Issue [#386](https://github.com/vahidmaghsoudi2/hbi/issues/386) reports an isolated operator pilot session on 2026-10-18 for candidate `G8-NUMBUZIN-NO9-20261018`, including two source-attributed `MANUFACTURER_CLAIM` assertions from one official product URL. This conflicts with older tracker wording that the operator pilot had not started.
+- Issue #386 also reports the candidate remained `DRAFT / NEEDS_REVIEW / PENDING` and that a same-source wording difference was classified as a HIGH unresolved conflict. Raw session artifacts, exact SHA/environment, and independent readback are not linked in the canonical execution package.
+- This is recorded as **reported / incomplete / not independently verified**, not G8 acceptance or a complete operator pilot. A1–A9 dispositions remain unchanged.
+- Historical artifact recovery is now tracked in fresh-master PR #672, which carries a read-only recovery utility, tests, and Windows runbook. Recovery can only be attempted from the operator machine/backup if original artifacts remain. Do not initialize, mutate, or delete the historical pilot DB to recover evidence.
+- No production DB, schema, product, activation, scoring, or merge action was performed by this documentation reconciliation.
