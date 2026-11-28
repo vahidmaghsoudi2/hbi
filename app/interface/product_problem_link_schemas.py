@@ -67,6 +67,7 @@ class ProductProblemCandidateItem(BaseModel):
     product_id: str
     brand: str
     product_name: str
+    product_market_region: Optional[str] = None
     product_identity_status: str
     product_qa_verdict: str
     product_lifecycle_status: str
@@ -103,6 +104,9 @@ class ProductProblemCandidateRetrievalResponse(BaseModel):
     problem_id: str
     problem_map_version: str
     retrieval_mode: Literal["CURRENT_CANDIDATES_ONLY"]
+    market_scope_mode: Literal["MARKET_NEUTRAL"]
+    market_filter_applied: Literal[False]
+    requested_market_region: Optional[str] = None
     review_gate: Literal["HUMAN_REVIEW_ONLY"]
     recommendation_eligible: Literal[False]
     candidate_count: int
